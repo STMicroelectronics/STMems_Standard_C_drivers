@@ -140,10 +140,10 @@ typedef struct {
 #define LIS2DW12_FROM_FS_8g_TO_mg(lsb)   (float)((int16_t)lsb >> 2) * 0.976f
 #define LIS2DW12_FROM_FS_16g_TO_mg(lsb)  (float)((int16_t)lsb >> 2) * 1.952f
 
-#define LIS2DH12_FROM_FS_2g_LP1_TO_mg(lsb)  (float)((int16_t)lsb>>4)* 0.976.0f
-#define LIS2DH12_FROM_FS_4g_LP1_TO_mg(lsb)  (float)((int16_t)lsb>>4)* 1.952.0f
-#define LIS2DH12_FROM_FS_8g_LP1_TO_mg(lsb)  (float)((int16_t)lsb>>4)* 3.904f
-#define LIS2DH12_FROM_FS_16g_LP1_TO_mg(lsb) (float)((int16_t)lsb>>4)* 7.808f
+#define LIS2DW12_FROM_FS_2g_LP1_TO_mg(lsb)  (float)((int16_t)lsb>>4)* 0.976.0f
+#define LIS2DW12_FROM_FS_4g_LP1_TO_mg(lsb)  (float)((int16_t)lsb>>4)* 1.952.0f
+#define LIS2DW12_FROM_FS_8g_LP1_TO_mg(lsb)  (float)((int16_t)lsb>>4)* 3.904f
+#define LIS2DW12_FROM_FS_16g_LP1_TO_mg(lsb) (float)((int16_t)lsb>>4)* 7.808f
 
 #define LIS2DW12_FROM_LSB_TO_degC(lsb)    (float)((int16_t)lsb) / 16.0f+25.0f
 

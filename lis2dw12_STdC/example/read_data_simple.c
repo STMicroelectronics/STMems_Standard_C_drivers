@@ -221,9 +221,9 @@ void example_main_lis2dw12(void)
       //acceleration_mg[1] = LIS2DW12_FROM_FS_8g_TO_mg( data_raw_acceleration.i16bit[1]);
       //acceleration_mg[2] = LIS2DW12_FROM_FS_8g_TO_mg( data_raw_acceleration.i16bit[2]);
  
-      acceleration_mg[0] = LIS2DH12_FROM_FS_8g_LP1_TO_mg( data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = LIS2DH12_FROM_FS_8g_LP1_TO_mg( data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = LIS2DH12_FROM_FS_8g_LP1_TO_mg( data_raw_acceleration.i16bit[2]);      
+      acceleration_mg[0] = LIS2DW12_FROM_FS_8g_LP1_TO_mg( data_raw_acceleration.i16bit[0]);
+      acceleration_mg[1] = LIS2DW12_FROM_FS_8g_LP1_TO_mg( data_raw_acceleration.i16bit[1]);
+      acceleration_mg[2] = LIS2DW12_FROM_FS_8g_LP1_TO_mg( data_raw_acceleration.i16bit[2]);      
       
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
