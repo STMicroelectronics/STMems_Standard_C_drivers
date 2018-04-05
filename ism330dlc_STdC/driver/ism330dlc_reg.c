@@ -1,13 +1,12 @@
 /*
  ******************************************************************************
  * @file    ism330dlc_reg.c
- * @author  MEMS Software Solution Team
- * @date    11-December-2017
+ * @author  Sensors Software Solution Team
  * @brief   ISM330DLC driver file
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
  *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
