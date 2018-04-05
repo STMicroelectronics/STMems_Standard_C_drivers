@@ -1,14 +1,13 @@
 /*
  ******************************************************************************
  * @file    lsm6dsm_reg.h
- * @author  MEMS Software Solution Team
- * @date    22-November-2017
+ * @author  Sensors Software Solution Team
  * @brief   This file contains all the functions prototypes for the
  *          lsm6dsm_reg.c driver.
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
  *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -140,11 +139,11 @@ typedef struct {
 #define LSM6DSM_FROM_FS_8g_TO_mg(lsb)    (float)(lsb * 244.0f) / 1000.0f
 #define LSM6DSM_FROM_FS_16g_TO_mg(lsb)   (float)(lsb * 488.0f) / 1000.0f
 
-#define LSM6DSM_FROM_FS_125dps_TO_mdps(lsb)    (float)(lsb * 4375.0f) / 1000.0f
-#define LSM6DSM_FROM_FS_250dps_TO_mdps(lsb)    (float)(lsb *  875.0f) / 1000.0f
-#define LSM6DSM_FROM_FS_500dps_TO_mdps(lsb)    (float)(lsb * 1750.0f) / 1000.0f
-#define LSM6DSM_FROM_FS_1000dps_TO_mdps(lsb)   (float)(lsb *   35.0f) / 1000.0f
-#define LSM6DSM_FROM_FS_2000dps_TO_mdps(lsb)   (float)(lsb *   70.0f) / 1000.0f
+#define LSM6DSM_FROM_FS_125dps_TO_mdps(lsb)  (float)(lsb *  4375.0f ) / 1000.0f
+#define LSM6DSM_FROM_FS_250dps_TO_mdps(lsb)  (float)(lsb *  8750.0f ) / 1000.0f
+#define LSM6DSM_FROM_FS_500dps_TO_mdps(lsb)  (float)(lsb * 17500.0f ) / 1000.0f
+#define LSM6DSM_FROM_FS_1000dps_TO_mdps(lsb) (float)(lsb * 35.0f)
+#define LSM6DSM_FROM_FS_2000dps_TO_mdps(lsb) (float)(lsb * 70.0f)
 
 #define LSM6DSM_FROM_LSB_TO_degC(lsb)   ((float)((int16_t)lsb>>8)*1.0f + 25.0f)
 
