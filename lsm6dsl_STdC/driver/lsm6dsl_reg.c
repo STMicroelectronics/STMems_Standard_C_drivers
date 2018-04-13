@@ -2132,8 +2132,8 @@ int32_t lsm6dsl_pin_int1_route_set(lsm6dsl_ctx_t *ctx,
                   }
                   else{
                     reg.tap_cfg.interrupts_enable = PROPERTY_DISABLE;
-                  ret = lsm6dsl_write_reg(ctx, LSM6DSL_TAP_CFG, &reg.byte, 1);
                   }
+                  ret = lsm6dsl_write_reg(ctx, LSM6DSL_TAP_CFG, &reg.byte, 1);
                 }
               }
             }
