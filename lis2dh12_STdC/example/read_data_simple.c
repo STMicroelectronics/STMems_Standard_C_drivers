@@ -35,7 +35,7 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "..\..\stdc\lis2dh12_STdC\driver\lis2dh12_reg.h"
+#include "lis2dh12_reg.h"
 #include <string.h>
 
 //#define MKI109V2
