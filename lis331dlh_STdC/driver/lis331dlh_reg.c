@@ -1,1589 +1,2001 @@
 /*
  ******************************************************************************
- * @file    lis331dlh_reg.c
- * @author  MEMS Software Solution Team
- * @date    20-December-2017
+ * @file    lis331dlh_c
+ * @author  Sensors Software Solution Team
  * @brief   LIS331DLH driver file
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  */
 
 #include "lis331dlh_reg.h"
 
 /**
-  * @addtogroup  lis331dlh
-  * @brief  This file provides a set of functions needed to drive the
-  *         lis331dlh enanced inertial module.
+  * @defgroup    LIS331DLH
+  * @brief       This file provides a set of functions needed to drive the
+  *              lis331dlh enhanced inertial module.
   * @{
+  *
   */
 
 /**
-  * @addtogroup  interfaces_functions
-  * @brief  This section provide a set of functions used to read and write
-  *         a generic register of the device.
+  * @defgroup    LIS331DLH_Interfaces_Functions
+  * @brief       This section provide a set of functions used to read and
+  *              write a generic register of the device.
+  *              MANDATORY: return 0 -> no Error.
   * @{
+  *
   */
 
 /**
   * @brief  Read generic device register
   *
-  * @param  lis331dlh_ctx_t* ctx: read / write interface definitions
-  * @param  uint8_t reg: register to read
-  * @param  uint8_t* data: pointer to buffer that store the data read
-  * @param  uint16_t len: number of consecutive register to read
+  * @param  ctx   read / write interface definitions(ptr)
+  * @param  reg   register to read
+  * @param  data  pointer to buffer that store the data read(ptr)
+  * @param  len   number of consecutive register to read
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lis331dlh_read_reg(lis331dlh_ctx_t* ctx, uint8_t reg, uint8_t* data,
                            uint16_t len)
 {
-  return ctx->read_reg(ctx->handle, reg, data, len);
+  int32_t ret;
+  ret = ctx->read_reg(ctx->handle, reg, data, len);
+  return ret;
 }
 
 /**
   * @brief  Write generic device register
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t reg: register to write
-  * @param  uint8_t* data: pointer to data to write in register reg
-  * @param  uint16_t len: number of consecutive register to write
+  * @param  ctx   read / write interface definitions(ptr)
+  * @param  reg   register to write
+  * @param  data  pointer to data to write in register reg(ptr)
+  * @param  len   number of consecutive register to write
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
-*/
+  */
 int32_t lis331dlh_write_reg(lis331dlh_ctx_t* ctx, uint8_t reg, uint8_t* data,
                             uint16_t len)
 {
-  return ctx->write_reg(ctx->handle, reg, data, len);
+  int32_t ret;
+  ret = ctx->write_reg(ctx->handle, reg, data, len);
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  data_generation_c
-  * @brief   This section groups all the functions concerning data generation
-  * @{
-  */
-
-/**
-  * @brief  axis_x_data: [set]  X axis enable/disable.
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of xen in reg CTRL_REG1
+  */
+
+  /**
+  * @defgroup    LIS331DLH_Sensitivity
+  * @brief       These functions convert raw-data into engineering units.
+  * @{
+  *
+  */
+
+float32_t lis331dlh_from_fs2_to_mg(int16_t lsb)
+{
+  return ((float32_t)lsb / 16.0f);
+}
+
+float32_t lis331dlh_from_fs4_to_mg(int16_t lsb)
+{
+  return ((float32_t)lsb * 2.0f / 16.0f);
+}
+
+float32_t lis331dlh_from_fs8_to_mg(int16_t lsb)
+{
+  return ((float32_t)lsb * 3.9f / 16.0f);
+}
+
+/**
+  * @}
+  *
+  */
+
+/**
+  * @defgroup    LIS331DLH_Data_Generation
+  * @brief       This section group all the functions concerning
+  *              data generation
+  * @{
+  *
+  */
+
+/**
+  * @brief  X axis enable/disable.[set]
+  *
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of xen in reg CTRL_REG1
   *
   */
 int32_t lis331dlh_axis_x_data_set(lis331dlh_ctx_t *ctx, uint8_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG1, &reg.byte, 1);
-  reg.ctrl_reg1.xen = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG1, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  if(ret == 0) {
+    ctrl_reg1.xen = val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG1,
+                              (uint8_t*)&ctrl_reg1, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  axis_x_data: [get]  X axis enable/disable.
+  * @brief  X axis enable/disable.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of xen in reg CTRL_REG1
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of xen in reg CTRL_REG1
   *
   */
 int32_t lis331dlh_axis_x_data_get(lis331dlh_ctx_t *ctx, uint8_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG1, &reg.byte, 1);
-  *val = reg.ctrl_reg1.xen;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  *val = ctrl_reg1.xen;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  axis_y_data: [set]  Y axis enable/disable.
+  * @brief  Y axis enable/disable.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of yen in reg CTRL_REG1
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of yen in reg CTRL_REG1
   *
   */
 int32_t lis331dlh_axis_y_data_set(lis331dlh_ctx_t *ctx, uint8_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG1, &reg.byte, 1);
-  reg.ctrl_reg1.yen = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG1, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  if(ret == 0) {
+    ctrl_reg1.yen = val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG1,
+                              (uint8_t*)&ctrl_reg1, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  axis_y_data: [get]  Y axis enable/disable.
+  * @brief  Y axis enable/disable.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of yen in reg CTRL_REG1
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of yen in reg CTRL_REG1
   *
   */
 int32_t lis331dlh_axis_y_data_get(lis331dlh_ctx_t *ctx, uint8_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG1, &reg.byte, 1);
-  *val = reg.ctrl_reg1.yen;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  *val = ctrl_reg1.yen;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  axis_z_data: [set]  Z axis enable/disable.
+  * @brief  Z axis enable/disable.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of zen in reg CTRL_REG1
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of zen in reg CTRL_REG1
   *
   */
 int32_t lis331dlh_axis_z_data_set(lis331dlh_ctx_t *ctx, uint8_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG1, &reg.byte, 1);
-  reg.ctrl_reg1.zen = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG1, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  if(ret == 0) {
+    ctrl_reg1.zen = val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG1,
+                              (uint8_t*)&ctrl_reg1, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  axis_z_data: [get]  Z axis enable/disable.
+  * @brief  Z axis enable/disable.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of zen in reg CTRL_REG1
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of zen in reg CTRL_REG1
   *
   */
 int32_t lis331dlh_axis_z_data_get(lis331dlh_ctx_t *ctx, uint8_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG1, &reg.byte, 1);
-  *val = reg.ctrl_reg1.zen;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  *val = ctrl_reg1.zen;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  data_rate: [set]   Accelerometer data rate selection.
+  * @brief  Accelerometer data rate selection.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_dr_t: change the values of dr in reg CTRL_REG1
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of dr in reg CTRL_REG1
   *
   */
 int32_t lis331dlh_data_rate_set(lis331dlh_ctx_t *ctx, lis331dlh_dr_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG1, &reg.byte, 1);
-  reg.ctrl_reg1.pm = val & 0x07;
-  reg.ctrl_reg1.dr = ( val & 0x30 ) >> 4;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG1, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG1,
+                           (uint8_t*)&ctrl_reg1, 1);
+  if(ret == 0) {
+    ctrl_reg1.pm = (uint8_t)val & 0x07U;
+    ctrl_reg1.dr = ( (uint8_t)val & 0x30U ) >> 4;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG1,
+                              (uint8_t*)&ctrl_reg1, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  data_rate: [get]   Accelerometer data rate selection.
+  * @brief  Accelerometer data rate selection.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_dr_t: Get the values of dr in reg CTRL_REG1
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of dr in reg CTRL_REG1
   *
   */
 int32_t lis331dlh_data_rate_get(lis331dlh_ctx_t *ctx, lis331dlh_dr_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG1, &reg.byte, 1);
-  *val = (lis331dlh_dr_t) ((reg.ctrl_reg1.dr << 4) + reg.ctrl_reg1.pm);
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG1,
+                           (uint8_t*)&ctrl_reg1, 1);
 
-  return mm_error;
+  switch ((ctrl_reg1.dr << 4) + ctrl_reg1.pm)
+  {
+    case LIS331DLH_ODR_OFF:
+      *val = LIS331DLH_ODR_OFF;
+      break;
+    case LIS331DLH_ODR_Hz5:
+      *val = LIS331DLH_ODR_Hz5;
+      break;
+    case LIS331DLH_ODR_1Hz:
+      *val = LIS331DLH_ODR_1Hz;
+      break;
+    case LIS331DLH_ODR_5Hz2:
+      *val = LIS331DLH_ODR_5Hz2;
+      break;
+    case LIS331DLH_ODR_5Hz:
+      *val = LIS331DLH_ODR_5Hz;
+      break;
+    case LIS331DLH_ODR_10Hz:
+      *val = LIS331DLH_ODR_10Hz;
+      break;
+    case LIS331DLH_ODR_50Hz:
+      *val = LIS331DLH_ODR_50Hz;
+      break;
+    case LIS331DLH_ODR_100Hz:
+      *val = LIS331DLH_ODR_100Hz;
+      break;
+    case LIS331DLH_ODR_400Hz:
+      *val = LIS331DLH_ODR_400Hz;
+      break;
+    case LIS331DLH_ODR_1kHz:
+      *val = LIS331DLH_ODR_1kHz;
+      break;
+    default:
+      *val = LIS331DLH_ODR_OFF;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  reference_mode: [set]  High pass filter mode selection.
+  * @brief  High pass filter mode selection.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_hpm_t: change the values of hpm in reg CTRL_REG2
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of hpm in reg CTRL_REG2
   *
   */
 int32_t lis331dlh_reference_mode_set(lis331dlh_ctx_t *ctx,
                                      lis331dlh_hpm_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG2, &reg.byte, 1);
-  reg.ctrl_reg2.hpm = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG2, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  if(ret == 0) {
+    ctrl_reg2.hpm = (uint8_t)val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG2,
+                              (uint8_t*)&ctrl_reg2, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  reference_mode: [get]  High pass filter mode selection.
+  * @brief  High pass filter mode selection.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_hpm_t: Get the values of hpm in reg CTRL_REG2
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of hpm in reg CTRL_REG2
   *
   */
 int32_t lis331dlh_reference_mode_get(lis331dlh_ctx_t *ctx,
                                      lis331dlh_hpm_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG2, &reg.byte, 1);
-  *val = (lis331dlh_hpm_t) reg.ctrl_reg2.hpm;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG2,
+                           (uint8_t*)&ctrl_reg2, 1);
 
-  return mm_error;
+  switch (ctrl_reg2.hpm)
+  {
+    case LIS331DLH_NORMAL_MODE:
+      *val = LIS331DLH_NORMAL_MODE;
+      break;
+    case LIS331DLH_REF_MODE_ENABLE:
+      *val = LIS331DLH_REF_MODE_ENABLE;
+      break;
+    default:
+      *val = LIS331DLH_NORMAL_MODE;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  full_scale: [set]  Accelerometer full-scale selection.
+  * @brief  Accelerometer full-scale selection.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_fs_t: change the values of fs in reg CTRL_REG4
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of fs in reg CTRL_REG4
   *
   */
 int32_t lis331dlh_full_scale_set(lis331dlh_ctx_t *ctx, lis331dlh_fs_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, &reg.byte, 1);
-  reg.ctrl_reg4.fs = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG4, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  if(ret == 0) {
+    ctrl_reg4.fs = (uint8_t)val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG4,
+                              (uint8_t*)&ctrl_reg4, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  full_scale: [get]  Accelerometer full-scale selection.
+  * @brief  Accelerometer full-scale selection.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_fs_t: Get the values of fs in reg CTRL_REG4
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of fs in reg CTRL_REG4
   *
   */
 int32_t lis331dlh_full_scale_get(lis331dlh_ctx_t *ctx, lis331dlh_fs_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, &reg.byte, 1);
-  *val = (lis331dlh_fs_t) reg.ctrl_reg4.fs;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
 
-  return mm_error;
+  switch (ctrl_reg4.fs)
+  {
+    case LIS331DLH_2g:
+      *val = LIS331DLH_2g;
+      break;
+    case LIS331DLH_4g:
+      *val = LIS331DLH_4g;
+      break;
+    case LIS331DLH_8g:
+      *val = LIS331DLH_8g;
+      break;
+    default:
+      *val = LIS331DLH_2g;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  block_data_update: [set] Blockdataupdate.
+  * @brief  Block data update.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of bdu in reg CTRL_REG4
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of bdu in reg CTRL_REG4
   *
   */
 int32_t lis331dlh_block_data_update_set(lis331dlh_ctx_t *ctx, uint8_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, &reg.byte, 1);
-  reg.ctrl_reg4.bdu = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG4, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  if(ret == 0) {
+    ctrl_reg4.bdu = val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG4,
+                              (uint8_t*)&ctrl_reg4, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  block_data_update: [get] Blockdataupdate.
+  * @brief  Block data update.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of bdu in reg CTRL_REG4
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of bdu in reg CTRL_REG4
   *
   */
 int32_t lis331dlh_block_data_update_get(lis331dlh_ctx_t *ctx, uint8_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, &reg.byte, 1);
-  *val = reg.ctrl_reg4.bdu;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  *val = ctrl_reg4.bdu;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  status_reg: [get] The STATUS_REG register is read by the
-  *                           primary interface
+  * @brief  The STATUS_REG register is read by the interface.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_status_reg_t: registers STATUS_REG
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         registers STATUS_REG
   *
   */
 int32_t lis331dlh_status_reg_get(lis331dlh_ctx_t *ctx,
                                  lis331dlh_status_reg_t *val)
 {
-  return lis331dlh_read_reg(ctx, LIS331DLH_STATUS_REG, (uint8_t*) val, 1);
+  int32_t ret;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_STATUS_REG, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
-  * @brief  flag_data_ready: [get]  Accelerometer new data available.
+  * @brief  Accelerometer new data available.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of zyxda in reg STATUS_REG
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of zyxda in reg STATUS_REG
   *
   */
 int32_t lis331dlh_flag_data_ready_get(lis331dlh_ctx_t *ctx, uint8_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_status_reg_t status_reg;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_STATUS_REG, &reg.byte, 1);
-  *val = reg.status_reg.zyxda;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_STATUS_REG,
+                           (uint8_t*)&status_reg, 1);
+  *val = status_reg.zyxda;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  Dataoutput
-  * @brief   This section groups all the data output functions.
-  * @{
-  */
-
-/**
-  * @brief  acceleration_raw: [get] Linear acceleration output register.
-  *                                 The value is expressed as a 16-bit word
-  *                                 in two’s complement.
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  */
+
+/**
+  * @defgroup    LIS331DLH_Data_Output
+  * @brief       This section groups all the data output functions.
+  * @{
+  *
+  */
+
+/**
+  * @brief  Linear acceleration output register. The value is expressed
+  *         as a 16-bit word in two’s complement.[get]
+  *
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  buff        buffer that stores data read
   *
   */
 int32_t lis331dlh_acceleration_raw_get(lis331dlh_ctx_t *ctx, uint8_t *buff)
 {
-  return lis331dlh_read_reg(ctx, LIS331DLH_OUT_X_L, buff, 6);
+  int32_t ret;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_OUT_X_L, buff, 6);
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  common
-  * @brief   This section groups common usefull functions.
-  * @{
-  */
-
-/**
-  * @brief  device_id: [get] DeviceWhoamI.
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  */
+
+/**
+  * @defgroup    LIS331DLH_Common
+  * @brief       This section groups common useful functions.
+  * @{
+  *
+  */
+
+/**
+  * @brief  Device Who am I.[get]
+  *
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  buff        buffer that stores data read
   *
   */
 int32_t lis331dlh_device_id_get(lis331dlh_ctx_t *ctx, uint8_t *buff)
 {
-  return lis331dlh_read_reg(ctx, LIS331DLH_WHO_AM_I, buff, 1);
+  int32_t ret;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_WHO_AM_I, buff, 1);
+  return ret;
 }
 
 /**
-  * @brief  boot: [set] Reboot memory content. Reload the calibration
-  *                     parameters.
+  * @brief  Reboot memory content. Reload the calibration parameters.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of boot in reg CTRL_REG2
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of boot in reg CTRL_REG2
   *
   */
 int32_t lis331dlh_boot_set(lis331dlh_ctx_t *ctx, uint8_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG2, &reg.byte, 1);
-  reg.ctrl_reg2.boot = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG2, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  if(ret == 0) {
+    ctrl_reg2.boot = val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG2,
+                              (uint8_t*)&ctrl_reg2, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  boot: [get] Reboot memory content. Reload the calibration
-  *                     parameters.
+  * @brief  Reboot memory content. Reload the calibration parameters.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of boot in reg CTRL_REG2
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of boot in reg CTRL_REG2
   *
   */
 int32_t lis331dlh_boot_get(lis331dlh_ctx_t *ctx, uint8_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG2, &reg.byte, 1);
-  *val = reg.ctrl_reg2.boot;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  *val = ctrl_reg2.boot;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  self_test: [set]  Linear acceleration sensor self-test enable.
+  * @brief  Linear acceleration sensor self-test enable.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_st_t: change the values of st in reg CTRL_REG4
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of st in reg CTRL_REG4
   *
   */
 int32_t lis331dlh_self_test_set(lis331dlh_ctx_t *ctx, lis331dlh_st_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, &reg.byte, 1);
-  reg.ctrl_reg4.st = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG4, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  if(ret == 0) {
+    ctrl_reg4.st = (uint8_t)val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG4,
+                              (uint8_t*)&ctrl_reg4, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  self_test: [get]  Linear acceleration sensor self-test enable.
+  * @brief  Linear acceleration sensor self-test enable.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_st_t: Get the values of st in reg CTRL_REG4
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of st in reg CTRL_REG4
   *
   */
 int32_t lis331dlh_self_test_get(lis331dlh_ctx_t *ctx, lis331dlh_st_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, &reg.byte, 1);
-  *val = (lis331dlh_st_t) reg.ctrl_reg4.st;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
 
-  return mm_error;
+  switch (ctrl_reg4.st)
+  {
+    case LIS331DLH_ST_DISABLE:
+      *val = LIS331DLH_ST_DISABLE;
+      break;
+    case LIS331DLH_ST_POSITIVE:
+      *val = LIS331DLH_ST_POSITIVE;
+      break;
+    case LIS331DLH_ST_NEGATIVE:
+      *val = LIS331DLH_ST_NEGATIVE;
+      break;
+    default:
+      *val = LIS331DLH_ST_DISABLE;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  data_format: [set]  Big/Little Endian Data selection.
+  * @brief  Big/Little Endian Data selection.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_ble_t: change the values of ble in reg CTRL_REG4
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of ble in reg CTRL_REG4
   *
   */
 int32_t lis331dlh_data_format_set(lis331dlh_ctx_t *ctx, lis331dlh_ble_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, &reg.byte, 1);
-  reg.ctrl_reg4.ble = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG4, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  if(ret == 0) {
+    ctrl_reg4.ble = (uint8_t)val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG4,
+                              (uint8_t*)&ctrl_reg4, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  data_format: [get]  Big/Little Endian Data selection.
+  * @brief  Big/Little Endian Data selection.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_ble_t: Get the values of ble in reg CTRL_REG4
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of ble in reg CTRL_REG4
   *
   */
 int32_t lis331dlh_data_format_get(lis331dlh_ctx_t *ctx, lis331dlh_ble_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, &reg.byte, 1);
-  *val = (lis331dlh_ble_t) reg.ctrl_reg4.ble;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
 
-  return mm_error;
+  switch (ctrl_reg4.ble)
+  {
+    case LIS331DLH_LSB_AT_LOW_ADD:
+      *val = LIS331DLH_LSB_AT_LOW_ADD;
+      break;
+    case LIS331DLH_MSB_AT_LOW_ADD:
+      *val = LIS331DLH_MSB_AT_LOW_ADD;
+      break;
+    default:
+      *val = LIS331DLH_LSB_AT_LOW_ADD;
+      break;
+  }
+
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  filters
-  * @brief   This section group all the functions concerning the
-  *          filters configuration.
-  * @{
-  */
-
-/**
-  * @brief  hp_bandwidth: [set] High pass filter cut-off frequency
-  *                             configuration.
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_hpcf_t: change the values of hpcf in reg CTRL_REG2
+  */
+
+/**
+  * @defgroup    LIS331DLH_Filters
+  * @brief       This section group all the functions concerning the
+  *              filters configuration.
+  * @{
+  *
+  */
+
+/**
+  * @brief  High pass filter cut-off frequency configuration.[set]
+  *
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of hpcf in reg CTRL_REG2
   *
   */
 int32_t lis331dlh_hp_bandwidth_set(lis331dlh_ctx_t *ctx, lis331dlh_hpcf_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG2, &reg.byte, 1);
-  reg.ctrl_reg2.hpcf = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG2, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  if(ret == 0) {
+    ctrl_reg2.hpcf = (uint8_t)val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG2,
+                              (uint8_t*)&ctrl_reg2, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  hp_bandwidth: [get] High pass filter cut-off frequency
-  *                             configuration.
+  * @brief  High pass filter cut-off frequency configuration.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_hpcf_t: Get the values of hpcf in reg CTRL_REG2
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of hpcf in reg CTRL_REG2
   *
   */
 int32_t lis331dlh_hp_bandwidth_get(lis331dlh_ctx_t *ctx,
                                    lis331dlh_hpcf_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG2, &reg.byte, 1);
-  *val = (lis331dlh_hpcf_t) reg.ctrl_reg2.hpcf;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
 
-  return mm_error;
+  switch (ctrl_reg2.hpcf)
+  {
+    case LIS331DLH_CUT_OFF_8Hz:
+      *val = LIS331DLH_CUT_OFF_8Hz;
+      break;
+    case LIS331DLH_CUT_OFF_16Hz:
+      *val = LIS331DLH_CUT_OFF_16Hz;
+      break;
+    case LIS331DLH_CUT_OFF_32Hz:
+      *val = LIS331DLH_CUT_OFF_32Hz;
+      break;
+    case LIS331DLH_CUT_OFF_64Hz:
+      *val = LIS331DLH_CUT_OFF_64Hz;
+      break;
+    default:
+      *val = LIS331DLH_CUT_OFF_8Hz;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  hp_path: [set]  Select High Pass filter path
+  * @brief  Select High Pass filter path.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_hpen_t: change the values of hpen in reg CTRL_REG2
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of hpen in reg CTRL_REG2
   *
   */
 int32_t lis331dlh_hp_path_set(lis331dlh_ctx_t *ctx, lis331dlh_hpen_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG2, &reg.byte, 1);
-  reg.ctrl_reg2.hpen = val & 0x03;
-  reg.ctrl_reg2.fds = (val & 0x04) >> 2;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG2, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  if(ret == 0) {
+    ctrl_reg2.hpen = (uint8_t)val & 0x03U;
+    ctrl_reg2.fds = ((uint8_t)val & 0x04U) >> 2;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG2,
+                              (uint8_t*)&ctrl_reg2, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  hp_path: [get]  Select High Pass filter path
+  * @brief  Select High Pass filter path.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_hpen_t: Get the values of hpen in reg CTRL_REG2
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of hpen in reg CTRL_REG2
   *
   */
 int32_t lis331dlh_hp_path_get(lis331dlh_ctx_t *ctx, lis331dlh_hpen_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG2, &reg.byte, 1);
-  *val = (lis331dlh_hpen_t) ( (reg.ctrl_reg2.fds << 2) + reg.ctrl_reg2.hpen );
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
 
-  return mm_error;
+  switch ( (ctrl_reg2.fds << 2) + ctrl_reg2.hpen )
+  {
+    case LIS331DLH_HP_DISABLE:
+      *val = LIS331DLH_HP_DISABLE;
+      break;
+    case LIS331DLH_HP_ON_OUT:
+      *val = LIS331DLH_HP_ON_OUT;
+      break;
+    case LIS331DLH_HP_ON_INT1:
+      *val = LIS331DLH_HP_ON_INT1;
+      break;
+    case LIS331DLH_HP_ON_INT2:
+      *val = LIS331DLH_HP_ON_INT2;
+      break;
+    case LIS331DLH_HP_ON_INT1_INT2:
+      *val = LIS331DLH_HP_ON_INT1_INT2;
+      break;
+    case LIS331DLH_HP_ON_INT1_INT2_OUT:
+      *val = LIS331DLH_HP_ON_INT1_INT2_OUT;
+      break;
+    case LIS331DLH_HP_ON_INT2_OUT:
+      *val = LIS331DLH_HP_ON_INT2_OUT;
+      break;
+    case LIS331DLH_HP_ON_INT1_OUT:
+      *val = LIS331DLH_HP_ON_INT1_OUT;
+      break;
+    default:
+      *val = LIS331DLH_HP_DISABLE;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  hp_reset: [get] Reading at this address zeroes instantaneously
-  *                         the content of the internal high pass-filter.
-  *                         If the high pass filter is enabled all three axes
-  *                         are instantaneously set to 0g. This allows to
-  *                         overcome the settling time of the high pass
-  *                         filter.
+  * @brief  Reading at this address zeroes instantaneously
+  *         the content of the internal high pass-filter.
+  *         If the high pass filter is enabled all three axes
+  *         are instantaneously set to 0g. This allows to
+  *         overcome the settling time of the high pass
+  *         filter.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx         read / write interface definitions(ptr)
   *
   */
 int32_t lis331dlh_hp_reset_get(lis331dlh_ctx_t *ctx)
 {
   uint8_t dummy;
-  return lis331dlh_read_reg(ctx, LIS331DLH_HP_FILTER_RESET, &dummy, 1);
+  int32_t ret;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_HP_FILTER_RESET,
+                           (uint8_t*)&dummy, 1);
+  return ret;
 }
 
 /**
-  * @brief  hp_reference_value: [set]  Reference value for high-pass filter.
+  * @brief  Reference value for high-pass filter.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of ref in reg REFERENCE
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of ref in reg REFERENCE
   *
   */
 int32_t lis331dlh_hp_reference_value_set(lis331dlh_ctx_t *ctx, uint8_t val)
 {
-  return lis331dlh_write_reg(ctx, LIS331DLH_REFERENCE, &val, 1);
+  int32_t ret;
+  ret = lis331dlh_write_reg(ctx, LIS331DLH_REFERENCE, (uint8_t*)&val, 1);
+  return ret;
 }
 
 /**
-  * @brief  hp_reference_value: [get]  Reference value for high-pass filter.
+  * @brief  Reference value for high-pass filter.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of ref in reg REFERENCE
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of ref in reg REFERENCE
   *
   */
 int32_t lis331dlh_hp_reference_value_get(lis331dlh_ctx_t *ctx, uint8_t *val)
 {
-  return lis331dlh_read_reg(ctx, LIS331DLH_REFERENCE, val, 1);
+  int32_t ret;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_REFERENCE, val, 1);
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup   main_serial_interface
-  * @brief   This section groups all the functions concerning serial
-  *          interface management.
-  * @{
-  */
-
-/**
-  * @brief  spi_mode: [set]  SPI 3- or 4-wire interface.
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_sim_t: change the values of sim in reg CTRL_REG4
+  */
+
+/**
+  * @defgroup    LIS331DLH_Serial_Interface
+  * @brief       This section groups all the functions concerning serial
+  *              interface management.
+  * @{
+  *
+  */
+
+/**
+  * @brief  SPI 3- or 4-wire interface.[set]
+  *
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of sim in reg CTRL_REG4
   *
   */
 int32_t lis331dlh_spi_mode_set(lis331dlh_ctx_t *ctx, lis331dlh_sim_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, &reg.byte, 1);
-  reg.ctrl_reg4.sim = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG4, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  if(ret == 0) {
+    ctrl_reg4.sim = (uint8_t)val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG4,
+                              (uint8_t*)&ctrl_reg4, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  spi_mode: [get]  SPI 3- or 4-wire interface.
+  * @brief  SPI 3- or 4-wire interface.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_sim_t: Get the values of sim in reg CTRL_REG4
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of sim in reg CTRL_REG4
   *
   */
 int32_t lis331dlh_spi_mode_get(lis331dlh_ctx_t *ctx, lis331dlh_sim_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, &reg.byte, 1);
-  *val = (lis331dlh_sim_t) reg.ctrl_reg4.sim;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
 
-  return mm_error;
+  switch ( ctrl_reg4.sim )
+  {
+    case LIS331DLH_SPI_4_WIRE:
+      *val = LIS331DLH_SPI_4_WIRE;
+      break;
+    case LIS331DLH_SPI_3_WIRE:
+      *val = LIS331DLH_SPI_3_WIRE;
+      break;
+    default:
+      *val = LIS331DLH_SPI_4_WIRE;
+      break;
+  }
+
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  interrupt_pins
-  * @brief   This section groups all the functions that manage interrupt pins.
-  * @{
-  */
-
-/**
-  * @brief  pin_int1_route: [set]  Data signal on INT 1 pad control bits.
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_i1_cfg_t: change the values of i1_cfg in reg CTRL_REG3
+  */
+
+/**
+  * @defgroup    LIS331DLH_Interrupt_Pins
+  * @brief       This section groups all the functions that manage
+  *              interrupt pins.
+  * @{
+  *
+  */
+
+/**
+  * @brief  Data signal on INT 1 pad control bits.[set]
+  *
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of i1_cfg in reg CTRL_REG3
   *
   */
 int32_t lis331dlh_pin_int1_route_set(lis331dlh_ctx_t *ctx,
                                      lis331dlh_i1_cfg_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, &reg.byte, 1);
-  reg.ctrl_reg3.i1_cfg = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG3, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  if(ret == 0) {
+    ctrl_reg3.i1_cfg = (uint8_t)val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG3,
+                              (uint8_t*)&ctrl_reg3, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  pin_int1_route: [get]  Data signal on INT 1 pad control bits.
+  * @brief  Data signal on INT 1 pad control bits.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_i1_cfg_t: Get the values of i1_cfg in reg CTRL_REG3
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of i1_cfg in reg CTRL_REG3
   *
   */
 int32_t lis331dlh_pin_int1_route_get(lis331dlh_ctx_t *ctx,
                                      lis331dlh_i1_cfg_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, &reg.byte, 1);
-  *val = (lis331dlh_i1_cfg_t) reg.ctrl_reg3.i1_cfg;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
 
-  return mm_error;
+  switch ( ctrl_reg3.i1_cfg )
+  {
+    case LIS331DLH_PAD1_INT1_SRC:
+      *val = LIS331DLH_PAD1_INT1_SRC;
+      break;
+    case LIS331DLH_PAD1_INT1_OR_INT2_SRC:
+      *val = LIS331DLH_PAD1_INT1_OR_INT2_SRC;
+      break;
+    case LIS331DLH_PAD1_DRDY:
+      *val = LIS331DLH_PAD1_DRDY;
+      break;
+    case LIS331DLH_PAD1_BOOT:
+      *val = LIS331DLH_PAD1_BOOT;
+      break;
+    default:
+      *val = LIS331DLH_PAD1_INT1_SRC;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  int1_notification: [set] Latch interrupt request on INT1_SRC
-  *                                  register, with INT1_SRC register cleared
-  *                                  by reading INT1_SRC register.
+  * @brief  Latch interrupt request on INT1_SRC register, with INT1_SRC
+  *         register cleared by reading INT1_SRC register.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_lir1_t: change the values of lir1 in reg CTRL_REG3
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of lir1 in reg CTRL_REG3
   *
   */
 int32_t lis331dlh_int1_notification_set(lis331dlh_ctx_t *ctx,
                                         lis331dlh_lir1_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, &reg.byte, 1);
-  reg.ctrl_reg3.lir1 = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG3, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  if(ret == 0) {
+    ctrl_reg3.lir1 = (uint8_t)val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG3,
+                              (uint8_t*)&ctrl_reg3, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int1_notification: [get] Latch interrupt request on INT1_SRC
-  *                                  register, with INT1_SRC register cleared
-  *                                  by reading INT1_SRC register.
+  * @brief  Latch interrupt request on INT1_SRC register, with INT1_SRC
+  *         register cleared by reading INT1_SRC register.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_lir1_t: Get the values of lir1 in reg CTRL_REG3
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of lir1 in reg CTRL_REG3
   *
   */
 int32_t lis331dlh_int1_notification_get(lis331dlh_ctx_t *ctx,
                                         lis331dlh_lir1_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, &reg.byte, 1);
-  *val = (lis331dlh_lir1_t) reg.ctrl_reg3.lir1;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
 
-  return mm_error;
+  switch ( ctrl_reg3.lir1 )
+  {
+    case LIS331DLH_INT1_PULSED:
+      *val = LIS331DLH_INT1_PULSED;
+      break;
+    case LIS331DLH_INT1_LATCHED:
+      *val = LIS331DLH_INT1_LATCHED;
+      break;
+    default:
+      *val = LIS331DLH_INT1_PULSED;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  pin_int2_route: [set]  Data signal on INT 2 pad control bits.
+  * @brief  Data signal on INT 2 pad control bits.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_i2_cfg_t: change the values of i2_cfg in reg CTRL_REG3
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of i2_cfg in reg CTRL_REG3
   *
   */
 int32_t lis331dlh_pin_int2_route_set(lis331dlh_ctx_t *ctx,
                                      lis331dlh_i2_cfg_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, &reg.byte, 1);
-  reg.ctrl_reg3.i2_cfg = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG3, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  if(ret == 0) {
+    ctrl_reg3.i2_cfg = (uint8_t)val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG3,
+                              (uint8_t*)&ctrl_reg3, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  pin_int2_route: [get]  Data signal on INT 2 pad control bits.
+  * @brief  Data signal on INT 2 pad control bits.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_i2_cfg_t: Get the values of i2_cfg in reg CTRL_REG3
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of i2_cfg in reg CTRL_REG3
   *
   */
 int32_t lis331dlh_pin_int2_route_get(lis331dlh_ctx_t *ctx,
                                      lis331dlh_i2_cfg_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, &reg.byte, 1);
-  *val = (lis331dlh_i2_cfg_t) reg.ctrl_reg3.i2_cfg;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
 
-  return mm_error;
+  switch ( ctrl_reg3.i2_cfg )
+  {
+    case LIS331DLH_PAD2_INT2_SRC:
+      *val = LIS331DLH_PAD2_INT2_SRC;
+      break;
+    case LIS331DLH_PAD2_INT1_OR_INT2_SRC:
+      *val = LIS331DLH_PAD2_INT1_OR_INT2_SRC;
+      break;
+    case LIS331DLH_PAD2_DRDY:
+      *val = LIS331DLH_PAD2_DRDY;
+      break;
+    case LIS331DLH_PAD2_BOOT:
+      *val = LIS331DLH_PAD2_BOOT;
+      break;
+    default:
+      *val = LIS331DLH_PAD2_INT2_SRC;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  int2_notification: [set] Latch interrupt request on
-  *                                  INT2_SRC register, with INT2_SRC
-  *                                  register cleared by reading INT2_SRC
-  *                                  itself.
+  * @brief  Latch interrupt request on INT2_SRC register, with INT2_SRC
+  *         register cleared by reading INT2_SRC itself.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_lir2_t: change the values of lir2 in reg CTRL_REG3
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of lir2 in reg CTRL_REG3
   *
   */
 int32_t lis331dlh_int2_notification_set(lis331dlh_ctx_t *ctx,
                                         lis331dlh_lir2_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, &reg.byte, 1);
-  reg.ctrl_reg3.lir2 = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG3, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  if(ret == 0) {
+    ctrl_reg3.lir2 = (uint8_t)val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG3,
+                              (uint8_t*)&ctrl_reg3, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int2_notification: [get] Latch interrupt request on INT2_SRC
-  *                                  register, with INT2_SRC register cleared
-  *                                  by reading INT2_SRC itself.
+  * @brief  Latch interrupt request on INT2_SRC register, with INT2_SRC
+  *         register cleared by reading INT2_SRC itself.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_lir2_t: Get the values of lir2 in reg CTRL_REG3
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of lir2 in reg CTRL_REG3
   *
   */
 int32_t lis331dlh_int2_notification_get(lis331dlh_ctx_t *ctx,
                                         lis331dlh_lir2_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, &reg.byte, 1);
-  *val = (lis331dlh_lir2_t) reg.ctrl_reg3.lir2;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
 
-  return mm_error;
+  switch ( ctrl_reg3.lir2 )
+  {
+    case LIS331DLH_INT2_PULSED:
+      *val = LIS331DLH_INT2_PULSED;
+      break;
+    case LIS331DLH_INT2_LATCHED:
+      *val = LIS331DLH_INT2_LATCHED;
+      break;
+    default:
+      *val = LIS331DLH_INT2_PULSED;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  pin_mode: [set]  Push-pull/open drain selection on interrupt pads.
+  * @brief  Push-pull/open drain selection on interrupt pads.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_pp_od_t: change the values of pp_od in reg CTRL_REG3
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of pp_od in reg CTRL_REG3
   *
   */
 int32_t lis331dlh_pin_mode_set(lis331dlh_ctx_t *ctx, lis331dlh_pp_od_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, &reg.byte, 1);
-  reg.ctrl_reg3.pp_od = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG3, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  if(ret == 0) {
+    ctrl_reg3.pp_od = (uint8_t)val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG3,
+                              (uint8_t*)&ctrl_reg3, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  pin_mode: [get]  Push-pull/open drain selection on interrupt pads.
+  * @brief  Push-pull/open drain selection on interrupt pads.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_pp_od_t: Get the values of pp_od in reg CTRL_REG3
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of pp_od in reg CTRL_REG3
   *
   */
 int32_t lis331dlh_pin_mode_get(lis331dlh_ctx_t *ctx, lis331dlh_pp_od_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, &reg.byte, 1);
-  *val = (lis331dlh_pp_od_t) reg.ctrl_reg3.pp_od;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
 
-  return mm_error;
+  switch ( ctrl_reg3.pp_od )
+  {
+    case LIS331DLH_PUSH_PULL:
+      *val = LIS331DLH_PUSH_PULL;
+      break;
+    case LIS331DLH_OPEN_DRAIN:
+      *val = LIS331DLH_OPEN_DRAIN;
+      break;
+    default:
+      *val = LIS331DLH_PUSH_PULL;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  pin_polarity: [set]  Interrupt active-high/low.
+  * @brief  Interrupt active-high/low.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_ihl_t: change the values of ihl in reg CTRL_REG3
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of ihl in reg CTRL_REG3
   *
   */
 int32_t lis331dlh_pin_polarity_set(lis331dlh_ctx_t *ctx, lis331dlh_ihl_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, &reg.byte, 1);
-  reg.ctrl_reg3.ihl = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG3, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  if(ret == 0) {
+    ctrl_reg3.ihl = (uint8_t)val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG3,
+                              (uint8_t*)&ctrl_reg3, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  pin_polarity: [get]  Interrupt active-high/low.
+  * @brief  Interrupt active-high/low.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_ihl_t: Get the values of ihl in reg CTRL_REG3
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of ihl in reg CTRL_REG3
   *
   */
 int32_t lis331dlh_pin_polarity_get(lis331dlh_ctx_t *ctx, lis331dlh_ihl_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, &reg.byte, 1);
-  *val = (lis331dlh_ihl_t) reg.ctrl_reg3.ihl;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
 
-  return mm_error;
+  switch ( ctrl_reg3.ihl )
+  {
+    case LIS331DLH_ACTIVE_HIGH:
+      *val = LIS331DLH_ACTIVE_HIGH;
+      break;
+    case LIS331DLH_ACTIVE_LOW:
+      *val = LIS331DLH_ACTIVE_LOW;
+      break;
+    default:
+      *val = LIS331DLH_ACTIVE_HIGH;
+      break;
+  }
+
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  interrupt_on_threshold
-  * @brief   This section groups all the functions that manage the interrupt
-  *          on threshold event generation.
-  * @{
-  */
-
-/**
-  * @brief   int1_on_threshold_conf: [set] Configure the interrupt 1
-  *                                        threshold sign.
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  int1_on_th_conf_t: enable sign and axis for interrupt on threshold
+  */
+
+/**
+  * @defgroup    LIS331DLH_interrupt_on_threshold
+  * @brief       This section groups all the functions that manage
+  *              the interrupt on threshold event generation.
+  * @{
+  *
+  */
+
+/**
+  * @brief  Configure the interrupt 1 threshold sign.[set]
+  *
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         enable sign and axis for interrupt on threshold
   *
   */
 int32_t lis331dlh_int1_on_threshold_conf_set(lis331dlh_ctx_t *ctx,
                                               int1_on_th_conf_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int1_cfg_t int1_cfg;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT1_CFG, &reg.byte, 1);
-  reg.int1_cfg.xlie  = val.int1_xlie;
-  reg.int1_cfg.xhie  = val.int1_xhie;
-  reg.int1_cfg.ylie  = val.int1_ylie;
-  reg.int1_cfg.yhie  = val.int1_yhie;
-  reg.int1_cfg.zlie  = val.int1_zlie;
-  reg.int1_cfg.zhie  = val.int1_zhie;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_INT1_CFG, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT1_CFG, (uint8_t*)&int1_cfg, 1);
+  if(ret == 0) {
+    int1_cfg.xlie  = val.int1_xlie;
+    int1_cfg.xhie  = val.int1_xhie;
+    int1_cfg.ylie  = val.int1_ylie;
+    int1_cfg.yhie  = val.int1_yhie;
+    int1_cfg.zlie  = val.int1_zlie;
+    int1_cfg.zhie  = val.int1_zhie;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_INT1_CFG,
+                              (uint8_t*)&int1_cfg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief   int1_on_threshold_conf: [get] Configure the interrupt 1
-  *                                        threshold sign.
+  * @brief   Configure the interrupt 1 threshold sign.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  int1_on_th_conf_t: enable sign and axis for interrupt on threshold
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         enable sign and axis for interrupt on threshold
   *
   */
 int32_t lis331dlh_int1_on_threshold_conf_get(lis331dlh_ctx_t *ctx,
                                              int1_on_th_conf_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int1_cfg_t int1_cfg;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT1_CFG, &reg.byte, 1);
-  val->int1_xlie = reg.int1_cfg.xlie;
-  val->int1_xhie = reg.int1_cfg.xhie;
-  val->int1_ylie = reg.int1_cfg.ylie;
-  val->int1_yhie = reg.int1_cfg.yhie;
-  val->int1_zlie = reg.int1_cfg.zlie;
-  val->int1_zhie = reg.int1_cfg.zhie;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT1_CFG, (uint8_t*)&int1_cfg, 1);
+  val->int1_xlie = int1_cfg.xlie;
+  val->int1_xhie = int1_cfg.xhie;
+  val->int1_ylie = int1_cfg.ylie;
+  val->int1_yhie = int1_cfg.yhie;
+  val->int1_zlie = int1_cfg.zlie;
+  val->int1_zhie = int1_cfg.zhie;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief   int1_on_threshold_mode: [set] AND/OR combination of
-  *                                        Interrupt 1 events.
+  * @brief  AND/OR combination of Interrupt 1 events.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_aoi_t: change the values of aoi in reg INT1_CFG
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of aoi in reg INT1_CFG
   *
   */
 int32_t lis331dlh_int1_on_threshold_mode_set(lis331dlh_ctx_t *ctx,
                                              lis331dlh_int1_aoi_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int1_cfg_t int1_cfg;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT1_CFG, &reg.byte, 1);
-  reg.int1_cfg.aoi = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_INT1_CFG, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT1_CFG, (uint8_t*)&int1_cfg, 1);
+  if(ret == 0) {
+    int1_cfg.aoi = (uint8_t) val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_INT1_CFG,
+                              (uint8_t*)&int1_cfg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief   int1_on_threshold_mode: [get] AND/OR combination of
-  *                                        Interrupt 1 events.
+  * @brief   AND/OR combination of Interrupt 1 events.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_aoi_t: Get the values of aoi in reg INT1_CFG
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of aoi in reg INT1_CFG
   *
   */
 int32_t lis331dlh_int1_on_threshold_mode_get(lis331dlh_ctx_t *ctx,
                                              lis331dlh_int1_aoi_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int1_cfg_t int1_cfg;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT1_CFG, &reg.byte, 1);
-  *val = (lis331dlh_int1_aoi_t) reg.int1_cfg.aoi;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT1_CFG, (uint8_t*)&int1_cfg, 1);
 
-  return mm_error;
+  switch ( int1_cfg.aoi )
+  {
+    case LIS331DLH_INT1_ON_THRESHOLD_OR:
+      *val = LIS331DLH_INT1_ON_THRESHOLD_OR;
+      break;
+    case LIS331DLH_INT1_ON_THRESHOLD_AND:
+      *val = LIS331DLH_INT1_ON_THRESHOLD_AND;
+      break;
+    default:
+      *val = LIS331DLH_INT1_ON_THRESHOLD_OR;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  int1_src: [get] Interrupt generator 1 on threshold
-  *                         source register.
+  * @brief  Interrupt generator 1 on threshold source register.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_int1_src_t: registers INT1_SRC
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         registers INT1_SRC
   *
   */
 int32_t lis331dlh_int1_src_get(lis331dlh_ctx_t *ctx,
                                lis331dlh_int1_src_t *val)
 {
-  return lis331dlh_read_reg(ctx, LIS331DLH_INT1_SRC, (uint8_t*) val, 1);
+  int32_t ret;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT1_SRC, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
-  * @brief  int1_treshold: [set]  Interrupt 1 threshold.
+  * @brief  Interrupt 1 threshold.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of ths in reg INT1_THS
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of ths in reg INT1_THS
   *
   */
 int32_t lis331dlh_int1_treshold_set(lis331dlh_ctx_t *ctx, uint8_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int1_ths_t int1_ths;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT1_THS, &reg.byte, 1);
-  reg.int1_ths.ths = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_INT1_THS, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT1_THS, (uint8_t*)&int1_ths, 1);
+  if(ret == 0) {
+    int1_ths.ths = val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_INT1_THS,
+                              (uint8_t*)&int1_ths, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int1_treshold: [get]  Interrupt 1 threshold.
+  * @brief  Interrupt 1 threshold.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of ths in reg INT1_THS
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of ths in reg INT1_THS
   *
   */
 int32_t lis331dlh_int1_treshold_get(lis331dlh_ctx_t *ctx, uint8_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int1_ths_t int1_ths;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT1_THS, &reg.byte, 1);
-  *val = reg.int1_ths.ths;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT1_THS, (uint8_t*)&int1_ths, 1);
+  *val = int1_ths.ths;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  int1_dur: [set]  Duration value for interrupt 1 generator.
+  * @brief  Duration value for interrupt 1 generator.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of d in reg INT1_DURATION
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of d in reg INT1_DURATION
   *
   */
 int32_t lis331dlh_int1_dur_set(lis331dlh_ctx_t *ctx, uint8_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int1_duration_t int1_duration;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT1_DURATION, &reg.byte, 1);
-  reg.int1_duration.d = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_INT1_DURATION, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT1_DURATION,
+                           (uint8_t*)&int1_duration, 1);
+  if(ret == 0) {
+    int1_duration.d = val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_INT1_DURATION,
+                              (uint8_t*)&int1_duration, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int1_dur: [get]  Duration value for interrupt 1 generator.
+  * @brief  Duration value for interrupt 1 generator.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of d in reg INT1_DURATION
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of d in reg INT1_DURATION
   *
   */
 int32_t lis331dlh_int1_dur_get(lis331dlh_ctx_t *ctx, uint8_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int1_duration_t int1_duration;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT1_DURATION, &reg.byte, 1);
-  *val = reg.int1_duration.d;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT1_DURATION,
+                           (uint8_t*)&int1_duration, 1);
+  *val = int1_duration.d;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief   int2_on_threshold_conf: [set] Configure the interrupt 2
-  *                                        threshold sign.
+  * @brief  Configure the interrupt 2 threshold sign.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  int2_on_th_conf_t: enable sign and axis for interrupt on threshold
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         enable sign and axis for interrupt on threshold
   *
   */
 int32_t lis331dlh_int2_on_threshold_conf_set(lis331dlh_ctx_t *ctx,
                                               int2_on_th_conf_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int2_cfg_t int2_cfg;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT2_CFG, &reg.byte, 1);
-  reg.int2_cfg.xlie  = val.int2_xlie;
-  reg.int2_cfg.xhie  = val.int2_xhie;
-  reg.int2_cfg.ylie  = val.int2_ylie;
-  reg.int2_cfg.yhie  = val.int2_yhie;
-  reg.int2_cfg.zlie  = val.int2_zlie;
-  reg.int2_cfg.zhie  = val.int2_zhie;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_INT2_CFG, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT2_CFG,
+                           (uint8_t*)&int2_cfg, 1);
+  if(ret == 0) {
+    int2_cfg.xlie  = val.int2_xlie;
+    int2_cfg.xhie  = val.int2_xhie;
+    int2_cfg.ylie  = val.int2_ylie;
+    int2_cfg.yhie  = val.int2_yhie;
+    int2_cfg.zlie  = val.int2_zlie;
+    int2_cfg.zhie  = val.int2_zhie;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_INT2_CFG,
+                              (uint8_t*)&int2_cfg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief   int2_on_threshold_conf: [get] Configure the interrupt 2
-  *                                        threshold sign.
+  * @brief  Configure the interrupt 2 threshold sign.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  int2_on_th_conf_t: enable sign and axis for interrupt on threshold
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         enable sign and axis for interrupt on threshold
   *
   */
 int32_t lis331dlh_int2_on_threshold_conf_get(lis331dlh_ctx_t *ctx,
                                               int2_on_th_conf_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int2_cfg_t int2_cfg;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT2_CFG, &reg.byte, 1);
-  val->int2_xlie = reg.int2_cfg.xlie;
-  val->int2_xhie = reg.int2_cfg.xhie;
-  val->int2_ylie = reg.int2_cfg.ylie;
-  val->int2_yhie = reg.int2_cfg.yhie;
-  val->int2_zlie = reg.int2_cfg.zlie;
-  val->int2_zhie = reg.int2_cfg.zhie;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT2_CFG, (uint8_t*)&int2_cfg, 1);
+  val->int2_xlie = int2_cfg.xlie;
+  val->int2_xhie = int2_cfg.xhie;
+  val->int2_ylie = int2_cfg.ylie;
+  val->int2_yhie = int2_cfg.yhie;
+  val->int2_zlie = int2_cfg.zlie;
+  val->int2_zhie = int2_cfg.zhie;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief   int2_on_threshold_mode: [set] AND/OR combination of
-  *                                        Interrupt 2 events.
+  * @brief  AND/OR combination of Interrupt 2 events.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_aoi_t: change the values of aoi in reg INT2_CFG
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of aoi in reg INT2_CFG
   *
   */
 int32_t lis331dlh_int2_on_threshold_mode_set(lis331dlh_ctx_t *ctx,
                                              lis331dlh_int2_aoi_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int2_cfg_t int2_cfg;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT2_CFG, &reg.byte, 1);
-  reg.int2_cfg.aoi = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_INT2_CFG, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT2_CFG, (uint8_t*)&int2_cfg, 1);
+  if(ret == 0) {
+    int2_cfg.aoi = (uint8_t) val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_INT2_CFG,
+                              (uint8_t*)&int2_cfg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief   int2_on_threshold_mode: [get] AND/OR combination of
-  *                                        Interrupt 2 events.
+  * @brief   AND/OR combination of Interrupt 2 events.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_aoi_t: Get the values of aoi in reg INT2_CFG
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of aoi in reg INT2_CFG
   *
   */
 int32_t lis331dlh_int2_on_threshold_mode_get(lis331dlh_ctx_t *ctx,
                                              lis331dlh_int2_aoi_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int2_cfg_t int2_cfg;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT2_CFG, &reg.byte, 1);
-  *val = (lis331dlh_int2_aoi_t) reg.int2_cfg.aoi;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT2_CFG, (uint8_t*)&int2_cfg, 1);
 
-  return mm_error;
+  switch ( int2_cfg.aoi )
+  {
+    case LIS331DLH_INT2_ON_THRESHOLD_OR:
+      *val = LIS331DLH_INT2_ON_THRESHOLD_OR;
+      break;
+    case LIS331DLH_INT2_ON_THRESHOLD_AND:
+      *val = LIS331DLH_INT2_ON_THRESHOLD_AND;
+      break;
+    default:
+      *val = LIS331DLH_INT2_ON_THRESHOLD_OR;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  int2_src: [get] Interrupt generator 1 on threshold source
-  *                         register.
+  * @brief  Interrupt generator 1 on threshold source register.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_int2_src_t: registers INT2_SRC
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         registers INT2_SRC
   *
   */
 int32_t lis331dlh_int2_src_get(lis331dlh_ctx_t *ctx,
                                lis331dlh_int2_src_t *val)
 {
-  return lis331dlh_read_reg(ctx, LIS331DLH_INT2_SRC, (uint8_t*) val, 1);
+  int32_t ret;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT2_SRC, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
-  * @brief  int2_treshold: [set]  Interrupt 2 threshold.
+  * @brief  Interrupt 2 threshold.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of ths in reg INT2_THS
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of ths in reg INT2_THS
   *
   */
 int32_t lis331dlh_int2_treshold_set(lis331dlh_ctx_t *ctx, uint8_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int2_ths_t int2_ths;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT2_THS, &reg.byte, 1);
-  reg.int2_ths.ths = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_INT2_THS, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT2_THS, (uint8_t*)&int2_ths, 1);
+  if(ret == 0) {
+    int2_ths.ths = val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_INT2_THS,
+                              (uint8_t*)&int2_ths, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int2_treshold: [get]  Interrupt 2 threshold.
+  * @brief  Interrupt 2 threshold.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of ths in reg INT2_THS
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of ths in reg INT2_THS
   *
   */
 int32_t lis331dlh_int2_treshold_get(lis331dlh_ctx_t *ctx, uint8_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int2_ths_t int2_ths;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT2_THS, &reg.byte, 1);
-  *val = reg.int2_ths.ths;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT2_THS, (uint8_t*)&int2_ths, 1);
+  *val = int2_ths.ths;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  int2_dur: [set]  Duration value for interrupt 2 generator.
+  * @brief  Duration value for interrupt 2 generator.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of d in reg INT2_DURATION
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of d in reg INT2_DURATION
   *
   */
 int32_t lis331dlh_int2_dur_set(lis331dlh_ctx_t *ctx, uint8_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int2_duration_t int2_duration;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT2_DURATION, &reg.byte, 1);
-  reg.int2_duration.d = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_INT2_DURATION, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT2_DURATION,
+                           (uint8_t*)&int2_duration, 1);
+  if(ret == 0) {
+    int2_duration.d = val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_INT2_DURATION,
+                              (uint8_t*)&int2_duration, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int2_dur: [get]  Duration value for interrupt 2 generator.
+  * @brief    Duration value for interrupt 2 generator.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of d in reg INT2_DURATION
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of d in reg INT2_DURATION
   *
   */
 int32_t lis331dlh_int2_dur_get(lis331dlh_ctx_t *ctx, uint8_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int2_duration_t int2_duration;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT2_DURATION, &reg.byte, 1);
-  *val = reg.int2_duration.d;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT2_DURATION,
+                           (uint8_t*)&int2_duration, 1);
+  *val = int2_duration.d;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  Wake_Up_event
-  * @brief  This section groups all the functions that manage the Wake Up
-  *         event generation.
-  * @{
-  */
-
-/**
-  * @brief  wkup_to_sleep: [set] Turn-on mode selection for sleep to
-  *                              wake function.
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of turnon in reg CTRL_REG5
+  */
+
+/**
+  * @defgroup    LIS331DLH_Wake_Up_Event
+  * @brief       This section groups all the functions that manage the
+  *              Wake Up event generation.
+  * @{
+  *
+  */
+
+/**
+  * @brief  Turn-on mode selection for sleep to wake function.[set]
+  *
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of turnon in reg CTRL_REG5
   *
   */
 int32_t lis331dlh_wkup_to_sleep_set(lis331dlh_ctx_t *ctx, uint8_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg5_t ctrl_reg5;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG5, &reg.byte, 1);
-  reg.ctrl_reg5.turnon = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG5, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+  if(ret == 0) {
+    ctrl_reg5.turnon = val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_CTRL_REG5,
+                              (uint8_t*)&ctrl_reg5, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  wkup_to_sleep: [get] Turn-on mode selection for sleep to
-  *                              wake function.
+  * @brief  Turn-on mode selection for sleep to wake function.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of turnon in reg CTRL_REG5
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of turnon in reg CTRL_REG5
   *
   */
 int32_t lis331dlh_wkup_to_sleep_get(lis331dlh_ctx_t *ctx, uint8_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_ctrl_reg5_t ctrl_reg5;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG5, &reg.byte, 1);
-  *val = reg.ctrl_reg5.turnon;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+  *val = ctrl_reg5.turnon;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup   Six_position_detection
-  * @brief   This section groups all the functions concerning six
-  *          position detection (6D).
-  * @{
-  */
-
-/**
-  * @brief  int1_6d_mode: [set]  Configure the 6d on interrupt 1 generator.
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_6d_t: change the values of 6d in reg INT1_CFG
+  */
+
+/**
+  * @defgroup    LIS331DLH_Six_Position_Detection
+  * @brief       This section groups all the functions concerning six
+  *              position detection (6D).
+  * @{
+  *
+  */
+
+/**
+  * @brief  Configure the 6d on interrupt 1 generator.[set]
+  *
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of 6d in reg INT1_CFG
   *
   */
 int32_t lis331dlh_int1_6d_mode_set(lis331dlh_ctx_t *ctx,
                                    lis331dlh_int1_6d_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int1_cfg_t int1_cfg;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT1_CFG, &reg.byte, 1);
-  reg.int1_cfg._6d = val & 0x01;
-  reg.int1_cfg.aoi = (val & 0x02) >> 1;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_INT1_CFG, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT1_CFG, (uint8_t*)&int1_cfg, 1);
+  if(ret == 0) {
+    int1_cfg._6d = (uint8_t)val & 0x01U;
+    int1_cfg.aoi = ((uint8_t)val & 0x02U) >> 1;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_INT1_CFG, (uint8_t*)&int1_cfg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int1_6d_mode: [get]  Configure the 6d on interrupt 1 generator.
+  * @brief  Configure the 6d on interrupt 1 generator.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_6d_t: Get the values of 6d in reg INT1_CFG
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of 6d in reg INT1_CFG
   *
   */
 int32_t lis331dlh_int1_6d_mode_get(lis331dlh_ctx_t *ctx,
                                    lis331dlh_int1_6d_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int1_cfg_t int1_cfg;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT1_CFG, &reg.byte, 1);
-  *val = (lis331dlh_int1_6d_t) ((reg.int1_cfg.aoi << 1) + reg.int1_cfg._6d);
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT1_CFG, (uint8_t*)&int1_cfg, 1);
 
-  return mm_error;
+  switch ((int1_cfg.aoi << 1) + int1_cfg._6d)
+  {
+    case LIS331DLH_6D_INT1_DISABLE:
+      *val = LIS331DLH_6D_INT1_DISABLE;
+      break;
+    case LIS331DLH_6D_INT1_MOVEMENT:
+      *val = LIS331DLH_6D_INT1_MOVEMENT;
+      break;
+     case LIS331DLH_6D_INT1_POSITION:
+      *val = LIS331DLH_6D_INT1_POSITION;
+      break;
+    default:
+      *val = LIS331DLH_6D_INT1_DISABLE;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  int1_6d_src: [get]  6D on interrupt generator 1 source register.
+  * @brief  6D on interrupt generator 1 source register.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_: registers INT1_SRC
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         registers INT1_SRC
   *
   */
 int32_t lis331dlh_int1_6d_src_get(lis331dlh_ctx_t *ctx,
                                   lis331dlh_int1_src_t *val)
 {
-  return lis331dlh_read_reg(ctx, LIS331DLH_INT1_SRC, (uint8_t*) val, 1);
+  int32_t ret;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT1_SRC, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
-  * @brief  int1_6d_treshold: [set]  Interrupt 1 threshold.
+  * @brief  Interrupt 1 threshold.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of ths in reg INT1_THS
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of ths in reg INT1_THS
   *
   */
 int32_t lis331dlh_int1_6d_treshold_set(lis331dlh_ctx_t *ctx, uint8_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int1_ths_t int1_ths;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT1_THS, &reg.byte, 1);
-  reg.int1_ths.ths = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_INT1_THS, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT1_THS, (uint8_t*)&int1_ths, 1);
+  if(ret == 0) {
+    int1_ths.ths = val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_INT1_THS, (uint8_t*)&int1_ths, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int1_6d_treshold: [get]  Interrupt 1 threshold.
+  * @brief  Interrupt 1 threshold.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of ths in reg INT1_THS
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of ths in reg INT1_THS
   *
   */
 int32_t lis331dlh_int1_6d_treshold_get(lis331dlh_ctx_t *ctx, uint8_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int1_ths_t int1_ths;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT1_THS, &reg.byte, 1);
-  *val = reg.int1_ths.ths;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT1_THS, (uint8_t*)&int1_ths, 1);
+  *val = int1_ths.ths;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  int2_6d_mode: [set]   Configure the 6d on interrupt 2 generator.
+  * @brief  Configure the 6d on interrupt 2 generator.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_6d_t: change the values of 6d in reg INT2_CFG
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of 6d in reg INT2_CFG
   *
   */
 int32_t lis331dlh_int2_6d_mode_set(lis331dlh_ctx_t *ctx,
                                    lis331dlh_int2_6d_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int2_cfg_t int2_cfg;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT2_CFG, &reg.byte, 1);
-  reg.int2_cfg._6d = val & 0x01;
-  reg.int2_cfg.aoi = (val & 0x02) >> 1;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_INT2_CFG, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT2_CFG, (uint8_t*)&int2_cfg, 1);
+  if(ret == 0) {
+    int2_cfg._6d = (uint8_t)val & 0x01U;
+    int2_cfg.aoi = ((uint8_t)val & 0x02U) >> 1;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_INT2_CFG,
+                              (uint8_t*)&int2_cfg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int2_6d_mode: [get]   Configure the 6d on interrupt 2 generator.
+  * @brief  Configure the 6d on interrupt 2 generator.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_6d_t: Get the values of 6d in reg INT2_CFG
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of 6d in reg INT2_CFG
   *
   */
 int32_t lis331dlh_int2_6d_mode_get(lis331dlh_ctx_t *ctx,
                                    lis331dlh_int2_6d_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int2_cfg_t int2_cfg;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT2_CFG, &reg.byte, 1);
-  *val = (lis331dlh_int2_6d_t) ((reg.int2_cfg.aoi << 1) + reg.int2_cfg._6d);
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT2_CFG, (uint8_t*)&int2_cfg, 1);
 
-  return mm_error;
+  switch ((int2_cfg.aoi << 1) + int2_cfg._6d)
+  {
+    case LIS331DLH_6D_INT2_DISABLE:
+      *val = LIS331DLH_6D_INT2_DISABLE;
+      break;
+    case LIS331DLH_6D_INT2_MOVEMENT:
+      *val = LIS331DLH_6D_INT2_MOVEMENT;
+      break;
+     case LIS331DLH_6D_INT2_POSITION:
+      *val = LIS331DLH_6D_INT2_POSITION;
+      break;
+    default:
+      *val = LIS331DLH_6D_INT2_DISABLE;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  int2_6d_src: [get]  6D on interrupt generator 2 source register.
+  * @brief  6D on interrupt generator 2 source register.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  lis331dlh_int2_src_t: registers INT2_SRC
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         registers INT2_SRC
   *
   */
 int32_t lis331dlh_int2_6d_src_get(lis331dlh_ctx_t *ctx,
                                   lis331dlh_int2_src_t *val)
 {
-  return lis331dlh_read_reg(ctx, LIS331DLH_INT2_SRC, (uint8_t*) val, 1);
+  int32_t ret;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT2_SRC, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
-  * @brief  int2_6d_treshold: [set]  Interrupt 2 threshold.
+  * @brief  Interrupt 2 threshold.[set]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of ths in reg INT2_THS
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of ths in reg INT2_THS
   *
   */
 int32_t lis331dlh_int2_6d_treshold_set(lis331dlh_ctx_t *ctx, uint8_t val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int2_ths_t int2_ths;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT2_THS, &reg.byte, 1);
-  reg.int2_ths.ths = val;
-  mm_error = lis331dlh_write_reg(ctx, LIS331DLH_INT2_THS, &reg.byte, 1);
-
-  return mm_error;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT2_THS, (uint8_t*)&int2_ths, 1);
+  if(ret == 0) {
+    int2_ths.ths = val;
+    ret = lis331dlh_write_reg(ctx, LIS331DLH_INT2_THS,
+                              (uint8_t*)&int2_ths, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int2_6d_treshold: [get]  Interrupt 2 threshold.
+  * @brief  Interrupt 2 threshold.[get]
   *
-  * @param  lis331dlh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of ths in reg INT2_THS
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of ths in reg INT2_THS
   *
   */
 int32_t lis331dlh_int2_6d_treshold_get(lis331dlh_ctx_t *ctx, uint8_t *val)
 {
-  lis331dlh_reg_t reg;
-  int32_t mm_error;
+  lis331dlh_int2_ths_t int2_ths;
+  int32_t ret;
 
-  mm_error = lis331dlh_read_reg(ctx, LIS331DLH_INT2_THS, &reg.byte, 1);
-  *val = reg.int2_ths.ths;
+  ret = lis331dlh_read_reg(ctx, LIS331DLH_INT2_THS, (uint8_t*)&int2_ths, 1);
+  *val = int2_ths.ths;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
