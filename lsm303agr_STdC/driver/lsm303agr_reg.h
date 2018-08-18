@@ -44,6 +44,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <math.h>
 
 /** @addtogroup lsm303agr
  * @{
@@ -135,26 +136,26 @@ typedef struct {
   * @{
   */
 
-#define LSM303AGR_FROM_FS_2g_HR_TO_mg(lsb)  (float)((int16_t)lsb>>4)* 1.0f
-#define LSM303AGR_FROM_FS_4g_HR_TO_mg(lsb)  (float)((int16_t)lsb>>4)* 2.0f
-#define LSM303AGR_FROM_FS_8g_HR_TO_mg(lsb)  (float)((int16_t)lsb>>4)* 4.0f
-#define LSM303AGR_FROM_FS_16g_HR_TO_mg(lsb) (float)((int16_t)lsb>>4)*12.0f
-#define LSM303AGR_FROM_LSB_TO_degC_HR(lsb) (float)((int16_t)lsb>>6)/4.0f+25.0f
+#define LSM303AGR_FROM_FS_2g_HR_TO_mg(lsb)  (float)((int16_t)lsb / pow(2, 4))* 1.0f
+#define LSM303AGR_FROM_FS_4g_HR_TO_mg(lsb)  (float)((int16_t)lsb / pow(2, 4))* 2.0f
+#define LSM303AGR_FROM_FS_8g_HR_TO_mg(lsb)  (float)((int16_t)lsb / pow(2, 4))* 4.0f
+#define LSM303AGR_FROM_FS_16g_HR_TO_mg(lsb) (float)((int16_t)lsb / pow(2, 4))*12.0f
+#define LSM303AGR_FROM_LSB_TO_degC_HR(lsb) (float)((int16_t)lsb / pow(2, 6))/4.0f+25.0f
 
-#define LSM303AGR_FROM_FS_2g_NM_TO_mg(lsb)  (float)((int16_t)lsb>>6)*  4.0f
-#define LSM303AGR_FROM_FS_4g_NM_TO_mg(lsb)  (float)((int16_t)lsb>>6)*  8.0f
-#define LSM303AGR_FROM_FS_8g_NM_TO_mg(lsb)  (float)((int16_t)lsb>>6)* 16.0f
-#define LSM303AGR_FROM_FS_16g_NM_TO_mg(lsb) (float)((int16_t)lsb>>6)* 48.0f
-#define LSM303AGR_FROM_LSB_TO_degC_NM(lsb) (float)((int16_t)lsb>>6)/4.0f+25.0f
+#define LSM303AGR_FROM_FS_2g_NM_TO_mg(lsb)  (float)((int16_t)lsb / pow(2, 6))*  4.0f
+#define LSM303AGR_FROM_FS_4g_NM_TO_mg(lsb)  (float)((int16_t)lsb / pow(2, 6))*  8.0f
+#define LSM303AGR_FROM_FS_8g_NM_TO_mg(lsb)  (float)((int16_t)lsb / pow(2, 6))* 16.0f
+#define LSM303AGR_FROM_FS_16g_NM_TO_mg(lsb) (float)((int16_t)lsb / pow(2, 6))* 48.0f
+#define LSM303AGR_FROM_LSB_TO_degC_NM(lsb) (float)((int16_t)lsb / pow(2, 6))/4.0f+25.0f
 
-#define LSM303AGR_FROM_FS_2g_LP_TO_mg(lsb)  (float)((int16_t)lsb>>8)*16.0f
-#define LSM303AGR_FROM_FS_4g_LP_TO_mg(lsb)  (float)((int16_t)lsb>>8)*32.0f
-#define LSM303AGR_FROM_FS_8g_LP_TO_mg(lsb)  (float)((int16_t)lsb>>8)*64.0f
-#define LSM303AGR_FROM_FS_16g_LP_TO_mg(lsb) (float)((int16_t)lsb>>8)*192.0f
+#define LSM303AGR_FROM_FS_2g_LP_TO_mg(lsb)  (float)((int16_t)lsb / pow(2, 8))*16.0f
+#define LSM303AGR_FROM_FS_4g_LP_TO_mg(lsb)  (float)((int16_t)lsb / pow(2, 8))*32.0f
+#define LSM303AGR_FROM_FS_8g_LP_TO_mg(lsb)  (float)((int16_t)lsb / pow(2, 8))*64.0f
+#define LSM303AGR_FROM_FS_16g_LP_TO_mg(lsb) (float)((int16_t)lsb / pow(2, 8))*192.0f
 
 #define LSM303AGR_FROM_LSB_TO_mG(lsb)     (float)(lsb * 1.5f)
 
-#define LSM303AGR_FROM_LSB_TO_degC_LP(lsb) (float)((int16_t)lsb>>8)*1.0f + 25.0f
+#define LSM303AGR_FROM_LSB_TO_degC_LP(lsb) (float)((int16_t)lsb / pow(2, 8))*1.0f + 25.0f
 
 /**
   * @}
