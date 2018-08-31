@@ -1,1341 +1,1712 @@
 /*
  ******************************************************************************
  * @file    lps22hh_reg.c
- * @author  MEMS Software Solution Team
- * @date    14-December-2017
+ * @author  Sensors Software Solution Team
  * @brief   LPS22HH driver file
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
- */
+*/
 
 #include "lps22hh_reg.h"
 
 /**
-  * @addtogroup  lps22hh
-  * @brief  This file provides a set of functions needed to drive the
-  *         lps22hh enanced inertial module.
+  * @defgroup  LPS22HH
+  * @brief     This file provides a set of functions needed to drive the
+  *            lps22hh enhanced inertial module.
   * @{
+  *
   */
 
 /**
-  * @addtogroup  interfaces_functions
-  * @brief  This section provide a set of functions used to read and write
-  *         a generic register of the device.
+  * @defgroup  LPS22HH_Interfaces_Functions
+  * @brief     This section provide a set of functions used to read and
+  *            write a generic register of the device.
+  *            MANDATORY: return 0 -> no Error.
   * @{
+  *
   */
 
 /**
   * @brief  Read generic device register
   *
-  * @param  lps22hh_ctx_t* ctx: read / write interface definitions
-  * @param  uint8_t reg: register to read
-  * @param  uint8_t* data: pointer to buffer that store the data read
-  * @param  uint16_t len: number of consecutive register to read
+  * @param  ctx   read / write interface definitions(ptr)
+  * @param  reg   register to read
+  * @param  data  pointer to buffer that store the data read(ptr)
+  * @param  len   number of consecutive register to read
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_read_reg(lps22hh_ctx_t* ctx, uint8_t reg, uint8_t* data,
                          uint16_t len)
 {
-  return ctx->read_reg(ctx->handle, reg, data, len);
+  int32_t ret;
+  ret = ctx->read_reg(ctx->handle, reg, data, len);
+  return ret;
 }
 
 /**
   * @brief  Write generic device register
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t reg: register to write
-  * @param  uint8_t* data: pointer to data to write in register reg
-  * @param  uint16_t len: number of consecutive register to write
+  * @param  ctx   read / write interface definitions(ptr)
+  * @param  reg   register to write
+  * @param  data  pointer to data to write in register reg(ptr)
+  * @param  len   number of consecutive register to write
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
-*/
+  */
 int32_t lps22hh_write_reg(lps22hh_ctx_t* ctx, uint8_t reg, uint8_t* data,
-                          uint16_t len)
+                           uint16_t len)
 {
-  return ctx->write_reg(ctx->handle, reg, data, len);
+  int32_t ret;
+  ret = ctx->write_reg(ctx->handle, reg, data, len);
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  data_generation_c
-  * @brief   This section groups all the functions concerning data generation.
-  * @{
-  */
-
-/**
-  * @brief  autozero_rst: [set]  Reset Autozero function.
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of reset_az in reg INTERRUPT_CFG
+  */
+
+/**
+  * @defgroup    LPS22HH_Sensitivity
+  * @brief       These functions convert raw-data into engineering units.
+  * @{
+  *
+  */
+float32_t lps22hh_from_lsb_to_hpa(int16_t lsb)
+{
+  return ( (float32_t) lsb / 4096.0f );
+}
+
+float32_t lps22hh_from_lsb_to_celsius(int16_t lsb)
+{
+  return ( (float32_t) lsb / 100.0f );
+}
+
+/**
+  * @}
+  *
+  */
+
+/**
+  * @defgroup  LPS22HH_Data_Generation
+  * @brief     This section groups all the functions concerning
+  *            data generation.
+  * @{
+  *
+  */
+
+/**
+  * @brief  Reset Autozero function.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of reset_az in reg INTERRUPT_CFG
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_autozero_rst_set(lps22hh_ctx_t *ctx, uint8_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_interrupt_cfg_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, &reg.byte, 1);
-  reg.interrupt_cfg.reset_az = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_INTERRUPT_CFG, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.reset_az = val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_INTERRUPT_CFG, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  autozero_rst: [get]  Reset Autozero function.
+  * @brief  Reset Autozero function.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of reset_az in reg INTERRUPT_CFG
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of reset_az in reg INTERRUPT_CFG
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_autozero_rst_get(lps22hh_ctx_t *ctx, uint8_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_interrupt_cfg_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, &reg.byte, 1);
-  *val = reg.interrupt_cfg.reset_az;
+  ret = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, (uint8_t*) &reg, 1);
+  *val = reg.reset_az;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  autozero: [set]  Enable Autozero function.
+  * @brief  Enable Autozero function.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of autozero in reg INTERRUPT_CFG
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of autozero in reg INTERRUPT_CFG
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_autozero_set(lps22hh_ctx_t *ctx, uint8_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_interrupt_cfg_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, &reg.byte, 1);
-  reg.interrupt_cfg.autozero = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_INTERRUPT_CFG, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.autozero = val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_INTERRUPT_CFG, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  autozero: [get]  Enable Autozero function.
+  * @brief  Enable Autozero function.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of autozero in reg INTERRUPT_CFG
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of autozero in reg INTERRUPT_CFG
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_autozero_get(lps22hh_ctx_t *ctx, uint8_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_interrupt_cfg_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, &reg.byte, 1);
-  *val = reg.interrupt_cfg.autozero;
+  ret = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, (uint8_t*) &reg, 1);
+  *val = reg.autozero;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pressure_snap_rst: [set]  Reset AutoRifP function.
+  * @brief  Reset AutoRifP function.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of reset_arp in reg INTERRUPT_CFG
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of reset_arp in reg INTERRUPT_CFG
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_pressure_snap_rst_set(lps22hh_ctx_t *ctx, uint8_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_interrupt_cfg_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, &reg.byte, 1);
-  reg.interrupt_cfg.reset_arp = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_INTERRUPT_CFG, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.reset_arp = val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_INTERRUPT_CFG, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  pressure_snap_rst: [get]  Reset AutoRifP function.
+  * @brief  Reset AutoRifP function.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of reset_arp in reg INTERRUPT_CFG
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of reset_arp in reg INTERRUPT_CFG
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_pressure_snap_rst_get(lps22hh_ctx_t *ctx, uint8_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_interrupt_cfg_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, &reg.byte, 1);
-  *val = reg.interrupt_cfg.reset_arp;
+  ret = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, (uint8_t*) &reg, 1);
+  *val = reg.reset_arp;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pressure_snap: [set]  Enable AutoRifP function.
+  * @brief  Enable AutoRefP function.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of autorifp in reg INTERRUPT_CFG
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of autorefp in reg INTERRUPT_CFG
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_pressure_snap_set(lps22hh_ctx_t *ctx, uint8_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_interrupt_cfg_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, &reg.byte, 1);
-  reg.interrupt_cfg.autorifp = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_INTERRUPT_CFG, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.autorefp = val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_INTERRUPT_CFG, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  pressure_snap: [get]  Enable AutoRifP function.
+  * @brief  Enable AutoRefP function.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of autorifp in reg INTERRUPT_CFG
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of autorefp in reg INTERRUPT_CFG
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_pressure_snap_get(lps22hh_ctx_t *ctx, uint8_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_interrupt_cfg_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, &reg.byte, 1);
-  *val = reg.interrupt_cfg.autorifp;
+  ret = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, (uint8_t*) &reg, 1);
+  *val = reg.autorefp;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  block_data_update: [set] Blockdataupdate.
+  * @brief  Block Data Update.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of bdu in reg CTRL_REG1
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of bdu in reg CTRL_REG1
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_block_data_update_set(lps22hh_ctx_t *ctx, uint8_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_ctrl_reg1_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG1, &reg.byte, 1);
-  reg.ctrl_reg1.bdu = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG1, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG1, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.bdu = val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG1, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  block_data_update: [get] Blockdataupdate.
+  * @brief  Block Data Update.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of bdu in reg CTRL_REG1
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of bdu in reg CTRL_REG1
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_block_data_update_get(lps22hh_ctx_t *ctx, uint8_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_ctrl_reg1_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG1, &reg.byte, 1);
-  *val = reg.ctrl_reg1.bdu;
+  ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG1, (uint8_t*) &reg, 1);
+  *val = reg.bdu;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  data_rate: [set]  Output data rate selection.
+  * @brief  Output data rate selection.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_odr_t: change the values of odr in reg CTRL_REG1
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of odr in reg CTRL_REG1
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_data_rate_set(lps22hh_ctx_t *ctx, lps22hh_odr_t val)
 {
-  lps22hh_reg_t reg[2];
-  int32_t mm_error;
+  lps22hh_ctrl_reg1_t ctrl_reg1;
+  lps22hh_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG1, &reg[0].byte, 2);
-  reg[0].ctrl_reg1.odr = val & 0x03;
-  reg[1].ctrl_reg2.low_noise_en = (val & 0x10) >> 4;
-  reg[1].ctrl_reg2.one_shot = (val & 0x08) >> 3;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG1, &reg[0].byte, 2);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  if (ret == 0) {
+    ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  }
+  if (ret == 0) {
+    ctrl_reg1.odr = (uint8_t)val & 0x03U;
+    ret = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  }
+  if (ret == 0) {
+    ctrl_reg2.low_noise_en = ((uint8_t)val & 0x10U) >> 4;
+    ctrl_reg2.one_shot = ((uint8_t)val & 0x08U) >> 3;
+    ret = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  data_rate: [get]  Output data rate selection.
+  * @brief  Output data rate selection.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_odr_t: Get the values of odr in reg CTRL_REG1
+  * @param  ctx      read / write interface definitions
+  * @param  val      Get the values of odr in reg CTRL_REG1
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_data_rate_get(lps22hh_ctx_t *ctx, lps22hh_odr_t *val)
 {
-  lps22hh_reg_t reg[2];
-  int32_t mm_error;
+  lps22hh_ctrl_reg1_t ctrl_reg1;
+  lps22hh_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG1, &reg[0].byte, 2);
-  *val = (lps22hh_odr_t) ( (reg[1].ctrl_reg2.low_noise_en << 4) +
-         (reg[1].ctrl_reg2.one_shot << 3) + reg[0].ctrl_reg1.odr );
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  if (ret == 0) {
+    ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  }
+  if (ret == 0) {
+    ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+    switch (((ctrl_reg2.low_noise_en << 4) + (ctrl_reg2.one_shot << 3) +
+            ctrl_reg1.odr )) {
+      case LPS22HH_POWER_DOWN:
+        *val = LPS22HH_POWER_DOWN;
+        break;
+      case LPS22HH_ONE_SHOOT:
+        *val = LPS22HH_ONE_SHOOT;
+        break;
+      case LPS22HH_1_Hz:
+        *val = LPS22HH_1_Hz;
+        break;
+      case LPS22HH_10_Hz:
+        *val = LPS22HH_10_Hz;
+        break;
+      case LPS22HH_25_Hz:
+        *val = LPS22HH_25_Hz;
+        break;
+      case LPS22HH_50_Hz:
+        *val = LPS22HH_50_Hz;
+        break;
+      case LPS22HH_1_Hz_LOW_NOISE:
+        *val = LPS22HH_1_Hz_LOW_NOISE;
+        break;
+      case LPS22HH_10_Hz_LOW_NOISE:
+        *val = LPS22HH_10_Hz_LOW_NOISE;
+        break;
+      case LPS22HH_25_Hz_LOW_NOISE:
+        *val = LPS22HH_25_Hz_LOW_NOISE;
+        break;
+      case LPS22HH_50_Hz_LOW_NOISE:
+        *val = LPS22HH_50_Hz_LOW_NOISE;
+        break;
+      case LPS22HH_100_Hz:
+        *val = LPS22HH_100_Hz;
+        break;
+      case LPS22HH_200_Hz:
+        *val = LPS22HH_200_Hz;
+        break;
+      default:
+        *val = LPS22HH_POWER_DOWN;
+        break;
+    }
+  }
+  return ret;
 }
 
 /**
-  * @brief  pressure_ref: [set] The Reference pressure value is a 16-bit data
-  *                             expressed as 2’s complement. The value is used
-  *                             when AUTOZERO or AUTORIFP function is enabled.
+  * @brief  The Reference pressure value is a 16-bit data
+  *         expressed as 2’s complement. The value is used
+  *         when AUTOZERO or AUTORIFP function is enabled.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that contains data to write
+  * @param  ctx      read / write interface definitions
+  * @param  buff     buffer that contains data to write
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_pressure_ref_set(lps22hh_ctx_t *ctx, uint8_t *buff)
 {
-  return lps22hh_write_reg(ctx, LPS22HH_REF_P_XL, buff, 2);
+  int32_t ret;
+  ret = lps22hh_write_reg(ctx, LPS22HH_REF_P_XL, buff, 2);
+  return ret;
 }
 
 /**
-  * @brief  pressure_ref: [get] The Reference pressure value is a 16-bit
-  *                             data expressed as 2’s complement.
-  *                             The value is used when AUTOZERO or AUTORIFP
-  *                             function is enabled.
+  * @brief  The Reference pressure value is a 16-bit
+  *         data expressed as 2’s complement.
+  *         The value is used when AUTOZERO or AUTORIFP
+  *         function is enabled.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx      read / write interface definitions
+  * @param  buff     buffer that stores data read
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_pressure_ref_get(lps22hh_ctx_t *ctx, uint8_t *buff)
 {
-  return lps22hh_read_reg(ctx, LPS22HH_REF_P_XL, buff, 2);
+  int32_t ret;
+  ret =  lps22hh_read_reg(ctx, LPS22HH_REF_P_XL, buff, 2);
+  return ret;
 }
 
 /**
-  * @brief  pressure_offset: [set] The pressure offset value is 16-bit data
-  *                                that can be used to implement one-point
-  *                                calibration (OPC) after soldering.
+  * @brief  The pressure offset value is 16-bit data
+  *         that can be used to implement one-point
+  *         calibration (OPC) after soldering.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that contains data to write
+  * @param  ctx      read / write interface definitions
+  * @param  buff     buffer that contains data to write
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_pressure_offset_set(lps22hh_ctx_t *ctx, uint8_t *buff)
 {
-  return lps22hh_write_reg(ctx, LPS22HH_RPDS_L, buff, 2);
+  int32_t ret;
+  ret =  lps22hh_write_reg(ctx, LPS22HH_RPDS_L, buff, 2);
+  return ret;
 }
 
 /**
-  * @brief  pressure_offset: [get] The pressure offset value is 16-bit
-  *                                data that can be used to implement
-  *                                one-point calibration (OPC) after
-  *                                soldering.
+  * @brief  The pressure offset value is 16-bit
+  *         data that can be used to implement
+  *         one-point calibration (OPC) after
+  *         soldering.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx      read / write interface definitions
+  * @param  buff     buffer that stores data read
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_pressure_offset_get(lps22hh_ctx_t *ctx, uint8_t *buff)
 {
-  return lps22hh_read_reg(ctx, LPS22HH_RPDS_L, buff, 2);
+  int32_t ret;
+  ret =  lps22hh_read_reg(ctx, LPS22HH_RPDS_L, buff, 2);
+  return ret;
 }
 
 /**
-  * @brief  all_sources: [get] Read all the interrupt/status flag of
-  *                            the device.
+  * @brief  Read all the interrupt/status flag of the device.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_all_sources: registers STATUS,FIFO_STATUS2,INT_SOURCE
+  * @param  ctx      read / write interface definitions
+  * @param  val      registers STATUS,FIFO_STATUS2,INT_SOURCE
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_all_sources_get(lps22hh_ctx_t *ctx, lps22hh_all_sources_t *val)
 {
-  lps22hh_reg_t reg[3];
-  int32_t mm_error;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_INT_SOURCE, &reg[0].byte, 1);
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_FIFO_STATUS2, &reg[1].byte, 2);
-
-  val->int_source   = reg[0].int_source;
-  val->fifo_status2 = reg[1].fifo_status2;
-  val->status       = reg[2].status;
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_INT_SOURCE,
+                         (uint8_t*) &(val->int_source), 1);
+  if (ret == 0) {
+    ret = lps22hh_read_reg(ctx, LPS22HH_FIFO_STATUS2,
+                           (uint8_t*) &(val->fifo_status2), 1);
+  }
+  if (ret == 0) {
+    ret = lps22hh_read_reg(ctx, LPS22HH_STATUS,
+                           (uint8_t*) &(val->status), 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  status_reg: [get] The STATUS_REG register is read by
-  *                           the primary interface
+  * @brief  The STATUS_REG register is read by the primary interface.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_: union of registers from STATUS to STATUS_REG
+  * @param  ctx      read / write interface definitions
+  * @param  val      structure of registers from STATUS to STATUS_REG
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_status_reg_get(lps22hh_ctx_t *ctx, lps22hh_status_t *val)
 {
-  return lps22hh_read_reg(ctx, LPS22HH_STATUS, (uint8_t*) val, 1);
+  int32_t ret;
+  ret =  lps22hh_read_reg(ctx, LPS22HH_STATUS, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
-  * @brief   press_flag_data_ready: [get]  Pressure new data available.
+  * @brief  Pressure new data available.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of p_da in reg STATUS
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of p_da in reg STATUS
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_press_flag_data_ready_get(lps22hh_ctx_t *ctx, uint8_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_status_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_STATUS, &reg.byte, 1);
-  *val = reg.status.p_da;
+  ret = lps22hh_read_reg(ctx, LPS22HH_STATUS, (uint8_t*) &reg, 1);
+  *val = reg.p_da;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief   temp_flag_data_ready: [get]  Temperature data available.
+  * @brief  Temperature data available.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of t_da in reg STATUS
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of t_da in reg STATUS
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_temp_flag_data_ready_get(lps22hh_ctx_t *ctx, uint8_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_status_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_STATUS, &reg.byte, 1);
-  *val = reg.status.t_da;
+  ret = lps22hh_read_reg(ctx, LPS22HH_STATUS, (uint8_t*) &reg, 1);
+  *val = reg.t_da;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  data_output
-  * @brief   This section groups all the data output functions.
-  * @{
-  */
-
-/**
-  * @brief  pressure_raw: [get]  Pressure output value.
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  */
+
+/**
+  * @defgroup  LPS22HH_Data_Output
+  * @brief     This section groups all the data output functions.
+  * @{
+  *
+  */
+
+/**
+  * @brief  Pressure output value.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  buff     buffer that stores data read
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_pressure_raw_get(lps22hh_ctx_t *ctx, uint8_t *buff)
 {
-  return lps22hh_read_reg(ctx, LPS22HH_PRESSURE_OUT_XL, buff, 3);
+  int32_t ret;
+  ret =  lps22hh_read_reg(ctx, LPS22HH_PRESSURE_OUT_XL, buff, 3);
+  return ret;
 }
 
 /**
-  * @brief  temperature_raw: [get]  Temperature output value.
+  * @brief  Temperature output value.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx      read / write interface definitions
+  * @param  buff     buffer that stores data read
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_temperature_raw_get(lps22hh_ctx_t *ctx, uint8_t *buff)
 {
-  return lps22hh_read_reg(ctx, LPS22HH_TEMP_OUT_L, buff, 2);
+  int32_t ret;
+  ret =  lps22hh_read_reg(ctx, LPS22HH_TEMP_OUT_L, buff, 2);
+  return ret;
 }
 
 /**
-  * @brief  fifo_pressure_raw: [get]  Pressure output from FIFO value.
+  * @brief  Pressure output from FIFO value.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx      read / write interface definitions
+  * @param  buff     buffer that stores data read
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_fifo_pressure_raw_get(lps22hh_ctx_t *ctx, uint8_t *buff)
 {
-  return lps22hh_read_reg(ctx, LPS22HH_FIFO_DATA_OUT_PRESS_XL, buff, 3);
+  int32_t ret;
+  ret =  lps22hh_read_reg(ctx, LPS22HH_FIFO_DATA_OUT_PRESS_XL, buff, 3);
+  return ret;
 }
 
 /**
-  * @brief   fifo_temperature_raw: [get]  Temperature output from FIFO value.
+  * @brief  Temperature output from FIFO value.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx      read / write interface definitions
+  * @param  buff     buffer that stores data read
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_fifo_temperature_raw_get(lps22hh_ctx_t *ctx, uint8_t *buff)
 {
-  return lps22hh_read_reg(ctx, LPS22HH_FIFO_DATA_OUT_TEMP_L, buff, 2);
+  int32_t ret;
+  ret =  lps22hh_read_reg(ctx, LPS22HH_FIFO_DATA_OUT_TEMP_L, buff, 2);
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  common
-  * @brief   This section groups common usefull functions.
-  * @{
-  */
-
-/**
-  * @brief  device_id: [get] DeviceWhoamI
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  */
+
+/**
+  * @defgroup  LPS22HH_Common
+  * @brief     This section groups common useful functions.
+  * @{
+  *
+  */
+
+/**
+  * @brief  DeviceWhoamI[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  buff     buffer that stores data read
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_device_id_get(lps22hh_ctx_t *ctx, uint8_t *buff)
 {
-  return lps22hh_read_reg(ctx, LPS22HH_WHO_AM_I, buff, 1);
+  int32_t ret;
+  ret =  lps22hh_read_reg(ctx, LPS22HH_WHO_AM_I, buff, 1);
+  return ret;
 }
 
 /**
-  * @brief  reset: [set] Software reset. Restore the default values
-  *                      in user registers.
+  * @brief  Software reset. Restore the default values
+  *         in user registers.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of swreset in reg CTRL_REG2
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of swreset in reg CTRL_REG2
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_reset_set(lps22hh_ctx_t *ctx, uint8_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, &reg.byte, 1);
-  reg.ctrl_reg2.swreset = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG2, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.swreset = val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  reset: [get] Software reset. Restore the default values
-  *                      in user registers.
+  * @brief   Software reset. Restore the default values
+  *          in user registers.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of swreset in reg CTRL_REG2
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of swreset in reg CTRL_REG2
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_reset_get(lps22hh_ctx_t *ctx, uint8_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, &reg.byte, 1);
-  *val = reg.ctrl_reg2.swreset;
+  ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*) &reg, 1);
+  *val = reg.swreset;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  auto_increment: [set] Register address automatically
-  *                               incremented during a multiple byte access
-  *                               with a serial interface.
+  * @brief  Register address automatically
+  *         incremented during a multiple byte access
+  *         with a serial interface.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of if_add_inc in reg CTRL_REG2
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of if_add_inc in reg CTRL_REG2
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_auto_increment_set(lps22hh_ctx_t *ctx, uint8_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, &reg.byte, 1);
-  reg.ctrl_reg2.if_add_inc = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG2, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.if_add_inc = val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  auto_increment: [get] Register address automatically
-  *                               incremented during a multiple byte
-  *                               access with a serial interface.
+  * @brief  Register address automatically
+  *         incremented during a multiple byte
+  *         access with a serial interface.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of if_add_inc in reg CTRL_REG2
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of if_add_inc in reg CTRL_REG2
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_auto_increment_get(lps22hh_ctx_t *ctx, uint8_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, &reg.byte, 1);
-  *val = reg.ctrl_reg2.if_add_inc;
+  ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*) &reg, 1);
+  *val = reg.if_add_inc;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  boot: [set] Reboot memory content. Reload the calibration
-  *                     parameters.
+  * @brief  Reboot memory content. Reload the calibration
+  *         parameters.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of boot in reg CTRL_REG2
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of boot in reg CTRL_REG2
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_boot_set(lps22hh_ctx_t *ctx, uint8_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, &reg.byte, 1);
-  reg.ctrl_reg2.boot = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG2, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.boot = val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  boot: [get] Reboot memory content. Reload the calibration
-  *                     parameters.
+  * @brief  Reboot memory content. Reload the calibration
+  *         parameters.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of boot in reg CTRL_REG2
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of boot in reg CTRL_REG2
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_boot_get(lps22hh_ctx_t *ctx, uint8_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, &reg.byte, 1);
-  *val = reg.ctrl_reg2.boot;
+  ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*) &reg, 1);
+  *val = reg.boot;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  filters
-  * @brief   This section group all the functions concerning the
-  *          filters configuration.
-  * @{
-  */
-
-/**
-  * @brief  lp_bandwidth: [set]  Low-pass bandwidth selection.
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_lpfp_cfg_t: change the values of lpfp_cfg in
-  *                             reg CTRL_REG1
+  */
+
+/**
+  * @defgroup  LPS22HH_Filters
+  * @brief     This section group all the functions concerning the
+  *            filters configuration.
+  * @{
+  *
+  */
+
+/**
+  * @brief  Low-pass bandwidth selection.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of lpfp_cfg in reg CTRL_REG1
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_lp_bandwidth_set(lps22hh_ctx_t *ctx, lps22hh_lpfp_cfg_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_ctrl_reg1_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG1, &reg.byte, 1);
-  reg.ctrl_reg1.lpfp_cfg = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG1, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG1, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.lpfp_cfg = (uint8_t)val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG1, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  lp_bandwidth: [get]  Low-pass bandwidth selection.
+  * @brief  Low-pass bandwidth selection.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_lpfp_cfg_t: Get the values of lpfp_cfg in reg CTRL_REG1
+  * @param  ctx      read / write interface definitions
+  * @param  val      Get the values of lpfp_cfg in reg CTRL_REG1
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_lp_bandwidth_get(lps22hh_ctx_t *ctx, lps22hh_lpfp_cfg_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_ctrl_reg1_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG1, &reg.byte, 1);
-  *val = (lps22hh_lpfp_cfg_t) reg.ctrl_reg1.lpfp_cfg;
+  ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG1, (uint8_t*) &reg, 1);
+  switch (reg.lpfp_cfg) {
+      case LPS22HH_LPF_ODR_DIV_2:
+        *val = LPS22HH_LPF_ODR_DIV_2;
+        break;
+      case LPS22HH_LPF_ODR_DIV_9:
+        *val = LPS22HH_LPF_ODR_DIV_9;
+        break;
+      case LPS22HH_LPF_ODR_DIV_20:
+        *val = LPS22HH_LPF_ODR_DIV_20;
+        break;
+      default:
+        *val = LPS22HH_LPF_ODR_DIV_2;
+        break;
+    }
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  serial_interface
-  * @brief   This section groups all the functions concerning  serial
-  *          interface management
-  * @{
-  */
-
-/**
-  * @brief  i2c_interface: [set]  Enable/Disable I2C interface.
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_i2c_disable_t: change the values of i2c_disable in
-  *                                reg IF_CTRL
+  */
+
+/**
+  * @defgroup  LPS22HH_Serial_Interface
+  * @brief     This section groups all the functions concerning serial
+  *            interface management
+  * @{
+  *
+  */
+
+/**
+  * @brief  Enable/Disable I2C interface.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of i2c_disable in reg IF_CTRL
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_i2c_interface_set(lps22hh_ctx_t *ctx,
                                   lps22hh_i2c_disable_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_if_ctrl_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_IF_CTRL, &reg.byte, 1);
-  reg.if_ctrl.i2c_disable = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_IF_CTRL, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_IF_CTRL, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.i2c_disable = (uint8_t)val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_IF_CTRL, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  i2c_interface: [get]  Enable/Disable I2C interface.
+  * @brief  Enable/Disable I2C interface.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_i2c_disable_t: Get the values of i2c_disable in reg
-  *                                IF_CTRL
+  * @param  ctx      read / write interface definitions
+  * @param  val      Get the values of i2c_disable in reg IF_CTRL
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_i2c_interface_get(lps22hh_ctx_t *ctx,
                                   lps22hh_i2c_disable_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_if_ctrl_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_IF_CTRL, &reg.byte, 1);
-  *val = (lps22hh_i2c_disable_t) reg.if_ctrl.i2c_disable;
+  ret = lps22hh_read_reg(ctx, LPS22HH_IF_CTRL, (uint8_t*) &reg, 1);
+  switch (reg.i2c_disable) {
+      case LPS22HH_I2C_ENABLE:
+        *val = LPS22HH_I2C_ENABLE;
+        break;
+      case LPS22HH_I2C_DISABLE:
+        *val = LPS22HH_I2C_DISABLE;
+        break;
+      default:
+        *val = LPS22HH_I2C_ENABLE;
+        break;
+    }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  i3c_interface: [set]  I3C Enable/Disable communication protocol
+  * @brief  I3C Enable/Disable communication protocol.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t lps22hh_i3c_disable_t: change the values of int_en_i3c in
-  *                                        reg IF_CTRL
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of int_en_i3c in reg IF_CTRL
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_i3c_interface_set(lps22hh_ctx_t *ctx,
                                   lps22hh_i3c_disable_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_if_ctrl_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_IF_CTRL, &reg.byte, 1);
-  reg.if_ctrl.i3c_disable = (val & 0x01);
-  reg.if_ctrl.int_en_i3c = (val & 0x10) >> 4;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_IF_CTRL, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_IF_CTRL, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.i3c_disable = ((uint8_t)val & 0x01u);
+    reg.int_en_i3c = ((uint8_t)val & 0x10U) >> 4;
+    ret = lps22hh_write_reg(ctx, LPS22HH_IF_CTRL, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  i3c_interface: [get]  I3C Enable/Disable communication protocol
+  * @brief  I3C Enable/Disable communication protocol.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_i3c_disable_t: change the values of int_en_i3c in reg
-  *                                IF_CTRL
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of int_en_i3c in reg IF_CTRL
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_i3c_interface_get(lps22hh_ctx_t *ctx,
                                   lps22hh_i3c_disable_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_if_ctrl_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_IF_CTRL, &reg.byte, 1);
-  *val = (lps22hh_i3c_disable_t)((reg.if_ctrl.int_en_i3c << 4) +
-         reg.if_ctrl.int_en_i3c);
+  ret = lps22hh_read_reg(ctx, LPS22HH_IF_CTRL, (uint8_t*) &reg, 1);
 
-  return mm_error;
+  switch ((reg.int_en_i3c << 4) + reg.int_en_i3c) {
+    case LPS22HH_I3C_ENABLE:
+      *val = LPS22HH_I3C_ENABLE;
+      break;
+    case LPS22HH_I3C_ENABLE_INT_PIN_ENABLE:
+      *val = LPS22HH_I3C_ENABLE_INT_PIN_ENABLE;
+      break;
+    case LPS22HH_I3C_DISABLE:
+      *val = LPS22HH_I3C_DISABLE;
+      break;
+    default:
+      *val = LPS22HH_I3C_ENABLE;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  sdo_sa0_mode: [set]  Enable/Disable pull-up on SDO pin.
+  * @brief  Enable/Disable pull-up on SDO pin.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_sdo_pu_en_t: change the values of sdo_pu_en in reg
-  *                              IF_CTRL
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of sdo_pu_en in reg IF_CTRL
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_sdo_sa0_mode_set(lps22hh_ctx_t *ctx, lps22hh_pu_en_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_if_ctrl_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_IF_CTRL, &reg.byte, 1);
-  reg.if_ctrl.sdo_pu_en = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_IF_CTRL, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_IF_CTRL, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.sdo_pu_en = (uint8_t)val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_IF_CTRL, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  sdo_sa0_mode: [get]  Enable/Disable pull-up on SDO pin.
+  * @brief  Enable/Disable pull-up on SDO pin.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_sdo_pu_en_t: Get the values of sdo_pu_en in reg IF_CTRL
+  * @param  ctx      read / write interface definitions
+  * @param  val      Get the values of sdo_pu_en in reg IF_CTRL
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_sdo_sa0_mode_get(lps22hh_ctx_t *ctx, lps22hh_pu_en_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_if_ctrl_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_IF_CTRL, &reg.byte, 1);
-  *val = (lps22hh_pu_en_t) reg.if_ctrl.sdo_pu_en;
+  ret = lps22hh_read_reg(ctx, LPS22HH_IF_CTRL, (uint8_t*) &reg, 1);
+  switch (reg.sdo_pu_en) {
+    case LPS22HH_PULL_UP_DISCONNECT:
+      *val = LPS22HH_PULL_UP_DISCONNECT;
+      break;
+    case LPS22HH_PULL_UP_CONNECT:
+      *val = LPS22HH_PULL_UP_CONNECT;
+      break;
+    default:
+      *val = LPS22HH_PULL_UP_DISCONNECT;
+      break;
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  sda_mode: [set]  Connect/Disconnect SDO/SA0 internal pull-up.
+  * @brief  Connect/Disconnect SDO/SA0 internal pull-up.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_sda_pu_en_t: change the values of sda_pu_en in reg
-  *                              IF_CTRL
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of sda_pu_en in reg IF_CTRL
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_sda_mode_set(lps22hh_ctx_t *ctx, lps22hh_pu_en_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_if_ctrl_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_IF_CTRL, &reg.byte, 1);
-  reg.if_ctrl.sda_pu_en = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_IF_CTRL, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_IF_CTRL, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.sda_pu_en = (uint8_t)val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_IF_CTRL, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  sda_mode: [get]  Connect/Disconnect SDO/SA0 internal pull-up.
+  * @brief  Connect/Disconnect SDO/SA0 internal pull-up.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_sda_pu_en_t: Get the values of sda_pu_en in reg IF_CTRL
+  * @param  ctx      read / write interface definitions
+  * @param  val      Get the values of sda_pu_en in reg IF_CTRL
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_sda_mode_get(lps22hh_ctx_t *ctx, lps22hh_pu_en_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_if_ctrl_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_IF_CTRL, &reg.byte, 1);
-  *val = (lps22hh_pu_en_t) reg.if_ctrl.sda_pu_en;
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_IF_CTRL, (uint8_t*) &reg, 1);
+  switch (reg.sda_pu_en) {
+    case LPS22HH_PULL_UP_DISCONNECT:
+      *val = LPS22HH_PULL_UP_DISCONNECT;
+      break;
+    case LPS22HH_PULL_UP_CONNECT:
+      *val = LPS22HH_PULL_UP_CONNECT;
+      break;
+    default:
+      *val = LPS22HH_PULL_UP_DISCONNECT;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  spi_mode: [set]  SPI Serial Interface Mode selection.
+  * @brief  SPI Serial Interface Mode selection.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_sim_t: change the values of sim in reg CTRL_REG1
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of sim in reg CTRL_REG1
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_spi_mode_set(lps22hh_ctx_t *ctx, lps22hh_sim_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_ctrl_reg1_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG1, &reg.byte, 1);
-  reg.ctrl_reg1.sim = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG1, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG1, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.sim = (uint8_t)val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG1, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  spi_mode: [get]  SPI Serial Interface Mode selection.
+  * @brief  SPI Serial Interface Mode selection.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_sim_t: Get the values of sim in reg CTRL_REG1
+  * @param  ctx      read / write interface definitions
+  * @param  val      Get the values of sim in reg CTRL_REG1
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_spi_mode_get(lps22hh_ctx_t *ctx, lps22hh_sim_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_ctrl_reg1_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG1, &reg.byte, 1);
-  *val = (lps22hh_sim_t) reg.ctrl_reg1.sim;
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG1, (uint8_t*) &reg, 1);
+  switch (reg.sim) {
+    case LPS22HH_SPI_4_WIRE:
+      *val = LPS22HH_SPI_4_WIRE;
+      break;
+    case LPS22HH_SPI_3_WIRE:
+      *val = LPS22HH_SPI_3_WIRE;
+      break;
+    default:
+      *val = LPS22HH_SPI_4_WIRE;
+      break;
+  }
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  interrupt_pins
-  * @brief   This section groups all the functions that manage interrupt pins.
-  * @{
-  */
-
-/**
-  * @brief  int_notification: [set] Latch interrupt request to the
-  *                                 INT_SOURCE (24h) register.
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_lir_t: change the values of lir in reg INTERRUPT_CFG
+  */
+
+/**
+  * @defgroup  LPS22HH_Interrupt_Pins
+  * @brief     This section groups all the functions that manage
+  *            interrupt pins.
+  * @{
+  *
+  */
+
+/**
+  * @brief  Latch interrupt request to the INT_SOURCE (24h) register.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of lir in reg INTERRUPT_CFG
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_int_notification_set(lps22hh_ctx_t *ctx, lps22hh_lir_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_interrupt_cfg_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, &reg.byte, 1);
-  reg.interrupt_cfg.lir = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_INTERRUPT_CFG, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.lir = (uint8_t)val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_INTERRUPT_CFG, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int_notification: [get] Latch interrupt request to the
-  *                                 INT_SOURCE (24h) register.
+  * @brief  Latch interrupt request to the INT_SOURCE (24h) register.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_lir_t: Get the values of lir in reg INTERRUPT_CFG
+  * @param  ctx      read / write interface definitions
+  * @param  val      Get the values of lir in reg INTERRUPT_CFG
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_int_notification_get(lps22hh_ctx_t *ctx, lps22hh_lir_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_interrupt_cfg_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, &reg.byte, 1);
-  *val = (lps22hh_lir_t) reg.interrupt_cfg.lir;
+  ret = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, (uint8_t*) &reg, 1);
 
-  return mm_error;
+  switch (reg.lir) {
+    case LPS22HH_INT_PULSED:
+      *val = LPS22HH_INT_PULSED;
+      break;
+    case LPS22HH_INT_LATCHED:
+      *val = LPS22HH_INT_LATCHED;
+      break;
+    default:
+      *val = LPS22HH_INT_PULSED;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  pin_mode: [set]  Push-pull/open drain selection on interrupt pads.
+  * @brief  Push-pull/open drain selection on interrupt pads.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_pp_od_t: change the values of pp_od in reg CTRL_REG2
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of pp_od in reg CTRL_REG2
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_pin_mode_set(lps22hh_ctx_t *ctx, lps22hh_pp_od_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, &reg.byte, 1);
-  reg.ctrl_reg2.pp_od = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG2, &reg.byte, 1);
+  ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.pp_od = (uint8_t)val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*) &reg, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pin_mode: [get]  Push-pull/open drain selection on interrupt pads.
+  * @brief  Push-pull/open drain selection on interrupt pads.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_pp_od_t: Get the values of pp_od in reg CTRL_REG2
+  * @param  ctx      read / write interface definitions
+  * @param  val      Get the values of pp_od in reg CTRL_REG2
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_pin_mode_get(lps22hh_ctx_t *ctx, lps22hh_pp_od_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, &reg.byte, 1);
-  *val = (lps22hh_pp_od_t) reg.ctrl_reg2.pp_od;
+  ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*) &reg, 1);
 
-  return mm_error;
+
+  switch (reg.pp_od) {
+    case LPS22HH_PUSH_PULL:
+      *val = LPS22HH_PUSH_PULL;
+      break;
+    case LPS22HH_OPEN_DRAIN:
+      *val = LPS22HH_OPEN_DRAIN;
+      break;
+    default:
+      *val = LPS22HH_PUSH_PULL;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  pin_polarity: [set]  Interrupt active-high/low.
+  * @brief  Interrupt active-high/low.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_int_h_l_t: change the values of int_h_l in reg CTRL_REG2
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of int_h_l in reg CTRL_REG2
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_pin_polarity_set(lps22hh_ctx_t *ctx, lps22hh_int_h_l_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, &reg.byte, 1);
-  reg.ctrl_reg2.int_h_l = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG2, &reg.byte, 1);
+  ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.int_h_l = (uint8_t)val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*) &reg, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pin_polarity: [get]  Interrupt active-high/low.
+  * @brief  Interrupt active-high/low.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_int_h_l_t: Get the values of int_h_l in reg CTRL_REG2
+  * @param  ctx      read / write interface definitions
+  * @param  val      Get the values of int_h_l in reg CTRL_REG2
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_pin_polarity_get(lps22hh_ctx_t *ctx, lps22hh_int_h_l_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, &reg.byte, 1);
-  *val = (lps22hh_int_h_l_t) reg.ctrl_reg2.int_h_l;
+  ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*) &reg, 1);
 
-  return mm_error;
+  switch (reg.int_h_l) {
+    case LPS22HH_ACTIVE_HIGH:
+      *val = LPS22HH_ACTIVE_HIGH;
+      break;
+    case LPS22HH_ACTIVE_LOW:
+      *val = LPS22HH_ACTIVE_LOW;
+      break;
+    default:
+      *val = LPS22HH_ACTIVE_HIGH;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  pin_int_route: [set] Select the signal that need to route
-  *                              on int pad
+  * @brief  Select the signal that need to route on int pad.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_: registers CTRL_REG3
+  * @param  ctx      read / write interface definitions
+  * @param  val      registers CTRL_REG3
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_pin_int_route_set(lps22hh_ctx_t *ctx,
                                   lps22hh_ctrl_reg3_t *val)
 {
-  return lps22hh_write_reg(ctx, LPS22HH_CTRL_REG3, (uint8_t*) val, 1);
+  int32_t ret;
+  ret =  lps22hh_write_reg(ctx, LPS22HH_CTRL_REG3, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
-  * @brief  pin_int_route: [get] Select the signal that need to route
-  *                              on int pad
+  * @brief  Select the signal that need to route on int pad.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_: registers CTRL_REG3
+  * @param  ctx      read / write interface definitions
+  * @param  val      registers CTRL_REG3
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_pin_int_route_get(lps22hh_ctx_t *ctx,
                                   lps22hh_ctrl_reg3_t *val)
 {
-  return lps22hh_read_reg(ctx, LPS22HH_CTRL_REG3, (uint8_t*) val, 1);
+  int32_t ret;
+  ret =  lps22hh_read_reg(ctx, LPS22HH_CTRL_REG3, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup   interrupt_on_threshold
-  * @brief   This section groups all the functions that manage the interrupt
-  *          on threshold event generation.
-  * @{
-  */
-
-/**
-  * @brief  int_on_threshold: [set] Enable interrupt generation on
-  *                                 pressure low/high event.
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_pe_t: change the values of pe in reg INTERRUPT_CFG
+  */
+
+/**
+  * @defgroup   LPS22HH_Interrupt_on_Threshold
+  * @brief      This section groups all the functions that manage the
+  *             interrupt on threshold event generation.
+  * @{
+  *
+  */
+
+/**
+  * @brief   Enable interrupt generation on pressure low/high event.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of pe in reg INTERRUPT_CFG
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_int_on_threshold_set(lps22hh_ctx_t *ctx, lps22hh_pe_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_interrupt_cfg_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, &reg.byte, 1);
-  reg.interrupt_cfg.pe = val;
+  ret = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.pe = (uint8_t)val;
 
-  if (val)
-    reg.interrupt_cfg.diff_en = 1;
-  else
-    reg.interrupt_cfg.diff_en = 0;
-
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_INTERRUPT_CFG, &reg.byte, 1);
-
-  return mm_error;
+    if (val == LPS22HH_NO_THRESHOLD){
+      reg.diff_en = PROPERTY_DISABLE;
+    }
+    else{
+      reg.diff_en = PROPERTY_ENABLE;
+    }
+    ret = lps22hh_write_reg(ctx, LPS22HH_INTERRUPT_CFG, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int_on_threshold: [get] Enable interrupt generation on
-  *                                 pressure low/high event.
+  * @brief  Enable interrupt generation on pressure low/high event.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_pe_t: Get the values of pe in reg INTERRUPT_CFG
+  * @param  ctx      read / write interface definitions
+  * @param  val      Get the values of pe in reg INTERRUPT_CFG
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_int_on_threshold_get(lps22hh_ctx_t *ctx, lps22hh_pe_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_interrupt_cfg_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, &reg.byte, 1);
-  *val = (lps22hh_pe_t) reg.interrupt_cfg.pe;
+  ret = lps22hh_read_reg(ctx, LPS22HH_INTERRUPT_CFG, (uint8_t*) &reg, 1);
 
-  return mm_error;
+  switch (reg.pe) {
+    case LPS22HH_NO_THRESHOLD:
+      *val = LPS22HH_NO_THRESHOLD;
+      break;
+    case LPS22HH_POSITIVE:
+      *val = LPS22HH_POSITIVE;
+      break;
+    case LPS22HH_NEGATIVE:
+      *val = LPS22HH_NEGATIVE;
+      break;
+    case LPS22HH_BOTH:
+      *val = LPS22HH_BOTH;
+      break;
+    default:
+      *val = LPS22HH_NO_THRESHOLD;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  int_treshold: [set] User-defined threshold value for
-  *                             pressure interrupt event.
+  * @brief  User-defined threshold value for pressure interrupt event.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that contains data to write
+  * @param  ctx      read / write interface definitions
+  * @param  buff     buffer that contains data to write
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps22hh_int_treshold_set(lps22hh_ctx_t *ctx, uint8_t *buff)
+int32_t lps22hh_int_treshold_set(lps22hh_ctx_t *ctx, uint16_t buff)
 {
-  return lps22hh_write_reg(ctx, LPS22HH_THS_P_L, buff, 2);
+  int32_t ret;
+  lps22hh_ths_p_l_t ths_p_l;
+  lps22hh_ths_p_h_t ths_p_h;
+  
+  ths_p_l.ths = (uint8_t)(buff & 0x00FFU);
+  ths_p_h.ths = (uint8_t)((buff & 0x7F00U) >> 8);
+  
+  ret =  lps22hh_write_reg(ctx, LPS22HH_THS_P_L,
+                           (uint8_t*)&ths_p_l, 1);
+  if (ret == 0) {
+      ret =  lps22hh_write_reg(ctx, LPS22HH_THS_P_H, 
+                               (uint8_t*)&ths_p_h, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int_treshold: [get] User-defined threshold value for
-  *                             pressure interrupt event.
+  * @brief   User-defined threshold value for pressure interrupt event.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx      read / write interface definitions
+  * @param  buff     buffer that stores data read
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps22hh_int_treshold_get(lps22hh_ctx_t *ctx, uint8_t *buff)
+int32_t lps22hh_int_treshold_get(lps22hh_ctx_t *ctx, uint16_t *buff)
 {
-  return lps22hh_read_reg(ctx, LPS22HH_THS_P_L, buff, 2);
+  int32_t ret;
+  lps22hh_ths_p_l_t ths_p_l;
+  lps22hh_ths_p_h_t ths_p_h;
+  
+  ret =  lps22hh_read_reg(ctx, LPS22HH_THS_P_L,
+                           (uint8_t*)&ths_p_l, 1);
+  if (ret == 0) {
+      ret =  lps22hh_read_reg(ctx, LPS22HH_THS_P_H, 
+                               (uint8_t*)&ths_p_h, 1);
+      *buff = (uint16_t)ths_p_h.ths << 8;
+      *buff |= (uint16_t)ths_p_l.ths;
+  }  
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup  fifo
+  * @defgroup  LPS22HH_Fifo
   * @brief   This section group all the functions concerning the fifo usage.
   * @{
+  *
   */
 
 /**
-  * @brief  fifo_mode: [set]
+  * @brief  Fifo Mode selection.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_f_mode_t: change the values of f_mode in reg FIFO_CTRL
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of f_mode in reg FIFO_CTRL
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_fifo_mode_set(lps22hh_ctx_t *ctx, lps22hh_f_mode_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_fifo_ctrl_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_FIFO_CTRL, &reg.byte, 1);
-  reg.fifo_ctrl.f_mode = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_FIFO_CTRL, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_FIFO_CTRL, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.f_mode = (uint8_t)val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_FIFO_CTRL, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  fifo_mode: [get]
+  * @brief  Fifo Mode selection.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_f_mode_t: Get the values of f_mode in reg FIFO_CTRL
+  * @param  ctx      read / write interface definitions
+  * @param  val      Get the values of f_mode in reg FIFO_CTRL
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_fifo_mode_get(lps22hh_ctx_t *ctx, lps22hh_f_mode_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_fifo_ctrl_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_FIFO_CTRL, &reg.byte, 1);
-  *val = (lps22hh_f_mode_t) reg.fifo_ctrl.f_mode;
+  ret = lps22hh_read_reg(ctx, LPS22HH_FIFO_CTRL, (uint8_t*) &reg, 1);
 
-  return mm_error;
+  switch (reg.f_mode) {
+    case LPS22HH_BYPASS_MODE:
+      *val = LPS22HH_BYPASS_MODE;
+      break;
+    case LPS22HH_FIFO_MODE:
+      *val = LPS22HH_FIFO_MODE;
+      break;
+    case LPS22HH_STREAM_MODE:
+      *val = LPS22HH_STREAM_MODE;
+      break;
+    case LPS22HH_DYNAMIC_STREAM_MODE:
+      *val = LPS22HH_DYNAMIC_STREAM_MODE;
+      break;
+    case LPS22HH_BYPASS_TO_FIFO_MODE:
+      *val = LPS22HH_BYPASS_TO_FIFO_MODE;
+      break;
+    case LPS22HH_BYPASS_TO_STREAM_MODE:
+      *val = LPS22HH_BYPASS_TO_STREAM_MODE;
+      break;
+    case LPS22HH_STREAM_TO_FIFO_MODE:
+      *val = LPS22HH_STREAM_TO_FIFO_MODE;
+      break;
+    default:
+      *val = LPS22HH_BYPASS_MODE;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  fifo_stop_on_wtm: [set] Sensing chain FIFO stop values
-  *                                 memorization at threshold level.
+  * @brief  Sensing chain FIFO stop values memorization at
+  *         threshold level.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of stop_on_fth in reg FIFO_CTRL
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of stop_on_wtm in reg FIFO_CTRL
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_fifo_stop_on_wtm_set(lps22hh_ctx_t *ctx, uint8_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_fifo_ctrl_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_FIFO_CTRL, &reg.byte, 1);
-  reg.fifo_ctrl.stop_on_fth = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_FIFO_CTRL, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_FIFO_CTRL, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.stop_on_wtm = val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_FIFO_CTRL, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  fifo_stop_on_wtm: [get] Sensing chain FIFO stop values
-  *                                 memorization at threshold level.
+  * @brief   Sensing chain FIFO stop values memorization at threshold
+  *          level.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of stop_on_fth in reg FIFO_CTRL
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of stop_on_wtm in reg FIFO_CTRL
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_fifo_stop_on_wtm_get(lps22hh_ctx_t *ctx, uint8_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_fifo_ctrl_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_FIFO_CTRL, &reg.byte, 1);
-  *val = reg.fifo_ctrl.stop_on_fth;
+  ret = lps22hh_read_reg(ctx, LPS22HH_FIFO_CTRL, (uint8_t*) &reg, 1);
+  *val = reg.stop_on_wtm;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_watermark: [set]  FIFO watermark level selection.
+  * @brief  FIFO watermark level selection.[set]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of wtm in reg FIFO_WTM
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of wtm in reg FIFO_WTM
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_fifo_watermark_set(lps22hh_ctx_t *ctx, uint8_t val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_fifo_wtm_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_FIFO_WTM, &reg.byte, 1);
-  reg.fifo_wtm.wtm = val;
-  mm_error = lps22hh_write_reg(ctx, LPS22HH_FIFO_WTM, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps22hh_read_reg(ctx, LPS22HH_FIFO_WTM, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    reg.wtm = val;
+    ret = lps22hh_write_reg(ctx, LPS22HH_FIFO_WTM, (uint8_t*) &reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  fifo_watermark: [get]  FIFO watermark level selection.
+  * @brief  FIFO watermark level selection.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of wtm in reg FIFO_WTM
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of wtm in reg FIFO_WTM
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_fifo_watermark_get(lps22hh_ctx_t *ctx, uint8_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_fifo_wtm_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_FIFO_WTM, &reg.byte, 1);
-  *val = reg.fifo_wtm.wtm;
+  ret = lps22hh_read_reg(ctx, LPS22HH_FIFO_WTM, (uint8_t*) &reg, 1);
+  *val = reg.wtm;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_data_level: [get]  FIFO stored data level.
+  * @brief  FIFO stored data level.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx      read / write interface definitions
+  * @param  buff     buffer that stores data read
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_fifo_data_level_get(lps22hh_ctx_t *ctx, uint8_t *buff)
 {
-  return lps22hh_read_reg(ctx, LPS22HH_FIFO_STATUS1, buff, 1);
+  int32_t ret;
+  ret =  lps22hh_read_reg(ctx, LPS22HH_FIFO_STATUS1, buff, 1);
+  return ret;
 }
 
 /**
-  * @brief  fifo_src: [get]  Read all the FIFO status flag of the device.
+  * @brief  Read all the FIFO status flag of the device.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  lps22hh_: union of registers from FIFO_STATUS2 to
+  * @param  ctx      read / write interface definitions
+  * @param  val      registers FIFO_STATUS2
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_fifo_src_get(lps22hh_ctx_t *ctx, lps22hh_fifo_status2_t *val)
 {
-  return lps22hh_read_reg(ctx, LPS22HH_FIFO_STATUS2, (uint8_t*) val, 1);
+  int32_t ret;
+  ret =  lps22hh_read_reg(ctx, LPS22HH_FIFO_STATUS2, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
-  * @brief  fifo_full_flag: [get]  Smart FIFO full status.
+  * @brief  Smart FIFO full status.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of f_full in reg FIFO_STATUS2
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of fifo_full_ia in reg FIFO_STATUS2
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_fifo_full_flag_get(lps22hh_ctx_t *ctx, uint8_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_fifo_status2_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_FIFO_STATUS2, &reg.byte, 1);
-  *val = reg.fifo_status2.f_full;
+  ret = lps22hh_read_reg(ctx, LPS22HH_FIFO_STATUS2, (uint8_t*) &reg, 1);
+  *val = reg.fifo_full_ia;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_ovr_flag: [get]  FIFO overrun status.
+  * @brief  FIFO overrun status.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of ovr in reg FIFO_STATUS2
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of fifo_ovr_ia in reg FIFO_STATUS2
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_fifo_ovr_flag_get(lps22hh_ctx_t *ctx, uint8_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_fifo_status2_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_FIFO_STATUS2, &reg.byte, 1);
-  *val = reg.fifo_status2.ovr;
+  ret = lps22hh_read_reg(ctx, LPS22HH_FIFO_STATUS2, (uint8_t*) &reg, 1);
+  *val = reg.fifo_ovr_ia;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_wtm_flag: [get]  FIFO watermark status.
+  * @brief  FIFO watermark status.[get]
   *
-  * @param  lps22hh_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of fth_fifo in reg FIFO_STATUS2
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of fifo_wtm_ia in reg FIFO_STATUS2
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps22hh_fifo_wtm_flag_get(lps22hh_ctx_t *ctx, uint8_t *val)
 {
-  lps22hh_reg_t reg;
-  int32_t mm_error;
+  lps22hh_fifo_status2_t reg;
+  int32_t ret;
 
-  mm_error = lps22hh_read_reg(ctx, LPS22HH_FIFO_STATUS2, &reg.byte, 1);
-  *val = reg.fifo_status2.fth_fifo;
+  ret = lps22hh_read_reg(ctx, LPS22HH_FIFO_STATUS2, (uint8_t*) &reg, 1);
+  *val = reg.fifo_wtm_ia;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

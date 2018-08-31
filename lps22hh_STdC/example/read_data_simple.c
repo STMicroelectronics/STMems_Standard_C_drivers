@@ -35,7 +35,7 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "..\..\stdc\lps22hh_STdC\driver\lps22hh_reg.h"
+#include "lps22hh_reg.h"
 #include <string.h>
 
 #define MKI109V2
