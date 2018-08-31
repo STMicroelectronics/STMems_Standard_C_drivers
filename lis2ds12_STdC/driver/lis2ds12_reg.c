@@ -198,7 +198,7 @@ int32_t lis2ds12_xl_data_rate_set(lis2ds12_ctx_t *ctx, lis2ds12_odr_t val)
 
   mm_error = lis2ds12_read_reg(ctx, LIS2DS12_CTRL1, &reg.byte, 1);
   reg.ctrl1.odr = val & 0x0F;
-  reg.ctrl1.hf_odr = val & 0x10 >> 4;
+  reg.ctrl1.hf_odr = (val & 0x10) >> 4;
   mm_error = lis2ds12_write_reg(ctx, LIS2DS12_CTRL1, &reg.byte, 1);
 
   return mm_error;
@@ -1970,7 +1970,7 @@ int32_t lis2ds12_fifo_data_level_get(lis2ds12_ctx_t *ctx, uint16_t *val)
   int32_t mm_error;
 
   mm_error = lis2ds12_read_reg(ctx, LIS2DS12_FIFO_SRC, &reg[0].byte, 2);
-  *val = (reg[1].fifo_src.diff << 7) + reg[0].byte;
+  *val = (reg[0].fifo_src.diff << 8) + reg[1].byte;
 
   return mm_error;
 }
