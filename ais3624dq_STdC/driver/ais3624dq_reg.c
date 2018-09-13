@@ -414,17 +414,17 @@ int32_t ais3624dq_full_scale_get(ais3624dq_ctx_t *ctx, ais3624dq_fs_t *val)
 
   switch (ctrl_reg4.fs)
   {
-    case AIS3624DQ_2g:
-      *val = AIS3624DQ_2g;
+    case AIS3624DQ_6g:
+      *val = AIS3624DQ_6g;
       break;
-    case AIS3624DQ_4g:
-      *val = AIS3624DQ_4g;
+    case AIS3624DQ_12g:
+      *val = AIS3624DQ_12g;
       break;
-    case AIS3624DQ_8g:
-      *val = AIS3624DQ_8g;
+    case AIS3624DQ_24g:
+      *val = AIS3624DQ_24g;
       break;
     default:
-      *val = AIS3624DQ_2g;
+      *val = AIS3624DQ_6g;
       break;
   }
 

@@ -366,9 +366,9 @@ int32_t ais3624dq_read_reg(ais3624dq_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t ais3624dq_write_reg(ais3624dq_ctx_t *ctx, uint8_t reg, uint8_t* data,
                             uint16_t len);
 
-extern float32_t ais3624dq_from_fs2_to_mg(int16_t lsb);
-extern float32_t ais3624dq_from_fs4_to_mg(int16_t lsb);
-extern float32_t ais3624dq_from_fs8_to_mg(int16_t lsb);
+extern float32_t ais3624dq_from_fs6_to_mg(int16_t lsb);
+extern float32_t ais3624dq_from_fs12_to_mg(int16_t lsb);
+extern float32_t ais3624dq_from_fs24_to_mg(int16_t lsb);
 
 int32_t ais3624dq_axis_x_data_set(ais3624dq_ctx_t *ctx, uint8_t val);
 int32_t ais3624dq_axis_x_data_get(ais3624dq_ctx_t *ctx, uint8_t *val);
