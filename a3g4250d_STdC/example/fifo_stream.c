@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    fifo_stream.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show how to configure sensor FIFO in stream mode.
  *
  ******************************************************************************
  * @attention
@@ -93,6 +93,17 @@
 #endif
 
 /* Private macro -------------------------------------------------------------*/
+#if defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+#define A3G4250D_INT2_PIN GPIO_PIN_1
+#define A3G4250D_INT2_GPIO_PORT GPIOC
+#define A3G4250D_INT1_PIN GPIO_PIN_0
+#define A3G4250D_INT1_GPIO_PORT GPIOC
+#else /* NUCLEO_F411RE_X_NUCLEO_IKS01A2 */
+#define A3G4250D_INT2_PIN GPIO_PIN_5
+#define A3G4250D_INT2_GPIO_PORT GPIOB
+#define A3G4250D_INT1_PIN GPIO_PIN_8
+#define A3G4250D_INT1_GPIO_PORT GPIOB
+#endif /* NUCLEO_F411RE_X_NUCLEO_IKS01A2 */
 
 /* Private variables ---------------------------------------------------------*/
 static axis3bit16_t data_raw_angular_rate;
@@ -117,14 +128,14 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_a3g4250d(void)
+void example_multi_read_fifo_a3g4250d(void)
 {
   a3g4250d_ctx_t dev_ctx;
 
   /*
-   * Uncomment to use interrupts on drdy
+   * Uncomment to configure watermark interrupt on INT2
    */
-  //a3g4250d_int2_route_t int2_reg;
+  //a3g4250d_int2_route_t int2_route;
 
   /*
    *  Initialize mems driver interface
@@ -146,19 +157,26 @@ void example_main_a3g4250d(void)
     while(1); /*manage here device not found */
 
   /*
-   * Configure filtering chain
-   *
-   * Gyroscope - High Pass
-   */  
-  a3g4250d_filter_path_set(&dev_ctx, A3G4250D_LPF1_HP_ON_OUT);
-  a3g4250d_hp_bandwidth_set(&dev_ctx, A3G4250D_HP_LEVEL_3);
+   * Set FIFO watermark to 10 samples
+   */
+  a3g4250d_fifo_watermark_set(&dev_ctx, 10);
 
   /*
-   * Uncomment to use interrupts on drdy
+   * Set FIFO mode to FIFO MODE
    */
-  //a3g4250d_pin_int2_route_get(&dev_ctx, &int2_reg);
-  //int2_reg.i2_drdy = PROPERTY_ENABLE;
-  //a3g4250d_pin_int2_route_set(&dev_ctx, int2_reg);
+  a3g4250d_fifo_mode_set(&dev_ctx, A3G4250D_FIFO_STREAM_MODE);
+
+  /*
+   * Enable FIFO
+   */
+  a3g4250d_fifo_enable_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /*
+   * Uncomment to configure watermark interrupt on INT2
+   */
+  //a3g4250d_pin_int2_route_get(&dev_ctx, &int2_route);
+  //int2_route.i2_wtm = PROPERTY_ENABLE;
+  //a3g4250d_pin_int2_route_set(&dev_ctx, int2_route);
 
   /*
    * Set Output Data Rate
@@ -166,30 +184,37 @@ void example_main_a3g4250d(void)
   a3g4250d_data_rate_set(&dev_ctx, A3G4250D_ODR_100Hz);
 
   /*
-   * Read samples in polling mode (no int)
+   * Wait Events Loop
    */
   while(1)
   {
-    uint8_t reg;
+    uint8_t flags;
+    uint8_t num = 0;
 
     /*
-     * Read output only if new value is available
+     * Read watermark interrupt flag
      */
-    a3g4250d_flag_data_ready_get(&dev_ctx, &reg);
-
-    if (reg)
+    a3g4250d_fifo_wtm_flag_get(&dev_ctx, &flags);
+    if (flags)
     {
-      /* Read angular rate data */
-      memset(data_raw_angular_rate.u8bit, 0x00, 3*sizeof(int16_t));
-      a3g4250d_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
-      angular_rate_mdps[0] = A3G4250D_FROM_FS_245dps_TO_mdps(data_raw_angular_rate.i16bit[0]);
-      angular_rate_mdps[1] = A3G4250D_FROM_FS_245dps_TO_mdps(data_raw_angular_rate.i16bit[1]);
-      angular_rate_mdps[2] = A3G4250D_FROM_FS_245dps_TO_mdps(data_raw_angular_rate.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Angular Rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-              angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    } 
+      /*
+       * Read how many samples in fifo
+       */
+      a3g4250d_fifo_data_level_get(&dev_ctx, &num);
+      while (num-- > 0)
+      {
+        /* Read angular rate data */
+        memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
+        a3g4250d_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
+        angular_rate_mdps[0] = A3G4250D_FROM_FS_245dps_TO_mdps(data_raw_angular_rate.i16bit[0]);
+        angular_rate_mdps[1] = A3G4250D_FROM_FS_245dps_TO_mdps(data_raw_angular_rate.i16bit[1]);
+        angular_rate_mdps[2] = A3G4250D_FROM_FS_245dps_TO_mdps(data_raw_angular_rate.i16bit[2]);
+
+        sprintf((char*)tx_buffer, "Angular Rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+                angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
+        tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      }
+    }
   }
 }
 

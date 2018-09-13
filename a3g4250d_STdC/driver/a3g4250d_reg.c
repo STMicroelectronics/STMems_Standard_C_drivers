@@ -7,29 +7,31 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  */
 
@@ -925,6 +927,7 @@ int32_t a3g4250d_int_on_threshold_src_get(a3g4250d_ctx_t *ctx,
 {
   return a3g4250d_read_reg(ctx, A3G4250D_INT1_SRC, (uint8_t*) val, 1);
 }
+
 /**
   * @brief  int_x_treshold: [set]  Interrupt threshold on X.
   *
@@ -932,14 +935,23 @@ int32_t a3g4250d_int_on_threshold_src_get(a3g4250d_ctx_t *ctx,
   * @param  uint8_t val: change the values of thsx in reg INT1_TSH_XH
   *
   */
-int32_t a3g4250d_int_x_treshold_set(a3g4250d_ctx_t *ctx, uint8_t val)
+int32_t a3g4250d_int_x_treshold_set(a3g4250d_ctx_t *ctx, uint16_t val)
 {
-  a3g4250d_reg_t reg;
+  a3g4250d_int1_tsh_xh_t int1_tsh_xh;
+  a3g4250d_int1_tsh_xl_t int1_tsh_xl;
   int32_t mm_error;
 
-  mm_error = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_XH, &reg.byte, 1);
-  reg.int1_tsh_xh.thsx = val;
-  mm_error = a3g4250d_write_reg(ctx, A3G4250D_INT1_TSH_XH, &reg.byte, 1);
+  mm_error = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_XH,
+                               (uint8_t*)&int1_tsh_xh, 1);
+  int1_tsh_xh.thsx = (val & 0x7F00)>>8;
+  mm_error = a3g4250d_write_reg(ctx, A3G4250D_INT1_TSH_XH,
+                                (uint8_t*)&int1_tsh_xh, 1);
+
+  mm_error = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_XL,
+                               (uint8_t*)&int1_tsh_xl, 1);
+  int1_tsh_xl.thsx = val & 0xFF;
+  mm_error = a3g4250d_write_reg(ctx, A3G4250D_INT1_TSH_XL,
+                                (uint8_t*)&int1_tsh_xl, 1);
 
   return mm_error;
 }
@@ -951,13 +963,18 @@ int32_t a3g4250d_int_x_treshold_set(a3g4250d_ctx_t *ctx, uint8_t val)
   * @param  uint8_t: change the values of thsx in reg INT1_TSH_XH
   *
   */
-int32_t a3g4250d_int_x_treshold_get(a3g4250d_ctx_t *ctx, uint8_t *val)
+int32_t a3g4250d_int_x_treshold_get(a3g4250d_ctx_t *ctx, uint16_t *val)
 {
-  a3g4250d_reg_t reg;
+  a3g4250d_int1_tsh_xh_t int1_tsh_xh;
+  a3g4250d_int1_tsh_xl_t int1_tsh_xl;
   int32_t mm_error;
 
-  mm_error = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_XH, &reg.byte, 1);
-  *val = reg.int1_tsh_xh.thsx;
+  mm_error = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_XH,
+                               (uint8_t*)&int1_tsh_xh, 1);
+  mm_error = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_XL,
+                               (uint8_t*)&int1_tsh_xl, 1);
+
+  *val = (int1_tsh_xh.thsx << 8) + int1_tsh_xl.thsx;
 
   return mm_error;
 }
@@ -969,14 +986,23 @@ int32_t a3g4250d_int_x_treshold_get(a3g4250d_ctx_t *ctx, uint8_t *val)
   * @param  uint8_t val: change the values of thsy in reg INT1_TSH_YH
   *
   */
-int32_t a3g4250d_int_y_treshold_set(a3g4250d_ctx_t *ctx, uint8_t val)
+int32_t a3g4250d_int_y_treshold_set(a3g4250d_ctx_t *ctx, uint16_t val)
 {
-  a3g4250d_reg_t reg;
+  a3g4250d_int1_tsh_yh_t int1_tsh_yh;
+  a3g4250d_int1_tsh_yl_t int1_tsh_yl;
   int32_t mm_error;
 
-  mm_error = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_YH, &reg.byte, 1);
-  reg.int1_tsh_yh.thsy = val;
-  mm_error = a3g4250d_write_reg(ctx, A3G4250D_INT1_TSH_YH, &reg.byte, 1);
+  mm_error = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_YH,
+                               (uint8_t*)&int1_tsh_yh, 1);
+  int1_tsh_yh.thsy = (val & 0x7F00)>>8;
+  mm_error = a3g4250d_write_reg(ctx, A3G4250D_INT1_TSH_YH,
+                                (uint8_t*)&int1_tsh_yh, 1);
+
+  mm_error = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_YL,
+                               (uint8_t*)&int1_tsh_yl, 1);
+  int1_tsh_yl.thsy = val & 0xFF;
+  mm_error = a3g4250d_write_reg(ctx, A3G4250D_INT1_TSH_YL,
+                                (uint8_t*)&int1_tsh_yl, 1);
 
   return mm_error;
 }
@@ -988,14 +1014,18 @@ int32_t a3g4250d_int_y_treshold_set(a3g4250d_ctx_t *ctx, uint8_t val)
   * @param  uint8_t: change the values of thsy in reg INT1_TSH_YH
   *
   */
-int32_t a3g4250d_int_y_treshold_get(a3g4250d_ctx_t *ctx, uint8_t *val)
+int32_t a3g4250d_int_y_treshold_get(a3g4250d_ctx_t *ctx, uint16_t *val)
 {
-  a3g4250d_reg_t reg;
+  a3g4250d_int1_tsh_yh_t int1_tsh_yh;
+  a3g4250d_int1_tsh_yl_t int1_tsh_yl;
   int32_t mm_error;
 
-  mm_error = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_YH, &reg.byte, 1);
-  *val = reg.int1_tsh_yh.thsy;
+  mm_error = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_YH,
+                               (uint8_t*)&int1_tsh_yh, 1);
+  mm_error = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_YL,
+                               (uint8_t*)&int1_tsh_yl, 1);
 
+  *val = (int1_tsh_yh.thsy << 8) + int1_tsh_yl.thsy;
   return mm_error;
 }
 
@@ -1006,14 +1036,23 @@ int32_t a3g4250d_int_y_treshold_get(a3g4250d_ctx_t *ctx, uint8_t *val)
   * @param  uint8_t val: change the values of thsz in reg INT1_TSH_ZH
   *
   */
-int32_t a3g4250d_int_z_treshold_set(a3g4250d_ctx_t *ctx, uint8_t val)
+int32_t a3g4250d_int_z_treshold_set(a3g4250d_ctx_t *ctx, uint16_t val)
 {
-  a3g4250d_reg_t reg;
+  a3g4250d_int1_tsh_zh_t int1_tsh_zh;
+  a3g4250d_int1_tsh_zl_t int1_tsh_zl;
   int32_t mm_error;
 
-  mm_error = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_ZH, &reg.byte, 1);
-  reg.int1_tsh_zh.thsz = val;
-  mm_error = a3g4250d_write_reg(ctx, A3G4250D_INT1_TSH_ZH, &reg.byte, 1);
+  mm_error = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_ZH,
+                               (uint8_t*)&int1_tsh_zh, 1);
+  int1_tsh_zh.thsz = (val & 0x7F00)>>8;
+  mm_error = a3g4250d_write_reg(ctx, A3G4250D_INT1_TSH_ZH,
+                                (uint8_t*)&int1_tsh_zh, 1);
+
+  mm_error = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_ZL,
+                               (uint8_t*)&int1_tsh_zl, 1);
+  int1_tsh_zl.thsz = val & 0xFF;
+  mm_error = a3g4250d_write_reg(ctx, A3G4250D_INT1_TSH_ZL,
+                                (uint8_t*)&int1_tsh_zl, 1);
 
   return mm_error;
 }
@@ -1025,13 +1064,18 @@ int32_t a3g4250d_int_z_treshold_set(a3g4250d_ctx_t *ctx, uint8_t val)
   * @param  uint8_t: change the values of thsz in reg INT1_TSH_ZH
   *
   */
-int32_t a3g4250d_int_z_treshold_get(a3g4250d_ctx_t *ctx, uint8_t *val)
+int32_t a3g4250d_int_z_treshold_get(a3g4250d_ctx_t *ctx, uint16_t *val)
 {
-  a3g4250d_reg_t reg;
+  a3g4250d_int1_tsh_zh_t int1_tsh_zh;
+  a3g4250d_int1_tsh_zl_t int1_tsh_zl;
   int32_t mm_error;
 
-  mm_error = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_ZH, &reg.byte, 1);
-  *val = reg.int1_tsh_zh.thsz;
+  mm_error = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_ZH,
+                               (uint8_t*)&int1_tsh_zh, 1);
+  mm_error = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_ZL,
+                               (uint8_t*)&int1_tsh_zl, 1);
+
+  *val = (int1_tsh_zh.thsz << 8) + int1_tsh_zl.thsz;
 
   return mm_error;
 }
@@ -1170,7 +1214,7 @@ int32_t a3g4250d_fifo_watermark_get(a3g4250d_ctx_t *ctx, uint8_t *val)
   * @param  uint8_t val: change the values of fm in reg FIFO_CTRL_REG
   *
   */
-int32_t a3g4250d_fifo_mode_set(a3g4250d_ctx_t *ctx, uint8_t val)
+int32_t a3g4250d_fifo_mode_set(a3g4250d_ctx_t *ctx, a3g4250d_fifo_mode_t val)
 {
   a3g4250d_reg_t reg;
   int32_t mm_error;
@@ -1189,13 +1233,13 @@ int32_t a3g4250d_fifo_mode_set(a3g4250d_ctx_t *ctx, uint8_t val)
   * @param  uint8_t: change the values of fm in reg FIFO_CTRL_REG
   *
   */
-int32_t a3g4250d_fifo_mode_get(a3g4250d_ctx_t *ctx, uint8_t *val)
+int32_t a3g4250d_fifo_mode_get(a3g4250d_ctx_t *ctx, a3g4250d_fifo_mode_t *val)
 {
   a3g4250d_reg_t reg;
   int32_t mm_error;
 
   mm_error = a3g4250d_read_reg(ctx, A3G4250D_FIFO_CTRL_REG, &reg.byte, 1);
-  *val = reg.fifo_ctrl_reg.fm;
+  *val = (a3g4250d_fifo_mode_t) reg.fifo_ctrl_reg.fm;
 
   return mm_error;
 }

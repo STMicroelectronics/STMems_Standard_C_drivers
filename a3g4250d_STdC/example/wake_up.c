@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    wake_up.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show how to configure sensor to detect a wake-up event.
  *
  ******************************************************************************
  * @attention
@@ -69,10 +69,8 @@
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
-
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
-
 #elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
 /* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
 #define SENSOR_BUS hi2c1
@@ -93,10 +91,19 @@
 #endif
 
 /* Private macro -------------------------------------------------------------*/
+#if defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+#define A3G4250D_INT2_PIN GPIO_PIN_1
+#define A3G4250D_INT2_GPIO_PORT GPIOC
+#define A3G4250D_INT1_PIN GPIO_PIN_0
+#define A3G4250D_INT1_GPIO_PORT GPIOC
+#else /* NUCLEO_F411RE_X_NUCLEO_IKS01A2 */
+#define A3G4250D_INT2_PIN GPIO_PIN_5
+#define A3G4250D_INT2_GPIO_PORT GPIOB
+#define A3G4250D_INT1_PIN GPIO_PIN_8
+#define A3G4250D_INT1_GPIO_PORT GPIOB
+#endif /* NUCLEO_F411RE_X_NUCLEO_IKS01A2 */
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_angular_rate;
-static float angular_rate_mdps[3];
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 
@@ -115,16 +122,14 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com(uint8_t *tx_buffer, uint16_t len);
 static void platform_init(void);
+static int32_t platform_read_int_pin(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_a3g4250d(void)
+void example_wake_up_a3g4250d(void)
 {
   a3g4250d_ctx_t dev_ctx;
-
-  /*
-   * Uncomment to use interrupts on drdy
-   */
-  //a3g4250d_int2_route_t int2_reg;
+  a3g4250d_int1_route_t int1_reg;
+  a3g4250d_int1_cfg_t int1_cfg;
 
   /*
    *  Initialize mems driver interface
@@ -146,19 +151,41 @@ void example_main_a3g4250d(void)
     while(1); /*manage here device not found */
 
   /*
-   * Configure filtering chain
-   *
-   * Gyroscope - High Pass
-   */  
-  a3g4250d_filter_path_set(&dev_ctx, A3G4250D_LPF1_HP_ON_OUT);
-  a3g4250d_hp_bandwidth_set(&dev_ctx, A3G4250D_HP_LEVEL_3);
+   * The value of 1 LSB of the threshold corresponds to ~7.5 mdps
+   * Set Threshold ~100 dps on X, Y and Z axis
+   */
+  a3g4250d_int_x_treshold_set(&dev_ctx, 0x3415);
+  a3g4250d_int_y_treshold_set(&dev_ctx, 0x3415);
+  a3g4250d_int_z_treshold_set(&dev_ctx, 0x3415);
+  
+  /*
+   * Set event duration to 0 ms
+   */
+  a3g4250d_int_on_threshold_dur_set(&dev_ctx, 0);
 
   /*
-   * Uncomment to use interrupts on drdy
+   * Simple interrupt configuration for detect wake-up
+   *
+   * The angular rate applied along either the
+   * X, Y or Z-axis exceeds threshold
    */
-  //a3g4250d_pin_int2_route_get(&dev_ctx, &int2_reg);
-  //int2_reg.i2_drdy = PROPERTY_ENABLE;
-  //a3g4250d_pin_int2_route_set(&dev_ctx, int2_reg);
+  a3g4250d_int_on_threshold_conf_get(&dev_ctx, &int1_cfg);
+  int1_cfg.xlie = PROPERTY_DISABLE;
+  int1_cfg.ylie = PROPERTY_DISABLE;
+  int1_cfg.zlie = PROPERTY_DISABLE;
+  int1_cfg.lir = PROPERTY_ENABLE;
+  int1_cfg.zhie = PROPERTY_ENABLE;
+  int1_cfg.xhie = PROPERTY_ENABLE;
+  int1_cfg.yhie = PROPERTY_ENABLE;
+  a3g4250d_int_on_threshold_conf_set(&dev_ctx, &int1_cfg);
+  a3g4250d_int_on_threshold_mode_set(&dev_ctx, A3G4250D_INT1_ON_TH_OR);
+
+  /*
+   * Configure interrupt on INT1
+   */
+  a3g4250d_pin_int1_route_get(&dev_ctx, &int1_reg);
+  int1_reg.i1_int1 = PROPERTY_ENABLE;
+  a3g4250d_pin_int1_route_set(&dev_ctx, int1_reg);
 
   /*
    * Set Output Data Rate
@@ -166,30 +193,32 @@ void example_main_a3g4250d(void)
   a3g4250d_data_rate_set(&dev_ctx, A3G4250D_ODR_100Hz);
 
   /*
-   * Read samples in polling mode (no int)
+   * Wait Events Loop
    */
   while(1)
   {
-    uint8_t reg;
+    a3g4250d_int1_src_t int1_src;
 
-    /*
-     * Read output only if new value is available
-     */
-    a3g4250d_flag_data_ready_get(&dev_ctx, &reg);
-
-    if (reg)
+    if (platform_read_int_pin())
     {
-      /* Read angular rate data */
-      memset(data_raw_angular_rate.u8bit, 0x00, 3*sizeof(int16_t));
-      a3g4250d_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
-      angular_rate_mdps[0] = A3G4250D_FROM_FS_245dps_TO_mdps(data_raw_angular_rate.i16bit[0]);
-      angular_rate_mdps[1] = A3G4250D_FROM_FS_245dps_TO_mdps(data_raw_angular_rate.i16bit[1]);
-      angular_rate_mdps[2] = A3G4250D_FROM_FS_245dps_TO_mdps(data_raw_angular_rate.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Angular Rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-              angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    } 
+      /*
+       * Read interrupt status
+       */
+      a3g4250d_int_on_threshold_src_get(&dev_ctx, &int1_src);
+      if (int1_src.ia)
+      {
+        sprintf((char*)tx_buffer, "wake-up event on ");
+        if (int1_src.zh)
+          sprintf((char*)tx_buffer, "%sz", tx_buffer);
+        if (int1_src.yh)
+          sprintf((char*)tx_buffer, "%sy", tx_buffer);
+        if (int1_src.xh)
+          sprintf((char*)tx_buffer, "%sx", tx_buffer);
+
+        sprintf((char*)tx_buffer, "%s\r\n", tx_buffer);
+        tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      }
+    }
   }
 }
 
@@ -288,4 +317,12 @@ static void platform_init(void)
   TIM3->CCR2 = PWM_3V3;
   HAL_Delay(1000);
 #endif
+}
+
+/*
+ * @brief  read interrupt pin (platform dependent)
+ */
+static int32_t platform_read_int_pin(void)
+{
+  return HAL_GPIO_ReadPin(A3G4250D_INT1_GPIO_PORT, A3G4250D_INT1_PIN);
 }
