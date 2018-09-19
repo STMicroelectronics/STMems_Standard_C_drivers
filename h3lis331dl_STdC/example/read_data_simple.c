@@ -1,235 +1,272 @@
 /*
  ******************************************************************************
  * @file    read_data_simple.c
- * @author  MEMS Software Solution Team
- * @date    20-December-2017
+ * @author  Sensors Software Solution Team
  * @brief   This file show the simplest way to get data from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  */
 
-/* Includes ------------------------------------------------------------------*/
-#include "..\..\stdc\h3lis331dl_STdC\driver\h3lis331dl_reg.h"
-#include <string.h>
+/*
+ * This example was developed using the following STMicroelectronics
+ * evaluation boards:
+ *
+ * - STEVAL_MKI109V3
+ * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ *
+ * and STM32CubeMX tool with STM32CubeF4 MCU Package
+ *
+ * Used interfaces:
+ *
+ * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
+ *                    - Sensor side: SPI(Default) / I2C(supported)
+ *
+ * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
+ *                                       - I2C(Default) / SPI(N/A)
+ *
+ * If you need to run this example on a different hardware platform a
+ * modification of the functions: `platform_write`, `platform_read`,
+ * `tx_com` and 'platform_init' is required.
+ *
+ */
 
-#define MKI109V2
-//#define NUCLEO_STM32F411RE
+/* STMicroelectronics evaluation boards definition
+ *
+ * Please uncomment ONLY the evaluation boards in use.
+ * If a different hardware is used please comment all
+ * following target board and redefine yours.
+ */
+//#define STEVAL_MKI109V3
+#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
 
-#ifdef MKI109V2
-#include "stm32f1xx_hal.h"
-#include "usbd_cdc_if.h"
-#include "spi.h"
-#include "i2c.h"
+#if defined(STEVAL_MKI109V3)
+/* MKI109V3: Define communication interface */
+#define SENSOR_BUS hspi2
+
+/* MKI109V3: Vdd and Vddio power supply values */
+#define PWM_3V3 915
+
+#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
+#define SENSOR_BUS hi2c1
+
 #endif
 
-#ifdef NUCLEO_STM32F411RE
-#include "stm32f4xx_hal.h"
-#include "i2c.h"
-#include "usart.h"
-#include "gpio.h"
+/* Includes ------------------------------------------------------------------*/
+#include <string.h>
+#include <stm32f4xx_hal.h>
+#include <h3lis331dl_reg.h>
+#include <gpio.h>
+#include <i2c.h>
+#if defined(STEVAL_MKI109V3)
+#include <usbd_cdc_if.h>
+#include <spi.h>
+#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+#include <usart.h>
 #endif
 
 /* Private macro -------------------------------------------------------------*/
-#ifdef MKI109V2
-#define CS_SPI2_GPIO_Port   CS_DEV_GPIO_Port
-#define CS_SPI2_Pin         CS_DEV_Pin
-#define CS_SPI1_GPIO_Port   CS_RF_GPIO_Port
-#define CS_SPI1_Pin         CS_RF_Pin
-#endif
-
-#ifdef NUCLEO_STM32F411RE
-/* N/A on NUCLEO_STM32F411RE + IKS01A1 */
-/* N/A on NUCLEO_STM32F411RE + IKS01A2 */
-#define CS_SPI2_GPIO_Port   0
-#define CS_SPI2_Pin         0
-#define CS_SPI1_GPIO_Port   0
-#define CS_SPI1_Pin         0
-#endif
-
-#define TX_BUF_DIM          1000
 
 /* Private variables ---------------------------------------------------------*/
 static axis3bit16_t data_raw_acceleration;
 static float acceleration_mg[3];
 static uint8_t whoamI;
-static uint8_t tx_buffer[TX_BUF_DIM];
+static uint8_t tx_buffer[1000];
 
 /* Extern variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
+/*
+ *   WARNING:
+ *   Functions declare in this section are defined at the end of this file
+ *   and are strictly related to the hardware platform used.
+ *
+ */
+static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+                              uint16_t len);
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
+                             uint16_t len);
+static void tx_com(uint8_t *tx_buffer, uint16_t len);
+static void platform_init(void);
+
+/* Main Example --------------------------------------------------------------*/
+void example_main_h3lis331dl(void)
+{
+  h3lis331dl_ctx_t dev_ctx;
+
+  /* Uncomment to use interrupts on drdy */
+  //a3g4250d_int2_route_t int2_reg;
+
+  /* Initialize mems driver interface */
+  dev_ctx.write_reg = platform_write;
+  dev_ctx.read_reg = platform_read;
+  dev_ctx.handle = &SENSOR_BUS;
+
+  /* Initialize platform specific hardware */
+  platform_init();
+
+  /* Check device ID */
+  whoamI = 0;
+  h3lis331dl_device_id_get(&dev_ctx, &whoamI);
+  if ( whoamI != H3LIS331DL_ID )
+    while(1); /*manage here device not found */
+
+  /* Enable Block Data Update */
+  h3lis331dl_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /* Set full scale */
+  h3lis331dl_full_scale_set(&dev_ctx, H3LIS331DL_200g);
+
+  /* Configure filtering chain */
+  h3lis331dl_hp_path_set(&dev_ctx, H3LIS331DL_HP_DISABLE);
+  //h3lis331dl_hp_path_set(&dev_ctx, H3LIS331DL_HP_ON_OUT);
+  //h3lis331dl_hp_reset_get(&dev_ctx);
+
+  /* Set Output Data Rate */
+  h3lis331dl_data_rate_set(&dev_ctx, H3LIS331DL_ODR_5Hz);
+
+  /* Read samples in polling mode (no int) */
+  while(1)
+  {
+    /* Read output only if new value is available */
+    h3lis331dl_reg_t reg;
+    h3lis331dl_status_reg_get(&dev_ctx, &reg.status_reg);
+
+    if (reg.status_reg.zyxda){
+      /* Read acceleration data */
+      memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
+      h3lis331dl_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+      acceleration_mg[0] = H3LIS331DL_FROM_FS_200g_TO_mg(data_raw_acceleration.i16bit[0]);
+      acceleration_mg[1] = H3LIS331DL_FROM_FS_200g_TO_mg(data_raw_acceleration.i16bit[1]);
+      acceleration_mg[2] = H3LIS331DL_FROM_FS_200g_TO_mg(data_raw_acceleration.i16bit[2]);
+
+      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+      tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
+    }
+  }
+}
 
 /*
- *   Replace the functions "platform_write" and "platform_read" with your
- *   platform specific read and write function.
- *   This example use an STM32 evaluation board and CubeMX tool.
- *   In this case the "*handle" variable is usefull in order to select the
- *   correct interface but the usage of "*handle" is not mandatory.
+ * @brief  Write generic device register (platform dependent)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to write
+ * @param  bufp      pointer to data to write in register reg
+ * @param  len       number of consecutive register to write
+ *
  */
-
-static int32_t platform_write(void *handle, uint8_t Reg, uint8_t *Bufp,
+static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
   if (handle == &hi2c1)
   {
-    /* enable auto incremented in multiple read/write commands */
-    Reg |= 0x80; 
-    HAL_I2C_Mem_Write(handle, H3LIS331DL_I2C_ADD_H, Reg,
-                      I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
+    /* Write multiple command */
+    reg |= 0x80;
+    HAL_I2C_Mem_Write(handle, H3LIS331DL_I2C_ADD_L, reg,
+                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
-#ifdef MKI109V2  
+#ifdef STEVAL_MKI109V3
   else if (handle == &hspi2)
   {
-    /* enable auto incremented in multiple read/write commands */
-    Reg |= 0x40;    
-    HAL_GPIO_WritePin(CS_SPI2_GPIO_Port, CS_SPI2_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &Reg, 1, 1000);
-    HAL_SPI_Transmit(handle, Bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_SPI2_GPIO_Port, CS_SPI2_Pin, GPIO_PIN_SET);
-  }
-  else if (handle == &hspi1)
-  {
-    /* enable auto incremented in multiple read/write commands */
-    Reg |= 0x40;     
-    HAL_GPIO_WritePin(CS_SPI1_GPIO_Port, CS_SPI1_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &Reg, 1, 1000);
-    HAL_SPI_Transmit(handle, Bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_SPI1_GPIO_Port, CS_SPI1_Pin, GPIO_PIN_SET);
+    /* Write multiple command */
+    reg |= 0x40;
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+    HAL_SPI_Transmit(handle, &reg, 1, 1000);
+    HAL_SPI_Transmit(handle, bufp, len, 1000);
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
 #endif
   return 0;
 }
 
-static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
+/*
+ * @brief  Read generic device register (platform dependent)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to read
+ * @param  bufp      pointer to buffer that store the data read
+ * @param  len       number of consecutive register to read
+ *
+ */
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
   if (handle == &hi2c1)
   {
-    /* enable auto incremented in multiple read/write commands */
-    Reg |= 0x80;
-    HAL_I2C_Mem_Read(handle, H3LIS331DL_I2C_ADD_H, Reg,
-                     I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
+    /* Read multiple command */
+    reg |= 0x80;
+    HAL_I2C_Mem_Read(handle, H3LIS331DL_I2C_ADD_L, reg,
+                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
-#ifdef MKI109V2   
+#ifdef STEVAL_MKI109V3
   else if (handle == &hspi2)
   {
-    /* enable auto incremented in multiple read/write commands */
-    Reg |= 0xC0;
-    HAL_GPIO_WritePin(CS_DEV_GPIO_Port, CS_DEV_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &Reg, 1, 1000);
-    HAL_SPI_Receive(handle, Bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_DEV_GPIO_Port, CS_DEV_Pin, GPIO_PIN_SET);
+    /* Read multiple command */
+    reg |= 0xC0;
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+    HAL_SPI_Transmit(handle, &reg, 1, 1000);
+    HAL_SPI_Receive(handle, bufp, len, 1000);
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
-  else
-  {
-    /* enable auto incremented in multiple read/write commands */
-    Reg |= 0xC0;    
-    HAL_GPIO_WritePin(CS_RF_GPIO_Port, CS_RF_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &Reg, 1, 1000);
-    HAL_SPI_Receive(handle, Bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_RF_GPIO_Port, CS_RF_Pin, GPIO_PIN_SET);
-  }
-#endif  
+#endif
   return 0;
 }
 
 /*
- *  Function to print messages
+ * @brief  Send buffer to console (platform dependent)
+ *
+ * @param  tx_buffer     buffer to trasmit
+ * @param  len           number of byte to send
+ *
  */
-void tx_com( uint8_t *tx_buffer, uint16_t len )
+static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_STM32F411RE  
+  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
   HAL_UART_Transmit( &huart2, tx_buffer, len, 1000 );
   #endif
-  #ifdef MKI109V2  
+  #ifdef STEVAL_MKI109V3
   CDC_Transmit_FS( tx_buffer, len );
   #endif
 }
 
-/* Main Example --------------------------------------------------------------*/
-void example_main(void)
-{
   /*
-   *  Initialize mems driver interface
+ * @brief  platform specific initialization (platform dependent)
    */
-  h3lis331dl_ctx_t dev_ctx;
-  dev_ctx.write_reg = platform_write;
-  dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hspi2;  
-  /*
-   *  Check device ID
-   */
-  whoamI = 0;
-  h3lis331dl_device_id_get(&dev_ctx, &whoamI);
-  if ( whoamI != H3LIS331DL_ID )
-    while(1); /*manage here device not found */
-  /*
-   *  Enable Block Data Update
-   */
-  h3lis331dl_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-  /*
-   * Set full scale
-   */  
-  h3lis331dl_full_scale_set(&dev_ctx, H3LIS331DL_100g);
-  /*
-   * Configure filtering chain
-   */  
-  /* Accelerometer - High Pass / Slope path */
-  h3lis331dl_hp_path_set(&dev_ctx, H3LIS331DL_HP_DISABLE);
-  //h3lis331dl_hp_path_set(&dev_ctx, H3LIS331DL_HP_ON_OUT);
-  //h3lis331dl_hp_reset_get(&dev_ctx);
-  /*
-   * Set Output Data Rate
-   */
-  h3lis331dl_data_rate_set(&dev_ctx, H3LIS331DL_ODR_5Hz);
-  /*
-   * Read samples in polling mode (no int)
-   */
-  while(1)
+static void platform_init(void)
   {
-    /*
-     * Read output only if new value is available
-     */
-    h3lis331dl_reg_t reg;
-    h3lis331dl_status_reg_get(&dev_ctx, &reg.status_reg);
-
-    if (reg.status_reg.zyxda)
-    {
-      /* Read acceleration data */
-      memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
-      h3lis331dl_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = H3LIS331DL_FROM_FS_100g_TO_mg( data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = H3LIS331DL_FROM_FS_100g_TO_mg( data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = H3LIS331DL_FROM_FS_100g_TO_mg( data_raw_acceleration.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
-    } 
-  }
+#ifdef STEVAL_MKI109V3
+  TIM3->CCR1 = PWM_3V3;
+  TIM3->CCR2 = PWM_3V3;
+  HAL_Delay(1000);
+#endif
 }
