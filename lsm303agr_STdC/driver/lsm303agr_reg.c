@@ -1873,7 +1873,7 @@ int32_t lsm303agr_xl_int1pin_notification_mode_get(lsm303agr_ctx_t *ctx,
 int32_t lsm303agr_xl_pin_int2_config_set(lsm303agr_ctx_t *ctx,
                                      lsm303agr_ctrl_reg6_a_t *val)
 {
-  return lsm303agr_read_reg(ctx, LSM303AGR_CTRL_REG6_A, (uint8_t*) val, 1);
+  return lsm303agr_write_reg(ctx, LSM303AGR_CTRL_REG6_A, (uint8_t*) val, 1);
 }
 
 /**
