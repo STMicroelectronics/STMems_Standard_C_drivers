@@ -251,13 +251,12 @@ int32_t lis3de_aux_adc_set(lis3de_ctx_t *ctx, lis3de_temp_en_t val)
       /* Required in order to use auxiliary adc */
       ret = lis3de_block_data_update_set(ctx, PROPERTY_ENABLE);
     }
-  } else if (ret == 0) {
+  } 
+  if (ret == 0) {
     temp_cfg_reg.temp_en = ( (uint8_t) val & 0x02U) >> 1;
     temp_cfg_reg.adc_pd  = (uint8_t) val &  0x01U;
     ret = lis3de_write_reg(ctx, LIS3DE_TEMP_CFG_REG,
                            (uint8_t*)&temp_cfg_reg, 1);
-  } else {
-    ret = ret;
   }
   return ret;
 }
@@ -278,7 +277,8 @@ int32_t lis3de_aux_adc_get(lis3de_ctx_t *ctx, lis3de_temp_en_t *val)
   ret = lis3de_read_reg(ctx, LIS3DE_TEMP_CFG_REG, (uint8_t*)&temp_cfg_reg, 1);
   if ( ( temp_cfg_reg.temp_en & temp_cfg_reg.adc_pd ) == PROPERTY_ENABLE ){
     *val = LIS3DE_AUX_ON_TEMPERATURE;
-  } else if ( ( temp_cfg_reg.temp_en  == PROPERTY_DISABLE ) &&
+  } 
+  if ( ( temp_cfg_reg.temp_en  == PROPERTY_DISABLE ) &&
               ( temp_cfg_reg.adc_pd == PROPERTY_ENABLE ) ) {
     *val = LIS3DE_AUX_ON_PADS;
   } else {
@@ -749,10 +749,9 @@ int32_t lis3de_acceleration_raw_get(lis3de_ctx_t *ctx, uint8_t *buff)
   ret = lis3de_read_reg(ctx, LIS3DE_OUT_X, &buff[3]  , 1);
   if (ret == 0) {
     ret = lis3de_read_reg(ctx, LIS3DE_OUT_Y, &buff[1], 1);
-  } else if (ret == 0) {
+  } 
+  if (ret == 0) {
     ret = lis3de_read_reg(ctx, LIS3DE_OUT_Z, &buff[2], 1);
-  } else {
-    ret = ret;
   }
   return ret;
 }
