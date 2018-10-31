@@ -189,11 +189,11 @@ void example_main_lis3dh(void)
       memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
       lis3dh_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
       acceleration_mg[0] =
-        LIS3DH_FROM_FS_2g_HR_TO_mg(data_raw_acceleration.i16bit[0]);
+        lis3dh_from_fs2_hr_to_mg(data_raw_acceleration.i16bit[0]);
       acceleration_mg[1] =
-        LIS3DH_FROM_FS_2g_HR_TO_mg(data_raw_acceleration.i16bit[1]);
+        lis3dh_from_fs2_hr_to_mg(data_raw_acceleration.i16bit[1]);
       acceleration_mg[2] =
-        LIS3DH_FROM_FS_2g_HR_TO_mg(data_raw_acceleration.i16bit[2]);
+        lis3dh_from_fs2_hr_to_mg(data_raw_acceleration.i16bit[2]);
       
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
@@ -207,7 +207,7 @@ void example_main_lis3dh(void)
       memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
       lis3dh_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
       temperature_degC =
-        LIS3DH_FROM_LSB_TO_degC_HR(data_raw_temperature.i16bit);
+        lis3dh_from_lsb_hr_to_celsius(data_raw_temperature.i16bit);
        
       sprintf((char*)tx_buffer,
               "Temperature [degC]:%6.2f\r\n",

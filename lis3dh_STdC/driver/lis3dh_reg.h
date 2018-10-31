@@ -163,56 +163,6 @@ typedef struct {
   *
   */
 
-/**
-  * @defgroup LIS3DH_Sensitivity
-  * @brief       These macro are mantained for back compatibility.
-  *              in order to convert data into engineering units please
-  *              use functions:
-  *                -> _from_fs2_hr_to_mg(int16_t lsb);
-  *                -> _from_fs4_hr_to_mg(int16_t lsb);
-  *                -> _from_fs8_hr_to_mg(int16_t lsb);
-  *                -> _from_fs16_hr_to_mg(int16_t lsb);
-  *                -> _from_lsb_hr_to_celsius(int16_t lsb);
-  *                -> _from_fs2_nm_to_mg(int16_t lsb);
-  *                -> _from_fs4_nm_to_mg(int16_t lsb);
-  *                -> _from_fs8_nm_to_mg(int16_t lsb);
-  *                -> _from_fs16_nm_to_mg(int16_t lsb);
-  *                -> _from_lsb_nm_to_celsius(int16_t lsb);
-  *                -> _from_fs2_lp_to_mg(int16_t lsb);
-  *                -> _from_fs4_lp_to_mg(int16_t lsb);
-  *                -> _from_fs8_lp_to_mg(int16_t lsb);
-  *                -> _from_fs16_lp_to_mg(int16_t lsb);
-  *                -> _from_lsb_lp_to_celsius(int16_t lsb);
-  *
-  *              REMOVING the MACRO you are complient with:
-  *              MISRA-C 2012 [Dir 4.9] -> " avoid function-like macros "
-  * @{
-  *
-*/
-
-#define LIS3DH_FROM_FS_2g_HR_TO_mg(lsb)  (float)((int16_t)lsb>>4)* 1.0f
-#define LIS3DH_FROM_FS_4g_HR_TO_mg(lsb)  (float)((int16_t)lsb>>4)* 2.0f
-#define LIS3DH_FROM_FS_8g_HR_TO_mg(lsb)  (float)((int16_t)lsb>>4)* 4.0f
-#define LIS3DH_FROM_FS_16g_HR_TO_mg(lsb) (float)((int16_t)lsb>>4)*12.0f
-#define LIS3DH_FROM_LSB_TO_degC_HR(lsb) (float)((int16_t)lsb>>6)/4.0f+25.0f
-
-#define LIS3DH_FROM_FS_2g_NM_TO_mg(lsb)  (float)((int16_t)lsb>>6)*  4.0f
-#define LIS3DH_FROM_FS_4g_NM_TO_mg(lsb)  (float)((int16_t)lsb>>6)*  8.0f
-#define LIS3DH_FROM_FS_8g_NM_TO_mg(lsb)  (float)((int16_t)lsb>>6)* 16.0f
-#define LIS3DH_FROM_FS_16g_NM_TO_mg(lsb) (float)((int16_t)lsb>>6)* 48.0f
-#define LIS3DH_FROM_LSB_TO_degC_NM(lsb) (float)((int16_t)lsb>>6)/4.0f+25.0f
-
-#define LIS3DH_FROM_FS_2g_LP_TO_mg(lsb)  (float)((int16_t)lsb>>8)*16.0f
-#define LIS3DH_FROM_FS_4g_LP_TO_mg(lsb)  (float)((int16_t)lsb>>8)*32.0f
-#define LIS3DH_FROM_FS_8g_LP_TO_mg(lsb)  (float)((int16_t)lsb>>8)*64.0f
-#define LIS3DH_FROM_FS_16g_LP_TO_mg(lsb) (float)((int16_t)lsb>>8)*192.0f
-#define LIS3DH_FROM_LSB_TO_degC_LP(lsb) (float)((int16_t)lsb>>8)*1.0f + 25.0f
-
-/**
-  * @}
-  *
-  */
-
 #define LIS3DH_STATUS_REG_AUX        0x07U
 typedef struct {
   uint8_t _1da              : 1;
