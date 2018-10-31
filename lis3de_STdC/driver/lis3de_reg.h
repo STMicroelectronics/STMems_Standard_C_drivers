@@ -163,34 +163,6 @@ typedef struct {
   *
   */
 
-/**
-  * @defgroup LIS3DE_Sensitivity
-  * @brief       These macro are mantained for back compatibility.
-  *              in order to convert data into engineering units please
-  *              use functions:
-  *                -> _from_fs2_to_mg(int16_t lsb);
-  *                -> _from_fs4_to_mg(int16_t lsb);
-  *                -> _from_fs8_to_mg(int16_t lsb);
-  *                -> _from_fs16_to_mg(int16_t lsb);
-  *                -> _from_lsb_to_celsius(int16_t lsb);
-  *
-  *              REMOVING the MACRO you are complient with:
-  *              MISRA-C 2012 [Dir 4.9] -> " avoid function-like macros "
-  * @{
-  *
-*/
-
-#define LIS3DE_FROM_FS_2g_TO_mg(lsb)  (float)((int16_t)lsb)*15.6f
-#define LIS3DE_FROM_FS_4g_TO_mg(lsb)  (float)((int16_t)lsb)*31.2f
-#define LIS3DE_FROM_FS_8g_TO_mg(lsb)  (float)((int16_t)lsb)*62.5f
-#define LIS3DE_FROM_FS_16g_TO_mg(lsb) (float)((int16_t)lsb)*187.5f
-#define LIS3DE_FROM_LSB_TO_degC(lsb)  (float)((int16_t)lsb)*1.0f + 25.0f
-
-/**
-  * @}
-  *
-  */
-
 #define LIS3DE_STATUS_REG_AUX        0x07U
 typedef struct {
   uint8_t _1da              : 1;
