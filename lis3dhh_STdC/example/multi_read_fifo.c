@@ -87,9 +87,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 static axis3bit16_t data_raw_acceleration;
-static axis1bit16_t data_raw_temperature;
 static float acceleration_mg[3];
-static float temperature_degC;
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -110,15 +108,16 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lis3dhh(void)
+void example_multi_read_fifo_lis3dhh(void)
 {
   /*
    *  Initialize mems driver interface
    */
   lis3dhh_ctx_t dev_ctx;
+
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hspi2;  
+  dev_ctx.handle = &hspi2;
 
   /*
    * Initialize platform specific hardware
@@ -152,42 +151,62 @@ void example_main_lis3dhh(void)
 
   /*
    * Enable temperature compensation
-   */  
+   */
   lis3dhh_offset_temp_comp_set(&dev_ctx, PROPERTY_ENABLE);
-  
+
+  /*
+   * Set FIFO watermark to 16 samples (half FIFO)
+   */
+  lis3dhh_fifo_watermark_set(&dev_ctx, 16);
+
+  /*
+   * Set FIFO to Stream mode
+   */
+  lis3dhh_fifo_mode_set(&dev_ctx, LIS3DHH_DYNAMIC_STREAM_MODE);
+
+  /*
+   * Enable FIFO
+   */
+  lis3dhh_fifo_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /*
+   * Uncomment to use Int1 as interrupt on FIFO watermark
+   */
+  //lis3dhh_fifo_threshold_on_int1_set(&dev_ctx, PROPERTY_ENABLE);
+
   /*
    * Read samples in polling mode (no int)
    */
   while(1)
   {
-    uint8_t reg;
+    uint8_t wtm;
+    uint8_t num = 0;
 
     /*
      * Read output only if new value is available
      */
-    lis3dhh_xl_data_ready_get(&dev_ctx, &reg);
-    if (reg)
+    lis3dhh_fifo_fth_flag_get(&dev_ctx, &wtm);
+    if (wtm)
     {
       /*
-       * Read acceleration data
+       * Read number of sample in FIFO
        */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      lis3dhh_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = LIS3DHH_FROM_LSB_TO_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = LIS3DHH_FROM_LSB_TO_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = LIS3DHH_FROM_LSB_TO_mg(data_raw_acceleration.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      
-      /* Read temperature data */
-      memset(data_raw_temperature.u8bit, 0, sizeof(int16_t));
-      lis3dhh_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = LIS3DHH_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
-       
-      sprintf((char*)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      lis3dhh_fifo_full_flag_get(&dev_ctx, &num);
+      while (num-- > 0)
+      {
+        /*
+         * Read XL samples
+         */
+        memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
+        lis3dhh_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+        acceleration_mg[0] = LIS3DHH_FROM_LSB_TO_mg(data_raw_acceleration.i16bit[0]);
+        acceleration_mg[1] = LIS3DHH_FROM_LSB_TO_mg(data_raw_acceleration.i16bit[1]);
+        acceleration_mg[2] = LIS3DHH_FROM_LSB_TO_mg(data_raw_acceleration.i16bit[2]);
+
+        sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+                acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+        tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      }
     }
   }
 }
