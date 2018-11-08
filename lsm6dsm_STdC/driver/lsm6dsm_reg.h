@@ -1774,9 +1774,9 @@ int32_t lsm6dsm_den_mode_set(lsm6dsm_ctx_t *ctx, lsm6dsm_den_mode_t val);
 int32_t lsm6dsm_den_mode_get(lsm6dsm_ctx_t *ctx, lsm6dsm_den_mode_t *val);
 
 typedef enum {
-  LSM6DSO_STAMP_IN_GY_DATA     = 0,
-  LSM6DSO_STAMP_IN_XL_DATA     = 1,
-  LSM6DSO_STAMP_IN_GY_XL_DATA  = 2,
+  LSM6DSM_STAMP_IN_GY_DATA     = 0,
+  LSM6DSM_STAMP_IN_XL_DATA     = 1,
+  LSM6DSM_STAMP_IN_GY_XL_DATA  = 2,
 } lsm6dsm_den_xl_en_t;
 int32_t lsm6dsm_den_enable_set(lsm6dsm_ctx_t *ctx, lsm6dsm_den_xl_en_t val);
 int32_t lsm6dsm_den_enable_get(lsm6dsm_ctx_t *ctx, lsm6dsm_den_xl_en_t *val);
