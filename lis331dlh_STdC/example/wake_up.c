@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    wake_up.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show the simplest way to detect wake_up from sensor.
  *
  ******************************************************************************
  * @attention
@@ -95,8 +95,6 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static float acceleration_mg[3];
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 
@@ -113,16 +111,18 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
-static void tx_com(uint8_t *tx_buffer, uint16_t len);
+static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lis331dlh(void)
+void example_main_wake_up_lis331dlh(void)
 {
   /*
-   *  Initialize mems driver interface
+   * Initialize mems driver interface
    */
   lis331dlh_ctx_t dev_ctx;
+  int1_on_th_conf_t int_route;
+
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
@@ -133,68 +133,103 @@ void example_main_lis331dlh(void)
   platform_init();
 
   /*
-   *  Check device ID
+   * Check device ID
    */
   lis331dlh_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LIS331DLH_ID)
-  {
     while(1)
     {
       /* manage here device not found */
     }
-  }
-
-  /*
-   *  Enable Block Data Update
-   */
-  lis331dlh_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
    * Set full scale
-   */  
+   */
   lis331dlh_full_scale_set(&dev_ctx, LIS331DLH_2g);
 
   /*
-   * Configure filtering chain
-   */  
-  /* Accelerometer - High Pass / Slope path */
-  lis331dlh_hp_path_set(&dev_ctx, LIS331DLH_HP_DISABLE);
-  //lis331dlh_hp_path_set(&dev_ctx, LIS331DLH_HP_ON_OUT);
-  //lis331dlh_hp_reset_get(&dev_ctx);
+   * Apply high-pass digital filter on Wake-Up function
+   *
+   * Comment out this configuration in case of HP filter
+   * bypassed: in this case you have on Z axis 1 g to take
+   * in account in threshold
+   */
+  lis331dlh_hp_path_set(&dev_ctx, LIS331DLH_HP_ON_INT1_OUT);
+  lis331dlh_hp_bandwidth_set(&dev_ctx, LIS331DLH_CUT_OFF_16Hz);
+  lis331dlh_reference_mode_set(&dev_ctx, LIS331DLH_NORMAL_MODE);
+
+  /*
+   * Apply high-pass digital filter on Wake-Up function
+   * Duration time is set to zero so Wake-Up interrupt signal
+   * is generated for each X,Y,Z filtered data exceeding the
+   * configured threshold
+   */
+  lis331dlh_int1_dur_set(&dev_ctx, 0);
+
+  /*
+   * Set wake-up threshold
+   *
+   * Threshold = 250 mg
+   */
+  lis331dlh_int1_treshold_set(&dev_ctx, 16);
+
+  /*
+   * Dummy read to force the HP filter to
+   * actual acceleration value
+   * (i.e. set reference acceleration/tilt value
+   */
+  lis331dlh_hp_reset_get(&dev_ctx);
+
+  /*
+   * Enable interrupt generation on Wake-Up INT1 pin
+   * 
+   */
+  lis331dlh_int1_on_threshold_conf_get(&dev_ctx, &int_route);
+  int_route.int1_xhie = PROPERTY_ENABLE;
+  int_route.int1_yhie = PROPERTY_ENABLE;
+
+  /*
+   * If HP filter is off take in account of 1g related to
+   * gravity
+   */
+  int_route.int1_zhie = PROPERTY_ENABLE;
+  lis331dlh_int1_on_threshold_conf_set(&dev_ctx, int_route);
 
   /*
    * Set Output Data Rate
    */
-  lis331dlh_data_rate_set(&dev_ctx, LIS331DLH_ODR_5Hz);
+  lis331dlh_data_rate_set(&dev_ctx, LIS331DLH_ODR_100Hz);
 
   /*
-   * Read samples in polling mode (no int)
+   * Wait Events
    */
   while(1)
   {
+    lis331dlh_int1_src_t all_source;
+
     /*
-     * Read output only if new value is available
+     * Check Wake-Up events
      */
-    lis331dlh_reg_t reg;
-    lis331dlh_status_reg_get(&dev_ctx, &reg.status_reg);
-
-    if (reg.status_reg.zyxda)
+    lis331dlh_int1_src_get(&dev_ctx, &all_source);
+    if (all_source.xh)
     {
-      /* Read acceleration data */
-      memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
-      lis331dlh_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-
-      acceleration_mg[0] =
-        LIS331DLH_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] =
-        LIS331DLH_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] =
-        LIS331DLH_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+      sprintf((char*)tx_buffer, "Wake-Up event on X\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    } 
+    }
+
+    if (all_source.yh)
+    {
+      sprintf((char*)tx_buffer, "Wake-Up event on Y\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
+
+    if (all_source.zh)
+    {
+      sprintf((char*)tx_buffer, "Wake-Up event on Z\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
+
+    lis331dlh_hp_reset_get(&dev_ctx);
   }
 }
 

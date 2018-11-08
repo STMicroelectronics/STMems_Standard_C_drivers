@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    orientation_6d.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show the simplest way to detect 6D orientation from sensor.
  *
  ******************************************************************************
  * @attention
@@ -95,8 +95,6 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static float acceleration_mg[3];
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 
@@ -117,12 +115,13 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lis331dlh(void)
+void example_main_orientation_6D_lis331dlh(void)
 {
   /*
-   *  Initialize mems driver interface
+   * Initialize mems driver interface
    */
   lis331dlh_ctx_t dev_ctx;
+
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
@@ -133,7 +132,7 @@ void example_main_lis331dlh(void)
   platform_init();
 
   /*
-   *  Check device ID
+   * Check device ID
    */
   lis331dlh_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LIS331DLH_ID)
@@ -145,56 +144,76 @@ void example_main_lis331dlh(void)
   }
 
   /*
-   *  Enable Block Data Update
-   */
-  lis331dlh_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /*
    * Set full scale
-   */  
+   */
   lis331dlh_full_scale_set(&dev_ctx, LIS331DLH_2g);
 
   /*
-   * Configure filtering chain
-   */  
-  /* Accelerometer - High Pass / Slope path */
+   * Disable HP filter
+   */
   lis331dlh_hp_path_set(&dev_ctx, LIS331DLH_HP_DISABLE);
-  //lis331dlh_hp_path_set(&dev_ctx, LIS331DLH_HP_ON_OUT);
-  //lis331dlh_hp_reset_get(&dev_ctx);
+
+  /*
+   * Set no duration
+   */
+  lis331dlh_int1_dur_set(&dev_ctx, 0);
+
+  /*
+   * Set 6D position detection
+   */
+  lis331dlh_int1_6d_mode_set(&dev_ctx, LIS331DLH_6D_INT1_POSITION);
+
+  /*
+   * Apply 6D Orientation axis threshold
+   */
+  lis331dlh_int1_treshold_set(&dev_ctx, 33);
 
   /*
    * Set Output Data Rate
    */
-  lis331dlh_data_rate_set(&dev_ctx, LIS331DLH_ODR_5Hz);
+  lis331dlh_data_rate_set(&dev_ctx, LIS331DLH_ODR_100Hz);
 
   /*
-   * Read samples in polling mode (no int)
+   * Wait Events
    */
   while(1)
   {
+    lis331dlh_reg_t all_source;
+
+    lis331dlh_int1_src_get(&dev_ctx, &all_source.int1_src);
+
     /*
-     * Read output only if new value is available
+     * Check 6D Orientation
      */
-    lis331dlh_reg_t reg;
-    lis331dlh_status_reg_get(&dev_ctx, &reg.status_reg);
-
-    if (reg.status_reg.zyxda)
+    switch(all_source.byte & 0x3f)
     {
-      /* Read acceleration data */
-      memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
-      lis331dlh_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-
-      acceleration_mg[0] =
-        LIS331DLH_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] =
-        LIS331DLH_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] =
-        LIS331DLH_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+    case 0x01:
+      sprintf((char*)tx_buffer, "6D Or. position XL\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    } 
+      break;
+    case 0x02:
+      sprintf((char*)tx_buffer, "6D Or. position XH\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      break;
+    case 0x04:
+      sprintf((char*)tx_buffer, "6D Or. position YL\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      break;
+    case 0x08:
+      sprintf((char*)tx_buffer, "6D Or. position YH\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      break;
+    case 0x10:
+      sprintf((char*)tx_buffer, "6D Or. position ZL\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      break;
+    case 0x20:
+      sprintf((char*)tx_buffer, "6D Or. position ZH\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      break;
+    default:
+      break;
+    }
   }
 }
 
