@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    self_test.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file implements self test process described by AN5069.
  *
  ******************************************************************************
  * @attention
@@ -93,12 +93,17 @@
 #endif
 
 /* Private macro -------------------------------------------------------------*/
+#define SELF_TEST_SAMPLES	50
+
+/*
+ * Self-test max value range
+ */
+#define ST_MIN_POS		15.0f
+#define ST_MAX_POS		500.0f
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_magnetic;
-static axis1bit16_t data_raw_temperature;
-static float magnetic_mG[3];
-static float temperature_degC;
+static axis3bit16_t data_raw_magnetic[SELF_TEST_SAMPLES];
+static float magnetic_mG[SELF_TEST_SAMPLES][3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -118,8 +123,188 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 static void tx_com(uint8_t *tx_buffer, uint16_t len);
 static void platform_init(void);
 
+static inline float ABSF(float _x)
+{
+	return (_x < 0.0f) ? -(_x) : _x;
+}
+
+static int lis2mdl_flush_samples(lis2mdl_ctx_t *dev_ctx)
+{
+  uint8_t reg;
+  axis3bit16_t dummy;
+  int samples = 0;
+
+  /*
+   * Discard old samples
+   */
+  lis2mdl_mag_data_ready_get(dev_ctx, &reg);
+  if (reg)
+  {
+    lis2mdl_magnetic_raw_get(dev_ctx, dummy.u8bit);
+    samples++;
+  }
+
+  return samples;
+}
+
+/*
+ * @brief  execute self test procedure
+ *
+ * @param  dev_ctx   customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ *
+ * @return 0: TEST PASSED
+ *        -1: TEST FAILED
+ */
+static int test_self_test_lis2mdl(lis2mdl_ctx_t *dev_ctx)
+{
+  uint8_t reg;
+  float media[3] = { 0.0f, 0.0f, 0.0f };
+  float mediast[3] = { 0.0f, 0.0f, 0.0f };
+  uint8_t match[3] = { 0, 0, 0 };
+  uint8_t j = 0;
+  uint16_t i = 0;
+  uint8_t k = 0;
+  uint8_t axis;
+  int result = 0;
+
+  /*
+   * Restore default configuration
+   */
+  lis2mdl_reset_set(dev_ctx, PROPERTY_ENABLE);
+  do
+  {
+    lis2mdl_reset_get(dev_ctx, &rst);
+  } while (rst);
+
+  lis2mdl_block_data_update_set(dev_ctx, PROPERTY_ENABLE);
+  /*
+   * Set / Reset sensor mode
+   */
+  lis2mdl_set_rst_mode_set(dev_ctx, LIS2MDL_SENS_OFF_CANC_EVERY_ODR);
+
+  /*
+   * Enable temperature compensation
+   */
+  lis2mdl_offset_temp_comp_set(dev_ctx, PROPERTY_ENABLE);
+
+  /*
+   * Set device in continuous mode
+   */
+  lis2mdl_operating_mode_set(dev_ctx, LIS2MDL_CONTINUOUS_MODE);
+
+  /*
+   * Set Output Data Rate to 100 Hz
+   */
+  lis2mdl_data_rate_set(dev_ctx, LIS2MDL_ODR_100Hz);
+
+  /*
+   * Power up and wait for 20 ms for stable output
+   */
+  HAL_Delay(20);
+
+  /*
+   * Flush old samples
+   */
+  lis2mdl_flush_samples(dev_ctx);
+
+  do
+  {
+    lis2mdl_mag_data_ready_get(dev_ctx, &reg);
+    if (reg)
+    {
+      /*
+       * Read magnetic field data
+       */
+      memset(data_raw_magnetic[i].u8bit, 0x00, 3 * sizeof(int16_t));
+      lis2mdl_magnetic_raw_get(dev_ctx, data_raw_magnetic[i].u8bit);
+      for (axis = 0; axis < 3; axis++)
+        magnetic_mG[i][axis] =
+          LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic[i].i16bit[axis]);
+
+        i++;
+    }
+  } while (i < SELF_TEST_SAMPLES);
+
+  for (k = 0; k < 3; k++)
+  {
+    for (j = 0; j < SELF_TEST_SAMPLES; j++)
+    {
+      media[k] += magnetic_mG[j][k];
+    }
+
+    media[k] = (media[k] / j);
+  }
+
+  /*
+   * Enable self test mode
+   */
+  lis2mdl_self_test_set(dev_ctx, PROPERTY_ENABLE);
+  HAL_Delay(60);
+  i = 0;
+
+  /*
+   * Flush old samples
+   */
+  lis2mdl_flush_samples(dev_ctx);
+
+  do
+  {
+    lis2mdl_mag_data_ready_get(dev_ctx, &reg);
+    if (reg)
+    {
+      /*
+       * Read accelerometer data
+       */
+      memset(data_raw_magnetic[i].u8bit, 0x00, 3 * sizeof(int16_t));
+      lis2mdl_magnetic_raw_get(dev_ctx, data_raw_magnetic[i].u8bit);
+      for (axis = 0; axis < 3; axis++)
+      magnetic_mG[i][axis] =
+        LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic[i].i16bit[axis]);
+
+      i++;
+    }
+  } while (i < SELF_TEST_SAMPLES);
+
+  for (k = 0; k < 3; k++)
+  {
+    for (j = 0; j < SELF_TEST_SAMPLES; j++)
+    {
+      mediast[k] += magnetic_mG[j][k];
+    }
+
+    mediast[k] = (mediast[k] / j);
+  }
+
+  /*
+   * Check for all axis self test value range
+   */
+  for (k = 0; k < 3; k++)
+  {
+    if ((ABSF(mediast[k] - media[k]) >= ST_MIN_POS) &&
+        (ABSF(mediast[k] - media[k]) <= ST_MAX_POS))
+    {
+      match[k] = 1;
+      result += 1;
+    }
+
+    sprintf((char*)tx_buffer, "%d: |%f| <= |%f| <= |%f| %s\r\n", k,
+            ST_MIN_POS, ABSF(mediast[k] - media[k]), ST_MAX_POS,
+            match[k] == 1 ? "PASSED" : "FAILED");
+    tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
+  }
+
+  /*
+   * Disable self test mode
+   */
+  lis2mdl_operating_mode_set(dev_ctx, LIS2MDL_POWER_DOWN);
+  lis2mdl_self_test_set(dev_ctx, PROPERTY_DISABLE);
+
+  return result == 3 ? 0 : -1;
+}
+
 /* Main Example --------------------------------------------------------------*/
-void example_main_lis2mdl(void)
+void example_test_self_test_lis2mdl(void)
 {
   /*
    *  Initialize mems driver interface
@@ -128,7 +313,7 @@ void example_main_lis2mdl(void)
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;  
+  dev_ctx.handle = &hi2c1;
 
   /*
    * Initialize platform specific hardware
@@ -145,76 +330,8 @@ void example_main_lis2mdl(void)
       /* manage here device not found */
     }
 
-  /*
-   *  Restore default configuration
-   */
-  lis2mdl_reset_set(&dev_ctx, PROPERTY_ENABLE);
-  do {
-    lis2mdl_reset_get(&dev_ctx, &rst);
-  } while (rst);
-
-  /*
-   *  Enable Block Data Update
-   */
-  lis2mdl_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /*
-   * Set Output Data Rate
-   */
-  lis2mdl_data_rate_set(&dev_ctx, LIS2MDL_ODR_10Hz);
-
-  /*
-   * Set / Reset sensor mode
-   */  
-  lis2mdl_set_rst_mode_set(&dev_ctx, LIS2MDL_SENS_OFF_CANC_EVERY_ODR);
-
-  /*
-   * Enable temperature compensation
-   */  
-  lis2mdl_offset_temp_comp_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /*
-   * Set device in continuous mode
-   */   
-  lis2mdl_operating_mode_set(&dev_ctx, LIS2MDL_CONTINUOUS_MODE);
-  
-  /*
-   * Read samples in polling mode (no int)
-   */
-  while(1)
-  {
-    uint8_t reg;
-
-    /*
-     * Read output only if new value is available
-     */
-    lis2mdl_mag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
-      /*
-       * Read magnetic field data
-       */
-      memset(data_raw_magnetic.u8bit, 0x00, 3 * sizeof(int16_t));
-      lis2mdl_magnetic_raw_get(&dev_ctx, data_raw_magnetic.u8bit);
-      magnetic_mG[0] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[0]);
-      magnetic_mG[1] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[1]);
-      magnetic_mG[2] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Magnetic field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
-              magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      
-      /*
-       * Read temperature data
-       */
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      lis2mdl_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = LIS2MDL_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
-       
-      sprintf((char*)tx_buffer, "Temperature [degC]:%6.2f\r\n",
-    		  temperature_degC);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
+  while(1) {
+    test_self_test_lis2mdl(&dev_ctx);
   }
 }
 

@@ -1,8 +1,9 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    hard_iron_offset_cancellation.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show the simplest way to get data from sensor. Include
+ * 			hard iron offset configuration and enable.
  *
  ******************************************************************************
  * @attention
@@ -119,16 +120,34 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lis2mdl(void)
+void example_hard_iron_offset_canc_lis2mdl(void)
 {
   /*
    *  Initialize mems driver interface
    */
   lis2mdl_ctx_t dev_ctx;
+  /*
+   * Fill magnetometer field offset (positive and negative values)
+   *
+   * The computation of the hard-iron distortion field should
+   * be performed by an external processor. After the computation
+   * of the hard iron-distortion field has been performed, the
+   * measured magnetic data can be compensated.
+   * These values act on the magnetic output data value in order
+   * to delete the environmental offset.
+   */
+  uint8_t mag_offset[6] = {
+    0x00, /* OFFSET_X_REG_L */
+    0xF5, /* OFFSET_X_REG_H */
+    0x00, /* OFFSET_Y_REG_L */
+    0xF8, /* OFFSET_Y_REG_H */
+    0x00, /* OFFSET_Z_REG_L */
+    0xF4  /* OFFSET_Z_REG_H */
+  };
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;  
+  dev_ctx.handle = &hi2c1;
 
   /*
    * Initialize platform specific hardware
@@ -159,25 +178,30 @@ void example_main_lis2mdl(void)
   lis2mdl_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
-   * Set Output Data Rate
+   * Set Output Data Rate to 10 Hz
    */
   lis2mdl_data_rate_set(&dev_ctx, LIS2MDL_ODR_10Hz);
 
   /*
    * Set / Reset sensor mode
-   */  
+   */
   lis2mdl_set_rst_mode_set(&dev_ctx, LIS2MDL_SENS_OFF_CANC_EVERY_ODR);
 
   /*
    * Enable temperature compensation
-   */  
+   */
   lis2mdl_offset_temp_comp_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
    * Set device in continuous mode
-   */   
+   */
   lis2mdl_operating_mode_set(&dev_ctx, LIS2MDL_CONTINUOUS_MODE);
-  
+
+  /*
+   * Configure Mag offset and enable cancellation
+   */
+  lis2mdl_mag_user_offset_set(&dev_ctx, mag_offset);
+
   /*
    * Read samples in polling mode (no int)
    */
@@ -199,18 +223,18 @@ void example_main_lis2mdl(void)
       magnetic_mG[0] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[0]);
       magnetic_mG[1] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[1]);
       magnetic_mG[2] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[2]);
-      
+
       sprintf((char*)tx_buffer, "Magnetic field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      
+
       /*
        * Read temperature data
        */
       memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
       lis2mdl_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
       temperature_degC = LIS2MDL_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
-       
+
       sprintf((char*)tx_buffer, "Temperature [degC]:%6.2f\r\n",
     		  temperature_degC);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
@@ -268,7 +292,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   if (handle == &hi2c1)
   {
     /* Read multiple command */
-    reg |= 0x80;
+	reg |= 0x80;
     HAL_I2C_Mem_Read(handle, LIS2MDL_I2C_ADD, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }

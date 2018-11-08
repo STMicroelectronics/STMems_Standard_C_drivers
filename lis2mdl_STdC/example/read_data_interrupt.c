@@ -1,8 +1,9 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    read_data_interrupt.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show the simplest way to get data from sensor
+ *          (interrupt mode).
  *
  ******************************************************************************
  * @attention
@@ -119,7 +120,7 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lis2mdl(void)
+void example_main_drdy_lis2mdl(void)
 {
   /*
    *  Initialize mems driver interface
@@ -128,7 +129,7 @@ void example_main_lis2mdl(void)
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;  
+  dev_ctx.handle = &hi2c1;
 
   /*
    * Initialize platform specific hardware
@@ -165,21 +166,31 @@ void example_main_lis2mdl(void)
 
   /*
    * Set / Reset sensor mode
-   */  
+   */
   lis2mdl_set_rst_mode_set(&dev_ctx, LIS2MDL_SENS_OFF_CANC_EVERY_ODR);
 
   /*
    * Enable temperature compensation
-   */  
+   */
   lis2mdl_offset_temp_comp_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
-   * Set device in continuous mode
-   */   
-  lis2mdl_operating_mode_set(&dev_ctx, LIS2MDL_CONTINUOUS_MODE);
-  
+   * Set Low-pass bandwidth to ODR/4
+   */
+  //lis2mdl_low_pass_bandwidth_set(&dev_ctx, LIS2MDL_ODR_DIV_4);
+
   /*
-   * Read samples in polling mode (no int)
+   * Set device in continuous mode
+   */
+  lis2mdl_operating_mode_set(&dev_ctx, LIS2MDL_CONTINUOUS_MODE);
+
+  /*
+   * Enable interrupt generation on new data ready
+   */
+  lis2mdl_drdy_on_pin_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /*
+   * Read samples in polling mode
    */
   while(1)
   {
@@ -196,23 +207,24 @@ void example_main_lis2mdl(void)
        */
       memset(data_raw_magnetic.u8bit, 0x00, 3 * sizeof(int16_t));
       lis2mdl_magnetic_raw_get(&dev_ctx, data_raw_magnetic.u8bit);
-      magnetic_mG[0] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[0]);
-      magnetic_mG[1] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[1]);
-      magnetic_mG[2] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Magnetic field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
+      magnetic_mG[0] = LIS2MDL_FROM_LSB_TO_mG( data_raw_magnetic.i16bit[0]);
+      magnetic_mG[1] = LIS2MDL_FROM_LSB_TO_mG( data_raw_magnetic.i16bit[1]);
+      magnetic_mG[2] = LIS2MDL_FROM_LSB_TO_mG( data_raw_magnetic.i16bit[2]);
+
+      sprintf((char*)tx_buffer, "Mag field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      
+
       /*
        * Read temperature data
        */
       memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
       lis2mdl_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = LIS2MDL_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
-       
+      temperature_degC =
+        LIS2MDL_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
+
       sprintf((char*)tx_buffer, "Temperature [degC]:%6.2f\r\n",
-    		  temperature_degC);
+              temperature_degC);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

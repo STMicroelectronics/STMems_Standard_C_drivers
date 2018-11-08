@@ -1,8 +1,9 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    interrupt_configuration_example.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file how to set interrupt and configure interrupt threshold
+ *          on magnetic field.
  *
  ******************************************************************************
  * @attention
@@ -96,11 +97,13 @@
 
 /* Private variables ---------------------------------------------------------*/
 static axis3bit16_t data_raw_magnetic;
-static axis1bit16_t data_raw_temperature;
 static float magnetic_mG[3];
-static float temperature_degC;
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
+/*
+ * Set the magnetic field threshold (in mg) for test
+ */
+static uint16_t threshold = 192 * 1.5f;
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -119,8 +122,11 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lis2mdl(void)
+void example_main_int_lis2mdl(void)
 {
+  uint8_t threshold_reg[2];
+  lis2mdl_int_crtl_reg_t int_ctrl;
+
   /*
    *  Initialize mems driver interface
    */
@@ -128,7 +134,7 @@ void example_main_lis2mdl(void)
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;  
+  dev_ctx.handle = &hi2c1;
 
   /*
    * Initialize platform specific hardware
@@ -159,34 +165,61 @@ void example_main_lis2mdl(void)
   lis2mdl_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
-   * Set Output Data Rate
+   * Set Output Data Rate to 10 Hz
    */
   lis2mdl_data_rate_set(&dev_ctx, LIS2MDL_ODR_10Hz);
 
   /*
    * Set / Reset sensor mode
-   */  
+   */
   lis2mdl_set_rst_mode_set(&dev_ctx, LIS2MDL_SENS_OFF_CANC_EVERY_ODR);
 
   /*
    * Enable temperature compensation
-   */  
+   */
   lis2mdl_offset_temp_comp_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
    * Set device in continuous mode
-   */   
+   */
   lis2mdl_operating_mode_set(&dev_ctx, LIS2MDL_CONTINUOUS_MODE);
-  
+
   /*
-   * Read samples in polling mode (no int)
+   * Enable interrupt generation on interrupt
+   */
+  lis2mdl_int_on_pin_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /*
+   * Set interrupt threshold:
+   * The sample code exploits a threshold set to 192 mG
+   * and the event is notified by hardware through the
+   * INT/DRDY pin
+   */
+  lis2mdl_int_gen_treshold_get(&dev_ctx, threshold_reg);
+  threshold_reg[0] = (uint8_t)threshold;
+  threshold_reg[1] = (uint8_t)(threshold >> 8) & 0xFF;
+  lis2mdl_int_gen_treshold_set(&dev_ctx, threshold_reg);
+
+  int_ctrl.iea = PROPERTY_ENABLE;
+  int_ctrl.ien = PROPERTY_ENABLE;
+  int_ctrl.iel = PROPERTY_ENABLE;
+  int_ctrl.zien = PROPERTY_ENABLE;
+  int_ctrl.yien = PROPERTY_ENABLE;
+  int_ctrl.xien = PROPERTY_ENABLE;
+  lis2mdl_int_gen_conf_set(&dev_ctx, &int_ctrl);
+
+  /*
+   * Read samples in polling mode
    */
   while(1)
   {
     uint8_t reg;
+    lis2mdl_reg_t source;
+    char *exceeds_info;
 
     /*
      * Read output only if new value is available
+     * It's also possible to use interrupt pin for trigger
      */
     lis2mdl_mag_data_ready_get(&dev_ctx, &reg);
     if (reg)
@@ -199,21 +232,30 @@ void example_main_lis2mdl(void)
       magnetic_mG[0] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[0]);
       magnetic_mG[1] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[1]);
       magnetic_mG[2] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Magnetic field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
-              magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      
+      exceeds_info = NULL;
+
       /*
-       * Read temperature data
+       * Read LIS2MDL INT register
        */
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      lis2mdl_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = LIS2MDL_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
-       
-      sprintf((char*)tx_buffer, "Temperature [degC]:%6.2f\r\n",
-    		  temperature_degC);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      lis2mdl_int_gen_source_get(&dev_ctx, &source.int_source_reg);
+      if (source.int_source_reg.n_th_s_x)
+        exceeds_info = "X-axis neg";
+      else if (source.int_source_reg.n_th_s_y)
+        exceeds_info = "Y-axis neg";
+      else if (source.int_source_reg.n_th_s_z)
+        exceeds_info = "Z-axis neg";
+      else if (source.int_source_reg.p_th_s_x)
+        exceeds_info = "X-axis pos";
+      else if (source.int_source_reg.p_th_s_y)
+        exceeds_info = "Y-axis pos";
+      else if (source.int_source_reg.p_th_s_z)
+        exceeds_info = "Z-axis pos";
+
+      sprintf((char*)tx_buffer,
+              "Magnetic [mG]:%4.2f\t%4.2f\t%4.2f (%s)\r\n",
+              magnetic_mG[0], magnetic_mG[1], magnetic_mG[2],
+              exceeds_info != NULL ? exceeds_info : "");
+              tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
 }
