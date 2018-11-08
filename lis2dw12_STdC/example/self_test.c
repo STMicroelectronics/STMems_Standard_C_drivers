@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    test_self_test.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file run selt test procedure
  *
  ******************************************************************************
  * @attention
@@ -93,10 +93,16 @@
 #endif
 
 /* Private macro -------------------------------------------------------------*/
+/* Self-test recommended samples */
+#define SELF_TEST_SAMPLES	5
+
+/* Self-test positive difference */
+#define ST_MIN_POS			70.0f
+#define ST_MAX_POS			1500.0f
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static float acceleration_mg[3];
+static axis3bit16_t data_raw_acceleration[SELF_TEST_SAMPLES];
+static float acceleration_mg[SELF_TEST_SAMPLES][3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -116,13 +122,162 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
+/* Utility functions ---------------------------------------------------------*/
+static inline float ABSF(float _x)
+{
+	return (_x < 0.0f) ? -(_x) : _x;
+}
+
+static int flush_samples(lis2dw12_ctx_t *dev_ctx)
+{
+  lis2dw12_reg_t reg;
+  axis3bit16_t dummy;
+  int samples = 0;
+
+  /*
+   * Discard old samples
+   */
+  lis2dw12_status_reg_get(dev_ctx, &reg.status);
+  if (reg.status.drdy)
+  {
+    lis2dw12_acceleration_raw_get(dev_ctx, dummy.u8bit);
+    samples++;
+  }
+
+  return samples;
+}
+
+static void test_self_test_lis2dw12(lis2dw12_ctx_t *dev_ctx)
+{
+  lis2dw12_reg_t reg;
+  float media[3] = { 0.0f, 0.0f, 0.0f };
+  float mediast[3] = { 0.0f, 0.0f, 0.0f };
+  uint8_t match[3] = { 0, 0, 0 };
+  uint8_t j = 0;
+  uint16_t i = 0;
+  uint8_t k = 0;
+  uint8_t axis;
+
+  /*
+   * Restore default configuration
+   */
+  lis2dw12_reset_set(dev_ctx, PROPERTY_ENABLE);
+  do
+  {
+    lis2dw12_reset_get(dev_ctx, &rst);
+  } while (rst);
+
+  lis2dw12_block_data_update_set(dev_ctx, PROPERTY_ENABLE);
+  lis2dw12_full_scale_set(dev_ctx, LIS2DW12_4g);
+  lis2dw12_power_mode_set(dev_ctx, LIS2DW12_HIGH_PERFORMANCE);
+  lis2dw12_data_rate_set(dev_ctx, LIS2DW12_XL_ODR_50Hz);
+  HAL_Delay(100);
+
+  /*
+   * Flush old samples
+   */
+  flush_samples(dev_ctx);
+
+  do
+  {
+    lis2dw12_status_reg_get(dev_ctx, &reg.status);
+    if (reg.status.drdy)
+    {
+      /*
+       * Read accelerometer data
+       */
+      memset(data_raw_acceleration[i].u8bit, 0x00, 3 * sizeof(int16_t));
+      lis2dw12_acceleration_raw_get(dev_ctx, data_raw_acceleration[i].u8bit);
+      for (axis = 0; axis < 3; axis++)
+        acceleration_mg[i][axis] =
+          LIS2DW12_FROM_FS_4g_TO_mg(data_raw_acceleration[i].i16bit[axis]);
+
+        i++;
+      }
+  } while (i < SELF_TEST_SAMPLES);
+
+  for (k = 0; k < 3; k++)
+  {
+    for (j = 0; j < SELF_TEST_SAMPLES; j++)
+    {
+      media[k] += acceleration_mg[j][k];
+    }
+
+    media[k] = (media[k] / j);
+  }
+
+  /*
+   * Enable self test mode
+   */
+  lis2dw12_self_test_set(dev_ctx, LIS2DW12_XL_ST_POSITIVE);
+  HAL_Delay(100);
+  i = 0;
+
+  /*
+   * Flush old samples
+   */
+  flush_samples(dev_ctx);
+
+  do
+  {
+    lis2dw12_status_reg_get(dev_ctx, &reg.status);
+    if (reg.status.drdy)
+    {
+      /*
+       * Read accelerometer data
+       */
+      memset(data_raw_acceleration[i].u8bit, 0x00, 3 * sizeof(int16_t));
+      lis2dw12_acceleration_raw_get(dev_ctx, data_raw_acceleration[i].u8bit);
+      for (axis = 0; axis < 3; axis++)
+        acceleration_mg[i][axis] =
+          LIS2DW12_FROM_FS_4g_TO_mg(data_raw_acceleration[i].i16bit[axis]);
+
+      i++;
+    }
+  } while (i < SELF_TEST_SAMPLES);
+
+  for (k = 0; k < 3; k++)
+  {
+      for (j = 0; j < SELF_TEST_SAMPLES; j++)
+      {
+        mediast[k] += acceleration_mg[j][k];
+      }
+
+    mediast[k] = (mediast[k] / j);
+  }
+
+  /*
+   * Check for all axis self test value range
+   */
+  for (k = 0; k < 3; k++)
+  {
+    if ((ABSF(mediast[k] - media[k]) >= ST_MIN_POS) &&
+        (ABSF(mediast[k] - media[k]) <= ST_MAX_POS))
+    {
+      match[k] = 1;
+    }
+
+    sprintf((char*)tx_buffer, "%d: |%f| <= |%f| <= |%f| %s\r\n", k,
+            ST_MIN_POS, ABSF(mediast[k] - media[k]), ST_MAX_POS,
+            match[k] == 1 ? "PASSED" : "FAILED");
+    tx_com(tx_buffer, strlen((char const*)tx_buffer));
+  }
+
+  /*
+   * Disable self test mode
+   */
+  lis2dw12_data_rate_set(dev_ctx, LIS2DW12_XL_ODR_OFF);
+  lis2dw12_self_test_set(dev_ctx, LIS2DW12_XL_ST_DISABLE);
+}
+
 /* Main Example --------------------------------------------------------------*/
-void example_main_lis2dw12(void)
+void example_main_selt_test_lis2dw12(void)
 {
   /*
-   *  Initialize mems driver interface
-   */
+   * Initialize mems driver interface
+  */
   lis2dw12_ctx_t dev_ctx;
+
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
@@ -133,78 +288,21 @@ void example_main_lis2dw12(void)
   platform_init();
 
   /*
-   *  Check device ID
+   * Check device ID
    */
   lis2dw12_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LIS2DW12_ID)
-    while(1)
-    {
-      /* manage here device not found */
-    }
+  while(1)
+  {
+    /* manage here device not found */
+  }
 
   /*
-   * Restore default configuration
-   */
-  lis2dw12_reset_set(&dev_ctx, PROPERTY_ENABLE);
-  do {
-    lis2dw12_reset_get(&dev_ctx, &rst);
-  } while (rst);
-
-  /*
-   *  Enable Block Data Update
-   */
-  lis2dw12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /*
-   * Set full scale
-   */  
-  lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_8g);
-
-  /*
-   * Configure filtering chain
-   *
-   * Accelerometer - filter path / bandwidth
-   */  
-  lis2dw12_filter_path_set(&dev_ctx, LIS2DW12_LPF_ON_OUT);
-  lis2dw12_filter_bandwidth_set(&dev_ctx, LIS2DW12_ODR_DIV_4);
-
-  /*
-   * Configure power mode
-   */    
-  //lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_HIGH_PERFORMANCE);
-  lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
-
-  /*
-   * Set Output Data Rate
-   */
-  lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_25Hz);
-
-  /*
-   * Read samples in polling mode (no int)
+   * Start self test
    */
   while(1)
   {
-    uint8_t reg;
-
-    /*
-     * Read output only if new value is available
-     */
-    lis2dw12_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
-      /*
-       * Read acceleration data
-       */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      lis2dw12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = LIS2DW12_FROM_FS_8g_LP1_TO_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = LIS2DW12_FROM_FS_8g_LP1_TO_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = LIS2DW12_FROM_FS_8g_LP1_TO_mg(data_raw_acceleration.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    } 
+    test_self_test_lis2dw12(&dev_ctx);
   }
 }
 

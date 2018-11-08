@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    orientation_6d.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show the simplest way to detect 6D orientation from sensor.
  *
  ******************************************************************************
  * @attention
@@ -95,8 +95,6 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static float acceleration_mg[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -117,12 +115,14 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lis2dw12(void)
+void example_main_orientation_6D_lis2dw12(void)
 {
   /*
-   *  Initialize mems driver interface
+   * Initialize mems driver interface
    */
   lis2dw12_ctx_t dev_ctx;
+  lis2dw12_reg_t int_route;
+
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
@@ -133,7 +133,7 @@ void example_main_lis2dw12(void)
   platform_init();
 
   /*
-   *  Check device ID
+   * Check device ID
    */
   lis2dw12_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LIS2DW12_ID)
@@ -151,60 +151,67 @@ void example_main_lis2dw12(void)
   } while (rst);
 
   /*
-   *  Enable Block Data Update
-   */
-  lis2dw12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /*
    * Set full scale
-   */  
-  lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_8g);
-
-  /*
-   * Configure filtering chain
-   *
-   * Accelerometer - filter path / bandwidth
-   */  
-  lis2dw12_filter_path_set(&dev_ctx, LIS2DW12_LPF_ON_OUT);
-  lis2dw12_filter_bandwidth_set(&dev_ctx, LIS2DW12_ODR_DIV_4);
+   */
+  lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_2g);
 
   /*
    * Configure power mode
-   */    
-  //lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_HIGH_PERFORMANCE);
+   */
   lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
+
+  /*
+   * Set threshold to 60 degrees
+   */
+  lis2dw12_6d_threshold_set(&dev_ctx, 0x02);
+
+  /*
+   * LPF2 on 6D function selection.
+   */
+  lis2dw12_6d_feed_data_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /*
+   * Enable interrupt generation on 6D INT1 pin.
+   */
+  lis2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
+  int_route.ctrl4_int1_pad_ctrl.int1_6d = PROPERTY_ENABLE;
+  lis2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
 
   /*
    * Set Output Data Rate
    */
-  lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_25Hz);
+  lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_200Hz);
 
   /*
-   * Read samples in polling mode (no int)
+   * Wait Events.
    */
   while(1)
   {
-    uint8_t reg;
+	lis2dw12_all_sources_t all_source;
 
-    /*
-     * Read output only if new value is available
-     */
-    lis2dw12_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
-      /*
-       * Read acceleration data
-       */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      lis2dw12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = LIS2DW12_FROM_FS_8g_LP1_TO_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = LIS2DW12_FROM_FS_8g_LP1_TO_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = LIS2DW12_FROM_FS_8g_LP1_TO_mg(data_raw_acceleration.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+	lis2dw12_all_sources_get(&dev_ctx, &all_source);
+
+	/*
+	 * Check 6D Orientation events
+	 */
+	if (all_source.sixd_src._6d_ia)
+	{
+      sprintf((char*)tx_buffer, "6D Or. switched to ");
+      if (all_source.sixd_src.xh)
+        strcat((char*)tx_buffer, "XH");
+      if (all_source.sixd_src.xl)
+        strcat((char*)tx_buffer, "XL");
+      if (all_source.sixd_src.yh)
+        strcat((char*)tx_buffer, "YH");
+      if (all_source.sixd_src.yl)
+        strcat((char*)tx_buffer, "YL");
+      if (all_source.sixd_src.zh)
+        strcat((char*)tx_buffer, "ZH");
+      if (all_source.sixd_src.zl)
+        strcat((char*)tx_buffer, "ZL");
+      strcat((char*)tx_buffer, "\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    } 
+	}
   }
 }
 
@@ -259,8 +266,8 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 #ifdef STEVAL_MKI109V3
   else if (handle == &hspi2)
   {
-	/* Read command */
-	reg |= 0x80;
+    /* Read command */
+    reg |= 0x80;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Receive(handle, bufp, len, 1000);

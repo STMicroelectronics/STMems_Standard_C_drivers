@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    double_tap.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show the simplest way to detect double tap from sensor.
  *
  ******************************************************************************
  * @attention
@@ -95,8 +95,6 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static float acceleration_mg[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -117,12 +115,14 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lis2dw12(void)
+void example_main_double_tap_lis2dw12(void)
 {
   /*
-   *  Initialize mems driver interface
+   * Initialize mems driver interface
    */
   lis2dw12_ctx_t dev_ctx;
+  lis2dw12_reg_t int_route;
+
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
@@ -133,7 +133,7 @@ void example_main_lis2dw12(void)
   platform_init();
 
   /*
-   *  Check device ID
+   * Check device ID
    */
   lis2dw12_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LIS2DW12_ID)
@@ -151,60 +151,94 @@ void example_main_lis2dw12(void)
   } while (rst);
 
   /*
-   *  Enable Block Data Update
-   */
-  lis2dw12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /*
    * Set full scale
-   */  
-  lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_8g);
-
-  /*
-   * Configure filtering chain
-   *
-   * Accelerometer - filter path / bandwidth
-   */  
-  lis2dw12_filter_path_set(&dev_ctx, LIS2DW12_LPF_ON_OUT);
-  lis2dw12_filter_bandwidth_set(&dev_ctx, LIS2DW12_ODR_DIV_4);
+   */
+  lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_2g);
 
   /*
    * Configure power mode
-   */    
-  //lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_HIGH_PERFORMANCE);
+   */
   lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
 
   /*
    * Set Output Data Rate
    */
-  lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_25Hz);
+  lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_400Hz);
 
   /*
-   * Read samples in polling mode (no int)
+   * Enable Tap detection on X, Y, Z
+   */
+  lis2dw12_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2dw12_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2dw12_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /*
+   * Set Tap threshold on all axis
+   */
+  lis2dw12_tap_threshold_x_set(&dev_ctx, 12);
+  lis2dw12_tap_threshold_y_set(&dev_ctx, 12);
+  lis2dw12_tap_threshold_z_set(&dev_ctx, 12);
+
+  /*
+   * Configure Double Tap parameter
+   */
+  lis2dw12_tap_dur_set(&dev_ctx, 7);
+  lis2dw12_tap_quiet_set(&dev_ctx, 3);
+  lis2dw12_tap_shock_set(&dev_ctx, 3);
+
+  /*
+   * Enable Double Tap detection
+   */
+  lis2dw12_tap_mode_set(&dev_ctx, LIS2DW12_BOTH_SINGLE_DOUBLE);
+
+  /*
+   * Enable single tap detection interrupt
+   */
+  lis2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
+  int_route.ctrl4_int1_pad_ctrl.int1_tap = PROPERTY_ENABLE;
+  lis2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
+
+  /*
+   * Wait Events.
    */
   while(1)
   {
-    uint8_t reg;
+    lis2dw12_all_sources_t all_source;
 
     /*
-     * Read output only if new value is available
+     * Check Double Tap events
      */
-    lis2dw12_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
+    lis2dw12_all_sources_get(&dev_ctx, &all_source);
+    if (all_source.tap_src.double_tap)
     {
-      /*
-       * Read acceleration data
-       */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      lis2dw12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = LIS2DW12_FROM_FS_8g_LP1_TO_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = LIS2DW12_FROM_FS_8g_LP1_TO_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = LIS2DW12_FROM_FS_8g_LP1_TO_mg(data_raw_acceleration.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+      sprintf((char*)tx_buffer, "Double Tap Detected: Sign %s",
+              all_source.tap_src.tap_sign ? "positive" : "negative");
+      if (all_source.tap_src.x_tap)
+        sprintf((char*)tx_buffer, "%s on X", tx_buffer);
+      if (all_source.tap_src.y_tap)
+        sprintf((char*)tx_buffer, "%s on Y", tx_buffer);
+      if (all_source.tap_src.z_tap)
+        sprintf((char*)tx_buffer, "%s on Z", tx_buffer);
+      sprintf((char*)tx_buffer, "%s axis\r\n", tx_buffer);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    } 
+    }
+
+    /*
+     * Check Single Tap events
+     */
+    if (all_source.tap_src.single_tap)
+    {
+      sprintf((char*)tx_buffer, "Tap Detected: Sign %s",
+              all_source.tap_src.tap_sign ? "positive" : "negative");
+      if (all_source.tap_src.x_tap)
+        sprintf((char*)tx_buffer, "%s on X", tx_buffer);
+      if (all_source.tap_src.y_tap)
+        sprintf((char*)tx_buffer, "%s on Y", tx_buffer);
+      if (all_source.tap_src.z_tap)
+        sprintf((char*)tx_buffer, "%s on Z", tx_buffer);
+      sprintf((char*)tx_buffer, "%s axis\r\n", tx_buffer);
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
   }
 }
 
@@ -259,8 +293,8 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 #ifdef STEVAL_MKI109V3
   else if (handle == &hspi2)
   {
-	/* Read command */
-	reg |= 0x80;
+    /* Read command */
+    reg |= 0x80;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Receive(handle, bufp, len, 1000);
