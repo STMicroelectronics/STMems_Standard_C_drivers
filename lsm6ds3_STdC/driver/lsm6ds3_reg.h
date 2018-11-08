@@ -1369,7 +1369,7 @@ int32_t lsm6ds3_tap_dur_get(lsm6ds3_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
   LSM6DS3_ONLY_DOUBLE = 1,
-  LSM6DS3_ONLY_SINGLE = 0,
+  LSM6DS3_SINGLE_DOUBLE = 0,
 } lsm6ds3_tap_md_t;
 int32_t lsm6ds3_tap_mode_set(lsm6ds3_ctx_t *ctx, lsm6ds3_tap_md_t val);
 int32_t lsm6ds3_tap_mode_get(lsm6ds3_ctx_t *ctx, lsm6ds3_tap_md_t *val);
