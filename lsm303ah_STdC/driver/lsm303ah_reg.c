@@ -276,7 +276,7 @@ int32_t lsm303ah_xl_data_rate_set(lsm303ah_ctx_t *ctx, lsm303ah_xl_odr_t val)
 
   mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL1_A, &reg.byte, 1);
   reg.ctrl1_a.odr = val & 0x0F;
-  reg.ctrl1_a.hf_odr = val & 0x10 >> 4;
+  reg.ctrl1_a.hf_odr = (val & 0x10) >> 4;
   mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL1_A, &reg.byte, 1);
 
   return mm_error;
