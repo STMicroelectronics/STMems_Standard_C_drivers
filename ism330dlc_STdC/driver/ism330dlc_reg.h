@@ -1751,9 +1751,9 @@ int32_t ism330dlc_den_mode_set(ism330dlc_ctx_t *ctx, ism330dlc_den_mode_t val);
 int32_t ism330dlc_den_mode_get(ism330dlc_ctx_t *ctx, ism330dlc_den_mode_t *val);
 
 typedef enum {
-  LSM6DSO_STAMP_IN_GY_DATA     = 0,
-  LSM6DSO_STAMP_IN_XL_DATA     = 1,
-  LSM6DSO_STAMP_IN_GY_XL_DATA  = 2,
+  ISM330DLC_STAMP_IN_GY_DATA     = 0,
+  ISM330DLC_STAMP_IN_XL_DATA     = 1,
+  ISM330DLC_STAMP_IN_GY_XL_DATA  = 2,
 } ism330dlc_den_xl_en_t;
 int32_t ism330dlc_den_enable_set(ism330dlc_ctx_t *ctx,
                                  ism330dlc_den_xl_en_t val);
