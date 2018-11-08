@@ -342,7 +342,7 @@ int32_t lps22hh_data_rate_set(lps22hh_ctx_t *ctx, lps22hh_odr_t val)
     ret = lps22hh_read_reg(ctx, LPS22HH_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
   }
   if (ret == 0) {
-    ctrl_reg1.odr = (uint8_t)val & 0x03U;
+    ctrl_reg1.odr = (uint8_t)val & 0x07U;
     ret = lps22hh_write_reg(ctx, LPS22HH_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
   }
   if (ret == 0) {
