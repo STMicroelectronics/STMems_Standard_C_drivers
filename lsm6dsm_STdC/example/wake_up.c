@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    wake_up.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show the simplest way to detect wake_up from sensor.
  *
  ******************************************************************************
  * @attention
@@ -95,12 +95,6 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static axis3bit16_t data_raw_angular_rate;
-static axis1bit16_t data_raw_temperature;
-static float acceleration_mg[3];
-static float angular_rate_mdps[3];
-static float temperature_degC;
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -122,12 +116,19 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lsm6dsm(void)
+void example_main_wake_up_lsm6dsm(void)
 {
   /*
-   *  Initialize mems driver interface
+   * Initialize mems driver interface.
    */
   lsm6dsm_ctx_t dev_ctx;
+  lsm6dsm_int1_route_t int_1_reg;
+
+  /*
+   * Uncomment if interrupt generation on Wake-Up INT2 pin.
+   */
+  //lsm6dsm_int2_route_t int_2_reg;
+
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
@@ -142,10 +143,12 @@ void example_main_lsm6dsm(void)
    */
   lsm6dsm_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSM_ID)
+  {
     while(1)
     {
       /* manage here device not found */
     }
+  }
 
   /*
    * Restore default configuration
@@ -156,110 +159,69 @@ void example_main_lsm6dsm(void)
   } while (rst);
 
   /*
-   *  Enable Block Data Update
+   * Set XL Output Data Rate
    */
-  lsm6dsm_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_416Hz);
 
   /*
-   * Set Output Data Rate for Acc and Gyro
+   * Set 2g full XL scale
    */
-  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_12Hz5);
-  lsm6dsm_gy_data_rate_set(&dev_ctx, LSM6DSM_GY_ODR_12Hz5);
-
-  /*
-   * Set full scale
-   */  
   lsm6dsm_xl_full_scale_set(&dev_ctx, LSM6DSM_2g);
-  lsm6dsm_gy_full_scale_set(&dev_ctx, LSM6DSM_2000dps);
-  
+
   /*
-   * Configure filtering chain(No aux interface)
-   * Accelerometer - analog filter
-   */  
-  lsm6dsm_xl_filter_analog_set(&dev_ctx, LSM6DSM_XL_ANA_BW_400Hz);
-  
-  /*
-   * Accelerometer - LPF1 path (LPF2 not used)
+   * Apply high-pass digital filter on Wake-Up function
    */
-  //lsm6dsm_xl_lp1_bandwidth_set(&dev_ctx, LSM6DSM_XL_LP1_ODR_DIV_4);
-  
+  lsm6dsm_xl_hp_path_internal_set(&dev_ctx, PROPERTY_ENABLE);
+
   /*
-   * Accelerometer - LPF1 + LPF2 path
+   * Apply high-pass digital filter on Wake-Up function
+   * Duration time is set to zero so Wake-Up interrupt signal
+   * is generated for each X,Y,Z filtered data exceeding the
+   * configured threshold
    */
-  lsm6dsm_xl_lp2_bandwidth_set(&dev_ctx, LSM6DSM_XL_LOW_NOISE_LP_ODR_DIV_100);
-  
+  lsm6dsm_wkup_dur_set(&dev_ctx, 0);
+
   /*
-   * Accelerometer - High Pass / Slope path
+   * Set Wake-Up threshold: 1 LSb corresponds to FS_XL/2^6
    */
-  //lsm6dsm_xl_reference_mode_set(&dev_ctx, PROPERTY_DISABLE);
-  //lsm6dsm_xl_hp_bandwidth_set(&dev_ctx, LSM6DSM_XL_HP_ODR_DIV_100);
-  
+  lsm6dsm_wkup_threshold_set(&dev_ctx, 2);
+
   /*
-   * Gyroscope - filtering chain
+   * Enable interrupt generation on Wake-Up INT1 pin
    */
-  lsm6dsm_gy_band_pass_set(&dev_ctx, LSM6DSM_HP_260mHz_LP1_STRONG);
-  
+  lsm6dsm_pin_int1_route_get(&dev_ctx, &int_1_reg);
+  int_1_reg.int1_wu = PROPERTY_ENABLE;
+  lsm6dsm_pin_int1_route_set(&dev_ctx, int_1_reg);
+
   /*
-   * Read samples in polling mode (no int)
+   * Uncomment if interrupt generation on Wake-Up INT2 pin
+   */
+  //lsm6dsm_pin_int2_route_get(&dev_ctx, &int_2_reg);
+  //int_2_reg.int2_wu = PROPERTY_ENABLE;
+  //lsm6dsm_pin_int2_route_set(&dev_ctx, int_2_reg);
+
+  /*
+   * Wait Events
    */
   while(1)
   {
-    lsm6dsm_reg_t reg;
+    lsm6dsm_all_sources_t all_source;
 
     /*
-     * Read output only if new value is available
+     * Check if Wake-Up events
      */
-    lsm6dsm_status_reg_get(&dev_ctx, &reg.status_reg);
-    if (reg.status_reg.xlda)
+    lsm6dsm_all_sources_get(&dev_ctx, &all_source);
+    if (all_source.reg.wake_up_src.wu_ia)
     {
-      /*
-       * Read acceleration field data
-       */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dsm_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] =
-    		  LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] =
-    		  LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] =
-    		  LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
+      sprintf((char*)tx_buffer, "Wake-Up event on ");
+      if (all_source.reg.wake_up_src.x_wu)
+        strcat((char*)tx_buffer, "X");
+      if (all_source.reg.wake_up_src.y_wu)
+        strcat((char*)tx_buffer, "Y");
+      if (all_source.reg.wake_up_src.z_wu)
+        strcat((char*)tx_buffer, "Z");
 
-    if (reg.status_reg.gda)
-    {
-      /*
-       * Read angular rate field data
-       */
-      memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dsm_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
-      angular_rate_mdps[0] =
-    		  LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[0]);
-      angular_rate_mdps[1] =
-    		  LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[1]);
-      angular_rate_mdps[2] =
-    		  LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-              angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }    
-
-    if (reg.status_reg.tda)
-    {   
-      /*
-       * Read temperature data
-       */
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      lsm6dsm_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = LSM6DSM_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
-       
-      sprintf((char*)tx_buffer,
-              "Temperature [degC]:%6.2f\r\n",
-              temperature_degC);
+      strcat((char*)tx_buffer, " direction\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

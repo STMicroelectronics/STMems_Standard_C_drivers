@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    tap_double.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show the simplest way to detect double tap from sensor.
  *
  ******************************************************************************
  * @attention
@@ -95,12 +95,6 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static axis3bit16_t data_raw_angular_rate;
-static axis1bit16_t data_raw_temperature;
-static float acceleration_mg[3];
-static float angular_rate_mdps[3];
-static float temperature_degC;
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -122,12 +116,19 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lsm6dsm(void)
+void example_main_tap_double_lsm6dsm(void)
 {
   /*
-   *  Initialize mems driver interface
+   * Initialize mems driver interface
    */
   lsm6dsm_ctx_t dev_ctx;
+
+  /*
+   * Uncomment if need interrupt on Double Tap (select int1 or 2)
+   */
+  lsm6dsm_int1_route_t int_1_reg;
+  //lsm6dsm_int2_route_t int_2_reg;
+
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
@@ -156,110 +157,82 @@ void example_main_lsm6dsm(void)
   } while (rst);
 
   /*
-   *  Enable Block Data Update
+   * Set XL Output Data Rate to 416 Hz
    */
-  lsm6dsm_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_416Hz);
 
-  /*
-   * Set Output Data Rate for Acc and Gyro
-   */
-  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_12Hz5);
-  lsm6dsm_gy_data_rate_set(&dev_ctx, LSM6DSM_GY_ODR_12Hz5);
-
-  /*
-   * Set full scale
-   */  
+  /* Set 2g full XL scale */
   lsm6dsm_xl_full_scale_set(&dev_ctx, LSM6DSM_2g);
-  lsm6dsm_gy_full_scale_set(&dev_ctx, LSM6DSM_2000dps);
-  
+
   /*
-   * Configure filtering chain(No aux interface)
-   * Accelerometer - analog filter
-   */  
-  lsm6dsm_xl_filter_analog_set(&dev_ctx, LSM6DSM_XL_ANA_BW_400Hz);
-  
-  /*
-   * Accelerometer - LPF1 path (LPF2 not used)
+   * Enable Tap detection on X, Y, Z
    */
-  //lsm6dsm_xl_lp1_bandwidth_set(&dev_ctx, LSM6DSM_XL_LP1_ODR_DIV_4);
-  
+  lsm6dsm_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsm_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsm_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsm_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
+
   /*
-   * Accelerometer - LPF1 + LPF2 path
+   * Set Tap threshold to 01100b, therefore the tap threshold
+   * is 750 mg (= 12 * FS_XL / 2 5 )
    */
-  lsm6dsm_xl_lp2_bandwidth_set(&dev_ctx, LSM6DSM_XL_LOW_NOISE_LP_ODR_DIV_100);
-  
-  /*
-   * Accelerometer - High Pass / Slope path
+  lsm6dsm_tap_threshold_x_set(&dev_ctx, 0x0c);
+
+  /* Configure Double Tap parameter
+   *
+   * The SHOCK field of the INT_DUR2 register is set to 11b, therefore
+   * the Shock time is 57.7 ms (= 3 * 8 / ODR_XL)
+   *
+   * The QUIET field of the INT_DUR2 register is set to 11b, therefore
+   * the Quiet time is 28.8 ms (= 3 * 4 / ODR_XL)
+   *
+   * For the maximum time between two consecutive detected taps, the DUR
+   * field of the INT_DUR2 register is set to 0111b, therefore the Duration
+   * time is 538.5 ms (= 7 * 32 / ODR_XL)
    */
-  //lsm6dsm_xl_reference_mode_set(&dev_ctx, PROPERTY_DISABLE);
-  //lsm6dsm_xl_hp_bandwidth_set(&dev_ctx, LSM6DSM_XL_HP_ODR_DIV_100);
-  
+  lsm6dsm_tap_dur_set(&dev_ctx, 0x07);
+  lsm6dsm_tap_quiet_set(&dev_ctx, 0x03);
+  lsm6dsm_tap_shock_set(&dev_ctx, 0x03);
+
   /*
-   * Gyroscope - filtering chain
+   * Enable Double Tap detection
    */
-  lsm6dsm_gy_band_pass_set(&dev_ctx, LSM6DSM_HP_260mHz_LP1_STRONG);
-  
+  lsm6dsm_tap_mode_set(&dev_ctx, LSM6DSM_BOTH_SINGLE_DOUBLE);
+
   /*
-   * Read samples in polling mode (no int)
+   * Enable interrupt generation on Double Tap INT1 pin
+   */
+  lsm6dsm_pin_int1_route_get(&dev_ctx, &int_1_reg);
+  int_1_reg.int1_double_tap = PROPERTY_ENABLE;
+  lsm6dsm_pin_int1_route_set(&dev_ctx, int_1_reg);
+
+  /*
+   * Uncomment if interrupt generation on Double Tap INT2 pin
+   */
+  //lsm6dsm_pin_int2_route_get(&dev_ctx, &int_2_reg);
+  //int_2_reg.int2_double_tap = PROPERTY_ENABLE;
+  //lsm6dsm_pin_int2_route_set(&dev_ctx, int_2_reg);
+
+  /*
+   * Wait Events
    */
   while(1)
   {
-    lsm6dsm_reg_t reg;
+    lsm6dsm_all_sources_t all_source;
 
     /*
-     * Read output only if new value is available
+     * Check if Double Tap events
      */
-    lsm6dsm_status_reg_get(&dev_ctx, &reg.status_reg);
-    if (reg.status_reg.xlda)
+    lsm6dsm_all_sources_get(&dev_ctx, &all_source);
+    if (all_source.reg.tap_src.double_tap)
     {
-      /*
-       * Read acceleration field data
-       */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dsm_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] =
-    		  LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] =
-    		  LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] =
-    		  LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+      sprintf((char*)tx_buffer, "Double Tap Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if (reg.status_reg.gda)
+    if (all_source.reg.tap_src.single_tap)
     {
-      /*
-       * Read angular rate field data
-       */
-      memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dsm_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
-      angular_rate_mdps[0] =
-    		  LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[0]);
-      angular_rate_mdps[1] =
-    		  LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[1]);
-      angular_rate_mdps[2] =
-    		  LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-              angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }    
-
-    if (reg.status_reg.tda)
-    {   
-      /*
-       * Read temperature data
-       */
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      lsm6dsm_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = LSM6DSM_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
-       
-      sprintf((char*)tx_buffer,
-              "Temperature [degC]:%6.2f\r\n",
-              temperature_degC);
+      sprintf((char*)tx_buffer, "Single Tap Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

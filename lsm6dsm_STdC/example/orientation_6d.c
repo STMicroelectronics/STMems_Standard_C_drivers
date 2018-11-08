@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    orientation_6d.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show the simplest way to detect 6D orientation from sensor.
  *
  ******************************************************************************
  * @attention
@@ -95,12 +95,6 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static axis3bit16_t data_raw_angular_rate;
-static axis1bit16_t data_raw_temperature;
-static float acceleration_mg[3];
-static float angular_rate_mdps[3];
-static float temperature_degC;
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -122,12 +116,19 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lsm6dsm(void)
+void example_main_orientation_6D_lsm6dsm(void)
 {
   /*
-   *  Initialize mems driver interface
+   * Initialize mems driver interface
    */
   lsm6dsm_ctx_t dev_ctx;
+  lsm6dsm_int1_route_t int_1_reg;
+
+  /*
+   * Uncomment if interrupt generation on 6D INT2 pin
+   */
+  //lsm6dsm_int2_route_t int_2_reg;
+
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
@@ -152,114 +153,75 @@ void example_main_lsm6dsm(void)
    */
   lsm6dsm_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
-    lsm6dsm_reset_get(&dev_ctx, &rst);
+	  lsm6dsm_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /*
-   *  Enable Block Data Update
+   * Set XL Output Data Rate
    */
-  lsm6dsm_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_416Hz);
 
   /*
-   * Set Output Data Rate for Acc and Gyro
+   * Set 2g full XL scale
    */
-  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_12Hz5);
-  lsm6dsm_gy_data_rate_set(&dev_ctx, LSM6DSM_GY_ODR_12Hz5);
-
-  /*
-   * Set full scale
-   */  
   lsm6dsm_xl_full_scale_set(&dev_ctx, LSM6DSM_2g);
-  lsm6dsm_gy_full_scale_set(&dev_ctx, LSM6DSM_2000dps);
-  
+
   /*
-   * Configure filtering chain(No aux interface)
-   * Accelerometer - analog filter
-   */  
-  lsm6dsm_xl_filter_analog_set(&dev_ctx, LSM6DSM_XL_ANA_BW_400Hz);
-  
-  /*
-   * Accelerometer - LPF1 path (LPF2 not used)
+   * Set threshold to 60 degrees
    */
-  //lsm6dsm_xl_lp1_bandwidth_set(&dev_ctx, LSM6DSM_XL_LP1_ODR_DIV_4);
-  
+  lsm6dsm_6d_threshold_set(&dev_ctx, LSM6DSM_DEG_60);
+
   /*
-   * Accelerometer - LPF1 + LPF2 path
+   * Use HP filter
    */
-  lsm6dsm_xl_lp2_bandwidth_set(&dev_ctx, LSM6DSM_XL_LOW_NOISE_LP_ODR_DIV_100);
-  
+  lsm6dsm_xl_hp_path_internal_set(&dev_ctx, LSM6DSM_USE_HPF);
+
   /*
-   * Accelerometer - High Pass / Slope path
+   * LPF2 on 6D function selection
    */
-  //lsm6dsm_xl_reference_mode_set(&dev_ctx, PROPERTY_DISABLE);
-  //lsm6dsm_xl_hp_bandwidth_set(&dev_ctx, LSM6DSM_XL_HP_ODR_DIV_100);
-  
+  lsm6dsm_6d_feed_data_set(&dev_ctx, PROPERTY_ENABLE);
+
   /*
-   * Gyroscope - filtering chain
+   * Enable interrupt generation on 6D INT1 pin
    */
-  lsm6dsm_gy_band_pass_set(&dev_ctx, LSM6DSM_HP_260mHz_LP1_STRONG);
-  
+  lsm6dsm_pin_int1_route_get(&dev_ctx, &int_1_reg);
+  int_1_reg.int1_6d = PROPERTY_ENABLE;
+  lsm6dsm_pin_int1_route_set(&dev_ctx, int_1_reg);
+
   /*
-   * Read samples in polling mode (no int)
+   * Uncomment if interrupt generation on 6D INT2 pin
+   */
+  //lsm6dsm_pin_int2_route_get(&dev_ctx, &int_2_reg);
+  //int_2_reg.int2_6d = PROPERTY_ENABLE;
+  //lsm6dsm_pin_int2_route_set(&dev_ctx, int_2_reg);
+
+  /*
+   * Wait Events
    */
   while(1)
   {
-    lsm6dsm_reg_t reg;
+    lsm6dsm_all_sources_t all_source;
 
     /*
-     * Read output only if new value is available
+     * Check if 6D Orientation events
      */
-    lsm6dsm_status_reg_get(&dev_ctx, &reg.status_reg);
-    if (reg.status_reg.xlda)
+    lsm6dsm_all_sources_get(&dev_ctx, &all_source);
+    if (all_source.reg.d6d_src.d6d_ia)
     {
-      /*
-       * Read acceleration field data
-       */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dsm_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] =
-    		  LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] =
-    		  LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] =
-    		  LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
-
-    if (reg.status_reg.gda)
-    {
-      /*
-       * Read angular rate field data
-       */
-      memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dsm_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
-      angular_rate_mdps[0] =
-    		  LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[0]);
-      angular_rate_mdps[1] =
-    		  LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[1]);
-      angular_rate_mdps[2] =
-    		  LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-              angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }    
-
-    if (reg.status_reg.tda)
-    {   
-      /*
-       * Read temperature data
-       */
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      lsm6dsm_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = LSM6DSM_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
-       
-      sprintf((char*)tx_buffer,
-              "Temperature [degC]:%6.2f\r\n",
-              temperature_degC);
+      sprintf((char*)tx_buffer, "6D Or. switched to ");
+      if (all_source.reg.d6d_src.xh)
+        strcat((char*)tx_buffer, "XH");
+      if (all_source.reg.d6d_src.xl)
+        strcat((char*)tx_buffer, "XL");
+      if (all_source.reg.d6d_src.yh)
+        strcat((char*)tx_buffer, "YH");
+      if (all_source.reg.d6d_src.yl)
+        strcat((char*)tx_buffer, "YL");
+      if (all_source.reg.d6d_src.zh)
+        strcat((char*)tx_buffer, "ZH");
+      if (all_source.reg.d6d_src.zl)
+        strcat((char*)tx_buffer, "ZL");
+      strcat((char*)tx_buffer, "\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

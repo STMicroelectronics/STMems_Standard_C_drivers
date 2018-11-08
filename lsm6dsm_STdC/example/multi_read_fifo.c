@@ -1,8 +1,9 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    multi_read_fifo.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show a little bit more complete way to get data
+ *          from sensor by using FIFO.
  *
  ******************************************************************************
  * @attention
@@ -93,16 +94,55 @@
 #endif
 
 /* Private macro -------------------------------------------------------------*/
+#define MIN_ODR(x, y) 				(x < y ? x : y)
+#define MAX_ODR(x, y) 				(x > y ? x : y)
+#define MAX_PATTERN_NUM				FIFO_THRESHOLD / 6
+#define LSM6DSM_ODR_LSB_TO_HZ(_odr)	(_odr ? (13 << (_odr - 1)) : 0)
+
+/* Private types ---------------------------------------------------------*/
+typedef struct {
+  uint8_t enable;
+  lsm6dsm_odr_xl_t odr;
+  uint16_t odr_hz_val;
+  lsm6dsm_fs_xl_t fs;
+  uint8_t decimation;
+  uint8_t samples_num_in_pattern;
+} sensor_lsm6dsl;
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static axis3bit16_t data_raw_angular_rate;
-static axis1bit16_t data_raw_temperature;
-static float acceleration_mg[3];
-static float angular_rate_mdps[3];
-static float temperature_degC;
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
+
+/*
+ * 6dsl Accelerometer test parameters
+ */
+static sensor_lsm6dsl test_6dsl_xl = {
+  PROPERTY_ENABLE,
+  LSM6DSM_XL_ODR_52Hz,
+  0,
+  LSM6DSM_2g,
+  0,
+  0,
+};
+
+/*
+ * 6dsl Gyroscope test parameters
+ */
+static sensor_lsm6dsl test_6dsl_gyro = {
+  PROPERTY_ENABLE,
+  LSM6DSM_GY_ODR_26Hz,
+  0,
+  LSM6DSM_2000dps,
+  0,
+  0,
+};
+
+static uint16_t pattern_len;
+static float acceleration_mg[3];
+static float angular_rate_mdps[3];
+static axis3bit16_t data_raw_acceleration;
+static axis3bit16_t data_raw_angular_rate;
+static lsm6dsm_ctx_t dev_ctx;
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -121,13 +161,142 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
-/* Main Example --------------------------------------------------------------*/
-void example_main_lsm6dsm(void)
+/*
+ * Following routine read a pattern from FIFO
+ */
+static void LSM6DSL_Read_FIFO_Pattern(void)
 {
+  uint8_t gy_num = test_6dsl_gyro.samples_num_in_pattern;
+  uint8_t xl_num = test_6dsl_xl.samples_num_in_pattern;
+
   /*
-   *  Initialize mems driver interface
+   * FIFO pattern is composed by gy_num gyroscope triplets and
+   * xl_num accelerometer triplets. The sequence has always following order:
+   * gyro first, accelerometer second
    */
-  lsm6dsm_ctx_t dev_ctx;
+  while(gy_num > 0 || xl_num > 0)
+  {
+    /*
+     * Read gyro samples
+     */
+    if (test_6dsl_gyro.enable && gy_num > 0)
+    {
+      lsm6dsm_fifo_raw_data_get(&dev_ctx, data_raw_angular_rate.u8bit,
+                                3 * sizeof(int16_t));
+      angular_rate_mdps[0] =
+        LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[0]);
+      angular_rate_mdps[1] =
+        LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[1]);
+      angular_rate_mdps[2] =
+        LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[2]);
+
+      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+              angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
+      tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
+      gy_num--;
+    }
+
+    /*
+     * Read XL samples
+     */
+    if (test_6dsl_xl.enable && xl_num > 0)
+    {
+      lsm6dsm_fifo_raw_data_get(&dev_ctx, data_raw_acceleration.u8bit,
+                                3 * sizeof(int16_t));
+      acceleration_mg[0] =
+        LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[0]);
+      acceleration_mg[1] =
+        LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[1]);
+      acceleration_mg[2] =
+        LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[2]);
+
+      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+      tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
+      xl_num--;
+    }
+  }
+}
+
+/*
+ * Callback to handle the XL and Gyro event
+ *
+ * Samples acquisition is triggered by FIFO threshold event
+ */
+static void LSM6DSL_ACC_GYRO_sample_Callback_fifo(void)
+{
+  uint16_t num = 0;
+  uint16_t num_pattern = 0;
+
+  /*
+   * Read number of word in FIFO
+   */
+  lsm6dsm_fifo_data_level_get(&dev_ctx, &num);
+  num_pattern = num / pattern_len;
+
+  while (num_pattern-- > 0)
+    LSM6DSL_Read_FIFO_Pattern();
+}
+
+/*
+ * Following routine calculate the FIFO pattern composition based
+ * on gyro and acc enable state and ODR freq
+ */
+static uint16_t LSM6DSL_Calculate_FIFO_Pattern(uint16_t *min_odr, uint16_t *max_odr)
+{
+  uint16_t fifo_samples_tot_num = 0;
+
+  /*
+   * Calculate min_odr and max_odr for current configuration
+   */
+  if (test_6dsl_gyro.enable)
+  {
+    test_6dsl_gyro.odr_hz_val = LSM6DSM_ODR_LSB_TO_HZ(test_6dsl_gyro.odr);
+    *max_odr = MAX_ODR(*max_odr, test_6dsl_gyro.odr_hz_val);
+    *min_odr = MIN_ODR(*min_odr, test_6dsl_gyro.odr_hz_val);
+  }
+
+  if (test_6dsl_xl.enable)
+  {
+    test_6dsl_xl.odr_hz_val = LSM6DSM_ODR_LSB_TO_HZ(test_6dsl_xl.odr);
+    *max_odr = MAX_ODR(*max_odr, test_6dsl_xl.odr_hz_val);
+    *min_odr = MIN_ODR(*min_odr, test_6dsl_xl.odr_hz_val);
+  }
+
+  /*
+   * Calculate how many samples for each sensor are in current FIFO pattern
+   */
+  if (test_6dsl_gyro.enable)
+  {
+    test_6dsl_gyro.samples_num_in_pattern = test_6dsl_gyro.odr_hz_val / *min_odr;
+    test_6dsl_gyro.decimation =  *max_odr / test_6dsl_gyro.odr_hz_val;
+    fifo_samples_tot_num += test_6dsl_gyro.samples_num_in_pattern;
+  }
+
+  if (test_6dsl_xl.enable)
+  {
+    test_6dsl_xl.samples_num_in_pattern = test_6dsl_xl.odr_hz_val / *min_odr;
+    test_6dsl_xl.decimation =  *max_odr / test_6dsl_xl.odr_hz_val;
+    fifo_samples_tot_num += test_6dsl_xl.samples_num_in_pattern;
+  }
+
+  /*
+   * Return the total number of 16-bit samples in the pattern
+   */
+  return(6 * fifo_samples_tot_num);
+}
+
+/* Main Example --------------------------------------------------------------*/
+void example_main_fifo_lsm6dsm(void)
+{
+  uint16_t max_odr = 0, min_odr = 0xffff;
+
+  /*
+   * Interrupt generation on FIFO watermark INT1/INT2 pin
+   */
+  //lsm6dsm_int2_route_t int_2_reg;
+  //lsm6dsm_int1_route_t int_1_reg;
+
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
@@ -152,116 +321,71 @@ void example_main_lsm6dsm(void)
    */
   lsm6dsm_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
-    lsm6dsm_reset_get(&dev_ctx, &rst);
+	  lsm6dsm_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /*
-   *  Enable Block Data Update
+   * Set XL and Gyro Output Data Rate
    */
-  lsm6dsm_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsm_xl_data_rate_set(&dev_ctx, test_6dsl_xl.odr);
+  lsm6dsm_gy_data_rate_set(&dev_ctx, test_6dsl_gyro.odr);
 
   /*
-   * Set Output Data Rate for Acc and Gyro
+   * Set XL full scale and Gyro full scale
    */
-  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_12Hz5);
-  lsm6dsm_gy_data_rate_set(&dev_ctx, LSM6DSM_GY_ODR_12Hz5);
+  lsm6dsm_xl_full_scale_set(&dev_ctx, test_6dsl_xl.fs);
+  lsm6dsm_gy_full_scale_set(&dev_ctx, test_6dsl_gyro.fs);
 
   /*
-   * Set full scale
-   */  
-  lsm6dsm_xl_full_scale_set(&dev_ctx, LSM6DSM_2g);
-  lsm6dsm_gy_full_scale_set(&dev_ctx, LSM6DSM_2000dps);
-  
-  /*
-   * Configure filtering chain(No aux interface)
-   * Accelerometer - analog filter
-   */  
-  lsm6dsm_xl_filter_analog_set(&dev_ctx, LSM6DSM_XL_ANA_BW_400Hz);
-  
-  /*
-   * Accelerometer - LPF1 path (LPF2 not used)
+   * Calculate number of sensors samples in each FIFO pattern
    */
-  //lsm6dsm_xl_lp1_bandwidth_set(&dev_ctx, LSM6DSM_XL_LP1_ODR_DIV_4);
-  
+  pattern_len = LSM6DSL_Calculate_FIFO_Pattern(&min_odr, &max_odr);
+
   /*
-   * Accelerometer - LPF1 + LPF2 path
+   * Set FIFO watermark to a multiple of a pattern
    */
-  lsm6dsm_xl_lp2_bandwidth_set(&dev_ctx, LSM6DSM_XL_LOW_NOISE_LP_ODR_DIV_100);
-  
+  lsm6dsm_fifo_watermark_set(&dev_ctx, pattern_len);
+
   /*
-   * Accelerometer - High Pass / Slope path
+   * Set FIFO mode to Stream mode
    */
-  //lsm6dsm_xl_reference_mode_set(&dev_ctx, PROPERTY_DISABLE);
-  //lsm6dsm_xl_hp_bandwidth_set(&dev_ctx, LSM6DSM_XL_HP_ODR_DIV_100);
-  
+  lsm6dsm_fifo_mode_set(&dev_ctx, LSM6DSM_STREAM_MODE);
+
   /*
-   * Gyroscope - filtering chain
+   * Enable FIFO watermark interrupt generation on INT1 pin
    */
-  lsm6dsm_gy_band_pass_set(&dev_ctx, LSM6DSM_HP_260mHz_LP1_STRONG);
-  
+  //lsm6dsm_pin_int1_route_get(&dev_ctx, &int_1_reg);
+  //int_1_reg.int1_fth = PROPERTY_ENABLE;
+  //lsm6dsm_pin_int1_route_set(&dev_ctx, int_1_reg);
+
   /*
-   * Read samples in polling mode (no int)
+   * FIFO watermark interrupt on INT2 pin
    */
+  //lsm6dsm_pin_int2_route_get(&dev_ctx, &int_2_reg);
+  //int_2_reg.int2_fth = PROPERTY_ENABLE;
+  //lsm6dsm_pin_int2_route_set(&dev_ctx, int_2_reg);
+
+  /*
+   * Set ODR FIFO
+   */
+  lsm6dsm_fifo_data_rate_set(&dev_ctx, LSM6DSM_FIFO_416Hz);
+
+  /*
+   * Set FIFO sensor decimator
+   */
+  lsm6dsm_fifo_xl_batch_set(&dev_ctx, test_6dsl_xl.decimation);
+  lsm6dsm_fifo_gy_batch_set(&dev_ctx, test_6dsl_gyro.decimation);
+
   while(1)
   {
-    lsm6dsm_reg_t reg;
+    uint8_t wt;
 
     /*
-     * Read output only if new value is available
+     * Read FIFO watermark flag in polling mode
      */
-    lsm6dsm_status_reg_get(&dev_ctx, &reg.status_reg);
-    if (reg.status_reg.xlda)
-    {
-      /*
-       * Read acceleration field data
-       */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dsm_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] =
-    		  LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] =
-    		  LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] =
-    		  LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
-
-    if (reg.status_reg.gda)
-    {
-      /*
-       * Read angular rate field data
-       */
-      memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dsm_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
-      angular_rate_mdps[0] =
-    		  LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[0]);
-      angular_rate_mdps[1] =
-    		  LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[1]);
-      angular_rate_mdps[2] =
-    		  LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-              angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }    
-
-    if (reg.status_reg.tda)
-    {   
-      /*
-       * Read temperature data
-       */
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      lsm6dsm_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = LSM6DSM_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
-       
-      sprintf((char*)tx_buffer,
-              "Temperature [degC]:%6.2f\r\n",
-              temperature_degC);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
+    lsm6dsm_fifo_wtm_flag_get(&dev_ctx, &wt);
+    if (wt)
+    	LSM6DSL_ACC_GYRO_sample_Callback_fifo();
   }
 }
 

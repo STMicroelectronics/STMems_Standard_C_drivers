@@ -1,8 +1,9 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    sensor_hub_lis2mdl_no_fifo_simple.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show the simplest way enable a LIS2MDL mag connected
+ *          to LSM6DSM I2C master interface (no FIFO support).
  *
  ******************************************************************************
  * @attention
@@ -83,6 +84,7 @@
 #include <string.h>
 #include "stm32f4xx_hal.h"
 #include <lsm6dsm_reg.h>
+#include <lis2mdl_reg.h>
 #include "gpio.h"
 #include "i2c.h"
 #if defined(STEVAL_MKI109V3)
@@ -92,15 +94,18 @@
 #include "usart.h"
 #endif
 
-/* Private macro -------------------------------------------------------------*/
+/* Define number of byte for each sensor sample */
+#define OUT_XYZ_SIZE		6
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static axis3bit16_t data_raw_angular_rate;
-static axis1bit16_t data_raw_temperature;
 static float acceleration_mg[3];
 static float angular_rate_mdps[3];
-static float temperature_degC;
+static float magnetic_mG[3];
+static axis3bit16_t data_raw_magnetic;
+static axis3bit16_t data_raw_acceleration;
+static axis3bit16_t data_raw_angular_rate;
+static lsm6dsm_ctx_t dev_ctx;
+static lis2mdl_ctx_t mag_ctx;
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -121,16 +126,152 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
-/* Main Example --------------------------------------------------------------*/
-void example_main_lsm6dsm(void)
+/*
+ * Read data byte from internal register of a slave device connected
+ * to master I2C interface
+ */
+static int32_t lsm6dsm_read_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
+        uint16_t len)
 {
+  axis3bit16_t data_raw_acceleration;
+  int32_t mm_error;
+  uint8_t drdy;
+  uint8_t i;
+  lsm6dsm_reg_t reg_endop;
+  lsm6dsm_emb_sh_read_t sh_reg;
+  lsm6dsm_sh_cfg_read_t val = {
+    .slv_add = LIS2MDL_I2C_ADD,
+    .slv_subadd = reg,
+    .slv_len = len,
+  };
+
+  (void)ctx;
+
   /*
-   *  Initialize mems driver interface
+   * Configure Sensor Hub to read LIS2MDL
    */
-  lsm6dsm_ctx_t dev_ctx;
+  mm_error = lsm6dsm_sh_slv0_cfg_read(&dev_ctx, &val);
+  lsm6dsm_sh_num_of_dev_connected_set(&dev_ctx, LSM6DSM_SLV_0_1);
+
+  /*
+   * Enable I2C Master and I2C master Pull Up
+   */
+  lsm6dsm_func_en_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsm_sh_master_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /*
+   * Enable accelerometer to trigger Sensor Hub operation
+   */
+  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_104Hz);
+
+  /*
+   * Wait Sensor Hub operation flag set
+   */
+  lsm6dsm_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+  do
+  {
+    lsm6dsm_xl_flag_data_ready_get(&dev_ctx, &drdy);
+  } while (!drdy);
+
+  do
+  {
+    lsm6dsm_read_reg(&dev_ctx, LSM6DSM_FUNC_SRC1, &reg_endop.byte, 1);
+  } while (!reg_endop.func_src1.sensorhub_end_op);
+
+  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_OFF);
+  lsm6dsm_sh_read_data_raw_get(&dev_ctx, &sh_reg);
+
+  lsm6dsm_func_en_set(&dev_ctx, PROPERTY_DISABLE);
+  lsm6dsm_sh_master_set(&dev_ctx, PROPERTY_DISABLE);
+
+  for(i = 0; i < len; i++)
+    data[i] = sh_reg.byte[i];
+
+  return mm_error;
+}
+
+/*
+ * Write data byte to internal register of a slave device connected
+ * to master I2C interface
+ */
+static int32_t lsm6dsm_write_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
+        uint16_t len)
+{
+  axis3bit16_t data_raw_acceleration;
+  int32_t mm_error;
+  uint8_t drdy;
+  lsm6dsm_reg_t reg_endop;
+  lsm6dsm_sh_cfg_write_t val = {
+    .slv0_add = LIS2MDL_I2C_ADD,
+    .slv0_subadd = reg,
+    .slv0_data = *data,
+  };
+
+  (void)ctx;
+  (void)len;
+
+  /*
+   * Disable accelerometer
+   */
+  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_OFF);
+
+  /*
+   * Configure Sensor Hub to write
+   */
+  mm_error = lsm6dsm_sh_cfg_write(&dev_ctx, &val);
+
+  /*
+   * Enable I2C Master and I2C master Pull Up
+   */
+  lsm6dsm_func_en_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsm_sh_master_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /*
+   * Enable accelerometer to trigger Sensor Hub operation
+   */
+  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_104Hz);
+
+  /*
+   * Wait Sensor Hub operation flag set
+   */
+  lsm6dsm_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+  do
+  {
+    lsm6dsm_xl_flag_data_ready_get(&dev_ctx, &drdy);
+  } while (!drdy);
+
+  do
+  {
+    lsm6dsm_read_reg(&dev_ctx, LSM6DSM_FUNC_SRC1, &reg_endop.byte, 1);
+  } while (!reg_endop.func_src1.sensorhub_end_op);
+
+  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_OFF);
+
+  lsm6dsm_func_en_set(&dev_ctx, PROPERTY_DISABLE);
+  lsm6dsm_sh_master_set(&dev_ctx, PROPERTY_DISABLE);
+
+  return mm_error;
+}
+
+/* Main Example --------------------------------------------------------------*/
+void example_sensor_hub_lis2mdl_no_fifo_simple_lsm6dsm(void)
+{
+  lsm6dsm_sh_cfg_read_t val = {
+    .slv_add = LIS2MDL_I2C_ADD,
+    .slv_subadd = LIS2MDL_OUTX_L_REG,
+    .slv_len = OUT_XYZ_SIZE,
+  };
+
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
+
+  /*
+   * Configure low level function to access to external device
+   */
+  mag_ctx.read_reg = lsm6dsm_read_lis2mdl_cx;
+  mag_ctx.write_reg = lsm6dsm_write_lis2mdl_cx;
+  mag_ctx.handle = &hi2c1;
 
   /*
    * Initialize platform specific hardware
@@ -152,114 +293,126 @@ void example_main_lsm6dsm(void)
    */
   lsm6dsm_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
-    lsm6dsm_reset_get(&dev_ctx, &rst);
+	  lsm6dsm_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /*
-   *  Enable Block Data Update
+   * Some hardware require to enable pull up on master I2C interface
    */
-  lsm6dsm_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  //lsm6dsm_sh_pin_mode_set(&dev_ctx, LSM6DSM_INTERNAL_PULL_UP);
 
   /*
-   * Set Output Data Rate for Acc and Gyro
+   * Check if LIS2MDL connected to Sensor Hub
    */
-  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_12Hz5);
-  lsm6dsm_gy_data_rate_set(&dev_ctx, LSM6DSM_GY_ODR_12Hz5);
+  lis2mdl_device_id_get(&mag_ctx, &whoamI);
+  if (whoamI != LIS2MDL_ID)
+  {
+    while(1)
+    {
+      /* manage here device not found */
+    }
+  }
 
   /*
-   * Set full scale
-   */  
+   * Set XL full scale and Gyro full scale
+   */
   lsm6dsm_xl_full_scale_set(&dev_ctx, LSM6DSM_2g);
   lsm6dsm_gy_full_scale_set(&dev_ctx, LSM6DSM_2000dps);
-  
+
   /*
-   * Configure filtering chain(No aux interface)
-   * Accelerometer - analog filter
-   */  
-  lsm6dsm_xl_filter_analog_set(&dev_ctx, LSM6DSM_XL_ANA_BW_400Hz);
-  
-  /*
-   * Accelerometer - LPF1 path (LPF2 not used)
+   * Configure LIS2MDL on the I2C master line
    */
-  //lsm6dsm_xl_lp1_bandwidth_set(&dev_ctx, LSM6DSM_XL_LP1_ODR_DIV_4);
-  
+  lis2mdl_operating_mode_set(&mag_ctx, LIS2MDL_CONTINUOUS_MODE);
+  lis2mdl_offset_temp_comp_set(&mag_ctx, PROPERTY_ENABLE);
+  lis2mdl_block_data_update_set(&mag_ctx, PROPERTY_ENABLE);
+  lis2mdl_data_rate_set(&mag_ctx, LIS2MDL_ODR_50Hz);
+
   /*
-   * Accelerometer - LPF1 + LPF2 path
+   * Prepare sensor hub to read data from external sensor
    */
-  lsm6dsm_xl_lp2_bandwidth_set(&dev_ctx, LSM6DSM_XL_LOW_NOISE_LP_ODR_DIV_100);
-  
+  lsm6dsm_sh_slv0_cfg_read(&dev_ctx, &val);
+
   /*
-   * Accelerometer - High Pass / Slope path
+   * Configure Sensor Hub to read one slave
    */
-  //lsm6dsm_xl_reference_mode_set(&dev_ctx, PROPERTY_DISABLE);
-  //lsm6dsm_xl_hp_bandwidth_set(&dev_ctx, LSM6DSM_XL_HP_ODR_DIV_100);
-  
+  lsm6dsm_sh_num_of_dev_connected_set(&dev_ctx, LSM6DSM_SLV_0);
+
   /*
-   * Gyroscope - filtering chain
+   * Enable master and XL trigger
    */
-  lsm6dsm_gy_band_pass_set(&dev_ctx, LSM6DSM_HP_260mHz_LP1_STRONG);
-  
+  lsm6dsm_func_en_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsm_sh_master_set(&dev_ctx, PROPERTY_ENABLE);
+
   /*
-   * Read samples in polling mode (no int)
+   * Set XL and Gyro Output Data Rate
    */
+  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_52Hz);
+  lsm6dsm_gy_data_rate_set(&dev_ctx, LSM6DSM_GY_ODR_26Hz);
+
   while(1)
   {
-    lsm6dsm_reg_t reg;
+    uint8_t drdy;
+    lsm6dsm_emb_sh_read_t emb_sh;
 
     /*
      * Read output only if new value is available
      */
-    lsm6dsm_status_reg_get(&dev_ctx, &reg.status_reg);
-    if (reg.status_reg.xlda)
+    lsm6dsm_xl_flag_data_ready_get(&dev_ctx, &drdy);
+    if (drdy)
     {
       /*
        * Read acceleration field data
        */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
+      memset(data_raw_acceleration.u8bit, 0x0, 3 * sizeof(int16_t));
       lsm6dsm_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
       acceleration_mg[0] =
-    		  LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[0]);
+        LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[0]);
       acceleration_mg[1] =
-    		  LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[1]);
+        LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[1]);
       acceleration_mg[2] =
-    		  LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[2]);
-      
+        LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[2]);
+
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+      /*
+       * Read magnetic data from sensor hub register: XL trigger a new read to
+       * mag sensor
+       */
+      lsm6dsm_sh_read_data_raw_get(&dev_ctx, &emb_sh);
+      memcpy((uint8_t *)&data_raw_magnetic,
+             (uint8_t *)&emb_sh.byte[0],
+             OUT_XYZ_SIZE);
+      magnetic_mG[0] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[0]);
+      magnetic_mG[1] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[1]);
+      magnetic_mG[2] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[2]);
+
+      sprintf((char*)tx_buffer, "Mag [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
+              magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if (reg.status_reg.gda)
+    lsm6dsm_gy_flag_data_ready_get(&dev_ctx, &drdy);
+    if (drdy)
     {
       /*
        * Read angular rate field data
        */
-      memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
+      memset(data_raw_angular_rate.u8bit, 0x0, 3 * sizeof(int16_t));
       lsm6dsm_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
       angular_rate_mdps[0] =
-    		  LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[0]);
+        LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[0]);
       angular_rate_mdps[1] =
-    		  LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[1]);
+        LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[1]);
       angular_rate_mdps[2] =
-    		  LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-              angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }    
+        LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[2]);
 
-    if (reg.status_reg.tda)
-    {   
-      /*
-       * Read temperature data
-       */
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      lsm6dsm_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = LSM6DSM_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
-       
       sprintf((char*)tx_buffer,
-              "Temperature [degC]:%6.2f\r\n",
-              temperature_degC);
+              "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+              angular_rate_mdps[0],
+              angular_rate_mdps[1],
+              angular_rate_mdps[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
