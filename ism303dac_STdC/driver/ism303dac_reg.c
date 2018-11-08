@@ -280,7 +280,7 @@ int32_t ism303dac_xl_data_rate_set(ism303dac_ctx_t *ctx,
 
   mm_error = ism303dac_read_reg(ctx, ISM303DAC_CTRL1_A, &reg.byte, 1);
   reg.ctrl1_a.odr = val & 0x0F;
-  reg.ctrl1_a.hf_odr = val & 0x10 >> 4;
+  reg.ctrl1_a.hf_odr = (val & 0x10) >> 4;
   mm_error = ism303dac_write_reg(ctx, ISM303DAC_CTRL1_A, &reg.byte, 1);
 
   return mm_error;
