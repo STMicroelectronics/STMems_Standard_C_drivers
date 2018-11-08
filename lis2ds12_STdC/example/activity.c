@@ -1,8 +1,9 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    activity.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show the simplest way to detect activity/inactivity
+ * 			from sensor.
  *
  ******************************************************************************
  * @attention
@@ -95,8 +96,6 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static float acceleration_mg[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -118,10 +117,10 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lis2ds12(void)
+void example_main_activity_lis2ds12(void)
 {
   /*
-   *  Initialize mems driver interface.
+   * Initialize mems driver interface
    */
   lis2ds12_ctx_t dev_ctx;
 
@@ -153,52 +152,63 @@ void example_main_lis2ds12(void)
   } while (rst);
 
   /*
-   *  Enable Block Data Update.
+   * Set XL and Gyro Output Data Rate
    */
-  lis2ds12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_200Hz_HR);
 
   /*
-   * Set full scale.
-   */  
+   * Set 2g full XL scale and 250 dps full Gyro
+   */
   lis2ds12_xl_full_scale_set(&dev_ctx, LIS2DS12_2g);
 
   /*
-   * Configure filtering chain.
-   */  
-  /* Accelerometer - High Pass / Slope path */
-  //lis2ds12_xl_hp_path_set(&dev_ctx, LIS2DS12_HP_ON_OUTPUTS);
-
-  /*
-   * Set Output Data Rate.
+   * Set wake-up duration:
+   * this field is set to 0010b, corresponding to
+   *
+   * 10 ms (= 2 * 1 / ODR)
    */
-  lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_100Hz_LP);
+  lis2ds12_wkup_dur_set(&dev_ctx, 0x02);
 
   /*
-   * Read samples in polling mode (no int).
+   * Set sleep duration:
+   * this field is set to 0010b, corresponding to
+   *
+   * 5.12 s (= 2 * 512 / ODR).
+   *
+   * After this period of time has elapsed, the accelerometer
+   * ODR is internally set to 12.5 Hz
+   */
+  lis2ds12_act_sleep_dur_set(&dev_ctx, 0x02);
+
+  /*
+   * Set Activity wake-up threshold:
+   * set to 000010b, therefore the activity/inactivity
+   * threshold is 62.5 mg(= 2 * FS / 64)
+   */
+  lis2ds12_wkup_threshold_set(&dev_ctx, 0x02);
+
+  /*
+   * Wait Events
    */
   while(1)
   {
-    /*
-     * Read output only if new value is available.
-     */
-    lis2ds12_reg_t reg;
-    lis2ds12_status_reg_get(&dev_ctx, &reg.status);
+    lis2ds12_all_sources_t all_source;
 
-    if (reg.status.drdy)
+    /*
+     * Check if Activity/Inactivity events
+     */
+    lis2ds12_all_sources_get(&dev_ctx, &all_source);
+    if (all_source.reg.wake_up_src.sleep_state_ia)
     {
-      /*
-       * Read acceleration data.
-       */
-      memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
-      lis2ds12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = LIS2DS12_FROM_FS_2g_TO_mg( data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = LIS2DS12_FROM_FS_2g_TO_mg( data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = LIS2DS12_FROM_FS_2g_TO_mg( data_raw_acceleration.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+      sprintf((char*)tx_buffer, "Inactivity Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    } 
+    }
+
+    if (all_source.reg.wake_up_src.wu_ia)
+    {
+      sprintf((char*)tx_buffer, "Activity Detected\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
   }
 }
 

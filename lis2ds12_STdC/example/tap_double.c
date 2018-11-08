@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    tap_double.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show the simplest way to detect double tap from sensor.
  *
  ******************************************************************************
  * @attention
@@ -95,8 +95,6 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static float acceleration_mg[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -118,10 +116,10 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lis2ds12(void)
+void example_main_tap_double_lis2ds12(void)
 {
   /*
-   *  Initialize mems driver interface.
+   * Initialize mems driver interface.
    */
   lis2ds12_ctx_t dev_ctx;
 
@@ -153,52 +151,72 @@ void example_main_lis2ds12(void)
   } while (rst);
 
   /*
-   *  Enable Block Data Update.
+   * Set XL Output Data Rate
    */
-  lis2ds12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_400Hz_HR);
 
   /*
-   * Set full scale.
-   */  
+   * Set 2g full XL scale
+   */
   lis2ds12_xl_full_scale_set(&dev_ctx, LIS2DS12_2g);
 
   /*
-   * Configure filtering chain.
-   */  
-  /* Accelerometer - High Pass / Slope path */
-  //lis2ds12_xl_hp_path_set(&dev_ctx, LIS2DS12_HP_ON_OUTPUTS);
-
-  /*
-   * Set Output Data Rate.
+   * Enable Tap detection on X, Y, Z
    */
-  lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_100Hz_LP);
+  lis2ds12_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2ds12_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2ds12_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2ds12_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
-   * Read samples in polling mode (no int).
+   * Set Tap threshold to 01100b, therefore the tap threshold
+   * is 750 mg (= 12 * FS_XL / 2 5 )
+   */
+  lis2ds12_tap_threshold_set(&dev_ctx, 0x0c);
+
+  /* Configure Double Tap parameter
+   *
+   * The SHOCK field of the INT_DUR2 register is set to 11b, therefore
+   * the Shock time is 57.7 ms (= 3 * 8 / ODR_XL).
+   *
+   * The QUIET field of the INT_DUR2 register is set to 11b, therefore
+   * the Quiet time is 28.8 ms (= 3 * 4 / ODR_XL).
+   *
+   * For the maximum time between two consecutive detected taps, the DUR
+   * field of the INT_DUR2 register is set to 0111b, therefore the Duration
+   * time is 538.5 ms (= 7 * 32 / ODR_XL).
+   */
+  lis2ds12_tap_dur_set(&dev_ctx, 0x07);
+  lis2ds12_tap_quiet_set(&dev_ctx, 0x03);
+  lis2ds12_tap_shock_set(&dev_ctx, 0x03);
+
+  /*
+   * Enable Double Tap detection
+   */
+  lis2ds12_tap_mode_set(&dev_ctx, LIS2DS12_ONLY_DOUBLE);
+
+  /*
+   * Wait Events
    */
   while(1)
   {
-    /*
-     * Read output only if new value is available.
-     */
-    lis2ds12_reg_t reg;
-    lis2ds12_status_reg_get(&dev_ctx, &reg.status);
+    lis2ds12_all_sources_t all_source;
 
-    if (reg.status.drdy)
+    /*
+     * Check if Double Tap events
+     */
+    lis2ds12_all_sources_get(&dev_ctx, &all_source);
+    if (all_source.reg.tap_src.double_tap)
     {
-      /*
-       * Read acceleration data.
-       */
-      memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
-      lis2ds12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = LIS2DS12_FROM_FS_2g_TO_mg( data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = LIS2DS12_FROM_FS_2g_TO_mg( data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = LIS2DS12_FROM_FS_2g_TO_mg( data_raw_acceleration.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+      sprintf((char*)tx_buffer, "Double Tap Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    } 
+    }
+
+    if (all_source.reg.tap_src.single_tap)
+    {
+      sprintf((char*)tx_buffer, "Single Tap Detected\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
   }
 }
 

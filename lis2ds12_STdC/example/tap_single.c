@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    tap_single.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show the simplest way to detect single tap from sensor.
  *
  ******************************************************************************
  * @attention
@@ -95,8 +95,6 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static float acceleration_mg[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -118,10 +116,10 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lis2ds12(void)
+void example_main_single_tap_lis2ds12(void)
 {
   /*
-   *  Initialize mems driver interface.
+   * Initialize mems driver interface
    */
   lis2ds12_ctx_t dev_ctx;
 
@@ -153,52 +151,58 @@ void example_main_lis2ds12(void)
   } while (rst);
 
   /*
-   *  Enable Block Data Update.
+   * Set XL Output Data Rate
    */
-  lis2ds12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_400Hz_HR);
 
   /*
-   * Set full scale.
-   */  
+   * Set 2g full XL scale
+   */
   lis2ds12_xl_full_scale_set(&dev_ctx, LIS2DS12_2g);
 
   /*
-   * Configure filtering chain.
-   */  
-  /* Accelerometer - High Pass / Slope path */
-  //lis2ds12_xl_hp_path_set(&dev_ctx, LIS2DS12_HP_ON_OUTPUTS);
-
-  /*
-   * Set Output Data Rate.
+   * Enable Tap detection on X, Y, Z
    */
-  lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_100Hz_LP);
+  lis2ds12_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2ds12_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2ds12_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2ds12_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
-   * Read samples in polling mode (no int).
+   * Set Tap threshold to 01001b, therefore the tap threshold is
+   * 562.5 mg (= 9 * FS_XL / 2 5 )
+   */
+  lis2ds12_tap_threshold_set(&dev_ctx, 0x09);
+
+  /*
+   * Configure Single Tap parameter
+   */
+  //lis2ds12_tap_dur_set(&dev_ctx, 0x0);
+  lis2ds12_tap_quiet_set(&dev_ctx, 0x01);
+  lis2ds12_tap_shock_set(&dev_ctx, 0x02);
+
+  /*
+   * Enable Single Tap detection only
+   */
+  lis2ds12_tap_mode_set(&dev_ctx, LIS2DS12_ONLY_SINGLE);
+
+  /*
+   * Wait Events
    */
   while(1)
   {
-    /*
-     * Read output only if new value is available.
-     */
-    lis2ds12_reg_t reg;
-    lis2ds12_status_reg_get(&dev_ctx, &reg.status);
+    lis2ds12_all_sources_t all_source;
 
-    if (reg.status.drdy)
+    lis2ds12_all_sources_get(&dev_ctx, &all_source);
+
+    /*
+     * Check if Single Tap events
+     */
+    if (all_source.reg.tap_src.single_tap)
     {
-      /*
-       * Read acceleration data.
-       */
-      memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
-      lis2ds12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = LIS2DS12_FROM_FS_2g_TO_mg( data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = LIS2DS12_FROM_FS_2g_TO_mg( data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = LIS2DS12_FROM_FS_2g_TO_mg( data_raw_acceleration.i16bit[2]);
-      
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+      sprintf((char*)tx_buffer, "Tap Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    } 
+    }
   }
 }
 
