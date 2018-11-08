@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    multi_read_fifo.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show the simplest way to get data from sensor FIFO
  *
  ******************************************************************************
  * @attention
@@ -63,8 +63,8 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-#define STEVAL_MKI109V3
-//#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+//#define STEVAL_MKI109V3
+#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
@@ -120,66 +120,104 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lps22hb(void)
+void example_main_multi_read_fifo_lps22hb(void)
 {
-  /* Initialize mems driver interface */
+  /*
+   *  Initialize mems driver interface
+   */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &SENSOR_BUS;
+  dev_ctx.handle = &hi2c1;
 
-  /* Initialize platform specific hardware */
+  /*
+   * Initialize platform specific hardware
+   */
   platform_init();
 
-  /* Check device ID */
+  /*
+   *  Check device ID
+   */
   lps22hb_device_id_get(&dev_ctx, &whoamI);
-  if (whoamI != LPS22HB_ID){
-    while(1)/* manage here device not found */;
+  if (whoamI != LPS22HB_ID)
+  {
+    while(1)
+    {
+      /* manage here device not found */
+    }
   }
 
-  /* Restore default configuration */
+  /*
+   *  Restore default configuration
+   */
   lps22hb_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lps22hb_reset_get(&dev_ctx, &rst);
   } while (rst);
-  
-  /* Enable Block Data Update */
-  //lps22hb_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /* Can be enabled low pass filter on output */
-  lps22hb_low_pass_filter_mode_set(&dev_ctx, LPS22HB_LPF_ODR_DIV_2);
+  /*
+   *  Enable Block Data Update
+   */
+  lps22hb_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /* Can be set Data-ready signal on INT_DRDY pin */
-  //lps22hb_drdy_on_int_set(&dev_ctx, PROPERTY_ENABLE);
+  /*
+   * Set FIFO watermark to 16 samples
+   */
+  lps22hb_fifo_watermark_set(&dev_ctx, 16);
 
-  /* Set Output Data Rate */
+  /*
+   * Set FIFO mode
+   */
+  lps22hb_fifo_mode_set(&dev_ctx, LPS22HB_FIFO_MODE);
+
+  /*
+   * Enable FIFO
+   */
+  lps22hb_fifo_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /*
+   * Can be set FIFO watermark status on INT_DRDY pin
+   */
+  //lps22hb_fifo_threshold_on_int_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /*
+   * Set Output Data Rate
+   */
   lps22hb_data_rate_set(&dev_ctx, LPS22HB_ODR_10_Hz);
-  
-  /* Read samples in polling mode (no int) */
+
+  /*
+   * Read samples in polling mode (no int)
+   */
   while(1)
   {
     uint8_t reg;
-    
-    /* Read output only if new value is available */
-    lps22hb_press_data_ready_get(&dev_ctx, &reg);
+
+    /*
+     * Read output only if fifo watermark set
+     */
+    lps22hb_fifo_fth_flag_get(&dev_ctx, &reg);
     if (reg)
     {
-      memset(data_raw_pressure.u8bit, 0x00, sizeof(int32_t));
-      lps22hb_pressure_raw_get(&dev_ctx, data_raw_pressure.u8bit);
-      
-      pressure_hPa = LPS22HB_FROM_LSB_TO_hPa(data_raw_pressure.i32bit);
-      sprintf((char*)tx_buffer, "pressure [hPa]:%6.2f\r\n", pressure_hPa);
+      /*
+       * Read FIFO watermark
+       */
+      lps22hb_fifo_data_level_get(&dev_ctx, &reg);
+      while(reg--)
+      {
+        memset(data_raw_pressure.u8bit, 0x00, sizeof(int32_t));
+        lps22hb_pressure_raw_get(&dev_ctx, data_raw_pressure.u8bit);
+        pressure_hPa = LPS22HB_FROM_LSB_TO_hPa(data_raw_pressure.i32bit);
 
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
- 
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      lps22hb_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
+        sprintf((char*)tx_buffer, "pressure [hPa]:%6.2f\r\n", pressure_hPa);
+        tx_com(tx_buffer, strlen((char const*)tx_buffer));
 
-      temperature_degC = LPS22HB_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
-      sprintf((char*)tx_buffer, "temperature [degC]:%6.2f\r\n", temperature_degC);
+        memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
+        lps22hb_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
+        temperature_degC = LPS22HB_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
 
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+        sprintf((char*)tx_buffer, "temperature [degC]:%6.2f\r\n", temperature_degC);
+        tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      }
     }
-    
   }
 }
 
