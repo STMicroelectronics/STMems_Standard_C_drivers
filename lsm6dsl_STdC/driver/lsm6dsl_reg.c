@@ -2132,6 +2132,7 @@ int32_t lsm6dsl_pin_int1_route_set(lsm6dsl_ctx_t *ctx,
                   }
                   else{
                     reg.tap_cfg.interrupts_enable = PROPERTY_DISABLE;
+                  
                   }
                   ret = lsm6dsl_write_reg(ctx, LSM6DSL_TAP_CFG, &reg.byte, 1);
                 }
@@ -4304,17 +4305,17 @@ int32_t lsm6dsl_den_enable_get(lsm6dsl_ctx_t *ctx, lsm6dsl_den_xl_en_t *val)
   if(ret == 0){
     ret = lsm6dsl_read_reg(ctx, LSM6DSL_CTRL9_XL, &reg[1].byte, 1);
     switch ( ( reg[0].ctrl4_c.den_xl_en << 1) + reg[1].ctrl9_xl.den_xl_g ) {
-      case LSM6DSO_STAMP_IN_GY_DATA:
-        *val = LSM6DSO_STAMP_IN_GY_DATA;
+      case LSM6DSL_STAMP_IN_GY_DATA:
+        *val = LSM6DSL_STAMP_IN_GY_DATA;
         break;
-      case LSM6DSO_STAMP_IN_XL_DATA:
-        *val = LSM6DSO_STAMP_IN_XL_DATA;
+      case LSM6DSL_STAMP_IN_XL_DATA:
+        *val = LSM6DSL_STAMP_IN_XL_DATA;
         break;
-      case LSM6DSO_STAMP_IN_GY_XL_DATA:
-        *val = LSM6DSO_STAMP_IN_GY_XL_DATA;
+      case LSM6DSL_STAMP_IN_GY_XL_DATA:
+        *val = LSM6DSL_STAMP_IN_GY_XL_DATA;
         break;
       default:
-        *val = LSM6DSO_DEN_STAMP_ND;
+        *val = LSM6DSL_DEN_STAMP_ND;
         break;
     }
   }
