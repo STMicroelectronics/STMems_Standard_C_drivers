@@ -154,11 +154,11 @@ typedef struct {
   */
 
 /** I2C Device Address 8 bit format  if SA0=0 -> 0x31 if SA0=1 -> 0x33 **/
-#define LIS331DLH_I2C_ADD_L     0x31
-#define LIS331DLH_I2C_ADD_H     0x33
+#define LIS331DLH_I2C_ADD_L     0x31U
+#define LIS331DLH_I2C_ADD_H     0x33U
 
 /** Device Identification (Who am I) **/
-#define LIS331DLH_ID            0x32
+#define LIS331DLH_ID            0x32U
 
 /**
   * @}
@@ -383,7 +383,7 @@ typedef enum {
   LIS331DLH_ODR_OFF   = 0x00,
   LIS331DLH_ODR_Hz5   = 0x02,
   LIS331DLH_ODR_1Hz   = 0x03,
-  LIS331DLH_ODR_5Hz2  = 0x04,
+  LIS331DLH_ODR_2Hz   = 0x04,
   LIS331DLH_ODR_5Hz   = 0x05,
   LIS331DLH_ODR_10Hz  = 0x06,
   LIS331DLH_ODR_50Hz  = 0x01,

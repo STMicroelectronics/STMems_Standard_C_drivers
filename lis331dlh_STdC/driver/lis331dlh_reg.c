@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * @file    lis331dlh_c
+ * @file    lis331dlh_reg.c
  * @author  Sensors Software Solution Team
  * @brief   LIS331DLH driver file
  ******************************************************************************
@@ -295,8 +295,8 @@ int32_t lis331dlh_data_rate_get(lis331dlh_ctx_t *ctx, lis331dlh_dr_t *val)
     case LIS331DLH_ODR_1Hz:
       *val = LIS331DLH_ODR_1Hz;
       break;
-    case LIS331DLH_ODR_5Hz2:
-      *val = LIS331DLH_ODR_5Hz2;
+    case LIS331DLH_ODR_2Hz:
+      *val = LIS331DLH_ODR_2Hz;
       break;
     case LIS331DLH_ODR_5Hz:
       *val = LIS331DLH_ODR_5Hz;
