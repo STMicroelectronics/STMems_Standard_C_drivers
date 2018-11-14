@@ -100,14 +100,14 @@ int32_t lps22hh_write_reg(lps22hh_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @{
   *
   */
-float32_t lps22hh_from_lsb_to_hpa(int16_t lsb)
+float lps22hh_from_lsb_to_hpa(int16_t lsb)
 {
-  return ( (float32_t) lsb / 4096.0f );
+  return ( (float) lsb / 4096.0f );
 }
 
-float32_t lps22hh_from_lsb_to_celsius(int16_t lsb)
+float lps22hh_from_lsb_to_celsius(int16_t lsb)
 {
-  return ( (float32_t) lsb / 100.0f );
+  return ( (float) lsb / 100.0f );
 }
 
 /**

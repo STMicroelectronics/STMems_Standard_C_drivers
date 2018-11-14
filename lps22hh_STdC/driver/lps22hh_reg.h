@@ -45,11 +45,12 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <math.h>
 
 /** @addtogroup LPS22HH
- * @{
- *
- */
+  * @{
+  *
+  */
 
 /** @defgroup LPS22HH_sensors_common_types
   * @{
@@ -58,12 +59,6 @@
 
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
-/**
-  * Float typedef definition for compliance with:
-  * MISRA-C 2012 [Dir 4.6a] -> " Basic type used without typedef "
-  *
-  */
-typedef float float32_t;
 
 /**
   * @defgroup axisXbitXX_t
@@ -343,8 +338,8 @@ int32_t lps22hh_read_reg(lps22hh_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lps22hh_write_reg(lps22hh_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
-extern float32_t lps22hh_from_lsb_to_hpa(int16_t lsb);
-extern float32_t lps22hh_from_lsb_to_celsius(int16_t lsb);
+extern float lps22hh_from_lsb_to_hpa(int16_t lsb);
+extern float lps22hh_from_lsb_to_celsius(int16_t lsb);
 
 int32_t lps22hh_autozero_rst_set(lps22hh_ctx_t *ctx, uint8_t val);
 int32_t lps22hh_autozero_rst_get(lps22hh_ctx_t *ctx, uint8_t *val);
