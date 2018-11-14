@@ -45,6 +45,7 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <math.h>
 
 /** @addtogroup LIS3MDL
   * @{
@@ -55,15 +56,9 @@ extern "C" {
   * @{
   *
   */
-  
+
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
-/**
-  * Float typedef definition for compliance with:
-  * MISRA-C 2012 [Dir 4.6a] -> " Basic type used without typedef "
-  *
-  */
-typedef float float32_t;
 
 /**
   * @defgroup axisXbitXX_t
@@ -317,11 +312,11 @@ int32_t lis3mdl_read_reg(lis3mdl_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lis3mdl_write_reg(lis3mdl_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
-extern float32_t lis3mdl_from_fs4_to_gauss(int16_t lsb);
-extern float32_t lis3mdl_from_fs8_to_gauss(int16_t lsb);
-extern float32_t lis3mdl_from_fs12_to_gauss(int16_t lsb);
-extern float32_t lis3mdl_from_fs16_to_gauss(int16_t lsb);
-extern float32_t lis3mdl_from_lsb_to_celsius(int16_t lsb);
+extern float lis3mdl_from_fs4_to_gauss(int16_t lsb);
+extern float lis3mdl_from_fs8_to_gauss(int16_t lsb);
+extern float lis3mdl_from_fs12_to_gauss(int16_t lsb);
+extern float lis3mdl_from_fs16_to_gauss(int16_t lsb);
+extern float lis3mdl_from_lsb_to_celsius(int16_t lsb);
 
 typedef enum{
   LIS3MDL_LP_Hz625      = 0x00,

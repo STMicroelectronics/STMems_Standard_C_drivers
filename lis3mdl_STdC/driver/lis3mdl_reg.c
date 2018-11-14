@@ -101,29 +101,29 @@ int32_t lis3mdl_write_reg(lis3mdl_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-float32_t lis3mdl_from_fs4_to_gauss(int16_t lsb)
+float lis3mdl_from_fs4_to_gauss(int16_t lsb)
 {
-  return ((float32_t)lsb / 6842.0f);
+  return ((float)lsb / 6842.0f);
 }
 
-float32_t lis3mdl_from_fs8_to_gauss(int16_t lsb)
+float lis3mdl_from_fs8_to_gauss(int16_t lsb)
 {
-  return ((float32_t)lsb / 3421.0f);
+  return ((float)lsb / 3421.0f);
 }
 
-float32_t lis3mdl_from_fs12_to_gauss(int16_t lsb)
+float lis3mdl_from_fs12_to_gauss(int16_t lsb)
 {
-  return ((float32_t)lsb / 2281.0f);
+  return ((float)lsb / 2281.0f);
 }
 
-float32_t lis3mdl_from_fs16_to_gauss(int16_t lsb)
+float lis3mdl_from_fs16_to_gauss(int16_t lsb)
 {
-  return ((float32_t)lsb / 1711.0f);
+  return ((float)lsb / 1711.0f);
 }
 
-float32_t lis3mdl_from_lsb_to_celsius(int16_t lsb)
+float lis3mdl_from_lsb_to_celsius(int16_t lsb)
 {
-  return ((float32_t)lsb / 8.0f ) + ( 25.0f );
+  return ((float)lsb / 8.0f ) + ( 25.0f );
 }
 
 /**
