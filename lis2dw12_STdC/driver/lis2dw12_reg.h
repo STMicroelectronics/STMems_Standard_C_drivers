@@ -45,6 +45,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <math.h>
 
 /** @addtogroup LIS2DW12
   * @{
@@ -55,15 +56,9 @@
   * @{
   *
   */
- 
+
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
-/**
-  * Float typedef definition for compliance with:
-  * MISRA-C 2012 [Dir 4.6a] -> " Basic type used without typedef "
-  *
-  */
-typedef float float32_t;
 
 /**
   * @defgroup axisXbitXX_t
@@ -470,15 +465,15 @@ int32_t lis2dw12_read_reg(lis2dw12_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lis2dw12_write_reg(lis2dw12_ctx_t *ctx, uint8_t reg, uint8_t* data,
                            uint16_t len);
                            
-extern float32_t lis2dw12_from_fs2_to_mg(int16_t lsb);
-extern float32_t lis2dw12_from_fs4_to_mg(int16_t lsb);
-extern float32_t lis2dw12_from_fs8_to_mg(int16_t lsb);
-extern float32_t lis2dw12_from_fs16_to_mg(int16_t lsb);
-extern float32_t lis2dw12_from_fs2_lp1_to_mg(int16_t lsb);
-extern float32_t lis2dw12_from_fs4_lp1_to_mg(int16_t lsb);
-extern float32_t lis2dw12_from_fs8_lp1_to_mg(int16_t lsb);
-extern float32_t lis2dw12_from_fs16_lp1_to_mg(int16_t lsb);
-extern float32_t lis2dw12_from_lsb_to_celsius(int16_t lsb);
+extern float lis2dw12_from_fs2_to_mg(int16_t lsb);
+extern float lis2dw12_from_fs4_to_mg(int16_t lsb);
+extern float lis2dw12_from_fs8_to_mg(int16_t lsb);
+extern float lis2dw12_from_fs16_to_mg(int16_t lsb);
+extern float lis2dw12_from_fs2_lp1_to_mg(int16_t lsb);
+extern float lis2dw12_from_fs4_lp1_to_mg(int16_t lsb);
+extern float lis2dw12_from_fs8_lp1_to_mg(int16_t lsb);
+extern float lis2dw12_from_fs16_lp1_to_mg(int16_t lsb);
+extern float lis2dw12_from_lsb_to_celsius(int16_t lsb);
 
 typedef enum {
   LIS2DW12_HIGH_PERFORMANCE                    = 0x04,
