@@ -100,14 +100,14 @@ int32_t iis2mdc_write_reg(iis2mdc_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-float32_t iis2mdc_from_lsb_to_mgauss(int16_t lsb)
+float iis2mdc_from_lsb_to_mgauss(int16_t lsb)
 {
-  return ((float32_t)lsb) * 1.5f;
+  return ((float)lsb) * 1.5f;
 }
 
-float32_t iis2mdc_from_lsb_to_celsius(int16_t lsb)
+float iis2mdc_from_lsb_to_celsius(int16_t lsb)
 {
-  return (((float32_t)lsb / 8.0f) + 25.0f);
+  return (((float)lsb / 8.0f) + 25.0f);
 }
 
 /**

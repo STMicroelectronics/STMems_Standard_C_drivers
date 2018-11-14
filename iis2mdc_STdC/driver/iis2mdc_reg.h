@@ -45,6 +45,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <math.h>
 
 /** @addtogroup IIS2MDC
   * @{
@@ -58,12 +59,6 @@
 
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
-/**
-  * Float typedef definition for compliance with:
-  * MISRA-C 2012 [Dir 4.6a] -> " Basic type used without typedef "
-  *
-  */
-typedef float float32_t;
 
 /**
   * @defgroup axisXbitXX_t
@@ -117,6 +112,11 @@ typedef struct{
 #define PROPERTY_ENABLE                 (1U)
 
 #endif /* MEMS_SHARED_TYPES */
+
+/**
+  * @}
+  *
+  */
 
 /**
   * @}
@@ -285,8 +285,8 @@ int32_t iis2mdc_read_reg(iis2mdc_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t iis2mdc_write_reg(iis2mdc_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
-float32_t iis2mdc_from_lsb_to_mgauss(int16_t lsb);
-float32_t iis2mdc_from_lsb_to_celsius(int16_t lsb);
+float iis2mdc_from_lsb_to_mgauss(int16_t lsb);
+float iis2mdc_from_lsb_to_celsius(int16_t lsb);
 
 int32_t iis2mdc_mag_user_offset_set(iis2mdc_ctx_t *ctx, uint8_t *buff);
 int32_t iis2mdc_mag_user_offset_get(iis2mdc_ctx_t *ctx, uint8_t *buff);
