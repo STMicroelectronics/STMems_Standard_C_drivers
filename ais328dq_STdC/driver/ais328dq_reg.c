@@ -101,19 +101,19 @@ int32_t ais328dq_write_reg(ais328dq_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-float32_t ais328dq_from_fs2_to_mg(int16_t lsb)
+float ais328dq_from_fs2_to_mg(int16_t lsb)
 {
-  return ((float32_t)lsb * 0.98f / 16.0f);
+  return ((float)lsb * 0.98f / 16.0f);
 }
 
-float32_t ais328dq_from_fs4_to_mg(int16_t lsb)
+float ais328dq_from_fs4_to_mg(int16_t lsb)
 {
-  return ((float32_t)lsb * 1.95f / 16.0f);
+  return ((float)lsb * 1.95f / 16.0f);
 }
 
-float32_t ais328dq_from_fs8_to_mg(int16_t lsb)
+float ais328dq_from_fs8_to_mg(int16_t lsb)
 {
-  return ((float32_t)lsb * 3.91f / 16.0f);
+  return ((float)lsb * 3.91f / 16.0f);
 }
 
 /**

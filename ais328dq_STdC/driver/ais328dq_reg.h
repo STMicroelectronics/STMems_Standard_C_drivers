@@ -45,6 +45,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <math.h>
 
 /** @addtogroup AIS328DQ
   * @{
@@ -58,12 +59,6 @@
 
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
-/**
-  * Float typedef definition for compliance with:
-  * MISRA-C 2012 [Dir 4.6a] -> " Basic type used without typedef "
-  *
-  */
-typedef float float32_t;
 
 /**
   * @defgroup axisXbitXX_t
@@ -366,9 +361,9 @@ int32_t ais328dq_read_reg(ais328dq_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t ais328dq_write_reg(ais328dq_ctx_t *ctx, uint8_t reg, uint8_t* data,
                             uint16_t len);
 
-extern float32_t ais328dq_from_fs2_to_mg(int16_t lsb);
-extern float32_t ais328dq_from_fs4_to_mg(int16_t lsb);
-extern float32_t ais328dq_from_fs8_to_mg(int16_t lsb);
+extern float ais328dq_from_fs2_to_mg(int16_t lsb);
+extern float ais328dq_from_fs4_to_mg(int16_t lsb);
+extern float ais328dq_from_fs8_to_mg(int16_t lsb);
 
 int32_t ais328dq_axis_x_data_set(ais328dq_ctx_t *ctx, uint8_t val);
 int32_t ais328dq_axis_x_data_get(ais328dq_ctx_t *ctx, uint8_t *val);
