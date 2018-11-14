@@ -43,56 +43,77 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <math.h>
 
-/** @addtogroup lsm6dsl
- * @{
- */
+/** @addtogroup LSM6DSL
+  * @{
+  *
+  */
+
+/** @defgroup LSM6DSL_sensors_common_types
+  * @{
+  *
+  */
 
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-/** @defgroup ST_MEMS_common_types
+/**
+  * @defgroup axisXbitXX_t
+  * @brief    These unions are useful to represent different sensors data type.
+  *           These unions are not need by the driver.
+  *
+  *           REMOVING the unions you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  *
   * @{
+  *
   */
 
 typedef union{
-	int16_t i16bit[3];
-	uint8_t u8bit[6];
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
 } axis3bit16_t;
 
 typedef union{
-	int16_t i16bit;
-	uint8_t u8bit[2];
+  int16_t i16bit;
+  uint8_t u8bit[2];
 } axis1bit16_t;
 
 typedef union{
-	int32_t i32bit[3];
-	uint8_t u8bit[12];
+  int32_t i32bit[3];
+  uint8_t u8bit[12];
 } axis3bit32_t;
 
 typedef union{
-	int32_t i32bit;
-	uint8_t u8bit[4];
+  int32_t i32bit;
+  uint8_t u8bit[4];
 } axis1bit32_t;
-
-typedef struct {
-   uint8_t bit0       : 1;
-   uint8_t bit1       : 1;
-   uint8_t bit2       : 1;
-   uint8_t bit3       : 1;
-   uint8_t bit4       : 1;
-   uint8_t bit5       : 1;
-   uint8_t bit6       : 1;
-   uint8_t bit7       : 1;
-} bitwise_t;
-
-#define PROPERTY_DISABLE                (0)
-#define PROPERTY_ENABLE                 (1)
-
-#endif /* MEMS_SHARED_TYPES*/
 
 /**
   * @}
+  *
+  */
+
+typedef struct{
+  uint8_t bit0       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit7       : 1;
+} bitwise_t;
+
+#define PROPERTY_DISABLE                (0U)
+#define PROPERTY_ENABLE                 (1U)
+
+#endif /* MEMS_SHARED_TYPES */
+
+/**
+  * @}
+  *
   */
 
 /** @defgroup lsm6dsl_interface
