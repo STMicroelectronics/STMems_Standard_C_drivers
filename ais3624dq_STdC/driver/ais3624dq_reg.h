@@ -45,6 +45,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <math.h>
 
 /** @addtogroup AIS3624DQ
   * @{
@@ -58,12 +59,6 @@
 
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
-/**
-  * Float typedef definition for compliance with:
-  * MISRA-C 2012 [Dir 4.6a] -> " Basic type used without typedef "
-  *
-  */
-typedef float float32_t;
 
 /**
   * @defgroup axisXbitXX_t
@@ -146,7 +141,6 @@ typedef struct {
   * @}
   *
   */
-
 
 /** @defgroup AIS3624DQ_Infos
   * @{
@@ -366,9 +360,9 @@ int32_t ais3624dq_read_reg(ais3624dq_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t ais3624dq_write_reg(ais3624dq_ctx_t *ctx, uint8_t reg, uint8_t* data,
                             uint16_t len);
 
-extern float32_t ais3624dq_from_fs6_to_mg(int16_t lsb);
-extern float32_t ais3624dq_from_fs12_to_mg(int16_t lsb);
-extern float32_t ais3624dq_from_fs24_to_mg(int16_t lsb);
+extern float ais3624dq_from_fs6_to_mg(int16_t lsb);
+extern float ais3624dq_from_fs12_to_mg(int16_t lsb);
+extern float ais3624dq_from_fs24_to_mg(int16_t lsb);
 
 int32_t ais3624dq_axis_x_data_set(ais3624dq_ctx_t *ctx, uint8_t val);
 int32_t ais3624dq_axis_x_data_get(ais3624dq_ctx_t *ctx, uint8_t *val);
