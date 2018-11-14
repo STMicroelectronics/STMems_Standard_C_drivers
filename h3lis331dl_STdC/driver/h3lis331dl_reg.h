@@ -45,6 +45,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <math.h>
 
 /** @addtogroup H3LIS331DL
   * @{
@@ -58,12 +59,6 @@
 
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
-/**
-  * Float typedef definition for compliance with:
-  * MISRA-C 2012 [Dir 4.6a] -> " Basic type used without typedef "
-  *
-  */
-typedef float float32_t;
 
 /**
   * @defgroup axisXbitXX_t
@@ -146,7 +141,6 @@ typedef struct {
   * @}
   *
   */
-
 
 /** @defgroup H3LIS331DL_Infos
   * @{
@@ -366,9 +360,9 @@ int32_t h3lis331dl_read_reg(h3lis331dl_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t h3lis331dl_write_reg(h3lis331dl_ctx_t *ctx, uint8_t reg, uint8_t* data,
                             uint16_t len);
 
-extern float32_t h3lis331dl_from_fs100_to_mg(int16_t lsb);
-extern float32_t h3lis331dl_from_fs200_to_mg(int16_t lsb);
-extern float32_t h3lis331dl_from_fs400_to_mg(int16_t lsb);
+extern float h3lis331dl_from_fs100_to_mg(int16_t lsb);
+extern float h3lis331dl_from_fs200_to_mg(int16_t lsb);
+extern float h3lis331dl_from_fs400_to_mg(int16_t lsb);
 
 int32_t h3lis331dl_axis_x_data_set(h3lis331dl_ctx_t *ctx, uint8_t val);
 int32_t h3lis331dl_axis_x_data_get(h3lis331dl_ctx_t *ctx, uint8_t *val);
