@@ -102,9 +102,9 @@ int32_t stts751_write_reg(stts751_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-float32_t stts751_from_lsb_to_celsius(int16_t lsb)
+float stts751_from_lsb_to_celsius(int16_t lsb)
 {
-  return ((float32_t)lsb) / 256.0f;
+  return ((float)lsb) / 256.0f;
 }
 
 /**
@@ -124,7 +124,7 @@ float32_t stts751_from_lsb_to_celsius(int16_t lsb)
   *
   */
 
-int16_t stts751_from_celsius_to_lsb(float32_t celsius)
+int16_t stts751_from_celsius_to_lsb(float celsius)
 {
   return (int16_t)(celsius * 256.0f);
 }

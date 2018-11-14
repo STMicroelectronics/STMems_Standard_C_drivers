@@ -45,6 +45,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <math.h>
 
 /** @addtogroup STTS751
   * @{
@@ -58,12 +59,6 @@
 
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
-/**
-  * Float typedef definition for compliance with:
-  * MISRA-C 2012 [Dir 4.6a] -> " Basic type used without typedef "
-  *
-  */
-typedef float float32_t;
 
 /**
   * @defgroup axisXbitXX_t
@@ -251,8 +246,8 @@ int32_t stts751_read_reg(stts751_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t stts751_write_reg(stts751_ctx_t *ctx, uint8_t reg, uint8_t* data,
                            uint16_t len);
 
-extern float32_t stts751_from_lsb_to_celsius(int16_t lsb);
-extern int16_t stts751_from_celsius_to_lsb(float32_t celsius);
+extern float stts751_from_lsb_to_celsius(int16_t lsb);
+extern int16_t stts751_from_celsius_to_lsb(float celsius);
 
 typedef enum {
   STTS751_TEMP_ODR_OFF        = 0x80,
