@@ -101,29 +101,29 @@ int32_t lis3de_write_reg(lis3de_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-float32_t lis3de_from_fs2_to_mg(int16_t lsb)
+float lis3de_from_fs2_to_mg(int16_t lsb)
 {
-  return ( (float32_t)lsb ) * 15.6f;
+  return ( (float)lsb ) * 15.6f;
 }
 
-float32_t lis3de_from_fs4_to_mg(int16_t lsb)
+float lis3de_from_fs4_to_mg(int16_t lsb)
 {
-  return ( (float32_t)lsb ) * 31.2f;
+  return ( (float)lsb ) * 31.2f;
 }
 
-float32_t lis3de_from_fs8_to_mg(int16_t lsb)
+float lis3de_from_fs8_to_mg(int16_t lsb)
 {
-  return ( (float32_t)lsb ) * 62.5f;
+  return ( (float)lsb ) * 62.5f;
 }
 
-float32_t lis3de_from_fs16_to_mg(int16_t lsb)
+float lis3de_from_fs16_to_mg(int16_t lsb)
 {
-  return ( (float32_t)lsb ) * 187.5f;
+  return ( (float)lsb ) * 187.5f;
 }
 
-float32_t lis3de_from_lsb_to_celsius(int16_t lsb)
+float lis3de_from_lsb_to_celsius(int16_t lsb)
 {
-  return ( ( (float32_t)lsb ) * 1.0f ) + 25.0f;
+  return ( ( (float)lsb ) * 1.0f ) + 25.0f;
 }
 
 /**

@@ -45,31 +45,27 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <math.h>
 
 /** @addtogroup LIS3DE
- * @{
- *
- */
+  * @{
+  *
+  */
 
 /** @defgroup LIS3DE_sensors_common_types
   * @{
   *
   */
+
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
-/**
-  * Float typedef definition for complyancy with:
-  * MISRA-C 2012 [Dir 4.6a] -> " Basic type used without typedef "
-  *
-  */
-typedef float float32_t;
 
 /**
   * @defgroup axisXbitXX_t
   * @brief    These unions are useful to represent different sensors data type.
   *           These unions are not need by the driver.
   *
-  *           REMOVING the unions you are complient with:
+  *           REMOVING the unions you are compliant with:
   *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
   *
   * @{
@@ -466,11 +462,11 @@ int32_t lis3de_read_reg(lis3de_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lis3de_write_reg(lis3de_ctx_t *ctx, uint8_t reg, uint8_t* data,
                            uint16_t len);
 
-extern float32_t lis3de_from_fs2_to_mg(int16_t lsb);
-extern float32_t lis3de_from_fs4_to_mg(int16_t lsb);
-extern float32_t lis3de_from_fs8_to_mg(int16_t lsb);
-extern float32_t lis3de_from_fs16_to_mg(int16_t lsb);
-extern float32_t lis3de_from_lsb_to_celsius(int16_t lsb);
+extern float lis3de_from_fs2_to_mg(int16_t lsb);
+extern float lis3de_from_fs4_to_mg(int16_t lsb);
+extern float lis3de_from_fs8_to_mg(int16_t lsb);
+extern float lis3de_from_fs16_to_mg(int16_t lsb);
+extern float lis3de_from_lsb_to_celsius(int16_t lsb);
 
 int32_t lis3de_temp_status_reg_get(lis3de_ctx_t *ctx, uint8_t *buff);
 int32_t lis3de_temp_data_ready_get(lis3de_ctx_t *ctx, uint8_t *val);
