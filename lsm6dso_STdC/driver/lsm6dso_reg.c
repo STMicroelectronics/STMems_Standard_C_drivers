@@ -100,59 +100,59 @@ int32_t lsm6dso_write_reg(lsm6dso_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @{
   *
 */
-float32_t lsm6dso_from_fs2_to_mg(int16_t lsb)
+float lsm6dso_from_fs2_to_mg(int16_t lsb)
 {
-  return ((float32_t)lsb) * 0.061f;
+  return ((float)lsb) * 0.061f;
 }
 
-float32_t lsm6dso_from_fs4_to_mg(int16_t lsb)
+float lsm6dso_from_fs4_to_mg(int16_t lsb)
 {
-  return ((float32_t)lsb) * 0.122f;
+  return ((float)lsb) * 0.122f;
 }
 
-float32_t lsm6dso_from_fs8_to_mg(int16_t lsb)
+float lsm6dso_from_fs8_to_mg(int16_t lsb)
 {
-  return ((float32_t)lsb) * 0.244f;
+  return ((float)lsb) * 0.244f;
 }
 
-float32_t lsm6dso_from_fs16_to_mg(int16_t lsb)
+float lsm6dso_from_fs16_to_mg(int16_t lsb)
 {
-  return ((float32_t)lsb) *0.488f;
+  return ((float)lsb) *0.488f;
 }
 
-float32_t lsm6dso_from_fs125_to_mdps(int16_t lsb)
+float lsm6dso_from_fs125_to_mdps(int16_t lsb)
 {
-  return ((float32_t)lsb) *4.375f;
+  return ((float)lsb) *4.375f;
 }
 
-float32_t lsm6dso_from_fs500_to_mdps(int16_t lsb)
+float lsm6dso_from_fs500_to_mdps(int16_t lsb)
 {
-  return ((float32_t)lsb) *1.750f;
+  return ((float)lsb) *1.750f;
 }
 
-float32_t lsm6dso_from_fs250_to_mdps(int16_t lsb)
+float lsm6dso_from_fs250_to_mdps(int16_t lsb)
 {
-  return ((float32_t)lsb) *0.875f;
+  return ((float)lsb) *0.875f;
 }
 
-float32_t lsm6dso_from_fs1000_to_mdps(int16_t lsb)
+float lsm6dso_from_fs1000_to_mdps(int16_t lsb)
 {
-  return ((float32_t)lsb) *0.035f;
+  return ((float)lsb) *0.035f;
 }
 
-float32_t lsm6dso_from_fs2000_to_mdps(int16_t lsb)
+float lsm6dso_from_fs2000_to_mdps(int16_t lsb)
 {
-  return ((float32_t)lsb) *0.070f;
+  return ((float)lsb) *0.070f;
 }
 
-float32_t lsm6dso_from_lsb_to_celsius(int16_t lsb)
+float lsm6dso_from_lsb_to_celsius(int16_t lsb)
 {
-  return (((float32_t)lsb / 256.0f) + 25.0f);
+  return (((float)lsb / 256.0f) + 25.0f);
 }
 
-float32_t lsm6dso_from_lsb_to_nsec(int16_t lsb)
+float lsm6dso_from_lsb_to_nsec(int16_t lsb)
 {
-  return ((float32_t)lsb * 25000.0f);
+  return ((float)lsb * 25000.0f);
 }
 
 /**

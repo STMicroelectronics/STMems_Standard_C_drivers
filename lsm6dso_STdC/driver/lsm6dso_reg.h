@@ -45,6 +45,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <math.h>
 
 /** @addtogroup LSM6DSO
   * @{
@@ -58,12 +59,6 @@
 
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
-/**
-  * Float typedef definition for compliance with:
-  * MISRA-C 2012 [Dir 4.6a] -> " Basic type used without typedef "
-  *
-  */
-typedef float float32_t;
 
 /**
   * @defgroup axisXbitXX_t
@@ -1601,17 +1596,17 @@ int32_t lsm6dso_read_reg(lsm6dso_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lsm6dso_write_reg(lsm6dso_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
-extern float32_t lsm6dso_from_fs2_to_mg(int16_t lsb);
-extern float32_t lsm6dso_from_fs4_to_mg(int16_t lsb);
-extern float32_t lsm6dso_from_fs8_to_mg(int16_t lsb);
-extern float32_t lsm6dso_from_fs16_to_mg(int16_t lsb);
-extern float32_t lsm6dso_from_fs125_to_mdps(int16_t lsb);
-extern float32_t lsm6dso_from_fs500_to_mdps(int16_t lsb);
-extern float32_t lsm6dso_from_fs250_to_mdps(int16_t lsb);
-extern float32_t lsm6dso_from_fs1000_to_mdps(int16_t lsb);
-extern float32_t lsm6dso_from_fs2000_to_mdps(int16_t lsb);
-extern float32_t lsm6dso_from_lsb_to_celsius(int16_t lsb);
-extern float32_t lsm6dso_from_lsb_to_nsec(int16_t lsb);
+extern float lsm6dso_from_fs2_to_mg(int16_t lsb);
+extern float lsm6dso_from_fs4_to_mg(int16_t lsb);
+extern float lsm6dso_from_fs8_to_mg(int16_t lsb);
+extern float lsm6dso_from_fs16_to_mg(int16_t lsb);
+extern float lsm6dso_from_fs125_to_mdps(int16_t lsb);
+extern float lsm6dso_from_fs500_to_mdps(int16_t lsb);
+extern float lsm6dso_from_fs250_to_mdps(int16_t lsb);
+extern float lsm6dso_from_fs1000_to_mdps(int16_t lsb);
+extern float lsm6dso_from_fs2000_to_mdps(int16_t lsb);
+extern float lsm6dso_from_lsb_to_celsius(int16_t lsb);
+extern float lsm6dso_from_lsb_to_nsec(int16_t lsb);
 
 typedef enum {
   LSM6DSO_2g   = 0,
