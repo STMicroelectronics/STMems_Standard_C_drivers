@@ -121,16 +121,18 @@ void example_main_lsm9ds1(void)
   platform_init();
 
   /* Initialize inertial sensors (IMU) driver interface */
+  uint8_t i2c_add_mag = LSM9DS1_MAG_I2C_ADD_L;
   lsm9ds1_ctx_t dev_ctx_mag;
   dev_ctx_mag.write_reg = platform_write;
   dev_ctx_mag.read_reg = platform_read;
-  dev_ctx_mag.handle = (void*)LSM9DS1_MAG_I2C_ADD_L;
+  dev_ctx_mag.handle = (void*)&i2c_add_mag;
 
   /* Initialize magnetic sensors driver interface */
+  uint8_t i2c_add_imu = LSM9DS1_IMU_I2C_ADD_H;
   lsm9ds1_ctx_t dev_ctx_imu;
   dev_ctx_imu.write_reg = platform_write;
   dev_ctx_imu.read_reg = platform_read;
-  dev_ctx_imu.handle = (void*)LSM9DS1_IMU_I2C_ADD_H;
+  dev_ctx_imu.handle = (void*)&i2c_add_imu;
 
   /* Check device ID */
   lsm9ds1_dev_id_get(&dev_ctx_mag, &dev_ctx_imu, &whoamI);
@@ -228,7 +230,8 @@ void example_main_lsm9ds1(void)
 static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
-  HAL_I2C_Mem_Write(&hi2c1, (uint8_t)handle, reg,
+  uint8_t *i2c_address = handle;
+  HAL_I2C_Mem_Write(&hi2c1, *i2c_address, reg,
                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   return 0;
 }
@@ -246,7 +249,8 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  HAL_I2C_Mem_Read(&hi2c1, (uint8_t)handle, reg,
+  uint8_t *i2c_address = handle;
+  HAL_I2C_Mem_Read(&hi2c1, *i2c_address, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   return 0;
 }
