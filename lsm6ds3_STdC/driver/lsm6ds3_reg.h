@@ -1325,14 +1325,8 @@ int32_t lsm6ds3_wkup_dur_get(lsm6ds3_ctx_t *ctx, uint8_t *val);
 int32_t lsm6ds3_gy_sleep_mode_set(lsm6ds3_ctx_t *ctx, uint8_t val);
 int32_t lsm6ds3_gy_sleep_mode_get(lsm6ds3_ctx_t *ctx, uint8_t *val);
 
-typedef enum {
-  LSM6DS3_XL_AND_GY_NOT_AFFECTED   = 0,
-  LSM6DS3_XL_12Hz5_GY_NOT_AFFECTED = 1,
-  LSM6DS3_XL_12Hz5_GY_SLEEP        = 2,
-  LSM6DS3_XL_12Hz5_GY_PD           = 3,
-} lsm6ds3_act_md_t;
-int32_t lsm6ds3_act_mode_set(lsm6ds3_ctx_t *ctx, lsm6ds3_act_md_t val);
-int32_t lsm6ds3_act_mode_get(lsm6ds3_ctx_t *ctx, lsm6ds3_act_md_t *val);
+int32_t lsm6ds3_act_mode_set(lsm6ds3_ctx_t *ctx, uint8_t val);
+int32_t lsm6ds3_act_mode_get(lsm6ds3_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm6ds3_act_sleep_dur_set(lsm6ds3_ctx_t *ctx, uint8_t val);
 int32_t lsm6ds3_act_sleep_dur_get(lsm6ds3_ctx_t *ctx, uint8_t *val);

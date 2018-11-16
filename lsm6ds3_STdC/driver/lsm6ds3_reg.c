@@ -1933,7 +1933,8 @@ int32_t lsm6ds3_xl_hp_bandwidth_set(lsm6ds3_ctx_t *ctx, lsm6ds3_hp_bw_t val)
 
   ret = lsm6ds3_read_reg(ctx, LSM6DS3_CTRL8_XL, (uint8_t*)&ctrl8_xl, 1);
   if(ret == 0){
-    ctrl8_xl.hp_slope_xl_en = (uint8_t)val;
+	ctrl8_xl.hp_slope_xl_en = PROPERTY_ENABLE;
+    ctrl8_xl.hpcf_xl = (uint8_t)val;
     ret = lsm6ds3_write_reg(ctx, LSM6DS3_CTRL8_XL, (uint8_t*)&ctrl8_xl, 1);
   }
   return ret;
@@ -1954,7 +1955,7 @@ int32_t lsm6ds3_xl_hp_bandwidth_get(lsm6ds3_ctx_t *ctx, lsm6ds3_hp_bw_t *val)
 
   ret = lsm6ds3_read_reg(ctx, LSM6DS3_CTRL8_XL, (uint8_t*)&ctrl8_xl, 1);
 
-  switch (ctrl8_xl.hp_slope_xl_en)
+  switch (ctrl8_xl.hpcf_xl)
   {
     case LSM6DS3_XL_HP_ODR_DIV_4:
       *val = LSM6DS3_XL_HP_ODR_DIV_4;
@@ -1991,7 +1992,8 @@ int32_t lsm6ds3_xl_lp2_bandwidth_set(lsm6ds3_ctx_t *ctx, lsm6ds3_lp_bw_t val)
 
   ret = lsm6ds3_read_reg(ctx, LSM6DS3_CTRL8_XL, (uint8_t*)&ctrl8_xl, 1);
   if(ret == 0){
-    ctrl8_xl.lpf2_xl_en = (uint8_t)val;
+    ctrl8_xl.lpf2_xl_en = PROPERTY_ENABLE;
+    ctrl8_xl.hpcf_xl= (uint8_t)val;
     ret = lsm6ds3_write_reg(ctx, LSM6DS3_CTRL8_XL, (uint8_t*)&ctrl8_xl, 1);
   }
   return ret;
@@ -2012,7 +2014,7 @@ int32_t lsm6ds3_xl_lp2_bandwidth_get(lsm6ds3_ctx_t *ctx, lsm6ds3_lp_bw_t *val)
 
   ret = lsm6ds3_read_reg(ctx, LSM6DS3_CTRL8_XL, (uint8_t*)&ctrl8_xl, 1);
 
-  switch (ctrl8_xl.lpf2_xl_en)
+  switch (ctrl8_xl.hpcf_xl)
   {
     case LSM6DS3_XL_LP_ODR_DIV_50:
       *val = LSM6DS3_XL_LP_ODR_DIV_50;
@@ -2765,7 +2767,7 @@ int32_t lsm6ds3_gy_sleep_mode_get(lsm6ds3_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lsm6ds3_act_mode_set(lsm6ds3_ctx_t *ctx, lsm6ds3_act_md_t val)
+int32_t lsm6ds3_act_mode_set(lsm6ds3_ctx_t *ctx, uint8_t val)
 {
   lsm6ds3_wake_up_ths_t wake_up_ths;
   int32_t ret;
@@ -2786,31 +2788,14 @@ int32_t lsm6ds3_act_mode_set(lsm6ds3_ctx_t *ctx, lsm6ds3_act_md_t val)
   * @param  val         get the values of inactivity in reg WAKE_UP_THS
   *
   */
-int32_t lsm6ds3_act_mode_get(lsm6ds3_ctx_t *ctx, lsm6ds3_act_md_t *val)
+int32_t lsm6ds3_act_mode_get(lsm6ds3_ctx_t *ctx, uint8_t *val)
 {
   lsm6ds3_wake_up_ths_t wake_up_ths;
   int32_t ret;
 
   ret = lsm6ds3_read_reg(ctx, LSM6DS3_WAKE_UP_THS, (uint8_t*)&wake_up_ths, 1);
+  *val = wake_up_ths.inactivity;
 
-  switch (wake_up_ths.inactivity)
-  {
-    case  LSM6DS3_XL_AND_GY_NOT_AFFECTED:
-      *val =  LSM6DS3_XL_AND_GY_NOT_AFFECTED;
-      break;
-    case  LSM6DS3_XL_12Hz5_GY_NOT_AFFECTED:
-      *val =  LSM6DS3_XL_12Hz5_GY_NOT_AFFECTED;
-      break;
-    case LSM6DS3_XL_12Hz5_GY_SLEEP:
-      *val = LSM6DS3_XL_12Hz5_GY_SLEEP;
-      break;
-    case LSM6DS3_XL_12Hz5_GY_PD:
-      *val = LSM6DS3_XL_12Hz5_GY_PD;
-      break;
-    default:
-      *val =  LSM6DS3_XL_AND_GY_NOT_AFFECTED;
-      break;
-  }
   return ret;
 }
 
