@@ -3917,7 +3917,7 @@ int32_t lsm6dso_int_notification_set(lsm6dso_ctx_t *ctx, lsm6dso_lir_t val)
   ret = lsm6dso_read_reg(ctx, LSM6DSO_TAP_CFG0, (uint8_t*) &tap_cfg0, 1);
   if (ret == 0) {
     tap_cfg0.lir = (uint8_t)val & 0x01U;
-    tap_cfg0.int_clr_on_read = (uint8_t)val & 0x0U;
+    tap_cfg0.int_clr_on_read = (uint8_t)val & 0x01U;
     ret = lsm6dso_write_reg(ctx, LSM6DSO_TAP_CFG0, (uint8_t*) &tap_cfg0, 1);
   }
   if (ret == 0) {
@@ -3954,7 +3954,17 @@ int32_t lsm6dso_int_notification_get(lsm6dso_ctx_t *ctx, lsm6dso_lir_t *val)
 
   ret = lsm6dso_read_reg(ctx, LSM6DSO_TAP_CFG0, (uint8_t*) &tap_cfg0, 1);
   if (ret == 0) {
-    switch (tap_cfg0.lir) {
+
+      ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_PAGE_RW, (uint8_t*) &page_rw, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
+  }
+  if (ret == 0) {
+    switch ((page_rw.emb_func_lir << 1) | tap_cfg0.lir) {
       case LSM6DSO_ALL_INT_PULSED:
         *val = LSM6DSO_ALL_INT_PULSED;
         break;
@@ -5278,7 +5288,7 @@ int32_t lsm6dso_compression_algo_get(lsm6dso_ctx_t *ctx,
 
   ret = lsm6dso_read_reg(ctx, LSM6DSO_FIFO_CTRL2, (uint8_t*)&reg, 1);
 
-  switch (reg.uncoptr_rate) {
+  switch ((reg.fifo_compr_rt_en<<2) | reg.uncoptr_rate) {
     case LSM6DSO_CMP_DISABLE:
       *val = LSM6DSO_CMP_DISABLE;
       break;
