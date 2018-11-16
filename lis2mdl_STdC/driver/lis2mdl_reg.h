@@ -1,42 +1,42 @@
 /*
  ******************************************************************************
  * @file    lis2mdl_reg.h
- * @author  MEMS Software Solution Team
- * @date    06-October-2017
+ * @author  Sensors Software Solution Team
  * @brief   This file contains all the functions prototypes for the
  *          lis2mdl_reg.c driver.
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __LIS2MDL_DRIVER__H
-#define __LIS2MDL_DRIVER__H
+#ifndef LIS2MDL_REGS_H
+#define LIS2MDL_REGS_H
 
 #ifdef __cplusplus
   extern "C" {
@@ -44,61 +44,86 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <math.h>
 
-/** @addtogroup lis2mdl
- * @{
- */
-
-#ifndef __MEMS_SHARED__TYPES
-#define __MEMS_SHARED__TYPES
-
-/** @defgroup ST_MEMS_common_types
+/** @addtogroup LIS2MDL
   * @{
+  *
+  */
+
+/** @defgroup LIS2MDL_sensors_common_types
+  * @{
+  *
+  */
+
+#ifndef MEMS_SHARED_TYPES
+#define MEMS_SHARED_TYPES
+
+/**
+  * @defgroup axisXbitXX_t
+  * @brief    These unions are useful to represent different sensors data type.
+  *           These unions are not need by the driver.
+  *
+  *           REMOVING the unions you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  *
+  * @{
+  *
   */
 
 typedef union{
-	int16_t i16bit[3];
-	uint8_t u8bit[6];
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
 } axis3bit16_t;
 
 typedef union{
-	int16_t i16bit;
-	uint8_t u8bit[2];
+  int16_t i16bit;
+  uint8_t u8bit[2];
 } axis1bit16_t;
 
 typedef union{
-	int32_t i32bit[3];
-	uint8_t u8bit[12];
+  int32_t i32bit[3];
+  uint8_t u8bit[12];
 } axis3bit32_t;
 
 typedef union{
-	int32_t i32bit;
-	uint8_t u8bit[4];
+  int32_t i32bit;
+  uint8_t u8bit[4];
 } axis1bit32_t;
-
-typedef struct {
-   uint8_t bit0       : 1;
-   uint8_t bit1       : 1;
-   uint8_t bit2       : 1;
-   uint8_t bit3       : 1;
-   uint8_t bit4       : 1;
-   uint8_t bit5       : 1;
-   uint8_t bit6       : 1;
-   uint8_t bit7       : 1;
-} bitwise_t;
-
-#define PROPERTY_DISABLE                (0)
-#define PROPERTY_ENABLE                 (1)
-
-#endif /*__MEMS_SHARED__TYPES*/
 
 /**
   * @}
+  *
   */
 
-/** @defgroup lis2mdl_interface
-  * @{
+typedef struct{
+  uint8_t bit0       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit7       : 1;
+} bitwise_t;
+
+#define PROPERTY_DISABLE                (0U)
+#define PROPERTY_ENABLE                 (1U)
+
+#endif /* MEMS_SHARED_TYPES */
+
+/**
+  * @}
+  *
   */
+
+  /** @addtogroup  LIS2MDL_Interfaces_Functions
+    * @brief       This section provide a set of functions used to read and
+    *              write a generic register of the device.
+    *              MANDATORY: return 0 -> no Error.
+    * @{
+    *
+    */
 
 typedef int32_t (*lis2mdl_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
 typedef int32_t (*lis2mdl_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
@@ -113,41 +138,33 @@ typedef struct {
 
 /**
   * @}
+  *
   */
 
-/** @defgroup lis2mdl_Infos
+/** @defgroup LSM9DS1_Infos
   * @{
+  *
   */
+
   /** I2C Device Address 8 bit format **/
-#define LIS2MDL_I2C_ADD   0x3D
+#define LIS2MDL_I2C_ADD                 0x3DU
 
 /** Device Identification (Who am I) **/
-#define LIS2MDL_ID            0x40
+#define LIS2MDL_ID                      0x40U
 
 /**
   * @}
+  *
   */
 
-/**
-  * @defgroup lis2mdl_Sensitivity
-  * @{
-  */
-
-#define LIS2MDL_FROM_LSB_TO_mG(lsb)     (float)(lsb * 1.5f)
-#define LIS2MDL_FROM_LSB_TO_degC(lsb)   (float)(lsb / 8.0f) + (25.0f)
-
-/**
-  * @}
-  */
-
-#define LIS2MDL_OFFSET_X_REG_L          0x45
-#define LIS2MDL_OFFSET_X_REG_H          0x46
-#define LIS2MDL_OFFSET_Y_REG_L          0x47
-#define LIS2MDL_OFFSET_Y_REG_H          0x48
-#define LIS2MDL_OFFSET_Z_REG_L          0x49
-#define LIS2MDL_OFFSET_Z_REG_H          0x4A
-#define LIS2MDL_WHO_AM_I                0x4F
-#define LIS2MDL_CFG_REG_A               0x60
+#define LIS2MDL_OFFSET_X_REG_L          0x45U
+#define LIS2MDL_OFFSET_X_REG_H          0x46U
+#define LIS2MDL_OFFSET_Y_REG_L          0x47U
+#define LIS2MDL_OFFSET_Y_REG_H          0x48U
+#define LIS2MDL_OFFSET_Z_REG_L          0x49U
+#define LIS2MDL_OFFSET_Z_REG_H          0x4AU
+#define LIS2MDL_WHO_AM_I                0x4FU
+#define LIS2MDL_CFG_REG_A               0x60U
 typedef struct {
   uint8_t md                     : 2;
   uint8_t odr                    : 2;
@@ -157,7 +174,7 @@ typedef struct {
   uint8_t comp_temp_en           : 1;
 } lis2mdl_cfg_reg_a_t;
 
-#define LIS2MDL_CFG_REG_B               0x61
+#define LIS2MDL_CFG_REG_B               0x61U
 typedef struct {
   uint8_t lpf                    : 1;
   uint8_t set_rst                : 2; /* OFF_CANC + Set_FREQ */
@@ -166,7 +183,7 @@ typedef struct {
   uint8_t not_used_01            : 3;
 } lis2mdl_cfg_reg_b_t;
 
-#define LIS2MDL_CFG_REG_C               0x62
+#define LIS2MDL_CFG_REG_C               0x62U
 typedef struct {
   uint8_t drdy_on_pin            : 1;
   uint8_t self_test              : 1;
@@ -178,7 +195,7 @@ typedef struct {
   uint8_t not_used_02            : 1;
 } lis2mdl_cfg_reg_c_t;
 
-#define LIS2MDL_INT_CRTL_REG            0x63
+#define LIS2MDL_INT_CRTL_REG            0x63U
 typedef struct {
   uint8_t ien                    : 1;
   uint8_t iel                    : 1;
@@ -189,7 +206,7 @@ typedef struct {
   uint8_t xien                   : 1;
 } lis2mdl_int_crtl_reg_t;
 
-#define LIS2MDL_INT_SOURCE_REG          0x64
+#define LIS2MDL_INT_SOURCE_REG          0x64U
 typedef struct {
   uint8_t _int                    : 1;
   uint8_t mroi                   : 1;
@@ -201,9 +218,9 @@ typedef struct {
   uint8_t p_th_s_x               : 1;
 } lis2mdl_int_source_reg_t;
 
-#define LIS2MDL_INT_THS_L_REG           0x65
-#define LIS2MDL_INT_THS_H_REG           0x66
-#define LIS2MDL_STATUS_REG              0x67
+#define LIS2MDL_INT_THS_L_REG           0x65U
+#define LIS2MDL_INT_THS_H_REG           0x66U
+#define LIS2MDL_STATUS_REG              0x67U
 typedef struct {
   uint8_t xda                    : 1;
   uint8_t yda                    : 1;
@@ -215,15 +232,27 @@ typedef struct {
   uint8_t zyxor                  : 1;
 } lis2mdl_status_reg_t;
 
-#define LIS2MDL_OUTX_L_REG              0x68
-#define LIS2MDL_OUTX_H_REG              0x69
-#define LIS2MDL_OUTY_L_REG              0x6A
-#define LIS2MDL_OUTY_H_REG              0x6B
-#define LIS2MDL_OUTZ_L_REG              0x6C
-#define LIS2MDL_OUTZ_H_REG              0x6D
-#define LIS2MDL_TEMP_OUT_L_REG          0x6E
-#define LIS2MDL_TEMP_OUT_H_REG          0x6F
+#define LIS2MDL_OUTX_L_REG              0x68U
+#define LIS2MDL_OUTX_H_REG              0x69U
+#define LIS2MDL_OUTY_L_REG              0x6AU
+#define LIS2MDL_OUTY_H_REG              0x6BU
+#define LIS2MDL_OUTZ_L_REG              0x6CU
+#define LIS2MDL_OUTZ_H_REG              0x6DU
+#define LIS2MDL_TEMP_OUT_L_REG          0x6EU
+#define LIS2MDL_TEMP_OUT_H_REG          0x6FU
 
+/**
+  * @defgroup LIS2MDL_Register_Union
+  * @brief    This union group all the registers that has a bit-field
+  *           description.
+  *           This union is useful but not need by the driver.
+  *
+  *           REMOVING this union you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  *
+  * @{
+  *
+  */
 typedef union{
   lis2mdl_cfg_reg_a_t            cfg_reg_a;
   lis2mdl_cfg_reg_b_t            cfg_reg_b;
@@ -235,13 +264,22 @@ typedef union{
   uint8_t                        byte;
 } lis2mdl_reg_t;
 
+/**
+  * @}
+  *
+  */
+
 int32_t lis2mdl_read_reg(lis2mdl_ctx_t *ctx, uint8_t reg, uint8_t* data,
                          uint16_t len);
 int32_t lis2mdl_write_reg(lis2mdl_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
+                          
+extern float_t lis2mdl_from_lsb_to_mgauss(int16_t lsb);
+extern float_t lis2mdl_from_lsb_to_celsius(int16_t lsb);
 
 int32_t lis2mdl_mag_user_offset_set(lis2mdl_ctx_t *ctx, uint8_t *buff);
 int32_t lis2mdl_mag_user_offset_get(lis2mdl_ctx_t *ctx, uint8_t *buff);
+
 typedef enum {
   LIS2MDL_CONTINUOUS_MODE  = 0,
   LIS2MDL_SINGLE_TRIGGER   = 1,
@@ -349,6 +387,7 @@ int32_t lis2mdl_int_gen_source_get(lis2mdl_ctx_t *ctx,
 
 int32_t lis2mdl_int_gen_treshold_set(lis2mdl_ctx_t *ctx, uint8_t *buff);
 int32_t lis2mdl_int_gen_treshold_get(lis2mdl_ctx_t *ctx, uint8_t *buff);
+
 typedef enum {
   LIS2MDL_I2C_ENABLE   = 0,
   LIS2MDL_I2C_DISABLE  = 1,
@@ -359,13 +398,14 @@ int32_t lis2mdl_i2c_interface_get(lis2mdl_ctx_t *ctx,
                                   lis2mdl_i2c_dis_t *val);
 
 /**
-  * @}
+  *@}
+  *
   */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*__LIS2MDL_DRIVER__H */
+#endif /* LIS2MDL_REGS_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

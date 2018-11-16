@@ -220,7 +220,7 @@ static int test_self_test_lis2mdl(lis2mdl_ctx_t *dev_ctx)
       lis2mdl_magnetic_raw_get(dev_ctx, data_raw_magnetic[i].u8bit);
       for (axis = 0; axis < 3; axis++)
         magnetic_mG[i][axis] =
-          LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic[i].i16bit[axis]);
+          lis2mdl_from_lsb_to_mgauss(data_raw_magnetic[i].i16bit[axis]);
 
         i++;
     }
@@ -260,7 +260,7 @@ static int test_self_test_lis2mdl(lis2mdl_ctx_t *dev_ctx)
       lis2mdl_magnetic_raw_get(dev_ctx, data_raw_magnetic[i].u8bit);
       for (axis = 0; axis < 3; axis++)
       magnetic_mG[i][axis] =
-        LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic[i].i16bit[axis]);
+        lis2mdl_from_lsb_to_mgauss(data_raw_magnetic[i].i16bit[axis]);
 
       i++;
     }
