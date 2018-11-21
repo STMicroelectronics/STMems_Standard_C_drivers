@@ -14,4 +14,4 @@ every hardware.
 
 www.st.com/mems
 
-IIS2DPLC DS rev1.0 
+IIS2DLPC DS rev1.0 
