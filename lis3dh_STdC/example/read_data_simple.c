@@ -165,7 +165,7 @@ void example_main_lis3dh(void)
   /*
    * Enable temperature sensor
    */   
-  lis3dh_temperature_meas_set(&dev_ctx, LIS3DH_TEMP_ENABLE);
+  lis3dh_aux_adc_set(&dev_ctx, LIS3DH_AUX_ON_TEMPERATURE);
 
   /*
    * Set device in continuous mode with 12 bit resol.
