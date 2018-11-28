@@ -451,12 +451,12 @@ int32_t stts751_high_temperature_threshold_set(stts751_ctx_t *ctx,
 
   temperature_ptr = (uint8_t*)&buff;
   ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_HIGH_LIMIT_LOW,
-                          (uint8_t*)&temperature_ptr, 1);
+                          (uint8_t*)temperature_ptr, 1);
 
   if (ret == 0) {
     temperature_ptr++;
     ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_HIGH_LIMIT_HIGH,
-                            (uint8_t*)&temperature_ptr, 1);
+                            (uint8_t*)temperature_ptr, 1);
   }
 
   return ret;
@@ -506,12 +506,12 @@ int32_t stts751_low_temperature_threshold_set(stts751_ctx_t *ctx,
 
   temperature_ptr = (uint8_t*)&buff;
   ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_LOW_LIMIT_LOW,
-                          (uint8_t*)&temperature_ptr, 1);
+                          (uint8_t*)temperature_ptr, 1);
 
   if (ret == 0) {
     temperature_ptr++;
     ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_LOW_LIMIT_HIGH,
-                            (uint8_t*)&temperature_ptr, 1);
+                            (uint8_t*)temperature_ptr, 1);
   }
 
   return ret;
