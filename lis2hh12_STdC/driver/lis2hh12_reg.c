@@ -100,24 +100,24 @@ int32_t lis2hh12_write_reg(lis2hh12_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-float32_t lis2hh12_from_fs2g_to_mg(int16_t lsb)
+float_t lis2hh12_from_fs2g_to_mg(int16_t lsb)
 {
-  return ((float32_t)lsb *0.061f);
+  return ((float_t)lsb *0.061f);
 }
 
-float32_t lis2hh12_from_fs4g_to_mg(int16_t lsb)
+float_t lis2hh12_from_fs4g_to_mg(int16_t lsb)
 {
-  return ((float32_t)lsb *0.122f);
+  return ((float_t)lsb *0.122f);
 }
 
-float32_t lis2hh12_from_fs8g_to_mg(int16_t lsb)
+float_t lis2hh12_from_fs8g_to_mg(int16_t lsb)
 {
-  return ((float32_t)lsb *0.244f);
+  return ((float_t)lsb *0.244f);
 }
 
-float32_t lis2hh12_from_lsb_to_celsius(int16_t lsb)
+float_t lis2hh12_from_lsb_to_celsius(int16_t lsb)
 {
-  return (((float32_t)lsb / 8.0f) + 25.0f);
+  return (((float_t)lsb / 8.0f) + 25.0f);
 }
 
 /**
@@ -585,7 +585,7 @@ int32_t lis2hh12_dev_status_get(lis2hh12_ctx_t *ctx,
   val->yda = status.yda;
   val->zda = status.zda;
   val->zyxda = status.zyxda;
-  val->xor = status.xor;
+  val->_xor = status._xor;
   val->yor = status.yor;
   val->zor = status.zor;
   val->zyxor = status.zyxor;

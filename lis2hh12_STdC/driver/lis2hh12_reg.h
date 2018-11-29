@@ -44,6 +44,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <math.h>
 
 /** @addtogroup LIS2HH12
   * @{
@@ -57,13 +58,6 @@
 
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
-/**
-  * Float typedef definition for compliance with:
-  * MISRA-C 2012 [Dir 4.6a] -> " Basic type used without typedef "
-  *
-  */
-
-typedef float float32_t;
 
 /**
   * @defgroup axisXbitXX_t
@@ -113,8 +107,8 @@ typedef struct{
   uint8_t bit7       : 1;
 } bitwise_t;
 
-#define PROPERTY_DISABLE                     (0U)
-#define PROPERTY_ENABLE                      (1U)
+#define PROPERTY_DISABLE                (0U)
+#define PROPERTY_ENABLE                 (1U)
 
 #endif /* MEMS_SHARED_TYPES */
 
@@ -254,7 +248,7 @@ typedef struct {
   uint8_t yda              : 1;
   uint8_t zda              : 1;
   uint8_t zyxda            : 1;
-  uint8_t xor              : 1;
+  uint8_t _xor             : 1;
   uint8_t yor              : 1;
   uint8_t zor              : 1;
   uint8_t zyxor            : 1;
@@ -396,10 +390,10 @@ int32_t lis2hh12_read_reg(lis2hh12_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lis2hh12_write_reg(lis2hh12_ctx_t *ctx, uint8_t reg, uint8_t* data,
                            uint16_t len);
 
-extern float32_t lis2hh12_from_fs2g_to_mg(int16_t lsb);
-extern float32_t lis2hh12_from_fs4g_to_mg(int16_t lsb);
-extern float32_t lis2hh12_from_fs8g_to_mg(int16_t lsb);
-extern float32_t lis2hh12_from_lsb_to_celsius(int16_t lsb);
+extern float_t lis2hh12_from_fs2g_to_mg(int16_t lsb);
+extern float_t lis2hh12_from_fs4g_to_mg(int16_t lsb);
+extern float_t lis2hh12_from_fs8g_to_mg(int16_t lsb);
+extern float_t lis2hh12_from_lsb_to_celsius(int16_t lsb);
 
 typedef struct {
   uint8_t xen              : 1;
@@ -465,7 +459,7 @@ typedef struct {
   uint8_t yda              : 1;
   uint8_t zda              : 1;
   uint8_t zyxda            : 1;
-  uint8_t xor              : 1;
+  uint8_t _xor             : 1;
   uint8_t yor              : 1;
   uint8_t zor              : 1;
   uint8_t zyxor            : 1;
