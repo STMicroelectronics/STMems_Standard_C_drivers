@@ -204,7 +204,7 @@ typedef struct {
   uint8_t yda              : 1;
   uint8_t zda              : 1;
   uint8_t zyxda            : 1;
-  uint8_t xor              : 1;
+  uint8_t _xor             : 1;
   uint8_t yor              : 1;
   uint8_t zor              : 1;
   uint8_t zyxor            : 1;
