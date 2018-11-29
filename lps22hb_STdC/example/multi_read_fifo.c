@@ -205,14 +205,14 @@ void example_main_multi_read_fifo_lps22hb(void)
       {
         memset(data_raw_pressure.u8bit, 0x00, sizeof(int32_t));
         lps22hb_pressure_raw_get(&dev_ctx, data_raw_pressure.u8bit);
-        pressure_hPa = LPS22HB_FROM_LSB_TO_hPa(data_raw_pressure.i32bit);
+        pressure_hPa = lps22hb_from_lsb_to_hpa(data_raw_pressure.i32bit);
 
         sprintf((char*)tx_buffer, "pressure [hPa]:%6.2f\r\n", pressure_hPa);
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
 
         memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
         lps22hb_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-        temperature_degC = LPS22HB_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
+        temperature_degC = lps22hb_from_lsb_to_degc(data_raw_temperature.i16bit);
 
         sprintf((char*)tx_buffer, "temperature [degC]:%6.2f\r\n", temperature_degC);
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
