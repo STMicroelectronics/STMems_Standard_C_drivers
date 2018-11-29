@@ -597,7 +597,7 @@ int32_t lis2mdl_mag_data_ovr_get(lis2mdl_ctx_t *ctx, uint8_t *val)
   int32_t ret;
 
   ret = lis2mdl_read_reg(ctx, LIS2MDL_STATUS_REG, (uint8_t*)&reg, 1);
-  *val = reg.zyxor;
+  *val = reg.zyxovr;
 
   return ret;
 }
