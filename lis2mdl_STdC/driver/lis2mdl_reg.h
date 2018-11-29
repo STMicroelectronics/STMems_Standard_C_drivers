@@ -227,9 +227,9 @@ typedef struct {
   uint8_t zda                    : 1;
   uint8_t zyxda                  : 1;
   uint8_t _xor                    : 1;
-  uint8_t _yor                    : 1;
-  uint8_t _zor                    : 1;
-  uint8_t _zyxor                  : 1;
+  uint8_t yor                    : 1;
+  uint8_t zor                    : 1;
+  uint8_t zyxor                  : 1;
 } lis2mdl_status_reg_t;
 
 #define LIS2MDL_OUTX_L_REG              0x68U
