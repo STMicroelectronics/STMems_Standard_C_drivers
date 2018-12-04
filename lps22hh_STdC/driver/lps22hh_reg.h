@@ -521,6 +521,15 @@ int32_t lps22hh_fifo_ovr_flag_get(lps22hh_ctx_t *ctx, uint8_t *val);
 
 int32_t lps22hh_fifo_wtm_flag_get(lps22hh_ctx_t *ctx, uint8_t *val);
 
+int32_t lps22hh_fifo_ovr_on_int_set(lps22hh_ctx_t *ctx, uint8_t val);
+int32_t lps22hh_fifo_ovr_on_int_get(lps22hh_ctx_t *ctx, uint8_t *val);
+
+int32_t lps22hh_fifo_threshold_on_int_set(lps22hh_ctx_t *ctx, uint8_t val);
+int32_t lps22hh_fifo_threshold_on_int_get(lps22hh_ctx_t *ctx, uint8_t *val);
+
+int32_t lps22hh_fifo_full_on_int_set(lps22hh_ctx_t *ctx, uint8_t val);
+int32_t lps22hh_fifo_full_on_int_get(lps22hh_ctx_t *ctx, uint8_t *val);
+
 /**
   * @}
   *
