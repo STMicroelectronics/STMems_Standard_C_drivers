@@ -35,7 +35,7 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "lis3dh_reg.h"
+#include "lis3de_reg.h"
 #include <string.h>
 
 //#define MKI109V2
@@ -86,7 +86,7 @@ static uint8_t tx_buffer[TX_BUF_DIM];
 
 static float acceleration_mg[3];
 static axis3bit16_t data_raw_acceleration;
-static lis3dh_ctx_t dev_ctx;
+static lis3de_ctx_t dev_ctx;
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -185,7 +185,7 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len )
  *
  * FIFO read acc sample
  */
-void example_lis3dh_fifo(void)
+void example_lis3de_fifo(void)
 {
   uint8_t whoamI;
 
@@ -194,45 +194,45 @@ void example_lis3dh_fifo(void)
   dev_ctx.handle = &hi2c1;
 
   whoamI = 0;
-  lis3dh_device_id_get(&dev_ctx, &whoamI);
+  lis3de_device_id_get(&dev_ctx, &whoamI);
   if ( whoamI != LIS3DE_ID )
     while(1); /*manage here device not found */
 
   /*
    *  Enable Block Data Update.
    */
-  lis3dh_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  lis3de_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
    * Set Output Data Rate to 100 hz.
    */
-  lis3dh_data_rate_set(&dev_ctx, LIS3DE_ODR_100Hz);
+  lis3de_data_rate_set(&dev_ctx, LIS3DE_ODR_100Hz);
 
   /*
    * Set full scale to 2 g.
    */
-  lis3dh_full_scale_set(&dev_ctx, LIS3DE_2g);
+  lis3de_full_scale_set(&dev_ctx, LIS3DE_2g);
 
   /*
    * Set operating mode to high resolution.
    */
-  lis3dh_operating_mode_set(&dev_ctx, LIS3DE_HR_12bit);
+  lis3de_operating_mode_set(&dev_ctx, LIS3DE_LP);
 
   /*
    * Set FIFO watermark to FIFO_WATERMARK samples.
    */
-  lis3dh_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
+  lis3de_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
 
   /*
    * Set FIFO mode to Stream mode: Accumulate samples and
    * override old data.
    */
-  lis3dh_fifo_mode_set(&dev_ctx, LIS3DE_DYNAMIC_STREAM_MODE);
+  lis3de_fifo_mode_set(&dev_ctx, LIS3DE_DYNAMIC_STREAM_MODE);
 
   /*
    * Enable FIFO.
    */
-  lis3dh_fifo_set(&dev_ctx, PROPERTY_ENABLE);
+  lis3de_fifo_set(&dev_ctx, PROPERTY_ENABLE);
 
   while(1)
   {
@@ -242,20 +242,20 @@ void example_lis3dh_fifo(void)
 	/*
 	 * Check if FIFO level over threshold.
 	 */
-	lis3dh_fifo_fth_flag_get(&dev_ctx, &flags);
+	lis3de_fifo_fth_flag_get(&dev_ctx, &flags);
 	if (flags)
 	{
 		/*
 		 * Read number of sample in FIFO.
 		 */
-		lis3dh_fifo_data_level_get(&dev_ctx, &num);
+		lis3de_fifo_data_level_get(&dev_ctx, &num);
 
 		while (num-- > 0)
 		{
 			/*
 			 * Read XL samples.
 			 */
-			lis3dh_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+			lis3de_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
 			acceleration_mg[0] = lis3de_from_fs2_to_mg(data_raw_acceleration.i16bit[0]);
 			acceleration_mg[1] = lis3de_from_fs2_to_mg(data_raw_acceleration.i16bit[1]);
 			acceleration_mg[2] = lis3de_from_fs2_to_mg(data_raw_acceleration.i16bit[2]);

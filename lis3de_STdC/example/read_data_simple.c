@@ -35,7 +35,7 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "lis3dh_reg.h"
+#include "lis3de_reg.h"
 #include <string.h>
 
 //#define MKI109V2
@@ -180,7 +180,7 @@ void example_main(void)
   /*
    *  Initialize mems driver interface
    */
-  lis3dh_ctx_t dev_ctx;
+  lis3de_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;  
@@ -188,29 +188,29 @@ void example_main(void)
    *  Check device ID
    */
   whoamI = 0;
-  lis3dh_device_id_get(&dev_ctx, &whoamI);
+  lis3de_device_id_get(&dev_ctx, &whoamI);
   if ( whoamI != LIS3DE_ID )
     while(1); /*manage here device not found */
   /*
    *  Enable Block Data Update
    */
-  lis3dh_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  lis3de_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
   /*
    * Set Output Data Rate
    */
-  lis3dh_data_rate_set(&dev_ctx, LIS3DE_ODR_1Hz);
+  lis3de_data_rate_set(&dev_ctx, LIS3DE_ODR_1Hz);
   /*
    * Set full scale
    */  
-  lis3dh_full_scale_set(&dev_ctx, LIS3DE_2g);
+  lis3de_full_scale_set(&dev_ctx, LIS3DE_2g);
   /*
    * Enable temperature sensor
    */   
-  lis3dh_temperature_meas_set(&dev_ctx, LIS3DE_TEMP_ENABLE);
+  lis3de_aux_adc_set(&dev_ctx, LIS3DE_AUX_ON_TEMPERATURE);
   /*
    * Set device in continuous mode
    */   
-  lis3dh_operating_mode_set(&dev_ctx, LIS3DE_HR_12bit);
+  lis3de_operating_mode_set(&dev_ctx, LIS3DE_LP);
   
   /*
    * Read samples in polling mode (no int)
@@ -220,14 +220,14 @@ void example_main(void)
     /*
      * Read output only if new value is available
      */
-    lis3dh_reg_t reg;
-    lis3dh_status_get(&dev_ctx, &reg.status_reg);
+    lis3de_reg_t reg;
+    lis3de_status_get(&dev_ctx, &reg.status_reg);
 
     if (reg.status_reg.zyxda)
     {
       /* Read accelerometer data */
       memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
-      lis3dh_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+      lis3de_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
       acceleration_mg[0] = lis3de_from_fs2_to_mg( data_raw_acceleration.i16bit[0] );
       acceleration_mg[1] = lis3de_from_fs2_to_mg( data_raw_acceleration.i16bit[1] );
       acceleration_mg[2] = lis3de_from_fs2_to_mg( data_raw_acceleration.i16bit[2] );
@@ -237,12 +237,12 @@ void example_main(void)
       tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
     }
     
-    lis3dh_temp_data_ready_get(&dev_ctx, &reg.byte);      
+    lis3de_temp_data_ready_get(&dev_ctx, &reg.byte);      
     if (reg.byte)      
     {
       /* Read temperature data */
       memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      lis3dh_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
+      lis3de_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
       temperature_degC = lis3de_from_lsb_to_celsius( data_raw_temperature.i16bit );
        
       sprintf((char*)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC );

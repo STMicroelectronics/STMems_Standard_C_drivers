@@ -36,7 +36,7 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "lis3dh_reg.h"
+#include "lis3de_reg.h"
 #include <string.h>
 
 //#define MKI109V2
@@ -194,14 +194,14 @@ static int32_t platform_reap_int_pin(void)
  * Configure free-fall recognition
  * Poll on platform INT pin 1 waiting for free fall event detection
  */
-void example_freefall_lis3dh(void)
+void example_freefall_lis3de(void)
 {
   /*
    *  Initialize mems driver interface.
    */
-  lis3dh_ctx_t dev_ctx;
-  lis3dh_ctrl_reg3_t ctrl_reg3;
-  lis3dh_int1_cfg_t int1_cfg;
+  lis3de_ctx_t dev_ctx;
+  lis3de_ctrl_reg3_t ctrl_reg3;
+  lis3de_ig1_cfg_t ig1_cfg;
   uint8_t whoamI;
 
   dev_ctx.write_reg = platform_write;
@@ -212,31 +212,31 @@ void example_freefall_lis3dh(void)
    *  Check device ID.
    */
   whoamI = 0;
-  lis3dh_device_id_get(&dev_ctx, &whoamI);
+  lis3de_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LIS3DE_ID)
     while(1); /* manage here device not found */
 
   /*
    * Set Output Data Rate to 100 Hz.
    */
-  lis3dh_data_rate_set(&dev_ctx, LIS3DE_ODR_100Hz);
+  lis3de_data_rate_set(&dev_ctx, LIS3DE_ODR_100Hz);
 
   /*
    * Set full scale to 2 g.
    */
-  lis3dh_full_scale_set(&dev_ctx, LIS3DE_2g);
+  lis3de_full_scale_set(&dev_ctx, LIS3DE_2g);
 
   /*
    * Enable AOI1 interrupt on INT pin 1.
    */
   memset((uint8_t *)&ctrl_reg3, 0, sizeof(ctrl_reg3));
-  ctrl_reg3.i1_ia1 = PROPERTY_ENABLE;
-  lis3dh_pin_int1_config_set(&dev_ctx, &ctrl_reg3);
+  ctrl_reg3.int1_ig1 = PROPERTY_ENABLE;
+  lis3de_pin_int1_config_set(&dev_ctx, &ctrl_reg3);
 
   /*
    * Enable Interrupt 1 pin latched.
    */
-  lis3dh_int1_pin_notification_mode_set(&dev_ctx, LIS3DE_INT1_LATCHED);
+  lis3de_int1_pin_notification_mode_set(&dev_ctx, LIS3DE_INT1_LATCHED);
 
   /*
    * Set threshold to 16h -> 350 mg
@@ -244,35 +244,35 @@ void example_freefall_lis3dh(void)
    * If acceleration an all axis is below the threshold for more
    * than 30 ms than device is falling down
    */
-  lis3dh_int1_gen_threshold_set(&dev_ctx, 0x16);
-  lis3dh_int1_gen_duration_set(&dev_ctx, 0x03);
+  lis3de_int1_gen_threshold_set(&dev_ctx, 0x16);
+  lis3de_int1_gen_duration_set(&dev_ctx, 0x03);
 
   /*
    * Configure free-fall recognition
    * Enable condiction (AND) for x, y, z acc. data below threshold.
    */
-  memset((uint8_t *)&int1_cfg, 0, sizeof(int1_cfg));
-  int1_cfg.aoi = PROPERTY_ENABLE;
-  int1_cfg.zlie = PROPERTY_ENABLE;
-  int1_cfg.ylie = PROPERTY_ENABLE;
-  int1_cfg.xlie = PROPERTY_ENABLE;
-  lis3dh_int1_gen_conf_set(&dev_ctx, &int1_cfg);
+  memset((uint8_t *)&ig1_cfg, 0, sizeof(ig1_cfg));
+  ig1_cfg.aoi = PROPERTY_ENABLE;
+  ig1_cfg.zlie = PROPERTY_ENABLE;
+  ig1_cfg.ylie = PROPERTY_ENABLE;
+  ig1_cfg.xlie = PROPERTY_ENABLE;
+  lis3de_int1_gen_conf_set(&dev_ctx, &ig1_cfg);
 
   /*
    * Set device in HR mode.
    */
-  lis3dh_operating_mode_set(&dev_ctx, LIS3DE_HR_12bit);
+  lis3de_operating_mode_set(&dev_ctx, LIS3DE_LP);
 
   while(1)
   {
  /*
   * Read INT pin 1 in polling mode.
   */
-  lis3dh_int1_src_t src;
+  lis3de_ig1_source_t src;
 
     if (platform_reap_int_pin())
     {
-      lis3dh_int1_gen_source_get(&dev_ctx, &src);
+      lis3de_int1_gen_source_get(&dev_ctx, &src);
       sprintf((char*)tx_buffer, "freefall detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
