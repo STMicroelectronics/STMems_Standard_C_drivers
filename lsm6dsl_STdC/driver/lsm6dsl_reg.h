@@ -1,7 +1,7 @@
 /*
  ******************************************************************************
  * @file    lsm6dsl_reg.h
- * @author  MEMS Software Solution Team
+ * @author  Sensors Software Solution Team
  * @brief   This file contains all the functions prototypes for the
  *          lsm6dsl_reg.c driver.
  ******************************************************************************
@@ -9,29 +9,31 @@
  *
  * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
- */
+*/
 
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef LSM6DSL_DRIVER_H
@@ -116,8 +118,12 @@ typedef struct{
   *
   */
 
-/** @defgroup lsm6dsl_interface
+/** @addtogroup  LSM9DS1_Interfaces_Functions
+  * @brief       This section provide a set of functions used to read and
+  *              write a generic register of the device.
+  *              MANDATORY: return 0 -> no Error.
   * @{
+  *
   */
 
 typedef int32_t (*lsm6dsl_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
@@ -133,70 +139,50 @@ typedef struct {
 
 /**
   * @}
+  *
   */
 
-/** @defgroup lsm6dsl_Infos
+/** @defgroup LSM6DSL_Infos
   * @{
+  *
   */
 
 /** I2C Device Address 8 bit format  if SA0=0 -> D5 if SA0=1 -> D7 **/
-#define LSM6DSL_I2C_ADD_L     0xD5
-#define LSM6DSL_I2C_ADD_H     0xD7
+#define LSM6DSL_I2C_ADD_L     0xD5U
+#define LSM6DSL_I2C_ADD_H     0xD7U
 
 /** Device Identification (Who am I) **/
 #define LSM6DSL_ID            0x6AU
 
 /**
   * @}
+  *
   */
 
-/**
-  * @defgroup lsm6dsl_Sensitivity
-  * @{
-  */
-
-#define LSM6DSL_FROM_FS_2g_TO_mg(lsb)    (float)(lsb *  61.0f) / 1000.0f
-#define LSM6DSL_FROM_FS_4g_TO_mg(lsb)    (float)(lsb * 122.0f) / 1000.0f
-#define LSM6DSL_FROM_FS_8g_TO_mg(lsb)    (float)(lsb * 244.0f) / 1000.0f
-#define LSM6DSL_FROM_FS_16g_TO_mg(lsb)   (float)(lsb * 488.0f) / 1000.0f
-
-#define LSM6DSL_FROM_FS_125dps_TO_mdps(lsb)  (float)(lsb *  4375.0f ) / 1000.0f
-#define LSM6DSL_FROM_FS_250dps_TO_mdps(lsb)  (float)(lsb *  8750.0f ) / 1000.0f
-#define LSM6DSL_FROM_FS_500dps_TO_mdps(lsb)  (float)(lsb * 17500.0f ) / 1000.0f
-#define LSM6DSL_FROM_FS_1000dps_TO_mdps(lsb) (float)(lsb *     35.0f)
-#define LSM6DSL_FROM_FS_2000dps_TO_mdps(lsb) (float)(lsb *     70.0f)
-
-
-#define LSM6DSL_FROM_LSB_TO_degC(lsb)   ((float)((int16_t)lsb>>8)*1.0f + 25.0f)
-
-/**
-  * @}
-  */
-
-#define LSM6DSL_FUNC_CFG_ACCESS              0x01
+#define LSM6DSL_FUNC_CFG_ACCESS              0x01U
 typedef struct {
   uint8_t not_used_01              : 5;
   uint8_t func_cfg_en              : 3;  /* func_cfg_en + func_cfg_en_b */
 } lsm6dsl_func_cfg_access_t;
 
-#define LSM6DSL_SENSOR_SYNC_TIME_FRAME       0x04
+#define LSM6DSL_SENSOR_SYNC_TIME_FRAME       0x04U
 typedef struct {
   uint8_t tph                      : 4;
   uint8_t not_used_01              : 4;
 } lsm6dsl_sensor_sync_time_frame_t;
 
-#define LSM6DSL_SENSOR_SYNC_RES_RATIO        0x05
+#define LSM6DSL_SENSOR_SYNC_RES_RATIO        0x05U
 typedef struct {
   uint8_t rr                       : 2;
   uint8_t not_used_01              : 6;
 } lsm6dsl_sensor_sync_res_ratio_t;
 
-#define LSM6DSL_FIFO_CTRL1                   0x06
+#define LSM6DSL_FIFO_CTRL1                   0x06U
 typedef struct {
   uint8_t fth                      : 8;  /* + FIFO_CTRL2(fth) */
 } lsm6dsl_fifo_ctrl1_t;
 
-#define LSM6DSL_FIFO_CTRL2                   0x07
+#define LSM6DSL_FIFO_CTRL2                   0x07U
 typedef struct {
   uint8_t fth                      : 3;  /* + FIFO_CTRL1(fth) */
   uint8_t fifo_temp_en             : 1;
@@ -205,14 +191,14 @@ typedef struct {
   uint8_t timer_pedo_fifo_en       : 1;
 } lsm6dsl_fifo_ctrl2_t;
 
-#define LSM6DSL_FIFO_CTRL3                   0x08
+#define LSM6DSL_FIFO_CTRL3                   0x08U
 typedef struct {
   uint8_t dec_fifo_xl              : 3;
   uint8_t dec_fifo_gyro            : 3;
   uint8_t not_used_01              : 2;
 } lsm6dsl_fifo_ctrl3_t;
 
-#define LSM6DSL_FIFO_CTRL4                   0x09
+#define LSM6DSL_FIFO_CTRL4                   0x09U
 typedef struct {
   uint8_t dec_ds3_fifo             : 3;
   uint8_t dec_ds4_fifo             : 3;
@@ -220,21 +206,21 @@ typedef struct {
   uint8_t stop_on_fth              : 1;
 } lsm6dsl_fifo_ctrl4_t;
 
-#define LSM6DSL_FIFO_CTRL5                   0x0A
+#define LSM6DSL_FIFO_CTRL5                   0x0AU
 typedef struct {
   uint8_t fifo_mode                : 3;
   uint8_t odr_fifo                 : 4;
   uint8_t not_used_01              : 1;
 } lsm6dsl_fifo_ctrl5_t;
 
-#define LSM6DSL_DRDY_PULSE_CFG_G             0x0B
+#define LSM6DSL_DRDY_PULSE_CFG_G             0x0BU
 typedef struct {
   uint8_t int2_wrist_tilt          : 1;
   uint8_t not_used_01              : 6;
   uint8_t drdy_pulsed              : 1;
 } lsm6dsl_drdy_pulse_cfg_g_t;
 
-#define LSM6DSL_INT1_CTRL                    0x0D
+#define LSM6DSL_INT1_CTRL                    0x0DU
 typedef struct {
   uint8_t int1_drdy_xl             : 1;
   uint8_t int1_drdy_g              : 1;
@@ -246,7 +232,7 @@ typedef struct {
   uint8_t int1_step_detector       : 1;
 } lsm6dsl_int1_ctrl_t;
 
-#define LSM6DSL_INT2_CTRL                    0x0E
+#define LSM6DSL_INT2_CTRL                    0x0EU
 typedef struct {
   uint8_t int2_drdy_xl             : 1;
   uint8_t int2_drdy_g              : 1;
@@ -258,8 +244,8 @@ typedef struct {
   uint8_t int2_step_delta          : 1;
 } lsm6dsl_int2_ctrl_t;
 
-#define LSM6DSL_WHO_AM_I                     0x0F
-#define LSM6DSL_CTRL1_XL                     0x10
+#define LSM6DSL_WHO_AM_I                     0x0FU
+#define LSM6DSL_CTRL1_XL                     0x10U
 typedef struct {
   uint8_t bw0_xl                   : 1;
   uint8_t lpf1_bw_sel              : 1;
@@ -267,14 +253,14 @@ typedef struct {
   uint8_t odr_xl                   : 4;
 } lsm6dsl_ctrl1_xl_t;
 
-#define LSM6DSL_CTRL2_G                      0x11
+#define LSM6DSL_CTRL2_G                      0x11U
 typedef struct {
   uint8_t not_used_01              : 1;
   uint8_t fs_g                     : 3;  /* fs_g + fs_125 */
   uint8_t odr_g                    : 4;
 } lsm6dsl_ctrl2_g_t;
 
-#define LSM6DSL_CTRL3_C                      0x12
+#define LSM6DSL_CTRL3_C                      0x12U
 typedef struct {
   uint8_t sw_reset                 : 1;
   uint8_t ble                      : 1;
@@ -286,7 +272,7 @@ typedef struct {
   uint8_t boot                     : 1;
 } lsm6dsl_ctrl3_c_t;
 
-#define LSM6DSL_CTRL4_C                      0x13
+#define LSM6DSL_CTRL4_C                      0x13U
 typedef struct {
   uint8_t not_used_01              : 1;
   uint8_t lpf1_sel_g               : 1;
@@ -298,7 +284,7 @@ typedef struct {
   uint8_t den_xl_en                : 1;
 } lsm6dsl_ctrl4_c_t;
 
-#define LSM6DSL_CTRL5_C                      0x14
+#define LSM6DSL_CTRL5_C                      0x14U
 typedef struct {
   uint8_t st_xl                    : 2;
   uint8_t st_g                     : 2;
@@ -306,7 +292,7 @@ typedef struct {
   uint8_t rounding                 : 3;
 } lsm6dsl_ctrl5_c_t;
 
-#define LSM6DSL_CTRL6_C                      0x15
+#define LSM6DSL_CTRL6_C                      0x15U
 typedef struct {
   uint8_t ftype                    : 2;
   uint8_t not_used_01              : 1;
@@ -315,7 +301,7 @@ typedef struct {
   uint8_t den_mode                 : 3;  /* trig_en + lvl_en + lvl2_en */
 } lsm6dsl_ctrl6_c_t;
 
-#define LSM6DSL_CTRL7_G                      0x16
+#define LSM6DSL_CTRL7_G                      0x16U
 typedef struct {
   uint8_t not_used_01              : 2;
   uint8_t rounding_status          : 1;
@@ -325,7 +311,7 @@ typedef struct {
   uint8_t g_hm_mode                : 1;
 } lsm6dsl_ctrl7_g_t;
 
-#define LSM6DSL_CTRL8_XL                     0x17
+#define LSM6DSL_CTRL8_XL                     0x17U
 typedef struct {
   uint8_t low_pass_on_6d           : 1;
   uint8_t not_used_01              : 1;
@@ -336,7 +322,7 @@ typedef struct {
   uint8_t lpf2_xl_en               : 1;
 } lsm6dsl_ctrl8_xl_t;
 
-#define LSM6DSL_CTRL9_XL                     0x18
+#define LSM6DSL_CTRL9_XL                     0x18U
 typedef struct {
   uint8_t not_used_01              : 2;
   uint8_t soft_en                  : 1;
@@ -347,7 +333,7 @@ typedef struct {
   uint8_t den_x                    : 1;
 } lsm6dsl_ctrl9_xl_t;
 
-#define LSM6DSL_CTRL10_C                     0x19
+#define LSM6DSL_CTRL10_C                     0x19U
 typedef struct {
   uint8_t sign_motion_en           : 1;
   uint8_t pedo_rst_step            : 1;
@@ -359,7 +345,7 @@ typedef struct {
   uint8_t wrist_tilt_en            : 1;
 } lsm6dsl_ctrl10_c_t;
 
-#define LSM6DSL_MASTER_CONFIG                0x1A
+#define LSM6DSL_MASTER_CONFIG                0x1AU
 typedef struct {
   uint8_t master_on                : 1;
   uint8_t iron_en                  : 1;
@@ -371,7 +357,7 @@ typedef struct {
   uint8_t drdy_on_int1             : 1;
 } lsm6dsl_master_config_t;
 
-#define LSM6DSL_WAKE_UP_SRC                  0x1B
+#define LSM6DSL_WAKE_UP_SRC                  0x1BU
 typedef struct {
   uint8_t z_wu                     : 1;
   uint8_t y_wu                     : 1;
@@ -382,7 +368,7 @@ typedef struct {
   uint8_t not_used_01              : 2;
 } lsm6dsl_wake_up_src_t;
 
-#define LSM6DSL_TAP_SRC                      0x1C
+#define LSM6DSL_TAP_SRC                      0x1CU
 typedef struct {
   uint8_t z_tap                    : 1;
   uint8_t y_tap                    : 1;
@@ -394,7 +380,7 @@ typedef struct {
   uint8_t not_used_01              : 1;
 } lsm6dsl_tap_src_t;
 
-#define LSM6DSL_D6D_SRC                      0x1D
+#define LSM6DSL_D6D_SRC                      0x1DU
 typedef struct {
   uint8_t xl                       : 1;
   uint8_t xh                       : 1;
@@ -406,7 +392,7 @@ typedef struct {
   uint8_t den_drdy                 : 1;
 } lsm6dsl_d6d_src_t;
 
-#define LSM6DSL_STATUS_REG                   0x1E
+#define LSM6DSL_STATUS_REG                   0x1EU
 typedef struct {
   uint8_t xlda                     : 1;
   uint8_t gda                      : 1;
@@ -414,21 +400,21 @@ typedef struct {
   uint8_t not_used_01              : 5;
 } lsm6dsl_status_reg_t;
 
-#define LSM6DSL_OUT_TEMP_L                   0x20
-#define LSM6DSL_OUT_TEMP_H                   0x21
-#define LSM6DSL_OUTX_L_G                     0x22
-#define LSM6DSL_OUTX_H_G                     0x23
-#define LSM6DSL_OUTY_L_G                     0x24
-#define LSM6DSL_OUTY_H_G                     0x25
-#define LSM6DSL_OUTZ_L_G                     0x26
-#define LSM6DSL_OUTZ_H_G                     0x27
-#define LSM6DSL_OUTX_L_XL                    0x28
-#define LSM6DSL_OUTX_H_XL                    0x29
-#define LSM6DSL_OUTY_L_XL                    0x2A
-#define LSM6DSL_OUTY_H_XL                    0x2B
-#define LSM6DSL_OUTZ_L_XL                    0x2C
-#define LSM6DSL_OUTZ_H_XL                    0x2D
-#define LSM6DSL_SENSORHUB1_REG               0x2E
+#define LSM6DSL_OUT_TEMP_L                   0x20U
+#define LSM6DSL_OUT_TEMP_H                   0x21U
+#define LSM6DSL_OUTX_L_G                     0x22U
+#define LSM6DSL_OUTX_H_G                     0x23U
+#define LSM6DSL_OUTY_L_G                     0x24U
+#define LSM6DSL_OUTY_H_G                     0x25U
+#define LSM6DSL_OUTZ_L_G                     0x26U
+#define LSM6DSL_OUTZ_H_G                     0x27U
+#define LSM6DSL_OUTX_L_XL                    0x28U
+#define LSM6DSL_OUTX_H_XL                    0x29U
+#define LSM6DSL_OUTY_L_XL                    0x2AU
+#define LSM6DSL_OUTY_H_XL                    0x2BU
+#define LSM6DSL_OUTZ_L_XL                    0x2CU
+#define LSM6DSL_OUTZ_H_XL                    0x2DU
+#define LSM6DSL_SENSORHUB1_REG               0x2EU
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -440,7 +426,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } lsm6dsl_sensorhub1_reg_t;
 
-#define LSM6DSL_SENSORHUB2_REG               0x2F
+#define LSM6DSL_SENSORHUB2_REG               0x2FU
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -452,7 +438,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } lsm6dsl_sensorhub2_reg_t;
 
-#define LSM6DSL_SENSORHUB3_REG               0x30
+#define LSM6DSL_SENSORHUB3_REG               0x30U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -464,7 +450,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } lsm6dsl_sensorhub3_reg_t;
 
-#define LSM6DSL_SENSORHUB4_REG               0x31
+#define LSM6DSL_SENSORHUB4_REG               0x31U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -476,7 +462,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } lsm6dsl_sensorhub4_reg_t;
 
-#define LSM6DSL_SENSORHUB5_REG               0x32
+#define LSM6DSL_SENSORHUB5_REG               0x32U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -488,7 +474,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } lsm6dsl_sensorhub5_reg_t;
 
-#define LSM6DSL_SENSORHUB6_REG               0x33
+#define LSM6DSL_SENSORHUB6_REG               0x33U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -500,7 +486,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } lsm6dsl_sensorhub6_reg_t;
 
-#define LSM6DSL_SENSORHUB7_REG               0x34
+#define LSM6DSL_SENSORHUB7_REG               0x34U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -512,7 +498,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } lsm6dsl_sensorhub7_reg_t;
 
-#define LSM6DSL_SENSORHUB8_REG               0x35
+#define LSM6DSL_SENSORHUB8_REG               0x35U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -524,7 +510,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } lsm6dsl_sensorhub8_reg_t;
 
-#define LSM6DSL_SENSORHUB9_REG               0x36
+#define LSM6DSL_SENSORHUB9_REG               0x36U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -536,7 +522,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } lsm6dsl_sensorhub9_reg_t;
 
-#define LSM6DSL_SENSORHUB10_REG              0x37
+#define LSM6DSL_SENSORHUB10_REG              0x37U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -548,7 +534,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } lsm6dsl_sensorhub10_reg_t;
 
-#define LSM6DSL_SENSORHUB11_REG              0x38
+#define LSM6DSL_SENSORHUB11_REG              0x38U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -560,7 +546,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } lsm6dsl_sensorhub11_reg_t;
 
-#define LSM6DSL_SENSORHUB12_REG              0x39
+#define LSM6DSL_SENSORHUB12_REG              0x39U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -572,12 +558,12 @@ typedef struct {
   uint8_t bit7                     : 1;
 } lsm6dsl_sensorhub12_reg_t;
 
-#define LSM6DSL_FIFO_STATUS1                 0x3A
+#define LSM6DSL_FIFO_STATUS1                 0x3AU
 typedef struct {
   uint8_t diff_fifo                : 8;  /* + FIFO_STATUS2(diff_fifo) */
 } lsm6dsl_fifo_status1_t;
 
-#define LSM6DSL_FIFO_STATUS2                 0x3B
+#define LSM6DSL_FIFO_STATUS2                 0x3BU
 typedef struct {
   uint8_t diff_fifo                : 3;  /* + FIFO_STATUS1(diff_fifo) */
   uint8_t not_used_01              : 1;
@@ -587,28 +573,28 @@ typedef struct {
   uint8_t waterm                   : 1;
 } lsm6dsl_fifo_status2_t;
 
-#define LSM6DSL_FIFO_STATUS3                 0x3C
+#define LSM6DSL_FIFO_STATUS3                 0x3CU
 typedef struct {
   uint8_t fifo_pattern             : 8;  /* + FIFO_STATUS4(fifo_pattern) */
 } lsm6dsl_fifo_status3_t;
 
-#define LSM6DSL_FIFO_STATUS4                 0x3D
+#define LSM6DSL_FIFO_STATUS4                 0x3DU
 typedef struct {
   uint8_t fifo_pattern             : 2;  /* + FIFO_STATUS3(fifo_pattern) */
   uint8_t not_used_01              : 6;
 } lsm6dsl_fifo_status4_t;
 
-#define LSM6DSL_FIFO_DATA_OUT_L              0x3E
-#define LSM6DSL_FIFO_DATA_OUT_H              0x3F
-#define LSM6DSL_TIMESTAMP0_REG               0x40
-#define LSM6DSL_TIMESTAMP1_REG               0x41
-#define LSM6DSL_TIMESTAMP2_REG               0x42
-#define LSM6DSL_STEP_TIMESTAMP_L             0x49
-#define LSM6DSL_STEP_TIMESTAMP_H             0x4A
-#define LSM6DSL_STEP_COUNTER_L               0x4B
-#define LSM6DSL_STEP_COUNTER_H               0x4C
+#define LSM6DSL_FIFO_DATA_OUT_L              0x3EU
+#define LSM6DSL_FIFO_DATA_OUT_H              0x3FU
+#define LSM6DSL_TIMESTAMP0_REG               0x40U
+#define LSM6DSL_TIMESTAMP1_REG               0x41U
+#define LSM6DSL_TIMESTAMP2_REG               0x42U
+#define LSM6DSL_STEP_TIMESTAMP_L             0x49U
+#define LSM6DSL_STEP_TIMESTAMP_H             0x4AU
+#define LSM6DSL_STEP_COUNTER_L               0x4BU
+#define LSM6DSL_STEP_COUNTER_H               0x4CU
 
-#define LSM6DSL_SENSORHUB13_REG              0x4D
+#define LSM6DSL_SENSORHUB13_REG              0x4DU
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -620,7 +606,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } lsm6dsl_sensorhub13_reg_t;
 
-#define LSM6DSL_SENSORHUB14_REG              0x4E
+#define LSM6DSL_SENSORHUB14_REG              0x4EU
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -632,7 +618,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } lsm6dsl_sensorhub14_reg_t;
 
-#define LSM6DSL_SENSORHUB15_REG              0x4F
+#define LSM6DSL_SENSORHUB15_REG              0x4FU
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -644,7 +630,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } lsm6dsl_sensorhub15_reg_t;
 
-#define LSM6DSL_SENSORHUB16_REG              0x50
+#define LSM6DSL_SENSORHUB16_REG              0x50U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -656,7 +642,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } lsm6dsl_sensorhub16_reg_t;
 
-#define LSM6DSL_SENSORHUB17_REG              0x51
+#define LSM6DSL_SENSORHUB17_REG              0x51U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -668,7 +654,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } lsm6dsl_sensorhub17_reg_t;
 
-#define LSM6DSL_SENSORHUB18_REG              0x52
+#define LSM6DSL_SENSORHUB18_REG              0x52U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -680,7 +666,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } lsm6dsl_sensorhub18_reg_t;
 
-#define LSM6DSL_FUNC_SRC1                    0x53
+#define LSM6DSL_FUNC_SRC1                    0x53U
 typedef struct {
   uint8_t sensorhub_end_op         : 1;
   uint8_t si_end_op                : 1;
@@ -692,7 +678,7 @@ typedef struct {
   uint8_t  step_count_delta_ia     : 1;
 } lsm6dsl_func_src1_t;
 
-#define LSM6DSL_FUNC_SRC2                    0x54
+#define LSM6DSL_FUNC_SRC2                    0x54U
 typedef struct {
   uint8_t wrist_tilt_ia            : 1;
   uint8_t not_used_01              : 2;
@@ -703,7 +689,7 @@ typedef struct {
   uint8_t not_used_02              : 1;
 } lsm6dsl_func_src2_t;
 
-#define LSM6DSL_WRIST_TILT_IA                0x55
+#define LSM6DSL_WRIST_TILT_IA                0x55U
 typedef struct {
   uint8_t not_used_01              : 2;
   uint8_t wrist_tilt_ia_zneg       : 1;
@@ -714,7 +700,7 @@ typedef struct {
   uint8_t wrist_tilt_ia_xpos       : 1;
 } lsm6dsl_wrist_tilt_ia_t;
 
-#define LSM6DSL_TAP_CFG                      0x58
+#define LSM6DSL_TAP_CFG                      0x58U
 typedef struct {
   uint8_t lir                      : 1;
   uint8_t tap_z_en                 : 1;
@@ -725,28 +711,28 @@ typedef struct {
   uint8_t interrupts_enable        : 1;
 } lsm6dsl_tap_cfg_t;
 
-#define LSM6DSL_TAP_THS_6D                   0x59
+#define LSM6DSL_TAP_THS_6D                   0x59U
 typedef struct {
   uint8_t tap_ths                  : 5;
   uint8_t sixd_ths                 : 2;
   uint8_t d4d_en                   : 1;
 } lsm6dsl_tap_ths_6d_t;
 
-#define LSM6DSL_INT_DUR2                     0x5A
+#define LSM6DSL_INT_DUR2                     0x5AU
 typedef struct {
   uint8_t shock                    : 2;
   uint8_t quiet                    : 2;
   uint8_t dur                      : 4;
 } lsm6dsl_int_dur2_t;
 
-#define LSM6DSL_WAKE_UP_THS                  0x5B
+#define LSM6DSL_WAKE_UP_THS                  0x5BU
 typedef struct {
   uint8_t wk_ths                   : 6;
   uint8_t not_used_01              : 1;
   uint8_t single_double_tap        : 1;
 } lsm6dsl_wake_up_ths_t;
 
-#define LSM6DSL_WAKE_UP_DUR                  0x5C
+#define LSM6DSL_WAKE_UP_DUR                  0x5CU
 typedef struct {
   uint8_t sleep_dur                : 4;
   uint8_t timer_hr                 : 1;
@@ -754,13 +740,13 @@ typedef struct {
   uint8_t ff_dur                   : 1;
 } lsm6dsl_wake_up_dur_t;
 
-#define LSM6DSL_FREE_FALL                    0x5D
+#define LSM6DSL_FREE_FALL                    0x5DU
 typedef struct {
   uint8_t ff_ths                   : 3;
   uint8_t ff_dur                   : 5;
 } lsm6dsl_free_fall_t;
 
-#define LSM6DSL_MD1_CFG                      0x5E
+#define LSM6DSL_MD1_CFG                      0x5EU
 typedef struct {
   uint8_t int1_timer               : 1;
   uint8_t int1_tilt                : 1;
@@ -772,7 +758,7 @@ typedef struct {
   uint8_t int1_inact_state         : 1;
 } lsm6dsl_md1_cfg_t;
 
-#define LSM6DSL_MD2_CFG                      0x5F
+#define LSM6DSL_MD2_CFG                      0x5FU
 typedef struct {
   uint8_t int2_iron                : 1;
   uint8_t int2_tilt                : 1;
@@ -784,37 +770,37 @@ typedef struct {
   uint8_t int2_inact_state         : 1;
 } lsm6dsl_md2_cfg_t;
 
-#define LSM6DSL_MASTER_CMD_CODE              0x60
+#define LSM6DSL_MASTER_CMD_CODE              0x60U
 typedef struct {
   uint8_t master_cmd_code          : 8;
 } lsm6dsl_master_cmd_code_t;
 
-#define LSM6DSL_SENS_SYNC_SPI_ERROR_CODE     0x61
+#define LSM6DSL_SENS_SYNC_SPI_ERROR_CODE     0x61U
 typedef struct {
   uint8_t error_code               : 8;
 } lsm6dsl_sens_sync_spi_error_code_t;
 
-#define LSM6DSL_OUT_MAG_RAW_X_L              0x66
-#define LSM6DSL_OUT_MAG_RAW_X_H              0x67
-#define LSM6DSL_OUT_MAG_RAW_Y_L              0x68
-#define LSM6DSL_OUT_MAG_RAW_Y_H              0x69
-#define LSM6DSL_OUT_MAG_RAW_Z_L              0x6A
-#define LSM6DSL_OUT_MAG_RAW_Z_H              0x6B
-#define LSM6DSL_X_OFS_USR                    0x73
-#define LSM6DSL_Y_OFS_USR                    0x74
-#define LSM6DSL_Z_OFS_USR                    0x75
-#define LSM6DSL_SLV0_ADD                     0x02
+#define LSM6DSL_OUT_MAG_RAW_X_L              0x66U
+#define LSM6DSL_OUT_MAG_RAW_X_H              0x67U
+#define LSM6DSL_OUT_MAG_RAW_Y_L              0x68U
+#define LSM6DSL_OUT_MAG_RAW_Y_H              0x69U
+#define LSM6DSL_OUT_MAG_RAW_Z_L              0x6AU
+#define LSM6DSL_OUT_MAG_RAW_Z_H              0x6BU
+#define LSM6DSL_X_OFS_USR                    0x73U
+#define LSM6DSL_Y_OFS_USR                    0x74U
+#define LSM6DSL_Z_OFS_USR                    0x75U
+#define LSM6DSL_SLV0_ADD                     0x02U
 typedef struct {
   uint8_t rw_0                     : 1;
   uint8_t slave0_add               : 7;
 } lsm6dsl_slv0_add_t;
 
-#define LSM6DSL_SLV0_SUBADD                  0x03
+#define LSM6DSL_SLV0_SUBADD                  0x03U
 typedef struct {
   uint8_t slave0_reg               : 8;
 } lsm6dsl_slv0_subadd_t;
 
-#define LSM6DSL_SLAVE0_CONFIG                0x04
+#define LSM6DSL_SLAVE0_CONFIG                0x04U
 typedef struct {
   uint8_t slave0_numop             : 3;
   uint8_t src_mode                 : 1;
@@ -822,18 +808,18 @@ typedef struct {
   uint8_t slave0_rate              : 2;
 } lsm6dsl_slave0_config_t;
 
-#define LSM6DSL_SLV1_ADD                     0x05
+#define LSM6DSL_SLV1_ADD                     0x05U
 typedef struct {
   uint8_t r_1                      : 1;
   uint8_t slave1_add               : 7;
 } lsm6dsl_slv1_add_t;
 
-#define LSM6DSL_SLV1_SUBADD                  0x06
+#define LSM6DSL_SLV1_SUBADD                  0x06U
 typedef struct {
   uint8_t slave1_reg               : 8;
 } lsm6dsl_slv1_subadd_t;
 
-#define LSM6DSL_SLAVE1_CONFIG                0x07
+#define LSM6DSL_SLAVE1_CONFIG                0x07U
 typedef struct {
   uint8_t slave1_numop             : 3;
   uint8_t not_used_01              : 2;
@@ -841,80 +827,80 @@ typedef struct {
   uint8_t slave1_rate              : 2;
 } lsm6dsl_slave1_config_t;
 
-#define LSM6DSL_SLV2_ADD                     0x08
+#define LSM6DSL_SLV2_ADD                     0x08U
 typedef struct {
   uint8_t r_2                      : 1;
   uint8_t slave2_add               : 7;
 } lsm6dsl_slv2_add_t;
 
-#define LSM6DSL_SLV2_SUBADD                  0x09
+#define LSM6DSL_SLV2_SUBADD                  0x09U
 typedef struct {
   uint8_t slave2_reg               : 8;
 } lsm6dsl_slv2_subadd_t;
 
-#define LSM6DSL_SLAVE2_CONFIG                0x0A
+#define LSM6DSL_SLAVE2_CONFIG                0x0AU
 typedef struct {
   uint8_t slave2_numop             : 3;
   uint8_t not_used_01              : 3;
   uint8_t slave2_rate              : 2;
 } lsm6dsl_slave2_config_t;
 
-#define LSM6DSL_SLV3_ADD                     0x0B
+#define LSM6DSL_SLV3_ADD                     0x0BU
 typedef struct {
   uint8_t r_3                      : 1;
   uint8_t slave3_add               : 7;
 } lsm6dsl_slv3_add_t;
 
-#define LSM6DSL_SLV3_SUBADD                  0x0C
+#define LSM6DSL_SLV3_SUBADD                  0x0CU
 typedef struct {
   uint8_t slave3_reg               : 8;
 } lsm6dsl_slv3_subadd_t;
 
-#define LSM6DSL_SLAVE3_CONFIG                0x0D
+#define LSM6DSL_SLAVE3_CONFIG                0x0DU
 typedef struct {
   uint8_t slave3_numop             : 3;
   uint8_t not_used_01              : 3;
   uint8_t slave3_rate              : 2;
 } lsm6dsl_slave3_config_t;
 
-#define LSM6DSL_DATAWRITE_SRC_MODE_SUB_SLV0  0x0E
+#define LSM6DSL_DATAWRITE_SRC_MODE_SUB_SLV0  0x0EU
 typedef struct {
   uint8_t slave_dataw              : 8;
 } lsm6dsl_datawrite_src_mode_sub_slv0_t;
 
-#define LSM6DSL_CONFIG_PEDO_THS_MIN          0x0F
+#define LSM6DSL_CONFIG_PEDO_THS_MIN          0x0FU
 typedef struct {
   uint8_t ths_min                  : 5;
   uint8_t not_used_01              : 2;
   uint8_t pedo_fs                  : 1;
 } lsm6dsl_config_pedo_ths_min_t;
 
-#define LSM6DSL_SM_THS                       0x13
-#define LSM6DSL_PEDO_DEB_REG                 0x14
+#define LSM6DSL_SM_THS                       0x13U
+#define LSM6DSL_PEDO_DEB_REG                 0x14U
 typedef struct {
   uint8_t deb_step      : 3;
   uint8_t deb_time      : 5;
 } lsm6dsl_pedo_deb_reg_t;
 
-#define LSM6DSL_STEP_COUNT_DELTA             0x15
-#define LSM6DSL_MAG_SI_XX                    0x24
-#define LSM6DSL_MAG_SI_XY                    0x25
-#define LSM6DSL_MAG_SI_XZ                    0x26
-#define LSM6DSL_MAG_SI_YX                    0x27
-#define LSM6DSL_MAG_SI_YY                    0x28
-#define LSM6DSL_MAG_SI_YZ                    0x29
-#define LSM6DSL_MAG_SI_ZX                    0x2A
-#define LSM6DSL_MAG_SI_ZY                    0x2B
-#define LSM6DSL_MAG_SI_ZZ                    0x2C
-#define LSM6DSL_MAG_OFFX_L                   0x2D
-#define LSM6DSL_MAG_OFFX_H                   0x2E
-#define LSM6DSL_MAG_OFFY_L                   0x2F
-#define LSM6DSL_MAG_OFFY_H                   0x30
-#define LSM6DSL_MAG_OFFZ_L                   0x31
-#define LSM6DSL_MAG_OFFZ_H                   0x32
-#define LSM6DSL_A_WRIST_TILT_LAT             0x50
-#define LSM6DSL_A_WRIST_TILT_THS             0x54
-#define LSM6DSL_A_WRIST_TILT_MASK            0x59
+#define LSM6DSL_STEP_COUNT_DELTA             0x15U
+#define LSM6DSL_MAG_SI_XX                    0x24U
+#define LSM6DSL_MAG_SI_XY                    0x25U
+#define LSM6DSL_MAG_SI_XZ                    0x26U
+#define LSM6DSL_MAG_SI_YX                    0x27U
+#define LSM6DSL_MAG_SI_YY                    0x28U
+#define LSM6DSL_MAG_SI_YZ                    0x29U
+#define LSM6DSL_MAG_SI_ZX                    0x2AU
+#define LSM6DSL_MAG_SI_ZY                    0x2BU
+#define LSM6DSL_MAG_SI_ZZ                    0x2CU
+#define LSM6DSL_MAG_OFFX_L                   0x2DU
+#define LSM6DSL_MAG_OFFX_H                   0x2EU
+#define LSM6DSL_MAG_OFFY_L                   0x2FU
+#define LSM6DSL_MAG_OFFY_H                   0x30U
+#define LSM6DSL_MAG_OFFZ_L                   0x31U
+#define LSM6DSL_MAG_OFFZ_H                   0x32U
+#define LSM6DSL_A_WRIST_TILT_LAT             0x50U
+#define LSM6DSL_A_WRIST_TILT_THS             0x54U
+#define LSM6DSL_A_WRIST_TILT_MASK            0x59U
 typedef struct {
   uint8_t not_used_01              : 2;
   uint8_t  wrist_tilt_mask_zneg    : 1;
@@ -925,6 +911,18 @@ typedef struct {
   uint8_t  wrist_tilt_mask_xpos    : 1;
 } lsm6dsl_a_wrist_tilt_mask_t;
 
+/**
+  * @defgroup LSM6DSL_Register_Union
+  * @brief    This union group all the registers that has a bit-field
+  *           description.
+  *           This union is useful but not need by the driver.
+  *
+  *           REMOVING this union you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  *
+  * @{
+  *
+  */
 typedef union{
   lsm6dsl_func_cfg_access_t                  func_cfg_access;
   lsm6dsl_sensor_sync_time_frame_t           sensor_sync_time_frame;
@@ -1006,10 +1004,29 @@ typedef union{
   bitwise_t                                  bitwise;
   uint8_t                                    byte;
 } lsm6dsl_reg_t;
+
+/**
+  * @}
+  *
+  */
+
 int32_t lsm6dsl_read_reg(lsm6dsl_ctx_t *ctx, uint8_t reg, uint8_t* data,
                          uint16_t len);
 int32_t lsm6dsl_write_reg(lsm6dsl_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
+
+extern float_t lsm6dsl_from_fs2g_to_mg(int16_t lsb);
+extern float_t lsm6dsl_from_fs4g_to_mg(int16_t lsb);
+extern float_t lsm6dsl_from_fs8g_to_mg(int16_t lsb);
+extern float_t lsm6dsl_from_fs16g_to_mg(int16_t lsb);
+
+extern float_t lsm6dsl_from_fs125dps_to_mdps(int16_t lsb);
+extern float_t lsm6dsl_from_fs250dps_to_mdps(int16_t lsb);
+extern float_t lsm6dsl_from_fs500dps_to_mdps(int16_t lsb);
+extern float_t lsm6dsl_from_fs1000dps_to_mdps(int16_t lsb);
+extern float_t lsm6dsl_from_fs2000dps_to_mdps(int16_t lsb);
+
+extern float_t lsm6dsl_from_lsb_to_celsius(int16_t lsb);
 
 typedef enum {
   LSM6DSL_2g       = 0,
@@ -1110,8 +1127,7 @@ int32_t lsm6dsl_gy_power_mode_set(lsm6dsl_ctx_t *ctx,
 int32_t lsm6dsl_gy_power_mode_get(lsm6dsl_ctx_t *ctx,
                                   lsm6dsl_g_hm_mode_t *val);
 
-typedef union {
-  struct {
+typedef struct {
   lsm6dsl_wake_up_src_t        wake_up_src;
   lsm6dsl_tap_src_t            tap_src;
   lsm6dsl_d6d_src_t            d6d_src;
@@ -1120,8 +1136,6 @@ typedef union {
   lsm6dsl_func_src2_t          func_src2;
   lsm6dsl_wrist_tilt_ia_t      wrist_tilt_ia;
   lsm6dsl_a_wrist_tilt_mask_t  a_wrist_tilt_mask;
-  } reg;
-  uint8_t byte[8];
 } lsm6dsl_all_sources_t;
 int32_t lsm6dsl_all_sources_get(lsm6dsl_ctx_t *ctx,
                                 lsm6dsl_all_sources_t *val);
@@ -1773,8 +1787,7 @@ int32_t lsm6dsl_sh_syncro_mode_get(lsm6dsl_ctx_t *ctx,
 int32_t lsm6dsl_sh_drdy_on_int1_set(lsm6dsl_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsl_sh_drdy_on_int1_get(lsm6dsl_ctx_t *ctx, uint8_t *val);
 
-typedef union {
-  struct {
+typedef struct {
     lsm6dsl_sensorhub1_reg_t   sh_byte_1;
     lsm6dsl_sensorhub2_reg_t   sh_byte_2;
     lsm6dsl_sensorhub3_reg_t   sh_byte_3;
@@ -1793,8 +1806,6 @@ typedef union {
     lsm6dsl_sensorhub16_reg_t  sh_byte_16;
     lsm6dsl_sensorhub17_reg_t  sh_byte_17;
     lsm6dsl_sensorhub18_reg_t  sh_byte_18;
-  } reg;
-  uint8_t byte[18];
 } lsm6dsl_emb_sh_read_t;
 int32_t lsm6dsl_sh_read_data_raw_get(lsm6dsl_ctx_t *ctx,
                                      lsm6dsl_emb_sh_read_t *val);
@@ -1898,6 +1909,7 @@ int32_t lsm6dsl_sh_slave_3_dec_get(lsm6dsl_ctx_t *ctx,
 
 /**
   * @}
+  *
   */
 
 #ifdef __cplusplus
