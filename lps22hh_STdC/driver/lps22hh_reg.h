@@ -363,10 +363,12 @@ typedef enum {
   LPS22HH_10_Hz               = 0x02,
   LPS22HH_25_Hz               = 0x03,
   LPS22HH_50_Hz               = 0x04,
+  LPS22HH_75_Hz               = 0x05,
   LPS22HH_1_Hz_LOW_NOISE      = 0x11,
   LPS22HH_10_Hz_LOW_NOISE     = 0x12,
   LPS22HH_25_Hz_LOW_NOISE     = 0x13,
   LPS22HH_50_Hz_LOW_NOISE     = 0x14,
+  LPS22HH_75_Hz_LOW_NOISE     = 0x15,
   LPS22HH_100_Hz              = 0x06,
   LPS22HH_200_Hz              = 0x07,
 } lps22hh_odr_t;
