@@ -295,11 +295,11 @@ int32_t stts751_low_temperature_threshold_set(stts751_ctx_t *ctx,
 int32_t stts751_low_temperature_threshold_get(stts751_ctx_t *ctx,
                                               int16_t *buff);
 
-int32_t stts751_ara_thermal_limit_set(stts751_ctx_t *ctx, int8_t val);
-int32_t stts751_ara_thermal_limit_get(stts751_ctx_t *ctx, int8_t *val);
+int32_t stts751_ota_thermal_limit_set(stts751_ctx_t *ctx, int8_t val);
+int32_t stts751_ota_thermal_limit_get(stts751_ctx_t *ctx, int8_t *val);
 
-int32_t stts751_ara_thermal_hyst_set(stts751_ctx_t *ctx, int8_t val);
-int32_t stts751_ara_thermal_hyst_get(stts751_ctx_t *ctx, int8_t *val);
+int32_t stts751_ota_thermal_hyst_set(stts751_ctx_t *ctx, int8_t val);
+int32_t stts751_ota_thermal_hyst_get(stts751_ctx_t *ctx, int8_t *val);
 
 int32_t stts751_smbus_timeout_set(stts751_ctx_t *ctx, uint8_t val);
 int32_t stts751_smbus_timeout_get(stts751_ctx_t *ctx, uint8_t *val);

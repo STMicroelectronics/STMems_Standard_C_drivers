@@ -450,13 +450,13 @@ int32_t stts751_high_temperature_threshold_set(stts751_ctx_t *ctx,
   int32_t ret;
 
   temperature_ptr = (uint8_t*)&buff;
-  ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_HIGH_LIMIT_HIGH,
-                          (uint8_t*)&temperature_ptr, 1);
+  ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_HIGH_LIMIT_LOW,
+                          (uint8_t*)temperature_ptr, 1);
 
   if (ret == 0) {
     temperature_ptr++;
-    ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_HIGH_LIMIT_LOW,
-                            (uint8_t*)&temperature_ptr, 1);
+    ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_HIGH_LIMIT_HIGH,
+                            (uint8_t*)temperature_ptr, 1);
   }
 
   return ret;
@@ -505,13 +505,13 @@ int32_t stts751_low_temperature_threshold_set(stts751_ctx_t *ctx,
   int32_t ret;
 
   temperature_ptr = (uint8_t*)&buff;
-  ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_LOW_LIMIT_HIGH,
-                          (uint8_t*)&temperature_ptr, 1);
+  ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_LOW_LIMIT_LOW,
+                          (uint8_t*)temperature_ptr, 1);
 
   if (ret == 0) {
     temperature_ptr++;
-    ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_LOW_LIMIT_LOW,
-                            (uint8_t*)&temperature_ptr, 1);
+    ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_LOW_LIMIT_HIGH,
+                            (uint8_t*)temperature_ptr, 1);
   }
 
   return ret;
@@ -552,9 +552,9 @@ int32_t stts751_low_temperature_threshold_get(stts751_ctx_t *ctx,
 
 
   /**
-  * @defgroup  STTS751_Alert_response_address
+  * @defgroup  STTS751 over temperature alarm
   * @brief     This section groups all the functions that manage
-  *            alert response address functionality.
+  *            over temperature alarm functionality.
   * @{
   *
   */
@@ -567,7 +567,7 @@ int32_t stts751_low_temperature_threshold_get(stts751_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_ara_thermal_limit_set(stts751_ctx_t *ctx, int8_t val)
+int32_t stts751_ota_thermal_limit_set(stts751_ctx_t *ctx, int8_t val)
 {
   int32_t ret;
   ret = stts751_write_reg(ctx, STTS751_THERM_LIMIT, (uint8_t*)&val, 1);
@@ -582,7 +582,7 @@ int32_t stts751_ara_thermal_limit_set(stts751_ctx_t *ctx, int8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_ara_thermal_limit_get(stts751_ctx_t *ctx, int8_t *val)
+int32_t stts751_ota_thermal_limit_get(stts751_ctx_t *ctx, int8_t *val)
 {
   int32_t ret;
 
@@ -599,7 +599,7 @@ int32_t stts751_ara_thermal_limit_get(stts751_ctx_t *ctx, int8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_ara_thermal_hyst_set(stts751_ctx_t *ctx, int8_t val)
+int32_t stts751_ota_thermal_hyst_set(stts751_ctx_t *ctx, int8_t val)
 {
   int32_t ret;
 
@@ -616,7 +616,7 @@ int32_t stts751_ara_thermal_hyst_set(stts751_ctx_t *ctx, int8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_ara_thermal_hyst_get(stts751_ctx_t *ctx, int8_t *val)
+int32_t stts751_ota_thermal_hyst_get(stts751_ctx_t *ctx, int8_t *val)
 {
   int32_t ret;
 
