@@ -393,6 +393,9 @@ int32_t lps22hh_data_rate_get(lps22hh_ctx_t *ctx, lps22hh_odr_t *val)
       case LPS22HH_50_Hz:
         *val = LPS22HH_50_Hz;
         break;
+      case LPS22HH_75_Hz:
+        *val = LPS22HH_75_Hz;
+        break;
       case LPS22HH_1_Hz_LOW_NOISE:
         *val = LPS22HH_1_Hz_LOW_NOISE;
         break;
@@ -404,6 +407,9 @@ int32_t lps22hh_data_rate_get(lps22hh_ctx_t *ctx, lps22hh_odr_t *val)
         break;
       case LPS22HH_50_Hz_LOW_NOISE:
         *val = LPS22HH_50_Hz_LOW_NOISE;
+        break;
+      case LPS22HH_75_Hz_LOW_NOISE:
+        *val = LPS22HH_75_Hz_LOW_NOISE;
         break;
       case LPS22HH_100_Hz:
         *val = LPS22HH_100_Hz;
