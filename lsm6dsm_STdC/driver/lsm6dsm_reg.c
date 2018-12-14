@@ -2586,7 +2586,7 @@ int32_t lsm6dsm_pin_int2_route_set(lsm6dsm_ctx_t *ctx,
   lsm6dsm_int2_ctrl_t int2_ctrl;
   lsm6dsm_md1_cfg_t md1_cfg;
   lsm6dsm_md2_cfg_t md2_cfg;
-  lsm6dsm_drdy_pulse_cfg_g_t drdy_pulse_cfg_g;
+  lsm6dsm_drdy_pulse_cfg_t drdy_pulse_cfg;
   lsm6dsm_tap_cfg_t tap_cfg;
   int32_t ret;
 
@@ -2621,13 +2621,13 @@ int32_t lsm6dsm_pin_int2_route_set(lsm6dsm_ctx_t *ctx,
     ret = lsm6dsm_write_reg(ctx, LSM6DSM_MD2_CFG, (uint8_t*)&md2_cfg, 1);
   }
   if(ret == 0){
-    ret = lsm6dsm_read_reg(ctx, LSM6DSM_DRDY_PULSE_CFG_G,
-                           (uint8_t*)&drdy_pulse_cfg_g, 1);
+    ret = lsm6dsm_read_reg(ctx, LSM6DSM_DRDY_PULSE_CFG,
+                           (uint8_t*)&drdy_pulse_cfg, 1);
   }
   if(ret == 0){
-    drdy_pulse_cfg_g.int2_wrist_tilt = val.int2_wrist_tilt;
-    ret = lsm6dsm_write_reg(ctx, LSM6DSM_DRDY_PULSE_CFG_G,
-                            (uint8_t*)&drdy_pulse_cfg_g, 1);
+    drdy_pulse_cfg.int2_wrist_tilt = val.int2_wrist_tilt;
+    ret = lsm6dsm_write_reg(ctx, LSM6DSM_DRDY_PULSE_CFG,
+                            (uint8_t*)&drdy_pulse_cfg, 1);
   }
   if(ret == 0){
     ret = lsm6dsm_read_reg(ctx, LSM6DSM_TAP_CFG, (uint8_t*)&tap_cfg, 1);
