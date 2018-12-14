@@ -2,7 +2,7 @@
  ******************************************************************************
  * @file    lis2dw12_reg.h
  * @author  Sensors Software Solution Team
- * @brief   This file contains all the functions prototypes for the 
+ * @brief   This file contains all the functions prototypes for the
  *          lis2dw12_reg.c driver.
  ******************************************************************************
  * @attention
@@ -34,7 +34,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
- 
+
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef LIS2DW12_REGS_H
 #define LIS2DW12_REGS_H
@@ -124,7 +124,7 @@ typedef struct{
   *              MANDATORY: return 0 -> no Error.
   * @{
   *
-  */ 
+  */
 
 typedef int32_t (*lis2dw12_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
 typedef int32_t (*lis2dw12_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
@@ -146,7 +146,7 @@ typedef struct {
   * @{
   *
   */
-  
+
 /** I2C Device Address 8 bit format  if SA0=0 -> 31 if SA0=1 -> 33 **/
 #define LIS2DW12_I2C_ADD_L   0x31U
 #define LIS2DW12_I2C_ADD_H   0x33U
@@ -171,7 +171,7 @@ typedef struct {
   *                -> _from_fs2_lp1_to_mg(int16_t lsb);
   *                -> _from_fs4_lp1_to_mg(int16_t lsb);
   *                -> _from_fs8_lp1_to_mg(int16_t lsb);
-  *                -> _from_fs16_lp1_to_mg(int16_t lsb);  
+  *                -> _from_fs16_lp1_to_mg(int16_t lsb);
   *                -> _from_lsb_to_celsius(int16_t lsb);
   *
   *              REMOVING the MACRO you are compliant with:
@@ -464,7 +464,7 @@ int32_t lis2dw12_read_reg(lis2dw12_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 int32_t lis2dw12_write_reg(lis2dw12_ctx_t *ctx, uint8_t reg, uint8_t* data,
                            uint16_t len);
-                           
+
 extern float lis2dw12_from_fs2_to_mg(int16_t lsb);
 extern float lis2dw12_from_fs4_to_mg(int16_t lsb);
 extern float lis2dw12_from_fs8_to_mg(int16_t lsb);
@@ -593,7 +593,7 @@ int32_t lis2dw12_data_ready_mode_get(lis2dw12_ctx_t *ctx,
 
 typedef enum {
   LIS2DW12_LPF_ON_OUT         = 0x00,
-  LIS2DW12_USER_OFFSET_ON_OUT  = 0x01,    
+  LIS2DW12_USER_OFFSET_ON_OUT  = 0x01,
   LIS2DW12_HIGH_PASS_ON_OUT    = 0x10,
 } lis2dw12_fds_t;
 int32_t lis2dw12_filter_path_set(lis2dw12_ctx_t *ctx, lis2dw12_fds_t val);
@@ -661,7 +661,7 @@ typedef enum {
 int32_t lis2dw12_pin_mode_set(lis2dw12_ctx_t *ctx, lis2dw12_pp_od_t val);
 int32_t lis2dw12_pin_mode_get(lis2dw12_ctx_t *ctx, lis2dw12_pp_od_t *val);
 
-int32_t lis2dw12_pin_int1_route_set(lis2dw12_ctx_t *ctx, 
+int32_t lis2dw12_pin_int1_route_set(lis2dw12_ctx_t *ctx,
                                     lis2dw12_ctrl4_int1_pad_ctrl_t *val);
 int32_t lis2dw12_pin_int1_route_get(lis2dw12_ctx_t *ctx,
                                     lis2dw12_ctrl4_int1_pad_ctrl_t *val);
