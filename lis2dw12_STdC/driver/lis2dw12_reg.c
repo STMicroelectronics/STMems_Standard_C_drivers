@@ -101,49 +101,49 @@ int32_t lis2dw12_write_reg(lis2dw12_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-float lis2dw12_from_fs2_to_mg(int16_t lsb)
+float_t lis2dw12_from_fs2_to_mg(int16_t lsb)
 {
-  return ((float)lsb) * 0.061f;
+  return ((float_t)lsb) * 0.061f;
 }
 
-float lis2dw12_from_fs4_to_mg(int16_t lsb)
+float_t lis2dw12_from_fs4_to_mg(int16_t lsb)
 {
-  return ((float)lsb) * 0.122f;
+  return ((float_t)lsb) * 0.122f;
 }
 
-float lis2dw12_from_fs8_to_mg(int16_t lsb)
+float_t lis2dw12_from_fs8_to_mg(int16_t lsb)
 {
-  return ((float)lsb) * 0.244f;
+  return ((float_t)lsb) * 0.244f;
 }
 
-float lis2dw12_from_fs16_to_mg(int16_t lsb)
+float_t lis2dw12_from_fs16_to_mg(int16_t lsb)
 {
-  return ((float)lsb) *0.488f;
+  return ((float_t)lsb) *0.488f;
 }
 
-float lis2dw12_from_fs2_lp1_to_mg(int16_t lsb)
+float_t lis2dw12_from_fs2_lp1_to_mg(int16_t lsb)
 {
-  return ((float)lsb) * 0.061f;
+  return ((float_t)lsb) * 0.061f;
 }
 
-float lis2dw12_from_fs4_lp1_to_mg(int16_t lsb)
+float_t lis2dw12_from_fs4_lp1_to_mg(int16_t lsb)
 {
-  return ((float)lsb) * 0.122f;
+  return ((float_t)lsb) * 0.122f;
 }
 
-float lis2dw12_from_fs8_lp1_to_mg(int16_t lsb)
+float_t lis2dw12_from_fs8_lp1_to_mg(int16_t lsb)
 {
-  return ((float)lsb) * 0.244f;
+  return ((float_t)lsb) * 0.244f;
 }
 
-float lis2dw12_from_fs16_lp1_to_mg(int16_t lsb)
+float_t lis2dw12_from_fs16_lp1_to_mg(int16_t lsb)
 {
-  return ((float)lsb) * 0.488f;
+  return ((float_t)lsb) * 0.488f;
 }
 
-float lis2dw12_from_lsb_to_celsius(int16_t lsb)
+float_t lis2dw12_from_lsb_to_celsius(int16_t lsb)
 {
-  return (((float)lsb / 16.0f) + 25.0f);
+  return (((float_t)lsb / 16.0f) + 25.0f);
 }
 
 /**
@@ -1500,13 +1500,15 @@ int32_t lis2dw12_pin_int1_route_set(lis2dw12_ctx_t *ctx,
 
   if (ret == 0) {
     ret = lis2dw12_read_reg(ctx, LIS2DW12_CTRL_REG7,(uint8_t*) &reg, 1);
+  }
+  if (ret == 0) {
     if ((val->int1_tap |
          val->int1_ff |
          val->int1_wu |
          val->int1_single_tap |
          val->int1_6d |
-         ctrl5_int2_pad_ctrl->int2_sleep_state |
-         ctrl5_int2_pad_ctrl->int2_sleep_chg ) != PROPERTY_DISABLE){
+         ctrl5_int2_pad_ctrl.int2_sleep_state |
+         ctrl5_int2_pad_ctrl.int2_sleep_chg ) != PROPERTY_DISABLE){
       reg.interrupts_enable = PROPERTY_ENABLE;
     }
     else{
@@ -1558,11 +1560,13 @@ int32_t lis2dw12_pin_int2_route_set(lis2dw12_ctx_t *ctx,
 
   if (ret == 0) {
     ret = lis2dw12_read_reg(ctx, LIS2DW12_CTRL_REG7,(uint8_t*) &reg, 1);
-    if ((ctrl4_int1_pad_ctrl->int1_tap |
-         ctrl4_int1_pad_ctrl->int1_ff |
-         ctrl4_int1_pad_ctrl->int1_wu |
-         ctrl4_int1_pad_ctrl->int1_single_tap |
-         ctrl4_int1_pad_ctrl->int1_6d |
+  }
+  if (ret == 0) {
+    if ((ctrl4_int1_pad_ctrl.int1_tap |
+         ctrl4_int1_pad_ctrl.int1_ff |
+         ctrl4_int1_pad_ctrl.int1_wu |
+         ctrl4_int1_pad_ctrl.int1_single_tap |
+         ctrl4_int1_pad_ctrl.int1_6d |
          val->int2_sleep_state | val->int2_sleep_chg ) != PROPERTY_DISABLE) {
         reg.interrupts_enable = PROPERTY_ENABLE;
     }

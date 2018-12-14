@@ -159,44 +159,6 @@ typedef struct {
   *
   */
 
-/**
-  * @addtogroup  LIS2DW12_Sensitivity
-  * @brief       These macro are maintained for back compatibility.
-  *              in order to convert data into engineering units please
-  *              use functions:
-  *                -> _from_fs2_to_mg(int16_t lsb);
-  *                -> _from_fs4_to_mg(int16_t lsb);
-  *                -> _from_fs8_to_mg(int16_t lsb);
-  *                -> _from_fs16_to_mg(int16_t lsb);
-  *                -> _from_fs2_lp1_to_mg(int16_t lsb);
-  *                -> _from_fs4_lp1_to_mg(int16_t lsb);
-  *                -> _from_fs8_lp1_to_mg(int16_t lsb);
-  *                -> _from_fs16_lp1_to_mg(int16_t lsb);
-  *                -> _from_lsb_to_celsius(int16_t lsb);
-  *
-  *              REMOVING the MACRO you are compliant with:
-  *              MISRA-C 2012 [Dir 4.9] -> " avoid function-like macros "
-  * @{
-  *
-  */
-
-#define LIS2DW12_FROM_FS_2g_TO_mg(lsb)   (float)((int16_t)lsb >> 2) * 0.244f
-#define LIS2DW12_FROM_FS_4g_TO_mg(lsb)   (float)((int16_t)lsb >> 2) * 0.488f
-#define LIS2DW12_FROM_FS_8g_TO_mg(lsb)   (float)((int16_t)lsb >> 2) * 0.976f
-#define LIS2DW12_FROM_FS_16g_TO_mg(lsb)  (float)((int16_t)lsb >> 2) * 1.952f
-
-#define LIS2DW12_FROM_FS_2g_LP1_TO_mg(lsb)  (float)((int16_t)lsb>>4)* 0.976f
-#define LIS2DW12_FROM_FS_4g_LP1_TO_mg(lsb)  (float)((int16_t)lsb>>4)* 1.952f
-#define LIS2DW12_FROM_FS_8g_LP1_TO_mg(lsb)  (float)((int16_t)lsb>>4)* 3.904f
-#define LIS2DW12_FROM_FS_16g_LP1_TO_mg(lsb) (float)((int16_t)lsb>>4)* 7.808f
-
-#define LIS2DW12_FROM_LSB_TO_degC(lsb)    (float)((int16_t)lsb) / 16.0f+25.0f
-
-/**
-  * @}
-  *
-  */
-
 #define LIS2DW12_OUT_T_L                     0x0DU
 #define LIS2DW12_OUT_T_H                     0x0EU
 #define LIS2DW12_WHO_AM_I                    0x0FU
@@ -465,15 +427,15 @@ int32_t lis2dw12_read_reg(lis2dw12_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lis2dw12_write_reg(lis2dw12_ctx_t *ctx, uint8_t reg, uint8_t* data,
                            uint16_t len);
 
-extern float lis2dw12_from_fs2_to_mg(int16_t lsb);
-extern float lis2dw12_from_fs4_to_mg(int16_t lsb);
-extern float lis2dw12_from_fs8_to_mg(int16_t lsb);
-extern float lis2dw12_from_fs16_to_mg(int16_t lsb);
-extern float lis2dw12_from_fs2_lp1_to_mg(int16_t lsb);
-extern float lis2dw12_from_fs4_lp1_to_mg(int16_t lsb);
-extern float lis2dw12_from_fs8_lp1_to_mg(int16_t lsb);
-extern float lis2dw12_from_fs16_lp1_to_mg(int16_t lsb);
-extern float lis2dw12_from_lsb_to_celsius(int16_t lsb);
+extern float_t lis2dw12_from_fs2_to_mg(int16_t lsb);
+extern float_t lis2dw12_from_fs4_to_mg(int16_t lsb);
+extern float_t lis2dw12_from_fs8_to_mg(int16_t lsb);
+extern float_t lis2dw12_from_fs16_to_mg(int16_t lsb);
+extern float_t lis2dw12_from_fs2_lp1_to_mg(int16_t lsb);
+extern float_t lis2dw12_from_fs4_lp1_to_mg(int16_t lsb);
+extern float_t lis2dw12_from_fs8_lp1_to_mg(int16_t lsb);
+extern float_t lis2dw12_from_fs16_lp1_to_mg(int16_t lsb);
+extern float_t lis2dw12_from_lsb_to_celsius(int16_t lsb);
 
 typedef enum {
   LIS2DW12_HIGH_PERFORMANCE                    = 0x04,
