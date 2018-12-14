@@ -427,15 +427,15 @@ int32_t iis2dlpc_read_reg(iis2dlpc_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t iis2dlpc_write_reg(iis2dlpc_ctx_t *ctx, uint8_t reg, uint8_t* data,
                            uint16_t len);
 
-extern float iis2dlpc_from_fs2_to_mg(int16_t lsb);
-extern float iis2dlpc_from_fs4_to_mg(int16_t lsb);
-extern float iis2dlpc_from_fs8_to_mg(int16_t lsb);
-extern float iis2dlpc_from_fs16_to_mg(int16_t lsb);
-extern float iis2dlpc_from_fs2_lp1_to_mg(int16_t lsb);
-extern float iis2dlpc_from_fs4_lp1_to_mg(int16_t lsb);
-extern float iis2dlpc_from_fs8_lp1_to_mg(int16_t lsb);
-extern float iis2dlpc_from_fs16_lp1_to_mg(int16_t lsb);
-extern float iis2dlpc_from_lsb_to_celsius(int16_t lsb);
+extern float_t iis2dlpc_from_fs2_to_mg(int16_t lsb);
+extern float_t iis2dlpc_from_fs4_to_mg(int16_t lsb);
+extern float_t iis2dlpc_from_fs8_to_mg(int16_t lsb);
+extern float_t iis2dlpc_from_fs16_to_mg(int16_t lsb);
+extern float_t iis2dlpc_from_fs2_lp1_to_mg(int16_t lsb);
+extern float_t iis2dlpc_from_fs4_lp1_to_mg(int16_t lsb);
+extern float_t iis2dlpc_from_fs8_lp1_to_mg(int16_t lsb);
+extern float_t iis2dlpc_from_fs16_lp1_to_mg(int16_t lsb);
+extern float_t iis2dlpc_from_lsb_to_celsius(int16_t lsb);
 
 typedef enum {
   IIS2DLPC_HIGH_PERFORMANCE                    = 0x04,

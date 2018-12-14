@@ -101,49 +101,49 @@ int32_t iis2dlpc_write_reg(iis2dlpc_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-float iis2dlpc_from_fs2_to_mg(int16_t lsb)
+float_t iis2dlpc_from_fs2_to_mg(int16_t lsb)
 {
-  return ((float)lsb) * 0.061f;
+  return ((float_t)lsb) * 0.061f;
 }
 
-float iis2dlpc_from_fs4_to_mg(int16_t lsb)
+float_t iis2dlpc_from_fs4_to_mg(int16_t lsb)
 {
-  return ((float)lsb) * 0.122f;
+  return ((float_t)lsb) * 0.122f;
 }
 
-float iis2dlpc_from_fs8_to_mg(int16_t lsb)
+float_t iis2dlpc_from_fs8_to_mg(int16_t lsb)
 {
-  return ((float)lsb) * 0.244f;
+  return ((float_t)lsb) * 0.244f;
 }
 
-float iis2dlpc_from_fs16_to_mg(int16_t lsb)
+float_t iis2dlpc_from_fs16_to_mg(int16_t lsb)
 {
-  return ((float)lsb) *0.488f;
+  return ((float_t)lsb) *0.488f;
 }
 
-float iis2dlpc_from_fs2_lp1_to_mg(int16_t lsb)
+float_t iis2dlpc_from_fs2_lp1_to_mg(int16_t lsb)
 {
-  return ((float)lsb) * 0.061f;
+  return ((float_t)lsb) * 0.061f;
 }
 
-float iis2dlpc_from_fs4_lp1_to_mg(int16_t lsb)
+float_t iis2dlpc_from_fs4_lp1_to_mg(int16_t lsb)
 {
-  return ((float)lsb) * 0.122f;
+  return ((float_t)lsb) * 0.122f;
 }
 
-float iis2dlpc_from_fs8_lp1_to_mg(int16_t lsb)
+float_t iis2dlpc_from_fs8_lp1_to_mg(int16_t lsb)
 {
-  return ((float)lsb) * 0.244f;
+  return ((float_t)lsb) * 0.244f;
 }
 
-float iis2dlpc_from_fs16_lp1_to_mg(int16_t lsb)
+float_t iis2dlpc_from_fs16_lp1_to_mg(int16_t lsb)
 {
-  return ((float)lsb) * 0.488f;
+  return ((float_t)lsb) * 0.488f;
 }
 
-float iis2dlpc_from_lsb_to_celsius(int16_t lsb)
+float_t iis2dlpc_from_lsb_to_celsius(int16_t lsb)
 {
-  return (((float)lsb / 16.0f) + 25.0f);
+  return (((float_t)lsb / 16.0f) + 25.0f);
 }
 
 /**
@@ -1502,11 +1502,12 @@ int32_t iis2dlpc_pin_int1_route_set(iis2dlpc_ctx_t *ctx,
 
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL5_INT2_PAD_CTRL,
                           (uint8_t*) &ctrl5_int2_pad_ctrl, 1);
-
   if (ret == 0) {
     ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL_REG7,(uint8_t*) &reg, 1);
-    if ((  ctrl5_int2_pad_ctrl->int2_sleep_state
-     | ctrl5_int2_pad_ctrl->int2_sleep_chg
+  }
+  if (ret == 0) {
+    if ((  ctrl5_int2_pad_ctrl.int2_sleep_state
+     | ctrl5_int2_pad_ctrl.int2_sleep_chg
      | val->int1_tap
      | val->int1_ff
      | val->int1_wu
@@ -1565,13 +1566,15 @@ int32_t iis2dlpc_pin_int2_route_set(iis2dlpc_ctx_t *ctx,
                           (uint8_t*)&ctrl4_int1_pad, 1);
   if (ret == 0) {
     ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL_REG7,(uint8_t*) &ctrl_reg7, 1);
+  }
+  if (ret == 0) {
     if ((  val->int2_sleep_state
          | val->int2_sleep_chg
-         | ctrl4_int1_pad->int1_tap
-         | ctrl4_int1_pad->int1_ff
-         | ctrl4_int1_pad->int1_wu
-         | ctrl4_int1_pad->int1_single_tap
-         | ctrl4_int1_pad->int1_6d ) != PROPERTY_DISABLE) {
+         | ctrl4_int1_pad.int1_tap
+         | ctrl4_int1_pad.int1_ff
+         | ctrl4_int1_pad.int1_wu
+         | ctrl4_int1_pad.int1_single_tap
+         | ctrl4_int1_pad.int1_6d ) != PROPERTY_DISABLE) {
       ctrl_reg7.interrupts_enable = PROPERTY_ENABLE;
     }
     else{
