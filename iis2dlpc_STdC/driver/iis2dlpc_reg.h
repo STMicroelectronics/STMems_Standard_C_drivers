@@ -2,7 +2,7 @@
  ******************************************************************************
  * @file    iis2dlpc_reg.h
  * @author  Sensors Software Solution Team
- * @brief   This file contains all the functions prototypes for the 
+ * @brief   This file contains all the functions prototypes for the
  *          iis2dlpc_reg.c driver.
  ******************************************************************************
  * @attention
@@ -34,7 +34,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
- 
+
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef IIS2DLPC_REGS_H
 #define IIS2DLPC_REGS_H
@@ -124,7 +124,7 @@ typedef struct{
   *              MANDATORY: return 0 -> no Error.
   * @{
   *
-  */ 
+  */
 
 typedef int32_t (*iis2dlpc_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
 typedef int32_t (*iis2dlpc_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
@@ -146,7 +146,7 @@ typedef struct {
   * @{
   *
   */
-  
+
 /** I2C Device Address 8 bit format  if SA0=0 -> 31 if SA0=1 -> 33 **/
 #define IIS2DLPC_I2C_ADD_L   0x31U
 #define IIS2DLPC_I2C_ADD_H   0x33U
@@ -426,7 +426,7 @@ int32_t iis2dlpc_read_reg(iis2dlpc_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 int32_t iis2dlpc_write_reg(iis2dlpc_ctx_t *ctx, uint8_t reg, uint8_t* data,
                            uint16_t len);
-                           
+
 extern float iis2dlpc_from_fs2_to_mg(int16_t lsb);
 extern float iis2dlpc_from_fs4_to_mg(int16_t lsb);
 extern float iis2dlpc_from_fs8_to_mg(int16_t lsb);
@@ -555,7 +555,7 @@ int32_t iis2dlpc_data_ready_mode_get(iis2dlpc_ctx_t *ctx,
 
 typedef enum {
   IIS2DLPC_LPF_ON_OUT         = 0x00,
-  IIS2DLPC_USER_OFFSET_ON_OUT  = 0x01,    
+  IIS2DLPC_USER_OFFSET_ON_OUT  = 0x01,
   IIS2DLPC_HIGH_PASS_ON_OUT    = 0x10,
 } iis2dlpc_fds_t;
 int32_t iis2dlpc_filter_path_set(iis2dlpc_ctx_t *ctx, iis2dlpc_fds_t val);
@@ -623,7 +623,7 @@ typedef enum {
 int32_t iis2dlpc_pin_mode_set(iis2dlpc_ctx_t *ctx, iis2dlpc_pp_od_t val);
 int32_t iis2dlpc_pin_mode_get(iis2dlpc_ctx_t *ctx, iis2dlpc_pp_od_t *val);
 
-int32_t iis2dlpc_pin_int1_route_set(iis2dlpc_ctx_t *ctx, 
+int32_t iis2dlpc_pin_int1_route_set(iis2dlpc_ctx_t *ctx,
                                     iis2dlpc_ctrl4_int1_pad_ctrl_t *val);
 int32_t iis2dlpc_pin_int1_route_get(iis2dlpc_ctx_t *ctx,
                                     iis2dlpc_ctrl4_int1_pad_ctrl_t *val);

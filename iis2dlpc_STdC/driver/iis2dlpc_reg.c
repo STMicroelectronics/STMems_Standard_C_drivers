@@ -93,7 +93,7 @@ int32_t iis2dlpc_write_reg(iis2dlpc_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @}
   *
   */
-  
+
   /**
   * @defgroup    IIS2DLPC_Sensitivity
   * @brief       These functions convert raw-data into engineering units.
@@ -153,7 +153,7 @@ float iis2dlpc_from_lsb_to_celsius(int16_t lsb)
 
 /**
   * @defgroup  IIS2DLPC_Data_Generation
-  * @brief     This section groups all the functions concerning 
+  * @brief     This section groups all the functions concerning
   *            data generation
   * @{
   *
@@ -177,12 +177,12 @@ int32_t iis2dlpc_power_mode_set(iis2dlpc_ctx_t *ctx, iis2dlpc_mode_t val)
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL1,(uint8_t*) &ctrl1, 1);
   if (ret == 0) {
     ctrl1.mode = ( (uint8_t) val & 0x0CU ) >> 2;
-    ctrl1.lp_mode = (uint8_t) val & 0x03U ;  
+    ctrl1.lp_mode = (uint8_t) val & 0x03U ;
     ret = iis2dlpc_write_reg(ctx, IIS2DLPC_CTRL1,(uint8_t*) &ctrl1, 1);
-  } 
+  }
   if (ret == 0) {
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL6,(uint8_t*) &ctrl6, 1);
-  } 
+  }
   if (ret == 0) {
     ctrl6.low_noise = ( (uint8_t) val & 0x10U ) >> 4;
     ret = iis2dlpc_write_reg(ctx, IIS2DLPC_CTRL6,(uint8_t*) &ctrl6, 1);
@@ -211,7 +211,7 @@ int32_t iis2dlpc_power_mode_get(iis2dlpc_ctx_t *ctx, iis2dlpc_mode_t *val)
   if (ret == 0) {
     ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL6,(uint8_t*) &ctrl6, 1);
 
-    switch (((ctrl6.low_noise << 4) + (ctrl1.mode << 2) + 
+    switch (((ctrl6.low_noise << 4) + (ctrl1.mode << 2) +
             ctrl1.lp_mode)) {
       case IIS2DLPC_HIGH_PERFORMANCE:
         *val = IIS2DLPC_HIGH_PERFORMANCE;
@@ -271,7 +271,7 @@ int32_t iis2dlpc_power_mode_get(iis2dlpc_ctx_t *ctx, iis2dlpc_mode_t *val)
         *val = IIS2DLPC_HIGH_PERFORMANCE;
         break;
     }
-  } 
+  }
   return ret;
 }
 
@@ -293,16 +293,16 @@ int32_t iis2dlpc_data_rate_set(iis2dlpc_ctx_t *ctx, iis2dlpc_odr_t val)
   if (ret == 0) {
     ctrl1.odr = (uint8_t) val;
     ret = iis2dlpc_write_reg(ctx, IIS2DLPC_CTRL1,(uint8_t*) &ctrl1, 1);
-  } 
-  if (ret == 0) { 
+  }
+  if (ret == 0) {
     ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL3,(uint8_t*) &ctrl3, 1);
-  } 
-  if (ret == 0) { 
+  }
+  if (ret == 0) {
     ctrl3.slp_mode = ( (uint8_t) val & 0x30U ) >> 4;
     ret = iis2dlpc_write_reg(ctx, IIS2DLPC_CTRL3,(uint8_t*) &ctrl3, 1);
   } else {
     ret = ret;
-  } 
+  }
   return ret;
 }
 
@@ -323,7 +323,7 @@ int32_t iis2dlpc_data_rate_get(iis2dlpc_ctx_t *ctx, iis2dlpc_odr_t *val)
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL1,(uint8_t*) &ctrl1, 1);
   if (ret == 0) {
     ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL3,(uint8_t*) &ctrl3, 1);
-   
+
     switch ((ctrl3.slp_mode << 4) + ctrl1.odr) {
       case IIS2DLPC_XL_ODR_OFF:
         *val = IIS2DLPC_XL_ODR_OFF;
@@ -348,7 +348,7 @@ int32_t iis2dlpc_data_rate_get(iis2dlpc_ctx_t *ctx, iis2dlpc_odr_t *val)
         break;
       case IIS2DLPC_XL_ODR_400Hz:
         *val = IIS2DLPC_XL_ODR_400Hz;
-        break;     
+        break;
        case IIS2DLPC_XL_ODR_800Hz:
         *val = IIS2DLPC_XL_ODR_800Hz;
         break;
@@ -360,17 +360,17 @@ int32_t iis2dlpc_data_rate_get(iis2dlpc_ctx_t *ctx, iis2dlpc_odr_t *val)
         break;
       case IIS2DLPC_XL_SET_PIN_TRIG:
         *val = IIS2DLPC_XL_SET_PIN_TRIG;
-        break;     
+        break;
       default:
         *val = IIS2DLPC_XL_ODR_OFF;
         break;
     }
-  } 
+  }
   return ret;
 }
 
 /**
-  * @brief  Block data update.[set] 
+  * @brief  Block data update.[set]
   *
   * @param  ctx      read / write interface definitions
   * @param  val      change the values of bdu in reg CTRL2
@@ -425,7 +425,7 @@ int32_t iis2dlpc_full_scale_set(iis2dlpc_ctx_t *ctx, iis2dlpc_fs_t val)
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL6,(uint8_t*) &reg, 1);
   if (ret == 0) {
     reg.fs = (uint8_t) val;
-    ret = iis2dlpc_write_reg(ctx, IIS2DLPC_CTRL6,(uint8_t*) &reg, 1); 
+    ret = iis2dlpc_write_reg(ctx, IIS2DLPC_CTRL6,(uint8_t*) &reg, 1);
   }
   return ret;
 }
@@ -469,7 +469,7 @@ int32_t iis2dlpc_full_scale_get(iis2dlpc_ctx_t *ctx, iis2dlpc_fs_t *val)
   * @brief  The STATUS_REG register of the device.[get]
   *
   * @param  ctx      read / write interface definitions
-  * @param  val      union of registers from STATUS to 
+  * @param  val      union of registers from STATUS to
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
@@ -477,7 +477,7 @@ int32_t iis2dlpc_status_reg_get(iis2dlpc_ctx_t *ctx, iis2dlpc_status_t *val)
 {
   int32_t ret;
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_STATUS, (uint8_t*) val, 1);
-  return ret;     
+  return ret;
 }
 
 /**
@@ -500,7 +500,7 @@ int32_t iis2dlpc_flag_data_ready_get(iis2dlpc_ctx_t *ctx, uint8_t *val)
 }
 /**
   * @brief   Read all the interrupt/status flag of the device.[get]
-  *                            
+  *
   * @param  ctx      read / write interface definitions
   * @param  val      registers STATUS_DUP, WAKE_UP_SRC,
   *                  TAP_SRC, SIXD_SRC, ALL_INT_SRC
@@ -512,13 +512,13 @@ int32_t iis2dlpc_all_sources_get(iis2dlpc_ctx_t *ctx,
 {
   int32_t ret;
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_STATUS_DUP, (uint8_t*) val, 5);
-  return ret;     
+  return ret;
 }
 
 /**
-  * @brief  Accelerometer X-axis user offset correction expressed in two’s 
+  * @brief  Accelerometer X-axis user offset correction expressed in two’s
   *         complement, weight depends on bit USR_OFF_W. The value must be
-  *         in the range [-127 127].[set] 
+  *         in the range [-127 127].[set]
   *
   * @param  ctx      read / write interface definitions
   * @param  buff     buffer that contains data to write
@@ -529,13 +529,13 @@ int32_t iis2dlpc_usr_offset_x_set(iis2dlpc_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis2dlpc_write_reg(ctx, IIS2DLPC_X_OFS_USR, buff, 1);
-  return ret;     
+  return ret;
 }
 
 /**
-  * @brief  Accelerometer X-axis user offset correction expressed in two’s 
+  * @brief  Accelerometer X-axis user offset correction expressed in two’s
   *         complement, weight depends on bit USR_OFF_W. The value must be
-  *         in the range [-127 127].[get] 
+  *         in the range [-127 127].[get]
   *
   * @param  ctx      read / write interface definitions
   * @param  buff     buffer that stores data read
@@ -546,13 +546,13 @@ int32_t iis2dlpc_usr_offset_x_get(iis2dlpc_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_X_OFS_USR, buff, 1);
-  return ret;     
+  return ret;
 }
 
 /**
-  * @brief  Accelerometer Y-axis user offset correction expressed in two’s 
+  * @brief  Accelerometer Y-axis user offset correction expressed in two’s
   *         complement, weight depends on bit USR_OFF_W. The value must be
-  *         in the range [-127 127].[set] 
+  *         in the range [-127 127].[set]
   *
   * @param  ctx      read / write interface definitions
   * @param  buff     buffer that contains data to write
@@ -563,13 +563,13 @@ int32_t iis2dlpc_usr_offset_y_set(iis2dlpc_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis2dlpc_write_reg(ctx, IIS2DLPC_Y_OFS_USR, buff, 1);
-  return ret;     
+  return ret;
 }
 
 /**
-  * @brief  Accelerometer Y-axis user offset correction expressed in two’s 
+  * @brief  Accelerometer Y-axis user offset correction expressed in two’s
   *         complement, weight depends on bit USR_OFF_W. The value must be
-  *         in the range [-127 127].[get] 
+  *         in the range [-127 127].[get]
   *
   * @param  ctx      read / write interface definitions
   * @param  buff     buffer that stores data read
@@ -580,13 +580,13 @@ int32_t iis2dlpc_usr_offset_y_get(iis2dlpc_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_Y_OFS_USR, buff, 1);
-  return ret;     
+  return ret;
 }
 
 /**
-  * @brief  Accelerometer Z-axis user offset correction expressed in two’s 
+  * @brief  Accelerometer Z-axis user offset correction expressed in two’s
   *         complement, weight depends on bit USR_OFF_W. The value must be
-  *         in the range [-127 127].[set] 
+  *         in the range [-127 127].[set]
   *
   * @param  ctx      read / write interface definitions
   * @param  buff     buffer that contains data to write
@@ -597,13 +597,13 @@ int32_t iis2dlpc_usr_offset_z_set(iis2dlpc_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis2dlpc_write_reg(ctx, IIS2DLPC_Z_OFS_USR, buff, 1);
-  return ret;     
+  return ret;
 }
 
 /**
-  * @brief  Accelerometer Z-axis user offset correction expressed in two’s 
+  * @brief  Accelerometer Z-axis user offset correction expressed in two’s
   *         complement, weight depends on bit USR_OFF_W. The value must be
-  *         in the range [-127 127].[get] 
+  *         in the range [-127 127].[get]
   *
   * @param  ctx      read / write interface definitions
   * @param  buff     buffer that stores data read
@@ -614,11 +614,11 @@ int32_t iis2dlpc_usr_offset_z_get(iis2dlpc_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_Z_OFS_USR, buff, 1);
-  return ret;     
+  return ret;
 }
 
 /**
-  * @brief  Weight of XL user offset bits of registers X_OFS_USR, 
+  * @brief  Weight of XL user offset bits of registers X_OFS_USR,
   *         Y_OFS_USR, Z_OFS_USR.[set]
   *
   * @param  ctx      read / write interface definitions
@@ -642,7 +642,7 @@ int32_t iis2dlpc_offset_weight_set(iis2dlpc_ctx_t *ctx,
 }
 
 /**
-  * @brief  Weight of XL user offset bits of registers X_OFS_USR, 
+  * @brief  Weight of XL user offset bits of registers X_OFS_USR,
   *         Y_OFS_USR, Z_OFS_USR.[get]
   *
   * @param  ctx      read / write interface definitions
@@ -684,7 +684,7 @@ int32_t iis2dlpc_offset_weight_get(iis2dlpc_ctx_t *ctx,
   */
 
 /**
-  * @brief  Temperature data output register (r). L and H registers 
+  * @brief  Temperature data output register (r). L and H registers
   *         together express a 16-bit word in two’s complement.[get]
   *
   * @param  ctx      read / write interface definitions
@@ -696,11 +696,11 @@ int32_t iis2dlpc_temperature_raw_get(iis2dlpc_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_OUT_T_L, buff, 2);
-  return ret;     
+  return ret;
 }
 
 /**
-  * @brief  Linear acceleration output register. The value is expressed as 
+  * @brief  Linear acceleration output register. The value is expressed as
   *         a 16-bit word in two’s complement.[get]
   *
   * @param  ctx      read / write interface definitions
@@ -712,7 +712,7 @@ int32_t iis2dlpc_acceleration_raw_get(iis2dlpc_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_OUT_X_L, buff, 6);
-  return ret;     
+  return ret;
 }
 
 /**
@@ -739,11 +739,11 @@ int32_t iis2dlpc_device_id_get(iis2dlpc_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_WHO_AM_I, buff, 1);
-  return ret;     
+  return ret;
 }
 
 /**
-  * @brief  Register address automatically incremented during multiple byte 
+  * @brief  Register address automatically incremented during multiple byte
   *         access with a serial interface.[set]
   *
   * @param  ctx      read / write interface definitions
@@ -765,7 +765,7 @@ int32_t iis2dlpc_auto_increment_set(iis2dlpc_ctx_t *ctx, uint8_t val)
 }
 
 /**
-  * @brief  Register address automatically incremented during multiple 
+  * @brief  Register address automatically incremented during multiple
   *         byte access with a serial interface.[get]
   *
   * @param  ctx      read / write interface definitions
@@ -866,7 +866,7 @@ int32_t iis2dlpc_boot_get(iis2dlpc_ctx_t *ctx, uint8_t *val)
 }
 
 /**
-  * @brief  Sensor self-test enable.[set] 
+  * @brief  Sensor self-test enable.[set]
   *
   * @param  ctx      read / write interface definitions
   * @param  val      change the values of st in reg CTRL3
@@ -1003,13 +1003,13 @@ int32_t iis2dlpc_filter_path_set(iis2dlpc_ctx_t *ctx, iis2dlpc_fds_t val)
   if (ret == 0) {
     ctrl6.fds = ( (uint8_t) val & 0x10U ) >> 4;
     ret = iis2dlpc_write_reg(ctx, IIS2DLPC_CTRL6,(uint8_t*) &ctrl6, 1);
-  } 
+  }
   if (ret == 0) {
     ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL_REG7,(uint8_t*) &ctrl_reg7, 1);
-  } 
-  if (ret == 0) {  
+  }
+  if (ret == 0) {
     ctrl_reg7.usr_off_on_out = (uint8_t) val & 0x01U;
-    ret = iis2dlpc_write_reg(ctx, IIS2DLPC_CTRL_REG7,(uint8_t*) &ctrl_reg7, 1);  
+    ret = iis2dlpc_write_reg(ctx, IIS2DLPC_CTRL_REG7,(uint8_t*) &ctrl_reg7, 1);
   } else {
     ret = ret;
   }
@@ -1033,7 +1033,7 @@ int32_t iis2dlpc_filter_path_get(iis2dlpc_ctx_t *ctx, iis2dlpc_fds_t *val)
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL6,(uint8_t*) &ctrl6, 1);
   if (ret == 0) {
    ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL_REG7,(uint8_t*) &ctrl_reg7, 1);
-  
+
     switch ((ctrl6.fds << 4 ) + ctrl_reg7.usr_off_on_out) {
       case IIS2DLPC_LPF_ON_OUT:
         *val = IIS2DLPC_LPF_ON_OUT;
@@ -1053,7 +1053,7 @@ int32_t iis2dlpc_filter_path_get(iis2dlpc_ctx_t *ctx, iis2dlpc_fds_t *val)
 }
 
 /**
-  * @brief   Accelerometer cutoff filter frequency. Valid for low and high 
+  * @brief   Accelerometer cutoff filter frequency. Valid for low and high
   *          pass filter.[set]
   *
   * @param  ctx      read / write interface definitions
@@ -1077,7 +1077,7 @@ int32_t iis2dlpc_filter_bandwidth_set(iis2dlpc_ctx_t *ctx,
 }
 
 /**
-  * @brief   Accelerometer cutoff filter frequency. Valid for low and 
+  * @brief   Accelerometer cutoff filter frequency. Valid for low and
   *          high pass filter.[get]
   *
   * @param  ctx      read / write interface definitions
@@ -1180,7 +1180,7 @@ int32_t iis2dlpc_spi_mode_set(iis2dlpc_ctx_t *ctx, iis2dlpc_sim_t val)
   int32_t ret;
 
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL2,(uint8_t*) &reg, 1);
-  if (ret == 0) {  
+  if (ret == 0) {
     reg.sim = (uint8_t) val;
     ret = iis2dlpc_write_reg(ctx, IIS2DLPC_CTRL2,(uint8_t*) &reg, 1);
   }
@@ -1188,7 +1188,7 @@ int32_t iis2dlpc_spi_mode_set(iis2dlpc_ctx_t *ctx, iis2dlpc_sim_t val)
 }
 
 /**
-  * @brief  SPI Serial Interface Mode selection.[get] 
+  * @brief  SPI Serial Interface Mode selection.[get]
   *
   * @param  ctx      read / write interface definitions
   * @param  val      Get the values of sim in reg CTRL2
@@ -1240,7 +1240,7 @@ int32_t iis2dlpc_i2c_interface_set(iis2dlpc_ctx_t *ctx,
 }
 
 /**
-  * @brief  Disable / Enable I2C interface.[get] 
+  * @brief  Disable / Enable I2C interface.[get]
   *
   * @param  ctx      read / write interface definitions
   * @param  val      Get the values of i2c_disable in reg CTRL2
@@ -1384,7 +1384,7 @@ int32_t iis2dlpc_pin_polarity_get(iis2dlpc_ctx_t *ctx,
 }
 
 /**
-  * @brief  Latched/pulsed interrupt.[set] 
+  * @brief  Latched/pulsed interrupt.[set]
   *
   * @param  ctx      read / write interface definitions
   * @param  val      change the values of lir in reg CTRL3
@@ -1496,28 +1496,37 @@ int32_t iis2dlpc_pin_mode_get(iis2dlpc_ctx_t *ctx, iis2dlpc_pp_od_t *val)
 int32_t iis2dlpc_pin_int1_route_set(iis2dlpc_ctx_t *ctx,
                                     iis2dlpc_ctrl4_int1_pad_ctrl_t *val)
 {
+  iis2dlpc_ctrl5_int2_pad_ctrl_t ctrl5_int2_pad_ctrl;
   iis2dlpc_ctrl_reg7_t reg;
   int32_t ret;
-  
-  ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL_REG7,(uint8_t*) &reg, 1);
+
+  ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL5_INT2_PAD_CTRL,
+                          (uint8_t*) &ctrl5_int2_pad_ctrl, 1);
+
   if (ret == 0) {
-    if ((val->int1_tap | val->int1_ff | val->int1_wu | val->int1_single_tap |
-         val->int1_6d) != PROPERTY_DISABLE){     
-      reg.interrupts_enable = PROPERTY_ENABLE;   
-    } 
+    ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL_REG7,(uint8_t*) &reg, 1);
+    if ((  ctrl5_int2_pad_ctrl->int2_sleep_state
+     | ctrl5_int2_pad_ctrl->int2_sleep_chg
+     | val->int1_tap
+     | val->int1_ff
+     | val->int1_wu
+     | val->int1_single_tap
+     | val->int1_6d ) != PROPERTY_DISABLE) {
+      reg.interrupts_enable = PROPERTY_ENABLE;
+    }
     else{
       reg.interrupts_enable = PROPERTY_DISABLE;
     }
-    
+
     ret = iis2dlpc_write_reg(ctx, IIS2DLPC_CTRL4_INT1_PAD_CTRL,
-                                (uint8_t*) val, 1);  
-  } 
+                                (uint8_t*) val, 1);
+  }
   if (ret == 0) {
-    ret = iis2dlpc_write_reg(ctx, IIS2DLPC_CTRL_REG7,(uint8_t*) &reg, 1); 
+    ret = iis2dlpc_write_reg(ctx, IIS2DLPC_CTRL_REG7,(uint8_t*) &reg, 1);
   } else {
     ret = ret;
-  }                        
-  return ret;                          
+  }
+  return ret;
 }
 
 /**
@@ -1534,11 +1543,11 @@ int32_t iis2dlpc_pin_int1_route_get(iis2dlpc_ctx_t *ctx,
   int32_t ret;
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL4_INT1_PAD_CTRL,
                           (uint8_t*) val, 1);
-  return ret;     
+  return ret;
 }
 
 /**
-  * @brief   Select the signal that need to route on int2 pad.[set] 
+  * @brief   Select the signal that need to route on int2 pad.[set]
   *
   * @param  ctx      read / write interface definitions
   * @param  val      register CTRL5_INT2_PAD_CTRL.
@@ -1548,27 +1557,36 @@ int32_t iis2dlpc_pin_int1_route_get(iis2dlpc_ctx_t *ctx,
 int32_t iis2dlpc_pin_int2_route_set(iis2dlpc_ctx_t *ctx,
                                     iis2dlpc_ctrl5_int2_pad_ctrl_t *val)
 {
-  iis2dlpc_ctrl_reg7_t reg;
+  iis2dlpc_ctrl_reg7_t ctrl_reg7;
+  iis2dlpc_ctrl4_int1_pad_ctrl_t  ctrl4_int1_pad;
   int32_t ret;
-  
-  ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL_REG7,(uint8_t*) &reg, 1);
+
+  ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL4_INT1_PAD_CTRL,
+                          (uint8_t*)&ctrl4_int1_pad, 1);
   if (ret == 0) {
-    if ((val->int2_sleep_state | val->int2_sleep_chg ) != PROPERTY_DISABLE) {  
-      reg.interrupts_enable = PROPERTY_ENABLE;   
-    } 
-    else{
-      reg.interrupts_enable = PROPERTY_DISABLE;
+    ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL_REG7,(uint8_t*) &ctrl_reg7, 1);
+    if ((  val->int2_sleep_state
+         | val->int2_sleep_chg
+         | ctrl4_int1_pad->int1_tap
+         | ctrl4_int1_pad->int1_ff
+         | ctrl4_int1_pad->int1_wu
+         | ctrl4_int1_pad->int1_single_tap
+         | ctrl4_int1_pad->int1_6d ) != PROPERTY_DISABLE) {
+      ctrl_reg7.interrupts_enable = PROPERTY_ENABLE;
     }
-    
+    else{
+      ctrl_reg7.interrupts_enable = PROPERTY_DISABLE;
+    }
+
     ret = iis2dlpc_write_reg(ctx, IIS2DLPC_CTRL5_INT2_PAD_CTRL,
-                             (uint8_t*) val, 1);  
-  } 
+                             (uint8_t*) val, 1);
+  }
   if (ret == 0) {
-    ret = iis2dlpc_write_reg(ctx, IIS2DLPC_CTRL_REG7,(uint8_t*) &reg, 1); 
+    ret = iis2dlpc_write_reg(ctx, IIS2DLPC_CTRL_REG7,(uint8_t*) &ctrl_reg7, 1);
   } else {
     ret = ret;
-  }                         
-  return ret;     
+  }
+  return ret;
 }
 
 /**
@@ -1585,10 +1603,10 @@ int32_t iis2dlpc_pin_int2_route_get(iis2dlpc_ctx_t *ctx,
   int32_t ret;
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_CTRL5_INT2_PAD_CTRL,
                           (uint8_t*) val, 1);
-  return ret;     
+  return ret;
 }
 /**
-  * @brief All interrupt signals become available on INT1 pin.[set] 
+  * @brief All interrupt signals become available on INT1 pin.[set]
   *
   * @param  ctx      read / write interface definitions
   * @param  val      change the values of int2_on_int1 in reg CTRL_REG7
@@ -1786,7 +1804,7 @@ int32_t iis2dlpc_wkup_feed_data_get(iis2dlpc_ctx_t *ctx,
   */
 
 /**
-  * @brief  Config activity / inactivity or 
+  * @brief  Config activity / inactivity or
   *         stationary / motion detection.[set]
   *
   * @param  ctx      read / write interface definitions
@@ -1800,11 +1818,11 @@ int32_t iis2dlpc_act_mode_set(iis2dlpc_ctx_t *ctx, iis2dlpc_sleep_on_t val)
   iis2dlpc_wake_up_ths_t wake_up_ths;
   iis2dlpc_wake_up_dur_t wake_up_dur;
   int32_t ret;
-  
+
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_WAKE_UP_THS,(uint8_t*) &wake_up_ths, 1);
   if (ret == 0) {
     ret = iis2dlpc_read_reg(ctx, IIS2DLPC_WAKE_UP_DUR,(uint8_t*) &wake_up_dur, 1);
-  } 
+  }
   if (ret == 0) {
     wake_up_ths.sleep_on = (uint8_t) val & 0x01U;
     wake_up_dur.stationary = ((uint8_t)val & 0x02U) >> 1;
@@ -1812,12 +1830,12 @@ int32_t iis2dlpc_act_mode_set(iis2dlpc_ctx_t *ctx, iis2dlpc_sleep_on_t val)
   } else {
     ret = ret;
   }
-  
+
   return ret;
 }
 
 /**
-  * @brief  Config activity / inactivity or 
+  * @brief  Config activity / inactivity or
   *         stationary / motion detection. [get]
   *
   * @param  ctx      read / write interface definitions
@@ -2261,9 +2279,9 @@ int32_t iis2dlpc_tap_shock_get(iis2dlpc_ctx_t *ctx, uint8_t *val)
 }
 
 /**
-  * @brief  Quiet time is the time after the first detected tap in which 
+  * @brief  Quiet time is the time after the first detected tap in which
   *         there must not be any overthreshold event.
-  *         The default value of these bits is 00b which corresponds 
+  *         The default value of these bits is 00b which corresponds
   *         to 2*ODR_XL time. If the QUIET[1:0] bits are set to a different
   *         value, 1LSB corresponds to 4*ODR_XL time.[set]
   *
@@ -2286,9 +2304,9 @@ int32_t iis2dlpc_tap_quiet_set(iis2dlpc_ctx_t *ctx, uint8_t val)
 }
 
 /**
-  * @brief  Quiet time is the time after the first detected tap in which 
+  * @brief  Quiet time is the time after the first detected tap in which
   *         there must not be any overthreshold event.
-  *         The default value of these bits is 00b which corresponds 
+  *         The default value of these bits is 00b which corresponds
   *         to 2*ODR_XL time. If the QUIET[1:0] bits are set to a different
   *         value, 1LSB corresponds to 4*ODR_XL time.[get]
   *
@@ -2309,11 +2327,11 @@ int32_t iis2dlpc_tap_quiet_get(iis2dlpc_ctx_t *ctx, uint8_t *val)
 }
 
 /**
-  * @brief  When double tap recognition is enabled, this register expresses  
-  *         the maximum time between two consecutive detected taps to 
+  * @brief  When double tap recognition is enabled, this register expresses
+  *         the maximum time between two consecutive detected taps to
   *         determine a double tap event.
-  *         The default value of these bits is 0000b which corresponds 
-  *         to 16*ODR_XL time. If the DUR[3:0] bits are set to a different 
+  *         The default value of these bits is 0000b which corresponds
+  *         to 16*ODR_XL time. If the DUR[3:0] bits are set to a different
   *         value, 1LSB corresponds to 32*ODR_XL time.[set]
   *
   * @param  ctx      read / write interface definitions
@@ -2335,11 +2353,11 @@ int32_t iis2dlpc_tap_dur_set(iis2dlpc_ctx_t *ctx, uint8_t val)
 }
 
 /**
-  * @brief  When double tap recognition is enabled, this register expresses  
-  *         the maximum time between two consecutive detected taps to 
+  * @brief  When double tap recognition is enabled, this register expresses
+  *         the maximum time between two consecutive detected taps to
   *         determine a double tap event.
-  *         The default value of these bits is 0000b which corresponds 
-  *         to 16*ODR_XL time. If the DUR[3:0] bits are set to a different 
+  *         The default value of these bits is 0000b which corresponds
+  *         to 16*ODR_XL time. If the DUR[3:0] bits are set to a different
   *         value, 1LSB corresponds to 32*ODR_XL time.[get]
   *
   * @param  ctx      read / write interface definitions
@@ -2415,7 +2433,7 @@ int32_t iis2dlpc_tap_mode_get(iis2dlpc_ctx_t *ctx,
   * @brief  Read the tap / double tap source register.[get]
   *
   * @param  ctx      read / write interface definitions
-  * @param  iis2dlpc_tap_src: union of registers from TAP_SRC to 
+  * @param  iis2dlpc_tap_src: union of registers from TAP_SRC to
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
@@ -2423,7 +2441,7 @@ int32_t iis2dlpc_tap_src_get(iis2dlpc_ctx_t *ctx, iis2dlpc_tap_src_t *val)
 {
   int32_t ret;
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_TAP_SRC, (uint8_t*) val, 1);
-  return ret;     
+  return ret;
 }
 
 /**
@@ -2440,7 +2458,7 @@ int32_t iis2dlpc_tap_src_get(iis2dlpc_ctx_t *ctx, iis2dlpc_tap_src_t *val)
   */
 
 /**
-  * @brief  Threshold for 4D/6D function.[set] 
+  * @brief  Threshold for 4D/6D function.[set]
   *
   * @param  ctx      read / write interface definitions
   * @param  val      change the values of 6d_ths in reg TAP_THS_X
@@ -2532,7 +2550,7 @@ int32_t iis2dlpc_6d_src_get(iis2dlpc_ctx_t *ctx, iis2dlpc_sixd_src_t *val)
 {
   int32_t ret;
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_SIXD_SRC, (uint8_t*) val, 1);
-  return ret;     
+  return ret;
 }
 /**
   * @brief  Data sent to 6D interrupt function.[set]
@@ -2617,13 +2635,13 @@ int32_t iis2dlpc_ff_dur_set(iis2dlpc_ctx_t *ctx, uint8_t val)
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_WAKE_UP_DUR,(uint8_t*) &wake_up_dur, 1);
   if (ret == 0) {
     ret = iis2dlpc_read_reg(ctx, IIS2DLPC_FREE_FALL,(uint8_t*) &free_fall, 1);
-  } 
-  if(ret == 0) { 
+  }
+  if(ret == 0) {
     wake_up_dur.ff_dur = ( (uint8_t) val & 0x20U) >> 5;
     free_fall.ff_dur = (uint8_t) val & 0x1FU;
     ret = iis2dlpc_write_reg(ctx, IIS2DLPC_WAKE_UP_DUR,(uint8_t*) &wake_up_dur, 1);
-  } 
-  if(ret == 0) {     
+  }
+  if(ret == 0) {
     ret = iis2dlpc_write_reg(ctx, IIS2DLPC_FREE_FALL,(uint8_t*) &free_fall, 1);
   }
 
@@ -2635,7 +2653,7 @@ int32_t iis2dlpc_ff_dur_set(iis2dlpc_ctx_t *ctx, uint8_t val)
   *
   * @param  ctx      read / write interface definitions
   * @param  val      change the values of ff_dur in
-  *                  reg WAKE_UP_DUR /F REE_FALL  
+  *                  reg WAKE_UP_DUR /F REE_FALL
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
@@ -2644,7 +2662,7 @@ int32_t iis2dlpc_ff_dur_get(iis2dlpc_ctx_t *ctx, uint8_t *val)
   iis2dlpc_wake_up_dur_t wake_up_dur;
   iis2dlpc_free_fall_t free_fall;
   int32_t ret;
-  
+
   ret = iis2dlpc_read_reg(ctx, IIS2DLPC_WAKE_UP_DUR,(uint8_t*) &wake_up_dur, 1);
   if (ret == 0) {
     ret = iis2dlpc_read_reg(ctx, IIS2DLPC_FREE_FALL,(uint8_t*) &free_fall, 1);
@@ -2758,7 +2776,7 @@ int32_t iis2dlpc_fifo_watermark_set(iis2dlpc_ctx_t *ctx, uint8_t val)
 }
 
 /**
-  * @brief  FIFO watermark level selection.[get] 
+  * @brief  FIFO watermark level selection.[get]
   *
   * @param  ctx      read / write interface definitions
   * @param  val      change the values of fth in reg FIFO_CTRL
@@ -2891,7 +2909,7 @@ int32_t iis2dlpc_fifo_wtm_flag_get(iis2dlpc_ctx_t *ctx, uint8_t *val)
 }
 /**
   * @}
-  *  
+  *
   */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
