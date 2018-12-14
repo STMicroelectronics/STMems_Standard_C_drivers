@@ -127,22 +127,22 @@ float_t lsm6dso_from_fs125_to_mdps(int16_t lsb)
 
 float_t lsm6dso_from_fs500_to_mdps(int16_t lsb)
 {
-  return ((float_t)lsb) *1.750f;
+  return ((float_t)lsb) *17.50f;
 }
 
 float_t lsm6dso_from_fs250_to_mdps(int16_t lsb)
 {
-  return ((float_t)lsb) *0.875f;
+  return ((float_t)lsb) *8.750f;
 }
 
 float_t lsm6dso_from_fs1000_to_mdps(int16_t lsb)
 {
-  return ((float_t)lsb) *0.035f;
+  return ((float_t)lsb) *35.0f;
 }
 
 float_t lsm6dso_from_fs2000_to_mdps(int16_t lsb)
 {
-  return ((float_t)lsb) *0.070f;
+  return ((float_t)lsb) *70.0f;
 }
 
 float_t lsm6dso_from_lsb_to_celsius(int16_t lsb)

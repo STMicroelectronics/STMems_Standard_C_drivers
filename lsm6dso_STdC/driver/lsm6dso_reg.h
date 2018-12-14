@@ -159,8 +159,6 @@ typedef struct {
   *
   */
 
-#define LSM6DSO_TIMESTAMP_LSB_TO_NSEC	     25000ULL
-
 #define LSM6DSO_FUNC_CFG_ACCESS              0x01U
 typedef struct {
   uint8_t not_used_01              : 6;
