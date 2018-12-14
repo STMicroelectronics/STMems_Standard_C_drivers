@@ -2517,7 +2517,7 @@ int32_t ism330dlc_pin_int1_route_set(ism330dlc_ctx_t *ctx,
   reg.master_config.drdy_on_int1   = val.den_drdy_int1;
   mm_error = ism330dlc_write_reg(ctx, ISM330DLC_MASTER_CONFIG, &reg.byte, 1);
   
-  mm_error = ism330dlc_read_reg(ctx, ISM330DLC_MD2_CFG, &md2_cfg, 1);
+  mm_error = ism330dlc_read_reg(ctx, ISM330DLC_MD2_CFG, (uint8_t*)&md2_cfg, 1);
 
   mm_error = ism330dlc_read_reg(ctx, ISM330DLC_TAP_CFG, &reg.byte, 1);
   
@@ -2613,7 +2613,7 @@ int32_t ism330dlc_pin_int2_route_set(ism330dlc_ctx_t *ctx,
   reg.md2_cfg.int2_inact_state       = val.int2_inact_state;
   mm_error = ism330dlc_write_reg(ctx, ISM330DLC_MD2_CFG, &reg.byte, 1);
 
-  mm_error = ism330dlc_read_reg(ctx, ISM330DLC_MD1_CFG, &md1_cfg, 1);
+  mm_error = ism330dlc_read_reg(ctx, ISM330DLC_MD1_CFG, (uint8_t*)&md1_cfg, 1);
 
   mm_error = ism330dlc_read_reg(ctx, ISM330DLC_TAP_CFG, &reg.byte, 1);
   if (val.int2_6d || val.int2_ff || val.int2_wu || val.int2_single_tap ||
