@@ -2487,6 +2487,7 @@ int32_t ism330dlc_pin_int1_route_set(ism330dlc_ctx_t *ctx,
                                    ism330dlc_int1_route_t val)
 {
   ism330dlc_reg_t reg;
+  ism330dlc_md2_cfg_t md2_cfg;
   int32_t mm_error;
 
   mm_error = ism330dlc_read_reg(ctx, ISM330DLC_INT1_CTRL, &reg.byte, 1);
@@ -2515,10 +2516,16 @@ int32_t ism330dlc_pin_int1_route_set(ism330dlc_ctx_t *ctx,
   mm_error = ism330dlc_read_reg(ctx, ISM330DLC_MASTER_CONFIG, &reg.byte, 1);
   reg.master_config.drdy_on_int1   = val.den_drdy_int1;
   mm_error = ism330dlc_write_reg(ctx, ISM330DLC_MASTER_CONFIG, &reg.byte, 1);
+  
+  mm_error = ism330dlc_read_reg(ctx, ISM330DLC_MD2_CFG, &md2_cfg, 1);
 
   mm_error = ism330dlc_read_reg(ctx, ISM330DLC_TAP_CFG, &reg.byte, 1);
-  if (val.int1_6d || val.int1_ff || val.int1_wu || val.int1_single_tap ||
-      val.int1_double_tap || val.int1_inact_state){
+  
+  if (md2_cfg.int2_6d || md2_cfg.int2_ff || md2_cfg.int2_wu || 
+        md2_cfg.int2_single_tap || md2_cfg.int2_double_tap ||
+        md2_cfg.int2_inact_state || 
+        val.int1_6d || val.int1_ff || val.int1_wu || val.int1_single_tap ||
+        val.int1_double_tap || val.int1_inact_state){
     reg.tap_cfg.interrupts_enable = PROPERTY_ENABLE;
   }
   else{
@@ -2582,6 +2589,7 @@ int32_t ism330dlc_pin_int1_route_get(ism330dlc_ctx_t *ctx,
 int32_t ism330dlc_pin_int2_route_set(ism330dlc_ctx_t *ctx,
                                    ism330dlc_int2_route_t val)
 {
+  ism330dlc_md1_cfg_t md1_cfg;
   ism330dlc_reg_t reg;
   int32_t mm_error;
 
@@ -2605,9 +2613,14 @@ int32_t ism330dlc_pin_int2_route_set(ism330dlc_ctx_t *ctx,
   reg.md2_cfg.int2_inact_state       = val.int2_inact_state;
   mm_error = ism330dlc_write_reg(ctx, ISM330DLC_MD2_CFG, &reg.byte, 1);
 
+  mm_error = ism330dlc_read_reg(ctx, ISM330DLC_MD1_CFG, &md1_cfg, 1);
+
   mm_error = ism330dlc_read_reg(ctx, ISM330DLC_TAP_CFG, &reg.byte, 1);
   if (val.int2_6d || val.int2_ff || val.int2_wu || val.int2_single_tap ||
-      val.int2_double_tap || val.int2_inact_state){
+      val.int2_double_tap || val.int2_inact_state ||
+      md1_cfg.int1_6d || md1_cfg.int1_ff || md1_cfg.int1_wu ||
+      md1_cfg.int1_single_tap ||
+      md1_cfg.int1_double_tap || md1_cfg.int1_inact_state){
     reg.tap_cfg.interrupts_enable = PROPERTY_ENABLE;
   }
   else{
