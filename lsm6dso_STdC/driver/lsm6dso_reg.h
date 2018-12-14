@@ -159,48 +159,7 @@ typedef struct {
   *
   */
 
-/**
-  * @addtogroup  LSM6DSO_Sensitivity
-  * @brief       These macro are maintained for back compatibility.
-  *              in order to convert data into engineering units please
-  *              use functions:
-  *                -> _from_fs2_to_mg(int16_t lsb);
-  *                -> _from_fs4_to_mg(int16_t lsb);
-  *                -> _from_fs8_to_mg(int16_t lsb);
-  *                -> _from_fs16_to_mg(int16_t lsb);
-  *                -> _from_fs125_to_mdps(int16_t lsb);
-  *                -> _from_fs500_to_mdps(int16_t lsb);
-  *                -> _from_fs250_to_mdps(int16_t lsb);
-  *                -> _from_fs1000_to_mdps(int16_t lsb);
-  *                -> _from_fs2000_to_mdps(int16_t lsb);
-  *                -> _from_lsb_to_celsius(int16_t lsb);
-  *                -> _from_lsb_to_nsec(int16_t lsb);
-  *
-  *              REMOVING the MACRO you are compliant with:
-  *              MISRA-C 2012 [Dir 4.9] -> " avoid function-like macros "
-  * @{
-  *
-  */
-
-#define LSM6DSO_FROM_FS_2g_TO_mg(lsb)    (float)(lsb *  61.0f) / 1000.0f
-#define LSM6DSO_FROM_FS_4g_TO_mg(lsb)    (float)(lsb * 122.0f) / 1000.0f
-#define LSM6DSO_FROM_FS_8g_TO_mg(lsb)    (float)(lsb * 244.0f) / 1000.0f
-#define LSM6DSO_FROM_FS_16g_TO_mg(lsb)   (float)(lsb * 488.0f) / 1000.0f
-
-#define LSM6DSO_FROM_FS_125dps_TO_mdps(lsb)    (float)(lsb * 4375.0f) / 1000.0f
-#define LSM6DSO_FROM_FS_250dps_TO_mdps(lsb)    (float)(lsb *  875.0f) / 1000.0f
-#define LSM6DSO_FROM_FS_500dps_TO_mdps(lsb)    (float)(lsb * 1750.0f) / 1000.0f
-#define LSM6DSO_FROM_FS_1000dps_TO_mdps(lsb)   (float)(lsb *   35.0f) / 1000.0f
-#define LSM6DSO_FROM_FS_2000dps_TO_mdps(lsb)   (float)(lsb *   70.0f) / 1000.0f
-
-#define LSM6DSO_FROM_LSB_TO_degC(lsb)    ((float)((int16_t)lsb>>8)*1.0f + 25.0f)
-
 #define LSM6DSO_TIMESTAMP_LSB_TO_NSEC	     25000ULL
-
-/**
-  * @}
-  *
-  */
 
 #define LSM6DSO_FUNC_CFG_ACCESS              0x01U
 typedef struct {
@@ -1596,17 +1555,17 @@ int32_t lsm6dso_read_reg(lsm6dso_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lsm6dso_write_reg(lsm6dso_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
-extern float lsm6dso_from_fs2_to_mg(int16_t lsb);
-extern float lsm6dso_from_fs4_to_mg(int16_t lsb);
-extern float lsm6dso_from_fs8_to_mg(int16_t lsb);
-extern float lsm6dso_from_fs16_to_mg(int16_t lsb);
-extern float lsm6dso_from_fs125_to_mdps(int16_t lsb);
-extern float lsm6dso_from_fs500_to_mdps(int16_t lsb);
-extern float lsm6dso_from_fs250_to_mdps(int16_t lsb);
-extern float lsm6dso_from_fs1000_to_mdps(int16_t lsb);
-extern float lsm6dso_from_fs2000_to_mdps(int16_t lsb);
-extern float lsm6dso_from_lsb_to_celsius(int16_t lsb);
-extern float lsm6dso_from_lsb_to_nsec(int16_t lsb);
+extern float_t lsm6dso_from_fs2_to_mg(int16_t lsb);
+extern float_t lsm6dso_from_fs4_to_mg(int16_t lsb);
+extern float_t lsm6dso_from_fs8_to_mg(int16_t lsb);
+extern float_t lsm6dso_from_fs16_to_mg(int16_t lsb);
+extern float_t lsm6dso_from_fs125_to_mdps(int16_t lsb);
+extern float_t lsm6dso_from_fs500_to_mdps(int16_t lsb);
+extern float_t lsm6dso_from_fs250_to_mdps(int16_t lsb);
+extern float_t lsm6dso_from_fs1000_to_mdps(int16_t lsb);
+extern float_t lsm6dso_from_fs2000_to_mdps(int16_t lsb);
+extern float_t lsm6dso_from_lsb_to_celsius(int16_t lsb);
+extern float_t lsm6dso_from_lsb_to_nsec(int16_t lsb);
 
 typedef enum {
   LSM6DSO_2g   = 0,
