@@ -465,8 +465,8 @@ int32_t lsm6dsm_all_sources_get(lsm6dsm_ctx_t *ctx, lsm6dsm_all_sources_t *val)
 
   mm_error = lsm6dsm_read_reg(ctx, LSM6DSM_WAKE_UP_SRC, &(val->byte[0]), 4);
   mm_error = lsm6dsm_read_reg(ctx, LSM6DSM_FUNC_SRC1, &(val->byte[4]), 3);
-  
-  lsm6dsm_mem_bank_set(ctx, LSM6DSM_BANK_B);  
+
+  lsm6dsm_mem_bank_set(ctx, LSM6DSM_BANK_B);
   mm_error = lsm6dsm_read_reg(ctx, LSM6DSM_A_WRIST_TILT_MASK,
                               &(val->byte[7]), 1);
   lsm6dsm_mem_bank_set(ctx, LSM6DSM_USER_BANK);
@@ -2437,62 +2437,94 @@ int32_t lsm6dsm_i2c_interface_get(lsm6dsm_ctx_t *ctx,
   */
 
 /**
-  * @brief  pin_int1_route: [set] Select the signal that need to route on
-  *                               int1 pad
+  * @brief  Select the signal that need to route on int1 pad[set]
   *
-  * @param  lsm6dsm_ctx_t *ctx: read / write interface definitions
-  * @param  lsm6dsm_int1_ctrl: configure INT1_CTRL, MD1_CFG,
-  *                            CTRL4_C(den_drdy_int1),
-  *                            MASTER_CONFIG(drdy_on_int1)
+  * @param  ctx    Read / write interface definitions
+  * @param  val    configure INT1_CTRL, MD1_CFG, CTRL4_C(den_drdy_int1),
+  *                MASTER_CONFIG(drdy_on_int1)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm6dsm_pin_int1_route_set(lsm6dsm_ctx_t *ctx,
                                    lsm6dsm_int1_route_t val)
 {
-  lsm6dsm_reg_t reg;
-  int32_t mm_error;
+  lsm6dsm_master_config_t master_config;
+  lsm6dsm_int1_ctrl_t int1_ctrl;
+  lsm6dsm_md1_cfg_t md1_cfg;
+  lsm6dsm_md2_cfg_t md2_cfg;
+  lsm6dsm_ctrl4_c_t ctrl4_c;
+  lsm6dsm_tap_cfg_t tap_cfg;
+  int32_t ret;
 
-  mm_error = lsm6dsm_read_reg(ctx, LSM6DSM_INT1_CTRL, &reg.byte, 1);
-  reg.int1_ctrl.int1_drdy_xl        = val.int1_drdy_xl;
-  reg.int1_ctrl.int1_drdy_g         = val.int1_drdy_g;
-  reg.int1_ctrl.int1_boot           = val.int1_boot;
-  reg.int1_ctrl.int1_fth            = val.int1_fth;
-  reg.int1_ctrl.int1_fifo_ovr       = val.int1_fifo_ovr;
-  reg.int1_ctrl.int1_full_flag      = val.int1_full_flag;
-  reg.int1_ctrl.int1_sign_mot       = val.int1_sign_mot;
-  reg.int1_ctrl.int1_step_detector  = val.int1_step_detector;
-  mm_error = lsm6dsm_write_reg(ctx, LSM6DSM_INT1_CTRL, &reg.byte, 1);
-
-  mm_error = lsm6dsm_read_reg(ctx, LSM6DSM_MD1_CFG, &reg.byte, 1);
-  reg.md1_cfg.int1_timer           = val.int1_timer;
-  reg.md1_cfg.int1_tilt            = val.int1_tilt;
-  reg.md1_cfg.int1_6d              = val.int1_6d;
-  reg.md1_cfg.int1_double_tap      = val.int1_double_tap;
-  reg.md1_cfg.int1_ff              = val.int1_ff;
-  reg.md1_cfg.int1_wu              = val.int1_wu;
-  reg.md1_cfg.int1_single_tap      = val.int1_single_tap;
-  reg.md1_cfg.int1_inact_state     = val.int1_inact_state;
-  mm_error = lsm6dsm_write_reg(ctx, LSM6DSM_MD1_CFG, &reg.byte, 1);
-
-  mm_error = lsm6dsm_read_reg(ctx, LSM6DSM_CTRL4_C, &reg.byte, 1);
-  reg.ctrl4_c.den_drdy_int1        = val.den_drdy_int1;
-  mm_error = lsm6dsm_write_reg(ctx, LSM6DSM_CTRL4_C, &reg.byte, 1);
-
-  mm_error = lsm6dsm_read_reg(ctx, LSM6DSM_MASTER_CONFIG, &reg.byte, 1);
-  reg.master_config.drdy_on_int1   = val.den_drdy_int1;
-  mm_error = lsm6dsm_write_reg(ctx, LSM6DSM_MASTER_CONFIG, &reg.byte, 1);
-
-  mm_error = lsm6dsm_read_reg(ctx, LSM6DSM_TAP_CFG, &reg.byte, 1);
-  if (val.int1_6d || val.int1_ff || val.int1_wu || val.int1_single_tap ||
-      val.int1_double_tap || val.int1_inact_state){
-    reg.tap_cfg.interrupts_enable = PROPERTY_ENABLE;
+  ret = lsm6dsm_read_reg(ctx, LSM6DSM_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  if(ret == 0){
+    int1_ctrl.int1_drdy_xl        = val.int1_drdy_xl;
+    int1_ctrl.int1_drdy_g         = val.int1_drdy_g;
+    int1_ctrl.int1_boot           = val.int1_boot;
+    int1_ctrl.int1_fth            = val.int1_fth;
+    int1_ctrl.int1_fifo_ovr       = val.int1_fifo_ovr;
+    int1_ctrl.int1_full_flag      = val.int1_full_flag;
+    int1_ctrl.int1_sign_mot       = val.int1_sign_mot;
+    int1_ctrl.int1_step_detector  = val.int1_step_detector;
+    ret = lsm6dsm_write_reg(ctx, LSM6DSM_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
   }
-  else{
-    reg.tap_cfg.interrupts_enable = PROPERTY_DISABLE;
+  if(ret == 0){
+    ret = lsm6dsm_read_reg(ctx, LSM6DSM_MD1_CFG, (uint8_t*)&md1_cfg, 1);
   }
-  mm_error = lsm6dsm_write_reg(ctx, LSM6DSM_TAP_CFG, &reg.byte, 1);
-
-  return mm_error;
+  if(ret == 0){
+    ret = lsm6dsm_read_reg(ctx, LSM6DSM_MD2_CFG, (uint8_t*)&md2_cfg, 1);
+  }
+  if(ret == 0){
+        md1_cfg.int1_timer           = val.int1_timer;
+        md1_cfg.int1_tilt            = val.int1_tilt;
+        md1_cfg.int1_6d              = val.int1_6d;
+        md1_cfg.int1_double_tap      = val.int1_double_tap;
+        md1_cfg.int1_ff              = val.int1_ff;
+        md1_cfg.int1_wu              = val.int1_wu;
+        md1_cfg.int1_single_tap      = val.int1_single_tap;
+        md1_cfg.int1_inact_state     = val.int1_inact_state;
+        ret = lsm6dsm_write_reg(ctx, LSM6DSM_MD1_CFG, (uint8_t*)&md1_cfg, 1);
+  }
+  if(ret == 0){
+    ret = lsm6dsm_read_reg(ctx, LSM6DSM_CTRL4_C, (uint8_t*)&ctrl4_c, 1);
+  }
+  if(ret == 0){
+    ctrl4_c.den_drdy_int1 = val.den_drdy_int1;
+    ret = lsm6dsm_write_reg(ctx, LSM6DSM_CTRL4_C, (uint8_t*)&ctrl4_c, 1);
+  }
+  if(ret == 0){
+    ret = lsm6dsm_read_reg(ctx, LSM6DSM_MASTER_CONFIG,
+                           (uint8_t*)&master_config, 1);
+  }
+  if(ret == 0){
+     master_config.drdy_on_int1   = val.den_drdy_int1;
+     ret = lsm6dsm_write_reg(ctx, LSM6DSM_MASTER_CONFIG,
+                             (uint8_t*)&master_config, 1);
+  }
+  if(ret == 0){
+    ret = lsm6dsm_read_reg(ctx, LSM6DSM_TAP_CFG, (uint8_t*)&tap_cfg, 1);
+    if ((val.int1_6d != 0x00U) ||
+        (val.int1_ff != 0x00U) ||
+        (val.int1_wu != 0x00U) ||
+        (val.int1_single_tap != 0x00U) ||
+        (val.int1_double_tap != 0x00U) ||
+        (val.int1_inact_state != 0x00U)||
+        (md2_cfg.int2_6d != 0x00U) ||
+        (md2_cfg.int2_ff != 0x00U) ||
+        (md2_cfg.int2_wu != 0x00U) ||
+        (md2_cfg.int2_single_tap != 0x00U) ||
+        (md2_cfg.int2_double_tap != 0x00U) ||
+        (md2_cfg.int2_inact_state!= 0x00U) ){
+      tap_cfg.interrupts_enable = PROPERTY_ENABLE;
+    }
+    else{
+      tap_cfg.interrupts_enable = PROPERTY_DISABLE;
+    }
+  }
+  if(ret == 0){
+    ret = lsm6dsm_write_reg(ctx, LSM6DSM_TAP_CFG, (uint8_t*)&tap_cfg, 1);
+  }
+  return ret;
 }
 
 /**
@@ -2541,57 +2573,86 @@ int32_t lsm6dsm_pin_int1_route_get(lsm6dsm_ctx_t *ctx,
 }
 
 /**
-  * @brief  pin_int2_route: [set] Select the signal that need to route on
-  *                               int2 pad
+  * @brief  Select the signal that need to route on int2 pad[set]
   *
-  * @param  lsm6dsm_ctx_t *ctx: read / write interface definitions
-  * @param  lsm6dsm_int2_route_t: INT2_CTRL, DRDY_PULSE_CFG(int2_wrist_tilt),
-  *                               MD2_CFG
+  * @param  ctx    Read / write interface definitions
+  * @param  val    INT2_CTRL, DRDY_PULSE_CFG(int2_wrist_tilt), MD2_CFG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm6dsm_pin_int2_route_set(lsm6dsm_ctx_t *ctx,
                                    lsm6dsm_int2_route_t val)
 {
-  lsm6dsm_reg_t reg;
-  int32_t mm_error;
+  lsm6dsm_int2_ctrl_t int2_ctrl;
+  lsm6dsm_md1_cfg_t md1_cfg;
+  lsm6dsm_md2_cfg_t md2_cfg;
+  lsm6dsm_drdy_pulse_cfg_g_t drdy_pulse_cfg_g;
+  lsm6dsm_tap_cfg_t tap_cfg;
+  int32_t ret;
 
-  mm_error = lsm6dsm_read_reg(ctx, LSM6DSM_INT2_CTRL, &reg.byte, 1);
-  reg.int2_ctrl.int2_drdy_xl        = val.int2_drdy_xl;
-  reg.int2_ctrl.int2_drdy_g         = val.int2_drdy_g;
-  reg.int2_ctrl.int2_drdy_temp      = val.int2_drdy_temp;
-  reg.int2_ctrl.int2_fth            = val.int2_fth;
-  reg.int2_ctrl.int2_fifo_ovr       = val.int2_fifo_ovr;
-  reg.int2_ctrl.int2_full_flag      = val.int2_full_flag;
-  reg.int2_ctrl.int2_step_count_ov  = val.int2_step_count_ov;
-  reg.int2_ctrl.int2_step_delta     = val.int2_step_delta;
-  mm_error = lsm6dsm_write_reg(ctx, LSM6DSM_INT2_CTRL, &reg.byte, 1);
-
-  mm_error = lsm6dsm_read_reg(ctx, LSM6DSM_MD2_CFG, &reg.byte, 1);
-  reg.md2_cfg.int2_iron              = val.int2_iron;
-  reg.md2_cfg.int2_tilt              = val.int2_tilt;
-  reg.md2_cfg.int2_6d                = val.int2_6d;
-  reg.md2_cfg.int2_double_tap        = val.int2_double_tap;
-  reg.md2_cfg.int2_ff                = val.int2_ff;
-  reg.md2_cfg.int2_wu                = val.int2_wu;
-  reg.md2_cfg.int2_single_tap        = val.int2_single_tap;
-  reg.md2_cfg.int2_inact_state       = val.int2_inact_state;
-  mm_error = lsm6dsm_write_reg(ctx, LSM6DSM_MD2_CFG, &reg.byte, 1);
-
-  mm_error = lsm6dsm_read_reg(ctx, LSM6DSM_DRDY_PULSE_CFG, &reg.byte, 1);
-  reg.drdy_pulse_cfg.int2_wrist_tilt        = val.int2_wrist_tilt;
-  mm_error = lsm6dsm_write_reg(ctx, LSM6DSM_DRDY_PULSE_CFG, &reg.byte, 1);
-
-  mm_error = lsm6dsm_read_reg(ctx, LSM6DSM_TAP_CFG, &reg.byte, 1);
-  if (val.int2_6d || val.int2_ff || val.int2_wu || val.int2_single_tap ||
-      val.int2_double_tap || val.int2_inact_state){
-    reg.tap_cfg.interrupts_enable = PROPERTY_ENABLE;
+  
+  ret = lsm6dsm_read_reg(ctx, LSM6DSM_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  if(ret == 0){
+    int2_ctrl.int2_drdy_xl        = val.int2_drdy_xl;
+    int2_ctrl.int2_drdy_g         = val.int2_drdy_g;
+    int2_ctrl.int2_drdy_temp      = val.int2_drdy_temp;
+    int2_ctrl.int2_fth            = val.int2_fth;
+    int2_ctrl.int2_fifo_ovr       = val.int2_fifo_ovr;
+    int2_ctrl.int2_full_flag      = val.int2_full_flag;
+    int2_ctrl.int2_step_count_ov  = val.int2_step_count_ov;
+    int2_ctrl.int2_step_delta     = val.int2_step_delta;
+    ret = lsm6dsm_write_reg(ctx, LSM6DSM_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
   }
-  else{
-    reg.tap_cfg.interrupts_enable = PROPERTY_DISABLE;
+  if(ret == 0){
+    ret = lsm6dsm_read_reg(ctx, LSM6DSM_MD1_CFG, (uint8_t*)&md1_cfg, 1);
   }
-  mm_error = lsm6dsm_write_reg(ctx, LSM6DSM_TAP_CFG, &reg.byte, 1);
-
-  return mm_error;
+  if(ret == 0){
+    ret = lsm6dsm_read_reg(ctx, LSM6DSM_MD2_CFG, (uint8_t*)&md2_cfg, 1);
+  }
+  if(ret == 0){
+    md2_cfg.int2_iron              = val.int2_iron;
+    md2_cfg.int2_tilt              = val.int2_tilt;
+    md2_cfg.int2_6d                = val.int2_6d;
+    md2_cfg.int2_double_tap        = val.int2_double_tap;
+    md2_cfg.int2_ff                = val.int2_ff;
+    md2_cfg.int2_wu                = val.int2_wu;
+    md2_cfg.int2_single_tap        = val.int2_single_tap;
+    md2_cfg.int2_inact_state       = val.int2_inact_state;
+    ret = lsm6dsm_write_reg(ctx, LSM6DSM_MD2_CFG, (uint8_t*)&md2_cfg, 1);
+  }
+  if(ret == 0){
+    ret = lsm6dsm_read_reg(ctx, LSM6DSM_DRDY_PULSE_CFG_G,
+                           (uint8_t*)&drdy_pulse_cfg_g, 1);
+  }
+  if(ret == 0){
+    drdy_pulse_cfg_g.int2_wrist_tilt = val.int2_wrist_tilt;
+    ret = lsm6dsm_write_reg(ctx, LSM6DSM_DRDY_PULSE_CFG_G,
+                            (uint8_t*)&drdy_pulse_cfg_g, 1);
+  }
+  if(ret == 0){
+    ret = lsm6dsm_read_reg(ctx, LSM6DSM_TAP_CFG, (uint8_t*)&tap_cfg, 1);
+    if ((md1_cfg.int1_6d != 0x00U) ||
+        (md1_cfg.int1_ff != 0x00U) ||
+        (md1_cfg.int1_wu != 0x00U) ||
+        (md1_cfg.int1_single_tap != 0x00U) ||
+        (md1_cfg.int1_double_tap != 0x00U) ||
+        (md1_cfg.int1_inact_state != 0x00U) ||
+        (val.int2_6d != 0x00U) ||
+        (val.int2_ff != 0x00U) ||
+        (val.int2_wu != 0x00U) ||
+        (val.int2_single_tap != 0x00U) ||
+        (val.int2_double_tap != 0x00U) ||
+        (val.int2_inact_state!= 0x00U) ){
+      tap_cfg.interrupts_enable = PROPERTY_ENABLE;
+    }
+    else{
+      tap_cfg.interrupts_enable = PROPERTY_DISABLE;
+    }
+  }
+  if(ret == 0){
+    ret = lsm6dsm_write_reg(ctx, LSM6DSM_TAP_CFG, (uint8_t*)&tap_cfg, 1);
+  }
+  return ret;
 }
 
 /**
