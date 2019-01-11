@@ -1,14 +1,13 @@
 /*
  ******************************************************************************
  * @file    a3g4250d_reg.h
- * @author  MEMS Software Solution Team
- * @date    20-December-2017
+ * @author  Sensors Software Solution Team
  * @brief   This file contains all the functions prototypes for the
  *          a3g4250d_reg.c driver.
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -35,10 +34,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __A3G4250D_DRIVER__H
-#define __A3G4250D_DRIVER__H
+#ifndef A3G4250D_REGS_H
+#define A3G4250D_REGS_H
 
 #ifdef __cplusplus
   extern "C" {
@@ -61,6 +59,18 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
+/**
+  * @defgroup axisXbitXX_t
+  * @brief    These unions are useful to represent different sensors data type.
+  *           These unions are not need by the driver.
+  *
+  *           REMOVING the unions you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  *
+  * @{
+  *
+  */
+
 typedef union{
   int16_t i16bit[3];
   uint8_t u8bit[6];
@@ -80,6 +90,11 @@ typedef union{
   int32_t i32bit;
   uint8_t u8bit[4];
 } axis1bit32_t;
+
+/**
+  * @}
+  *
+  */
 
 typedef struct{
   uint8_t bit0       : 1;
@@ -102,8 +117,10 @@ typedef struct{
   *
   */
 
-/** @defgroup a3g4250d_interface
+/**
+  * @defgroup a3g4250d_interface
   * @{
+  *
   */
 
 typedef int32_t (*a3g4250d_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
@@ -119,51 +136,44 @@ typedef struct {
 
 /**
   * @}
+  *
   */
 
 
-/** @defgroup a3g4250d_Infos
+/**
+  * @defgroup a3g4250d_Infos
   * @{
+  *
   */
-  /** I2C Device Address 8 bit format  if SA0=0 -> 0xD1 if SA0=1 -> 0xD3 **/
-#define A3G4250D_I2C_ADD_L               0xD1
-#define A3G4250D_I2C_ADD_H               0xD3
+
+/** I2C Device Address 8 bit format  if SA0=0 -> 0xD1 if SA0=1 -> 0xD3 **/
+#define A3G4250D_I2C_ADD_L               0xD1U
+#define A3G4250D_I2C_ADD_H               0xD3U
 
 /** Device Identification (Who am I) **/
-#define A3G4250D_ID                      0xD3
+#define A3G4250D_ID                      0xD3U
 
 /**
   * @}
+  *
   */
 
-/**
-  * @defgroup a3g4250d_Sensitivity
-  * @{
-  */
-
-#define A3G4250D_FROM_FS_245dps_TO_mdps(lsb)    (float)( lsb * 8.75f )
-#define A3G4250D_FROM_LSB_TO_degC(lsb)          (float)(lsb + 25.0f)
-
-/**
-  * @}
-  */
-
-#define A3G4250D_WHO_AM_I                0x0F
-#define A3G4250D_CTRL_REG1               0x20
+#define A3G4250D_WHO_AM_I                0x0FU
+#define A3G4250D_CTRL_REG1               0x20U
 typedef struct {
   uint8_t pd                        : 4; /* xen yen zen pd */
   uint8_t bw                        : 2;
   uint8_t dr                        : 2;
 } a3g4250d_ctrl_reg1_t;
 
-#define A3G4250D_CTRL_REG2               0x21
+#define A3G4250D_CTRL_REG2               0x21U
 typedef struct {
   uint8_t hpcf                      : 4;
   uint8_t hpm                       : 2;
   uint8_t not_used_01               : 2;
 } a3g4250d_ctrl_reg2_t;
 
-#define A3G4250D_CTRL_REG3               0x22
+#define A3G4250D_CTRL_REG3               0x22U
 typedef struct {
   uint8_t i2_empty                  : 1;
   uint8_t i2_orun                   : 1;
@@ -175,7 +185,7 @@ typedef struct {
   uint8_t i1_int1                   : 1;
 } a3g4250d_ctrl_reg3_t;
 
-#define A3G4250D_CTRL_REG4               0x23
+#define A3G4250D_CTRL_REG4               0x23U
 typedef struct {
   uint8_t sim                       : 1;
   uint8_t st                        : 2;
@@ -184,7 +194,7 @@ typedef struct {
   uint8_t not_used_02               : 1;
 } a3g4250d_ctrl_reg4_t;
 
-#define A3G4250D_CTRL_REG5               0x24
+#define A3G4250D_CTRL_REG5               0x24U
 typedef struct {
   uint8_t out_sel                   : 2;
   uint8_t int1_sel                  : 2;
@@ -194,13 +204,13 @@ typedef struct {
   uint8_t boot                      : 1;
 } a3g4250d_ctrl_reg5_t;
 
-#define A3G4250D_REFERENCE               0x25
+#define A3G4250D_REFERENCE               0x25U
 typedef struct {
   uint8_t ref                       : 8;
 } a3g4250d_reference_t;
 
-#define A3G4250D_OUT_TEMP                0x26
-#define A3G4250D_STATUS_REG              0x27
+#define A3G4250D_OUT_TEMP                0x26U
+#define A3G4250D_STATUS_REG              0x27U
 typedef struct {
   uint8_t xda                       : 1;
   uint8_t yda                       : 1;
@@ -212,19 +222,19 @@ typedef struct {
   uint8_t zyxor                     : 1;
 } a3g4250d_status_reg_t;
 
-#define A3G4250D_OUT_X_L                 0x28
-#define A3G4250D_OUT_X_H                 0x29
-#define A3G4250D_OUT_Y_L                 0x2A
-#define A3G4250D_OUT_Y_H                 0x2B
-#define A3G4250D_OUT_Z_L                 0x2C
-#define A3G4250D_OUT_Z_H                 0x2D
-#define A3G4250D_FIFO_CTRL_REG           0x2E
+#define A3G4250D_OUT_X_L                 0x28U
+#define A3G4250D_OUT_X_H                 0x29U
+#define A3G4250D_OUT_Y_L                 0x2AU
+#define A3G4250D_OUT_Y_H                 0x2BU
+#define A3G4250D_OUT_Z_L                 0x2CU
+#define A3G4250D_OUT_Z_H                 0x2DU
+#define A3G4250D_FIFO_CTRL_REG           0x2EU
 typedef struct {
   uint8_t wtm                       : 5;
   uint8_t fm                        : 3;
 } a3g4250d_fifo_ctrl_reg_t;
 
-#define A3G4250D_FIFO_SRC_REG            0x2F
+#define A3G4250D_FIFO_SRC_REG            0x2FU
 typedef struct {
   uint8_t fss                       : 5;
   uint8_t empty                     : 1;
@@ -232,7 +242,7 @@ typedef struct {
   uint8_t wtm                       : 1;
 } a3g4250d_fifo_src_reg_t;
 
-#define A3G4250D_INT1_CFG                0x30
+#define A3G4250D_INT1_CFG                0x30U
 typedef struct {
   uint8_t xlie                      : 1;
   uint8_t xhie                      : 1;
@@ -244,7 +254,7 @@ typedef struct {
   uint8_t and_or                    : 1;
 } a3g4250d_int1_cfg_t;
 
-#define A3G4250D_INT1_SRC                0x31
+#define A3G4250D_INT1_SRC                0x31U
 typedef struct {
   uint8_t xl                        : 1;
   uint8_t xh                        : 1;
@@ -256,44 +266,57 @@ typedef struct {
   uint8_t not_used_01               : 1;
 } a3g4250d_int1_src_t;
 
-#define A3G4250D_INT1_TSH_XH             0x32
+#define A3G4250D_INT1_TSH_XH             0x32U
 typedef struct {
   uint8_t thsx                      : 7;
   uint8_t not_used_01               : 1;
 } a3g4250d_int1_tsh_xh_t;
 
-#define A3G4250D_INT1_TSH_XL             0x33
+#define A3G4250D_INT1_TSH_XL             0x33U
 typedef struct {
   uint8_t thsx                      : 8;
 } a3g4250d_int1_tsh_xl_t;
 
-#define A3G4250D_INT1_TSH_YH             0x34
+#define A3G4250D_INT1_TSH_YH             0x34U
 typedef struct {
   uint8_t thsy                      : 7;
   uint8_t not_used_01               : 1;
 } a3g4250d_int1_tsh_yh_t;
 
-#define A3G4250D_INT1_TSH_YL             0x35
+#define A3G4250D_INT1_TSH_YL             0x35U
 typedef struct {
   uint8_t thsy                      : 8;
 } a3g4250d_int1_tsh_yl_t;
 
-#define A3G4250D_INT1_TSH_ZH             0x36
+#define A3G4250D_INT1_TSH_ZH             0x36U
 typedef struct {
   uint8_t thsz                      : 7;
   uint8_t not_used_01               : 1;
 } a3g4250d_int1_tsh_zh_t;
 
-#define A3G4250D_INT1_TSH_ZL             0x37
+#define A3G4250D_INT1_TSH_ZL             0x37U
 typedef struct {
   uint8_t thsz                      : 8;
 } a3g4250d_int1_tsh_zl_t;
 
-#define A3G4250D_INT1_DURATION           0x38
+#define A3G4250D_INT1_DURATION           0x38U
 typedef struct {
   uint8_t d                         : 7;
   uint8_t wait                      : 1;
 } a3g4250d_int1_duration_t;
+
+/**
+  * @defgroup LSM9DS1_Register_Union
+  * @brief    This union group all the registers that has a bit-field
+  *           description.
+  *           This union is useful but not need by the driver.
+  *
+  *           REMOVING this union you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  *
+  * @{
+  *
+  */
 
 typedef union{
   a3g4250d_ctrl_reg1_t        ctrl_reg1;
@@ -318,10 +341,18 @@ typedef union{
   uint8_t                     byte;
 } a3g4250d_reg_t;
 
+/**
+  * @}
+  *
+  */
+
 int32_t a3g4250d_read_reg(a3g4250d_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 int32_t a3g4250d_write_reg(a3g4250d_ctx_t *ctx, uint8_t reg, uint8_t* data,
                            uint16_t len);
+
+extern float_t a3g4250d_from_fs245dps_to_mdps(int16_t lsb);
+extern float_t a3g4250d_from_lsb_to_celsius(int16_t lsb);
 
 int32_t a3g4250d_axis_x_data_set(a3g4250d_ctx_t *ctx, uint8_t val);
 int32_t a3g4250d_axis_x_data_get(a3g4250d_ctx_t *ctx, uint8_t *val);
@@ -537,12 +568,13 @@ int32_t a3g4250d_fifo_wtm_flag_get(a3g4250d_ctx_t *ctx, uint8_t *val);
 
 /**
   * @}
+  *
   */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*__A3G4250D_DRIVER__H */
+#endif /* A3G4250D_REGS_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
