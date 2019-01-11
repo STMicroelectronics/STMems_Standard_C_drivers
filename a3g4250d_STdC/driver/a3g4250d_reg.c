@@ -1542,10 +1542,12 @@ int32_t a3g4250d_fifo_watermark_set(a3g4250d_ctx_t *ctx, uint8_t val)
   a3g4250d_fifo_ctrl_reg_t fifo_ctrl_reg;
   int32_t ret;
 
-  ret = a3g4250d_read_reg(ctx, A3G4250D_FIFO_CTRL_REG,(uint8_t*)&fifo_ctrl_reg, 1);
+  ret = a3g4250d_read_reg(ctx, A3G4250D_FIFO_CTRL_REG,
+                          (uint8_t*)&fifo_ctrl_reg, 1);
   if(ret == 0){
     fifo_ctrl_reg.wtm = val;
-    ret = a3g4250d_write_reg(ctx, A3G4250D_FIFO_CTRL_REG,(uint8_t*)&fifo_ctrl_reg, 1);
+    ret = a3g4250d_write_reg(ctx, A3G4250D_FIFO_CTRL_REG,
+                             (uint8_t*)&fifo_ctrl_reg, 1);
   }
 
   return ret;
@@ -1564,7 +1566,8 @@ int32_t a3g4250d_fifo_watermark_get(a3g4250d_ctx_t *ctx, uint8_t *val)
   a3g4250d_fifo_ctrl_reg_t fifo_ctrl_reg;
   int32_t ret;
 
-  ret = a3g4250d_read_reg(ctx, A3G4250D_FIFO_CTRL_REG,(uint8_t*)&fifo_ctrl_reg, 1);
+  ret = a3g4250d_read_reg(ctx, A3G4250D_FIFO_CTRL_REG,
+                          (uint8_t*)&fifo_ctrl_reg, 1);
   *val = fifo_ctrl_reg.wtm;
 
   return ret;
@@ -1583,10 +1586,12 @@ int32_t a3g4250d_fifo_mode_set(a3g4250d_ctx_t *ctx, a3g4250d_fifo_mode_t val)
   a3g4250d_fifo_ctrl_reg_t fifo_ctrl_reg;
   int32_t ret;
 
-  ret = a3g4250d_read_reg(ctx, A3G4250D_FIFO_CTRL_REG,(uint8_t*)&fifo_ctrl_reg, 1);
+  ret = a3g4250d_read_reg(ctx, A3G4250D_FIFO_CTRL_REG,
+                          (uint8_t*)&fifo_ctrl_reg, 1);
   if(ret == 0){
     fifo_ctrl_reg.fm = (uint8_t)val;
-    ret = a3g4250d_write_reg(ctx, A3G4250D_FIFO_CTRL_REG,(uint8_t*)&fifo_ctrl_reg, 1);
+    ret = a3g4250d_write_reg(ctx, A3G4250D_FIFO_CTRL_REG,
+                             (uint8_t*)&fifo_ctrl_reg, 1);
   }
 
   return ret;
@@ -1605,7 +1610,8 @@ int32_t a3g4250d_fifo_mode_get(a3g4250d_ctx_t *ctx, a3g4250d_fifo_mode_t *val)
   a3g4250d_fifo_ctrl_reg_t fifo_ctrl_reg;
   int32_t ret;
 
-  ret = a3g4250d_read_reg(ctx, A3G4250D_FIFO_CTRL_REG,(uint8_t*)&fifo_ctrl_reg, 1);
+  ret = a3g4250d_read_reg(ctx, A3G4250D_FIFO_CTRL_REG,
+                          (uint8_t*)&fifo_ctrl_reg, 1);
 
   switch (fifo_ctrl_reg.fm){
     case A3G4250D_FIFO_BYPASS_MODE:
@@ -1638,7 +1644,8 @@ int32_t a3g4250d_fifo_data_level_get(a3g4250d_ctx_t *ctx, uint8_t *val)
   a3g4250d_fifo_src_reg_t fifo_src_reg;
   int32_t ret;
 
-  ret = a3g4250d_read_reg(ctx, A3G4250D_FIFO_SRC_REG,(uint8_t*)&fifo_src_reg, 1);
+  ret = a3g4250d_read_reg(ctx, A3G4250D_FIFO_SRC_REG,
+                          (uint8_t*)&fifo_src_reg, 1);
   *val = fifo_src_reg.fss;
 
   return ret;
@@ -1657,7 +1664,8 @@ int32_t a3g4250d_fifo_empty_flag_get(a3g4250d_ctx_t *ctx, uint8_t *val)
   a3g4250d_fifo_src_reg_t fifo_src_reg;
   int32_t ret;
 
-  ret = a3g4250d_read_reg(ctx, A3G4250D_FIFO_SRC_REG,(uint8_t*)&fifo_src_reg, 1);
+  ret = a3g4250d_read_reg(ctx, A3G4250D_FIFO_SRC_REG,
+                          (uint8_t*)&fifo_src_reg, 1);
   *val = fifo_src_reg.empty;
 
   return ret;
@@ -1676,7 +1684,8 @@ int32_t a3g4250d_fifo_ovr_flag_get(a3g4250d_ctx_t *ctx, uint8_t *val)
   a3g4250d_fifo_src_reg_t fifo_src_reg;
   int32_t ret;
 
-  ret = a3g4250d_read_reg(ctx, A3G4250D_FIFO_SRC_REG,(uint8_t*)&fifo_src_reg, 1);
+  ret = a3g4250d_read_reg(ctx, A3G4250D_FIFO_SRC_REG,
+                          (uint8_t*)&fifo_src_reg, 1);
   *val = fifo_src_reg.ovrn;
 
   return ret;
@@ -1698,7 +1707,8 @@ int32_t a3g4250d_fifo_wtm_flag_get(a3g4250d_ctx_t *ctx, uint8_t *val)
   a3g4250d_fifo_src_reg_t fifo_src_reg;
   int32_t ret;
 
-  ret = a3g4250d_read_reg(ctx, A3G4250D_FIFO_SRC_REG,(uint8_t*)&fifo_src_reg, 1);
+  ret = a3g4250d_read_reg(ctx, A3G4250D_FIFO_SRC_REG,
+                          (uint8_t*)&fifo_src_reg, 1);
   *val = fifo_src_reg.wtm;
 
   return ret;
