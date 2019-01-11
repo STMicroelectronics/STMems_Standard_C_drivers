@@ -107,16 +107,25 @@ typedef struct {
   lsm6ds3_xl_fs_t fs;
   uint8_t decimation;
   uint8_t samples_num_in_pattern;
-} sensor_lsm6dsl;
+} sensor_lsm6ds3_xl;
+
+typedef struct {
+  uint8_t enable;
+  lsm6ds3_odr_g_t odr;
+  uint16_t odr_hz_val;
+  lsm6ds3_fs_g_t fs;
+  uint8_t decimation;
+  uint8_t samples_num_in_pattern;
+} sensor_lsm6ds3_gy;
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
 /*
- * 6dsl Accelerometer test parameters
+ * 6ds3 Accelerometer test parameters
  */
-static sensor_lsm6dsl test_6dsl_xl = {
+static sensor_lsm6ds3_xl test_6ds3_xl = {
   PROPERTY_ENABLE,
   LSM6DS3_XL_ODR_52Hz,
   0,
@@ -126,9 +135,9 @@ static sensor_lsm6dsl test_6dsl_xl = {
 };
 
 /*
- * 6dsl Gyroscope test parameters
+ * 6ds3 Gyroscope test parameters
  */
-static sensor_lsm6dsl test_6dsl_gyro = {
+static sensor_lsm6ds3_gy test_6ds3_gyro = {
   PROPERTY_ENABLE,
   LSM6DS3_GY_ODR_26Hz,
   0,
@@ -164,10 +173,10 @@ static void platform_init(void);
 /*
  * Following routine read a pattern from FIFO
  */
-static void LSM6DSL_Read_FIFO_Pattern(void)
+static void LSM6DS3_Read_FIFO_Pattern(void)
 {
-  uint8_t gy_num = test_6dsl_gyro.samples_num_in_pattern;
-  uint8_t xl_num = test_6dsl_xl.samples_num_in_pattern;
+  uint8_t gy_num = test_6ds3_gyro.samples_num_in_pattern;
+  uint8_t xl_num = test_6ds3_xl.samples_num_in_pattern;
 
   /*
    * FIFO pattern is composed by gy_num gyroscope triplets and
@@ -179,7 +188,7 @@ static void LSM6DSL_Read_FIFO_Pattern(void)
     /*
      * Read gyro samples
      */
-    if (test_6dsl_gyro.enable && gy_num > 0)
+    if (test_6ds3_gyro.enable && gy_num > 0)
     {
       lsm6ds3_fifo_raw_data_get(&dev_ctx, data_raw_angular_rate.u8bit,
                                 3 * sizeof(int16_t));
@@ -199,7 +208,7 @@ static void LSM6DSL_Read_FIFO_Pattern(void)
     /*
      * Read XL samples
      */
-    if (test_6dsl_xl.enable && xl_num > 0)
+    if (test_6ds3_xl.enable && xl_num > 0)
     {
       lsm6ds3_fifo_raw_data_get(&dev_ctx, data_raw_acceleration.u8bit,
                                 3 * sizeof(int16_t));
@@ -223,7 +232,7 @@ static void LSM6DSL_Read_FIFO_Pattern(void)
  *
  * Samples acquisition is triggered by FIFO threshold event
  */
-static void LSM6DSL_ACC_GYRO_sample_Callback_fifo(void)
+static void LSM6DS3_ACC_GYRO_sample_Callback_fifo(void)
 {
   uint16_t num = 0;
   uint16_t num_pattern = 0;
@@ -235,49 +244,49 @@ static void LSM6DSL_ACC_GYRO_sample_Callback_fifo(void)
   num_pattern = num / pattern_len;
 
   while (num_pattern-- > 0)
-    LSM6DSL_Read_FIFO_Pattern();
+    LSM6DS3_Read_FIFO_Pattern();
 }
 
 /*
  * Following routine calculate the FIFO pattern composition based
  * on gyro and acc enable state and ODR freq
  */
-static uint16_t LSM6DSL_Calculate_FIFO_Pattern(uint16_t *min_odr, uint16_t *max_odr)
+static uint16_t LSM6DS3_Calculate_FIFO_Pattern(uint16_t *min_odr, uint16_t *max_odr)
 {
   uint16_t fifo_samples_tot_num = 0;
 
   /*
    * Calculate min_odr and max_odr for current configuration
    */
-  if (test_6dsl_gyro.enable)
+  if (test_6ds3_gyro.enable)
   {
-    test_6dsl_gyro.odr_hz_val = LSM6DS3_ODR_LSB_TO_HZ(test_6dsl_gyro.odr);
-    *max_odr = MAX_ODR(*max_odr, test_6dsl_gyro.odr_hz_val);
-    *min_odr = MIN_ODR(*min_odr, test_6dsl_gyro.odr_hz_val);
+    test_6ds3_gyro.odr_hz_val = LSM6DS3_ODR_LSB_TO_HZ(test_6ds3_gyro.odr);
+    *max_odr = MAX_ODR(*max_odr, test_6ds3_gyro.odr_hz_val);
+    *min_odr = MIN_ODR(*min_odr, test_6ds3_gyro.odr_hz_val);
   }
 
-  if (test_6dsl_xl.enable)
+  if (test_6ds3_xl.enable)
   {
-    test_6dsl_xl.odr_hz_val = LSM6DS3_ODR_LSB_TO_HZ(test_6dsl_xl.odr);
-    *max_odr = MAX_ODR(*max_odr, test_6dsl_xl.odr_hz_val);
-    *min_odr = MIN_ODR(*min_odr, test_6dsl_xl.odr_hz_val);
+    test_6ds3_xl.odr_hz_val = LSM6DS3_ODR_LSB_TO_HZ(test_6ds3_xl.odr);
+    *max_odr = MAX_ODR(*max_odr, test_6ds3_xl.odr_hz_val);
+    *min_odr = MIN_ODR(*min_odr, test_6ds3_xl.odr_hz_val);
   }
 
   /*
    * Calculate how many samples for each sensor are in current FIFO pattern
    */
-  if (test_6dsl_gyro.enable)
+  if (test_6ds3_gyro.enable)
   {
-    test_6dsl_gyro.samples_num_in_pattern = test_6dsl_gyro.odr_hz_val / *min_odr;
-    test_6dsl_gyro.decimation =  *max_odr / test_6dsl_gyro.odr_hz_val;
-    fifo_samples_tot_num += test_6dsl_gyro.samples_num_in_pattern;
+    test_6ds3_gyro.samples_num_in_pattern = test_6ds3_gyro.odr_hz_val / *min_odr;
+    test_6ds3_gyro.decimation =  *max_odr / test_6ds3_gyro.odr_hz_val;
+    fifo_samples_tot_num += test_6ds3_gyro.samples_num_in_pattern;
   }
 
-  if (test_6dsl_xl.enable)
+  if (test_6ds3_xl.enable)
   {
-    test_6dsl_xl.samples_num_in_pattern = test_6dsl_xl.odr_hz_val / *min_odr;
-    test_6dsl_xl.decimation =  *max_odr / test_6dsl_xl.odr_hz_val;
-    fifo_samples_tot_num += test_6dsl_xl.samples_num_in_pattern;
+    test_6ds3_xl.samples_num_in_pattern = test_6ds3_xl.odr_hz_val / *min_odr;
+    test_6ds3_xl.decimation =  *max_odr / test_6ds3_xl.odr_hz_val;
+    fifo_samples_tot_num += test_6ds3_xl.samples_num_in_pattern;
   }
 
   /*
@@ -327,19 +336,19 @@ void example_main_fifo_lsm6ds3(void)
   /*
    * Set XL and Gyro Output Data Rate
    */
-  lsm6ds3_xl_data_rate_set(&dev_ctx, test_6dsl_xl.odr);
-  lsm6ds3_gy_data_rate_set(&dev_ctx, test_6dsl_gyro.odr);
+  lsm6ds3_xl_data_rate_set(&dev_ctx, test_6ds3_xl.odr);
+  lsm6ds3_gy_data_rate_set(&dev_ctx, test_6ds3_gyro.odr);
 
   /*
    * Set XL full scale and Gyro full scale
    */
-  lsm6ds3_xl_full_scale_set(&dev_ctx, test_6dsl_xl.fs);
-  lsm6ds3_gy_full_scale_set(&dev_ctx, test_6dsl_gyro.fs);
+  lsm6ds3_xl_full_scale_set(&dev_ctx, test_6ds3_xl.fs);
+  lsm6ds3_gy_full_scale_set(&dev_ctx, test_6ds3_gyro.fs);
 
   /*
    * Calculate number of sensors samples in each FIFO pattern
    */
-  pattern_len = LSM6DSL_Calculate_FIFO_Pattern(&min_odr, &max_odr);
+  pattern_len = LSM6DS3_Calculate_FIFO_Pattern(&min_odr, &max_odr);
 
   /*
    * Set FIFO watermark to a multiple of a pattern
@@ -373,8 +382,8 @@ void example_main_fifo_lsm6ds3(void)
   /*
    * Set FIFO sensor decimator
    */
-  lsm6ds3_fifo_xl_batch_set(&dev_ctx, test_6dsl_xl.decimation);
-  lsm6ds3_fifo_gy_batch_set(&dev_ctx, test_6dsl_gyro.decimation);
+  lsm6ds3_fifo_xl_batch_set(&dev_ctx, (lsm6ds3_dec_fifo_xl_t)test_6ds3_xl.decimation);
+  lsm6ds3_fifo_gy_batch_set(&dev_ctx, (lsm6ds3_dec_fifo_gyro_t)test_6ds3_gyro.decimation);
 
   while(1)
   {
@@ -385,7 +394,7 @@ void example_main_fifo_lsm6ds3(void)
      */
     lsm6ds3_fifo_wtm_flag_get(&dev_ctx, &wt);
     if (wt)
-    	LSM6DSL_ACC_GYRO_sample_Callback_fifo();
+    	LSM6DS3_ACC_GYRO_sample_Callback_fifo();
   }
 }
 

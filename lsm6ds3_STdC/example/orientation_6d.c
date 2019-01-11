@@ -179,7 +179,7 @@ void example_main_orientation_6D_lsm6ds3(void)
   /*
    * LPF2 on 6D function selection
    */
-  lsm6ds3_6d_feed_data_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6ds3_6d_feed_data_set(&dev_ctx, LSM6DS3_LPF2_FEED);
 
   /*
    * Enable interrupt generation on 6D INT1 pin

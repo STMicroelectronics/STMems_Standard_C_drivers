@@ -175,7 +175,7 @@ void example_main_tilt_lsm6ds3(void)
   /*
    * Enable interrupt generation on Tilt INT1 pin
    */
-  lsm6ds3_int_notification_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6ds3_int_notification_set(&dev_ctx, LSM6DS3_INT_LATCHED);
   lsm6ds3_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
   lsm6ds3_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
   lsm6ds3_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);

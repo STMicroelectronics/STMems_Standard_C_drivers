@@ -171,7 +171,7 @@ void example_main_wake_up_lsm6ds3(void)
   /*
    * Apply high-pass digital filter on Wake-Up function
    */
-  lsm6ds3_xl_hp_path_internal_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6ds3_xl_hp_path_internal_set(&dev_ctx, LSM6DS3_USE_HPF);
 
   /*
    * Apply high-pass digital filter on Wake-Up function

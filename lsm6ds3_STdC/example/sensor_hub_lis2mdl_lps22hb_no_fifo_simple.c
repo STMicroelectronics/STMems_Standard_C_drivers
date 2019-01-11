@@ -145,8 +145,6 @@ static int32_t lsm6ds3_read_lps22hb_cx(void* ctx, uint8_t reg, uint8_t* data,
   int32_t mm_error;
   uint8_t drdy;
   uint8_t endop;
-  uint8_t i;
-  lsm6ds3_sh_read_t sh_reg;
   lsm6ds3_sh_cfg_read_t val =
   {
     .slv_add = LPS22HB_I2C_ADD_H,
@@ -187,12 +185,9 @@ static int32_t lsm6ds3_read_lps22hb_cx(void* ctx, uint8_t reg, uint8_t* data,
   } while (!endop);
 
   lsm6ds3_xl_data_rate_set(&dev_ctx, LSM6DS3_XL_ODR_OFF);
-  lsm6ds3_sh_read_data_raw_get(&dev_ctx, &sh_reg);
+  lsm6ds3_sh_read_data_raw_get(&dev_ctx, (lsm6ds3_sh_read_t*)&data);
 
   lsm6ds3_sh_master_set(&dev_ctx, PROPERTY_DISABLE);
-
-  for(i = 0; i < len; i++)
-    data[i] = sh_reg.byte[i];
 
   return mm_error;
 }
@@ -268,9 +263,7 @@ static int32_t lsm6ds3_read_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
   axis3bit16_t data_raw_acceleration;
   int32_t mm_error;
   uint8_t drdy;
-  uint8_t i;
   uint8_t endop;
-  lsm6ds3_sh_read_t sh_reg;
   lsm6ds3_sh_cfg_read_t val = {
     .slv_add = LIS2MDL_I2C_ADD,
     .slv_subadd = reg,
@@ -309,12 +302,9 @@ static int32_t lsm6ds3_read_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
   } while (!endop);
 
   lsm6ds3_xl_data_rate_set(&dev_ctx, LSM6DS3_XL_ODR_OFF);
-  lsm6ds3_sh_read_data_raw_get(&dev_ctx, &sh_reg);
+  lsm6ds3_sh_read_data_raw_get(&dev_ctx, (lsm6ds3_sh_read_t*)&data);
 
   lsm6ds3_sh_master_set(&dev_ctx, PROPERTY_DISABLE);
-
-  for(i = 0; i < len; i++)
-    data[i] = sh_reg.byte[i];
 
   return mm_error;
 }
@@ -541,11 +531,11 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6ds3(void)
        */
       lsm6ds3_sh_read_data_raw_get(&dev_ctx, &sh_reg);
       memcpy((uint8_t *)&data_raw_magnetic,
-             (uint8_t *)&sh_reg.byte[0],
+             (uint8_t *)&sh_reg.sh_byte_1,
              OUT_XYZ_SIZE);
-      magnetic_mG[0] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[0]);
-      magnetic_mG[1] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[1]);
-      magnetic_mG[2] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[2]);
+      magnetic_mG[0] = lis2mdl_from_lsb_to_mgauss(data_raw_magnetic.i16bit[0]);
+      magnetic_mG[1] = lis2mdl_from_lsb_to_mgauss(data_raw_magnetic.i16bit[1]);
+      magnetic_mG[2] = lis2mdl_from_lsb_to_mgauss(data_raw_magnetic.i16bit[2]);
 
       sprintf((char*)tx_buffer, "Mag [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
@@ -557,13 +547,13 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6ds3(void)
        * because is a combo sensor
        */
       memcpy(data_raw_pressure.u8bit,
-             (uint8_t *)&sh_reg.byte[6],
+             (uint8_t *)&sh_reg.sh_byte_7,
              PRESS_OUT_XYZ_SIZE);
       memcpy(data_raw_temperature.u8bit,
-             (uint8_t *)&sh_reg.byte[9],
+             (uint8_t *)&sh_reg.sh_byte_10,
              TEMP_OUT_XYZ_SIZE);
-      pressure_hPa = LPS22HB_FROM_LSB_TO_hPa(data_raw_pressure.i32bit);
-      temperature_degC = LPS22HB_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
+      pressure_hPa = lps22hb_from_lsb_to_hpa(data_raw_pressure.i32bit);
+      temperature_degC = lps22hb_from_lsb_to_degc(data_raw_temperature.i16bit);
 
       sprintf((char*)tx_buffer, "Press [hPa]:%4.2f\t\r\n", pressure_hPa);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));

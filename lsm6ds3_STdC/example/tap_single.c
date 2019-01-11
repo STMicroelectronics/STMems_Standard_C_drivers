@@ -201,7 +201,7 @@ void example_main_tap_single_lsm6ds3(void)
   /*
    * Enable Single Tap detection only
    */
-  lsm6ds3_tap_mode_set(&dev_ctx, LSM6DS3_ONLY_SINGLE);
+  lsm6ds3_tap_mode_set(&dev_ctx, LSM6DS3_SINGLE_DOUBLE);
 
   /*
    * Enable interrupt generation on Single Tap INT1 pin

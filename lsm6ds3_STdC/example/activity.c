@@ -185,9 +185,9 @@ void example_main_activity_lsm6ds3(void)
   lsm6ds3_wkup_threshold_set(&dev_ctx, 0x02);
 
   /*
-   * Inactivity configuration: acc to 12.5 LP, gyro to Power-Down
+   * Inactivity: enable
    */
-  lsm6ds3_act_mode_set(&dev_ctx, LSM6DS3_XL_12Hz5_GY_PD);
+  lsm6ds3_act_mode_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
    * Enable interrupt generation on Inactivity INT1 pin
