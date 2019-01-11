@@ -206,9 +206,9 @@ void example_multi_read_fifo_a3g4250d(void)
         /* Read angular rate data */
         memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
         a3g4250d_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
-        angular_rate_mdps[0] = A3G4250D_FROM_FS_245dps_TO_mdps(data_raw_angular_rate.i16bit[0]);
-        angular_rate_mdps[1] = A3G4250D_FROM_FS_245dps_TO_mdps(data_raw_angular_rate.i16bit[1]);
-        angular_rate_mdps[2] = A3G4250D_FROM_FS_245dps_TO_mdps(data_raw_angular_rate.i16bit[2]);
+        angular_rate_mdps[0] = a3g4250d_from_fs245dps_to_mdps(data_raw_angular_rate.i16bit[0]);
+        angular_rate_mdps[1] = a3g4250d_from_fs245dps_to_mdps(data_raw_angular_rate.i16bit[1]);
+        angular_rate_mdps[2] = a3g4250d_from_fs245dps_to_mdps(data_raw_angular_rate.i16bit[2]);
 
         sprintf((char*)tx_buffer, "Angular Rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
                 angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
