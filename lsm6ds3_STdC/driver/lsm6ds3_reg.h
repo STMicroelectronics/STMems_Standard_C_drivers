@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -955,18 +955,18 @@ int32_t lsm6ds3_read_reg(lsm6ds3_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lsm6ds3_write_reg(lsm6ds3_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
-extern float lsm6ds3_from_fs2g_to_mg(int16_t lsb);
-extern float lsm6ds3_from_fs4g_to_mg(int16_t lsb);
-extern float lsm6ds3_from_fs8g_to_mg(int16_t lsb);
-extern float lsm6ds3_from_fs16g_to_mg(int16_t lsb);
+extern float_t lsm6ds3_from_fs2g_to_mg(int16_t lsb);
+extern float_t lsm6ds3_from_fs4g_to_mg(int16_t lsb);
+extern float_t lsm6ds3_from_fs8g_to_mg(int16_t lsb);
+extern float_t lsm6ds3_from_fs16g_to_mg(int16_t lsb);
 
-extern float lsm6ds3_from_fs125dps_to_mdps(int16_t lsb);
-extern float lsm6ds3_from_fs250dps_to_mdps(int16_t lsb);
-extern float lsm6ds3_from_fs500dps_to_mdps(int16_t lsb);
-extern float lsm6ds3_from_fs1000dps_to_mdps(int16_t lsb);
-extern float lsm6ds3_from_fs2000dps_to_mdps(int16_t lsb);
+extern float_t lsm6ds3_from_fs125dps_to_mdps(int16_t lsb);
+extern float_t lsm6ds3_from_fs250dps_to_mdps(int16_t lsb);
+extern float_t lsm6ds3_from_fs500dps_to_mdps(int16_t lsb);
+extern float_t lsm6ds3_from_fs1000dps_to_mdps(int16_t lsb);
+extern float_t lsm6ds3_from_fs2000dps_to_mdps(int16_t lsb);
 
-extern float lsm6ds3_from_lsb_to_celsius(int16_t lsb);
+extern float_t lsm6ds3_from_lsb_to_celsius(int16_t lsb);
 
 typedef enum {
   LSM6DS3_GY_ORIENT_XYZ = 0,

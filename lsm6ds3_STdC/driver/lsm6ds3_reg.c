@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -100,54 +100,54 @@ int32_t lsm6ds3_write_reg(lsm6ds3_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-float lsm6ds3_from_fs2g_to_mg(int16_t lsb)
+float_t lsm6ds3_from_fs2g_to_mg(int16_t lsb)
 {
-  return ((float)lsb * 61.0f / 1000.0f);
+  return ((float_t)lsb * 61.0f / 1000.0f);
 }
 
-float lsm6ds3_from_fs4g_to_mg(int16_t lsb)
+float_t lsm6ds3_from_fs4g_to_mg(int16_t lsb)
 {
-  return ((float)lsb * 122.0f / 1000.0f);
+  return ((float_t)lsb * 122.0f / 1000.0f);
 }
 
-float lsm6ds3_from_fs8g_to_mg(int16_t lsb)
+float_t lsm6ds3_from_fs8g_to_mg(int16_t lsb)
 {
-  return ((float)lsb * 244.0f / 1000.0f);
+  return ((float_t)lsb * 244.0f / 1000.0f);
 }
 
-float lsm6ds3_from_fs16g_to_mg(int16_t lsb)
+float_t lsm6ds3_from_fs16g_to_mg(int16_t lsb)
 {
-  return ((float)lsb * 488.0f / 1000.0f);
+  return ((float_t)lsb * 488.0f / 1000.0f);
 }
 
-float lsm6ds3_from_fs125dps_to_mdps(int16_t lsb)
+float_t lsm6ds3_from_fs125dps_to_mdps(int16_t lsb)
 {
-  return ((float)lsb   * 4375.0f / 1000.0f);
+  return ((float_t)lsb   * 4375.0f / 1000.0f);
 }
 
-float lsm6ds3_from_fs250dps_to_mdps(int16_t lsb)
+float_t lsm6ds3_from_fs250dps_to_mdps(int16_t lsb)
 {
-  return ((float)lsb  * 8750.0f / 1000.0f);
+  return ((float_t)lsb  * 8750.0f / 1000.0f);
 }
 
-float lsm6ds3_from_fs500dps_to_mdps(int16_t lsb)
+float_t lsm6ds3_from_fs500dps_to_mdps(int16_t lsb)
 {
-  return ((float)lsb * 1750.0f / 100.0f);
+  return ((float_t)lsb * 1750.0f / 100.0f);
 }
 
-float lsm6ds3_from_fs1000dps_to_mdps(int16_t lsb)
+float_t lsm6ds3_from_fs1000dps_to_mdps(int16_t lsb)
 {
-  return ((float)lsb * 35.0f);
+  return ((float_t)lsb * 35.0f);
 }
 
-float lsm6ds3_from_fs2000dps_to_mdps(int16_t lsb)
+float_t lsm6ds3_from_fs2000dps_to_mdps(int16_t lsb)
 {
-  return ((float)lsb * 70.0f);
+  return ((float_t)lsb * 70.0f);
 }
 
-float lsm6ds3_from_lsb_to_celsius(int16_t lsb)
+float_t lsm6ds3_from_lsb_to_celsius(int16_t lsb)
 {
-  return ((float)lsb + 25.0f );
+  return ((float_t)lsb + 25.0f );
 }
 
 /**
@@ -5560,7 +5560,7 @@ int32_t lsm6ds3_sh_read_data_raw_get(lsm6ds3_ctx_t *ctx,
                          (uint8_t*)&(buff->sh_byte_1), 12);
 
   if(ret == 0){
-    ret = lsm6ds3_read_reg(ctx, LSM6DS3_SENSORHUB1_REG,
+    ret = lsm6ds3_read_reg(ctx, LSM6DS3_SENSORHUB13_REG,
                            (uint8_t*)&(buff->sh_byte_13), 6);
   }
   return ret;
