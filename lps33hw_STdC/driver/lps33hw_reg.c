@@ -1,1561 +1,1865 @@
 /*
  ******************************************************************************
  * @file    lps33hw_reg.c
- * @author  MEMS Software Solution Team
- * @date    10-November-2017
+ * @author  Sensors Software Solution Team
  * @brief   LPS33HW driver file
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  */
 
 #include "lps33hw_reg.h"
 
 /**
-  * @addtogroup  lps33hw
-  * @brief  This file provides a set of functions needed to drive the
-  *         lps33hw enanced inertial module.
+  * @defgroup    LPS33HW
+  * @brief       This file provides a set of functions needed to drive the
+  *              ultra-compact piezoresistive absolute pressure sensor.
   * @{
+  *
   */
 
 /** 
-  * @addtogroup  interfaces_functions
-  * @brief  This section provide a set of functions used to read and write
-  *         a generic register of the device.
+  * @defgroup    LPS33HW_Interfaces_functions
+  * @brief       This section provide a set of functions used to read and
+  *              write a generic register of the device.
   * @{
+  *
   */
 
 /**
   * @brief  Read generic device register
-  * 
-  * @param  lps33hw_ctx_t* ctx: read / write interface definitions
-  * @param  uint8_t reg: register to read
-  * @param  uint8_t* data: pointer to buffer that store the data read
-  * @param  uint16_t len: number of consecutive register to read
+  *
+  * @param  ctx   read / write interface definitions(ptr)
+  * @param  reg   register to read
+  * @param  data  pointer to buffer that store the data read(ptr)
+  * @param  len   number of consecutive register to read
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps33hw_read_reg(lps33hw_ctx_t* ctx, uint8_t reg, uint8_t* data,
                          uint16_t len)
 {
-  return ctx->read_reg(ctx->handle, reg, data, len);
+  int32_t ret;
+  ret = ctx->read_reg(ctx->handle, reg, data, len);
+  return ret;
 }
 
 /**
   * @brief  Write generic device register
-  * 
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t reg: register to write
-  * @param  uint8_t* data: pointer to data to write in register reg
-  * @param  uint16_t len: number of consecutive register to write
   *
-*/
+  * @param  ctx   read / write interface definitions(ptr)
+  * @param  reg   register to write
+  * @param  data  pointer to data to write in register reg(ptr)
+  * @param  len   number of consecutive register to write
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
 int32_t lps33hw_write_reg(lps33hw_ctx_t* ctx, uint8_t reg, uint8_t* data,
                           uint16_t len)
 {
-  return ctx->write_reg(ctx->handle, reg, data, len);
+  int32_t ret;
+  ret = ctx->write_reg(ctx->handle, reg, data, len);
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup  data_generation_c
-  * @brief   This section group all the functions concerning data generation
+  * @defgroup    LPS33HW_Sensitivity
+  * @brief       These functions convert raw-data into engineering units.
   * @{
+  *
   */
 
-/**
-  * @brief  autozero_rst: [set]  Reset Autozero function.
-  *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of reset_az in reg INTERRUPT_CFG
-  *
-  */
-int32_t lps33hw_autozero_rst_set(lps33hw_ctx_t *ctx, uint8_t val)
+float_t lps33hw_from_lsb_to_hpa(int16_t lsb)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  return ( (float_t)lsb / 4096.0f );
+}
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-  reg.interrupt_cfg.reset_az = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-
-  return mm_error;
+float_t lps33hw_from_lsb_to_degc(int16_t lsb)
+{
+  return ( (float_t)lsb / 100.0f );
 }
 
 /**
-  * @brief  autozero_rst: [get]  Reset Autozero function.
+  * @}
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of reset_az in reg INTERRUPT_CFG
+  */
+
+/**
+  * @defgroup    LPS33HW_data_generation_c
+  * @brief       This section group all the functions concerning data
+  *              generation
+  * @{
+  *
+  */
+
+
+/**
+  * @brief  Reset Autozero function.[set]
+  *
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of reset_az in reg INTERRUPT_CFG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+
+int32_t lps33hw_autozero_rst_set(lps33hw_ctx_t *ctx, uint8_t val)
+{
+  lps33hw_interrupt_cfg_t interrupt_cfg;
+  int32_t ret;
+
+  ret = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                         (uint8_t*)&interrupt_cfg, 1);
+  if(ret == 0){
+    interrupt_cfg.reset_az = val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                            (uint8_t*)&interrupt_cfg, 1);
+  }
+  return ret;
+}
+
+/**
+  * @brief  Reset Autozero function.[get] 
+  *
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of reset_az in reg INTERRUPT_CFG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_autozero_rst_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_interrupt_cfg_t interrupt_cfg;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-  *val = reg.interrupt_cfg.reset_az;
+  ret = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                         (uint8_t*)&interrupt_cfg, 1);
+  *val = interrupt_cfg.reset_az;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  autozero: [set]  Enable Autozero function.
+  * @brief  Enable Autozero function.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of autozero in reg INTERRUPT_CFG
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of autozero in reg INTERRUPT_CFG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_autozero_set(lps33hw_ctx_t *ctx, uint8_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_interrupt_cfg_t interrupt_cfg;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-  reg.interrupt_cfg.autozero = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG, 
+                         (uint8_t*)&interrupt_cfg, 1);
+  if(ret == 0){
+    interrupt_cfg.autozero = val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                            (uint8_t*)&interrupt_cfg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  autozero: [get]  Enable Autozero function.
+  * @brief  Enable Autozero function.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of autozero in reg INTERRUPT_CFG
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of autozero in reg INTERRUPT_CFG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_autozero_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_interrupt_cfg_t interrupt_cfg;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-  *val = reg.interrupt_cfg.autozero;
+  ret = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                         (uint8_t*)&interrupt_cfg, 1);
+  *val = interrupt_cfg.autozero;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pressure_snap_rst: [set]  Reset AutoRifP function.
+  * @brief  Reset AutoRifP function.[set] 
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of reset_arp in reg INTERRUPT_CFG
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of reset_arp in reg INTERRUPT_CFG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_pressure_snap_rst_set(lps33hw_ctx_t *ctx, uint8_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_interrupt_cfg_t interrupt_cfg;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-  reg.interrupt_cfg.reset_arp = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                         (uint8_t*)&interrupt_cfg, 1);
+  if(ret == 0){
+    interrupt_cfg.reset_arp = val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                            (uint8_t*)&interrupt_cfg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  pressure_snap_rst: [get]  Reset AutoRifP function.
+  * @brief  Reset AutoRifP function.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of reset_arp in reg INTERRUPT_CFG
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of reset_arp in reg INTERRUPT_CFG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_pressure_snap_rst_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_interrupt_cfg_t interrupt_cfg;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-  *val = reg.interrupt_cfg.reset_arp;
+  ret = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                         (uint8_t*)&interrupt_cfg, 1);
+  *val = interrupt_cfg.reset_arp;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pressure_snap: [set]  Enable AutoRifP function.
+  * @brief  Enable AutoRifP function.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of autorifp in reg INTERRUPT_CFG
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of autorifp in reg INTERRUPT_CFG.
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_pressure_snap_set(lps33hw_ctx_t *ctx, uint8_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_interrupt_cfg_t interrupt_cfg;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-  reg.interrupt_cfg.autorifp = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                         (uint8_t*)&interrupt_cfg, 1);
+  if(ret == 0){
+    interrupt_cfg.autorifp = val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                            (uint8_t*)&interrupt_cfg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  pressure_snap: [get]  Enable AutoRifP function.
+  * @brief  Enable AutoRifP function.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of autorifp in reg INTERRUPT_CFG
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of autorifp in reg INTERRUPT_CFG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_pressure_snap_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_interrupt_cfg_t interrupt_cfg;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-  *val = reg.interrupt_cfg.autorifp;
+  ret = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                         (uint8_t*)&interrupt_cfg, 1);
+  *val = interrupt_cfg.autorifp;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  block_data_update: [set] Blockdataupdate.
+  * @brief  Block data update.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of bdu in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of bdu in reg CTRL_REG1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_block_data_update_set(lps33hw_ctx_t *ctx, uint8_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG1, &(reg.byte), 1);
-  reg.ctrl_reg1.bdu = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG1, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  if(ret == 0){
+    ctrl_reg1.bdu = val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  block_data_update: [get] Blockdataupdate.
+  * @brief  Block data update.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of bdu in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of bdu in reg CTRL_REG1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_block_data_update_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG1, &(reg.byte), 1);
-  *val = reg.ctrl_reg1.bdu;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  *val = ctrl_reg1.bdu;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief   low_pass_filter_mode: [set]  Low-pass bandwidth selection.
+  * @brief  Low-pass bandwidth selection.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_lpfp_t: change the values of lpfp in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of lpfp in reg CTRL_REG1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_low_pass_filter_mode_set(lps33hw_ctx_t *ctx,
                                           lps33hw_lpfp_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG1, &(reg.byte), 1);
-  reg.ctrl_reg1.lpfp = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG1, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  if(ret == 0){
+    ctrl_reg1.lpfp = (uint8_t)val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief   low_pass_filter_mode: [get]  Low-pass bandwidth selection.
+  * @brief   Low-pass bandwidth selection.[get] 
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_lpfp_t: Get the values of lpfp in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Get the values of lpfp in reg CTRL_REG1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_low_pass_filter_mode_get(lps33hw_ctx_t *ctx,
-                                          lps33hw_lpfp_t *val)
+                                         lps33hw_lpfp_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG1, &(reg.byte), 1);
-  *val = (lps33hw_lpfp_t) reg.ctrl_reg1.lpfp;
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  switch (ctrl_reg1.lpfp){
+    case LPS33HW_LPF_ODR_DIV_2:
+      *val = LPS33HW_LPF_ODR_DIV_2;
+      break;
+    case LPS33HW_LPF_ODR_DIV_9:
+      *val = LPS33HW_LPF_ODR_DIV_9;
+      break;
+    case LPS33HW_LPF_ODR_DIV_20:
+      *val = LPS33HW_LPF_ODR_DIV_20;
+      break;
+    default:
+      *val = LPS33HW_LPF_ODR_DIV_2;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  data_rate: [set]  Output data rate selection.
+  * @brief  Output data rate selection.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_odr_t: change the values of odr in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of odr in reg CTRL_REG1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_data_rate_set(lps33hw_ctx_t *ctx, lps33hw_odr_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG1, &(reg.byte), 1);
-  reg.ctrl_reg1.odr = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG1, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  if(ret == 0){
+    ctrl_reg1.odr = (uint8_t)val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  data_rate: [get]  Output data rate selection.
+  * @brief  Output data rate selection.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_odr_t: Get the values of odr in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Get the values of odr in reg CTRL_REG1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_data_rate_get(lps33hw_ctx_t *ctx, lps33hw_odr_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG1, &(reg.byte), 1);
-  *val = (lps33hw_odr_t) reg.ctrl_reg1.odr;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  switch (ctrl_reg1.odr){
+    case LPS33HW_POWER_DOWN:
+      *val = LPS33HW_POWER_DOWN;
+      break;
+    case LPS33HW_ODR_1_Hz:
+      *val = LPS33HW_ODR_1_Hz;
+      break;
+    case LPS33HW_ODR_10_Hz:
+      *val = LPS33HW_ODR_10_Hz;
+      break;
+    case LPS33HW_ODR_25_Hz:
+      *val = LPS33HW_ODR_25_Hz;
+      break;
+    case LPS33HW_ODR_50_Hz:
+      *val = LPS33HW_ODR_50_Hz;
+      break;
+    case LPS33HW_ODR_75_Hz:
+      *val = LPS33HW_ODR_75_Hz;
+      break;
+    default:
+      *val = LPS33HW_ODR_1_Hz;
+      break;
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  one_shoot_trigger: [set]  One-shot mode. Device perform
-  *                                   a single measure. 
+  * @brief  One-shot mode. Device perform a single measure.[set] 
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of one_shot in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of one_shot in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_one_shoot_trigger_set(lps33hw_ctx_t *ctx, uint8_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-  reg.ctrl_reg2.one_shot = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  if(ret == 0){
+    ctrl_reg2.one_shot = val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  one_shoot_trigger: [get]  One-shot mode. Device perform
-  *                                   a single measure. 
+  * @brief  One-shot mode. Device perform a single measure.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of one_shot in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of one_shot in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_one_shoot_trigger_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-  *val = reg.ctrl_reg2.one_shot;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  *val = ctrl_reg2.one_shot;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pressure_ref: [set]  The Reference pressure value is a 24-bit
-  *                              data expressed as 2’s complement. The value
-  *                              is used when AUTOZERO or AUTORIFP function
-  *                              is enabled.
+  * @brief  pressure_ref:   The Reference pressure value is a 24-bit data
+  *         expressed as 2’s complement. The value is used when AUTOZERO
+  *         or AUTORIFP function is enabled.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that contains data to write
+  * @param  ctx    Read / write interface definitions
+  * @param  buff   Buffer that contains data to write
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_pressure_ref_set(lps33hw_ctx_t *ctx, uint8_t *buff)
 {
-  return lps33hw_write_reg(ctx, LPS33HW_REF_P_XL, buff, 3);
+  int32_t ret;
+  ret =  lps33hw_write_reg(ctx, LPS33HW_REF_P_XL, buff, 3);
+  return ret;
 }
 
 /**
-  * @brief  pressure_ref: [get]  The Reference pressure value is a
-  *                              24-bit data expressed as 2’s complement.
-  *                              The value is used when AUTOZERO or AUTORIFP
-  *                              function is enabled.
+  * @brief  pressure_ref:   The Reference pressure value is a 24-bit data
+  *         expressed as 2’s complement. The value is used when AUTOZERO
+  *         or AUTORIFP function is enabled.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    Read / write interface definitions
+  * @param  buff   Buffer that stores data read
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_pressure_ref_get(lps33hw_ctx_t *ctx, uint8_t *buff)
 {
-  return lps33hw_read_reg(ctx, LPS33HW_REF_P_XL, buff, 3);
+  int32_t ret;
+  ret =  lps33hw_read_reg(ctx, LPS33HW_REF_P_XL, buff, 3);
+  return ret;
 }
 
 /**
-  * @brief  pressure_offset: [set]  The pressure offset value is 16-bit
-  *                                 data that can be used to implement
-  *                                 one-point calibration (OPC) after
-  *                                 soldering.
+  * @brief  The pressure offset value is 16-bit data that can be used to
+  *         implement one-point calibration (OPC) after soldering.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that contains data to write
+  * @param  ctx    Read / write interface definitions
+  * @param  buff   Buffer that contains data to write
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_pressure_offset_set(lps33hw_ctx_t *ctx, uint8_t *buff)
 {
-  return lps33hw_write_reg(ctx, LPS33HW_RPDS_L, buff, 2);
+  int32_t ret;
+  ret =  lps33hw_write_reg(ctx, LPS33HW_RPDS_L, buff, 2);
+  return ret;
 }
 
 /**
-  * @brief  pressure_offset: [get]  The pressure offset value is 16-bit
-  *                                 data that can be used to implement
-  *                                 one-point calibration (OPC) after
-  *                                 soldering.
+  * @brief  The pressure offset value is 16-bit data that can be used to
+  *         implement one-point calibration (OPC) after soldering.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    Read / write interface definitions
+  * @param  buff   Buffer that stores data read
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_pressure_offset_get(lps33hw_ctx_t *ctx, uint8_t *buff)
 {
-  return lps33hw_read_reg(ctx, LPS33HW_RPDS_L, buff, 2);
+  int32_t ret;
+  ret =  lps33hw_read_reg(ctx, LPS33HW_RPDS_L, buff, 2);
+  return ret;
 }
 
 /**
-  * @brief  press_data_ready: [get]  Pressure data available.
+  * @brief  Pressure data available.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of p_da in reg STATUS
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of p_da in reg STATUS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_press_data_ready_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_status_t status;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_STATUS, &(reg.byte), 1);
-  *val = reg.status.p_da;
+  ret = lps33hw_read_reg(ctx, LPS33HW_STATUS, (uint8_t*)&status, 1);
+  *val = status.p_da;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  temp_data_ready: [get]  Temperature data available.
+  * @brief  Temperature data available.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of t_da in reg STATUS
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of t_da in reg STATUS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_temp_data_ready_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_status_t status;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_STATUS, &(reg.byte), 1);
-  *val = reg.status.t_da;
+  ret = lps33hw_read_reg(ctx, LPS33HW_STATUS, (uint8_t*)&status, 1);
+  *val = status.t_da;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  press_data_ovr: [get]  Pressure data overrun.
+  * @brief  Pressure data overrun.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of p_or in reg STATUS
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of p_or in reg STATUS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_press_data_ovr_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_status_t status;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_STATUS, &(reg.byte), 1);
-  *val = reg.status.p_or;
+  ret = lps33hw_read_reg(ctx, LPS33HW_STATUS, (uint8_t*)&status, 1);
+  *val = status.p_or;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  temp_data_ovr: [get]  Temperature data overrun.
+  * @brief  Temperature data overrun.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of t_or in reg STATUS
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of t_or in reg STATUS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_temp_data_ovr_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_status_t status;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_STATUS, &(reg.byte), 1);
-  *val = reg.status.t_or;
+  ret = lps33hw_read_reg(ctx, LPS33HW_STATUS, (uint8_t*)&status, 1);
+  *val = status.t_or;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pressure_raw: [get]  Pressure output value
+  * @brief  Pressure output value[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    Read / write interface definitions
+  * @param  buff   Buffer that stores data read
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_pressure_raw_get(lps33hw_ctx_t *ctx, uint8_t *buff)
 {
-  return lps33hw_read_reg(ctx, LPS33HW_PRESS_OUT_XL, buff, 3);
+  int32_t ret;
+  ret =  lps33hw_read_reg(ctx, LPS33HW_PRESS_OUT_XL, buff, 3);
+  return ret;
 }
 
 /**
-  * @brief  temperature_raw: [get]  Temperature output value
+  * @brief  temperature_raw:   Temperature output value[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    Read / write interface definitions
+  * @param  buff   Buffer that stores data read.
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_temperature_raw_get(lps33hw_ctx_t *ctx, uint8_t *buff)
 {
-  return lps33hw_read_reg(ctx, LPS33HW_TEMP_OUT_L, (uint8_t*) buff, 2);
+  int32_t ret;
+  ret =  lps33hw_read_reg(ctx, LPS33HW_TEMP_OUT_L, (uint8_t*) buff, 2);
+  return ret;
 }
 
 /**
-  * @brief  low_pass_rst: [get]  Low-pass filter reset register. If the
-  *                              LPFP is active, in order to avoid the
-  *                              transitory phase, the filter can be reset
-  *                              by reading this register before generating
-  *                              pressure measurements.
+  * @brief  Low-pass filter reset register. If the LPFP is active, in
+  *         order to avoid the transitory phase, the filter can be
+  *         reset by reading this register before generating pressure
+  *         measurements.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    Read / write interface definitions
+  * @param  buff   Buffer that stores data read
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_low_pass_rst_get(lps33hw_ctx_t *ctx, uint8_t *buff)
 {
-  return lps33hw_read_reg(ctx, LPS33HW_LPFP_RES, (uint8_t*) buff, 1);
+  int32_t ret;
+  ret =  lps33hw_read_reg(ctx, LPS33HW_LPFP_RES, (uint8_t*) buff, 1);
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  common
-  * @brief   This section group common usefull functions
-  * @{
-  */
-
-/**
-  * @brief  device_id: [get] DeviceWhoamI
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  */
+
+/**
+  * @defgroup    LPS33HW_common
+  * @brief       This section group common usefull functions
+  * @{
+  *
+  */
+
+/**
+  * @brief  Device Who am I[get]
+  *
+  * @param  ctx    Read / write interface definitions
+  * @param  buff   Buffer that stores data read
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_device_id_get(lps33hw_ctx_t *ctx, uint8_t *buff)
 {
-  return lps33hw_read_reg(ctx, LPS33HW_WHO_AM_I, (uint8_t*) buff, 1);
+  int32_t ret;
+  ret =  lps33hw_read_reg(ctx, LPS33HW_WHO_AM_I, (uint8_t*) buff, 1);
+  return ret;
 }
 
 /**
-  * @brief  reset: [set]  Software reset. Restore the default values
-  *                       in user registers
+  * @brief  Software reset. Restore the default values in user registers[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of swreset in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of swreset in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_reset_set(lps33hw_ctx_t *ctx, uint8_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-  reg.ctrl_reg2.swreset = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  if(ret == 0){
+    ctrl_reg2.swreset = val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  reset: [get]  Software reset. Restore the default values
-  *                       in user registers
+  * @brief  Software reset. Restore the default values in user registers[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of swreset in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of swreset in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_reset_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-  *val = reg.ctrl_reg2.swreset;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  *val = ctrl_reg2.swreset;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  boot: [set]  Reboot memory content. Reload the calibration
-  *                      parameters
+  * @brief  Reboot memory content. Reload the calibration parameters.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of boot in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of boot in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_boot_set(lps33hw_ctx_t *ctx, uint8_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-  reg.ctrl_reg2.boot = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  if(ret == 0){
+    ctrl_reg2.boot = val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  boot: [get]  Reboot memory content. Reload the calibration
-  *                      parameters
+  * @brief  Reboot memory content. Reload the calibration parameters.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of boot in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of boot in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_boot_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-  *val = reg.ctrl_reg2.boot;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  *val = ctrl_reg2.boot;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  low_power: [set] Lowcurrentmode.
+  * @brief  Low current mode.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of lc_en in reg RES_CONF
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of lc_en in reg RES_CONF
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_low_power_set(lps33hw_ctx_t *ctx, uint8_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_res_conf_t res_conf;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_RES_CONF, &(reg.byte), 1);
-  reg.res_conf.lc_en = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_RES_CONF, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_RES_CONF, (uint8_t*)&res_conf, 1);
+  if(ret == 0){
+    res_conf.lc_en = val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_RES_CONF, (uint8_t*)&res_conf, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  low_power: [get] Lowcurrentmode.
+  * @brief  Low current mode.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of lc_en in reg RES_CONF
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of lc_en in reg RES_CONF
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_low_power_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_res_conf_t res_conf;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_RES_CONF, &(reg.byte), 1);
-  *val = reg.res_conf.lc_en;
+  ret = lps33hw_read_reg(ctx, LPS33HW_RES_CONF, (uint8_t*)&res_conf, 1);
+  *val = res_conf.lc_en;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  boot_status: [get]  If ‘1’ indicates that the Boot (Reboot)
-  *                             phase is running.
+  * @brief  If ‘1’ indicates that the Boot (Reboot) phase is running.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of boot_status in reg INT_SOURCE
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of boot_status in reg INT_SOURCE
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_boot_status_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_int_source_t int_source;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_INT_SOURCE, &(reg.byte), 1);
-  *val = reg.int_source.boot_status;
+  ret = lps33hw_read_reg(ctx, LPS33HW_INT_SOURCE, (uint8_t*)&int_source, 1);
+  *val = int_source.boot_status;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  dev_status: [get]  All the status bit, FIFO and data generation
+  * @brief  All the status bit, FIFO and data generation[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_dev_stat: union of registers from FIFO_STATUS to STATUS
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Structure of registers from FIFO_STATUS to STATUS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_dev_status_get(lps33hw_ctx_t *ctx, lps33hw_dev_stat_t *val)
 {
-  return lps33hw_read_reg(ctx, LPS33HW_FIFO_STATUS, (uint8_t*) val, 2);
+  int32_t ret;
+  ret =  lps33hw_read_reg(ctx, LPS33HW_FIFO_STATUS, (uint8_t*) val, 2);
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  interrupts
-  * @brief   This section group all the functions that manage interrupts
-  * @{
-  */
-
-/**
-  * @brief   sign_of_int_threshold: [set]  Enable interrupt generation on
-  *                                        pressure low/high event.
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_pe_t: change the values of pe in reg INTERRUPT_CFG
+  */
+
+/**
+  * @defgroup    LPS33HW_interrupts
+  * @brief       This section group all the functions that manage interrupts
+  * @{
+  *
+  */
+
+/**
+  * @brief  Enable interrupt generation on pressure low/high event.[set]
+  *
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of pe in reg INTERRUPT_CFG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_sign_of_int_threshold_set(lps33hw_ctx_t *ctx,
                                            lps33hw_pe_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_interrupt_cfg_t interrupt_cfg;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-  reg.interrupt_cfg.pe = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                         (uint8_t*)&interrupt_cfg, 1);
+  if(ret == 0){
+    interrupt_cfg.pe = (uint8_t)val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                            (uint8_t*)&interrupt_cfg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief   sign_of_int_threshold: [get]  Enable interrupt generation on
-  *                                        pressure low/high event.
+  * @brief  Enable interrupt generation on pressure low/high event.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_pe_t: Get the values of pe in reg INTERRUPT_CFG
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Get the values of pe in reg INTERRUPT_CFG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_sign_of_int_threshold_get(lps33hw_ctx_t *ctx,
                                            lps33hw_pe_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_interrupt_cfg_t interrupt_cfg;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-  *val = (lps33hw_pe_t) reg.interrupt_cfg.pe;
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                         (uint8_t*)&interrupt_cfg, 1);
+  switch (interrupt_cfg.pe){
+    case LPS33HW_NO_THRESHOLD:
+      *val = LPS33HW_NO_THRESHOLD;
+      break;
+    case LPS33HW_POSITIVE:
+      *val = LPS33HW_POSITIVE;
+      break;
+    case LPS33HW_NEGATIVE:
+      *val = LPS33HW_NEGATIVE;
+      break;
+    case LPS33HW_BOTH:
+      *val = LPS33HW_BOTH;
+      break;
+    default:
+      *val = LPS33HW_NO_THRESHOLD;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief   int_notification_mode: [set]  Interrupt request to the
-  *                                        INT_SOURCE (25h) register
-  *                                        mode (pulsed / latched) 
+  * @brief  Interrupt request to the INT_SOURCE (25h) register
+  *         mode (pulsed / latched) [set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_lir_t: change the values of lir in reg INTERRUPT_CFG
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of lir in reg INTERRUPT_CFG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_int_notification_mode_set(lps33hw_ctx_t *ctx,
                                            lps33hw_lir_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_interrupt_cfg_t interrupt_cfg;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-  reg.interrupt_cfg.lir = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                         (uint8_t*)&interrupt_cfg, 1);
+  if(ret == 0){
+    interrupt_cfg.lir = (uint8_t)val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                            (uint8_t*)&interrupt_cfg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief   int_notification_mode: [get]  Interrupt request to the
-  *                                        INT_SOURCE (25h) register
-  *                                        mode (pulsed / latched) 
+  * @brief   Interrupt request to the INT_SOURCE (25h) register
+  *          mode (pulsed / latched) [get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_lir_t: Get the values of lir in reg INTERRUPT_CFG
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Get the values of lir in reg INTERRUPT_CFG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_int_notification_mode_get(lps33hw_ctx_t *ctx,
                                           lps33hw_lir_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_interrupt_cfg_t interrupt_cfg;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-  *val = (lps33hw_lir_t) reg.interrupt_cfg.lir;
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                         (uint8_t*)&interrupt_cfg, 1);
+  switch (interrupt_cfg.lir){
+    case LPS33HW_INT_PULSED:
+      *val = LPS33HW_INT_PULSED;
+      break;
+    case LPS33HW_INT_LATCHED:
+      *val = LPS33HW_INT_LATCHED;
+      break;
+    default:
+      *val = LPS33HW_INT_PULSED;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  int_generation: [set]  Enable interrupt generation.
+  * @brief  Enable interrupt generation.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of diff_en in reg INTERRUPT_CFG
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of diff_en in reg INTERRUPT_CFG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_int_generation_set(lps33hw_ctx_t *ctx, uint8_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_interrupt_cfg_t interrupt_cfg;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-  reg.interrupt_cfg.diff_en = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                         (uint8_t*)&interrupt_cfg, 1);
+  if(ret == 0){
+    interrupt_cfg.diff_en = val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                            (uint8_t*)&interrupt_cfg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int_generation: [get]  Enable interrupt generation.
+  * @brief  Enable interrupt generation.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of diff_en in reg INTERRUPT_CFG
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of diff_en in reg INTERRUPT_CFG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_int_generation_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_interrupt_cfg_t interrupt_cfg;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG, &(reg.byte), 1);
-  *val = reg.interrupt_cfg.diff_en;
+  ret = lps33hw_read_reg(ctx, LPS33HW_INTERRUPT_CFG,
+                         (uint8_t*)&interrupt_cfg, 1);
+  *val = interrupt_cfg.diff_en;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  int_threshold: [set]  User-defined threshold value for
-  *                              pressure interrupt event
+  * @brief  User-defined threshold value for pressure interrupt event[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that contains data to write
+  * @param  ctx    Read / write interface definitions
+  * @param  buff   Buffer that contains data to write
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_int_threshold_set(lps33hw_ctx_t *ctx, uint8_t *buff)
 {
-  return lps33hw_write_reg(ctx, LPS33HW_THS_P_L, (uint8_t*) buff, 2);
+  int32_t ret;
+  ret =  lps33hw_write_reg(ctx, LPS33HW_THS_P_L, (uint8_t*) buff, 2);
+  return ret;
 }
 
 /**
-  * @brief  int_threshold: [get]  User-defined threshold value for
-  *                              pressure interrupt event
+  * @brief  User-defined threshold value for pressure interrupt event[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    Read / write interface definitions
+  * @param  buff   Buffer that stores data read
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_int_threshold_get(lps33hw_ctx_t *ctx, uint8_t *buff)
 {
-  return lps33hw_read_reg(ctx, LPS33HW_THS_P_L, (uint8_t*) buff, 2);
+  int32_t ret;
+  ret =  lps33hw_read_reg(ctx, LPS33HW_THS_P_L, (uint8_t*) buff, 2);
+  return ret;
 }
 
 /**
-  * @brief  int_pin_mode: [set]  Data signal on INT_DRDY pin control bits.
+  * @brief  Data signal on INT_DRDY pin control bits.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_int_s_t: change the values of int_s in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of int_s in reg CTRL_REG3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_int_pin_mode_set(lps33hw_ctx_t *ctx, lps33hw_int_s_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-  reg.ctrl_reg3.int_s = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  if(ret == 0){
+    ctrl_reg3.int_s = (uint8_t)val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int_pin_mode: [get]  Data signal on INT_DRDY pin control bits.
+  * @brief  Data signal on INT_DRDY pin control bits.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_int_s_t: Get the values of int_s in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Get the values of int_s in reg CTRL_REG3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_int_pin_mode_get(lps33hw_ctx_t *ctx, lps33hw_int_s_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-  *val = (lps33hw_int_s_t) reg.ctrl_reg3.int_s;
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  switch (ctrl_reg3.int_s){
+    case LPS33HW_DRDY_OR_FIFO_FLAGS:
+      *val = LPS33HW_DRDY_OR_FIFO_FLAGS;
+      break;
+    case LPS33HW_HIGH_PRES_INT:
+      *val = LPS33HW_HIGH_PRES_INT;
+      break;
+    case LPS33HW_LOW_PRES_INT:
+      *val = LPS33HW_LOW_PRES_INT;
+      break;
+    case LPS33HW_EVERY_PRES_INT:
+      *val = LPS33HW_EVERY_PRES_INT;
+      break;
+    default:
+      *val = LPS33HW_DRDY_OR_FIFO_FLAGS;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  drdy_on_int: [set]  Data-ready signal on INT_DRDY pin.
+  * @brief  Data-ready signal on INT_DRDY pin.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of drdy in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of drdy in reg CTRL_REG3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_drdy_on_int_set(lps33hw_ctx_t *ctx, uint8_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-  reg.ctrl_reg3.drdy = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  if(ret == 0){
+    ctrl_reg3.drdy = val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  drdy_on_int: [get]  Data-ready signal on INT_DRDY pin.
+  * @brief  Data-ready signal on INT_DRDY pin.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of drdy in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of drdy in reg CTRL_REG3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_drdy_on_int_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-  *val = reg.ctrl_reg3.drdy;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  *val = ctrl_reg3.drdy;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_ovr_on_int: [set]  FIFO overrun interrupt on INT_DRDY pin.
+  * @brief  FIFO overrun interrupt on INT_DRDY pin.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of f_ovr in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of f_ovr in reg CTRL_REG3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_fifo_ovr_on_int_set(lps33hw_ctx_t *ctx, uint8_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-  reg.ctrl_reg3.f_ovr = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  if(ret == 0){
+    ctrl_reg3.f_ovr = val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  fifo_ovr_on_int: [get]  FIFO overrun interrupt on INT_DRDY pin.
+  * @brief  FIFO overrun interrupt on INT_DRDY pin.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of f_ovr in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of f_ovr in reg CTRL_REG3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_fifo_ovr_on_int_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-  *val = reg.ctrl_reg3.f_ovr;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  *val = ctrl_reg3.f_ovr;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief   fifo_threshold_on_int: [set]  FIFO watermark status
-  *                                        on INT_DRDY pin.
+  * @brief  FIFO watermark status on INT_DRDY pin.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of f_fth in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of f_fth in reg CTRL_REG3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_fifo_threshold_on_int_set(lps33hw_ctx_t *ctx, uint8_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-  reg.ctrl_reg3.f_fth = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  if(ret == 0){
+    ctrl_reg3.f_fth = val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief   fifo_threshold_on_int: [get]  FIFO watermark status
-  *                                        on INT_DRDY pin.
+  * @brief   FIFO watermark status on INT_DRDY pin.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of f_fth in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of f_fth in reg CTRL_REG3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_fifo_threshold_on_int_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-  *val = reg.ctrl_reg3.f_fth;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  *val = ctrl_reg3.f_fth;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_full_on_int: [set]  FIFO full flag on INT_DRDY pin.
+  * @brief  FIFO full flag on INT_DRDY pin.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of f_fss5 in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of f_fss5 in reg CTRL_REG3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_fifo_full_on_int_set(lps33hw_ctx_t *ctx, uint8_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-  reg.ctrl_reg3.f_fss5 = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  if(ret == 0){
+    ctrl_reg3.f_fss5 = val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  fifo_full_on_int: [get]  FIFO full flag on INT_DRDY pin.
+  * @brief  FIFO full flag on INT_DRDY pin.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of f_fss5 in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of f_fss5 in reg CTRL_REG3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_fifo_full_on_int_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-  *val = reg.ctrl_reg3.f_fss5;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  *val = ctrl_reg3.f_fss5;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pin_mode: [set]  Push-pull/open drain selection on interrupt pads.
+  * @brief  Push-pull/open drain selection on interrupt pads.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_pp_od_t: change the values of pp_od in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of pp_od in reg CTRL_REG3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_pin_mode_set(lps33hw_ctx_t *ctx, lps33hw_pp_od_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-  reg.ctrl_reg3.pp_od = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  if(ret == 0){
+    ctrl_reg3.pp_od = (uint8_t)val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  pin_mode: [get]  Push-pull/open drain selection on interrupt pads.
+  * @brief  Push-pull/open drain selection on interrupt pads.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_pp_od_t: Get the values of pp_od in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Get the values of pp_od in reg CTRL_REG3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_pin_mode_get(lps33hw_ctx_t *ctx, lps33hw_pp_od_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-  *val = (lps33hw_pp_od_t) reg.ctrl_reg3.pp_od;
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  switch (ctrl_reg3.pp_od){
+    case LPS33HW_PUSH_PULL:
+      *val = LPS33HW_PUSH_PULL;
+      break;
+    case LPS33HW_OPEN_DRAIN:
+      *val = LPS33HW_OPEN_DRAIN;
+      break;
+    default:
+      *val = LPS33HW_PUSH_PULL;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  int_polarity: [set]  Interrupt active-high/low.
+  * @brief  Interrupt active-high/low.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_int_h_l_t: change the values of int_h_l in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of int_h_l in reg CTRL_REG3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_int_polarity_set(lps33hw_ctx_t *ctx, lps33hw_int_h_l_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-  reg.ctrl_reg3.int_h_l = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  if(ret == 0){
+    ctrl_reg3.int_h_l = (uint8_t)val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int_polarity: [get]  Interrupt active-high/low.
+  * @brief  Interrupt active-high/low.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_int_h_l_t: Get the values of int_h_l in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Get the values of int_h_l in reg CTRL_REG3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_int_polarity_get(lps33hw_ctx_t *ctx, lps33hw_int_h_l_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg3_t ctrl_reg3;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, &(reg.byte), 1);
-  *val = (lps33hw_int_h_l_t) reg.ctrl_reg3.int_h_l;
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  switch (ctrl_reg3.int_h_l){
+    case LPS33HW_ACTIVE_HIGH:
+      *val = LPS33HW_ACTIVE_HIGH;
+      break;
+    case LPS33HW_ACTIVE_LOW:
+      *val = LPS33HW_ACTIVE_LOW;
+      break;
+    default:
+      *val = LPS33HW_ACTIVE_HIGH;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  int_source: [get]  Interrupt source register
+  * @brief  Interrupt source register[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_int_source_t: register INT_SOURCE
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Register INT_SOURCE
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_int_source_get(lps33hw_ctx_t *ctx, lps33hw_int_source_t *val)
 {
-  return lps33hw_read_reg(ctx, LPS33HW_INT_SOURCE, (uint8_t*) val, 1);
+  int32_t ret;
+  ret =  lps33hw_read_reg(ctx, LPS33HW_INT_SOURCE, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
-  * @brief  int_on_press_high: [get]  Differential pressure high
-  *                                   interrupt flag.
+  * @brief  Differential pressure high interrupt flag.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of ph in reg INT_SOURCE
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of ph in reg INT_SOURCE
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_int_on_press_high_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_int_source_t int_source;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_INT_SOURCE, &(reg.byte), 1);
-  *val = reg.int_source.ph;
+  ret = lps33hw_read_reg(ctx, LPS33HW_INT_SOURCE, (uint8_t*)&int_source, 1);
+  *val = int_source.ph;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  int_on_press_low: [get]  Differential pressure low interrupt flag.
+  * @brief  Differential pressure low interrupt flag.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of pl in reg INT_SOURCE
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of pl in reg INT_SOURCE
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_int_on_press_low_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_int_source_t int_source;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_INT_SOURCE, &(reg.byte), 1);
-  *val = reg.int_source.pl;
+  ret = lps33hw_read_reg(ctx, LPS33HW_INT_SOURCE, (uint8_t*)&int_source, 1);
+  *val = int_source.pl;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  interrupt_event: [get]  Interrupt active flag.
+  * @brief  Interrupt active flag.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of ia in reg INT_SOURCE
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of ia in reg INT_SOURCE
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_interrupt_event_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_int_source_t int_source;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_INT_SOURCE, &(reg.byte), 1);
-  *val = reg.int_source.ia;
+  ret = lps33hw_read_reg(ctx, LPS33HW_INT_SOURCE, (uint8_t*)&int_source, 1);
+  *val = int_source.ia;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  fifo
-  * @brief   This section group all the functions concerning the fifo usage
-  * @{
-  */
-
-/**
-  * @brief   stop_on_fifo_threshold: [set]  Stop on FIFO watermark.
-  *                                         Enable FIFO watermark level use.
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of stop_on_fth in reg CTRL_REG2
+  */
+
+/**
+  * @defgroup    LPS33HW_fifo
+  * @brief       This section group all the functions concerning the
+  *              fifo usage
+  * @{
+  *
+  */
+
+/**
+  * @brief   Stop on FIFO watermark. Enable FIFO watermark level use.[set]
+  *
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of stop_on_fth in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_stop_on_fifo_threshold_set(lps33hw_ctx_t *ctx, uint8_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-  reg.ctrl_reg2.stop_on_fth = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  if(ret == 0){
+    ctrl_reg2.stop_on_fth = val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief   stop_on_fifo_threshold: [get]  Stop on FIFO watermark.
-  *                                         Enable FIFO watermark level use.
+  * @brief   Stop on FIFO watermark. Enable FIFO watermark level use.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of stop_on_fth in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of stop_on_fth in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_stop_on_fifo_threshold_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-  *val = reg.ctrl_reg2.stop_on_fth;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  *val = ctrl_reg2.stop_on_fth;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo: [set] FIFOenable.
+  * @brief  FIFO enable.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of fifo_en in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of fifo_en in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_fifo_set(lps33hw_ctx_t *ctx, uint8_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-  reg.ctrl_reg2.fifo_en = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  if(ret == 0){
+    ctrl_reg2.fifo_en = val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  fifo: [get] FIFOenable.
+  * @brief  FIFO enable.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of fifo_en in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of fifo_en in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_fifo_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-  *val = reg.ctrl_reg2.fifo_en;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  *val = ctrl_reg2.fifo_en;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_watermark: [set]  FIFO watermark level selection.
+  * @brief  FIFO watermark level selection.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of wtm in reg FIFO_CTRL
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of wtm in reg FIFO_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_fifo_watermark_set(lps33hw_ctx_t *ctx, uint8_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_fifo_ctrl_t fifo_ctrl;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_FIFO_CTRL, &(reg.byte), 1);
-  reg.fifo_ctrl.wtm = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_FIFO_CTRL, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
+  if(ret == 0){
+    fifo_ctrl.wtm = val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  fifo_watermark: [get]  FIFO watermark level selection.
+  * @brief  FIFO watermark level selection.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of wtm in reg FIFO_CTRL
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of wtm in reg FIFO_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_fifo_watermark_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_fifo_ctrl_t fifo_ctrl;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_FIFO_CTRL, &(reg.byte), 1);
-  *val = reg.fifo_ctrl.wtm;
+  ret = lps33hw_read_reg(ctx, LPS33HW_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
+  *val = fifo_ctrl.wtm;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_mode: [set]  FIFO mode selection.
+  * @brief  FIFO mode selection.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_f_mode_t: change the values of f_mode in reg FIFO_CTRL
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of f_mode in reg FIFO_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_fifo_mode_set(lps33hw_ctx_t *ctx, lps33hw_f_mode_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_fifo_ctrl_t fifo_ctrl;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_FIFO_CTRL, &(reg.byte), 1);
-  reg.fifo_ctrl.f_mode = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_FIFO_CTRL, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
+  if(ret == 0){
+    fifo_ctrl.f_mode = (uint8_t)val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  fifo_mode: [get]  FIFO mode selection.
+  * @brief  FIFO mode selection.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_f_mode_t: Get the values of f_mode in reg FIFO_CTRL
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Get the values of f_mode in reg FIFO_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_fifo_mode_get(lps33hw_ctx_t *ctx, lps33hw_f_mode_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_fifo_ctrl_t fifo_ctrl;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_FIFO_CTRL, &(reg.byte), 1);
-  *val = (lps33hw_f_mode_t) reg.fifo_ctrl.f_mode;
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
+  switch (fifo_ctrl.f_mode){
+    case LPS33HW_BYPASS_MODE:
+      *val = LPS33HW_BYPASS_MODE;
+      break;
+    case LPS33HW_FIFO_MODE:
+      *val = LPS33HW_FIFO_MODE;
+      break;
+    case LPS33HW_STREAM_MODE:
+      *val = LPS33HW_STREAM_MODE;
+      break;
+    case LPS33HW_STREAM_TO_FIFO_MODE:
+      *val = LPS33HW_STREAM_TO_FIFO_MODE;
+      break;
+    case LPS33HW_BYPASS_TO_STREAM_MODE:
+      *val = LPS33HW_BYPASS_TO_STREAM_MODE;
+      break;
+    case LPS33HW_DYNAMIC_STREAM_MODE:
+      *val = LPS33HW_DYNAMIC_STREAM_MODE;
+      break;
+    case LPS33HW_BYPASS_TO_FIFO_MODE:
+      *val = LPS33HW_BYPASS_TO_FIFO_MODE;
+      break;
+    default:
+      *val = LPS33HW_BYPASS_MODE;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  fifo_data_level: [get]  FIFO stored data level.
+  * @brief  FIFO stored data level.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of fss in reg FIFO_STATUS
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of fss in reg FIFO_STATUS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_fifo_data_level_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_fifo_status_t fifo_status;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_FIFO_STATUS, &(reg.byte), 1);
-  *val = reg.fifo_status.fss;
+  ret = lps33hw_read_reg(ctx, LPS33HW_FIFO_STATUS, (uint8_t*)&fifo_status, 1);
+  *val = fifo_status.fss;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_ovr_flag: [get]  FIFO overrun status.
+  * @brief  FIFO overrun status.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of ovr in reg FIFO_STATUS
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of ovr in reg FIFO_STATUS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_fifo_ovr_flag_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_fifo_status_t fifo_status;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_FIFO_STATUS, &(reg.byte), 1);
-  *val = reg.fifo_status.ovr;
+  ret = lps33hw_read_reg(ctx, LPS33HW_FIFO_STATUS, (uint8_t*)&fifo_status, 1);
+  *val = fifo_status.ovr;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_fth_flag: [get]  FIFO watermark status.
+  * @brief  FIFO watermark status.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of fth_fifo in reg FIFO_STATUS
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of fth_fifo in reg FIFO_STATUS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_fifo_fth_flag_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_fifo_status_t fifo_status;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_FIFO_STATUS, &(reg.byte), 1);
-  *val = reg.fifo_status.fth_fifo;
+  ret = lps33hw_read_reg(ctx, LPS33HW_FIFO_STATUS, (uint8_t*)&fifo_status, 1);
+  *val = fifo_status.fth_fifo;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  serial_interface
-  * @brief   This section group all the functions concerning serial
-  *          interface management
-  * @{
-  */
-
-/**
-  * @brief  spi_mode: [set]  SPI Serial Interface Mode selection.
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_sim_t: change the values of sim in reg CTRL_REG1
+  */
+
+/**
+  * @defgroup    LPS33HW_serial_interface
+  * @brief       This section group all the functions concerning serial
+  *              interface management
+  * @{
+  *
+  */
+
+/**
+  * @brief  SPI Serial Interface Mode selection.[set]
+  *
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of sim in reg CTRL_REG1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_spi_mode_set(lps33hw_ctx_t *ctx, lps33hw_sim_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG1, &(reg.byte), 1);
-  reg.ctrl_reg1.sim = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG1, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  if(ret == 0){
+    ctrl_reg1.sim = (uint8_t)val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  spi_mode: [get]  SPI Serial Interface Mode selection.
+  * @brief  SPI Serial Interface Mode selection.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_sim_t: Get the values of sim in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Get the values of sim in reg CTRL_REG1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_spi_mode_get(lps33hw_ctx_t *ctx, lps33hw_sim_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG1, &(reg.byte), 1);
-  *val = (lps33hw_sim_t) reg.ctrl_reg1.sim;
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  switch (ctrl_reg1.sim){
+    case LPS33HW_SPI_4_WIRE:
+      *val = LPS33HW_SPI_4_WIRE;
+      break;
+    case LPS33HW_SPI_3_WIRE:
+      *val = LPS33HW_SPI_3_WIRE;
+      break;
+    default:
+      *val = LPS33HW_SPI_4_WIRE;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  i2c_interface: [set]  Disable I2C interface.
+  * @brief  Disable I2C interface.[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_i2c_dis_t: change the values of i2c_dis in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of i2c_dis in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_i2c_interface_set(lps33hw_ctx_t *ctx, lps33hw_i2c_dis_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-  reg.ctrl_reg2.i2c_dis = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  if(ret == 0){
+    ctrl_reg2.i2c_dis = (uint8_t)val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  i2c_interface: [get]  Disable I2C interface.
+  * @brief  Disable I2C interface.[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  lps33hw_i2c_dis_t: Get the values of i2c_dis in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Get the values of i2c_dis in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_i2c_interface_get(lps33hw_ctx_t *ctx, lps33hw_i2c_dis_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-  *val = (lps33hw_i2c_dis_t) reg.ctrl_reg2.i2c_dis;
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  switch (ctrl_reg2.i2c_dis){
+    case LPS33HW_I2C_ENABLE:
+      *val = LPS33HW_I2C_ENABLE;
+      break;
+    case LPS33HW_I2C_DISABLE:
+      *val = LPS33HW_I2C_DISABLE;
+      break;
+    default:
+      *val = LPS33HW_I2C_ENABLE;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  auto_add_inc: [set]  Register address automatically incremented
-  *                              during a multiple byte access with a serial
-  *                              interface (I2C or SPI).
+  * @brief  Register address automatically incremented during a
+  *         multiple byte access with a serial interface (I2C or SPI).[set]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of if_add_inc in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of if_add_inc in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_auto_add_inc_set(lps33hw_ctx_t *ctx, uint8_t val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-  reg.ctrl_reg2.if_add_inc = val;
-  mm_error = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-
-  return mm_error;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  if(ret == 0){
+    ctrl_reg2.if_add_inc = val;
+    ret = lps33hw_write_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  auto_add_inc: [get]  Register address automatically
-  *                              incremented during a multiple byte access
-  *                              with a serial interface (I2C or SPI).
+  * @brief  Register address automatically incremented during a
+  *         multiple byte access with a serial interface (I2C or SPI).[get]
   *
-  * @param  lps33hw_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of if_add_inc in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions
+  * @param  val    Change the values of if_add_inc in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps33hw_auto_add_inc_get(lps33hw_ctx_t *ctx, uint8_t *val)
 {
-  lps33hw_reg_t reg;
-  int32_t mm_error;
+  lps33hw_ctrl_reg2_t ctrl_reg2;
+  int32_t ret;
 
-  mm_error = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, &(reg.byte), 1);
-  *val = reg.ctrl_reg2.if_add_inc;
+  ret = lps33hw_read_reg(ctx, LPS33HW_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  *val = ctrl_reg2.if_add_inc;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
