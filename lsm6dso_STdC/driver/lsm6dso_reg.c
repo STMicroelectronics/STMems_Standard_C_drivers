@@ -7940,7 +7940,7 @@ int32_t lsm6dso_fsm_data_rate_set(lsm6dso_ctx_t *ctx, lsm6dso_fsm_odr_t val)
   }
   if (ret == 0) {
     reg.not_used_01 = 3; /* set default values */
-    reg.not_used_02 = 1; /* set default values */
+    reg.not_used_02 = 2; /* set default values */
     reg.fsm_odr = (uint8_t)val;
     ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_ODR_CFG_B,
                             (uint8_t*)&reg, 1);
@@ -7981,12 +7981,6 @@ int32_t lsm6dso_fsm_data_rate_get(lsm6dso_ctx_t *ctx, lsm6dso_fsm_odr_t *val)
         break;
       case LSM6DSO_ODR_FSM_104Hz:
         *val = LSM6DSO_ODR_FSM_104Hz;
-        break;
-      case LSM6DSO_ODR_FSM_208Hz:
-        *val = LSM6DSO_ODR_FSM_208Hz;
-        break;
-      case LSM6DSO_ODR_FSM_416Hz:
-        *val = LSM6DSO_ODR_FSM_416Hz;
         break;
       default:
         *val = LSM6DSO_ODR_FSM_12Hz5;

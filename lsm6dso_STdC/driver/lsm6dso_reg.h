@@ -1005,8 +1005,8 @@ typedef struct {
 #define LSM6DSO_EMB_FUNC_ODR_CFG_B           0x5FU
 typedef struct {
   uint8_t not_used_01              : 3;
-  uint8_t fsm_odr                  : 3;
-  uint8_t not_used_02              : 2;
+  uint8_t fsm_odr                  : 2;
+  uint8_t not_used_02              : 3;
 } lsm6dso_emb_func_odr_cfg_b_t;
 
 #define LSM6DSO_STEP_COUNTER_L               0x62U
@@ -1782,10 +1782,10 @@ typedef enum {
   LSM6DSO_VERY_LIGHT   = 1,
   LSM6DSO_LIGHT        = 2,
   LSM6DSO_MEDIUM       = 3,
-  LSM6DSO_STRONG       = 4,
-  LSM6DSO_VERY_STRONG  = 5,
-  LSM6DSO_AGGRESSIVE   = 6,
-  LSM6DSO_XTREME       = 7,
+  LSM6DSO_STRONG       = 4, /* not available for data rate > 1k670Hz */
+  LSM6DSO_VERY_STRONG  = 5, /* not available for data rate > 1k670Hz */
+  LSM6DSO_AGGRESSIVE   = 6, /* not available for data rate > 1k670Hz */
+  LSM6DSO_XTREME       = 7, /* not available for data rate > 1k670Hz */
 } lsm6dso_ftype_t;
 int32_t lsm6dso_gy_lp1_bandwidth_set(lsm6dso_ctx_t *ctx,
                                      lsm6dso_ftype_t val);
@@ -2568,8 +2568,6 @@ typedef enum {
   LSM6DSO_ODR_FSM_26Hz  = 1,
   LSM6DSO_ODR_FSM_52Hz  = 2,
   LSM6DSO_ODR_FSM_104Hz = 3,
-  LSM6DSO_ODR_FSM_208Hz = 4,
-  LSM6DSO_ODR_FSM_416Hz = 5,
 } lsm6dso_fsm_odr_t;
 int32_t lsm6dso_fsm_data_rate_set(lsm6dso_ctx_t *ctx, lsm6dso_fsm_odr_t val);
 int32_t lsm6dso_fsm_data_rate_get(lsm6dso_ctx_t *ctx, lsm6dso_fsm_odr_t *val);
