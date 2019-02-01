@@ -14,4 +14,4 @@ every hardware.
 
 www.st.com/mems
 
-ISM330DLC DS rev2.0 
+ISM330DLC DS rev3.0 

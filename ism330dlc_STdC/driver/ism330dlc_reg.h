@@ -7,35 +7,37 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
- */
+*/
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __ISM330DLC_DRIVER__H
-#define __ISM330DLC_DRIVER__H
+#ifndef ISM330DLC_DRIVER_H
+#define ISM330DLC_DRIVER_H
 
 #ifdef __cplusplus
   extern "C" {
@@ -58,6 +60,18 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
+/**
+  * @defgroup axisXbitXX_t
+  * @brief    These unions are useful to represent different sensors data type.
+  *           These unions are not need by the driver.
+  *
+  *           REMOVING the unions you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  *
+  * @{
+  *
+  */
+
 typedef union{
   int16_t i16bit[3];
   uint8_t u8bit[6];
@@ -77,6 +91,11 @@ typedef union{
   int32_t i32bit;
   uint8_t u8bit[4];
 } axis1bit32_t;
+
+/**
+  * @}
+  *
+  */
 
 typedef struct{
   uint8_t bit0       : 1;
@@ -99,8 +118,12 @@ typedef struct{
   *
   */
 
-/** @defgroup ism330dlc_interface
+/** @addtogroup  LSM9DS1_Interfaces_Functions
+  * @brief       This section provide a set of functions used to read and
+  *              write a generic register of the device.
+  *              MANDATORY: return 0 -> no Error.
   * @{
+  *
   */
 
 typedef int32_t (*ism330dlc_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
@@ -116,83 +139,65 @@ typedef struct {
 
 /**
   * @}
+  *
   */
 
-/** @defgroup ism330dlc_Infos
+/** @defgroup ISM330DLC_Infos
   * @{
+  *
   */
 
 /** I2C Device Address 8 bit format  if SA0=0 -> D5 if SA0=1 -> D7 **/
-#define ISM330DLC_I2C_ADD_L     0xD5
-#define ISM330DLC_I2C_ADD_H     0xD7
+#define ISM330DLC_I2C_ADD_L     0xD5U
+#define ISM330DLC_I2C_ADD_H     0xD7U
 
 /** Device Identification (Who am I) **/
-#define ISM330DLC_ID            0x6A
+#define ISM330DLC_ID            0x6AU
 
 /**
   * @}
+  *
   */
 
-/**
-  * @defgroup ism330dlc_Sensitivity
-  * @{
-  */
-
-#define ISM330DLC_FROM_FS_2g_TO_mg(lsb)    (float)(lsb *  61.0f) / 1000.0f
-#define ISM330DLC_FROM_FS_4g_TO_mg(lsb)    (float)(lsb * 122.0f) / 1000.0f
-#define ISM330DLC_FROM_FS_8g_TO_mg(lsb)    (float)(lsb * 244.0f) / 1000.0f
-#define ISM330DLC_FROM_FS_16g_TO_mg(lsb)   (float)(lsb * 488.0f) / 1000.0f
-
-#define ISM330DLC_FROM_FS_125dps_TO_mdps(lsb)  (float)(lsb *  4375.0f)/1000.0f
-#define ISM330DLC_FROM_FS_250dps_TO_mdps(lsb)  (float)(lsb *  8750.0f)/1000.0f
-#define ISM330DLC_FROM_FS_500dps_TO_mdps(lsb)  (float)(lsb * 17500.0f)/1000.0f
-#define ISM330DLC_FROM_FS_1000dps_TO_mdps(lsb) (float)(lsb * 35.0f)
-#define ISM330DLC_FROM_FS_2000dps_TO_mdps(lsb) (float)(lsb * 70.0f)
-
-#define ISM330DLC_FROM_LSB_TO_degC(lsb) ((float)((int16_t)lsb>>8)*1.0f + 25.0f)
-
-/**
-  * @}
-  */
-
-#define ISM330DLC_FUNC_CFG_ACCESS              0x01
+#define ISM330DLC_FUNC_CFG_ACCESS              0x01U
 typedef struct {
   uint8_t not_used_01              : 7;
   uint8_t func_cfg_en              : 1;
 } ism330dlc_func_cfg_access_t;
 
-#define ISM330DLC_SENSOR_SYNC_TIME_FRAME       0x04
+#define ISM330DLC_SENSOR_SYNC_TIME_FRAME       0x04U
 typedef struct {
   uint8_t tph                      : 4;
   uint8_t not_used_01              : 4;
 } ism330dlc_sensor_sync_time_frame_t;
 
-#define ISM330DLC_SENSOR_SYNC_RES_RATIO        0x05
+#define ISM330DLC_SENSOR_SYNC_RES_RATIO        0x05U
 typedef struct {
   uint8_t rr                       : 2;
   uint8_t not_used_01              : 6;
 } ism330dlc_sensor_sync_res_ratio_t;
 
-#define ISM330DLC_FIFO_CTRL1                   0x06
+#define ISM330DLC_FIFO_CTRL1                   0x06U
 typedef struct {
   uint8_t fth                      : 8;  /* + FIFO_CTRL2(fth) */
 } ism330dlc_fifo_ctrl1_t;
 
-#define ISM330DLC_FIFO_CTRL2                   0x07
+#define ISM330DLC_FIFO_CTRL2                   0x07U
 typedef struct {
   uint8_t fth                      : 3;  /* + FIFO_CTRL1(fth) */
   uint8_t fifo_temp_en             : 1;
   uint8_t not_used_01              : 4;
+  uint8_t fifo_timer_en            : 1;
 } ism330dlc_fifo_ctrl2_t;
 
-#define ISM330DLC_FIFO_CTRL3                   0x08
+#define ISM330DLC_FIFO_CTRL3                   0x08U
 typedef struct {
   uint8_t dec_fifo_xl              : 3;
   uint8_t dec_fifo_gyro            : 3;
   uint8_t not_used_01              : 2;
 } ism330dlc_fifo_ctrl3_t;
 
-#define ISM330DLC_FIFO_CTRL4                   0x09
+#define ISM330DLC_FIFO_CTRL4                   0x09U
 typedef struct {
   uint8_t dec_ds3_fifo             : 3;
   uint8_t dec_ds4_fifo             : 3;
@@ -200,20 +205,20 @@ typedef struct {
   uint8_t stop_on_fth              : 1;
 } ism330dlc_fifo_ctrl4_t;
 
-#define ISM330DLC_FIFO_CTRL5                   0x0A
+#define ISM330DLC_FIFO_CTRL5                   0x0AU
 typedef struct {
   uint8_t fifo_mode                : 3;
   uint8_t odr_fifo                 : 4;
   uint8_t not_used_01              : 1;
 } ism330dlc_fifo_ctrl5_t;
 
-#define ISM330DLC_DRDY_PULSE_CFG               0x0B
+#define ISM330DLC_DRDY_PULSE_CFG               0x0BU
 typedef struct {
   uint8_t not_used_01              : 7;
   uint8_t drdy_pulsed              : 1;
 } ism330dlc_drdy_pulse_cfg_t;
 
-#define ISM330DLC_INT1_CTRL                    0x0D
+#define ISM330DLC_INT1_CTRL                    0x0DU
 typedef struct {
   uint8_t int1_drdy_xl             : 1;
   uint8_t int1_drdy_g              : 1;
@@ -224,7 +229,7 @@ typedef struct {
   uint8_t not_used_01              : 2;  
 } ism330dlc_int1_ctrl_t;
 
-#define ISM330DLC_INT2_CTRL                    0x0E
+#define ISM330DLC_INT2_CTRL                    0x0EU
 typedef struct {
   uint8_t int2_drdy_xl             : 1;
   uint8_t int2_drdy_g              : 1;
@@ -235,8 +240,8 @@ typedef struct {
   uint8_t not_used_01              : 2;
 } ism330dlc_int2_ctrl_t;
 
-#define ISM330DLC_WHO_AM_I                     0x0F
-#define ISM330DLC_CTRL1_XL                     0x10
+#define ISM330DLC_WHO_AM_I                     0x0FU
+#define ISM330DLC_CTRL1_XL                     0x10U
 typedef struct {
   uint8_t bw0_xl                   : 1;
   uint8_t lpf1_bw_sel              : 1;
@@ -244,14 +249,14 @@ typedef struct {
   uint8_t odr_xl                   : 4;
 } ism330dlc_ctrl1_xl_t;
 
-#define ISM330DLC_CTRL2_G                      0x11
+#define ISM330DLC_CTRL2_G                      0x11U
 typedef struct {
   uint8_t not_used_01              : 1;
   uint8_t fs_g                     : 3;  /* fs_g + fs_125 */
   uint8_t odr_g                    : 4;
 } ism330dlc_ctrl2_g_t;
 
-#define ISM330DLC_CTRL3_C                      0x12
+#define ISM330DLC_CTRL3_C                      0x12U
 typedef struct {
   uint8_t sw_reset                 : 1;
   uint8_t ble                      : 1;
@@ -263,7 +268,7 @@ typedef struct {
   uint8_t boot                     : 1;
 } ism330dlc_ctrl3_c_t;
 
-#define ISM330DLC_CTRL4_C                      0x13
+#define ISM330DLC_CTRL4_C                      0x13U
 typedef struct {
   uint8_t not_used_01              : 1;
   uint8_t lpf1_sel_g               : 1;
@@ -275,7 +280,7 @@ typedef struct {
   uint8_t den_xl_en                : 1;
 } ism330dlc_ctrl4_c_t;
 
-#define ISM330DLC_CTRL5_C                      0x14
+#define ISM330DLC_CTRL5_C                      0x14U
 typedef struct {
   uint8_t st_xl                    : 2;
   uint8_t st_g                     : 2;
@@ -283,7 +288,7 @@ typedef struct {
   uint8_t rounding                 : 3;
 } ism330dlc_ctrl5_c_t;
 
-#define ISM330DLC_CTRL6_C                      0x15
+#define ISM330DLC_CTRL6_C                      0x15U
 typedef struct {
   uint8_t ftype                    : 2;
   uint8_t not_used_01              : 1;
@@ -292,7 +297,7 @@ typedef struct {
   uint8_t den_mode                 : 3;  /* trig_en + lvl_en + lvl2_en */
 } ism330dlc_ctrl6_c_t;
 
-#define ISM330DLC_CTRL7_G                      0x16
+#define ISM330DLC_CTRL7_G                      0x16U
 typedef struct {
   uint8_t not_used_01              : 2;
   uint8_t rounding_status          : 1;
@@ -302,7 +307,7 @@ typedef struct {
   uint8_t g_hm_mode                : 1;
 } ism330dlc_ctrl7_g_t;
 
-#define ISM330DLC_CTRL8_XL                     0x17
+#define ISM330DLC_CTRL8_XL                     0x17U
 typedef struct {
   uint8_t low_pass_on_6d           : 1;
   uint8_t not_used_01              : 1;
@@ -313,7 +318,7 @@ typedef struct {
   uint8_t lpf2_xl_en               : 1;
 } ism330dlc_ctrl8_xl_t;
 
-#define ISM330DLC_CTRL9_XL                     0x18
+#define ISM330DLC_CTRL9_XL                     0x18U
 typedef struct {
   uint8_t not_used_01              : 2;
   uint8_t soft_en                  : 1;
@@ -324,7 +329,7 @@ typedef struct {
   uint8_t den_x                    : 1;
 } ism330dlc_ctrl9_xl_t;
 
-#define ISM330DLC_CTRL10_C                     0x19
+#define ISM330DLC_CTRL10_C                     0x19U
 typedef struct {
   uint8_t not_used_01              : 2;
   uint8_t func_en                  : 1;
@@ -334,7 +339,7 @@ typedef struct {
   uint8_t not_used_03              : 2;
 } ism330dlc_ctrl10_c_t;
 
-#define ISM330DLC_MASTER_CONFIG                0x1A
+#define ISM330DLC_MASTER_CONFIG                0x1AU
 typedef struct {
   uint8_t master_on                : 1;
   uint8_t iron_en                  : 1;
@@ -346,7 +351,7 @@ typedef struct {
   uint8_t drdy_on_int1             : 1;
 } ism330dlc_master_config_t;
 
-#define ISM330DLC_WAKE_UP_SRC                  0x1B
+#define ISM330DLC_WAKE_UP_SRC                  0x1BU
 typedef struct {
   uint8_t z_wu                     : 1;
   uint8_t y_wu                     : 1;
@@ -357,7 +362,7 @@ typedef struct {
   uint8_t not_used_01              : 2;
 } ism330dlc_wake_up_src_t;
 
-#define ISM330DLC_TAP_SRC                      0x1C
+#define ISM330DLC_TAP_SRC                      0x1CU
 typedef struct {
   uint8_t z_tap                    : 1;
   uint8_t y_tap                    : 1;
@@ -369,7 +374,7 @@ typedef struct {
   uint8_t not_used_01              : 1;
 } ism330dlc_tap_src_t;
 
-#define ISM330DLC_D6D_SRC                      0x1D
+#define ISM330DLC_D6D_SRC                      0x1DU
 typedef struct {
   uint8_t xl                       : 1;
   uint8_t xh                       : 1;
@@ -381,7 +386,7 @@ typedef struct {
   uint8_t den_drdy                 : 1;
 } ism330dlc_d6d_src_t;
 
-#define ISM330DLC_STATUS_REG                   0x1E
+#define ISM330DLC_STATUS_REG                   0x1EU
 typedef struct {
   uint8_t xlda                     : 1;
   uint8_t gda                      : 1;
@@ -389,7 +394,7 @@ typedef struct {
   uint8_t not_used_01              : 5;
 } ism330dlc_status_reg_t;
 
-#define ISM330DLC_STATUS_SPIAUX                0x1E
+#define ISM330DLC_STATUS_SPIAUX                0x1EU
 typedef struct {
   uint8_t xlda                     : 1;
   uint8_t gda                      : 1;
@@ -397,21 +402,21 @@ typedef struct {
   uint8_t not_used_01              : 5;
 } ism330dlc_status_spiaux_t;
 
-#define ISM330DLC_OUT_TEMP_L                   0x20
-#define ISM330DLC_OUT_TEMP_H                   0x21
-#define ISM330DLC_OUTX_L_G                     0x22
-#define ISM330DLC_OUTX_H_G                     0x23
-#define ISM330DLC_OUTY_L_G                     0x24
-#define ISM330DLC_OUTY_H_G                     0x25
-#define ISM330DLC_OUTZ_L_G                     0x26
-#define ISM330DLC_OUTZ_H_G                     0x27
-#define ISM330DLC_OUTX_L_XL                    0x28
-#define ISM330DLC_OUTX_H_XL                    0x29
-#define ISM330DLC_OUTY_L_XL                    0x2A
-#define ISM330DLC_OUTY_H_XL                    0x2B
-#define ISM330DLC_OUTZ_L_XL                    0x2C
-#define ISM330DLC_OUTZ_H_XL                    0x2D
-#define ISM330DLC_SENSORHUB1_REG               0x2E
+#define ISM330DLC_OUT_TEMP_L                   0x20U
+#define ISM330DLC_OUT_TEMP_H                   0x21U
+#define ISM330DLC_OUTX_L_G                     0x22U
+#define ISM330DLC_OUTX_H_G                     0x23U
+#define ISM330DLC_OUTY_L_G                     0x24U
+#define ISM330DLC_OUTY_H_G                     0x25U
+#define ISM330DLC_OUTZ_L_G                     0x26U
+#define ISM330DLC_OUTZ_H_G                     0x27U
+#define ISM330DLC_OUTX_L_XL                    0x28U
+#define ISM330DLC_OUTX_H_XL                    0x29U
+#define ISM330DLC_OUTY_L_XL                    0x2AU
+#define ISM330DLC_OUTY_H_XL                    0x2BU
+#define ISM330DLC_OUTZ_L_XL                    0x2CU
+#define ISM330DLC_OUTZ_H_XL                    0x2DU
+#define ISM330DLC_SENSORHUB1_REG               0x2EU
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -423,7 +428,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } ism330dlc_sensorhub1_reg_t;
 
-#define ISM330DLC_SENSORHUB2_REG               0x2F
+#define ISM330DLC_SENSORHUB2_REG               0x2FU
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -435,7 +440,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } ism330dlc_sensorhub2_reg_t;
 
-#define ISM330DLC_SENSORHUB3_REG               0x30
+#define ISM330DLC_SENSORHUB3_REG               0x30U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -447,7 +452,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } ism330dlc_sensorhub3_reg_t;
 
-#define ISM330DLC_SENSORHUB4_REG               0x31
+#define ISM330DLC_SENSORHUB4_REG               0x31U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -459,7 +464,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } ism330dlc_sensorhub4_reg_t;
 
-#define ISM330DLC_SENSORHUB5_REG               0x32
+#define ISM330DLC_SENSORHUB5_REG               0x32U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -471,7 +476,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } ism330dlc_sensorhub5_reg_t;
 
-#define ISM330DLC_SENSORHUB6_REG               0x33
+#define ISM330DLC_SENSORHUB6_REG               0x33U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -483,7 +488,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } ism330dlc_sensorhub6_reg_t;
 
-#define ISM330DLC_SENSORHUB7_REG               0x34
+#define ISM330DLC_SENSORHUB7_REG               0x34U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -495,7 +500,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } ism330dlc_sensorhub7_reg_t;
 
-#define ISM330DLC_SENSORHUB8_REG               0x35
+#define ISM330DLC_SENSORHUB8_REG               0x35U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -507,7 +512,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } ism330dlc_sensorhub8_reg_t;
 
-#define ISM330DLC_SENSORHUB9_REG               0x36
+#define ISM330DLC_SENSORHUB9_REG               0x36U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -519,7 +524,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } ism330dlc_sensorhub9_reg_t;
 
-#define ISM330DLC_SENSORHUB10_REG              0x37
+#define ISM330DLC_SENSORHUB10_REG              0x37U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -531,7 +536,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } ism330dlc_sensorhub10_reg_t;
 
-#define ISM330DLC_SENSORHUB11_REG              0x38
+#define ISM330DLC_SENSORHUB11_REG              0x38U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -543,7 +548,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } ism330dlc_sensorhub11_reg_t;
 
-#define ISM330DLC_SENSORHUB12_REG              0x39
+#define ISM330DLC_SENSORHUB12_REG              0x39U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -555,12 +560,12 @@ typedef struct {
   uint8_t bit7                     : 1;
 } ism330dlc_sensorhub12_reg_t;
 
-#define ISM330DLC_FIFO_STATUS1                 0x3A
+#define ISM330DLC_FIFO_STATUS1                 0x3AU
 typedef struct {
   uint8_t diff_fifo                : 8;  /* + FIFO_STATUS2(diff_fifo) */
 } ism330dlc_fifo_status1_t;
 
-#define ISM330DLC_FIFO_STATUS2                 0x3B
+#define ISM330DLC_FIFO_STATUS2                 0x3BU
 typedef struct {
   uint8_t diff_fifo                : 3;  /* + FIFO_STATUS1(diff_fifo) */
   uint8_t not_used_01              : 1;
@@ -570,12 +575,12 @@ typedef struct {
   uint8_t waterm                   : 1;
 } ism330dlc_fifo_status2_t;
 
-#define ISM330DLC_FIFO_STATUS3                 0x3C
+#define ISM330DLC_FIFO_STATUS3                 0x3CU
 typedef struct {
   uint8_t fifo_pattern             : 8;  /* + FIFO_STATUS4(fifo_pattern) */
 } ism330dlc_fifo_status3_t;
 
-#define ISM330DLC_FIFO_STATUS4                 0x3D
+#define ISM330DLC_FIFO_STATUS4                 0x3DU
 typedef struct {
   uint8_t fifo_pattern             : 2;  /* + FIFO_STATUS3(fifo_pattern) */
   uint8_t not_used_01              : 6;
@@ -587,7 +592,7 @@ typedef struct {
 #define ISM330DLC_TIMESTAMP1_REG               0x41
 #define ISM330DLC_TIMESTAMP2_REG               0x42
 
-#define ISM330DLC_SENSORHUB13_REG              0x4D
+#define ISM330DLC_SENSORHUB13_REG              0x4DU
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -599,7 +604,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } ism330dlc_sensorhub13_reg_t;
 
-#define ISM330DLC_SENSORHUB14_REG              0x4E
+#define ISM330DLC_SENSORHUB14_REG              0x4EU
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -611,7 +616,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } ism330dlc_sensorhub14_reg_t;
 
-#define ISM330DLC_SENSORHUB15_REG              0x4F
+#define ISM330DLC_SENSORHUB15_REG              0x4FU
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -623,7 +628,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } ism330dlc_sensorhub15_reg_t;
 
-#define ISM330DLC_SENSORHUB16_REG              0x50
+#define ISM330DLC_SENSORHUB16_REG              0x50U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -635,7 +640,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } ism330dlc_sensorhub16_reg_t;
 
-#define ISM330DLC_SENSORHUB17_REG              0x51
+#define ISM330DLC_SENSORHUB17_REG              0x51U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -647,7 +652,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } ism330dlc_sensorhub17_reg_t;
 
-#define ISM330DLC_SENSORHUB18_REG              0x52
+#define ISM330DLC_SENSORHUB18_REG              0x52U
 typedef struct {
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
@@ -659,7 +664,7 @@ typedef struct {
   uint8_t bit7                     : 1;
 } ism330dlc_sensorhub18_reg_t;
 
-#define ISM330DLC_FUNC_SRC1                    0x53
+#define ISM330DLC_FUNC_SRC1                    0x53U
 typedef struct {
   uint8_t sensorhub_end_op         : 1;
   uint8_t si_end_op                : 1;
@@ -669,7 +674,7 @@ typedef struct {
   uint8_t not_used_02              : 2;
 } ism330dlc_func_src1_t;
 
-#define ISM330DLC_FUNC_SRC2                    0x54
+#define ISM330DLC_FUNC_SRC2                    0x54U
 typedef struct {
   uint8_t not_used_01              : 3;
   uint8_t slave0_nack              : 1;
@@ -679,7 +684,7 @@ typedef struct {
   uint8_t not_used_02              : 1;
 } ism330dlc_func_src2_t;
 
-#define ISM330DLC_TAP_CFG                      0x58
+#define ISM330DLC_TAP_CFG                      0x58U
 typedef struct {
   uint8_t lir                      : 1;
   uint8_t tap_z_en                 : 1;
@@ -690,28 +695,28 @@ typedef struct {
   uint8_t interrupts_enable        : 1;
 } ism330dlc_tap_cfg_t;
 
-#define ISM330DLC_TAP_THS_6D                   0x59
+#define ISM330DLC_TAP_THS_6D                   0x59U
 typedef struct {
   uint8_t tap_ths                  : 5;
   uint8_t sixd_ths                 : 2;
   uint8_t d4d_en                   : 1;
 } ism330dlc_tap_ths_6d_t;
 
-#define ISM330DLC_INT_DUR2                     0x5A
+#define ISM330DLC_INT_DUR2                     0x5AU
 typedef struct {
   uint8_t shock                    : 2;
   uint8_t quiet                    : 2;
   uint8_t dur                      : 4;
 } ism330dlc_int_dur2_t;
 
-#define ISM330DLC_WAKE_UP_THS                  0x5B
+#define ISM330DLC_WAKE_UP_THS                  0x5BU
 typedef struct {
   uint8_t wk_ths                   : 6;
   uint8_t not_used_01              : 1;
   uint8_t single_double_tap        : 1;
 } ism330dlc_wake_up_ths_t;
 
-#define ISM330DLC_WAKE_UP_DUR                  0x5C
+#define ISM330DLC_WAKE_UP_DUR                  0x5CU
 typedef struct {
   uint8_t sleep_dur                : 4;
   uint8_t timer_hr                 : 1;
@@ -719,14 +724,15 @@ typedef struct {
   uint8_t ff_dur                   : 1;
 } ism330dlc_wake_up_dur_t;
 
-#define ISM330DLC_FREE_FALL                    0x5D
+#define ISM330DLC_FREE_FALL                    0x5DU
 typedef struct {
   uint8_t ff_ths                   : 3;
   uint8_t ff_dur                   : 5;
 } ism330dlc_free_fall_t;
 
-#define ISM330DLC_MD1_CFG                      0x5E
+#define ISM330DLC_MD1_CFG                      0x5EU
 typedef struct {
+  uint8_t int1_timer               : 1;
   uint8_t int1_tilt                : 1;
   uint8_t int1_6d                  : 1;
   uint8_t int1_double_tap          : 1;
@@ -736,7 +742,7 @@ typedef struct {
   uint8_t int1_inact_state         : 1;
 } ism330dlc_md1_cfg_t;
 
-#define ISM330DLC_MD2_CFG                      0x5F
+#define ISM330DLC_MD2_CFG                      0x5FU
 typedef struct {
   uint8_t int2_iron                : 1;
   uint8_t int2_tilt                : 1;
@@ -748,30 +754,30 @@ typedef struct {
   uint8_t int2_inact_state         : 1;
 } ism330dlc_md2_cfg_t;
 
-#define ISM330DLC_MASTER_CMD_CODE              0x60
+#define ISM330DLC_MASTER_CMD_CODE              0x60U
 typedef struct {
   uint8_t master_cmd_code          : 8;
 } ism330dlc_master_cmd_code_t;
 
-#define ISM330DLC_SENS_SYNC_SPI_ERROR_CODE     0x61
+#define ISM330DLC_SENS_SYNC_SPI_ERROR_CODE     0x61U
 typedef struct {
   uint8_t error_code               : 8;
 } ism330dlc_sens_sync_spi_error_code_t;
 
-#define ISM330DLC_OUT_MAG_RAW_X_L              0x66
-#define ISM330DLC_OUT_MAG_RAW_X_H              0x67
-#define ISM330DLC_OUT_MAG_RAW_Y_L              0x68
-#define ISM330DLC_OUT_MAG_RAW_Y_H              0x69
-#define ISM330DLC_OUT_MAG_RAW_Z_L              0x6A
-#define ISM330DLC_OUT_MAG_RAW_Z_H              0x6B
-#define ISM330DLC_INT_OIS  0x6F
+#define ISM330DLC_OUT_MAG_RAW_X_L              0x66U
+#define ISM330DLC_OUT_MAG_RAW_X_H              0x67U
+#define ISM330DLC_OUT_MAG_RAW_Y_L              0x68U
+#define ISM330DLC_OUT_MAG_RAW_Y_H              0x69U
+#define ISM330DLC_OUT_MAG_RAW_Z_L              0x6AU
+#define ISM330DLC_OUT_MAG_RAW_Z_H              0x6BU
+#define ISM330DLC_INT_OIS                      0x6FU
 typedef struct {
   uint8_t not_used_01              : 6;
   uint8_t lvl2_ois                 : 1;
   uint8_t int2_drdy_ois            : 1;
 } ism330dlc_int_ois_t;
 
-#define ISM330DLC_CTRL1_OIS                    0x70
+#define ISM330DLC_CTRL1_OIS                    0x70U
 typedef struct {
   uint8_t ois_en_spi2              : 1;
   uint8_t fs_g_ois                 : 3;  /* fs_g_ois + fs_125_ois */
@@ -781,7 +787,7 @@ typedef struct {
   uint8_t ble_ois                  : 1;
 } ism330dlc_ctrl1_ois_t;
 
-#define ISM330DLC_CTRL2_OIS                    0x71
+#define ISM330DLC_CTRL2_OIS                    0x71U
 typedef struct {
   uint8_t hp_en_ois                : 1;
   uint8_t ftype_ois                : 2;
@@ -790,7 +796,7 @@ typedef struct {
   uint8_t not_used_02              : 2;
 } ism330dlc_ctrl2_ois_t;
 
-#define ISM330DLC_CTRL3_OIS                    0x72
+#define ISM330DLC_CTRL3_OIS                    0x72U
 typedef struct {
   uint8_t st_ois_clampdis          : 1;
   uint8_t st_ois                   : 2;
@@ -799,21 +805,21 @@ typedef struct {
   uint8_t den_lh_ois               : 1;
 } ism330dlc_ctrl3_ois_t;
 
-#define ISM330DLC_X_OFS_USR                    0x73
-#define ISM330DLC_Y_OFS_USR                    0x74
-#define ISM330DLC_Z_OFS_USR                    0x75
-#define ISM330DLC_SLV0_ADD                     0x02
+#define ISM330DLC_X_OFS_USR                    0x73U
+#define ISM330DLC_Y_OFS_USR                    0x74U
+#define ISM330DLC_Z_OFS_USR                    0x75U
+#define ISM330DLC_SLV0_ADD                     0x02U
 typedef struct {
   uint8_t rw_0                     : 1;
   uint8_t slave0_add               : 7;
 } ism330dlc_slv0_add_t;
 
-#define ISM330DLC_SLV0_SUBADD                  0x03
+#define ISM330DLC_SLV0_SUBADD                  0x03U
 typedef struct {
   uint8_t slave0_reg               : 8;
 } ism330dlc_slv0_subadd_t;
 
-#define ISM330DLC_SLAVE0_CONFIG                0x04
+#define ISM330DLC_SLAVE0_CONFIG                0x04U
 typedef struct {
   uint8_t slave0_numop             : 3;
   uint8_t src_mode                 : 1;
@@ -821,18 +827,18 @@ typedef struct {
   uint8_t slave0_rate              : 2;
 } ism330dlc_slave0_config_t;
 
-#define ISM330DLC_SLV1_ADD                     0x05
+#define ISM330DLC_SLV1_ADD                     0x05U
 typedef struct {
   uint8_t r_1                      : 1;
   uint8_t slave1_add               : 7;
 } ism330dlc_slv1_add_t;
 
-#define ISM330DLC_SLV1_SUBADD                  0x06
+#define ISM330DLC_SLV1_SUBADD                  0x06U
 typedef struct {
   uint8_t slave1_reg               : 8;
 } ism330dlc_slv1_subadd_t;
 
-#define ISM330DLC_SLAVE1_CONFIG                0x07
+#define ISM330DLC_SLAVE1_CONFIG                0x07U
 typedef struct {
   uint8_t slave1_numop             : 3;
   uint8_t not_used_01              : 2;
@@ -840,63 +846,75 @@ typedef struct {
   uint8_t slave1_rate              : 2;
 } ism330dlc_slave1_config_t;
 
-#define ISM330DLC_SLV2_ADD                     0x08
+#define ISM330DLC_SLV2_ADD                     0x08U
 typedef struct {
   uint8_t r_2                      : 1;
   uint8_t slave2_add               : 7;
 } ism330dlc_slv2_add_t;
 
-#define ISM330DLC_SLV2_SUBADD                  0x09
+#define ISM330DLC_SLV2_SUBADD                  0x09U
 typedef struct {
   uint8_t slave2_reg               : 8;
 } ism330dlc_slv2_subadd_t;
 
-#define ISM330DLC_SLAVE2_CONFIG                0x0A
+#define ISM330DLC_SLAVE2_CONFIG                0x0AU
 typedef struct {
   uint8_t slave2_numop             : 3;
   uint8_t not_used_01              : 3;
   uint8_t slave2_rate              : 2;
 } ism330dlc_slave2_config_t;
 
-#define ISM330DLC_SLV3_ADD                     0x0B
+#define ISM330DLC_SLV3_ADD                     0x0BU
 typedef struct {
   uint8_t r_3                      : 1;
   uint8_t slave3_add               : 7;
 } ism330dlc_slv3_add_t;
 
-#define ISM330DLC_SLV3_SUBADD                  0x0C
+#define ISM330DLC_SLV3_SUBADD                  0x0CU
 typedef struct {
   uint8_t slave3_reg               : 8;
 } ism330dlc_slv3_subadd_t;
 
-#define ISM330DLC_SLAVE3_CONFIG                0x0D
+#define ISM330DLC_SLAVE3_CONFIG                0x0DU
 typedef struct {
   uint8_t slave3_numop             : 3;
   uint8_t not_used_01              : 3;
   uint8_t slave3_rate              : 2;
 } ism330dlc_slave3_config_t;
 
-#define ISM330DLC_DATAWRITE_SRC_MODE_SUB_SLV0  0x0E
+#define ISM330DLC_DATAWRITE_SRC_MODE_SUB_SLV0  0x0EU
 typedef struct {
   uint8_t slave_dataw              : 8;
 } ism330dlc_datawrite_src_mode_sub_slv0_t;
 
-#define ISM330DLC_MAG_SI_XX                    0x24
-#define ISM330DLC_MAG_SI_XY                    0x25
-#define ISM330DLC_MAG_SI_XZ                    0x26
-#define ISM330DLC_MAG_SI_YX                    0x27
-#define ISM330DLC_MAG_SI_YY                    0x28
-#define ISM330DLC_MAG_SI_YZ                    0x29
-#define ISM330DLC_MAG_SI_ZX                    0x2A
-#define ISM330DLC_MAG_SI_ZY                    0x2B
-#define ISM330DLC_MAG_SI_ZZ                    0x2C
-#define ISM330DLC_MAG_OFFX_L                   0x2D
-#define ISM330DLC_MAG_OFFX_H                   0x2E
-#define ISM330DLC_MAG_OFFY_L                   0x2F
-#define ISM330DLC_MAG_OFFY_H                   0x30
-#define ISM330DLC_MAG_OFFZ_L                   0x31
-#define ISM330DLC_MAG_OFFZ_H                   0x32
+#define ISM330DLC_MAG_SI_XX                    0x24U
+#define ISM330DLC_MAG_SI_XY                    0x25U
+#define ISM330DLC_MAG_SI_XZ                    0x26U
+#define ISM330DLC_MAG_SI_YX                    0x27U
+#define ISM330DLC_MAG_SI_YY                    0x28U
+#define ISM330DLC_MAG_SI_YZ                    0x29U
+#define ISM330DLC_MAG_SI_ZX                    0x2AU
+#define ISM330DLC_MAG_SI_ZY                    0x2BU
+#define ISM330DLC_MAG_SI_ZZ                    0x2CU
+#define ISM330DLC_MAG_OFFX_L                   0x2DU
+#define ISM330DLC_MAG_OFFX_H                   0x2EU
+#define ISM330DLC_MAG_OFFY_L                   0x2FU
+#define ISM330DLC_MAG_OFFY_H                   0x30U
+#define ISM330DLC_MAG_OFFZ_L                   0x31U
+#define ISM330DLC_MAG_OFFZ_H                   0x32U
 
+/**
+  * @defgroup ISM330DLC_Register_Union
+  * @brief    This union group all the registers that has a bit-field
+  *           description.
+  *           This union is useful but not need by the driver.
+  *
+  *           REMOVING this union you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  *
+  * @{
+  *
+  */
 typedef union{
   ism330dlc_func_cfg_access_t                  func_cfg_access;
   ism330dlc_sensor_sync_time_frame_t           sensor_sync_time_frame;
@@ -979,21 +997,39 @@ typedef union{
   bitwise_t                                    bitwise;
   uint8_t                                      byte;
 } ism330dlc_reg_t;
+
+/**
+  * @}
+  *
+  */
+
 int32_t ism330dlc_read_reg(ism330dlc_ctx_t *ctx, uint8_t reg, uint8_t* data,
                          uint16_t len);
 int32_t ism330dlc_write_reg(ism330dlc_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
+extern float_t ism330dlc_from_fs2g_to_mg(int16_t lsb);
+extern float_t ism330dlc_from_fs4g_to_mg(int16_t lsb);
+extern float_t ism330dlc_from_fs8g_to_mg(int16_t lsb);
+extern float_t ism330dlc_from_fs16g_to_mg(int16_t lsb);
+
+extern float_t ism330dlc_from_fs125dps_to_mdps(int16_t lsb);
+extern float_t ism330dlc_from_fs250dps_to_mdps(int16_t lsb);
+extern float_t ism330dlc_from_fs500dps_to_mdps(int16_t lsb);
+extern float_t ism330dlc_from_fs1000dps_to_mdps(int16_t lsb);
+extern float_t ism330dlc_from_fs2000dps_to_mdps(int16_t lsb);
+
+extern float_t ism330dlc_from_lsb_to_celsius(int16_t lsb);
+
 typedef enum {
-  ISM330DLC_2g    = 0,
-  ISM330DLC_16g   = 1,
-  ISM330DLC_4g    = 2,
-  ISM330DLC_8g    = 3,
+  ISM330DLC_2g       = 0,
+  ISM330DLC_16g      = 1,
+  ISM330DLC_4g       = 2,
+  ISM330DLC_8g       = 3,
+  ISM330DLC_XL_FS_ND = 4,  /* ERROR CODE */
 } ism330dlc_fs_xl_t;
-int32_t ism330dlc_xl_full_scale_set(ism330dlc_ctx_t *ctx,
-                                    ism330dlc_fs_xl_t val);
-int32_t ism330dlc_xl_full_scale_get(ism330dlc_ctx_t *ctx,
-                                    ism330dlc_fs_xl_t *val);
+int32_t ism330dlc_xl_full_scale_set(ism330dlc_ctx_t *ctx, ism330dlc_fs_xl_t val);
+int32_t ism330dlc_xl_full_scale_get(ism330dlc_ctx_t *ctx, ism330dlc_fs_xl_t *val);
 
 typedef enum {
   ISM330DLC_XL_ODR_OFF      =  0,
@@ -1009,10 +1045,8 @@ typedef enum {
   ISM330DLC_XL_ODR_6k66Hz   = 10,
   ISM330DLC_XL_ODR_1Hz6     = 11,
 } ism330dlc_odr_xl_t;
-int32_t ism330dlc_xl_data_rate_set(ism330dlc_ctx_t *ctx,
-                                   ism330dlc_odr_xl_t val);
-int32_t ism330dlc_xl_data_rate_get(ism330dlc_ctx_t *ctx,
-                                   ism330dlc_odr_xl_t *val);
+int32_t ism330dlc_xl_data_rate_set(ism330dlc_ctx_t *ctx, ism330dlc_odr_xl_t val);
+int32_t ism330dlc_xl_data_rate_get(ism330dlc_ctx_t *ctx, ism330dlc_odr_xl_t *val);
 
 typedef enum {
   ISM330DLC_250dps   = 0,
@@ -1021,10 +1055,8 @@ typedef enum {
   ISM330DLC_1000dps  = 4,
   ISM330DLC_2000dps  = 6,
 } ism330dlc_fs_g_t;
-int32_t ism330dlc_gy_full_scale_set(ism330dlc_ctx_t *ctx,
-                                    ism330dlc_fs_g_t val);
-int32_t ism330dlc_gy_full_scale_get(ism330dlc_ctx_t *ctx,
-                                    ism330dlc_fs_g_t *val);
+int32_t ism330dlc_gy_full_scale_set(ism330dlc_ctx_t *ctx, ism330dlc_fs_g_t val);
+int32_t ism330dlc_gy_full_scale_get(ism330dlc_ctx_t *ctx, ism330dlc_fs_g_t *val);
 
 typedef enum {
   ISM330DLC_GY_ODR_OFF    =  0,
@@ -1039,10 +1071,8 @@ typedef enum {
   ISM330DLC_GY_ODR_3k33Hz =  9,
   ISM330DLC_GY_ODR_6k66Hz = 10,
 } ism330dlc_odr_g_t;
-int32_t ism330dlc_gy_data_rate_set(ism330dlc_ctx_t *ctx,
-                                   ism330dlc_odr_g_t val);
-int32_t ism330dlc_gy_data_rate_get(ism330dlc_ctx_t *ctx,
-                                   ism330dlc_odr_g_t *val);
+int32_t ism330dlc_gy_data_rate_set(ism330dlc_ctx_t *ctx, ism330dlc_odr_g_t val);
+int32_t ism330dlc_gy_data_rate_get(ism330dlc_ctx_t *ctx, ism330dlc_odr_g_t *val);
 
 int32_t ism330dlc_block_data_update_set(ism330dlc_ctx_t *ctx, uint8_t val);
 int32_t ism330dlc_block_data_update_get(ism330dlc_ctx_t *ctx, uint8_t *val);
@@ -1083,22 +1113,18 @@ int32_t ism330dlc_gy_power_mode_set(ism330dlc_ctx_t *ctx,
 int32_t ism330dlc_gy_power_mode_get(ism330dlc_ctx_t *ctx,
                                   ism330dlc_g_hm_mode_t *val);
 
-typedef union {
-  struct {
+typedef struct {
   ism330dlc_wake_up_src_t        wake_up_src;
   ism330dlc_tap_src_t            tap_src;
   ism330dlc_d6d_src_t            d6d_src;
   ism330dlc_status_reg_t         status_reg;
   ism330dlc_func_src1_t          func_src1;
   ism330dlc_func_src2_t          func_src2;
-  } reg;
-  uint8_t byte[6];
 } ism330dlc_all_sources_t;
 int32_t ism330dlc_all_sources_get(ism330dlc_ctx_t *ctx,
                                 ism330dlc_all_sources_t *val);
 
-int32_t ism330dlc_status_reg_get(ism330dlc_ctx_t *ctx,
-                                 ism330dlc_status_reg_t *val);
+int32_t ism330dlc_status_reg_get(ism330dlc_ctx_t *ctx, ism330dlc_status_reg_t *val);
 
 int32_t ism330dlc_xl_flag_data_ready_get(ism330dlc_ctx_t *ctx, uint8_t *val);
 
@@ -1115,10 +1141,8 @@ typedef enum {
   ISM330DLC_LSB_6ms4 = 0,
   ISM330DLC_LSB_25us = 1,
 } ism330dlc_timer_hr_t;
-int32_t ism330dlc_timestamp_res_set(ism330dlc_ctx_t *ctx,
-                                    ism330dlc_timer_hr_t val);
-int32_t ism330dlc_timestamp_res_get(ism330dlc_ctx_t *ctx,
-                                    ism330dlc_timer_hr_t *val);
+int32_t ism330dlc_timestamp_res_set(ism330dlc_ctx_t *ctx, ism330dlc_timer_hr_t val);
+int32_t ism330dlc_timestamp_res_get(ism330dlc_ctx_t *ctx, ism330dlc_timer_hr_t *val);
 
 typedef enum {
   ISM330DLC_ROUND_DISABLE            = 0,
@@ -1130,10 +1154,8 @@ typedef enum {
   ISM330DLC_ROUND_GY_XL_SH1_TO_SH12  = 6,
   ISM330DLC_ROUND_GY_XL_SH1_TO_SH6   = 7,
 } ism330dlc_rounding_t;
-int32_t ism330dlc_rounding_mode_set(ism330dlc_ctx_t *ctx,
-                                    ism330dlc_rounding_t val);
-int32_t ism330dlc_rounding_mode_get(ism330dlc_ctx_t *ctx,
-                                    ism330dlc_rounding_t *val);
+int32_t ism330dlc_rounding_mode_set(ism330dlc_ctx_t *ctx, ism330dlc_rounding_t val);
+int32_t ism330dlc_rounding_mode_get(ism330dlc_ctx_t *ctx, ism330dlc_rounding_t *val);
 
 int32_t ism330dlc_temperature_raw_get(ism330dlc_ctx_t *ctx, uint8_t *buff);
 
@@ -1143,17 +1165,15 @@ int32_t ism330dlc_acceleration_raw_get(ism330dlc_ctx_t *ctx, uint8_t *buff);
 
 int32_t ism330dlc_mag_calibrated_raw_get(ism330dlc_ctx_t *ctx, uint8_t *buff);
 
-int32_t ism330dlc_fifo_raw_data_get(ism330dlc_ctx_t *ctx, uint8_t *buffer, 
-                                    uint8_t len);
+int32_t ism330dlc_fifo_raw_data_get(ism330dlc_ctx_t *ctx, uint8_t *buffer,
+                                  uint8_t len);
 
 typedef enum {
   ISM330DLC_USER_BANK   = 0,
   ISM330DLC_BANK_A      = 1,
 } ism330dlc_func_cfg_en_t;
-int32_t ism330dlc_mem_bank_set(ism330dlc_ctx_t *ctx,
-                               ism330dlc_func_cfg_en_t val);
-int32_t ism330dlc_mem_bank_get(ism330dlc_ctx_t *ctx,
-                               ism330dlc_func_cfg_en_t *val);
+int32_t ism330dlc_mem_bank_set(ism330dlc_ctx_t *ctx, ism330dlc_func_cfg_en_t val);
+int32_t ism330dlc_mem_bank_get(ism330dlc_ctx_t *ctx, ism330dlc_func_cfg_en_t *val);
 
 typedef enum {
   ISM330DLC_DRDY_LATCHED    = 0,
@@ -1186,20 +1206,16 @@ typedef enum {
   ISM330DLC_XL_ST_POSITIVE   = 1,
   ISM330DLC_XL_ST_NEGATIVE   = 2,
 } ism330dlc_st_xl_t;
-int32_t ism330dlc_xl_self_test_set(ism330dlc_ctx_t *ctx,
-                                   ism330dlc_st_xl_t val);
-int32_t ism330dlc_xl_self_test_get(ism330dlc_ctx_t *ctx,
-                                   ism330dlc_st_xl_t *val);
+int32_t ism330dlc_xl_self_test_set(ism330dlc_ctx_t *ctx, ism330dlc_st_xl_t val);
+int32_t ism330dlc_xl_self_test_get(ism330dlc_ctx_t *ctx, ism330dlc_st_xl_t *val);
 
 typedef enum {
   ISM330DLC_GY_ST_DISABLE    = 0,
   ISM330DLC_GY_ST_POSITIVE   = 1,
   ISM330DLC_GY_ST_NEGATIVE   = 3,
 } ism330dlc_st_g_t;
-int32_t ism330dlc_gy_self_test_set(ism330dlc_ctx_t *ctx,
-                                   ism330dlc_st_g_t val);
-int32_t ism330dlc_gy_self_test_get(ism330dlc_ctx_t *ctx,
-                                   ism330dlc_st_g_t *val);
+int32_t ism330dlc_gy_self_test_set(ism330dlc_ctx_t *ctx, ism330dlc_st_g_t val);
+int32_t ism330dlc_gy_self_test_get(ism330dlc_ctx_t *ctx, ism330dlc_st_g_t *val);
 
 int32_t ism330dlc_filter_settling_mask_set(ism330dlc_ctx_t *ctx, uint8_t val);
 int32_t ism330dlc_filter_settling_mask_get(ism330dlc_ctx_t *ctx, uint8_t *val);
@@ -1225,7 +1241,7 @@ int32_t ism330dlc_xl_filter_analog_get(ism330dlc_ctx_t *ctx,
 typedef enum {
   ISM330DLC_XL_LP1_ODR_DIV_2 = 0,
   ISM330DLC_XL_LP1_ODR_DIV_4 = 1,
-  ISM330DLC_XL_LP1_NA        = 2,  /* ERROR CODE */
+  ISM330DLC_XL_LP1_NA        = 2,
 } ism330dlc_lpf1_bw_sel_t;
 int32_t ism330dlc_xl_lp1_bandwidth_set(ism330dlc_ctx_t *ctx,
                                      ism330dlc_lpf1_bw_sel_t val);
@@ -1241,7 +1257,7 @@ typedef enum {
   ISM330DLC_XL_LOW_NOISE_LP_ODR_DIV_100  = 0x11,
   ISM330DLC_XL_LOW_NOISE_LP_ODR_DIV_9    = 0x12,
   ISM330DLC_XL_LOW_NOISE_LP_ODR_DIV_400  = 0x13,
-  ISM330DLC_XL_LP_NA                     = 0x20, /* ERROR CODE */
+  ISM330DLC_XL_LP_NA                     = 0x14
 } ism330dlc_input_composite_t;
 int32_t ism330dlc_xl_lp2_bandwidth_set(ism330dlc_ctx_t *ctx,
                                      ism330dlc_input_composite_t val);
@@ -1256,7 +1272,7 @@ typedef enum {
   ISM330DLC_XL_HP_ODR_DIV_100    = 0x01,
   ISM330DLC_XL_HP_ODR_DIV_9      = 0x02,
   ISM330DLC_XL_HP_ODR_DIV_400    = 0x03,
-  ISM330DLC_XL_HP_NA             = 0x10, /* ERROR CODE */
+  ISM330DLC_XL_HP_NA             = 0x04,
 } ism330dlc_hpcf_xl_t;
 int32_t ism330dlc_xl_hp_bandwidth_set(ism330dlc_ctx_t *ctx,
                                     ism330dlc_hpcf_xl_t val);
@@ -1503,10 +1519,8 @@ typedef enum {
   ISM330DLC_ACTIVE_HIGH   = 0,
   ISM330DLC_ACTIVE_LOW    = 1,
 } ism330dlc_h_lactive_t;
-int32_t ism330dlc_pin_polarity_set(ism330dlc_ctx_t *ctx,
-                                   ism330dlc_h_lactive_t val);
-int32_t ism330dlc_pin_polarity_get(ism330dlc_ctx_t *ctx,
-                                   ism330dlc_h_lactive_t *val);
+int32_t ism330dlc_pin_polarity_set(ism330dlc_ctx_t *ctx, ism330dlc_h_lactive_t val);
+int32_t ism330dlc_pin_polarity_get(ism330dlc_ctx_t *ctx, ism330dlc_h_lactive_t *val);
 
 int32_t ism330dlc_all_on_int1_set(ism330dlc_ctx_t *ctx, uint8_t val);
 int32_t ism330dlc_all_on_int1_get(ism330dlc_ctx_t *ctx, uint8_t *val);
@@ -1515,10 +1529,8 @@ typedef enum {
   ISM330DLC_INT_PULSED   = 0,
   ISM330DLC_INT_LATCHED  = 1,
 } ism330dlc_lir_t;
-int32_t ism330dlc_int_notification_set(ism330dlc_ctx_t *ctx,
-                                       ism330dlc_lir_t val);
-int32_t ism330dlc_int_notification_get(ism330dlc_ctx_t *ctx,
-                                       ism330dlc_lir_t *val);
+int32_t ism330dlc_int_notification_set(ism330dlc_ctx_t *ctx, ism330dlc_lir_t val);
+int32_t ism330dlc_int_notification_get(ism330dlc_ctx_t *ctx, ism330dlc_lir_t *val);
 
 int32_t ism330dlc_wkup_threshold_set(ism330dlc_ctx_t *ctx, uint8_t val);
 int32_t ism330dlc_wkup_threshold_get(ism330dlc_ctx_t *ctx, uint8_t *val);
@@ -1535,10 +1547,8 @@ typedef enum {
   ISM330DLC_XL_12Hz5_GY_SLEEP         = 2,
   ISM330DLC_XL_12Hz5_GY_PD            = 3,
 } ism330dlc_inact_en_t;
-int32_t ism330dlc_act_mode_set(ism330dlc_ctx_t *ctx,
-                               ism330dlc_inact_en_t val);
-int32_t ism330dlc_act_mode_get(ism330dlc_ctx_t *ctx,
-                               ism330dlc_inact_en_t *val);
+int32_t ism330dlc_act_mode_set(ism330dlc_ctx_t *ctx, ism330dlc_inact_en_t val);
+int32_t ism330dlc_act_mode_get(ism330dlc_ctx_t *ctx, ism330dlc_inact_en_t *val);
 
 int32_t ism330dlc_act_sleep_dur_set(ism330dlc_ctx_t *ctx, uint8_t val);
 int32_t ism330dlc_act_sleep_dur_get(ism330dlc_ctx_t *ctx, uint8_t *val);
@@ -1590,10 +1600,8 @@ typedef enum {
   ISM330DLC_DEG_60      = 2,
   ISM330DLC_DEG_50      = 3,
 } ism330dlc_sixd_ths_t;
-int32_t ism330dlc_6d_threshold_set(ism330dlc_ctx_t *ctx,
-                                   ism330dlc_sixd_ths_t val);
-int32_t ism330dlc_6d_threshold_get(ism330dlc_ctx_t *ctx,
-                                   ism330dlc_sixd_ths_t *val);
+int32_t ism330dlc_6d_threshold_set(ism330dlc_ctx_t *ctx, ism330dlc_sixd_ths_t val);
+int32_t ism330dlc_6d_threshold_get(ism330dlc_ctx_t *ctx, ism330dlc_sixd_ths_t *val);
 
 int32_t ism330dlc_4d_mode_set(ism330dlc_ctx_t *ctx, uint8_t val);
 int32_t ism330dlc_4d_mode_get(ism330dlc_ctx_t *ctx, uint8_t *val);
@@ -1611,10 +1619,8 @@ typedef enum {
   ISM330DLC_FF_TSH_469mg = 6,
   ISM330DLC_FF_TSH_500mg = 7,
 } ism330dlc_ff_ths_t;
-int32_t ism330dlc_ff_threshold_set(ism330dlc_ctx_t *ctx,
-                                   ism330dlc_ff_ths_t val);
-int32_t ism330dlc_ff_threshold_get(ism330dlc_ctx_t *ctx,
-                                   ism330dlc_ff_ths_t *val);
+int32_t ism330dlc_ff_threshold_set(ism330dlc_ctx_t *ctx, ism330dlc_ff_ths_t val);
+int32_t ism330dlc_ff_threshold_get(ism330dlc_ctx_t *ctx, ism330dlc_ff_ths_t *val);
 
 int32_t ism330dlc_fifo_watermark_set(ism330dlc_ctx_t *ctx, uint16_t val);
 int32_t ism330dlc_fifo_watermark_get(ism330dlc_ctx_t *ctx, uint16_t *val);
@@ -1654,13 +1660,13 @@ int32_t ism330dlc_fifo_xl_batch_get(ism330dlc_ctx_t *ctx,
 
 typedef enum {
   ISM330DLC_FIFO_GY_DISABLE = 0,
-  ISM330DLC_FIFO_GY_NO_DEC = 1,
-  ISM330DLC_FIFO_GY_DEC_2 = 2,
-  ISM330DLC_FIFO_GY_DEC_3 = 3,
-  ISM330DLC_FIFO_GY_DEC_4 = 4,
-  ISM330DLC_FIFO_GY_DEC_8 = 5,
-  ISM330DLC_FIFO_GY_DEC_16 = 6,
-  ISM330DLC_FIFO_GY_DEC_32 = 7,
+  ISM330DLC_FIFO_GY_NO_DEC  = 1,
+  ISM330DLC_FIFO_GY_DEC_2   = 2,
+  ISM330DLC_FIFO_GY_DEC_3   = 3,
+  ISM330DLC_FIFO_GY_DEC_4   = 4,
+  ISM330DLC_FIFO_GY_DEC_8   = 5,
+  ISM330DLC_FIFO_GY_DEC_16  = 6,
+  ISM330DLC_FIFO_GY_DEC_32  = 7,
 } ism330dlc_dec_fifo_gyro_t;
 int32_t ism330dlc_fifo_gy_batch_set(ism330dlc_ctx_t *ctx,
                                   ism330dlc_dec_fifo_gyro_t val);
@@ -1697,10 +1703,8 @@ int32_t ism330dlc_fifo_dataset_4_batch_set(ism330dlc_ctx_t *ctx,
 int32_t ism330dlc_fifo_dataset_4_batch_get(ism330dlc_ctx_t *ctx,
                                          ism330dlc_dec_ds4_fifo_t *val);
 
-int32_t ism330dlc_fifo_xl_gy_8bit_format_set(ism330dlc_ctx_t *ctx,
-                                             uint8_t val);
-int32_t ism330dlc_fifo_xl_gy_8bit_format_get(ism330dlc_ctx_t *ctx,
-                                             uint8_t *val);
+int32_t ism330dlc_fifo_xl_gy_8bit_format_set(ism330dlc_ctx_t *ctx, uint8_t val);
+int32_t ism330dlc_fifo_xl_gy_8bit_format_get(ism330dlc_ctx_t *ctx, uint8_t *val);
 
 int32_t ism330dlc_fifo_stop_on_wtm_set(ism330dlc_ctx_t *ctx, uint8_t val);
 int32_t ism330dlc_fifo_stop_on_wtm_get(ism330dlc_ctx_t *ctx, uint8_t *val);
@@ -1712,10 +1716,8 @@ typedef enum {
   ISM330DLC_BYPASS_TO_STREAM_MODE = 4,
   ISM330DLC_STREAM_MODE           = 6,
 } ism330dlc_fifo_mode_t;
-int32_t ism330dlc_fifo_mode_set(ism330dlc_ctx_t *ctx,
-                                ism330dlc_fifo_mode_t val);
-int32_t ism330dlc_fifo_mode_get(ism330dlc_ctx_t *ctx,
-                                ism330dlc_fifo_mode_t *val);
+int32_t ism330dlc_fifo_mode_set(ism330dlc_ctx_t *ctx, ism330dlc_fifo_mode_t val);
+int32_t ism330dlc_fifo_mode_get(ism330dlc_ctx_t *ctx, ism330dlc_fifo_mode_t *val);
 
 typedef enum {
   ISM330DLC_FIFO_DISABLE   =  0,
@@ -1739,10 +1741,8 @@ typedef enum {
   ISM330DLC_DEN_ACT_LOW    = 0,
   ISM330DLC_DEN_ACT_HIGH   = 1,
 } ism330dlc_den_lh_t;
-int32_t ism330dlc_den_polarity_set(ism330dlc_ctx_t *ctx,
-                                   ism330dlc_den_lh_t val);
-int32_t ism330dlc_den_polarity_get(ism330dlc_ctx_t *ctx,
-                                   ism330dlc_den_lh_t *val);
+int32_t ism330dlc_den_polarity_set(ism330dlc_ctx_t *ctx, ism330dlc_den_lh_t val);
+int32_t ism330dlc_den_polarity_get(ism330dlc_ctx_t *ctx, ism330dlc_den_lh_t *val);
 
 typedef enum {
   ISM330DLC_DEN_DISABLE    = 0,
@@ -1759,10 +1759,8 @@ typedef enum {
   ISM330DLC_STAMP_IN_XL_DATA     = 1,
   ISM330DLC_STAMP_IN_GY_XL_DATA  = 2,
 } ism330dlc_den_xl_en_t;
-int32_t ism330dlc_den_enable_set(ism330dlc_ctx_t *ctx,
-                                 ism330dlc_den_xl_en_t val);
-int32_t ism330dlc_den_enable_get(ism330dlc_ctx_t *ctx,
-                                 ism330dlc_den_xl_en_t *val);
+int32_t ism330dlc_den_enable_set(ism330dlc_ctx_t *ctx, ism330dlc_den_xl_en_t val);
+int32_t ism330dlc_den_enable_get(ism330dlc_ctx_t *ctx, ism330dlc_den_xl_en_t *val);
 
 int32_t ism330dlc_den_mark_axis_z_set(ism330dlc_ctx_t *ctx, uint8_t val);
 int32_t ism330dlc_den_mark_axis_z_get(ism330dlc_ctx_t *ctx, uint8_t *val);
@@ -1776,8 +1774,12 @@ int32_t ism330dlc_den_mark_axis_x_get(ism330dlc_ctx_t *ctx, uint8_t *val);
 int32_t ism330dlc_tilt_sens_set(ism330dlc_ctx_t *ctx, uint8_t val);
 int32_t ism330dlc_tilt_sens_get(ism330dlc_ctx_t *ctx, uint8_t *val);
 
+int32_t ism330dlc_wrist_tilt_sens_set(ism330dlc_ctx_t *ctx, uint8_t val);
+int32_t ism330dlc_wrist_tilt_sens_get(ism330dlc_ctx_t *ctx, uint8_t *val);
+
 int32_t ism330dlc_tilt_latency_set(ism330dlc_ctx_t *ctx, uint8_t *buff);
 int32_t ism330dlc_tilt_latency_get(ism330dlc_ctx_t *ctx, uint8_t *buff);
+
 int32_t ism330dlc_tilt_threshold_set(ism330dlc_ctx_t *ctx, uint8_t *buff);
 int32_t ism330dlc_tilt_threshold_get(ism330dlc_ctx_t *ctx, uint8_t *buff);
 
@@ -1802,10 +1804,8 @@ typedef enum {
   ISM330DLC_RES_RATIO_2_13  = 2,
   ISM330DLC_RES_RATIO_2_14  = 3,
 } ism330dlc_rr_t;
-int32_t ism330dlc_sh_sync_sens_ratio_set(ism330dlc_ctx_t *ctx,
-                                         ism330dlc_rr_t val);
-int32_t ism330dlc_sh_sync_sens_ratio_get(ism330dlc_ctx_t *ctx,
-                                         ism330dlc_rr_t *val);
+int32_t ism330dlc_sh_sync_sens_ratio_set(ism330dlc_ctx_t *ctx, ism330dlc_rr_t val);
+int32_t ism330dlc_sh_sync_sens_ratio_get(ism330dlc_ctx_t *ctx, ism330dlc_rr_t *val);
 
 int32_t ism330dlc_sh_master_set(ism330dlc_ctx_t *ctx, uint8_t val);
 int32_t ism330dlc_sh_master_get(ism330dlc_ctx_t *ctx, uint8_t *val);
@@ -1817,10 +1817,8 @@ typedef enum {
   ISM330DLC_EXT_PULL_UP       = 0,
   ISM330DLC_INTERNAL_PULL_UP  = 1,
 } ism330dlc_pull_up_en_t;
-int32_t ism330dlc_sh_pin_mode_set(ism330dlc_ctx_t *ctx,
-                                  ism330dlc_pull_up_en_t val);
-int32_t ism330dlc_sh_pin_mode_get(ism330dlc_ctx_t *ctx,
-                                  ism330dlc_pull_up_en_t *val);
+int32_t ism330dlc_sh_pin_mode_set(ism330dlc_ctx_t *ctx, ism330dlc_pull_up_en_t val);
+int32_t ism330dlc_sh_pin_mode_get(ism330dlc_ctx_t *ctx, ism330dlc_pull_up_en_t *val);
 
 typedef enum {
   ISM330DLC_XL_GY_DRDY        = 0,
@@ -1834,8 +1832,7 @@ int32_t ism330dlc_sh_syncro_mode_get(ism330dlc_ctx_t *ctx,
 int32_t ism330dlc_sh_drdy_on_int1_set(ism330dlc_ctx_t *ctx, uint8_t val);
 int32_t ism330dlc_sh_drdy_on_int1_get(ism330dlc_ctx_t *ctx, uint8_t *val);
 
-typedef union {
-  struct {
+typedef struct {
     ism330dlc_sensorhub1_reg_t   sh_byte_1;
     ism330dlc_sensorhub2_reg_t   sh_byte_2;
     ism330dlc_sensorhub3_reg_t   sh_byte_3;
@@ -1854,8 +1851,6 @@ typedef union {
     ism330dlc_sensorhub16_reg_t  sh_byte_16;
     ism330dlc_sensorhub17_reg_t  sh_byte_17;
     ism330dlc_sensorhub18_reg_t  sh_byte_18;
-  } reg;
-  uint8_t byte[18];
 } ism330dlc_emb_sh_read_t;
 int32_t ism330dlc_sh_read_data_raw_get(ism330dlc_ctx_t *ctx,
                                      ism330dlc_emb_sh_read_t *val);
@@ -1891,8 +1886,7 @@ typedef struct{
   uint8_t   slv0_subadd;
   uint8_t   slv0_data;
 } ism330dlc_sh_cfg_write_t;
-int32_t ism330dlc_sh_cfg_write(ism330dlc_ctx_t *ctx,
-                               ism330dlc_sh_cfg_write_t *val);
+int32_t ism330dlc_sh_cfg_write(ism330dlc_ctx_t *ctx, ism330dlc_sh_cfg_write_t *val);
 
 typedef struct{
   uint8_t   slv_add;
@@ -1963,12 +1957,13 @@ int32_t ism330dlc_sh_slave_3_dec_get(ism330dlc_ctx_t *ctx,
 
 /**
   * @}
+  *
   */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*__ISM330DLC_DRIVER__H */
+#endif /* ISM330DLC_DRIVER_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
