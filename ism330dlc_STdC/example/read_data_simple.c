@@ -1,45 +1,45 @@
 /*
  ******************************************************************************
  * @file    read_data_simple.c
- * @author  MEMS Software Solution Team
- * @date    11-December-2017
- * @brief   This file show the simplest way to get data from sensor.
- *
+ * @author  Sensors Software Solution Team
+ * @brief   ISM330DLC driver file
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
- */
+*/
 
 /* Includes ------------------------------------------------------------------*/
-#include "..\..\stdc\ism330dlc_STdC\driver\ism330dlc_reg.h"
+#include <ism330dlc_reg.h>
 #include <string.h>
 
-#define MKI109V2
-//#define NUCLEO_STM32F411RE
+//#define MKI109V2
+#define NUCLEO_STM32F411RE
 
 #ifdef MKI109V2
 #include "stm32f1xx_hal.h"
@@ -174,7 +174,7 @@ void example_main(void)
   ism330dlc_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hspi2;  
+  dev_ctx.handle = &hi2c1;  
   /*
    *  Check device ID
    */
@@ -239,9 +239,9 @@ void example_main(void)
       /* Read magnetic field data */
       memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
       ism330dlc_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = ISM330DLC_FROM_FS_2g_TO_mg( data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = ISM330DLC_FROM_FS_2g_TO_mg( data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = ISM330DLC_FROM_FS_2g_TO_mg( data_raw_acceleration.i16bit[2]);
+      acceleration_mg[0] = ism330dlc_from_fs2g_to_mg( data_raw_acceleration.i16bit[0]);
+      acceleration_mg[1] = ism330dlc_from_fs2g_to_mg( data_raw_acceleration.i16bit[1]);
+      acceleration_mg[2] = ism330dlc_from_fs2g_to_mg( data_raw_acceleration.i16bit[2]);
       
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
@@ -252,9 +252,9 @@ void example_main(void)
       /* Read magnetic field data */
       memset(data_raw_angular_rate.u8bit, 0x00, 3*sizeof(int16_t));
       ism330dlc_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
-      angular_rate_mdps[0] = ISM330DLC_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[0]);
-      angular_rate_mdps[1] = ISM330DLC_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[1]);
-      angular_rate_mdps[2] = ISM330DLC_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[2]);
+      angular_rate_mdps[0] = ism330dlc_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[0]);
+      angular_rate_mdps[1] = ism330dlc_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[1]);
+      angular_rate_mdps[2] = ism330dlc_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
       
       sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
               angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
@@ -265,7 +265,7 @@ void example_main(void)
       /* Read temperature data */
       memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
       ism330dlc_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = ISM330DLC_FROM_LSB_TO_degC( data_raw_temperature.i16bit );
+      temperature_degC = ism330dlc_from_lsb_to_celsius( data_raw_temperature.i16bit );
        
       sprintf((char*)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC );
       tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
