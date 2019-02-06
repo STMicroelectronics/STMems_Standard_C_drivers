@@ -35,7 +35,7 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "..\..\stdc\lsm303agr_STdC\driver\lsm303agr_reg.h"
+#include "lsm303agr_reg.h"
 #include <string.h>
 
 //#define MKI109V2
@@ -227,9 +227,9 @@ void example_main(void)
       /* Read accelerometer data */
       memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
       lsm303agr_acceleration_raw_get(&dev_ctx_xl, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = LSM303AGR_FROM_FS_2g_HR_TO_mg( data_raw_acceleration.i16bit[0] );
-      acceleration_mg[1] = LSM303AGR_FROM_FS_2g_HR_TO_mg( data_raw_acceleration.i16bit[1] );
-      acceleration_mg[2] = LSM303AGR_FROM_FS_2g_HR_TO_mg( data_raw_acceleration.i16bit[2] );
+      acceleration_mg[0] = lsm303agr_from_fs_2g_hr_to_mg( data_raw_acceleration.i16bit[0] );
+      acceleration_mg[1] = lsm303agr_from_fs_2g_hr_to_mg( data_raw_acceleration.i16bit[1] );
+      acceleration_mg[2] = lsm303agr_from_fs_2g_hr_to_mg( data_raw_acceleration.i16bit[2] );
       
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
@@ -242,9 +242,9 @@ void example_main(void)
       /* Read magnetic field data */
       memset(data_raw_magnetic.u8bit, 0x00, 3*sizeof(int16_t));
       lsm303agr_magnetic_raw_get(&dev_ctx_mg, data_raw_magnetic.u8bit);
-      magnetic_mG[0] = LSM303AGR_FROM_LSB_TO_mG( data_raw_magnetic.i16bit[0]);
-      magnetic_mG[1] = LSM303AGR_FROM_LSB_TO_mG( data_raw_magnetic.i16bit[1]);
-      magnetic_mG[2] = LSM303AGR_FROM_LSB_TO_mG( data_raw_magnetic.i16bit[2]);
+      magnetic_mG[0] = lsm303agr_from_lsb_to_mgauss( data_raw_magnetic.i16bit[0]);
+      magnetic_mG[1] = lsm303agr_from_lsb_to_mgauss( data_raw_magnetic.i16bit[1]);
+      magnetic_mG[2] = lsm303agr_from_lsb_to_mgauss( data_raw_magnetic.i16bit[2]);
       
       sprintf((char*)tx_buffer, "Magnetic field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
@@ -257,7 +257,7 @@ void example_main(void)
       /* Read temperature data */
       memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
       lsm303agr_temperature_raw_get(&dev_ctx_xl, data_raw_temperature.u8bit);
-      temperature_degC = LSM303AGR_FROM_LSB_TO_degC_HR( data_raw_temperature.i16bit );
+      temperature_degC = lsm303agr_from_lsb_hr_to_celsius( data_raw_temperature.i16bit );
        
       sprintf((char*)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC );
       tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
