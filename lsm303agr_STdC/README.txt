@@ -14,4 +14,4 @@ every hardware.
 
 www.st.com/mems
 
-LSM303AGR DS rev9.0 
+LSM303AGR DS rev10.0

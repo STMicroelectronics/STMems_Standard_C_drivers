@@ -1,42 +1,42 @@
 /*
  ******************************************************************************
  * @file    lsm303agr_reg.h
- * @author  MEMS Software Solution Team
- * @date    12-October-2017
+ * @author  Sensors Software Solution Team
  * @brief   This file contains all the functions prototypes for the
  *          lsm303agr_reg.c driver.
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  */
-
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __LSM303AGR_DRIVER__H
-#define __LSM303AGR_DRIVER__H
+#ifndef LSM303AGR_REGS_H
+#define LSM303AGR_REGS_H
 
 #ifdef __cplusplus
   extern "C" {
@@ -59,6 +59,18 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
+/**
+  * @defgroup axisXbitXX_t
+  * @brief    These unions are useful to represent different sensors data type.
+  *           These unions are not need by the driver.
+  *
+  *           REMOVING the unions you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  *
+  * @{
+  *
+  */
+
 typedef union{
   int16_t i16bit[3];
   uint8_t u8bit[6];
@@ -78,6 +90,11 @@ typedef union{
   int32_t i32bit;
   uint8_t u8bit[4];
 } axis1bit32_t;
+
+/**
+  * @}
+  *
+  */
 
 typedef struct{
   uint8_t bit0       : 1;
@@ -100,8 +117,12 @@ typedef struct{
   *
   */
 
-/** @defgroup lsm303agr_interface
+  /** @addtogroup  LSM303AGR_Interfaces_Functions
+  * @brief       This section provide a set of functions used to read and
+  *              write a generic register of the device.
+  *              MANDATORY: return 0 -> no Error.
   * @{
+  *
   */
 
 typedef int32_t (*lsm303agr_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
@@ -117,54 +138,28 @@ typedef struct {
 
 /**
   * @}
+  *
   */
 
 /** @defgroup lsm303agr_Infos
   * @{
+  *
   */
+
   /** I2C Device Address 8 bit format**/
-#define LSM303AGR_I2C_ADD_XL       0x33
-#define LSM303AGR_I2C_ADD_MG       0x3D
+#define LSM303AGR_I2C_ADD_XL       0x33U
+#define LSM303AGR_I2C_ADD_MG       0x3DU
 
 /** Device Identification (Who am I) **/
-#define LSM303AGR_ID_XL            0x33
-#define LSM303AGR_ID_MG            0x40
+#define LSM303AGR_ID_XL            0x33U
+#define LSM303AGR_ID_MG            0x40U
 
 /**
   * @}
+  *
   */
 
-/**
-  * @defgroup lsm303agr_Sensitivity
-  * @{
-  */
-
-#define LSM303AGR_FROM_FS_2g_HR_TO_mg(lsb)  (float)((int16_t)lsb>>4)* 1.0f
-#define LSM303AGR_FROM_FS_4g_HR_TO_mg(lsb)  (float)((int16_t)lsb>>4)* 2.0f
-#define LSM303AGR_FROM_FS_8g_HR_TO_mg(lsb)  (float)((int16_t)lsb>>4)* 4.0f
-#define LSM303AGR_FROM_FS_16g_HR_TO_mg(lsb) (float)((int16_t)lsb>>4)*12.0f
-#define LSM303AGR_FROM_LSB_TO_degC_HR(lsb) (float)((int16_t)lsb>>6)/4.0f+25.0f
-
-#define LSM303AGR_FROM_FS_2g_NM_TO_mg(lsb)  (float)((int16_t)lsb>>6)*  4.0f
-#define LSM303AGR_FROM_FS_4g_NM_TO_mg(lsb)  (float)((int16_t)lsb>>6)*  8.0f
-#define LSM303AGR_FROM_FS_8g_NM_TO_mg(lsb)  (float)((int16_t)lsb>>6)* 16.0f
-#define LSM303AGR_FROM_FS_16g_NM_TO_mg(lsb) (float)((int16_t)lsb>>6)* 48.0f
-#define LSM303AGR_FROM_LSB_TO_degC_NM(lsb) (float)((int16_t)lsb>>6)/4.0f+25.0f
-
-#define LSM303AGR_FROM_FS_2g_LP_TO_mg(lsb)  (float)((int16_t)lsb>>8)*16.0f
-#define LSM303AGR_FROM_FS_4g_LP_TO_mg(lsb)  (float)((int16_t)lsb>>8)*32.0f
-#define LSM303AGR_FROM_FS_8g_LP_TO_mg(lsb)  (float)((int16_t)lsb>>8)*64.0f
-#define LSM303AGR_FROM_FS_16g_LP_TO_mg(lsb) (float)((int16_t)lsb>>8)*192.0f
-
-#define LSM303AGR_FROM_LSB_TO_mG(lsb)     (float)(lsb * 1.5f)
-
-#define LSM303AGR_FROM_LSB_TO_degC_LP(lsb) (float)((int16_t)lsb>>8)*1.0f + 25.0f
-
-/**
-  * @}
-  */
-
-#define LSM303AGR_STATUS_REG_AUX_A           0x07
+#define LSM303AGR_STATUS_REG_AUX_A           0x07U
 typedef struct {
   uint8_t not_used_01            : 2;
   uint8_t tda                    : 1;
@@ -173,18 +168,18 @@ typedef struct {
   uint8_t not_used_03            : 1;
 } lsm303agr_status_reg_aux_a_t;
 
-#define LSM303AGR_OUT_TEMP_L_A               0x0C
-#define LSM303AGR_OUT_TEMP_H_A               0x0D
-#define LSM303AGR_INT_COUNTER_REG_A          0x0E
-#define LSM303AGR_WHO_AM_I_A                 0x0F
+#define LSM303AGR_OUT_TEMP_L_A               0x0CU
+#define LSM303AGR_OUT_TEMP_H_A               0x0DU
+#define LSM303AGR_INT_COUNTER_REG_A          0x0EU
+#define LSM303AGR_WHO_AM_I_A                 0x0FU
 
-#define LSM303AGR_TEMP_CFG_REG_A             0x1F
+#define LSM303AGR_TEMP_CFG_REG_A             0x1FU
 typedef struct {
   uint8_t not_used_01            : 6;
   uint8_t temp_en                : 2;
 } lsm303agr_temp_cfg_reg_a_t;
 
-#define LSM303AGR_CTRL_REG1_A                0x20
+#define LSM303AGR_CTRL_REG1_A                0x20U
 typedef struct {
   uint8_t xen                    : 1;
   uint8_t yen                    : 1;
@@ -193,7 +188,7 @@ typedef struct {
   uint8_t odr                    : 4;
 } lsm303agr_ctrl_reg1_a_t;
 
-#define LSM303AGR_CTRL_REG2_A                0x21
+#define LSM303AGR_CTRL_REG2_A                0x21U
 typedef struct {
   uint8_t hp                     : 3; /* HPCLICK + HPIS2 + HPIS1 -> HP */
   uint8_t fds                    : 1;
@@ -201,7 +196,7 @@ typedef struct {
   uint8_t hpm                    : 2;
 } lsm303agr_ctrl_reg2_a_t;
 
-#define LSM303AGR_CTRL_REG3_A                0x22
+#define LSM303AGR_CTRL_REG3_A                0x22U
 typedef struct {
   uint8_t not_used_01            : 1;
   uint8_t i1_overrun             : 1;
@@ -213,7 +208,7 @@ typedef struct {
   uint8_t i1_click               : 1;
 } lsm303agr_ctrl_reg3_a_t;
 
-#define LSM303AGR_CTRL_REG4_A                0x23
+#define LSM303AGR_CTRL_REG4_A                0x23U
 typedef struct {
   uint8_t spi_enable             : 1;
   uint8_t st                     : 2;
@@ -223,7 +218,7 @@ typedef struct {
   uint8_t bdu                    : 1;
 } lsm303agr_ctrl_reg4_a_t;
 
-#define LSM303AGR_CTRL_REG5_A                0x24
+#define LSM303AGR_CTRL_REG5_A                0x24U
 typedef struct {
   uint8_t d4d_int2               : 1;
   uint8_t lir_int2               : 1;
@@ -234,7 +229,7 @@ typedef struct {
   uint8_t boot                   : 1;
 } lsm303agr_ctrl_reg5_a_t;
 
-#define LSM303AGR_CTRL_REG6_A               0x25
+#define LSM303AGR_CTRL_REG6_A               0x25U
 typedef struct {
   uint8_t not_used_01            : 1;
   uint8_t h_lactive              : 1;
@@ -246,8 +241,8 @@ typedef struct {
   uint8_t i2_clicken             : 1;
 } lsm303agr_ctrl_reg6_a_t;
 
-#define LSM303AGR_REFERENCE_A               0x26
-#define LSM303AGR_STATUS_REG_A              0x27
+#define LSM303AGR_REFERENCE_A               0x26U
+#define LSM303AGR_STATUS_REG_A              0x27U
 typedef struct {
   uint8_t xda                    : 1;
   uint8_t yda                    : 1;
@@ -259,20 +254,20 @@ typedef struct {
   uint8_t zyxor                  : 1;
 } lsm303agr_status_reg_a_t;
 
-#define LSM303AGR_OUT_X_L_A                 0x28
-#define LSM303AGR_OUT_X_H_A                 0x29
-#define LSM303AGR_OUT_Y_L_A                 0x2A
-#define LSM303AGR_OUT_Y_H_A                 0x2B
-#define LSM303AGR_OUT_Z_L_A                 0x2C
-#define LSM303AGR_OUT_Z_H_A                 0x2D
-#define LSM303AGR_FIFO_CTRL_REG_A           0x2E
+#define LSM303AGR_OUT_X_L_A                 0x28U
+#define LSM303AGR_OUT_X_H_A                 0x29U
+#define LSM303AGR_OUT_Y_L_A                 0x2AU
+#define LSM303AGR_OUT_Y_H_A                 0x2BU
+#define LSM303AGR_OUT_Z_L_A                 0x2CU
+#define LSM303AGR_OUT_Z_H_A                 0x2DU
+#define LSM303AGR_FIFO_CTRL_REG_A           0x2EU
 typedef struct {
   uint8_t fth                    : 5;
   uint8_t tr                     : 1;
   uint8_t fm                     : 2;
 } lsm303agr_fifo_ctrl_reg_a_t;
 
-#define LSM303AGR_FIFO_SRC_REG_A            0x2F
+#define LSM303AGR_FIFO_SRC_REG_A            0x2FU
 typedef struct {
   uint8_t fss                    : 5;
   uint8_t empty                  : 1;
@@ -280,7 +275,7 @@ typedef struct {
   uint8_t wtm                    : 1;
 } lsm303agr_fifo_src_reg_a_t;
 
-#define LSM303AGR_INT1_CFG_A                0x30
+#define LSM303AGR_INT1_CFG_A                0x30U
 typedef struct {
   uint8_t xlie                   : 1; /* or XDOWNE */
   uint8_t xhie                   : 1; /* or XUPE */
@@ -292,7 +287,7 @@ typedef struct {
   uint8_t aoi                    : 1;
 } lsm303agr_int1_cfg_a_t;
 
-#define LSM303AGR_INT1_SRC_A                0x31
+#define LSM303AGR_INT1_SRC_A                0x31U
 typedef struct {
   uint8_t xl                     : 1;
   uint8_t xh                     : 1;
@@ -304,19 +299,19 @@ typedef struct {
   uint8_t not_used_01            : 1;
 } lsm303agr_int1_src_a_t;
 
-#define LSM303AGR_INT1_THS_A                0x32
+#define LSM303AGR_INT1_THS_A                0x32U
 typedef struct {
   uint8_t ths                    : 7;
   uint8_t not_used_01            : 1;
 } lsm303agr_int1_ths_a_t;
 
-#define LSM303AGR_INT1_DURATION_A           0x33
+#define LSM303AGR_INT1_DURATION_A           0x33U
 typedef struct {
   uint8_t d                      : 7;
   uint8_t not_used_01            : 1;
 } lsm303agr_int1_duration_a_t;
 
-#define LSM303AGR_INT2_CFG_A                0x34
+#define LSM303AGR_INT2_CFG_A                0x34U
 typedef struct {
   uint8_t xlie                   : 1;
   uint8_t xhie                   : 1;
@@ -328,7 +323,7 @@ typedef struct {
   uint8_t aoi                    : 1;
 } lsm303agr_int2_cfg_a_t;
 
-#define LSM303AGR_INT2_SRC_A                0x35
+#define LSM303AGR_INT2_SRC_A                0x35U
 typedef struct {
   uint8_t xl                     : 1;
   uint8_t xh                     : 1;
@@ -340,19 +335,19 @@ typedef struct {
   uint8_t not_used_01            : 1;
 } lsm303agr_int2_src_a_t;
 
-#define LSM303AGR_INT2_THS_A                0x36
+#define LSM303AGR_INT2_THS_A                0x36U
 typedef struct {
   uint8_t ths                    : 7;
   uint8_t not_used_01            : 1;
 } lsm303agr_int2_ths_a_t;
 
-#define LSM303AGR_INT2_DURATION_A           0x37
+#define LSM303AGR_INT2_DURATION_A           0x37U
 typedef struct {
   uint8_t d                      : 7;
   uint8_t not_used_01            : 1;
 } lsm303agr_int2_duration_a_t;
 
-#define LSM303AGR_CLICK_CFG_A               0x38
+#define LSM303AGR_CLICK_CFG_A               0x38U
 typedef struct {
   uint8_t xs                     : 1;
   uint8_t xd                     : 1;
@@ -363,7 +358,7 @@ typedef struct {
   uint8_t not_used_01            : 2;
 } lsm303agr_click_cfg_a_t;
 
-#define LSM303AGR_CLICK_SRC_A               0x39
+#define LSM303AGR_CLICK_SRC_A               0x39U
 typedef struct {
   uint8_t x                      : 1;
   uint8_t y                      : 1;
@@ -375,47 +370,47 @@ typedef struct {
   uint8_t not_used_01            : 1;
 } lsm303agr_click_src_a_t;
 
-#define LSM303AGR_CLICK_THS_A               0x3A
+#define LSM303AGR_CLICK_THS_A               0x3AU
 typedef struct {
   uint8_t ths                    : 7;
   uint8_t not_used_01            : 1;
 } lsm303agr_click_ths_a_t;
 
-#define LSM303AGR_TIME_LIMIT_A              0x3B
+#define LSM303AGR_TIME_LIMIT_A              0x3BU
 typedef struct {
   uint8_t tli                    : 7;
   uint8_t not_used_01            : 1;
 } lsm303agr_time_limit_a_t;
 
-#define LSM303AGR_TIME_LATENCY_A            0x3C
+#define LSM303AGR_TIME_LATENCY_A            0x3CU
 typedef struct {
   uint8_t tla                    : 8;
 } lsm303agr_time_latency_a_t;
 
-#define LSM303AGR_TIME_WINDOW_A             0x3D
+#define LSM303AGR_TIME_WINDOW_A             0x3DU
 typedef struct {
   uint8_t tw                     : 8;
 } lsm303agr_time_window_a_t;
 
-#define LSM303AGR_ACT_THS_A                 0x3E
+#define LSM303AGR_ACT_THS_A                 0x3EU
 typedef struct {
   uint8_t acth                   : 7;
   uint8_t not_used_01            : 1;
 } lsm303agr_act_ths_a_t;
 
-#define LSM303AGR_ACT_DUR_A                 0x3F
+#define LSM303AGR_ACT_DUR_A                 0x3FU
 typedef struct {
   uint8_t actd                   : 8;
 } lsm303agr_act_dur_a_t;
 
-#define LSM303AGR_OFFSET_X_REG_L_M          0x45
-#define LSM303AGR_OFFSET_X_REG_H_M          0x46
-#define LSM303AGR_OFFSET_Y_REG_L_M          0x47
-#define LSM303AGR_OFFSET_Y_REG_H_M          0x48
-#define LSM303AGR_OFFSET_Z_REG_L_M          0x49
-#define LSM303AGR_OFFSET_Z_REG_H_M          0x4A
-#define LSM303AGR_WHO_AM_I_M                0x4F
-#define LSM303AGR_CFG_REG_A_M               0x60
+#define LSM303AGR_OFFSET_X_REG_L_M          0x45U
+#define LSM303AGR_OFFSET_X_REG_H_M          0x46U
+#define LSM303AGR_OFFSET_Y_REG_L_M          0x47U
+#define LSM303AGR_OFFSET_Y_REG_H_M          0x48U
+#define LSM303AGR_OFFSET_Z_REG_L_M          0x49U
+#define LSM303AGR_OFFSET_Z_REG_H_M          0x4AU
+#define LSM303AGR_WHO_AM_I_M                0x4FU
+#define LSM303AGR_CFG_REG_A_M               0x60U
 typedef struct {
   uint8_t md                     : 2;
   uint8_t odr                    : 2;
@@ -425,7 +420,7 @@ typedef struct {
   uint8_t comp_temp_en           : 1;
 } lsm303agr_cfg_reg_a_m_t;
 
-#define LSM303AGR_CFG_REG_B_M               0x61
+#define LSM303AGR_CFG_REG_B_M               0x61U
 typedef struct {
   uint8_t lpf                    : 1;
   uint8_t set_rst                : 2; /* OFF_CANC + Set_FREQ */
@@ -434,7 +429,7 @@ typedef struct {
   uint8_t not_used_01            : 3;
 } lsm303agr_cfg_reg_b_m_t;
 
-#define LSM303AGR_CFG_REG_C_M               0x62
+#define LSM303AGR_CFG_REG_C_M               0x62U
 typedef struct {
   uint8_t int_mag                : 1;
   uint8_t self_test              : 1;
@@ -446,7 +441,7 @@ typedef struct {
   uint8_t not_used_02            : 1;
 } lsm303agr_cfg_reg_c_m_t;
 
-#define LSM303AGR_INT_CRTL_REG_M            0x63
+#define LSM303AGR_INT_CRTL_REG_M            0x63U
 typedef struct {
   uint8_t ien                    : 1;
   uint8_t iel                    : 1;
@@ -457,7 +452,7 @@ typedef struct {
   uint8_t xien                   : 1;
 } lsm303agr_int_crtl_reg_m_t;
 
-#define LSM303AGR_INT_SOURCE_REG_M          0x64
+#define LSM303AGR_INT_SOURCE_REG_M          0x64U
 typedef struct {
   uint8_t _int                    : 1;
   uint8_t mroi                   : 1;
@@ -469,9 +464,9 @@ typedef struct {
   uint8_t p_th_s_x               : 1;
 } lsm303agr_int_source_reg_m_t;
 
-#define LSM303AGR_INT_THS_L_REG_M           0x65
-#define LSM303AGR_INT_THS_H_REG_M           0x66
-#define LSM303AGR_STATUS_REG_M              0x67
+#define LSM303AGR_INT_THS_L_REG_M           0x65U
+#define LSM303AGR_INT_THS_H_REG_M           0x66U
+#define LSM303AGR_STATUS_REG_M              0x67U
 typedef struct {
   uint8_t xda                    : 1;
   uint8_t yda                    : 1;
@@ -483,13 +478,25 @@ typedef struct {
   uint8_t zyxor                  : 1;
 } lsm303agr_status_reg_m_t;
 
-#define LSM303AGR_OUTX_L_REG_M              0x68
-#define LSM303AGR_OUTX_H_REG_M              0x69
-#define LSM303AGR_OUTY_L_REG_M              0x6A
-#define LSM303AGR_OUTY_H_REG_M              0x6B
-#define LSM303AGR_OUTZ_L_REG_M              0x6C
-#define LSM303AGR_OUTZ_H_REG_M              0x6D
+#define LSM303AGR_OUTX_L_REG_M              0x68U
+#define LSM303AGR_OUTX_H_REG_M              0x69U
+#define LSM303AGR_OUTY_L_REG_M              0x6AU
+#define LSM303AGR_OUTY_H_REG_M              0x6BU
+#define LSM303AGR_OUTZ_L_REG_M              0x6CU
+#define LSM303AGR_OUTZ_H_REG_M              0x6DU
 
+/**
+  * @defgroup LSM303AGR_Register_Union
+  * @brief    This union group all the registers that has a bit-field
+  *           description.
+  *           This union is useful but not need by the driver.
+  *
+  *           REMOVING this union you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  *
+  * @{
+  *
+  */
 typedef union{
   lsm303agr_status_reg_aux_a_t       status_reg_aux_a;
   lsm303agr_temp_cfg_reg_a_t         temp_cfg_reg_a;
@@ -523,15 +530,40 @@ typedef union{
   lsm303agr_cfg_reg_c_m_t            cfg_reg_c_m;
   lsm303agr_int_crtl_reg_m_t         int_crtl_reg_m;
   lsm303agr_int_source_reg_m_t       int_source_reg_m;
-  lsm303agr_status_reg_m_t           status_reg_m;  
+  lsm303agr_status_reg_m_t           status_reg_m;
   bitwise_t                          bitwise;
   uint8_t                            byte;
 } lsm303agr_reg_t;
 
+/**
+  * @}
+  *
+  */
+
 int32_t lsm303agr_read_reg(lsm303agr_ctx_t *ctx, uint8_t reg, uint8_t* data,
-                          uint16_t len);
+                           uint16_t len);
 int32_t lsm303agr_write_reg(lsm303agr_ctx_t *ctx, uint8_t reg, uint8_t* data,
                            uint16_t len);
+
+extern float_t lsm303agr_from_fs_2g_hr_to_mg(int16_t lsb);
+extern float_t lsm303agr_from_fs_4g_hr_to_mg(int16_t lsb);
+extern float_t lsm303agr_from_fs_8g_hr_to_mg(int16_t lsb);
+extern float_t lsm303agr_from_fs_16g_hr_to_mg(int16_t lsb);
+extern float_t lsm303agr_from_lsb_hr_to_celsius(int16_t lsb);
+
+extern float_t lsm303agr_from_fs_2g_nm_to_mg(int16_t lsb);
+extern float_t lsm303agr_from_fs_4g_nm_to_mg(int16_t lsb);
+extern float_t lsm303agr_from_fs_8g_nm_to_mg(int16_t lsb);
+extern float_t lsm303agr_from_fs_16g_nm_to_mg(int16_t lsb);
+extern float_t lsm303agr_from_lsb_nm_to_celsius(int16_t lsb);
+
+extern float_t lsm303agr_from_fs_2g_lp_to_mg(int16_t lsb);
+extern float_t lsm303agr_from_fs_4g_lp_to_mg(int16_t lsb);
+extern float_t lsm303agr_from_fs_8g_lp_to_mg(int16_t lsb);
+extern float_t lsm303agr_from_fs_16g_lp_to_mg(int16_t lsb);
+extern float_t lsm303agr_from_lsb_lp_to_celsius(int16_t lsb);
+
+extern float_t lsm303agr_from_lsb_to_mgauss(int16_t lsb);
 
 int32_t lsm303agr_temp_status_reg_get(lsm303agr_ctx_t *ctx, uint8_t *buff);
 
@@ -546,9 +578,9 @@ typedef enum {
   LSM303AGR_TEMP_ENABLE   = 3,
 } lsm303agr_temp_en_a_t;
 int32_t lsm303agr_temperature_meas_set(lsm303agr_ctx_t *ctx,
-                                      lsm303agr_temp_en_a_t val);
+                                       lsm303agr_temp_en_a_t val);
 int32_t lsm303agr_temperature_meas_get(lsm303agr_ctx_t *ctx,
-                                      lsm303agr_temp_en_a_t *val);
+                                       lsm303agr_temp_en_a_t *val);
 
 typedef enum {
   LSM303AGR_HR_12bit   = 0,
@@ -556,22 +588,21 @@ typedef enum {
   LSM303AGR_LP_8bit    = 2,
 } lsm303agr_op_md_a_t;
 int32_t lsm303agr_xl_operating_mode_set(lsm303agr_ctx_t *ctx,
-                                    lsm303agr_op_md_a_t val);
+                                        lsm303agr_op_md_a_t val);
 int32_t lsm303agr_xl_operating_mode_get(lsm303agr_ctx_t *ctx,
-                                    lsm303agr_op_md_a_t *val);
+                                        lsm303agr_op_md_a_t *val);
 
 typedef enum {
-  LSM303AGR_XL_POWER_DOWN        = 0,
-  LSM303AGR_XL_ODR_1Hz           = 1,
-  LSM303AGR_XL_ODR_10Hz          = 2,
-  LSM303AGR_XL_ODR_25Hz          = 3,
-  LSM303AGR_XL_ODR_50Hz          = 4,
-  LSM303AGR_XL_ODR_100Hz         = 5,
-  LSM303AGR_XL_ODR_200Hz         = 6,
-  LSM303AGR_XL_ODR_400Hz         = 7,
-  LSM303AGR_XL_ODR_1kHz620_LP    = 8,
-  LSM303AGR_XL_ODR_5kHz376_LP    = 9,
-  LSM303AGR_XL_ODR_1kHz344_NM_HP = 9,
+  LSM303AGR_XL_POWER_DOWN                      = 0,
+  LSM303AGR_XL_ODR_1Hz                         = 1,
+  LSM303AGR_XL_ODR_10Hz                        = 2,
+  LSM303AGR_XL_ODR_25Hz                        = 3,
+  LSM303AGR_XL_ODR_50Hz                        = 4,
+  LSM303AGR_XL_ODR_100Hz                       = 5,
+  LSM303AGR_XL_ODR_200Hz                       = 6,
+  LSM303AGR_XL_ODR_400Hz                       = 7,
+  LSM303AGR_XL_ODR_1kHz620_LP                  = 8,
+  LSM303AGR_XL_ODR_1kHz344_NM_HP_5kHz376_LP    = 9,
 } lsm303agr_odr_a_t;
 int32_t lsm303agr_xl_data_rate_set(lsm303agr_ctx_t *ctx,
                                    lsm303agr_odr_a_t val);
@@ -616,11 +647,15 @@ int32_t lsm303agr_xl_full_scale_set(lsm303agr_ctx_t *ctx,
 int32_t lsm303agr_xl_full_scale_get(lsm303agr_ctx_t *ctx,
                                     lsm303agr_fs_a_t *val);
 
-int32_t lsm303agr_xl_block_data_update_set(lsm303agr_ctx_t *ctx, uint8_t val);
-int32_t lsm303agr_xl_block_data_update_get(lsm303agr_ctx_t *ctx, uint8_t *val);
+int32_t lsm303agr_xl_block_data_update_set(lsm303agr_ctx_t *ctx,
+                                           uint8_t val);
+int32_t lsm303agr_xl_block_data_update_get(lsm303agr_ctx_t *ctx,
+                                           uint8_t *val);
 
-int32_t lsm303agr_xl_filter_reference_set(lsm303agr_ctx_t *ctx, uint8_t *buff);
-int32_t lsm303agr_xl_filter_reference_get(lsm303agr_ctx_t *ctx, uint8_t *buff);
+int32_t lsm303agr_xl_filter_reference_set(lsm303agr_ctx_t *ctx,
+                                          uint8_t *buff);
+int32_t lsm303agr_xl_filter_reference_get(lsm303agr_ctx_t *ctx,
+                                          uint8_t *buff);
 
 int32_t lsm303agr_xl_data_ready_get(lsm303agr_ctx_t *ctx, uint8_t *val);
 
@@ -822,7 +857,7 @@ int32_t lsm303agr_mag_user_offset_set(lsm303agr_ctx_t *ctx,
                                       uint8_t *buff);
 int32_t lsm303agr_mag_user_offset_get(lsm303agr_ctx_t *ctx,
                                       uint8_t *buff);
-                      
+
 typedef enum {
   LSM303AGR_CONTINUOUS_MODE  = 0,
   LSM303AGR_SINGLE_TRIGGER   = 1,
@@ -956,12 +991,13 @@ int32_t lsm303agr_mag_i2c_interface_get(lsm303agr_ctx_t *ctx,
 
 /**
   * @}
+  *
   */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*__LSM303AGR_DRIVER__H */
+#endif /* LSM303AGR_REGS_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
