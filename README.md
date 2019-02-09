@@ -63,6 +63,21 @@ dev_ctx.handle = &platform_handle;
 - A standard C language compiler for the target MCU
 - A C library for the target MCU and the desired interface (ie. SPI, I2C)
 
+### 2.c PlatformIO Integration
+
+It may be needed to add the following in your `platformio.ini`:
+
+```ini
+build_flags =
+    -D float_t=float
+```
+
+Also, you have to include the full path of the library to the sensor library you want to use. As example, for IIS2DLPC:
+
+```C
+#include <iis2dlpc_STdC/driver/iis2dlpc_reg.h>
+```
+
 ------
 
 ## 3 - Running Examples

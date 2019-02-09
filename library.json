@@ -8,7 +8,10 @@
     },
     "export": {
         "include": [
-            "*_STdC/driver/*.[ch]"
+            "*_STdC/driver/*_reg.[ch]"
+        ],
+        "exclude": [
+            "*_STdC/example/*.c"
         ]
     },
     "frameworks": "*",
@@ -18,11 +21,12 @@
     ],
     "build":{
         "srcFilter": [
-            "+<*_STdC/driver/*.[ch]>",
+            "+<*_STdC/driver/*_reg.[ch]>",
             "-<*_STdC/example/*.c>"
         ],
         "flags": [
-            "-I*_STdC/driver/*.[ch]"
+            "-Dfloat_t=float",
+            "-I*_STdC/driver/"
         ]
     }
 }
