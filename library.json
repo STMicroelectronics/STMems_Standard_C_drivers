@@ -15,5 +15,14 @@
     "platforms": "*",
     "examples":[
         "*_STdC/example/*.c"
-    ]
+    ],
+    "build":{
+        "srcFilter": [
+            "+<*_STdC/driver/*.[ch]>",
+            "-<*_STdC/example/*.c>"
+        ],
+        "flags": [
+            "-I*_STdC/driver/*.[ch]"
+        ]
+    }
 }
