@@ -1,0 +1,19 @@
+{
+    "name": "ST MEMS StdC drivers",
+    "description": "Platform-independent drivers source code for STMicroelectronics MEMS motion and environmental sensors, based on C standard.",
+    "keywords": "ST,MEMS,IMU,environmental sensor,accelerometer,gyroscope",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/STMicroelectronics/STMems_Standard_C_drivers/"
+    },
+    "export": {
+        "include": [
+            "*_STdC/driver/*.[ch]"
+        ]
+    },
+    "frameworks": "*",
+    "platforms": "*",
+    "examples":[
+        "*_STdC/example/*.c"
+    ]
+}

@@ -1,0 +1,43 @@
+language: c
+compiler: gcc
+env:
+  - MCU=a3g4250d
+  - MCU=ais328dq
+  - MCU=ais3624dq
+  - MCU=h3lis331dl
+  - MCU=hts221
+  - MCU=i3g4250d
+  - MCU=iis2dh
+  - MCU=iis2dlpc
+  - MCU=iis2mdc
+  - MCU=iis328dq
+  - MCU=iis3dhhc
+  - MCU=ism303dac
+  - MCU=ism330dlc
+  - MCU=l20g20is
+  - MCU=lis2de12
+  - MCU=lis2dh12
+  - MCU=lis2ds12
+  - MCU=lis2dw12
+  - MCU=lis2hh12
+  - MCU=lis2mdl
+  - MCU=lis331dlh
+  - MCU=lis3de
+  - MCU=lis3dhh
+  - MCU=lis3dh
+  - MCU=lis3mdl
+  - MCU=lps22hb
+  - MCU=lps22hh
+  - MCU=lps25hb
+  - MCU=lps33hw
+  - MCU=lsm303agr
+  - MCU=lsm303ah
+  - MCU=lsm6ds3
+  - MCU=lsm6dsl
+  - MCU=lsm6dsm
+  - MCU=lsm6dso
+  - MCU=lsm6dsox
+  - MCU=lsm9ds1
+  - MCU=stts751
+script:
+  - gcc -c ${MCU}_STdC/driver/${MCU}_reg.c
