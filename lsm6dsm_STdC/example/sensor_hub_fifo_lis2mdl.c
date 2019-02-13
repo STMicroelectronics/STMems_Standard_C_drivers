@@ -203,11 +203,11 @@ static void LSM6DSL_SH_Read_FIFO_Pattern(void)
                                 data_raw_angular_rate.u8bit,
                                 3 * sizeof(int16_t));
       angular_rate_mdps[0] =
-        LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[0]);
+        lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[0]);
       angular_rate_mdps[1] =
-        LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[1]);
+        lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[1]);
       angular_rate_mdps[2] =
-        LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[2]);
+        lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
 
       sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
               angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
@@ -224,11 +224,11 @@ static void LSM6DSL_SH_Read_FIFO_Pattern(void)
                                 data_raw_acceleration.u8bit,
                                 3 * sizeof(int16_t));
       acceleration_mg[0] =
-        LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[0]);
+        lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
       acceleration_mg[1] =
-        LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[1]);
+        lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
       acceleration_mg[2] =
-        LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[2]);
+        lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
 
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
       		  acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
@@ -245,11 +245,11 @@ static void LSM6DSL_SH_Read_FIFO_Pattern(void)
                                 data_raw_magnetic.u8bit,
                                 3 * sizeof(int16_t));
       magnetic_mG[0] =
-        LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[0]);
+        lis2mdl_from_lsb_to_mgauss(data_raw_magnetic.i16bit[0]);
       magnetic_mG[1] =
-        LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[1]);
+        lis2mdl_from_lsb_to_mgauss(data_raw_magnetic.i16bit[1]);
       magnetic_mG[2] =
-        LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[2]);
+        lis2mdl_from_lsb_to_mgauss(data_raw_magnetic.i16bit[2]);
 
       sprintf((char*)tx_buffer, "Mag [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
@@ -368,9 +368,7 @@ static int32_t lsm6dsm_read_cx(void* ctx, uint8_t reg, uint8_t* data,
 {
   int32_t mm_error;
   uint8_t drdy;
-  uint8_t i;
   lsm6dsm_func_src1_t func_src1;
-  lsm6dsm_emb_sh_read_t sh_reg;
   lsm6dsm_sh_cfg_read_t val = {
     .slv_add = LIS2MDL_I2C_ADD,
     .slv_subadd = reg,
@@ -416,13 +414,10 @@ static int32_t lsm6dsm_read_cx(void* ctx, uint8_t reg, uint8_t* data,
   } while (!func_src1.sensorhub_end_op);
 
   lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_OFF);
-  lsm6dsm_sh_read_data_raw_get(&dev_ctx, &sh_reg);
+  lsm6dsm_sh_read_data_raw_get(&dev_ctx, (lsm6dsm_emb_sh_read_t*)&data);
 
   lsm6dsm_func_en_set(&dev_ctx, PROPERTY_DISABLE);
   lsm6dsm_sh_master_set(&dev_ctx, PROPERTY_DISABLE);
-
-  for(i = 0; i < len; i++)
-    data[i] = sh_reg.byte[i];
 
   return mm_error;
 }

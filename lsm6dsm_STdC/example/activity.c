@@ -214,13 +214,13 @@ void example_main_activity_lsm6dsm(void)
      * Check if Activity/Inactivity events
      */
     lsm6dsm_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.reg.wake_up_src.sleep_state_ia)
+    if (all_source.wake_up_src.sleep_state_ia)
     {
       sprintf((char*)tx_buffer, "Inactivity Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if (all_source.reg.wake_up_src.wu_ia)
+    if (all_source.wake_up_src.wu_ia)
     {
       sprintf((char*)tx_buffer, "Activity Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));

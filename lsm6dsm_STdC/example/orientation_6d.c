@@ -179,7 +179,7 @@ void example_main_orientation_6D_lsm6dsm(void)
   /*
    * LPF2 on 6D function selection
    */
-  lsm6dsm_6d_feed_data_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsm_6d_feed_data_set(&dev_ctx, LSM6DSM_LPF2_FEED);
 
   /*
    * Enable interrupt generation on 6D INT1 pin
@@ -206,20 +206,20 @@ void example_main_orientation_6D_lsm6dsm(void)
      * Check if 6D Orientation events
      */
     lsm6dsm_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.reg.d6d_src.d6d_ia)
+    if (all_source.d6d_src.d6d_ia)
     {
       sprintf((char*)tx_buffer, "6D Or. switched to ");
-      if (all_source.reg.d6d_src.xh)
+      if (all_source.d6d_src.xh)
         strcat((char*)tx_buffer, "XH");
-      if (all_source.reg.d6d_src.xl)
+      if (all_source.d6d_src.xl)
         strcat((char*)tx_buffer, "XL");
-      if (all_source.reg.d6d_src.yh)
+      if (all_source.d6d_src.yh)
         strcat((char*)tx_buffer, "YH");
-      if (all_source.reg.d6d_src.yl)
+      if (all_source.d6d_src.yl)
         strcat((char*)tx_buffer, "YL");
-      if (all_source.reg.d6d_src.zh)
+      if (all_source.d6d_src.zh)
         strcat((char*)tx_buffer, "ZH");
-      if (all_source.reg.d6d_src.zl)
+      if (all_source.d6d_src.zl)
         strcat((char*)tx_buffer, "ZL");
       strcat((char*)tx_buffer, "\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));

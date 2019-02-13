@@ -209,9 +209,9 @@ static void LSM6DSL_SH_Read_FIFO_Pattern(void)
     if (test_6dsl_gyro.enable && gy_num > 0)
     {
       lsm6dsm_fifo_raw_data_get(&dev_ctx, data_raw_angular_rate.u8bit, OUT_XYZ_SIZE);
-      angular_rate_mdps[0] = LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[0]);
-      angular_rate_mdps[1] = LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[1]);
-      angular_rate_mdps[2] = LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[2]);
+      angular_rate_mdps[0] = lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[0]);
+      angular_rate_mdps[1] = lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[1]);
+      angular_rate_mdps[2] = lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
 
       sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
               angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
@@ -225,9 +225,9 @@ static void LSM6DSL_SH_Read_FIFO_Pattern(void)
     if (test_6dsl_xl.enable && xl_num > 0)
     {
       lsm6dsm_fifo_raw_data_get(&dev_ctx, data_raw_acceleration.u8bit, OUT_XYZ_SIZE);
-      acceleration_mg[0] = LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[2]);
+      acceleration_mg[0] = lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
+      acceleration_mg[1] = lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
+      acceleration_mg[2] = lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
 
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
@@ -382,9 +382,7 @@ static int32_t lsm6dsm_read_cx(void* ctx, uint8_t reg, uint8_t* data,
 {
   int32_t mm_error;
   uint8_t drdy;
-  uint8_t i;
   lsm6dsm_func_src1_t func_src1;
-  lsm6dsm_emb_sh_read_t sh_reg;
   lsm6dsm_sh_cfg_read_t val = {
     .slv_add = LPS22HB_I2C_ADD_H,
     .slv_subadd = reg,
@@ -425,13 +423,10 @@ static int32_t lsm6dsm_read_cx(void* ctx, uint8_t reg, uint8_t* data,
   } while (!func_src1.sensorhub_end_op);
 
   lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_OFF);
-  lsm6dsm_sh_read_data_raw_get(&dev_ctx, &sh_reg);
+  lsm6dsm_sh_read_data_raw_get(&dev_ctx, (lsm6dsm_emb_sh_read_t*)&data);
 
   lsm6dsm_func_en_set(&dev_ctx, PROPERTY_DISABLE);
   lsm6dsm_sh_master_set(&dev_ctx, PROPERTY_DISABLE);
-
-  for(i = 0; i < len; i++)
-    data[i] = sh_reg.byte[i];
 
   return mm_error;
 }

@@ -220,11 +220,11 @@ void example_main_fifo_stream_lsm6dsm(void)
         lsm6dsm_fifo_raw_data_get(&dev_ctx, data_raw_acceleration.u8bit,
                                   3 * sizeof(int16_t));
         acceleration_mg[0] =
-          LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[0]);
+          lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
         acceleration_mg[1] =
-          LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[1]);
+          lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
         acceleration_mg[2] =
-         LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[2]);
+         lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
 
         sprintf((char*)tx_buffer, "[%03d] Acc [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                 num_pattern, acceleration_mg[0],

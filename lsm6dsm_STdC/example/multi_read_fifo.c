@@ -107,7 +107,16 @@ typedef struct {
   lsm6dsm_fs_xl_t fs;
   uint8_t decimation;
   uint8_t samples_num_in_pattern;
-} sensor_lsm6dsl;
+} sensor_lsm6dsl_xl;
+
+typedef struct {
+  uint8_t enable;
+  lsm6dsm_odr_g_t odr;
+  uint16_t odr_hz_val;
+  lsm6dsm_fs_g_t fs;
+  uint8_t decimation;
+  uint8_t samples_num_in_pattern;
+} sensor_lsm6dsl_gy;
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t whoamI, rst;
@@ -116,7 +125,7 @@ static uint8_t tx_buffer[1000];
 /*
  * 6dsl Accelerometer test parameters
  */
-static sensor_lsm6dsl test_6dsl_xl = {
+static sensor_lsm6dsl_xl test_6dsl_xl = {
   PROPERTY_ENABLE,
   LSM6DSM_XL_ODR_52Hz,
   0,
@@ -128,7 +137,7 @@ static sensor_lsm6dsl test_6dsl_xl = {
 /*
  * 6dsl Gyroscope test parameters
  */
-static sensor_lsm6dsl test_6dsl_gyro = {
+static sensor_lsm6dsl_gy test_6dsl_gyro = {
   PROPERTY_ENABLE,
   LSM6DSM_GY_ODR_26Hz,
   0,
@@ -184,11 +193,11 @@ static void LSM6DSL_Read_FIFO_Pattern(void)
       lsm6dsm_fifo_raw_data_get(&dev_ctx, data_raw_angular_rate.u8bit,
                                 3 * sizeof(int16_t));
       angular_rate_mdps[0] =
-        LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[0]);
+        lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[0]);
       angular_rate_mdps[1] =
-        LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[1]);
+        lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[1]);
       angular_rate_mdps[2] =
-        LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[2]);
+        lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
 
       sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
               angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
@@ -204,11 +213,11 @@ static void LSM6DSL_Read_FIFO_Pattern(void)
       lsm6dsm_fifo_raw_data_get(&dev_ctx, data_raw_acceleration.u8bit,
                                 3 * sizeof(int16_t));
       acceleration_mg[0] =
-        LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[0]);
+        lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
       acceleration_mg[1] =
-        LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[1]);
+        lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
       acceleration_mg[2] =
-        LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[2]);
+        lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
 
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);

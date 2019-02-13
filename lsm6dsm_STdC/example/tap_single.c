@@ -226,7 +226,7 @@ void example_main_single_tap_lsm6dsm(void)
      * Check if Single Tap events
      */
     lsm6dsm_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.reg.tap_src.single_tap)
+    if (all_source.tap_src.single_tap)
     {
       sprintf((char*)tx_buffer, "Tap Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));

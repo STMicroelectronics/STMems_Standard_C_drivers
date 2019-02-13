@@ -175,7 +175,7 @@ void example_main_free_fall_lsm6dsm(void)
    * Set Free Fall duration to 3 and 6 samples event duration.
    */
   lsm6dsm_ff_dur_set(&dev_ctx, 0x06);
-  lsm6dsm_ff_threshold_set(&dev_ctx, 0x03);
+  lsm6dsm_ff_threshold_set(&dev_ctx, LSM6DSM_FF_TSH_312mg);
 
   /*
    * Enable interrupt generation on Free Fall INT1 pin.
@@ -202,7 +202,7 @@ void example_main_free_fall_lsm6dsm(void)
      * Check if Free Fall events.
      */
     lsm6dsm_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.reg.wake_up_src.ff_ia)
+    if (all_source.wake_up_src.ff_ia)
     {
       sprintf((char*)tx_buffer, "Free Fall Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));

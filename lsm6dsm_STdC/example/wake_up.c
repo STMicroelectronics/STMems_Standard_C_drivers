@@ -171,7 +171,7 @@ void example_main_wake_up_lsm6dsm(void)
   /*
    * Apply high-pass digital filter on Wake-Up function
    */
-  lsm6dsm_xl_hp_path_internal_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsm_xl_hp_path_internal_set(&dev_ctx, LSM6DSM_USE_HPF);
 
   /*
    * Apply high-pass digital filter on Wake-Up function
@@ -211,14 +211,14 @@ void example_main_wake_up_lsm6dsm(void)
      * Check if Wake-Up events
      */
     lsm6dsm_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.reg.wake_up_src.wu_ia)
+    if (all_source.wake_up_src.wu_ia)
     {
       sprintf((char*)tx_buffer, "Wake-Up event on ");
-      if (all_source.reg.wake_up_src.x_wu)
+      if (all_source.wake_up_src.x_wu)
         strcat((char*)tx_buffer, "X");
-      if (all_source.reg.wake_up_src.y_wu)
+      if (all_source.wake_up_src.y_wu)
         strcat((char*)tx_buffer, "Y");
-      if (all_source.reg.wake_up_src.z_wu)
+      if (all_source.wake_up_src.z_wu)
         strcat((char*)tx_buffer, "Z");
 
       strcat((char*)tx_buffer, " direction\r\n");

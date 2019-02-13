@@ -161,7 +161,7 @@ void example_main_wtilt_lsm6dsm(void)
   /*
    * Enable interrupt generation on Tilt INT1 pin
    */
-  lsm6dsm_int_notification_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsm_int_notification_set(&dev_ctx, LSM6DSM_INT_LATCHED);
   lsm6dsm_pin_int2_route_get(&dev_ctx, &int_2_reg);
   int_2_reg.int2_wrist_tilt = PROPERTY_ENABLE;
   lsm6dsm_pin_int2_route_set(&dev_ctx, int_2_reg);
@@ -189,7 +189,7 @@ void example_main_wtilt_lsm6dsm(void)
      * Check if Tilt events
      */
     lsm6dsm_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.reg.func_src2.wrist_tilt_ia)
+    if (all_source.func_src2.wrist_tilt_ia)
     {
       sprintf((char*)tx_buffer, "Wrist TILT Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));

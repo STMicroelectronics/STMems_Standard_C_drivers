@@ -175,7 +175,7 @@ void example_main_tilt_lsm6dsm(void)
   /*
    * Enable interrupt generation on Tilt INT1 pin
    */
-  lsm6dsm_int_notification_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsm_int_notification_set(&dev_ctx, LSM6DSM_INT_LATCHED);
   lsm6dsm_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
   lsm6dsm_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
   lsm6dsm_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
@@ -201,7 +201,7 @@ void example_main_tilt_lsm6dsm(void)
      * Check Tilt events
      */
     lsm6dsm_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.reg.func_src1.tilt_ia)
+    if (all_source.func_src1.tilt_ia)
     {
       sprintf((char*)tx_buffer, "TILT Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));

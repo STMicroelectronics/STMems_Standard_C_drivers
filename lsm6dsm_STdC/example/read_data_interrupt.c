@@ -235,11 +235,11 @@ void example_main_drdy_lsm6dsm(void)
         memset(data_raw_acceleration.u8bit, 0, 3 * sizeof(int16_t));
         lsm6dsm_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
         acceleration_mg[0] =
-          LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[0]);
+          lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
         acceleration_mg[1] =
-          LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[1]);
+          lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
         acceleration_mg[2] =
-          LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[2]);
+          lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
         sprintf((char*)tx_buffer, "Acc [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                 acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
@@ -254,11 +254,11 @@ void example_main_drdy_lsm6dsm(void)
         memset(data_raw_angular_rate.u8bit, 0, 3 * sizeof(int16_t));
         lsm6dsm_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
         angular_rate_mdps[0] =
-          LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[0]);
+          lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[0]);
         angular_rate_mdps[1] =
-          LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[1]);
+          lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[1]);
         angular_rate_mdps[2] =
-          LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[2]);
+          lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
 
         sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
                 angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
