@@ -363,8 +363,7 @@ int32_t iis2dh_operating_mode_get(iis2dh_ctx_t *ctx, iis2dh_op_md_t *val)
     ret = iis2dh_read_reg(ctx, IIS2DH_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
     if ( ctrl_reg1.lpen == PROPERTY_ENABLE ) {
       *val = IIS2DH_LP_8bit;
-    }
-    if (ctrl_reg4.hr == PROPERTY_ENABLE ) {
+    } else if (ctrl_reg4.hr == PROPERTY_ENABLE ) {
       *val = IIS2DH_HR_12bit;
     } else {
       *val = IIS2DH_NM_10bit;
