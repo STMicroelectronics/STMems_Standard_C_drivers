@@ -1275,7 +1275,7 @@ int32_t lsm6dso_ln_pg_write_byte(lsm6dso_ctx_t *ctx, uint16_t address,
   }
 
   if (ret == 0) {
-    page_sel.page_sel = (((uint8_t)address >> 8) & 0x0FU);
+    page_sel.page_sel = ((uint8_t)(address >> 8) & 0x0FU);
     page_sel.not_used_01 = 1;
     ret = lsm6dso_write_reg(ctx, LSM6DSO_PAGE_SEL, (uint8_t*) &page_sel, 1);
   }
@@ -1320,7 +1320,7 @@ int32_t lsm6dso_ln_pg_write(lsm6dso_ctx_t *ctx, uint16_t address,
   uint8_t msb, lsb;
   uint8_t i ;
 
-  msb = (((uint8_t)address >> 8) & 0x0fU);
+  msb = ((uint8_t)(address >> 8) & 0x0fU);
   lsb = (uint8_t)address & 0xFFU;
 
   ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
@@ -1415,7 +1415,7 @@ int32_t lsm6dso_ln_pg_read_byte(lsm6dso_ctx_t *ctx, uint16_t address,
     ret = lsm6dso_read_reg(ctx, LSM6DSO_PAGE_SEL, (uint8_t*) &page_sel, 1);
   }
   if (ret == 0) {
-    page_sel.page_sel = (((uint8_t)address >> 8) & 0x0FU);
+    page_sel.page_sel = ((uint8_t)(address >> 8) & 0x0FU);
     page_sel.not_used_01 = 1;
     ret = lsm6dso_write_reg(ctx, LSM6DSO_PAGE_SEL, (uint8_t*) &page_sel, 1);
   }
