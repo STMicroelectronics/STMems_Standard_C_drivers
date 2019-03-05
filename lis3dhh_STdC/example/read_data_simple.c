@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -112,80 +112,60 @@ static void platform_init(void);
 /* Main Example --------------------------------------------------------------*/
 void example_main_lis3dhh(void)
 {
-  /*
-   *  Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   lis3dhh_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hspi2;  
+  dev_ctx.handle = &hspi2;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Initialize platform specific hardware */
   platform_init();
 
-  /*
-   *  Check device ID
-   */
+  /* Check device ID */
   lis3dhh_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LIS3DHH_ID)
     while(1); /*manage here device not found */
 
-  /*
-   *  Restore default configuration
-   */
+  /* Restore default configuration */
   lis3dhh_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lis3dhh_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   *  Enable Block Data Update
-   */
+  /* Enable Block Data Update */
   lis3dhh_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Set Output Data Rate
-   */
+  /* Set Output Data Rate */
   lis3dhh_data_rate_set(&dev_ctx, LIS3DHH_1kHz1);
 
-  /*
-   * Enable temperature compensation
-   */  
+  /* Enable temperature compensation */
   lis3dhh_offset_temp_comp_set(&dev_ctx, PROPERTY_ENABLE);
-  
-  /*
-   * Read samples in polling mode (no int)
-   */
+
+  /* Read samples in polling mode (no int) */
   while(1)
   {
     uint8_t reg;
 
-    /*
-     * Read output only if new value is available
-     */
+    /* Read output only if new value is available */
     lis3dhh_xl_data_ready_get(&dev_ctx, &reg);
     if (reg)
     {
-      /*
-       * Read acceleration data
-       */
+      /* Read acceleration data */
       memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
       lis3dhh_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = LIS3DHH_FROM_LSB_TO_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = LIS3DHH_FROM_LSB_TO_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = LIS3DHH_FROM_LSB_TO_mg(data_raw_acceleration.i16bit[2]);
-      
+      acceleration_mg[0] = lis3dhh_from_lsb_to_mg(data_raw_acceleration.i16bit[0]);
+      acceleration_mg[1] = lis3dhh_from_lsb_to_mg(data_raw_acceleration.i16bit[1]);
+      acceleration_mg[2] = lis3dhh_from_lsb_to_mg(data_raw_acceleration.i16bit[2]);
+
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      
+
       /* Read temperature data */
       memset(data_raw_temperature.u8bit, 0, sizeof(int16_t));
       lis3dhh_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = LIS3DHH_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
-       
+      temperature_degC = lis3dhh_from_lsb_to_celsius(data_raw_temperature.i16bit);
+
       sprintf((char*)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
