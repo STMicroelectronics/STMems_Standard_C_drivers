@@ -159,28 +159,6 @@ typedef struct {
   *
   */
 
-/**
-  * @addtogroup  LPS22HH_Sensitivity
-  * @brief       These macro are maintained for back compatibility.
-  *              in order to convert data into engineering units please
-  *              use functions:
-  *                -> _from_lsb_to_hpa(int16_t lsb)
-  *                -> _from_lsb_to_celsius(int16_t lsb);
-  *
-  *              REMOVING the MACRO you are compliant with:
-  *              MISRA-C 2012 [Dir 4.9] -> " avoid function-like macros "
-  * @{
-  *
-  */
-
-#define LPS22HH_FROM_LSB_TO_hPa(lsb)     (float)( lsb / 4096.0f )
-#define LPS22HH_FROM_LSB_TO_degC(lsb)    (float)( lsb / 100.0f )
-
-/**
-  * @}
-  *
-  */
-
 #define LPS22HH_INTERRUPT_CFG                   0x0BU
 typedef struct {
   uint8_t pe                              : 2;  /* ple + phe */
@@ -259,8 +237,8 @@ typedef struct {
   uint8_t not_used_01                     : 1;
 } lps22hh_fifo_wtm_t;
 
-#define LPS22HH_REF_P_XL                        0x15U
-#define LPS22HH_REF_P_L                         0x16U
+#define LPS22HH_REF_P_L                         0x15U
+#define LPS22HH_REF_P_H                         0x16U
 #define LPS22HH_RPDS_L                          0x18U
 #define LPS22HH_RPDS_H                          0x19U
 #define LPS22HH_INT_SOURCE                      0x24U
@@ -268,7 +246,8 @@ typedef struct {
   uint8_t ph                              : 1;
   uint8_t pl                              : 1;
   uint8_t ia                              : 1;
-  uint8_t not_used_01                     : 5;
+  uint8_t not_used_01                     : 4;
+  uint8_t boot_on                         : 1;
 } lps22hh_int_source_t;
 
 #define LPS22HH_FIFO_STATUS1                    0x25U
@@ -290,9 +269,9 @@ typedef struct {
   uint8_t not_used_02                     : 2;
 } lps22hh_status_t;
 
-#define LPS22HH_PRESSURE_OUT_XL                 0x28U
-#define LPS22HH_PRESSURE_OUT_L                  0x29U
-#define LPS22HH_PRESSURE_OUT_H                  0x2AU
+#define LPS22HH_PRESS_OUT_XL                    0x28U
+#define LPS22HH_PRESS_OUT_L                     0x29U
+#define LPS22HH_PRESS_OUT_H                     0x2AU
 #define LPS22HH_TEMP_OUT_L                      0x2BU
 #define LPS22HH_TEMP_OUT_H                      0x2CU
 #define LPS22HH_FIFO_DATA_OUT_PRESS_XL          0x78U
