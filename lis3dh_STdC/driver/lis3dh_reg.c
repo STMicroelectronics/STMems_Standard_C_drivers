@@ -398,8 +398,7 @@ int32_t lis3dh_operating_mode_get(lis3dh_ctx_t *ctx, lis3dh_op_md_t *val)
     ret = lis3dh_read_reg(ctx, LIS3DH_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
     if ( ctrl_reg1.lpen == PROPERTY_ENABLE ) {
       *val = LIS3DH_LP_8bit;
-    } 
-    if (ctrl_reg4.hr == PROPERTY_ENABLE ) {
+    } else if (ctrl_reg4.hr == PROPERTY_ENABLE ) {
       *val = LIS3DH_HR_12bit;
     } else {
       *val = LIS3DH_NM_10bit;
