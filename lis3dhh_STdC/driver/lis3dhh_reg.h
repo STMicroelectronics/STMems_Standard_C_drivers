@@ -1,42 +1,43 @@
 /*
  ******************************************************************************
- * @file    lis3dhh_reg.h
- * @author  MEMS Software Solution Team
- * @date    28-September-2017
+ * @file    li3dhh_reg.h
+ * @author  Sensors Software Solution Team
  * @brief   This file contains all the functions prototypes for the
- *          lis3dhh_reg.c driver.
+ *          li3dhh_reg.c driver.
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __LIS3DHH_DRIVER__H
-#define __LIS3DHH_DRIVER__H
+#ifndef LIS3DHH_REGS_H
+#define LIS3DHH_REGS_H
 
 #ifdef __cplusplus
   extern "C" {
@@ -59,6 +60,18 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
+/**
+  * @defgroup axisXbitXX_t
+  * @brief    These unions are useful to represent different sensors data type.
+  *           These unions are not need by the driver.
+  *
+  *           REMOVING the unions you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  *
+  * @{
+  *
+  */
+
 typedef union{
   int16_t i16bit[3];
   uint8_t u8bit[6];
@@ -78,6 +91,11 @@ typedef union{
   int32_t i32bit;
   uint8_t u8bit[4];
 } axis1bit32_t;
+
+/**
+  * @}
+  *
+  */
 
 typedef struct{
   uint8_t bit0       : 1;
@@ -100,8 +118,12 @@ typedef struct{
   *
   */
 
-/** @defgroup lis3dhh_interface
+/** @addtogroup  LIS3DHH_Interfaces_Functions
+  * @brief       This section provide a set of functions used to read and
+  *              write a generic register of the device.
+  *              MANDATORY: return 0 -> no Error.
   * @{
+  *
   */
 
 typedef int32_t (*lis3dhh_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
@@ -117,39 +139,30 @@ typedef struct {
 
 /**
   * @}
+  *
   */
 
-/** @defgroup lis3dhh_Infos
+/** @defgroup LIS3DHH_Infos
   * @{
+  *
   */
 
 /** Device Identification (Who am I) **/
-#define LIS3DHH_ID            0x11
+#define LIS3DHH_ID            0x11U
 
 /**
   * @}
+  *
   */
 
-/**
-  * @defgroup lis3dhh_Sensitivity
-  * @{
-  */
-
-#define LIS3DHH_FROM_LSB_TO_mg(lsb)   (float)((lsb * 76.0f) / 1000.0f)
-#define LIS3DHH_FROM_LSB_TO_degC(lsb) (float)(((int16_t)lsb>>4) / 16.0f) + 25.0f
-
-/**
-  * @}
-  */
-
-#define LIS3DHH_WHO_AM_I      0x0F
-#define LIS3DHH_ID_REG        0x1B
+#define LIS3DHH_WHO_AM_I      0x0FU
+#define LIS3DHH_ID_REG        0x1BU
 typedef struct {
   uint8_t not_used_01      : 7;
   uint8_t asic_id          : 1;
 } lis3dhh_id_reg_t;
 
-#define LIS3DHH_CTRL_REG1     0x20
+#define LIS3DHH_CTRL_REG1     0x20U
 typedef struct {
   uint8_t bdu              : 1;
   uint8_t drdy_pulse       : 1;
@@ -160,7 +173,7 @@ typedef struct {
   uint8_t norm_mod_en      : 1;
 } lis3dhh_ctrl_reg1_t;
 
-#define LIS3DHH_INT1_CTRL     0x21
+#define LIS3DHH_INT1_CTRL     0x21U
 typedef struct {
   uint8_t not_used_01      : 2;
   uint8_t int1_ext         : 1;
@@ -171,7 +184,7 @@ typedef struct {
   uint8_t int1_drdy        : 1;
 } lis3dhh_int1_ctrl_t;
 
-#define LIS3DHH_INT2_CTRL     0x22
+#define LIS3DHH_INT2_CTRL     0x22U
 typedef struct {
   uint8_t not_used_01      : 3;
   uint8_t int2_fth         : 1;
@@ -181,7 +194,7 @@ typedef struct {
   uint8_t int2_drdy        : 1;
 } lis3dhh_int2_ctrl_t;
 
-#define LIS3DHH_CTRL_REG4     0x23
+#define LIS3DHH_CTRL_REG4     0x23U
 typedef struct {
   uint8_t off_tcomp_en     : 1;
   uint8_t fifo_en          : 1;
@@ -190,15 +203,15 @@ typedef struct {
   uint8_t dsp              : 2;
 } lis3dhh_ctrl_reg4_t;
 
-#define LIS3DHH_CTRL_REG5     0x24
+#define LIS3DHH_CTRL_REG5     0x24U
 typedef struct {
   uint8_t fifo_spi_hs_on   : 1;
   uint8_t not_used_01      : 7;
 } lis3dhh_ctrl_reg5_t;
 
-#define LIS3DHH_OUT_TEMP_L    0x25
-#define LIS3DHH_OUT_TEMP_H    0x26
-#define LIS3DHH_STATUS        0x27
+#define LIS3DHH_OUT_TEMP_L    0x25U
+#define LIS3DHH_OUT_TEMP_H    0x26U
+#define LIS3DHH_STATUS        0x27U
 typedef struct {
   uint8_t xda              : 1;
   uint8_t yda              : 1;
@@ -210,25 +223,37 @@ typedef struct {
   uint8_t zyxor            : 1;
 } lis3dhh_status_t;
 
-#define LIS3DHH_OUT_X_L_XL    0x28
-#define LIS3DHH_OUT_X_H_XL    0x29
-#define LIS3DHH_OUT_Y_L_XL    0x2A
-#define LIS3DHH_OUT_Y_H_XL    0x2B
-#define LIS3DHH_OUT_Z_L_XL    0x2C
-#define LIS3DHH_OUT_Z_H_XL    0x2D
-#define LIS3DHH_FIFO_CTRL     0x2E
+#define LIS3DHH_OUT_X_L_XL    0x28U
+#define LIS3DHH_OUT_X_H_XL    0x29U
+#define LIS3DHH_OUT_Y_L_XL    0x2AU
+#define LIS3DHH_OUT_Y_H_XL    0x2BU
+#define LIS3DHH_OUT_Z_L_XL    0x2CU
+#define LIS3DHH_OUT_Z_H_XL    0x2DU
+#define LIS3DHH_FIFO_CTRL     0x2EU
 typedef struct {
   uint8_t fth              : 5;
   uint8_t fmode            : 3;
 } lis3dhh_fifo_ctrl_t;
 
-#define LIS3DHH_FIFO_SRC      0x2F
+#define LIS3DHH_FIFO_SRC      0x2FU
 typedef struct {
   uint8_t fss      : 6;
   uint8_t ovrn      : 1;
   uint8_t fth      : 1;
 } lis3dhh_fifo_src_t;
 
+/**
+  * @defgroup LIS3DHH_Register_Union
+  * @brief    This union group all the registers that has a bit-field
+  *           description.
+  *           This union is useful but not need by the driver.
+  *
+  *           REMOVING this union you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  *
+  * @{
+  *
+  */
 typedef union{
   lis3dhh_id_reg_t       id_reg;
   lis3dhh_ctrl_reg1_t    ctrl_reg1;
@@ -242,10 +267,19 @@ typedef union{
   bitwise_t              bitwise;
   uint8_t                byte;
 } lis3dhh_reg_t;
+
+/**
+  * @}
+  *
+  */
+
 int32_t lis3dhh_read_reg(lis3dhh_ctx_t *ctx, uint8_t reg, uint8_t* data,
                          uint16_t len);
 int32_t lis3dhh_write_reg(lis3dhh_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
+
+extern float_t lis3dhh_from_lsb_to_mg(int16_t lsb);
+extern float_t lis3dhh_from_lsb_to_celsius(int16_t lsb);
 
 int32_t lis3dhh_block_data_update_set(lis3dhh_ctx_t *ctx, uint8_t val);
 int32_t lis3dhh_block_data_update_get(lis3dhh_ctx_t *ctx, uint8_t *val);
@@ -292,8 +326,8 @@ int32_t lis3dhh_self_test_get(lis3dhh_ctx_t *ctx, lis3dhh_st_t *val);
 typedef enum {
   LIS3DHH_LINEAR_PHASE_440Hz      = 0,
   LIS3DHH_LINEAR_PHASE_235Hz      = 1,
-  LIS3DHH_NO_LINEAR_PHASE_440Hz  = 2,
-  LIS3DHH_NO_LINEAR_PHASE_235Hz  = 3,
+  LIS3DHH_NO_LINEAR_PHASE_440Hz   = 2,
+  LIS3DHH_NO_LINEAR_PHASE_235Hz   = 3,
 } lis3dhh_dsp_t;
 int32_t lis3dhh_filter_config_set(lis3dhh_ctx_t *ctx, lis3dhh_dsp_t val);
 int32_t lis3dhh_filter_config_get(lis3dhh_ctx_t *ctx, lis3dhh_dsp_t *val);
@@ -305,23 +339,21 @@ typedef enum {
   LIS3DHH_PULSED   = 1,
 } lis3dhh_drdy_pulse_t;
 int32_t lis3dhh_drdy_notification_mode_set(lis3dhh_ctx_t *ctx,
-                                            lis3dhh_drdy_pulse_t val);
+                                           lis3dhh_drdy_pulse_t val);
 int32_t lis3dhh_drdy_notification_mode_get(lis3dhh_ctx_t *ctx,
-                                            lis3dhh_drdy_pulse_t *val);
+                                           lis3dhh_drdy_pulse_t *val);
 
 
 typedef enum {
-  LIS3DHH_PIN_AS_INTERRUPT  = 0,
+  LIS3DHH_PIN_AS_INTERRUPT   = 0,
   LIS3DHH_PIN_AS_TRIGGER     = 1,
 } lis3dhh_int1_ext_t;
 int32_t lis3dhh_int1_mode_set(lis3dhh_ctx_t *ctx, lis3dhh_int1_ext_t val);
 int32_t lis3dhh_int1_mode_get(lis3dhh_ctx_t *ctx, lis3dhh_int1_ext_t *val);
 
 
-int32_t lis3dhh_fifo_threshold_on_int1_set(lis3dhh_ctx_t *ctx,
-                                            uint8_t val);
-int32_t lis3dhh_fifo_threshold_on_int1_get(lis3dhh_ctx_t *ctx,
-                                            uint8_t *val);
+int32_t lis3dhh_fifo_threshold_on_int1_set(lis3dhh_ctx_t *ctx, uint8_t val);
+int32_t lis3dhh_fifo_threshold_on_int1_get(lis3dhh_ctx_t *ctx, uint8_t *val);
 
 int32_t lis3dhh_fifo_full_on_int1_set(lis3dhh_ctx_t *ctx, uint8_t val);
 int32_t lis3dhh_fifo_full_on_int1_get(lis3dhh_ctx_t *ctx, uint8_t *val);
@@ -335,10 +367,8 @@ int32_t lis3dhh_boot_on_int1_get(lis3dhh_ctx_t *ctx, uint8_t *val);
 int32_t lis3dhh_drdy_on_int1_set(lis3dhh_ctx_t *ctx, uint8_t val);
 int32_t lis3dhh_drdy_on_int1_get(lis3dhh_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3dhh_fifo_threshold_on_int2_set(lis3dhh_ctx_t *ctx,
-                                            uint8_t val);
-int32_t lis3dhh_fifo_threshold_on_int2_get(lis3dhh_ctx_t *ctx,
-                                            uint8_t *val);
+int32_t lis3dhh_fifo_threshold_on_int2_set(lis3dhh_ctx_t *ctx, uint8_t val);
+int32_t lis3dhh_fifo_threshold_on_int2_get(lis3dhh_ctx_t *ctx, uint8_t *val);
 
 int32_t lis3dhh_fifo_full_on_int2_set(lis3dhh_ctx_t *ctx, uint8_t val);
 int32_t lis3dhh_fifo_full_on_int2_get(lis3dhh_ctx_t *ctx, uint8_t *val);
@@ -373,15 +403,14 @@ int32_t lis3dhh_fifo_watermark_get(lis3dhh_ctx_t *ctx, uint8_t *val);
 typedef enum {
   LIS3DHH_BYPASS_MODE             = 0,
   LIS3DHH_FIFO_MODE               = 1,
-  LIS3DHH_STREAM_TO_FIFO_MODE    = 3,
-  LIS3DHH_BYPASS_TO_STREAM_MODE  = 4,
-  LIS3DHH_DYNAMIC_STREAM_MODE    = 6,
+  LIS3DHH_STREAM_TO_FIFO_MODE     = 3,
+  LIS3DHH_BYPASS_TO_STREAM_MODE   = 4,
+  LIS3DHH_DYNAMIC_STREAM_MODE     = 6,
 } lis3dhh_fmode_t;
 int32_t lis3dhh_fifo_mode_set(lis3dhh_ctx_t *ctx, lis3dhh_fmode_t val);
 int32_t lis3dhh_fifo_mode_get(lis3dhh_ctx_t *ctx, lis3dhh_fmode_t *val);
 
-int32_t lis3dhh_fifo_status_get(lis3dhh_ctx_t *ctx,
-                                lis3dhh_fifo_src_t *val);
+int32_t lis3dhh_fifo_status_get(lis3dhh_ctx_t *ctx, lis3dhh_fifo_src_t *val);
 
 int32_t lis3dhh_fifo_full_flag_get(lis3dhh_ctx_t *ctx, uint8_t *val);
 
@@ -393,13 +422,14 @@ int32_t lis3dhh_auto_add_inc_set(lis3dhh_ctx_t *ctx, uint8_t val);
 int32_t lis3dhh_auto_add_inc_get(lis3dhh_ctx_t *ctx, uint8_t *val);
 
 /**
-  * @}
+  *@}
+  *
   */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*__LIS3DHH_DRIVER__H */
+#endif /* LIS3DHH_REGS_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
