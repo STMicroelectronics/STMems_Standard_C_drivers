@@ -147,7 +147,7 @@ float_t lsm6ds3_from_fs2000dps_to_mdps(int16_t lsb)
 
 float_t lsm6ds3_from_lsb_to_celsius(int16_t lsb)
 {
-  return ((float_t)lsb + 25.0f );
+  return ((float_t)lsb / 16.0f + 25.0f );
 }
 
 /**
