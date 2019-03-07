@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -743,15 +743,19 @@ int32_t lis3de_xl_data_ovr_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_acceleration_raw_get(lis3de_ctx_t *ctx, uint8_t *buff)
+int32_t lis3de_acceleration_raw_get(lis3de_ctx_t *ctx, int16_t *buff)
 {
   int32_t ret;
-  ret = lis3de_read_reg(ctx, LIS3DE_OUT_X, &buff[3]  , 1);
+  int8_t dummy;
+  ret = lis3de_read_reg(ctx, LIS3DE_OUT_X, (uint8_t*)&dummy  , 1);
+  buff[0] = dummy;
   if (ret == 0) {
-    ret = lis3de_read_reg(ctx, LIS3DE_OUT_Y, &buff[1], 1);
+    ret = lis3de_read_reg(ctx, LIS3DE_OUT_Y, (uint8_t*)&dummy, 1);
+    buff[1] = dummy;
   } 
   if (ret == 0) {
-    ret = lis3de_read_reg(ctx, LIS3DE_OUT_Z, &buff[2], 1);
+    ret = lis3de_read_reg(ctx, LIS3DE_OUT_Z, (uint8_t*)&dummy, 1);
+    buff[2] = dummy;
   }
   return ret;
 }

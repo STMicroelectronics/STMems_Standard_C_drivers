@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -548,7 +548,7 @@ int32_t lis3de_xl_data_ready_get(lis3de_ctx_t *ctx, uint8_t *val);
 
 int32_t lis3de_xl_data_ovr_get(lis3de_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3de_acceleration_raw_get(lis3de_ctx_t *ctx, uint8_t *buff);
+int32_t lis3de_acceleration_raw_get(lis3de_ctx_t *ctx, int16_t *buff);
 
 int32_t lis3de_device_id_get(lis3de_ctx_t *ctx, uint8_t *buff);
 
