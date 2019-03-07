@@ -1,37 +1,37 @@
 /*
  ******************************************************************************
  * @file    free_fall.c
- * @author  MEMS Software Solution Team
- * @date    02-January-2018
- * @brief   This file show the simplest way to detect free fall events
- *          from sensor.
+ * @author  Sensors Software Solution Team
+ * @brief   LIS3DE driver file
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  */
 
@@ -196,46 +196,35 @@ static int32_t platform_reap_int_pin(void)
  */
 void example_freefall_lis3de(void)
 {
-  /*
-   *  Initialize mems driver interface.
-   */
   lis3de_ctx_t dev_ctx;
   lis3de_ctrl_reg3_t ctrl_reg3;
   lis3de_ig1_cfg_t ig1_cfg;
+  
   uint8_t whoamI;
 
+  /* Initialize mems driver interface. */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
 
-  /*
-   *  Check device ID.
-   */
+  /* Check device ID. */
   whoamI = 0;
   lis3de_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LIS3DE_ID)
     while(1); /* manage here device not found */
 
-  /*
-   * Set Output Data Rate to 100 Hz.
-   */
+  /* Set Output Data Rate to 100 Hz. */
   lis3de_data_rate_set(&dev_ctx, LIS3DE_ODR_100Hz);
 
-  /*
-   * Set full scale to 2 g.
-   */
+  /* Set full scale to 2 g. */
   lis3de_full_scale_set(&dev_ctx, LIS3DE_2g);
 
-  /*
-   * Enable AOI1 interrupt on INT pin 1.
-   */
+  /* Enable AOI1 interrupt on INT pin 1. */
   memset((uint8_t *)&ctrl_reg3, 0, sizeof(ctrl_reg3));
   ctrl_reg3.int1_ig1 = PROPERTY_ENABLE;
   lis3de_pin_int1_config_set(&dev_ctx, &ctrl_reg3);
 
-  /*
-   * Enable Interrupt 1 pin latched.
-   */
+  /* Enable Interrupt 1 pin latched. */
   lis3de_int1_pin_notification_mode_set(&dev_ctx, LIS3DE_INT1_LATCHED);
 
   /*
@@ -258,16 +247,12 @@ void example_freefall_lis3de(void)
   ig1_cfg.xlie = PROPERTY_ENABLE;
   lis3de_int1_gen_conf_set(&dev_ctx, &ig1_cfg);
 
-  /*
-   * Set device in HR mode.
-   */
+  /* Set device in HR mode. */
   lis3de_operating_mode_set(&dev_ctx, LIS3DE_LP);
 
   while(1)
   {
- /*
-  * Read INT pin 1 in polling mode.
-  */
+ /* Read INT pin 1 in polling mode. */
   lis3de_ig1_source_t src;
 
     if (platform_reap_int_pin())

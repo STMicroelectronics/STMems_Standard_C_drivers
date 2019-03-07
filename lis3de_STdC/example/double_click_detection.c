@@ -1,37 +1,37 @@
 /*
  ******************************************************************************
  * @file    double_click_detection.c
- * @author  MEMS Software Solution Team
- * @date    03-January-2018
- * @brief   This file show the simplest way to detect a double click from
- *          sensor.
+ * @author  Sensors Software Solution Team
+ * @brief   LIS3DE driver file
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  */
 
@@ -196,9 +196,7 @@ static int32_t platform_reap_int_pin(void)
  */
 void example_double_click_lis3de(void)
 {
-  /*
-   *  Initialize mems driver interface.
-   */
+  /* Initialize mems driver interface. */
   lis3de_ctx_t dev_ctx;
   lis3de_ctrl_reg3_t ctrl_reg3;
   lis3de_click_cfg_t click_cfg;
@@ -208,9 +206,7 @@ void example_double_click_lis3de(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
 
-  /*
-   *  Check device ID.
-   */
+  /* Check device ID. */
   whoamI = 0;
   lis3de_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LIS3DE_ID)
@@ -223,9 +219,7 @@ void example_double_click_lis3de(void)
    */
   lis3de_data_rate_set(&dev_ctx, LIS3DE_ODR_400Hz);
 
-  /*
-   * Set full scale to 2 g.
-   */
+  /* Set full scale to 2 g. */
   lis3de_full_scale_set(&dev_ctx, LIS3DE_2g);
 
   /*
@@ -241,33 +235,25 @@ void example_double_click_lis3de(void)
   lis3de_quiet_dur_set(&dev_ctx, 0x20);
   lis3de_double_tap_timeout_set(&dev_ctx, 0x30);
 
-  /*
-   * Enable Click interrupt on INT pin 1.
-   */
+  /* Enable Click interrupt on INT pin 1. */
   memset((uint8_t *)&ctrl_reg3, 0, sizeof(ctrl_reg3));
   ctrl_reg3.int1_click = PROPERTY_ENABLE;
   lis3de_pin_int1_config_set(&dev_ctx, &ctrl_reg3);
   lis3de_int1_gen_duration_set(&dev_ctx, 0);
 
-  /*
-   * Enable double click on all axis.
-   */
+  /* Enable double click on all axis. */
   memset((uint8_t *)&click_cfg, 0, sizeof(click_cfg));
   click_cfg.xd = PROPERTY_ENABLE;
   click_cfg.yd = PROPERTY_ENABLE;
   click_cfg.zd = PROPERTY_ENABLE;
   lis3de_tap_conf_set(&dev_ctx, &click_cfg);
 
-  /*
-   * Set device in HR mode.
-   */
+  /* Set device in HR mode. */
   lis3de_operating_mode_set(&dev_ctx, LIS3DE_LP);
 
   while(1)
   {
-    /*
-     * Read INT pin 1 in polling mode.
-     */
+    /* Read INT pin 1 in polling mode. */
 	lis3de_click_src_t src;
 
     if (platform_reap_int_pin())

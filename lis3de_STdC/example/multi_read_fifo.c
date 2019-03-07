@@ -1,36 +1,37 @@
 /*
  ******************************************************************************
  * @file    multi_read_fifo.c
- * @author  MEMS Software Solution Team
- * @date    14-December-2017
- * @brief   This file show the simplest way to get data from sensor FIFO.
+ * @author  Sensors Software Solution Team
+ * @brief   LIS3DE driver file
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  */
 
@@ -198,19 +199,13 @@ void example_lis3de_fifo(void)
   if ( whoamI != LIS3DE_ID )
     while(1); /*manage here device not found */
 
-  /*
-   *  Enable Block Data Update.
-   */
+  /* Enable Block Data Update. */
   lis3de_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Set Output Data Rate to 100 hz.
-   */
+  /* Set Output Data Rate to 100 hz. */
   lis3de_data_rate_set(&dev_ctx, LIS3DE_ODR_100Hz);
 
-  /*
-   * Set full scale to 2 g.
-   */
+  /* Set full scale to 2 g. */
   lis3de_full_scale_set(&dev_ctx, LIS3DE_2g);
 
   /*
@@ -218,9 +213,7 @@ void example_lis3de_fifo(void)
    */
   lis3de_operating_mode_set(&dev_ctx, LIS3DE_LP);
 
-  /*
-   * Set FIFO watermark to FIFO_WATERMARK samples.
-   */
+  /* Set FIFO watermark to FIFO_WATERMARK samples. */
   lis3de_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
 
   /*
@@ -229,9 +222,7 @@ void example_lis3de_fifo(void)
    */
   lis3de_fifo_mode_set(&dev_ctx, LIS3DE_DYNAMIC_STREAM_MODE);
 
-  /*
-   * Enable FIFO.
-   */
+  /* Enable FIFO. */
   lis3de_fifo_set(&dev_ctx, PROPERTY_ENABLE);
 
   while(1)
@@ -239,23 +230,17 @@ void example_lis3de_fifo(void)
 	uint8_t flags;
 	uint8_t num = 0;
 
-	/*
-	 * Check if FIFO level over threshold.
-	 */
+	/* Check if FIFO level over threshold. */
 	lis3de_fifo_fth_flag_get(&dev_ctx, &flags);
 	if (flags)
 	{
-		/*
-		 * Read number of sample in FIFO.
-		 */
+		/* Read number of sample in FIFO. */
 		lis3de_fifo_data_level_get(&dev_ctx, &num);
 
 		while (num-- > 0)
 		{
-			/*
-			 * Read XL samples.
-			 */
-			lis3de_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+			/* Read XL samples. */
+			lis3de_acceleration_raw_get(&dev_ctx, data_raw_acceleration.i16bit);
 			acceleration_mg[0] = lis3de_from_fs2_to_mg(data_raw_acceleration.i16bit[0]);
 			acceleration_mg[1] = lis3de_from_fs2_to_mg(data_raw_acceleration.i16bit[1]);
 			acceleration_mg[2] = lis3de_from_fs2_to_mg(data_raw_acceleration.i16bit[2]);
@@ -267,9 +252,7 @@ void example_lis3de_fifo(void)
 	}
 	else
 	{
-		/*
-		 * Force compiler to generate code, avoiding I2C polling stress.
-		 */
+		/* Force compiler to generate code, avoiding I2C polling stress. */
     	for (volatile uint32_t i = 0; i < 10000; i++);
     }
   }

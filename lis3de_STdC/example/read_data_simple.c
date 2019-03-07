@@ -1,36 +1,37 @@
 /*
  ******************************************************************************
  * @file    read_data_simple.c
- * @author  MEMS Software Solution Team
- * @date    05-October-2017
- * @brief   This file show the simplest way to get data from sensor.
+ * @author  Sensors Software Solution Team
+ * @brief   LIS3DE driver file
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  */
 
@@ -177,49 +178,31 @@ void tx_com( uint8_t *tx_buffer, uint16_t len )
 
 void example_main(void)
 {
-  /*
-   *  Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   lis3de_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;  
-  /*
-   *  Check device ID
-   */
+  /* Check device ID */
   whoamI = 0;
   lis3de_device_id_get(&dev_ctx, &whoamI);
   if ( whoamI != LIS3DE_ID )
     while(1); /*manage here device not found */
-  /*
-   *  Enable Block Data Update
-   */
+  /* Enable Block Data Update */
   lis3de_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-  /*
-   * Set Output Data Rate
-   */
+  /* Set Output Data Rate */
   lis3de_data_rate_set(&dev_ctx, LIS3DE_ODR_1Hz);
-  /*
-   * Set full scale
-   */  
+  /* Set full scale */
   lis3de_full_scale_set(&dev_ctx, LIS3DE_2g);
-  /*
-   * Enable temperature sensor
-   */   
+  /* * Enable temperature sensor */
   lis3de_aux_adc_set(&dev_ctx, LIS3DE_AUX_ON_TEMPERATURE);
-  /*
-   * Set device in continuous mode
-   */   
+  /* Set device in continuous mode */
   lis3de_operating_mode_set(&dev_ctx, LIS3DE_LP);
-  
-  /*
-   * Read samples in polling mode (no int)
-   */
+
+  /* Read samples in polling mode (no int) */
   while(1)
   {
-    /*
-     * Read output only if new value is available
-     */
+    /* Read output only if new value is available */
     lis3de_reg_t reg;
     lis3de_status_get(&dev_ctx, &reg.status_reg);
 
@@ -227,7 +210,7 @@ void example_main(void)
     {
       /* Read accelerometer data */
       memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
-      lis3de_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+      lis3de_acceleration_raw_get(&dev_ctx, data_raw_acceleration.i16bit);
       acceleration_mg[0] = lis3de_from_fs2_to_mg( data_raw_acceleration.i16bit[0] );
       acceleration_mg[1] = lis3de_from_fs2_to_mg( data_raw_acceleration.i16bit[1] );
       acceleration_mg[2] = lis3de_from_fs2_to_mg( data_raw_acceleration.i16bit[2] );
@@ -237,7 +220,7 @@ void example_main(void)
       tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
     }
     
-    lis3de_temp_data_ready_get(&dev_ctx, &reg.byte);      
+    lis3de_temp_data_ready_get(&dev_ctx, &reg.byte);
     if (reg.byte)      
     {
       /* Read temperature data */
