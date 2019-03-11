@@ -1,1480 +1,1776 @@
 /*
  ******************************************************************************
  * @file    lps25hb_reg.c
- * @author  MEMS Software Solution Team
- * @date    20-September-2017
+ * @author  Sensors Software Solution Team
  * @brief   LPS25HB driver file
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  */
 
 #include "lps25hb_reg.h"
 
 /**
-  * @addtogroup  lps25hb
-  * @brief  This file provides a set of functions needed to drive the
-  *         lps25hb enanced inertial module.
+  * @defgroup    LPS25HB
+  * @brief       This file provides a set of functions needed to drive the
+  *              ultra-compact piezoresistive absolute pressure sensor.
   * @{
+  *
   */
 
 /**
-  * @addtogroup  interfaces_functions
-  * @brief  This section provide a set of functions used to read and write
-  *         a generic register of the device.
+  * @defgroup    LPS25HB_Interfaces_functions
+  * @brief       This section provide a set of functions used to read and
+  *              write a generic register of the device.
   * @{
+  *
   */
 
 /**
   * @brief  Read generic device register
   *
-  * @param  lps25hb_ctx_t* ctx: read / write interface definitions
-  * @param  uint8_t reg: register to read
-  * @param  uint8_t* data: pointer to buffer that store the data read
-  * @param  uint16_t len: number of consecutive register to read
+  * @param  ctx   read / write interface definitions(ptr)
+  * @param  reg   register to read
+  * @param  data  pointer to buffer that store the data read(ptr)
+  * @param  len   number of consecutive register to read
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lps25hb_read_reg(lps25hb_ctx_t* ctx, uint8_t reg, uint8_t* data,
                          uint16_t len)
 {
-  return ctx->read_reg(ctx->handle, reg, data, len);
+  int32_t ret;
+  ret = ctx->read_reg(ctx->handle, reg, data, len);
+  return ret;
 }
 
 /**
   * @brief  Write generic device register
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t reg: register to write
-  * @param  uint8_t* data: pointer to data to write in register reg
-  * @param  uint16_t len: number of consecutive register to write
+  * @param  ctx   read / write interface definitions(ptr)
+  * @param  reg   register to write
+  * @param  data  pointer to data to write in register reg(ptr)
+  * @param  len   number of consecutive register to write
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
-*/
+  */
 int32_t lps25hb_write_reg(lps25hb_ctx_t* ctx, uint8_t reg, uint8_t* data,
                           uint16_t len)
 {
-  return ctx->write_reg(ctx->handle, reg, data, len);
+  int32_t ret;
+  ret = ctx->write_reg(ctx->handle, reg, data, len);
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  data_generation_c
-  * @brief   This section group all the functions concerning data generation
-  * @{
-  */
-
-/**
-  * @brief  pressure_ref: [set]  The Reference pressure value is a 24-bit
-  *                              data expressed as 2’s complement. The value
-  *                              is used when AUTOZERO or AUTORIFP function
-  *                              is enabled.
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that contains data to write
+  */
+
+/**
+  * @defgroup    LPS25HB_Sensitivity
+  * @brief       These functions convert raw-data into engineering units.
+  * @{
+  *
+  */
+
+float_t lps25hb_from_lsb_to_hpa(uint32_t lsb)
+{
+  return ( (float_t)lsb / 4096.0f );
+}
+
+float_t lps25hb_from_lsb_to_degc(int16_t lsb)
+{
+  return ( (float_t)lsb / 480.0f ) + 42.5f ;
+}
+
+/**
+  * @}
+  *
+  */
+
+/**
+  * @defgroup   LPS25HB_data_generation_c
+  * @brief      This section group all the functions concerning data generation
+  * @{
+  *
+  */
+
+/**
+  * @brief  The Reference pressure value is a 24-bit data expressed as 2’s
+  *         complement. The value is used when AUTOZERO or AUTORIFP function
+  *         is enabled.[set]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  buff   Buffer that contains data to write
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_pressure_ref_set(lps25hb_ctx_t *ctx, uint8_t *buff)
 {
-  return lps25hb_read_reg(ctx, LPS25HB_REF_P_XL,  buff, 3);
+  int32_t ret;
+  ret = lps25hb_read_reg(ctx, LPS25HB_REF_P_XL,  buff, 3);
+  return ret;
 }
 
 /**
-  * @brief  pressure_ref: [get]  The Reference pressure value is a 24-bit
-  *                              data expressed as 2’s complement. The value
-  *                              is used when AUTOZERO or AUTORIFP function
-  *                              is enabled.
+  * @brief  The Reference pressure value is a 24-bit data expressed as 2’s
+  *         complement. The value is used when AUTOZERO or AUTORIFP function
+  *         is enabled.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  buff   Buffer that stores data read.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_pressure_ref_get(lps25hb_ctx_t *ctx, uint8_t *buff)
 {
-  return lps25hb_read_reg(ctx, LPS25HB_REF_P_XL,  buff, 3);
+  int32_t ret;
+  ret = lps25hb_read_reg(ctx, LPS25HB_REF_P_XL,  buff, 3);
+  return ret;
 }
 
 /**
-  * @brief  pressure_avg: [set]  Pressure internal average configuration.
+  * @brief  Pressure internal average configuration.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_avgp_t: change the values of avgp in reg RES_CONF
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of avgp in reg RES_CONF
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_pressure_avg_set(lps25hb_ctx_t *ctx, lps25hb_avgp_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_res_conf_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_RES_CONF, &reg.byte, 1);
-  reg.res_conf.avgp = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_RES_CONF, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_RES_CONF, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.avgp = (uint8_t)val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_RES_CONF, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  pressure_avg: [get]  Pressure internal average configuration.
+  * @brief  Pressure internal average configuration.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_avgp_t: Get the values of avgp in reg RES_CONF
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of avgp in reg RES_CONF.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_pressure_avg_get(lps25hb_ctx_t *ctx, lps25hb_avgp_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_res_conf_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_RES_CONF, &reg.byte, 1);
-  *val = (lps25hb_avgp_t) reg.res_conf.avgp;
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_RES_CONF, (uint8_t*)&reg, 1);
+  switch (reg.avgp){
+    case LPS25HB_P_AVG_8:
+      *val = LPS25HB_P_AVG_8;
+      break;
+    case LPS25HB_P_AVG_16:
+      *val = LPS25HB_P_AVG_16;
+      break;
+    case LPS25HB_P_AVG_32:
+      *val = LPS25HB_P_AVG_32;
+      break;
+    case LPS25HB_P_AVG_64:
+      *val = LPS25HB_P_AVG_64;
+      break;
+    default:
+      *val = LPS25HB_P_AVG_8;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  temperature_avg: [set]  Temperature internal average configuration.
+  * @brief  Temperature internal average configuration.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_avgt_t: change the values of avgt in reg RES_CONF
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of avgt in reg RES_CONF
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_temperature_avg_set(lps25hb_ctx_t *ctx, lps25hb_avgt_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_res_conf_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_RES_CONF, &reg.byte, 1);
-  reg.res_conf.avgt = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_RES_CONF, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_RES_CONF, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.avgt = (uint8_t)val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_RES_CONF, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  temperature_avg: [get]  Temperature internal average configuration.
+  * @brief  Temperature internal average configuration.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_avgt_t: Get the values of avgt in reg RES_CONF
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of avgt in reg RES_CONF.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_temperature_avg_get(lps25hb_ctx_t *ctx, lps25hb_avgt_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_res_conf_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_RES_CONF, &reg.byte, 1);
-  *val = (lps25hb_avgt_t) reg.res_conf.avgt;
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_RES_CONF, (uint8_t*)&reg, 1);
+  switch (reg.avgt){
+    case LPS25HB_T_AVG_8:
+      *val = LPS25HB_T_AVG_8;
+      break;
+    case LPS25HB_T_AVG_16:
+      *val = LPS25HB_T_AVG_16;
+      break;
+    case LPS25HB_T_AVG_32:
+      *val = LPS25HB_T_AVG_32;
+      break;
+    case LPS25HB_T_AVG_64:
+      *val = LPS25HB_T_AVG_64;
+      break;
+    default:
+      *val = LPS25HB_T_AVG_8;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  autozero_rst: [set]  Reset Autozero function.
+  * @brief  Reset Autozero function. [set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of reset_az in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of reset_az in reg CTRL_REG1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_autozero_rst_set(lps25hb_ctx_t *ctx, uint8_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg1_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, &reg.byte, 1);
-  reg.ctrl_reg1.reset_az = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG1, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.reset_az = val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG1, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  autozero_rst: [get]  Reset Autozero function.
+  * @brief  Reset Autozero function.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of reset_az in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of reset_az in reg CTRL_REG1.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_autozero_rst_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg1_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, &reg.byte, 1);
-  *val = reg.ctrl_reg1.reset_az;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, (uint8_t*)&reg, 1);
+  *val = reg.reset_az;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  block_data_update: [set] Blockdataupdate.
+  * @brief  Blockdataupdate.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of bdu in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of bdu in reg CTRL_REG1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_block_data_update_set(lps25hb_ctx_t *ctx, uint8_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg1_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, &reg.byte, 1);
-  reg.ctrl_reg1.bdu = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG1, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.bdu = val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG1, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  block_data_update: [get] Blockdataupdate.
+  * @brief Blockdataupdate. [get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of bdu in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of bdu in reg CTRL_REG1.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_block_data_update_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg1_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, &reg.byte, 1);
-  *val = reg.ctrl_reg1.bdu;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, (uint8_t*)&reg, 1);
+  *val = reg.bdu;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  data_rate: [set]  Output data rate selection.
+  * @brief  Output data rate selection.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_odr_t: change the values of odr in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of odr in reg CTRL_REG1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_data_rate_set(lps25hb_ctx_t *ctx, lps25hb_odr_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg1_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, &reg.byte, 1);
-  reg.ctrl_reg1.odr = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG1, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.odr = (uint8_t)val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG1, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  data_rate: [get]  Output data rate selection.
+  * @brief  Output data rate selection.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_odr_t: Get the values of odr in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of odr in reg CTRL_REG1.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_data_rate_get(lps25hb_ctx_t *ctx, lps25hb_odr_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg1_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, &reg.byte, 1);
-  *val = (lps25hb_odr_t) reg.ctrl_reg1.odr;
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, (uint8_t*)&reg, 1);
+  switch (reg.odr){
+    case LPS25HB_POWER_DOWN:
+      *val = LPS25HB_POWER_DOWN;
+      break;
+    case LPS25HB_ODR_1Hz:
+      *val = LPS25HB_ODR_1Hz;
+      break;
+    case LPS25HB_ODR_7Hz:
+      *val = LPS25HB_ODR_7Hz;
+      break;
+    case LPS25HB_ODR_12Hz5:
+      *val = LPS25HB_ODR_12Hz5;
+      break;
+    case LPS25HB_ODR_25Hz:
+      *val = LPS25HB_ODR_25Hz;
+      break;
+    case LPS25HB_ONE_SHOT:
+      *val = LPS25HB_ONE_SHOT;
+      break;
+    default:
+      *val = LPS25HB_POWER_DOWN;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  one_shoot_trigger: [set]  One-shot mode. Device perform a
-  *                                   single measure.
+  * @brief  One-shot mode. Device perform a single measure.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of one_shot in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of one_shot in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_one_shoot_trigger_set(lps25hb_ctx_t *ctx, uint8_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-  reg.ctrl_reg2.one_shot = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.one_shot = val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  one_shoot_trigger: [get]  One-shot mode. Device perform a
-  *                                   single measure.
+  * @brief  One-shot mode. Device perform a single measure.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of one_shot in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of one_shot in reg CTRL_REG2.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_one_shoot_trigger_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-  *val = reg.ctrl_reg2.one_shot;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  *val = reg.one_shot;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  autozero: [set]  Enable Autozero function.
+  * @brief  Enable Autozero function.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of autozero in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of autozero in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_autozero_set(lps25hb_ctx_t *ctx, uint8_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-  reg.ctrl_reg2.autozero = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.autozero = val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  autozero: [get]  Enable Autozero function.
+  * @brief  Enable Autozero function.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of autozero in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of autozero in reg CTRL_REG2.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_autozero_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-  *val = reg.ctrl_reg2.autozero;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  *val = reg.autozero;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief   fifo_mean_decimator: [set]  Enable to decimate the output
-  *                                      pressure to 1Hz with FIFO Mean mode.
+  * @brief  Enable to decimate the output pressure to 1Hz
+  *         with FIFO Mean mode.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of fifo_mean_dec in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of fifo_mean_dec in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_fifo_mean_decimator_set(lps25hb_ctx_t *ctx, uint8_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-  reg.ctrl_reg2.fifo_mean_dec = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.fifo_mean_dec = val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief   fifo_mean_decimator: [get]  Enable to decimate the output
-  *                                      pressure to 1Hz with FIFO Mean mode.
+  * @brief  Enable to decimate the output pressure to 1Hz
+  *         with FIFO Mean mode.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of fifo_mean_dec in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of fifo_mean_dec in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_fifo_mean_decimator_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-  *val = reg.ctrl_reg2.fifo_mean_dec;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  *val = reg.fifo_mean_dec;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  press_data_ready: [get]  Pressure data available.
+  * @brief  Pressure data available.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of p_da in reg STATUS_REG
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of p_da in reg STATUS_REG.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_press_data_ready_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_status_reg_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_STATUS_REG, &reg.byte, 1);
-  *val = reg.status_reg.p_da;
+  ret = lps25hb_read_reg(ctx, LPS25HB_STATUS_REG, (uint8_t*)&reg, 1);
+  *val = reg.p_da;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  temp_data_ready: [get]  Temperature data available.
+  * @brief  Temperature data available.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of t_da in reg STATUS_REG
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of t_da in reg STATUS_REG.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_temp_data_ready_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_status_reg_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_STATUS_REG, &reg.byte, 1);
-  *val = reg.status_reg.t_da;
+  ret = lps25hb_read_reg(ctx, LPS25HB_STATUS_REG, (uint8_t*)&reg, 1);
+  *val = reg.t_da;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  temp_data_ovr: [get]   Temperature data overrun.
+  * @brief  Temperature data overrun.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of t_or in reg STATUS_REG
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of t_or in reg STATUS_REG.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_temp_data_ovr_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_status_reg_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_STATUS_REG, &reg.byte, 1);
-  *val = reg.status_reg.t_or;
+  ret = lps25hb_read_reg(ctx, LPS25HB_STATUS_REG, (uint8_t*)&reg, 1);
+  *val = reg.t_or;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  press_data_ovr: [get]   Pressure data overrun.
+  * @brief  Pressure data overrun.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of p_or in reg STATUS_REG
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of p_or in reg STATUS_REG.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_press_data_ovr_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_status_reg_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_STATUS_REG, &reg.byte, 1);
-  *val = reg.status_reg.p_or;
+  ret = lps25hb_read_reg(ctx, LPS25HB_STATUS_REG, (uint8_t*)&reg, 1);
+  *val = reg.p_or;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pressure_raw: [get]  Pressure output value.
+  * @brief  Pressure output value.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  buff   Buffer that stores data read.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_pressure_raw_get(lps25hb_ctx_t *ctx, uint8_t *buff)
 {
-  return lps25hb_read_reg(ctx, LPS25HB_PRESS_OUT_XL,  buff, 3);
+  int32_t ret;
+  ret = lps25hb_read_reg(ctx, LPS25HB_PRESS_OUT_XL,  buff, 3);
+  return ret;
 }
 
 /**
-  * @brief  temperature_raw: [get]  Temperature output value.
+  * @brief  Temperature output value.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  buff   Buffer that stores data read.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_temperature_raw_get(lps25hb_ctx_t *ctx, uint8_t *buff)
 {
-  return lps25hb_read_reg(ctx, LPS25HB_TEMP_OUT_L,  buff, 2);
+  int32_t ret;
+  ret = lps25hb_read_reg(ctx, LPS25HB_TEMP_OUT_L,  buff, 2);
+  return ret;
 }
 
 /**
-  * @brief  pressure_offset: [set]  The pressure offset value is 16-bit
-  *                                 data that can be used to implement
-  *                                 one-point calibration (OPC)
-  *                                 after soldering.
+  * @brief  The pressure offset value is 16-bit data that can be used to
+  *         implement one-point calibration (OPC) after soldering.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that contains data to write
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  buff   Buffer that contains data to write
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_pressure_offset_set(lps25hb_ctx_t *ctx, uint8_t *buff)
 {
-  return lps25hb_read_reg(ctx, LPS25HB_RPDS_L,  buff, 2);
+  int32_t ret;
+  ret = lps25hb_read_reg(ctx, LPS25HB_RPDS_L,  buff, 2);
+  return ret;
 }
 
 /**
-  * @brief  pressure_offset: [get]  The pressure offset value is 16-bit
-  *                                 data that can be used to implement
-  *                                 one-point calibration (OPC) after
-  *                                 soldering.
+  * @brief  The pressure offset value is 16-bit data that can be used to
+  *         implement one-point calibration (OPC) after soldering.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  buff   Buffer that stores data read.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_pressure_offset_get(lps25hb_ctx_t *ctx, uint8_t *buff)
 {
-  return lps25hb_read_reg(ctx, LPS25HB_RPDS_L,  buff, 2);
+  int32_t ret;
+  ret = lps25hb_read_reg(ctx, LPS25HB_RPDS_L,  buff, 2);
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  common
-  * @brief   This section group common usefull functions
-  * @{
-  */
-
-/**
-  * @brief  device_id: [get] DeviceWhoamI.
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  */
+
+/**
+  * @defgroup   LPS25HB_common
+  * @brief      This section group common usefull functions
+  * @{
+  *
+  */
+
+/**
+  * @brief  DeviceWhoamI.[get]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  buff   Buffer that stores data read.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_device_id_get(lps25hb_ctx_t *ctx, uint8_t *buff)
 {
-  return lps25hb_read_reg(ctx, LPS25HB_WHO_AM_I,  buff, 1);
+  int32_t ret;
+  ret = lps25hb_read_reg(ctx, LPS25HB_WHO_AM_I,  buff, 1);
+  return ret;
 }
 
 /**
-  * @brief  reset: [set]  Software reset. Restore the default values
-  *                       in user registers
+  * @brief  Software reset. Restore the default values in user registers[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of swreset in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of swreset in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_reset_set(lps25hb_ctx_t *ctx, uint8_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-  reg.ctrl_reg2.swreset = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.swreset = val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  reset: [get]  Software reset. Restore the default values
-  *                       in user registers
+  * @brief  Software reset. Restore the default values in user registers[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of swreset in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of swreset in reg CTRL_REG2.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_reset_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-  *val = reg.ctrl_reg2.swreset;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  *val = reg.swreset;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  boot: [set]  Reboot memory content. Reload the calibration
-  *                      parameters
+  * @brief  Reboot memory content. Reload the calibration parameters[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of boot in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of boot in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_boot_set(lps25hb_ctx_t *ctx, uint8_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-  reg.ctrl_reg2.boot = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.boot = val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  boot: [get]  Reboot memory content. Reload the calibration
-  *                      parameters
+  * @brief  Reboot memory content. Reload the calibration parameters[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of boot in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of boot in reg CTRL_REG2.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_boot_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-  *val = reg.ctrl_reg2.boot;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  *val = reg.boot;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  status: [get]
+  * @brief  Status: [get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_: registers STATUS_REG.
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get registers STATUS_REG.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_status_get(lps25hb_ctx_t *ctx, lps25hb_status_reg_t *val)
 {
-  return lps25hb_read_reg(ctx, LPS25HB_STATUS_REG, (uint8_t*) val, 1);
+  int32_t ret;
+  ret = lps25hb_read_reg(ctx, LPS25HB_STATUS_REG, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  interrupts
-  * @brief   This section group all the functions that manage interrupts
-  * @{
-  */
-
-/**
-  * @brief  int_generation: [set]  Enable interrupt generation.
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of diff_en in reg CTRL_REG1
+  */
+
+/**
+  * @defgroup   LPS25HB_interrupts
+  * @brief      This section group all the functions that manage interrupts
+  * @{
+  *
+  */
+
+/**
+  * @brief  Enable interrupt generation.[set]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of diff_en in reg CTRL_REG1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_int_generation_set(lps25hb_ctx_t *ctx, uint8_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg1_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, &reg.byte, 1);
-  reg.ctrl_reg1.diff_en = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG1, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.diff_en = val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG1, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int_generation: [get]  Enable interrupt generation.
+  * @brief  Enable interrupt generation.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of diff_en in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of diff_en in reg CTRL_REG1.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_int_generation_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg1_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, &reg.byte, 1);
-  *val = reg.ctrl_reg1.diff_en;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, (uint8_t*)&reg, 1);
+  *val = reg.diff_en;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  int_pin_mode: [set]  Data signal on INT_DRDY pin control bits.
+  * @brief  Data signal on INT_DRDY pin control bits.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_int_s_t: change the values of int_s in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of int_s in reg CTRL_REG3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_int_pin_mode_set(lps25hb_ctx_t *ctx, lps25hb_int_s_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg3_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG3, &reg.byte, 1);
-  reg.ctrl_reg3.int_s = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG3, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG3, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.int_s = (uint8_t)val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG3, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int_pin_mode: [get]  Data signal on INT_DRDY pin control bits.
+  * @brief  Data signal on INT_DRDY pin control bits.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_int_s_t: Get the values of int_s in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of int_s in reg CTRL_REG3.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_int_pin_mode_get(lps25hb_ctx_t *ctx, lps25hb_int_s_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg3_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG3, &reg.byte, 1);
-  *val = (lps25hb_int_s_t) reg.ctrl_reg3.int_s;
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG3, (uint8_t*)&reg, 1);
+  switch (reg.int_s){
+    case LPS25HB_DRDY_OR_FIFO_FLAGS:
+      *val = LPS25HB_DRDY_OR_FIFO_FLAGS;
+      break;
+    case LPS25HB_HIGH_PRES_INT:
+      *val = LPS25HB_HIGH_PRES_INT;
+      break;
+    case LPS25HB_LOW_PRES_INT:
+      *val = LPS25HB_LOW_PRES_INT;
+      break;
+    case LPS25HB_EVERY_PRES_INT:
+      *val = LPS25HB_EVERY_PRES_INT;
+      break;
+    default:
+      *val = LPS25HB_DRDY_OR_FIFO_FLAGS;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  pin_mode: [set]  Push-pull/open drain selection on interrupt pads.
+  * @brief  Push-pull/open drain selection on interrupt pads.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_pp_od_t: change the values of pp_od in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of pp_od in reg CTRL_REG3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_pin_mode_set(lps25hb_ctx_t *ctx, lps25hb_pp_od_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg3_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG3, &reg.byte, 1);
-  reg.ctrl_reg3.pp_od = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG3, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG3, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.pp_od = (uint8_t)val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG3, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  pin_mode: [get]  Push-pull/open drain selection on interrupt pads.
+  * @brief  Push-pull/open drain selection on interrupt pads.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_pp_od_t: Get the values of pp_od in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of pp_od in reg CTRL_REG3.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_pin_mode_get(lps25hb_ctx_t *ctx, lps25hb_pp_od_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg3_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG3, &reg.byte, 1);
-  *val = (lps25hb_pp_od_t) reg.ctrl_reg3.pp_od;
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG3, (uint8_t*)&reg, 1);
+  switch (reg.pp_od){
+    case LPS25HB_PUSH_PULL:
+      *val = LPS25HB_PUSH_PULL;
+      break;
+    case LPS25HB_OPEN_DRAIN:
+      *val = LPS25HB_OPEN_DRAIN;
+      break;
+    default:
+      *val = LPS25HB_PUSH_PULL;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  int_polarity: [set]  Interrupt active-high/low.
+  * @brief  Interrupt active-high/low.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_int_h_l_t: change the values of int_h_l in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of int_h_l in reg CTRL_REG3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_int_polarity_set(lps25hb_ctx_t *ctx, lps25hb_int_h_l_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg3_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG3, &reg.byte, 1);
-  reg.ctrl_reg3.int_h_l = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG3, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG3, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.int_h_l = (uint8_t)val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG3, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  int_polarity: [get]  Interrupt active-high/low.
+  * @brief  Interrupt active-high/low.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_int_h_l_t: Get the values of int_h_l in reg CTRL_REG3
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of int_h_l in reg CTRL_REG3.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_int_polarity_get(lps25hb_ctx_t *ctx, lps25hb_int_h_l_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg3_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG3, &reg.byte, 1);
-  *val = (lps25hb_int_h_l_t) reg.ctrl_reg3.int_h_l;
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG3, (uint8_t*)&reg, 1);
+  switch (reg.int_h_l){
+    case LPS25HB_ACTIVE_HIGH:
+      *val = LPS25HB_ACTIVE_HIGH;
+      break;
+    case LPS25HB_ACTIVE_LOW:
+      *val = LPS25HB_ACTIVE_LOW;
+      break;
+    default:
+      *val = LPS25HB_ACTIVE_HIGH;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  drdy_on_int: [set]  Data-ready signal on INT_DRDY pin.
+  * @brief  Data-ready signal on INT_DRDY pin.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of drdy in reg CTRL_REG4
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of drdy in reg CTRL_REG4
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_drdy_on_int_set(lps25hb_ctx_t *ctx, uint8_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg4_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG4, &reg.byte, 1);
-  reg.ctrl_reg4.drdy = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG4, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG4, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.drdy = val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG4, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  drdy_on_int: [get]  Data-ready signal on INT_DRDY pin.
+  * @brief  Data-ready signal on INT_DRDY pin.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of drdy in reg CTRL_REG4
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of drdy in reg CTRL_REG4.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_drdy_on_int_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg4_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG4, &reg.byte, 1);
-  *val = reg.ctrl_reg4.drdy;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG4, (uint8_t*)&reg, 1);
+  *val = reg.drdy;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_ovr_on_int: [set]  FIFO overrun interrupt on INT_DRDY pin.
+  * @brief  FIFO overrun interrupt on INT_DRDY pin.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of f_ovr in reg CTRL_REG4
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of f_ovr in reg CTRL_REG4
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_fifo_ovr_on_int_set(lps25hb_ctx_t *ctx, uint8_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg4_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG4, &reg.byte, 1);
-  reg.ctrl_reg4.f_ovr = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG4, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG4, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.f_ovr = val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG4, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  fifo_ovr_on_int: [get]  FIFO overrun interrupt on INT_DRDY pin.
+  * @brief  FIFO overrun interrupt on INT_DRDY pin.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of f_ovr in reg CTRL_REG4
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of f_ovr in reg CTRL_REG4.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_fifo_ovr_on_int_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg4_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG4, &reg.byte, 1);
-  *val = reg.ctrl_reg4.f_ovr;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG4, (uint8_t*)&reg, 1);
+  *val = reg.f_ovr;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief   fifo_threshold_on_int: [set]  FIFO watermark status
-  *                                        on INT_DRDY pin.
+  * @brief  FIFO watermark status on INT_DRDY pin.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of f_fth in reg CTRL_REG4
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of f_fth in reg CTRL_REG4
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_fifo_threshold_on_int_set(lps25hb_ctx_t *ctx, uint8_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg4_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG4, &reg.byte, 1);
-  reg.ctrl_reg4.f_fth = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG4, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG4, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.f_fth = val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG4, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief   fifo_threshold_on_int: [get]  FIFO watermark status
-  *                                        on INT_DRDY pin.
+  * @brief  FIFO watermark status on INT_DRDY pin.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of f_fth in reg CTRL_REG4
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of f_fth in reg CTRL_REG4.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_fifo_threshold_on_int_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg4_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG4, &reg.byte, 1);
-  *val = reg.ctrl_reg4.f_fth;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG4, (uint8_t*)&reg, 1);
+  *val = reg.f_fth;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_empty_on_int: [set]  FIFO empty flag on INT_DRDY pin.
+  * @brief  FIFO empty flag on INT_DRDY pin.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of f_empty in reg CTRL_REG4
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of f_empty in reg CTRL_REG4
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_fifo_empty_on_int_set(lps25hb_ctx_t *ctx, uint8_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg4_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG4, &reg.byte, 1);
-  reg.ctrl_reg4.f_empty = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG4, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG4, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.f_empty = val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG4, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  fifo_empty_on_int: [get]  FIFO empty flag on INT_DRDY pin.
+  * @brief  FIFO empty flag on INT_DRDY pin.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of f_empty in reg CTRL_REG4
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of f_empty in reg CTRL_REG4.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_fifo_empty_on_int_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg4_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG4, &reg.byte, 1);
-  *val = reg.ctrl_reg4.f_empty;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG4, (uint8_t*)&reg, 1);
+  *val = reg.f_empty;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief   sign_of_int_threshold: [set]  Enable interrupt generation on
-  *                                        pressure low/high event.
+  * @brief  Enable interrupt generation on pressure low/high event.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_pe_t: change the values of pe in reg INTERRUPT_CFG
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of pe in reg INTERRUPT_CFG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_sign_of_int_threshold_set(lps25hb_ctx_t *ctx,
                                           lps25hb_pe_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_interrupt_cfg_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_INTERRUPT_CFG, &reg.byte, 1);
-  reg.interrupt_cfg.pe = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_INTERRUPT_CFG, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_INTERRUPT_CFG, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.pe = (uint8_t)val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_INTERRUPT_CFG, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief   sign_of_int_threshold: [get]  Enable interrupt generation on
-  *                                        pressure low/high event.
+  * @brief  Enable interrupt generation on pressure low/high event.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_pe_t: Get the values of pe in reg INTERRUPT_CFG
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of pe in reg INTERRUPT_CFG.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_sign_of_int_threshold_get(lps25hb_ctx_t *ctx,
                                           lps25hb_pe_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_interrupt_cfg_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_INTERRUPT_CFG, &reg.byte, 1);
-  *val = (lps25hb_pe_t) reg.interrupt_cfg.pe;
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_INTERRUPT_CFG, (uint8_t*)&reg, 1);
+  switch (reg.pe){
+    case LPS25HB_NO_THRESHOLD:
+      *val = LPS25HB_NO_THRESHOLD;
+      break;
+    case LPS25HB_POSITIVE:
+      *val = LPS25HB_POSITIVE;
+      break;
+    case LPS25HB_NEGATIVE:
+      *val = LPS25HB_NEGATIVE;
+      break;
+    case LPS25HB_BOTH:
+      *val = LPS25HB_BOTH;
+      break;
+    default:
+      *val = LPS25HB_NO_THRESHOLD;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief   int_notification_mode: [set]  Interrupt request to the
-  *                                        INT_SOURCE (25h) register
-  *                                        mode (pulsed / latched)
+  * @brief  Interrupt request to the INT_SOURCE (25h) register mode.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_lir_t: change the values of lir in reg INTERRUPT_CFG
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of lir in reg INTERRUPT_CFG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_int_notification_mode_set(lps25hb_ctx_t *ctx,
                                           lps25hb_lir_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_interrupt_cfg_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_INTERRUPT_CFG, &reg.byte, 1);
-  reg.interrupt_cfg.lir = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_INTERRUPT_CFG, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_INTERRUPT_CFG, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.lir = (uint8_t)val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_INTERRUPT_CFG, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief   int_notification_mode: [get]  Interrupt request to the
-  *                                        INT_SOURCE (25h) register mode
-  *                                        (pulsed / latched)
+  * @brief  Interrupt request to the  INT_SOURCE (25h) register mode.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_lir_t: Get the values of lir in reg INTERRUPT_CFG
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of lir in reg INTERRUPT_CFG.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_int_notification_mode_get(lps25hb_ctx_t *ctx,
                                           lps25hb_lir_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_interrupt_cfg_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_INTERRUPT_CFG, &reg.byte, 1);
-  *val = (lps25hb_lir_t) reg.interrupt_cfg.lir;
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_INTERRUPT_CFG, (uint8_t*)&reg, 1);
+  switch (reg.lir){
+    case LPS25HB_INT_PULSED:
+      *val = LPS25HB_INT_PULSED;
+      break;
+    case LPS25HB_INT_LATCHED:
+      *val = LPS25HB_INT_LATCHED;
+      break;
+    default:
+      *val = LPS25HB_INT_PULSED;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  int_source: [get]  Interrupt source register
+  * @brief  Interrupt source register[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_int_source_t: registers INT_SOURCE
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get registers INT_SOURCE.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_int_source_get(lps25hb_ctx_t *ctx, lps25hb_int_source_t *val)
 {
-  return lps25hb_read_reg(ctx, LPS25HB_INT_SOURCE, (uint8_t*) val, 1);
+  int32_t ret;
+  ret = lps25hb_read_reg(ctx, LPS25HB_INT_SOURCE, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
-  * @brief  int_on_press_high: [get]  Differential pressure high
-  *                                   interrupt flag.
+  * @brief  Differential pressure high interrupt flag.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of ph in reg INT_SOURCE
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of ph in reg INT_SOURCE.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_int_on_press_high_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_int_source_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_INT_SOURCE, &reg.byte, 1);
-  *val = reg.int_source.ph;
+  ret = lps25hb_read_reg(ctx, LPS25HB_INT_SOURCE, (uint8_t*)&reg, 1);
+  *val = reg.ph;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  int_on_press_low: [get]  Differential pressure low
-  *                                  interrupt flag.
+  * @brief  Differential pressure low interrupt flag.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of pl in reg INT_SOURCE
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of pl in reg INT_SOURCE.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_int_on_press_low_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_int_source_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_INT_SOURCE, &reg.byte, 1);
-  *val = reg.int_source.pl;
+  ret = lps25hb_read_reg(ctx, LPS25HB_INT_SOURCE, (uint8_t*)&reg, 1);
+  *val = reg.pl;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  interrupt_event: [get]  Interrupt active flag.
+  * @brief  Interrupt active flag.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of ia in reg INT_SOURCE
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of ia in reg INT_SOURCE
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_interrupt_event_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_int_source_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_INT_SOURCE, &reg.byte, 1);
-  *val = reg.int_source.ia;
+  ret = lps25hb_read_reg(ctx, LPS25HB_INT_SOURCE, (uint8_t*)&reg, 1);
+  *val = reg.ia;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  int_threshold: [set]  User-defined threshold value for
-  *                              pressure interrupt event
+  * @brief  User-defined threshold value for pressure interrupt event[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that contains data to write
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  buff   Buffer that contains data to write
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_int_threshold_set(lps25hb_ctx_t *ctx, uint8_t *buff)
 {
-  return lps25hb_read_reg(ctx, LPS25HB_THS_P_L,  buff, 2);
+  int32_t ret;
+  ret = lps25hb_read_reg(ctx, LPS25HB_THS_P_L,  buff, 2);
+  return ret;
 }
 
 /**
-  * @brief  int_threshold: [get]  User-defined threshold value for
-  *                              pressure interrupt event
+  * @brief  User-defined threshold value for pressure interrupt event[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  buff   Buffer that stores data read.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_int_threshold_get(lps25hb_ctx_t *ctx, uint8_t *buff)
 {
-  return lps25hb_read_reg(ctx, LPS25HB_THS_P_L,  buff, 2);
+  int32_t ret;
+  ret = lps25hb_read_reg(ctx, LPS25HB_THS_P_L,  buff, 2);
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup  fifo
+  * @defgroup   LPS25HB_fifo
   * @brief   This section group all the functions concerning the fifo usage
   * @{
+  *
   */
 
 /**
-  * @brief   stop_on_fifo_threshold: [set]  Stop on FIFO watermark.
-  *                                         Enable FIFO watermark level use.
+  * @brief  Stop on FIFO watermark. Enable FIFO watermark level use.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of stop_on_fth in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of stop_on_fth in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_stop_on_fifo_threshold_set(lps25hb_ctx_t *ctx, uint8_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-  reg.ctrl_reg2.stop_on_fth = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.stop_on_fth = val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief   stop_on_fifo_threshold: [get]  Stop on FIFO watermark.
-  *                                         Enable FIFO watermark
-  *                                         level use.
+  * @brief  Stop on FIFO watermark. Enable FIFO watermark level use.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of stop_on_fth in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of stop_on_fth in reg CTRL_REG2.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_stop_on_fifo_threshold_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-  *val = reg.ctrl_reg2.stop_on_fth;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  *val = reg.stop_on_fth;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo: [set] FIFOenable.
+  * @brief  FIFOenable.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of fifo_en in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of fifo_en in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_fifo_set(lps25hb_ctx_t *ctx, uint8_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-  reg.ctrl_reg2.fifo_en = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.fifo_en = val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  fifo: [get] FIFOenable.
+  * @brief  FIFOenable.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of fifo_en in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of fifo_en in reg CTRL_REG2.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_fifo_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-  *val = reg.ctrl_reg2.fifo_en;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  *val = reg.fifo_en;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_watermark: [set]  FIFO watermark level selection.
+  * @brief  FIFO watermark level selection.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of wtm_point in reg FIFO_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of wtm_point in reg FIFO_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_fifo_watermark_set(lps25hb_ctx_t *ctx, uint8_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_fifo_ctrl_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_FIFO_CTRL, &reg.byte, 1);
-  reg.fifo_ctrl.wtm_point = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_FIFO_CTRL, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_FIFO_CTRL, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.wtm_point = val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_FIFO_CTRL, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  fifo_watermark: [get]  FIFO watermark level selection.
+  * @brief  FIFO watermark level selection.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of wtm_point in reg FIFO_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of wtm_point in reg FIFO_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_fifo_watermark_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_fifo_ctrl_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_FIFO_CTRL, &reg.byte, 1);
-  *val = reg.fifo_ctrl.wtm_point;
+  ret = lps25hb_read_reg(ctx, LPS25HB_FIFO_CTRL, (uint8_t*)&reg, 1);
+  *val = reg.wtm_point;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_mode: [set]  FIFO mode selection.
+  * @brief  FIFO mode selection.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_f_mode_t: change the values of f_mode in reg FIFO_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of f_mode in reg FIFO_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_fifo_mode_set(lps25hb_ctx_t *ctx, lps25hb_f_mode_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_fifo_ctrl_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_FIFO_CTRL, &reg.byte, 1);
-  reg.fifo_ctrl.f_mode = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_FIFO_CTRL, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_FIFO_CTRL, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.f_mode = (uint8_t)val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_FIFO_CTRL, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  fifo_mode: [get]  FIFO mode selection.
+  * @brief  FIFO mode selection.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_f_mode_t: Get the values of f_mode in reg FIFO_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of f_mode in reg FIFO_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_fifo_mode_get(lps25hb_ctx_t *ctx, lps25hb_f_mode_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_fifo_ctrl_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_FIFO_CTRL, &reg.byte, 1);
-  *val = (lps25hb_f_mode_t) reg.fifo_ctrl.f_mode;
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_FIFO_CTRL, (uint8_t*)&reg, 1);
+  switch (reg.f_mode){
+    case LPS25HB_BYPASS_MODE:
+      *val = LPS25HB_BYPASS_MODE;
+      break;
+    case LPS25HB_FIFO_MODE:
+      *val = LPS25HB_FIFO_MODE;
+      break;
+    case LPS25HB_STREAM_MODE:
+      *val = LPS25HB_STREAM_MODE;
+      break;
+    case LPS25HB_Stream_to_FIFO_mode:
+      *val = LPS25HB_Stream_to_FIFO_mode;
+      break;
+    case LPS25HB_BYPASS_TO_STREAM_MODE:
+      *val = LPS25HB_BYPASS_TO_STREAM_MODE;
+      break;
+    case LPS25HB_MEAN_MODE:
+      *val = LPS25HB_MEAN_MODE;
+      break;
+    case LPS25HB_BYPASS_TO_FIFO_MODE:
+      *val = LPS25HB_BYPASS_TO_FIFO_MODE;
+      break;
+    default:
+      *val = LPS25HB_BYPASS_MODE;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  fifo_status: [get]  FIFO status register.
+  * @brief  FIFO status register. [get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_: registers FIFO_STATUS
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  lps25hb_: registers FIFO_STATUS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps25hb_fifo_status_get(lps25hb_ctx_t *ctx, lps25hb_fifo_status_t *val)
+int32_t lps25hb_fifo_status_get(lps25hb_ctx_t *ctx,
+                                lps25hb_fifo_status_t *val)
 {
-  return lps25hb_read_reg(ctx, LPS25HB_FIFO_STATUS, (uint8_t*) val, 1);
+  int32_t ret;
+  ret = lps25hb_read_reg(ctx, LPS25HB_FIFO_STATUS, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
-  * @brief  fifo_data_level: [get]  FIFO stored data level.
+  * @brief  FIFO stored data level.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of fss in reg FIFO_STATUS
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of fss in reg FIFO_STATUS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_fifo_data_level_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_fifo_status_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_FIFO_STATUS, &reg.byte, 1);
-  *val = reg.fifo_status.fss;
+  ret = lps25hb_read_reg(ctx, LPS25HB_FIFO_STATUS, (uint8_t*)&reg, 1);
+  *val = reg.fss;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_empty_flag: [get]  Empty FIFO status flag.
+  * @brief  Empty FIFO status flag.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of empty_fifo in reg FIFO_STATUS
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of empty_fifo in reg FIFO_STATUS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_fifo_empty_flag_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_fifo_status_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_FIFO_STATUS, &reg.byte, 1);
-  *val = reg.fifo_status.empty_fifo;
+  ret = lps25hb_read_reg(ctx, LPS25HB_FIFO_STATUS, (uint8_t*)&reg, 1);
+  *val = reg.empty_fifo;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_ovr_flag: [get]  FIFO overrun status flag.
+  * @brief  FIFO overrun status flag.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of ovr in reg FIFO_STATUS
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of ovr in reg FIFO_STATUS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_fifo_ovr_flag_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_fifo_status_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_FIFO_STATUS, &reg.byte, 1);
-  *val = reg.fifo_status.ovr;
+  ret = lps25hb_read_reg(ctx, LPS25HB_FIFO_STATUS, (uint8_t*)&reg, 1);
+  *val = reg.ovr;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_fth_flag: [get]  FIFO watermark status.
+  * @brief  FIFO watermark status.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of fth_fifo in reg FIFO_STATUS
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of fth_fifo in reg FIFO_STATUS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_fifo_fth_flag_get(lps25hb_ctx_t *ctx, uint8_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_fifo_status_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_FIFO_STATUS, &reg.byte, 1);
-  *val = reg.fifo_status.fth_fifo;
+  ret = lps25hb_read_reg(ctx, LPS25HB_FIFO_STATUS, (uint8_t*)&reg, 1);
+  *val = reg.fth_fifo;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  serial_interface
-  * @brief   This section group all the functions concerning serial
-  *          interface management
-  * @{
-  */
-
-/**
-  * @brief  spi_mode: [set]  SPI Serial Interface Mode selection.
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_sim_t: change the values of sim in reg CTRL_REG1
+  */
+
+/**
+  * @defgroup   LPS25HB_serial_interface
+  * @brief      This section group all the functions concerning serial
+  *             interface management
+  * @{
+  *
+  */
+
+/**
+  * @brief  SPI Serial Interface Mode selection.[set]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of sim in reg CTRL_REG1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_spi_mode_set(lps25hb_ctx_t *ctx, lps25hb_sim_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg1_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, &reg.byte, 1);
-  reg.ctrl_reg1.sim = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG1, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.sim = (uint8_t)val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG1, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  spi_mode: [get]  SPI Serial Interface Mode selection.
+  * @brief  SPI Serial Interface Mode selection.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_sim_t: Get the values of sim in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of sim in reg CTRL_REG1.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_spi_mode_get(lps25hb_ctx_t *ctx, lps25hb_sim_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg1_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, &reg.byte, 1);
-  *val = (lps25hb_sim_t) reg.ctrl_reg1.sim;
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG1, (uint8_t*)&reg, 1);
+  switch (reg.sim){
+    case LPS25HB_SPI_4_WIRE:
+      *val = LPS25HB_SPI_4_WIRE;
+      break;
+    case LPS25HB_SPI_3_WIRE:
+      *val = LPS25HB_SPI_3_WIRE;
+      break;
+    default:
+      *val = LPS25HB_SPI_4_WIRE;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  i2c_interface: [set]  Disable I2C interface.
+  * @brief  Disable I2C interface.[set]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_i2c_dis_t: change the values of i2c_dis in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of i2c_dis in reg CTRL_REG2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_i2c_interface_set(lps25hb_ctx_t *ctx, lps25hb_i2c_dis_t val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-  reg.ctrl_reg2.i2c_dis = val;
-  mm_error = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  if(ret == 0){
+    reg.i2c_dis = (uint8_t)val;
+    ret = lps25hb_write_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  }
+  return ret;
 }
 
 /**
-  * @brief  i2c_interface: [get]  Disable I2C interface.
+  * @brief  Disable I2C interface.[get]
   *
-  * @param  lps25hb_ctx_t *ctx: read / write interface definitions
-  * @param  lps25hb_i2c_dis_t: Get the values of i2c_dis in reg CTRL_REG2
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of i2c_dis in reg CTRL_REG2.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lps25hb_i2c_interface_get(lps25hb_ctx_t *ctx, lps25hb_i2c_dis_t *val)
 {
-  lps25hb_reg_t reg;
-  int32_t mm_error;
+  lps25hb_ctrl_reg2_t reg;
+  int32_t ret;
 
-  mm_error = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, &reg.byte, 1);
-  *val = (lps25hb_i2c_dis_t) reg.ctrl_reg2.i2c_dis;
-
-  return mm_error;
+  ret = lps25hb_read_reg(ctx, LPS25HB_CTRL_REG2, (uint8_t*)&reg, 1);
+  switch (reg.i2c_dis){
+    case LPS25HB_I2C_ENABLE:
+      *val = LPS25HB_I2C_ENABLE;
+      break;
+    case LPS25HB_I2C_DISABLE:
+      *val = LPS25HB_I2C_DISABLE;
+      break;
+    default:
+      *val = LPS25HB_I2C_ENABLE;
+      break;
+  }
+  return ret;
 }
 
 /**
   * @}
+  *
+  */
+
+/**
+  * @}
+  *
   */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

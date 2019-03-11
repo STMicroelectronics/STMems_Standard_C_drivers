@@ -1,42 +1,43 @@
 /*
  ******************************************************************************
  * @file    lps25hb_reg.h
- * @author  MEMS Software Solution Team
- * @date    20-September-2017
+ * @author  Sensors Software Solution Team
  * @brief   This file contains all the functions prototypes for the
  *          lps25hb_reg.c driver.
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __LPS25HB_DRIVER__H
-#define __LPS25HB_DRIVER__H
+#ifndef LPS25HB_REGS_H
+#define LPS25HB_REGS_H
 
 #ifdef __cplusplus
   extern "C" {
@@ -59,6 +60,18 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
+/**
+  * @defgroup axisXbitXX_t
+  * @brief    These unions are useful to represent different sensors data type.
+  *           These unions are not need by the driver.
+  *
+  *           REMOVING the unions you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  *
+  * @{
+  *
+  */
+
 typedef union{
   int16_t i16bit[3];
   uint8_t u8bit[6];
@@ -78,6 +91,11 @@ typedef union{
   int32_t i32bit;
   uint8_t u8bit[4];
 } axis1bit32_t;
+
+/**
+  * @}
+  *
+  */
 
 typedef struct{
   uint8_t bit0       : 1;
@@ -100,8 +118,12 @@ typedef struct{
   *
   */
 
-/** @defgroup lps25hb_interface
+  /** @addtogroup  LPS25HB_Interfaces_Functions
+  * @brief       This section provide a set of functions used to read and
+  *              write a generic register of the device.
+  *              MANDATORY: return 0 -> no Error.
   * @{
+  *
   */
 
 typedef int32_t (*lps25hb_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
@@ -117,47 +139,38 @@ typedef struct {
 
 /**
   * @}
+  *
   */
 
-
-/** @defgroup lps25hb_Infos
+/** @defgroup LPS25HB_Infos
   * @{
+  *
   */
-  /** I2C Device Address 8 bit format if SA0=0 -> B9 if SA0=1 -> BB **/
-#define LPS25HB_I2C_ADD_L    0xB9
-#define LPS25HB_I2C_ADD_H    0xBB
+
+/** I2C Device Address 8 bit format if SA0=0 -> B9 if SA0=1 -> BB **/
+#define LPS25HB_I2C_ADD_L    0xB9U
+#define LPS25HB_I2C_ADD_H    0xBBU
 
 /** Device Identification (Who am I) **/
-#define LPS25HB_ID             0xBD
+#define LPS25HB_ID             0xBDU
 
 /**
   * @}
+  *
   */
 
-/**
-  * @defgroup lps25hb_Sensitivity
-  * @{
-  */
-
-#define LPS25HB_FROM_LSB_TO_hPa(lsb)      (float)( lsb / 4096.0f )
-#define LPS25HB_FROM_LSB_TO_degC(lsb)    ((float)( lsb / 480.0f ) + 42.5f )
-
-/**
-  * @}
-  */
-
-#define LPS25HB_REF_P_XL        0x08
-#define LPS25HB_REF_P_L         0x09
-#define LPS25HB_REF_P_H         0x0A
-#define LPS25HB_WHO_AM_I        0x0F
-#define LPS25HB_RES_CONF        0x10
+#define LPS25HB_REF_P_XL        0x08U
+#define LPS25HB_REF_P_L         0x09U
+#define LPS25HB_REF_P_H         0x0AU
+#define LPS25HB_WHO_AM_I        0x0FU
+#define LPS25HB_RES_CONF        0x10U
 typedef struct {
   uint8_t avgp             : 2;
   uint8_t avgt             : 2;
   uint8_t not_used_01      : 4;
 } lps25hb_res_conf_t;
 
-#define LPS25HB_CTRL_REG1       0x20
+#define LPS25HB_CTRL_REG1       0x20U
 typedef struct {
   uint8_t sim              : 1;
   uint8_t reset_az         : 1;
@@ -166,7 +179,7 @@ typedef struct {
   uint8_t odr              : 4; /* pd + odr -> odr */
 } lps25hb_ctrl_reg1_t;
 
-#define LPS25HB_CTRL_REG2       0x21
+#define LPS25HB_CTRL_REG2       0x21U
 typedef struct {
   uint8_t one_shot         : 1;
   uint8_t autozero         : 1;
@@ -178,7 +191,7 @@ typedef struct {
   uint8_t boot             : 1;
 } lps25hb_ctrl_reg2_t;
 
-#define LPS25HB_CTRL_REG3       0x22
+#define LPS25HB_CTRL_REG3       0x22U
 typedef struct {
   uint8_t int_s           : 2;
   uint8_t not_used_01     : 4;
@@ -186,7 +199,7 @@ typedef struct {
   uint8_t int_h_l         : 1;
 } lps25hb_ctrl_reg3_t;
 
-#define LPS25HB_CTRL_REG4       0x23
+#define LPS25HB_CTRL_REG4       0x23U
 typedef struct {
   uint8_t drdy            : 1;
   uint8_t f_ovr           : 1;
@@ -195,14 +208,14 @@ typedef struct {
   uint8_t not_used_01     : 4;
 } lps25hb_ctrl_reg4_t;
 
-#define LPS25HB_INTERRUPT_CFG   0x24
+#define LPS25HB_INTERRUPT_CFG   0x24U
 typedef struct {
   uint8_t pe              : 2;  /* pl_e + ph_e -> pe */
   uint8_t lir             : 1;
   uint8_t not_used_01     : 5;
 } lps25hb_interrupt_cfg_t;
 
-#define LPS25HB_INT_SOURCE      0x25
+#define LPS25HB_INT_SOURCE      0x25U
 typedef struct {
   uint8_t ph              : 1;
   uint8_t pl              : 1;
@@ -210,7 +223,7 @@ typedef struct {
   uint8_t not_used_01     : 5;
 } lps25hb_int_source_t;
 
-#define LPS25HB_STATUS_REG      0x27
+#define LPS25HB_STATUS_REG      0x27U
 typedef struct {
   uint8_t t_da            : 1;
   uint8_t p_da            : 1;
@@ -220,18 +233,18 @@ typedef struct {
   uint8_t not_used_02     : 2;
 } lps25hb_status_reg_t;
 
-#define LPS25HB_PRESS_OUT_XL    0x28
-#define LPS25HB_PRESS_OUT_L     0x29
-#define LPS25HB_PRESS_OUT_H     0x2A
-#define LPS25HB_TEMP_OUT_L      0x2B
-#define LPS25HB_TEMP_OUT_H      0x2C
-#define LPS25HB_FIFO_CTRL       0x2E
+#define LPS25HB_PRESS_OUT_XL    0x28U
+#define LPS25HB_PRESS_OUT_L     0x29U
+#define LPS25HB_PRESS_OUT_H     0x2AU
+#define LPS25HB_TEMP_OUT_L      0x2BU
+#define LPS25HB_TEMP_OUT_H      0x2CU
+#define LPS25HB_FIFO_CTRL       0x2EU
 typedef struct {
   uint8_t wtm_point       : 5;
   uint8_t f_mode          : 3;
 } lps25hb_fifo_ctrl_t;
 
-#define LPS25HB_FIFO_STATUS     0x2F
+#define LPS25HB_FIFO_STATUS     0x2FU
 typedef struct {
   uint8_t fss             : 5;
   uint8_t empty_fifo      : 1;
@@ -239,11 +252,23 @@ typedef struct {
   uint8_t fth_fifo        : 1;
 } lps25hb_fifo_status_t;
 
-#define LPS25HB_THS_P_L         0x30
-#define LPS25HB_THS_P_H         0x31
-#define LPS25HB_RPDS_L          0x39
-#define LPS25HB_RPDS_H          0x3A
+#define LPS25HB_THS_P_L         0x30U
+#define LPS25HB_THS_P_H         0x31U
+#define LPS25HB_RPDS_L          0x39U
+#define LPS25HB_RPDS_H          0x3AU
 
+/**
+  * @defgroup LPS25HB_Register_Union
+  * @brief    This union group all the registers that has a bit-field
+  *           description.
+  *           This union is useful but not need by the driver.
+  *
+  *           REMOVING this union you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  *
+  * @{
+  *
+  */
 typedef union{
   lps25hb_res_conf_t            res_conf;
   lps25hb_ctrl_reg1_t           ctrl_reg1;
@@ -259,8 +284,18 @@ typedef union{
   uint8_t                       byte;
 } lps25hb_reg_t;
 
-int32_t lps25hb_read_reg(lps25hb_ctx_t *ctx, uint8_t reg, uint8_t* data, uint16_t len);
-int32_t lps25hb_write_reg(lps25hb_ctx_t *ctx, uint8_t reg, uint8_t* data, uint16_t len);
+/**
+  * @}
+  *
+  */
+
+int32_t lps25hb_read_reg(lps25hb_ctx_t *ctx, uint8_t reg, uint8_t* data,
+                         uint16_t len);
+int32_t lps25hb_write_reg(lps25hb_ctx_t *ctx, uint8_t reg, uint8_t* data,
+                          uint16_t len);
+
+extern float_t lps25hb_from_lsb_to_hpa(uint32_t lsb);
+extern float_t lps25hb_from_lsb_to_degc(int16_t lsb);
 
 int32_t lps25hb_pressure_ref_set(lps25hb_ctx_t *ctx, uint8_t *buff);
 int32_t lps25hb_pressure_ref_get(lps25hb_ctx_t *ctx, uint8_t *buff);
@@ -378,15 +413,19 @@ typedef enum {
   LPS25HB_NEGATIVE     = 2,
   LPS25HB_BOTH         = 3,
 } lps25hb_pe_t;
-int32_t lps25hb_sign_of_int_threshold_set(lps25hb_ctx_t *ctx, lps25hb_pe_t val);
-int32_t lps25hb_sign_of_int_threshold_get(lps25hb_ctx_t *ctx, lps25hb_pe_t *val);
+int32_t lps25hb_sign_of_int_threshold_set(lps25hb_ctx_t *ctx,
+                                          lps25hb_pe_t val);
+int32_t lps25hb_sign_of_int_threshold_get(lps25hb_ctx_t *ctx,
+                                          lps25hb_pe_t *val);
 
 typedef enum {
   LPS25HB_INT_PULSED = 0,
   LPS25HB_INT_LATCHED = 1,
 } lps25hb_lir_t;
-int32_t lps25hb_int_notification_mode_set(lps25hb_ctx_t *ctx, lps25hb_lir_t val);
-int32_t lps25hb_int_notification_mode_get(lps25hb_ctx_t *ctx, lps25hb_lir_t *val);
+int32_t lps25hb_int_notification_mode_set(lps25hb_ctx_t *ctx,
+                                          lps25hb_lir_t val);
+int32_t lps25hb_int_notification_mode_get(lps25hb_ctx_t *ctx,
+                                          lps25hb_lir_t *val);
 
 int32_t lps25hb_int_source_get(lps25hb_ctx_t *ctx, lps25hb_int_source_t *val);
 
@@ -420,7 +459,8 @@ typedef enum {
 int32_t lps25hb_fifo_mode_set(lps25hb_ctx_t *ctx, lps25hb_f_mode_t val);
 int32_t lps25hb_fifo_mode_get(lps25hb_ctx_t *ctx, lps25hb_f_mode_t *val);
 
-int32_t lps25hb_fifo_status_get(lps25hb_ctx_t *ctx, lps25hb_fifo_status_t *val);
+int32_t lps25hb_fifo_status_get(lps25hb_ctx_t *ctx,
+                                lps25hb_fifo_status_t *val);
 
 int32_t lps25hb_fifo_data_level_get(lps25hb_ctx_t *ctx, uint8_t *val);
 
@@ -445,13 +485,14 @@ int32_t lps25hb_i2c_interface_set(lps25hb_ctx_t *ctx, lps25hb_i2c_dis_t val);
 int32_t lps25hb_i2c_interface_get(lps25hb_ctx_t *ctx, lps25hb_i2c_dis_t *val);
 
 /**
-  * @}
+  *@}
+  *
   */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*__LPS25HB_DRIVER__H */
+#endif /* LPS25HB_REGS_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
