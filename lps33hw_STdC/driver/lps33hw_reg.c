@@ -100,7 +100,7 @@ int32_t lps33hw_write_reg(lps33hw_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-float_t lps33hw_from_lsb_to_hpa(int16_t lsb)
+float_t lps33hw_from_lsb_to_hpa(uint32_t lsb)
 {
   return ( (float_t)lsb / 4096.0f );
 }
