@@ -2630,11 +2630,16 @@ int32_t ism330dlc_aux_den_mode_set(ism330dlc_ctx_t *ctx,
 int32_t ism330dlc_aux_den_mode_get(ism330dlc_ctx_t *ctx,
                                    ism330dlc_lvl_ois_t *val)
 {
-  ism330dlc_int_ois_t reg;
+  ism330dlc_ctrl1_ois_t ctrl1_ois;
+  ism330dlc_int_ois_t int_ois;
   int32_t ret;
 
-  ret = ism330dlc_read_reg(ctx, ISM330DLC_INT_OIS, (uint8_t*)&reg, 1);
-  switch ( reg.lvl2_ois ) {
+  ret = ism330dlc_read_reg(ctx, ISM330DLC_INT_OIS, (uint8_t*)&int_ois, 1);
+  if(ret == 0){
+    ret = ism330dlc_read_reg(ctx, ISM330DLC_CTRL1_OIS,
+                             (uint8_t*)&ctrl1_ois, 1);
+  }
+  switch ( (ctrl1_ois.lvl1_ois << 1) | int_ois.lvl2_ois) {
     case ISM330DLC_AUX_DEN_DISABLE:
       *val = ISM330DLC_AUX_DEN_DISABLE;
       break;
