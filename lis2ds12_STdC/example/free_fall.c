@@ -182,7 +182,7 @@ void example_main_free_fall_lis2ds12(void)
      * Check if Free Fall events
      */
     lis2ds12_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.reg.wake_up_src.ff_ia)
+    if (all_source.wake_up_src.ff_ia)
     {
       sprintf((char*)tx_buffer, "Free Fall Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));

@@ -198,7 +198,7 @@ void example_main_single_tap_lis2ds12(void)
     /*
      * Check if Single Tap events
      */
-    if (all_source.reg.tap_src.single_tap)
+    if (all_source.tap_src.single_tap)
     {
       sprintf((char*)tx_buffer, "Tap Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));

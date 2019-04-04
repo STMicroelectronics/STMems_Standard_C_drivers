@@ -184,14 +184,14 @@ void example_main_wake_lis2ds12(void)
      * Check if Wake-Up events
      */
     lis2ds12_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.reg.wake_up_src.wu_ia)
+    if (all_source.wake_up_src.wu_ia)
     {
       sprintf((char*)tx_buffer, "Wake-Up event on ");
-      if (all_source.reg.wake_up_src.x_wu)
+      if (all_source.wake_up_src.x_wu)
         strcat((char*)tx_buffer, "X");
-      if (all_source.reg.wake_up_src.y_wu)
+      if (all_source.wake_up_src.y_wu)
         strcat((char*)tx_buffer, "Y");
-      if (all_source.reg.wake_up_src.z_wu)
+      if (all_source.wake_up_src.z_wu)
         strcat((char*)tx_buffer, "Z");
 
       strcat((char*)tx_buffer, " direction\r\n");

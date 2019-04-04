@@ -92,14 +92,9 @@
 
 /* Private variables ---------------------------------------------------------*/
 static axis3bit16_t data_raw_acceleration;
-static axis1bit16_t data_raw_temperature;
-static uint16_t acceleration_mg[3];
 static uint16_t magnitude[30];
-static uint8_t magnitude_8[30];
 
-static float temperature_degC;
 static uint8_t whoamI, rst;
-static uint8_t tx_buffer[1000];
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -230,9 +225,9 @@ void lis2ds12_14bit_module(void)
         magnitude[j++] = data_raw_acceleration.i16bit[1] >> 2;
         magnitude[j++] = data_raw_acceleration.i16bit[2] >> 2;
   */
-    magnitude[j++] = LIS2DS12_FROM_FS_4g_TO_mg(data_raw_acceleration.i16bit[0]);     
-    magnitude[j++] = LIS2DS12_FROM_FS_4g_TO_mg(data_raw_acceleration.i16bit[1]);     
-    magnitude[j++] = LIS2DS12_FROM_FS_4g_TO_mg(data_raw_acceleration.i16bit[2]);     
+    magnitude[j++] = (uint16_t)lis2ds12_from_fs4g_to_mg(data_raw_acceleration.i16bit[0]);     
+    magnitude[j++] = (uint16_t)lis2ds12_from_fs4g_to_mg(data_raw_acceleration.i16bit[1]);     
+    magnitude[j++] = (uint16_t)lis2ds12_from_fs4g_to_mg(data_raw_acceleration.i16bit[2]);     
       
   /*
     LIS2DS12_FROM_FS_2g_TO_mg(lsb)      

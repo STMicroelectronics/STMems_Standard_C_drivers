@@ -92,14 +92,9 @@
 
 /* Private variables ---------------------------------------------------------*/
 static axis3bit16_t data_raw_acceleration;
-static axis1bit16_t data_raw_temperature;
-static uint16_t acceleration_mg[3];
 static uint16_t magnitude[30];
-static uint8_t magnitude_8[30];
 
-static float temperature_degC;
 static uint8_t whoamI, rst;
-static uint8_t tx_buffer[1000];
 
 /* Extern variables ----------------------------------------------------------*/
 

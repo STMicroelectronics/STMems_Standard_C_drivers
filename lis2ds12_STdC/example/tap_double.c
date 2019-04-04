@@ -206,13 +206,13 @@ void example_main_tap_double_lis2ds12(void)
      * Check if Double Tap events
      */
     lis2ds12_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.reg.tap_src.double_tap)
+    if (all_source.tap_src.double_tap)
     {
       sprintf((char*)tx_buffer, "Double Tap Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if (all_source.reg.tap_src.single_tap)
+    if (all_source.tap_src.single_tap)
     {
       sprintf((char*)tx_buffer, "Single Tap Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));

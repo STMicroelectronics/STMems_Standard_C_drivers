@@ -207,11 +207,11 @@ void example_multi_read_fifo_lis2ds12(void)
         */
         lis2ds12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
         acceleration_mg[0] =
-          LIS2DS12_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[0]);
+          lis2ds12_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
         acceleration_mg[1] =
-          LIS2DS12_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[1]);
+          lis2ds12_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
         acceleration_mg[2] =
-          LIS2DS12_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[2]);
+          lis2ds12_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
 
         sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                 acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
