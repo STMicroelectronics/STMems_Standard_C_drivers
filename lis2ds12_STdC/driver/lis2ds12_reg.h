@@ -1,13 +1,13 @@
 /*
  ******************************************************************************
  * @file    lis2ds12_reg.h
- * @author  MEMS Software Solution Team
+ * @author  Sensors Software Solution Team
  * @brief   This file contains all the functions prototypes for the
  *          lis2ds12_reg.c driver.
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -36,8 +36,8 @@
  */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __LIS2DS12_DRIVER__H
-#define __LIS2DS12_DRIVER__H
+#ifndef LIS2DS12_REGS_H
+#define LIS2DS12_REGS_H
 
 #ifdef __cplusplus
   extern "C" {
@@ -60,6 +60,18 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
+/**
+  * @defgroup axisXbitXX_t
+  * @brief    These unions are useful to represent different sensors data type.
+  *           These unions are not need by the driver.
+  *
+  *           REMOVING the unions you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  *
+  * @{
+  *
+  */
+
 typedef union{
   int16_t i16bit[3];
   uint8_t u8bit[6];
@@ -79,6 +91,11 @@ typedef union{
   int32_t i32bit;
   uint8_t u8bit[4];
 } axis1bit32_t;
+
+/**
+  * @}
+  *
+  */
 
 typedef struct{
   uint8_t bit0       : 1;
@@ -101,8 +118,12 @@ typedef struct{
   *
   */
 
-/** @defgroup lis2ds12_interface
+/** @addtogroup  LIS2DS12_Interfaces_Functions
+  * @brief       This section provide a set of functions used to read and
+  *              write a generic register of the device.
+  *              MANDATORY: return 0 -> no Error.
   * @{
+  *
   */
 
 typedef int32_t (*lis2ds12_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
@@ -118,39 +139,27 @@ typedef struct {
 
 /**
   * @}
+  *
   */
 
-/** @defgroup lis2ds12_Infos
+/** @defgroup LIS2DS12_Infos
   * @{
+  *
   */
+
   /** I2C Device Address 8 bit format  if SA0=0 -> 0x3D if SA0=1 -> 0x3B **/
-#define LIS2DS12_I2C_ADD_L     0x3D
-#define LIS2DS12_I2C_ADD_H     0x3B
+#define LIS2DS12_I2C_ADD_L     0x3DU
+#define LIS2DS12_I2C_ADD_H     0x3BU
 
 /** Device Identification (Who am I) **/
-#define LIS2DS12_ID            0x43
+#define LIS2DS12_ID            0x43U
 
 /**
   * @}
+  *
   */
 
-/**
-  * @defgroup lis2ds12_Sensitivity
-  * @{
-  */
-
-#define LIS2DS12_FROM_FS_2g_TO_mg(lsb)    (float)(lsb *  61.0f) / 1000.0f
-#define LIS2DS12_FROM_FS_4g_TO_mg(lsb)    (float)(lsb * 122.0f) / 1000.0f
-#define LIS2DS12_FROM_FS_8g_TO_mg(lsb)    (float)(lsb * 244.0f) / 1000.0f
-#define LIS2DS12_FROM_FS_16g_TO_mg(lsb)   (float)(lsb * 488.0f) / 1000.0f
-
-#define LIS2DS12_FROM_LSB_TO_degC(lsb)  ((float)((int16_t)lsb>>8)*1.0f + 25.0f)
-
-/**
-  * @}
-  */
-
-#define LIS2DS12_SENSORHUB1_REG        0x06
+#define LIS2DS12_SENSORHUB1_REG        0x06U
 typedef struct {
   uint8_t bit0                : 1;
   uint8_t bit1                : 1;
@@ -162,7 +171,7 @@ typedef struct {
   uint8_t bit7                : 1;
 } lis2ds12_sensorhub1_reg_t;
 
-#define LIS2DS12_SENSORHUB2_REG        0x07
+#define LIS2DS12_SENSORHUB2_REG        0x07U
 typedef struct {
   uint8_t bit0                : 1;
   uint8_t bit1                : 1;
@@ -174,7 +183,7 @@ typedef struct {
   uint8_t bit7                : 1;
 } lis2ds12_sensorhub2_reg_t;
 
-#define LIS2DS12_SENSORHUB3_REG        0x08
+#define LIS2DS12_SENSORHUB3_REG        0x08U
 typedef struct {
   uint8_t bit0                : 1;
   uint8_t bit1                : 1;
@@ -186,7 +195,7 @@ typedef struct {
   uint8_t bit7                : 1;
 } lis2ds12_sensorhub3_reg_t;
 
-#define LIS2DS12_SENSORHUB4_REG        0x09
+#define LIS2DS12_SENSORHUB4_REG        0x09U
 typedef struct {
   uint8_t bit0                : 1;
   uint8_t bit1                : 1;
@@ -198,7 +207,7 @@ typedef struct {
   uint8_t bit7                : 1;
 } lis2ds12_sensorhub4_reg_t;
 
-#define LIS2DS12_SENSORHUB5_REG        0x0A
+#define LIS2DS12_SENSORHUB5_REG        0x0AU
 typedef struct {
   uint8_t bit0                : 1;
   uint8_t bit1                : 1;
@@ -210,7 +219,7 @@ typedef struct {
   uint8_t bit7                : 1;
 } lis2ds12_sensorhub5_reg_t;
 
-#define LIS2DS12_SENSORHUB6_REG        0x0B
+#define LIS2DS12_SENSORHUB6_REG        0x0BU
 typedef struct {
   uint8_t bit0                : 1;
   uint8_t bit1                : 1;
@@ -222,9 +231,9 @@ typedef struct {
   uint8_t bit7                : 1;
 } lis2ds12_sensorhub6_reg_t;
 
-#define LIS2DS12_MODULE_8BIT           0x0C
-#define LIS2DS12_WHO_AM_I              0x0F
-#define LIS2DS12_CTRL1                 0x20
+#define LIS2DS12_MODULE_8BIT           0x0CU
+#define LIS2DS12_WHO_AM_I              0x0FU
+#define LIS2DS12_CTRL1                 0x20U
 typedef struct {
   uint8_t bdu                 : 1;
   uint8_t hf_odr              : 1;
@@ -232,7 +241,7 @@ typedef struct {
   uint8_t odr                 : 4;
 } lis2ds12_ctrl1_t;
 
-#define LIS2DS12_CTRL2                 0x21
+#define LIS2DS12_CTRL2                 0x21U
 typedef struct {
   uint8_t sim                 : 1;
   uint8_t i2c_disable         : 1;
@@ -244,7 +253,7 @@ typedef struct {
   uint8_t boot                : 1;
 } lis2ds12_ctrl2_t;
 
-#define LIS2DS12_CTRL3                 0x22
+#define LIS2DS12_CTRL3                 0x22U
 typedef struct {
   uint8_t pp_od               : 1;
   uint8_t h_lactive           : 1;
@@ -255,7 +264,7 @@ typedef struct {
   uint8_t st                  : 2;
 } lis2ds12_ctrl3_t;
 
-#define LIS2DS12_CTRL4                 0x23
+#define LIS2DS12_CTRL4                 0x23U
 typedef struct {
   uint8_t int1_drdy           : 1;
   uint8_t int1_fth            : 1;
@@ -267,7 +276,7 @@ typedef struct {
   uint8_t int1_master_drdy    : 1;
 } lis2ds12_ctrl4_t;
 
-#define LIS2DS12_CTRL5                 0x24
+#define LIS2DS12_CTRL5                 0x24U
 typedef struct {
   uint8_t int2_drdy           : 1;
   uint8_t int2_fth            : 1;
@@ -279,7 +288,7 @@ typedef struct {
   uint8_t drdy_pulsed         : 1;
 } lis2ds12_ctrl5_t;
 
-#define LIS2DS12_FIFO_CTRL             0x25
+#define LIS2DS12_FIFO_CTRL             0x25U
 typedef struct {
   uint8_t if_cs_pu_dis        : 1;
   uint8_t not_used_01         : 2;
@@ -288,8 +297,8 @@ typedef struct {
   uint8_t fmode               : 3;
 } lis2ds12_fifo_ctrl_t;
 
-#define LIS2DS12_OUT_T                 0x26
-#define LIS2DS12_STATUS                0x27
+#define LIS2DS12_OUT_T                 0x26U
+#define LIS2DS12_STATUS                0x27U
 typedef struct {
   uint8_t drdy                : 1;
   uint8_t ff_ia               : 1;
@@ -301,14 +310,18 @@ typedef struct {
   uint8_t fifo_ths            : 1;
 } lis2ds12_status_t;
 
-#define LIS2DS12_OUT_X_L               0x28
-#define LIS2DS12_OUT_X_H               0x29
-#define LIS2DS12_OUT_Y_L               0x2A
-#define LIS2DS12_OUT_Y_H               0x2B
-#define LIS2DS12_OUT_Z_L               0x2C
-#define LIS2DS12_OUT_Z_H               0x2D
-#define LIS2DS12_FIFO_THS              0x2E
-#define LIS2DS12_FIFO_SRC              0x2F
+#define LIS2DS12_OUT_X_L               0x28U
+#define LIS2DS12_OUT_X_H               0x29U
+#define LIS2DS12_OUT_Y_L               0x2AU
+#define LIS2DS12_OUT_Y_H               0x2BU
+#define LIS2DS12_OUT_Z_L               0x2CU
+#define LIS2DS12_OUT_Z_H               0x2DU
+#define LIS2DS12_FIFO_THS              0x2EU
+typedef struct {
+  uint8_t fth                 : 8;
+} lis2ds12_fifo_ths_t;
+
+#define LIS2DS12_FIFO_SRC              0x2FU
 typedef struct {
   uint8_t not_used_01         : 5;
   uint8_t diff                : 1;
@@ -316,29 +329,29 @@ typedef struct {
   uint8_t fth                 : 1;
 } lis2ds12_fifo_src_t;
 
-#define LIS2DS12_FIFO_SAMPLES          0x30
-#define LIS2DS12_TAP_6D_THS            0x31
+#define LIS2DS12_FIFO_SAMPLES          0x30U
+#define LIS2DS12_TAP_6D_THS            0x31U
 typedef struct {
   uint8_t tap_ths             : 5;
   uint8_t _6d_ths             : 2;
   uint8_t _4d_en              : 1;
 } lis2ds12_tap_6d_ths_t;
 
-#define LIS2DS12_INT_DUR               0x32
+#define LIS2DS12_INT_DUR               0x32U
 typedef struct {
   uint8_t shock               : 2;
   uint8_t quiet               : 2;
   uint8_t lat                 : 4;
 } lis2ds12_int_dur_t;
 
-#define LIS2DS12_WAKE_UP_THS           0x33
+#define LIS2DS12_WAKE_UP_THS           0x33U
 typedef struct {
   uint8_t wu_ths              : 6;
   uint8_t sleep_on            : 1;
   uint8_t single_double_tap   : 1;
 } lis2ds12_wake_up_ths_t;
 
-#define LIS2DS12_WAKE_UP_DUR           0x34
+#define LIS2DS12_WAKE_UP_DUR           0x34U
 typedef struct {
   uint8_t sleep_dur           : 4;
   uint8_t int1_fss7           : 1;
@@ -346,13 +359,13 @@ typedef struct {
   uint8_t ff_dur              : 1;
 } lis2ds12_wake_up_dur_t;
 
-#define LIS2DS12_FREE_FALL             0x35
+#define LIS2DS12_FREE_FALL             0x35U
 typedef struct {
   uint8_t ff_ths              : 3;
   uint8_t ff_dur              : 5;
 } lis2ds12_free_fall_t;
 
-#define LIS2DS12_STATUS_DUP            0x36
+#define LIS2DS12_STATUS_DUP            0x36U
 typedef struct {
   uint8_t drdy                : 1;
   uint8_t ff_ia               : 1;
@@ -364,7 +377,7 @@ typedef struct {
   uint8_t ovr                 : 1;
 } lis2ds12_status_dup_t;
 
-#define LIS2DS12_WAKE_UP_SRC           0x37
+#define LIS2DS12_WAKE_UP_SRC           0x37U
 typedef struct {
   uint8_t z_wu                : 1;
   uint8_t y_wu                : 1;
@@ -375,7 +388,7 @@ typedef struct {
   uint8_t not_used_01         : 2;
 } lis2ds12_wake_up_src_t;
 
-#define LIS2DS12_TAP_SRC               0x38
+#define LIS2DS12_TAP_SRC               0x38U
 typedef struct {
   uint8_t z_tap               : 1;
   uint8_t y_tap               : 1;
@@ -387,7 +400,7 @@ typedef struct {
   uint8_t not_used_01         : 1;
 } lis2ds12_tap_src_t;
 
-#define LIS2DS12_6D_SRC                0x39
+#define LIS2DS12_6D_SRC                0x39U
 typedef struct {
   uint8_t xl                  : 1;
   uint8_t xh                  : 1;
@@ -399,16 +412,16 @@ typedef struct {
   uint8_t not_used_01         : 1;
 } lis2ds12_6d_src_t;
 
-#define LIS2DS12_STEP_COUNTER_MINTHS   0x3A
+#define LIS2DS12_STEP_COUNTER_MINTHS   0x3AU
 typedef struct {
   uint8_t sc_mths             : 6;
   uint8_t pedo4g              : 1;
   uint8_t rst_nstep           : 1;
 } lis2ds12_step_counter_minths_t;
 
-#define LIS2DS12_STEP_COUNTER_L        0x3B
-#define LIS2DS12_STEP_COUNTER_H        0x3C
-#define LIS2DS12_FUNC_CK_GATE          0x3D
+#define LIS2DS12_STEP_COUNTER_L        0x3BU
+#define LIS2DS12_STEP_COUNTER_H        0x3CU
+#define LIS2DS12_FUNC_CK_GATE          0x3DU
 typedef struct {
   uint8_t ck_gate_func        : 1;
   uint8_t step_detect         : 1;
@@ -419,7 +432,7 @@ typedef struct {
   uint8_t tilt_int            : 1;
 } lis2ds12_func_ck_gate_t;
 
-#define LIS2DS12_FUNC_SRC              0x3E
+#define LIS2DS12_FUNC_SRC              0x3EU
 typedef struct {
   uint8_t sensorhub_end_op    : 1;
   uint8_t module_ready        : 1;
@@ -427,7 +440,7 @@ typedef struct {
   uint8_t not_used_01         : 5;
 } lis2ds12_func_src_t;
 
-#define LIS2DS12_FUNC_CTRL             0x3F
+#define LIS2DS12_FUNC_CTRL             0x3FU
 typedef struct {
   uint8_t step_cnt_on         : 1;
   uint8_t sign_mot_on         : 1;
@@ -438,45 +451,45 @@ typedef struct {
   uint8_t not_used_01         : 2;
 } lis2ds12_func_ctrl_t;
 
-#define LIS2DS12_PEDO_DEB_REG          0x2B
+#define LIS2DS12_PEDO_DEB_REG          0x2BU
 typedef struct {
   uint8_t deb_step            : 3;
   uint8_t deb_time            : 5;
 } lis2ds12_pedo_deb_reg_t;
 
-#define LIS2DS12_SLV0_ADD              0x30
+#define LIS2DS12_SLV0_ADD              0x30U
 typedef struct {
   uint8_t rw_0                : 1;
   uint8_t slave0_add          : 7;
 } lis2ds12_slv0_add_t;
 
-#define LIS2DS12_SLV0_SUBADD           0x31
+#define LIS2DS12_SLV0_SUBADD           0x31U
 typedef struct {
   uint8_t slave0_reg          : 8;
 } lis2ds12_slv0_subadd_t;
 
-#define LIS2DS12_SLV0_CONFIG           0x32
+#define LIS2DS12_SLV0_CONFIG           0x32U
 typedef struct {
   uint8_t slave0_numop        : 3;
   uint8_t not_used_01         : 5;
 } lis2ds12_slv0_config_t;
 
-#define LIS2DS12_DATAWRITE_SLV0        0x33
+#define LIS2DS12_DATAWRITE_SLV0        0x33U
 typedef struct {
   uint8_t slave_dataw         : 8;
 } lis2ds12_datawrite_slv0_t;
 
-#define LIS2DS12_SM_THS                0x34
+#define LIS2DS12_SM_THS                0x34U
 typedef struct {
   uint8_t sm_ths              : 8;
 } lis2ds12_sm_ths_t;
 
-#define LIS2DS12_STEP_COUNT_DELTA      0x3A
+#define LIS2DS12_STEP_COUNT_DELTA      0x3AU
 typedef struct {
   uint8_t step_count_d        : 8;
 } lis2ds12_step_count_delta_t;
 
-#define LIS2DS12_CTRL2_ADV             0x3F
+#define LIS2DS12_CTRL2_ADV             0x3FU
 typedef struct {
   uint8_t sim                 : 1;
   uint8_t i2c_disable         : 1;
@@ -488,6 +501,18 @@ typedef struct {
   uint8_t boot                : 1;
 } lis2ds12_ctrl2_adv_t;
 
+/**
+  * @defgroup LIS2DS12_Register_Union
+  * @brief    This union group all the registers that has a bit-field
+  *           description.
+  *           This union is useful but not need by the driver.
+  *
+  *           REMOVING this union you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  *
+  * @{
+  *
+  */
 typedef union{
   lis2ds12_sensorhub1_reg_t            sensorhub1_reg;
   lis2ds12_sensorhub2_reg_t            sensorhub2_reg;
@@ -527,13 +552,25 @@ typedef union{
   bitwise_t                            bitwise;
   uint8_t                              byte;
 } lis2ds12_reg_t;
+
+/**
+  * @}
+  *
+  */
+
 int32_t lis2ds12_read_reg(lis2ds12_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 int32_t lis2ds12_write_reg(lis2ds12_ctx_t *ctx, uint8_t reg, uint8_t* data,
                            uint16_t len);
 
-typedef union {
-  struct {
+extern float_t lis2ds12_from_fs2g_to_mg(int16_t lsb);
+extern float_t lis2ds12_from_fs4g_to_mg(int16_t lsb);
+extern float_t lis2ds12_from_fs8g_to_mg(int16_t lsb);
+extern float_t lis2ds12_from_fs16g_to_mg(int16_t lsb);
+
+extern float_t lis2ds12_from_lsb_to_celsius(int16_t lsb);
+
+typedef struct {
   lis2ds12_fifo_src_t       fifo_src;
   lis2ds12_status_dup_t     status_dup;
   lis2ds12_wake_up_src_t    wake_up_src;
@@ -541,12 +578,9 @@ typedef union {
   lis2ds12_6d_src_t         _6d_src;
   lis2ds12_func_ck_gate_t   func_ck_gate;
   lis2ds12_func_src_t       func_src;
-  } reg;
-  uint8_t byte[7];
-} lis2ds12_all_sources_t;
+  } lis2ds12_all_sources_t;
 int32_t lis2ds12_all_sources_get(lis2ds12_ctx_t *ctx,
                                  lis2ds12_all_sources_t *val);
-
 
 int32_t lis2ds12_block_data_update_set(lis2ds12_ctx_t *ctx, uint8_t val);
 int32_t lis2ds12_block_data_update_get(lis2ds12_ctx_t *ctx, uint8_t *val);
@@ -857,16 +891,13 @@ int32_t lis2ds12_tilt_sens_get(lis2ds12_ctx_t *ctx, uint8_t *val);
 int32_t lis2ds12_module_sens_set(lis2ds12_ctx_t *ctx, uint8_t val);
 int32_t lis2ds12_module_sens_get(lis2ds12_ctx_t *ctx, uint8_t *val);
 
-typedef union {
-  struct {
+typedef struct {
     lis2ds12_sensorhub1_reg_t  sensorhub1_reg;
     lis2ds12_sensorhub2_reg_t  sensorhub2_reg;
     lis2ds12_sensorhub3_reg_t  sensorhub3_reg;
     lis2ds12_sensorhub4_reg_t  sensorhub4_reg;
     lis2ds12_sensorhub5_reg_t  sensorhub5_reg;
     lis2ds12_sensorhub6_reg_t  sensorhub6_reg;
-  } reg;
-  uint8_t byte[6];
 } lis2ds12_sh_read_data_raw_t;
 int32_t lis2ds12_sh_read_data_raw_get(lis2ds12_ctx_t *ctx,
                                       lis2ds12_sh_read_data_raw_t *val);
@@ -904,6 +935,7 @@ int32_t lis2ds12_sh_end_op_flag_get(lis2ds12_ctx_t *ctx, uint8_t *val);
 
 /**
   * @}
+  *
   */
 
 #ifdef __cplusplus
