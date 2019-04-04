@@ -1,1255 +1,1496 @@
 /*
  ******************************************************************************
  * @file    iis3dhhc_reg.c
- * @author  MEMS Software Solution Team
- * @date    20-December-2017
+ * @author  Sensor Solutions Software Team
  * @brief   IIS3DHHC driver file
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  */
 
 #include "iis3dhhc_reg.h"
 
 /**
-  * @addtogroup  iis3dhhc
-  * @brief  This file provides a set of functions needed to drive the
-  *         iis3dhhc enanced inertial module.
+  * @defgroup  IIS3DHHC
+  * @brief     This file provides a set of functions needed to drive the
+  *            iis3dhhc enhanced inertial module.
   * @{
+  *
   */
 
 /**
-  * @addtogroup  interfaces_functions
-  * @brief  This section provide a set of functions used to read and write
-  *         a generic register of the device.
+  * @defgroup  IIS3DHHC_Interfaces_Functions
+  * @brief     This section provide a set of functions used to read and
+  *            write a generic register of the device.
+  *            MANDATORY: return 0 -> no Error.
   * @{
+  *
   */
 
 /**
   * @brief  Read generic device register
   *
-  * @param  iis3dhhc_ctx_t* ctx: read / write interface definitions
-  * @param  uint8_t reg: register to read
-  * @param  uint8_t* data: pointer to buffer that store the data read
-  * @param  uint16_t len: number of consecutive register to read
+  * @param  ctx   read / write interface definitions(ptr)
+  * @param  reg   register to read
+  * @param  data  pointer to buffer that store the data read(ptr)
+  * @param  len   number of consecutive register to read
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t iis3dhhc_read_reg(iis3dhhc_ctx_t* ctx, uint8_t reg, uint8_t* data,
                          uint16_t len)
 {
-  return ctx->read_reg(ctx->handle, reg, data, len);
+  int32_t ret;
+  ret = ctx->read_reg(ctx->handle, reg, data, len);
+  return ret;
 }
 
 /**
   * @brief  Write generic device register
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t reg: register to write
-  * @param  uint8_t* data: pointer to data to write in register reg
-  * @param  uint16_t len: number of consecutive register to write
+  * @param  ctx   read / write interface definitions(ptr)
+  * @param  reg   register to write
+  * @param  data  pointer to data to write in register reg(ptr)
+  * @param  len   number of consecutive register to write
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
-*/
+  */
 int32_t iis3dhhc_write_reg(iis3dhhc_ctx_t* ctx, uint8_t reg, uint8_t* data,
                           uint16_t len)
 {
-  return ctx->write_reg(ctx->handle, reg, data, len);
+  int32_t ret;
+  ret = ctx->write_reg(ctx->handle, reg, data, len);
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  data_generation_c
-  * @brief   This section group all the functions concerning data generation
-  * @{
-  */
-
-/**
-  * @brief  block_data_update: [set] Blockdataupdate.
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of bdu in reg CTRL_REG1
+  */
+
+  /**
+  * @defgroup    IIS3DHHC_Sensitivity
+  * @brief       These functions convert raw-data into engineering units.
+  * @{
+  *
+  */
+
+float_t iis3dhhc_from_lsb_to_mg(int16_t lsb)
+{
+  return ((float_t)lsb *0.076f);
+}
+
+float_t iis3dhhc_from_lsb_to_celsius(int16_t lsb)
+{
+  return (((float_t)lsb / 16.0f) + 25.0f);
+}
+
+/**
+  * @}
+  *
+  */
+
+/**
+  * @defgroup   IIS3DHHC_Data_generation
+  * @brief      This section groups all the functions concerning data
+  *             generation
+  * @{
+  *
+  */
+
+/**
+  * @brief  Blockdataupdate.[set]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of bdu in reg CTRL_REG1.
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_block_data_update_set(iis3dhhc_ctx_t *ctx, uint8_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, &reg.byte, 1);
-  reg.ctrl_reg1.bdu = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  if(ret == 0){
+    ctrl_reg1.bdu = val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  block_data_update: [get] Blockdataupdate.
+  * @brief  Blockdataupdate.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of bdu in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of bdu in reg CTRL_REG1.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_block_data_update_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, &reg.byte, 1);
-  *val = reg.ctrl_reg1.bdu;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  *val = ctrl_reg1.bdu;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  data_rate: [set]  Output data rate selection.
+  * @brief  Output data rate selection.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  iis3dhhc_norm_mod_en_t: change the values of norm_mod_en in
-  *                                reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of norm_mod_en in reg CTRL_REG1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_data_rate_set(iis3dhhc_ctx_t *ctx, iis3dhhc_norm_mod_en_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, &reg.byte, 1);
-  reg.ctrl_reg1.norm_mod_en = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  if(ret == 0){
+    ctrl_reg1.norm_mod_en = (uint8_t)val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  data_rate: [get]  Output data rate selection.
+  * @brief  Output data rate selection.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  iis3dhhc_norm_mod_en_t: Get the values of norm_mod_en in
-  *                                reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of norm_mod_en in reg CTRL_REG1.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_data_rate_get(iis3dhhc_ctx_t *ctx, iis3dhhc_norm_mod_en_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, &reg.byte, 1);
-  *val = (iis3dhhc_norm_mod_en_t) reg.ctrl_reg1.norm_mod_en;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
 
-  return mm_error;
+  switch (ctrl_reg1.norm_mod_en){
+    case IIS3DHHC_POWER_DOWN:
+      *val = IIS3DHHC_POWER_DOWN;
+      break;
+    case IIS3DHHC_1kHz1:
+      *val = IIS3DHHC_1kHz1;
+      break;
+    default:
+      *val = IIS3DHHC_POWER_DOWN;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  offset_temp_comp: [set]  Offset temperature compensation enable.
+  * @brief  Offset temperature compensation enable.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of off_tcomp_en in reg CTRL_REG4
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of off_tcomp_en in reg CTRL_REG4
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_offset_temp_comp_set(iis3dhhc_ctx_t *ctx, uint8_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, &reg.byte, 1);
-  reg.ctrl_reg4.off_tcomp_en = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  if(ret == 0){
+    ctrl_reg4.off_tcomp_en = val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  offset_temp_comp: [get]  Offset temperature compensation enable.
+  * @brief  Offset temperature compensation enable.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of off_tcomp_en in reg CTRL_REG4
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of off_tcomp_en in reg CTRL_REG4.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_offset_temp_comp_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, &reg.byte, 1);
-  *val = reg.ctrl_reg4.off_tcomp_en;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  *val = ctrl_reg4.off_tcomp_en;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  temperature_raw: [get]  Temperature output value.
+  * @brief  Temperature output value.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  buff   Buffer that stores data read
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_temperature_raw_get(iis3dhhc_ctx_t *ctx, uint8_t *buff)
 {
-  return iis3dhhc_read_reg(ctx, IIS3DHHC_OUT_TEMP_L, buff, 2);
+  int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_OUT_TEMP_L, buff, 2);
+  return ret;
 }
 
 /**
-  * @brief  acceleration_raw: [get]  acceleration output value.
+  * @brief  acceleration output value.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  buff   Buffer that stores data read
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_acceleration_raw_get(iis3dhhc_ctx_t *ctx, uint8_t *buff)
 {
-  return iis3dhhc_read_reg(ctx, IIS3DHHC_OUT_X_L_XL, buff, 6);
+  int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_OUT_X_L_XL, buff, 6);
+  return ret;
 }
 
 /**
-  * @brief  xl_data_ready: [get]  Acceleration set of data available.
+  * @brief  Acceleration set of data available.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of zyxda in reg STATUS
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of zyxda in reg STATUS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_xl_data_ready_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_status_t status;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_STATUS, &reg.byte, 1);
-  *val = reg.status.zyxda;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_STATUS, (uint8_t*)&status, 1);
+  *val = status.zyxda;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  xl_data_ovr: [get]  Acceleration set of data overrun.
+  * @brief  Acceleration set of data overrun.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of zyxor in reg STATUS
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of zyxor in reg STATUS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_xl_data_ovr_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_status_t status;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_STATUS, &reg.byte, 1);
-  *val = reg.status.zyxor;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_STATUS, (uint8_t*)&status, 1);
+  *val = status.zyxor;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  common
-  * @brief   This section group common usefull functions
-  * @{
-  */
-
-/**
-  * @brief  device_id: [get] DeviceWhoamI.
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  */
+
+/**
+  * @defgroup  IIS3DHHC_common
+  * @brief     This section group common useful functions
+  * @{
+  *
+  */
+
+/**
+  * @brief  DeviceWhoamI.[get]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  buff   Buffer that stores data read
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_device_id_get(iis3dhhc_ctx_t *ctx, uint8_t *buff)
 {
-  return iis3dhhc_read_reg(ctx, IIS3DHHC_WHO_AM_I, buff, 1);
+  int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_WHO_AM_I, buff, 1);
+  return ret;
 }
 
 /**
-  * @brief  reset: [set]  Software reset. Restore the default values
-  *                       in user registers.
+  * @brief  Software reset. Restore the default values in user registers.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of sw_reset in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of sw_reset in reg CTRL_REG1.
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_reset_set(iis3dhhc_ctx_t *ctx, uint8_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, &reg.byte, 1);
-  reg.ctrl_reg1.sw_reset = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  if(ret == 0){
+    ctrl_reg1.sw_reset = val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  reset: [get]  Software reset. Restore the default values
-  *                       in user registers.
+  * @brief  Software reset. Restore the default values in user registers.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of sw_reset in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of sw_reset in reg CTRL_REG1.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_reset_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, &reg.byte, 1);
-  *val = reg.ctrl_reg1.sw_reset;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  *val = ctrl_reg1.sw_reset;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  boot: [set]  Reboot memory content. Reload the
-  *                      calibration parameters.
+  * @brief  Reboot memory content. Reload the calibration parameters.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of boot in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of boot in reg CTRL_REG1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_boot_set(iis3dhhc_ctx_t *ctx, uint8_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, &reg.byte, 1);
-  reg.ctrl_reg1.boot = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  if(ret == 0){
+    ctrl_reg1.boot = val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  boot: [get]  Reboot memory content. Reload
-  *                      the calibration parameters.
+  * @brief  Reboot memory content. Reload the calibration parameters.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of boot in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of boot in reg CTRL_REG1.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_boot_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, &reg.byte, 1);
-  *val = reg.ctrl_reg1.boot;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  *val = ctrl_reg1.boot;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  self_test: [set] Selftest.
+  * @brief  Selftest.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  iis3dhhc_st_t: change the values of st in reg CTRL_REG4
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of st in reg CTRL_REG4
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_self_test_set(iis3dhhc_ctx_t *ctx, iis3dhhc_st_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, &reg.byte, 1);
-  reg.ctrl_reg4.st = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  if(ret == 0){
+    ctrl_reg4.st = (uint8_t)val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  self_test: [get] Selftest.
+  * @brief  Selftest.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  iis3dhhc_st_t: Get the values of st in reg CTRL_REG4
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of st in reg CTRL_REG4.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_self_test_get(iis3dhhc_ctx_t *ctx, iis3dhhc_st_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, &reg.byte, 1);
-  *val = (iis3dhhc_st_t) reg.ctrl_reg4.st;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
 
-  return mm_error;
+  switch (ctrl_reg4.st){
+    case IIS3DHHC_ST_DISABLE:
+      *val = IIS3DHHC_ST_DISABLE;
+      break;
+    case IIS3DHHC_ST_POSITIVE:
+      *val = IIS3DHHC_ST_POSITIVE;
+      break;
+    case IIS3DHHC_ST_NEGATIVE:
+      *val = IIS3DHHC_ST_NEGATIVE;
+      break;
+    default:
+      *val = IIS3DHHC_ST_DISABLE;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  filter_config: [set]  Digital filtering Phase/bandwidth selection.
+  * @brief  Digital filtering Phase/bandwidth selection.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  iis3dhhc_dsp_t: change the values of dsp in reg CTRL_REG4
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of dsp in reg CTRL_REG4
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_filter_config_set(iis3dhhc_ctx_t *ctx, iis3dhhc_dsp_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, &reg.byte, 1);
-  reg.ctrl_reg4.dsp = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  if(ret == 0){
+    ctrl_reg4.dsp = (uint8_t)val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  filter_config: [get]  Digital filtering Phase/bandwidth selection.
+  * @brief  Digital filtering Phase/bandwidth selection.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  iis3dhhc_dsp_t: Get the values of dsp in reg CTRL_REG4
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of dsp in reg CTRL_REG4.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_filter_config_get(iis3dhhc_ctx_t *ctx, iis3dhhc_dsp_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, &reg.byte, 1);
-  *val = (iis3dhhc_dsp_t) reg.ctrl_reg4.dsp;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
 
-  return mm_error;
+  switch (ctrl_reg4.dsp){
+    case IIS3DHHC_LINEAR_PHASE_440Hz:
+      *val = IIS3DHHC_LINEAR_PHASE_440Hz;
+      break;
+    case IIS3DHHC_LINEAR_PHASE_235Hz:
+      *val = IIS3DHHC_LINEAR_PHASE_235Hz;
+      break;
+    case IIS3DHHC_NO_LINEAR_PHASE_440Hz:
+      *val = IIS3DHHC_NO_LINEAR_PHASE_440Hz;
+      break;
+    case IIS3DHHC_NO_LINEAR_PHASE_235Hz:
+      *val = IIS3DHHC_NO_LINEAR_PHASE_235Hz;
+      break;
+    default:
+      *val = IIS3DHHC_LINEAR_PHASE_440Hz;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  status: [get] Statusregister.
+  * @brief  Statusregister.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  iis3dhhc_status_t: Registers STATUS
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get registers STATUS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_status_get(iis3dhhc_ctx_t *ctx, iis3dhhc_status_t *val)
 {
-  return iis3dhhc_read_reg(ctx, IIS3DHHC_STATUS, (uint8_t*) val, 1);
+  int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_STATUS, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  interrupts
-  * @brief   This section group all the functions that manage interrupts
-  * @{
-  */
-
-/**
-  * @brief   drdy_notification_mode: [set]  DRDY latched / pulsed, pulse
-  *                                         duration is 1/4 ODR
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  iis3dhhc_drdy_pulse_t: change the values of drdy_pulse in
-  *                               reg CTRL_REG1
+  */
+
+/**
+  * @defgroup  IIS3DHHC_interrupts
+  * @brief     This section group all the functions that manage interrupts
+  * @{
+  *
+  */
+
+/**
+  * @brief  DRDY latched / pulsed, pulse duration is 1/4 ODR.[set]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of drdy_pulse in reg CTRL_REG1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_drdy_notification_mode_set(iis3dhhc_ctx_t *ctx,
                                             iis3dhhc_drdy_pulse_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, &reg.byte, 1);
-  reg.ctrl_reg1.drdy_pulse = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  if(ret == 0){
+    ctrl_reg1.drdy_pulse = (uint8_t)val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief   drdy_notification_mode: [get]  DRDY latched / pulsed, pulse
-  *                                         duration is 1/4 ODR
+  * @brief   DRDY latched / pulsed, pulse duration is 1/4 ODR.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  iis3dhhc_drdy_pulse_t: Get the values of drdy_pulse in
-  *                               reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of drdy_pulse in reg CTRL_REG1.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_drdy_notification_mode_get(iis3dhhc_ctx_t *ctx,
                                             iis3dhhc_drdy_pulse_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, &reg.byte, 1);
-  *val = (iis3dhhc_drdy_pulse_t) reg.ctrl_reg1.drdy_pulse;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
 
-  return mm_error;
+  switch (ctrl_reg1.drdy_pulse){
+    case IIS3DHHC_LATCHED:
+      *val = IIS3DHHC_LATCHED;
+      break;
+    case IIS3DHHC_PULSED:
+      *val = IIS3DHHC_PULSED;
+      break;
+    default:
+      *val = IIS3DHHC_LATCHED;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  int1_mode: [set]  It configures the INT1 pad as output for
-  *                           FIFO flags or as external asynchronous
-  *                           input trigger to FIFO.
+  * @brief  It configures the INT1 pad as output for FIFO flags or as
+  *                external asynchronous input trigger to FIFO.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  iis3dhhc_int1_ext_t: change the values of int1_ext in
-  *                             reg INT1_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of int1_ext in reg INT1_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_int1_mode_set(iis3dhhc_ctx_t *ctx, iis3dhhc_int1_ext_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int1_ctrl_t int1_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, &reg.byte, 1);
-  reg.int1_ctrl.int1_ext = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  if(ret == 0){
+    int1_ctrl.int1_ext = (uint8_t)val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  int1_mode: [get]  It configures the INT1 pad as output
-  *                           for FIFO flags or as external asynchronous
-  *                           input trigger to FIFO.
+  * @brief  It configures the INT1 pad as output for FIFO flags or as
+  *                external asynchronous input trigger to FIFO.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  iis3dhhc_int1_ext_t: Get the values of int1_ext in reg INT1_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of int1_ext in reg INT1_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_int1_mode_get(iis3dhhc_ctx_t *ctx, iis3dhhc_int1_ext_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int1_ctrl_t int1_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, &reg.byte, 1);
-  *val = (iis3dhhc_int1_ext_t) reg.int1_ctrl.int1_ext;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
 
-  return mm_error;
+  switch (int1_ctrl.int1_ext){
+    case IIS3DHHC_PIN_AS_INTERRUPT:
+      *val = IIS3DHHC_PIN_AS_INTERRUPT;
+      break;
+    case IIS3DHHC_PIN_AS_TRIGGER:
+      *val = IIS3DHHC_PIN_AS_TRIGGER;
+      break;
+    default:
+      *val = IIS3DHHC_PIN_AS_INTERRUPT;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief   fifo_threshold_on_int1: [set]  FIFO watermark status
-  *                                         on INT1 pin.
+  * @brief  FIFO watermark status on INT1 pin.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of int1_fth in reg INT1_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of int1_fth in reg INT1_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_threshold_on_int1_set(iis3dhhc_ctx_t *ctx,
-                                            uint8_t val)
+                                           uint8_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int1_ctrl_t int1_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, &reg.byte, 1);
-  reg.int1_ctrl.int1_fth = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  if(ret == 0){
+    int1_ctrl.int1_fth = val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief   fifo_threshold_on_int1: [get]  FIFO watermark status
-  *                                         on INT1 pin.
+  * @brief  FIFO watermark status on INT1 pin.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of int1_fth in reg INT1_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of int1_fth in reg INT1_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_fifo_threshold_on_int1_get(iis3dhhc_ctx_t *ctx,
-                                            uint8_t *val)
+int32_t iis3dhhc_fifo_threshold_on_int1_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int1_ctrl_t int1_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, &reg.byte, 1);
-  *val = reg.int1_ctrl.int1_fth;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  *val = int1_ctrl.int1_fth;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_full_on_int1: [set]  FIFO full flag on INT1 pin.
+  * @brief  FIFO full flag on INT1 pin.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of int1_fss5 in reg INT1_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of int1_fss5 in reg INT1_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_full_on_int1_set(iis3dhhc_ctx_t *ctx, uint8_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int1_ctrl_t int1_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, &reg.byte, 1);
-  reg.int1_ctrl.int1_fss5 = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  if(ret == 0){
+    int1_ctrl.int1_fss5 = val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_full_on_int1: [get]  FIFO full flag on INT1 pin.
+  * @brief  FIFO full flag on INT1 pin.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of int1_fss5 in reg INT1_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of int1_fss5 in reg INT1_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_full_on_int1_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int1_ctrl_t int1_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, &reg.byte, 1);
-  *val = reg.int1_ctrl.int1_fss5;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  *val = int1_ctrl.int1_fss5;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_ovr_on_int1: [set]  FIFO overrun interrupt on INT1 pin.
+  * @brief  FIFO overrun interrupt on INT1 pin.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of int1_ovr in reg INT1_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of int1_ovr in reg INT1_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_ovr_on_int1_set(iis3dhhc_ctx_t *ctx, uint8_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int1_ctrl_t int1_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, &reg.byte, 1);
-  reg.int1_ctrl.int1_ovr = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  if(ret == 0){
+    int1_ctrl.int1_ovr = val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_ovr_on_int1: [get]  FIFO overrun interrupt on INT1 pin.
+  * @brief  FIFO overrun interrupt on INT1 pin.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of int1_ovr in reg INT1_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of int1_ovr in reg INT1_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_ovr_on_int1_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int1_ctrl_t int1_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, &reg.byte, 1);
-  *val = reg.int1_ctrl.int1_ovr;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  *val = int1_ctrl.int1_ovr;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  boot_on_int1: [set]  BOOT status on INT1 pin.
+  * @brief  BOOT status on INT1 pin.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of int1_boot in reg INT1_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of int1_boot in reg INT1_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_boot_on_int1_set(iis3dhhc_ctx_t *ctx, uint8_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int1_ctrl_t int1_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, &reg.byte, 1);
-  reg.int1_ctrl.int1_boot = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  if(ret == 0){
+    int1_ctrl.int1_boot = val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  boot_on_int1: [get]  BOOT status on INT1 pin.
+  * @brief  BOOT status on INT1 pin.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of int1_boot in reg INT1_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of int1_boot in reg INT1_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_boot_on_int1_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int1_ctrl_t int1_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, &reg.byte, 1);
-  *val = reg.int1_ctrl.int1_boot;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  *val = int1_ctrl.int1_boot;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  drdy_on_int1: [set]  Data-ready signal on INT1 pin.
+  * @brief  Data-ready signal on INT1 pin.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of int1_drdy in reg INT1_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of int1_drdy in reg INT1_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_drdy_on_int1_set(iis3dhhc_ctx_t *ctx, uint8_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int1_ctrl_t int1_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, &reg.byte, 1);
-  reg.int1_ctrl.int1_drdy = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  if(ret == 0){
+    int1_ctrl.int1_drdy = val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  drdy_on_int1: [get]  Data-ready signal on INT1 pin.
+  * @brief  Data-ready signal on INT1 pin.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of int1_drdy in reg INT1_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of int1_drdy in reg INT1_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_drdy_on_int1_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int1_ctrl_t int1_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, &reg.byte, 1);
-  *val = reg.int1_ctrl.int1_drdy;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  *val = int1_ctrl.int1_drdy;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief   fifo_threshold_on_int2: [set]  FIFO watermark status
-  *                                         on INT2 pin.
+  * @brief  FIFO watermark status on INT2 pin.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of int2_fth in reg INT2_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of int2_fth in reg INT2_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_threshold_on_int2_set(iis3dhhc_ctx_t *ctx, uint8_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int2_ctrl_t int2_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, &reg.byte, 1);
-  reg.int2_ctrl.int2_fth = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  if(ret == 0){
+    int2_ctrl.int2_fth = val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief   fifo_threshold_on_int2: [get]  FIFO watermark status on
-  *                                         INT2 pin.
+  * @brief  FIFO watermark status on INT2 pin.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of int2_fth in reg INT2_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of int2_fth in reg INT2_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_fifo_threshold_on_int2_get(iis3dhhc_ctx_t *ctx,
-                                            uint8_t *val)
+int32_t iis3dhhc_fifo_threshold_on_int2_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int2_ctrl_t int2_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, &reg.byte, 1);
-  *val = reg.int2_ctrl.int2_fth;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  *val = int2_ctrl.int2_fth;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_full_on_int2: [set]  FIFO full flag on INT2 pin.
+  * @brief  FIFO full flag on INT2 pin.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of int2_fss5 in reg INT2_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of int2_fss5 in reg INT2_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_full_on_int2_set(iis3dhhc_ctx_t *ctx, uint8_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int2_ctrl_t int2_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, &reg.byte, 1);
-  reg.int2_ctrl.int2_fss5 = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  if(ret == 0){
+    int2_ctrl.int2_fss5 = val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_full_on_int2: [get]  FIFO full flag on INT2 pin.
+  * @brief  FIFO full flag on INT2 pin.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of int2_fss5 in reg INT2_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of int2_fss5 in reg INT2_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_full_on_int2_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int2_ctrl_t int2_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, &reg.byte, 1);
-  *val = reg.int2_ctrl.int2_fss5;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  *val = int2_ctrl.int2_fss5;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_ovr_on_int2: [set]  FIFO overrun interrupt on INT2 pin.
+  * @brief  FIFO overrun interrupt on INT2 pin.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of int2_ovr in reg INT2_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of int2_ovr in reg INT2_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_ovr_on_int2_set(iis3dhhc_ctx_t *ctx, uint8_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int2_ctrl_t int2_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, &reg.byte, 1);
-  reg.int2_ctrl.int2_ovr = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  if(ret == 0){
+    int2_ctrl.int2_ovr = val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_ovr_on_int2: [get]  FIFO overrun interrupt on INT2 pin.
+  * @brief  FIFO overrun interrupt on INT2 pin.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of int2_ovr in reg INT2_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of int2_ovr in reg INT2_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_ovr_on_int2_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int2_ctrl_t int2_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, &reg.byte, 1);
-  *val = reg.int2_ctrl.int2_ovr;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  *val = int2_ctrl.int2_ovr;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  boot_on_int2: [set]  BOOT status on INT2 pin.
+  * @brief  BOOT status on INT2 pin.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of int2_boot in reg INT2_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of int2_boot in reg INT2_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_boot_on_int2_set(iis3dhhc_ctx_t *ctx, uint8_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int2_ctrl_t int2_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, &reg.byte, 1);
-  reg.int2_ctrl.int2_boot = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  if(ret == 0){
+    int2_ctrl.int2_boot = val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  boot_on_int2: [get]  BOOT status on INT2 pin.
+  * @brief  BOOT status on INT2 pin.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of int2_boot in reg INT2_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of int2_boot in reg INT2_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_boot_on_int2_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int2_ctrl_t int2_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, &reg.byte, 1);
-  *val = reg.int2_ctrl.int2_boot;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  *val = int2_ctrl.int2_boot;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  drdy_on_int2: [set]  Data-ready signal on INT2 pin.
+  * @brief  Data-ready signal on INT2 pin.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of int2_drdy in reg INT2_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of int2_drdy in reg INT2_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_drdy_on_int2_set(iis3dhhc_ctx_t *ctx, uint8_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int2_ctrl_t int2_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, &reg.byte, 1);
-  reg.int2_ctrl.int2_drdy = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  if(ret == 0){
+    int2_ctrl.int2_drdy = val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  drdy_on_int2: [get]  Data-ready signal on INT2 pin.
+  * @brief  Data-ready signal on INT2 pin.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of int2_drdy in reg INT2_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of int2_drdy in reg INT2_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_drdy_on_int2_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_int2_ctrl_t int2_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, &reg.byte, 1);
-  *val = reg.int2_ctrl.int2_drdy;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  *val = int2_ctrl.int2_drdy;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pin_mode: [set]  Push-pull/open drain selection on
-  *                          interrupt pads.
+  * @brief  Push-pull/open drain selection on interrupt pads.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  iis3dhhc_pp_od_t: change the values of pp_od in reg CTRL_REG4
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of pp_od in reg CTRL_REG4
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_pin_mode_set(iis3dhhc_ctx_t *ctx, iis3dhhc_pp_od_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, &reg.byte, 1);
-  reg.ctrl_reg4.pp_od = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  if(ret == 0){
+    ctrl_reg4.pp_od = (uint8_t)val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pin_mode: [get]  Push-pull/open drain selection on
-  *                          interrupt pads.
+  * @brief  Push-pull/open drain selection on interrupt pads.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  iis3dhhc_pp_od_t: Get the values of pp_od in reg CTRL_REG4
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of pp_od in reg CTRL_REG4.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_pin_mode_get(iis3dhhc_ctx_t *ctx, iis3dhhc_pp_od_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, &reg.byte, 1);
-  *val = (iis3dhhc_pp_od_t) reg.ctrl_reg4.pp_od;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
 
-  return mm_error;
+  switch (ctrl_reg4.pp_od){
+    case IIS3DHHC_ALL_PUSH_PULL:
+      *val = IIS3DHHC_ALL_PUSH_PULL;
+      break;
+    case IIS3DHHC_INT1_OD_INT2_PP:
+      *val = IIS3DHHC_INT1_OD_INT2_PP;
+      break;
+    case IIS3DHHC_INT1_PP_INT2_OD:
+      *val = IIS3DHHC_INT1_PP_INT2_OD;
+      break;
+    case IIS3DHHC_ALL_OPEN_DRAIN:
+      *val = IIS3DHHC_ALL_OPEN_DRAIN;
+      break;
+    default:
+      *val = IIS3DHHC_ALL_PUSH_PULL;
+      break;
+  }
+
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  fifo
-  * @brief   This section group all the functions concerning the
-  *          fifo usage
-  * @{
-  */
-
-/**
-  * @brief  fifo: [set] FIFOenable.
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of fifo_en in reg CTRL_REG4
+  */
+
+/**
+  * @defgroup  IIS3DHHC_fifo
+  * @brief     This section group all the functions concerning the
+  *            fifo usage
+  * @{
+  *
+  */
+
+/**
+  * @brief  FIFOenable.[set]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of fifo_en in reg CTRL_REG4
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_set(iis3dhhc_ctx_t *ctx, uint8_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, &reg.byte, 1);
-  reg.ctrl_reg4.fifo_en = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  if(ret == 0){
+    ctrl_reg4.fifo_en = val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo: [get] FIFOenable.
+  * @brief  FIFOenable.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of fifo_en in reg CTRL_REG4
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of fifo_en in reg CTRL_REG4.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, &reg.byte, 1);
-  *val = reg.ctrl_reg4.fifo_en;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  *val = ctrl_reg4.fifo_en;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_block_spi_hs: [set]  Enables the SPI high speed
-                                      configuration for the FIFO block that
-                                      is used to guarantee a minimum duration
-                                      of the window in which writing operation
-                                      of RAM output is blocked. This bit is
-                                      recommended for SPI clock frequencies
-                                      higher than 6 MHz.
+  * @brief  Enables the SPI high speed configuration for the FIFO block that
+            is used to guarantee a minimum duration of the window in which
+            writing operation of RAM output is blocked. This bit is recommended
+            for SPI clock frequencies higher than 6 MHz.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of fifo_spi_hs_on in reg CTRL_REG5
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of fifo_spi_hs_on in reg CTRL_REG5
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_block_spi_hs_set(iis3dhhc_ctx_t *ctx, uint8_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg5_t ctrl_reg5;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG5, &reg.byte, 1);
-  reg.ctrl_reg5.fifo_spi_hs_on = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG5, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+  if(ret == 0){
+    ctrl_reg5.fifo_spi_hs_on = val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_block_spi_hs: [get]  Enables the SPI high speed configuration
-                                      for the FIFO block that is used to
-                                      guarantee a minimum duration of the
-                                      window in which writing operation of
-                                      RAM output is blocked.
-                                      This bit is recommended for SPI
-                                      clock frequencies higher than 6 MHz.
+  * @brief  Enables the SPI high speed configuration for the FIFO block that
+            is used to guarantee a minimum duration of the window in which
+            writing operation of RAM output is blocked. This bit is recommended
+            for SPI clock frequencies higher than 6 MHz.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of fifo_spi_hs_on in reg CTRL_REG5
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of fifo_spi_hs_on in reg CTRL_REG5.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_block_spi_hs_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg5_t ctrl_reg5;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG5, &reg.byte, 1);
-  *val = reg.ctrl_reg5.fifo_spi_hs_on;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+  *val = ctrl_reg5.fifo_spi_hs_on;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_watermark: [set]  FIFO watermark level selection.
+  * @brief  FIFO watermark level selection.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of fth in reg FIFO_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of fth in reg FIFO_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_watermark_set(iis3dhhc_ctx_t *ctx, uint8_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_fifo_ctrl_t fifo_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_CTRL, &reg.byte, 1);
-  reg.fifo_ctrl.fth = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_FIFO_CTRL, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
+  if(ret == 0){
+    fifo_ctrl.fth = val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_watermark: [get]  FIFO watermark level selection.
+  * @brief  FIFO watermark level selection.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of fth in reg FIFO_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of fth in reg FIFO_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_watermark_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_fifo_ctrl_t fifo_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_CTRL, &reg.byte, 1);
-  *val = reg.fifo_ctrl.fth;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
+  *val = fifo_ctrl.fth;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_mode: [set]  FIFO mode selection.
+  * @brief  FIFO mode selection.[set]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  iis3dhhc_fmode_t: change the values of fmode in reg FIFO_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of fmode in reg FIFO_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_mode_set(iis3dhhc_ctx_t *ctx, iis3dhhc_fmode_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_fifo_ctrl_t fifo_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_CTRL, &reg.byte, 1);
-  reg.fifo_ctrl.fmode = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_FIFO_CTRL, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
+  if(ret == 0){
+    fifo_ctrl.fmode = (uint8_t)val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_mode: [get]  FIFO mode selection.
+  * @brief  FIFO mode selection.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  iis3dhhc_fmode_t: Get the values of fmode in reg FIFO_CTRL
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of fmode in reg FIFO_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_mode_get(iis3dhhc_ctx_t *ctx, iis3dhhc_fmode_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_fifo_ctrl_t fifo_ctrl;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_CTRL, &reg.byte, 1);
-  *val = (iis3dhhc_fmode_t) reg.fifo_ctrl.fmode;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
 
-  return mm_error;
+  switch (fifo_ctrl.fmode){
+    case IIS3DHHC_BYPASS_MODE:
+      *val = IIS3DHHC_BYPASS_MODE;
+      break;
+    case IIS3DHHC_FIFO_MODE:
+      *val = IIS3DHHC_FIFO_MODE;
+      break;
+    case IIS3DHHC_STREAM_TO_FIFO_MODE:
+      *val = IIS3DHHC_STREAM_TO_FIFO_MODE;
+      break;
+    case IIS3DHHC_BYPASS_TO_STREAM_MODE:
+      *val = IIS3DHHC_BYPASS_TO_STREAM_MODE;
+      break;
+    case IIS3DHHC_DYNAMIC_STREAM_MODE:
+      *val = IIS3DHHC_DYNAMIC_STREAM_MODE;
+      break;
+    default:
+      *val = IIS3DHHC_BYPASS_MODE;
+      break;
+  }
+
+  return ret;
 }
 
 /**
-  * @brief  fifo_status: [get]  FIFO status register.
+  * @brief  FIFO status register.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  iis3dhhc_fifo_src_t: Registers FIFO_SRC
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get registers FIFO_SRC.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_status_get(iis3dhhc_ctx_t *ctx, iis3dhhc_fifo_src_t *val)
 {
-  return iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_SRC, (uint8_t*) val, 1);
+  int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_SRC, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
-  * @brief  fifo_full_flag: [get]  FIFO stored data level.
+  * @brief  FIFO stored data level.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of fss in reg FIFO_SRC
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of fss in reg FIFO_SRC.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_full_flag_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_fifo_src_t fifo_src;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_SRC, &reg.byte, 1);
-  *val = reg.fifo_src.fss;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_SRC, (uint8_t*)&fifo_src, 1);
+  *val = fifo_src.fss;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_ovr_flag: [get]  FIFO overrun status flag.
+  * @brief  FIFO overrun status flag.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of ovrn in reg FIFO_SRC
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of ovrn in reg FIFO_SRC.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_ovr_flag_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_fifo_src_t fifo_src;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_SRC, &reg.byte, 1);
-  *val = reg.fifo_src.ovrn;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_SRC, (uint8_t*)&fifo_src, 1);
+  *val = fifo_src.ovrn;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_fth_flag: [get]  FIFO watermark status.
+  * @brief  FIFO watermark status.[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of fth in reg FIFO_SRC
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of fth in reg FIFO_SRC.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_fifo_fth_flag_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_fifo_src_t fifo_src;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_SRC, &reg.byte, 1);
-  *val = reg.fifo_src.fth;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_SRC, (uint8_t*)&fifo_src, 1);
+  *val = fifo_src.fth;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  serial_interface
-  * @brief   This section group all the functions concerning serial
-  *          interface management
-  * @{
-  */
-
-/**
-  * @brief  auto_add_inc: [set]  Register address automatically
-  *                              incremented during a multiple byte access
-  *                              with a serial interface (I2C or SPI).
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of if_add_inc in reg CTRL_REG1
+  */
+
+/**
+  * @defgroup  IIS3DHHC_serial_interface
+  * @brief     This section group all the functions concerning serial
+  *            interface management
+  * @{
+  *
+  */
+
+/**
+  * @brief  Register address automatically incremented during a multiple byte
+  *         access with a serial interface (I2C or SPI).[set]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of if_add_inc in reg CTRL_REG1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_auto_add_inc_set(iis3dhhc_ctx_t *ctx, uint8_t val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, &reg.byte, 1);
-  reg.ctrl_reg1.if_add_inc = val;
-  mm_error = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1, &reg.byte, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  if(ret == 0){
+    ctrl_reg1.if_add_inc = val;
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  auto_add_inc: [get]  Register address automatically incremented
-  *                              during a multiple byte access with a serial
-  *                              interface (I2C or SPI).
+  * @brief  Register address automatically incremented during a multiple byte
+  *         access with a serial interface (I2C or SPI).[get]
   *
-  * @param  iis3dhhc_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of if_add_inc in reg CTRL_REG1
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of if_add_inc in reg CTRL_REG1.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t iis3dhhc_auto_add_inc_get(iis3dhhc_ctx_t *ctx, uint8_t *val)
 {
-  iis3dhhc_reg_t reg;
-  int32_t mm_error;
+  iis3dhhc_ctrl_reg1_t ctrl_reg1;
+  int32_t ret;
 
-  mm_error = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, &reg.byte, 1);
-  *val = reg.ctrl_reg1.if_add_inc;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  *val = ctrl_reg1.if_add_inc;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
+  *
+  */
+
+/**
+  * @}
+  *
   */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

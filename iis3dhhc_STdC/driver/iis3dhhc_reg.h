@@ -1,42 +1,43 @@
 /*
  ******************************************************************************
  * @file    iis3dhhc_reg.h
- * @author  MEMS Software Solution Team
- * @date    20-December-2017
+ * @author  Sensors Software Solution Team
  * @brief   This file contains all the functions prototypes for the
  *          iis3dhhc_reg.c driver.
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __IIS3DHHC_DRIVER__H
-#define __IIS3DHHC_DRIVER__H
+#ifndef IIS3DHHC_REGS_H
+#define IIS3DHHC_REGS_H
 
 #ifdef __cplusplus
   extern "C" {
@@ -59,6 +60,18 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
+/**
+  * @defgroup axisXbitXX_t
+  * @brief    These unions are useful to represent different sensors data type.
+  *           These unions are not need by the driver.
+  *
+  *           REMOVING the unions you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  *
+  * @{
+  *
+  */
+
 typedef union{
   int16_t i16bit[3];
   uint8_t u8bit[6];
@@ -78,6 +91,11 @@ typedef union{
   int32_t i32bit;
   uint8_t u8bit[4];
 } axis1bit32_t;
+
+/**
+  * @}
+  *
+  */
 
 typedef struct{
   uint8_t bit0       : 1;
@@ -100,8 +118,12 @@ typedef struct{
   *
   */
 
-/** @defgroup iis3dhhc_interface
+/** @addtogroup  IIS3DHHC_Interfaces_Functions
+  * @brief       This section provide a set of functions used to read and
+  *              write a generic register of the device.
+  *              MANDATORY: return 0 -> no Error.
   * @{
+  *
   */
 
 typedef int32_t (*iis3dhhc_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
@@ -117,35 +139,29 @@ typedef struct {
 
 /**
   * @}
+  *
   */
 
-
-/** @defgroup iis3dhhc_Infos
+/** @defgroup IIS3DHHC_Infos
   * @{
+  *
   */
 
 /** Device Identification (Who am I) **/
-#define IIS3DHHC_ID            0x11
+#define IIS3DHHC_ID            0x11U
 
 /**
   * @}
+  *
   */
 
-/**
-  * @defgroup iis3dhhc_Sensitivity
-  * @{
-  */
+#define IIS3DHHC_WHO_AM_I      0x0FU
+typedef struct {
+  uint8_t not_used_01      : 7;
+  uint8_t asic_id          : 1;
+} iis3dhhc_id_reg_t;
 
-#define IIS3DHHC_FROM_LSB_TO_mg(lsb)   (float)((lsb * 76.0f) / 1000.0f)
-#define IIS3DHHC_FROM_LSB_TO_degC(lsb) (float)(((int16_t)lsb>>4) / 16.0f) + 25.0f
-
-/**
-  * @}
-  */
-
-#define IIS3DHHC_WHO_AM_I      0x0F
-
-#define IIS3DHHC_CTRL_REG1     0x20
+#define IIS3DHHC_CTRL_REG1     0x20U
 typedef struct {
   uint8_t bdu              : 1;
   uint8_t drdy_pulse       : 1;
@@ -156,7 +172,7 @@ typedef struct {
   uint8_t norm_mod_en      : 1;
 } iis3dhhc_ctrl_reg1_t;
 
-#define IIS3DHHC_INT1_CTRL     0x21
+#define IIS3DHHC_INT1_CTRL     0x21U
 typedef struct {
   uint8_t not_used_01      : 2;
   uint8_t int1_ext         : 1;
@@ -167,7 +183,7 @@ typedef struct {
   uint8_t int1_drdy        : 1;
 } iis3dhhc_int1_ctrl_t;
 
-#define IIS3DHHC_INT2_CTRL     0x22
+#define IIS3DHHC_INT2_CTRL     0x22U
 typedef struct {
   uint8_t not_used_01      : 3;
   uint8_t int2_fth         : 1;
@@ -177,24 +193,24 @@ typedef struct {
   uint8_t int2_drdy        : 1;
 } iis3dhhc_int2_ctrl_t;
 
-#define IIS3DHHC_CTRL_REG4     0x23
+#define IIS3DHHC_CTRL_REG4     0x23U
 typedef struct {
   uint8_t off_tcomp_en     : 1;
   uint8_t fifo_en          : 1;
   uint8_t pp_od            : 2;
   uint8_t st               : 2;
-  uint8_t dsp              : 2;
+  uint8_t dsp              : 2;  /* dsp_lp_type + dsp_bw_sel */
 } iis3dhhc_ctrl_reg4_t;
 
-#define IIS3DHHC_CTRL_REG5     0x24
+#define IIS3DHHC_CTRL_REG5     0x24U
 typedef struct {
   uint8_t fifo_spi_hs_on   : 1;
   uint8_t not_used_01      : 7;
 } iis3dhhc_ctrl_reg5_t;
 
-#define IIS3DHHC_OUT_TEMP_L    0x25
-#define IIS3DHHC_OUT_TEMP_H    0x26
-#define IIS3DHHC_STATUS        0x27
+#define IIS3DHHC_OUT_TEMP_L    0x25U
+#define IIS3DHHC_OUT_TEMP_H    0x26U
+#define IIS3DHHC_STATUS        0x27U
 typedef struct {
   uint8_t xda              : 1;
   uint8_t yda              : 1;
@@ -206,26 +222,39 @@ typedef struct {
   uint8_t zyxor            : 1;
 } iis3dhhc_status_t;
 
-#define IIS3DHHC_OUT_X_L_XL    0x28
-#define IIS3DHHC_OUT_X_H_XL    0x29
-#define IIS3DHHC_OUT_Y_L_XL    0x2A
-#define IIS3DHHC_OUT_Y_H_XL    0x2B
-#define IIS3DHHC_OUT_Z_L_XL    0x2C
-#define IIS3DHHC_OUT_Z_H_XL    0x2D
-#define IIS3DHHC_FIFO_CTRL     0x2E
+#define IIS3DHHC_OUT_X_L_XL    0x28U
+#define IIS3DHHC_OUT_X_H_XL    0x29U
+#define IIS3DHHC_OUT_Y_L_XL    0x2AU
+#define IIS3DHHC_OUT_Y_H_XL    0x2BU
+#define IIS3DHHC_OUT_Z_L_XL    0x2CU
+#define IIS3DHHC_OUT_Z_H_XL    0x2DU
+#define IIS3DHHC_FIFO_CTRL     0x2EU
 typedef struct {
   uint8_t fth              : 5;
   uint8_t fmode            : 3;
 } iis3dhhc_fifo_ctrl_t;
 
-#define IIS3DHHC_FIFO_SRC      0x2F
+#define IIS3DHHC_FIFO_SRC      0x2FU
 typedef struct {
-  uint8_t fss      : 6;
-  uint8_t ovrn      : 1;
-  uint8_t fth      : 1;
+  uint8_t fss             : 6;
+  uint8_t ovrn            : 1;
+  uint8_t fth             : 1;
 } iis3dhhc_fifo_src_t;
 
+/**
+  * @defgroup IIS3DHHC_Register_Union
+  * @brief    This union group all the registers that has a bit-field
+  *           description.
+  *           This union is useful but not need by the driver.
+  *
+  *           REMOVING this union you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  *
+  * @{
+  *
+  */
 typedef union{
+  iis3dhhc_id_reg_t       id_reg;
   iis3dhhc_ctrl_reg1_t    ctrl_reg1;
   iis3dhhc_int1_ctrl_t    int1_ctrl;
   iis3dhhc_int2_ctrl_t    int2_ctrl;
@@ -234,13 +263,22 @@ typedef union{
   iis3dhhc_status_t       status;
   iis3dhhc_fifo_ctrl_t    fifo_ctrl;
   iis3dhhc_fifo_src_t     fifo_src;
-  bitwise_t              bitwise;
-  uint8_t                byte;
+  bitwise_t               bitwise;
+  uint8_t                 byte;
 } iis3dhhc_reg_t;
+
+/**
+  * @}
+  *
+  */
+
 int32_t iis3dhhc_read_reg(iis3dhhc_ctx_t *ctx, uint8_t reg, uint8_t* data,
-                         uint16_t len);
-int32_t iis3dhhc_write_reg(iis3dhhc_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
+int32_t iis3dhhc_write_reg(iis3dhhc_ctx_t *ctx, uint8_t reg, uint8_t* data,
+                           uint16_t len);
+
+extern float_t iis3dhhc_from_lsb_to_mg(int16_t lsb);
+extern float_t iis3dhhc_from_lsb_to_celsius(int16_t lsb);
 
 int32_t iis3dhhc_block_data_update_set(iis3dhhc_ctx_t *ctx, uint8_t val);
 int32_t iis3dhhc_block_data_update_get(iis3dhhc_ctx_t *ctx, uint8_t *val);
@@ -249,13 +287,16 @@ typedef enum {
   IIS3DHHC_POWER_DOWN  = 0,
   IIS3DHHC_1kHz1       = 1,
 } iis3dhhc_norm_mod_en_t;
-int32_t iis3dhhc_data_rate_set(iis3dhhc_ctx_t *ctx, iis3dhhc_norm_mod_en_t val);
-int32_t iis3dhhc_data_rate_get(iis3dhhc_ctx_t *ctx, iis3dhhc_norm_mod_en_t *val);
+int32_t iis3dhhc_data_rate_set(iis3dhhc_ctx_t *ctx,
+                               iis3dhhc_norm_mod_en_t val);
+int32_t iis3dhhc_data_rate_get(iis3dhhc_ctx_t *ctx,
+                               iis3dhhc_norm_mod_en_t *val);
 
 int32_t iis3dhhc_offset_temp_comp_set(iis3dhhc_ctx_t *ctx, uint8_t val);
 int32_t iis3dhhc_offset_temp_comp_get(iis3dhhc_ctx_t *ctx, uint8_t *val);
 
 int32_t iis3dhhc_temperature_raw_get(iis3dhhc_ctx_t *ctx, uint8_t *buff);
+
 int32_t iis3dhhc_acceleration_raw_get(iis3dhhc_ctx_t *ctx, uint8_t *buff);
 
 int32_t iis3dhhc_xl_data_ready_get(iis3dhhc_ctx_t *ctx, uint8_t *val);
@@ -281,8 +322,8 @@ int32_t iis3dhhc_self_test_get(iis3dhhc_ctx_t *ctx, iis3dhhc_st_t *val);
 typedef enum {
   IIS3DHHC_LINEAR_PHASE_440Hz      = 0,
   IIS3DHHC_LINEAR_PHASE_235Hz      = 1,
-  IIS3DHHC_NO_LINEAR_PHASE_440Hz  = 2,
-  IIS3DHHC_NO_LINEAR_PHASE_235Hz  = 3,
+  IIS3DHHC_NO_LINEAR_PHASE_440Hz   = 2,
+  IIS3DHHC_NO_LINEAR_PHASE_235Hz   = 3,
 } iis3dhhc_dsp_t;
 int32_t iis3dhhc_filter_config_set(iis3dhhc_ctx_t *ctx, iis3dhhc_dsp_t val);
 int32_t iis3dhhc_filter_config_get(iis3dhhc_ctx_t *ctx, iis3dhhc_dsp_t *val);
@@ -298,14 +339,12 @@ int32_t iis3dhhc_drdy_notification_mode_set(iis3dhhc_ctx_t *ctx,
 int32_t iis3dhhc_drdy_notification_mode_get(iis3dhhc_ctx_t *ctx,
                                             iis3dhhc_drdy_pulse_t *val);
 
-
 typedef enum {
-  IIS3DHHC_PIN_AS_INTERRUPT  = 0,
+  IIS3DHHC_PIN_AS_INTERRUPT   = 0,
   IIS3DHHC_PIN_AS_TRIGGER     = 1,
 } iis3dhhc_int1_ext_t;
 int32_t iis3dhhc_int1_mode_set(iis3dhhc_ctx_t *ctx, iis3dhhc_int1_ext_t val);
 int32_t iis3dhhc_int1_mode_get(iis3dhhc_ctx_t *ctx, iis3dhhc_int1_ext_t *val);
-
 
 int32_t iis3dhhc_fifo_threshold_on_int1_set(iis3dhhc_ctx_t *ctx,
                                             uint8_t val);
@@ -362,15 +401,15 @@ int32_t iis3dhhc_fifo_watermark_get(iis3dhhc_ctx_t *ctx, uint8_t *val);
 typedef enum {
   IIS3DHHC_BYPASS_MODE             = 0,
   IIS3DHHC_FIFO_MODE               = 1,
-  IIS3DHHC_STREAM_TO_FIFO_MODE    = 3,
-  IIS3DHHC_BYPASS_TO_STREAM_MODE  = 4,
-  IIS3DHHC_DYNAMIC_STREAM_MODE    = 6,
+  IIS3DHHC_STREAM_TO_FIFO_MODE     = 3,
+  IIS3DHHC_BYPASS_TO_STREAM_MODE   = 4,
+  IIS3DHHC_DYNAMIC_STREAM_MODE     = 6,
 } iis3dhhc_fmode_t;
 int32_t iis3dhhc_fifo_mode_set(iis3dhhc_ctx_t *ctx, iis3dhhc_fmode_t val);
 int32_t iis3dhhc_fifo_mode_get(iis3dhhc_ctx_t *ctx, iis3dhhc_fmode_t *val);
 
 int32_t iis3dhhc_fifo_status_get(iis3dhhc_ctx_t *ctx,
-                                iis3dhhc_fifo_src_t *val);
+                                 iis3dhhc_fifo_src_t *val);
 
 int32_t iis3dhhc_fifo_full_flag_get(iis3dhhc_ctx_t *ctx, uint8_t *val);
 
@@ -382,13 +421,14 @@ int32_t iis3dhhc_auto_add_inc_set(iis3dhhc_ctx_t *ctx, uint8_t val);
 int32_t iis3dhhc_auto_add_inc_get(iis3dhhc_ctx_t *ctx, uint8_t *val);
 
 /**
-  * @}
+  *@}
+  *
   */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*__IIS3DHHC_DRIVER__H */
+#endif /* IIS3DHHC_REGS_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
