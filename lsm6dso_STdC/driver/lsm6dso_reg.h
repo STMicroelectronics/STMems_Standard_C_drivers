@@ -1406,6 +1406,8 @@ typedef struct {
   uint8_t wr_once_done             : 1;
 } lsm6dso_status_master_t;
 
+#define LSM6DSO_START_FSM_ADD                0x0400U
+
 /**
   * @defgroup LSM6DSO_Register_Union
   * @brief    This union group all the registers that has a bitfield
@@ -2552,14 +2554,14 @@ typedef struct {
     lsm6dso_fsm_outs6_t    fsm_outs6;
     lsm6dso_fsm_outs7_t    fsm_outs7;
     lsm6dso_fsm_outs8_t    fsm_outs8;
-    lsm6dso_fsm_outs1_t    fsm_outs9;
-    lsm6dso_fsm_outs2_t    fsm_outs10;
-    lsm6dso_fsm_outs3_t    fsm_outs11;
-    lsm6dso_fsm_outs4_t    fsm_outs12;
-    lsm6dso_fsm_outs5_t    fsm_outs13;
-    lsm6dso_fsm_outs6_t    fsm_outs14;
-    lsm6dso_fsm_outs7_t    fsm_outs15;
-    lsm6dso_fsm_outs8_t    fsm_outs16;
+    lsm6dso_fsm_outs9_t    fsm_outs9;
+    lsm6dso_fsm_outs10_t   fsm_outs10;
+    lsm6dso_fsm_outs11_t   fsm_outs11;
+    lsm6dso_fsm_outs12_t   fsm_outs12;
+    lsm6dso_fsm_outs13_t   fsm_outs13;
+    lsm6dso_fsm_outs14_t   fsm_outs14;
+    lsm6dso_fsm_outs15_t   fsm_outs15;
+    lsm6dso_fsm_outs16_t   fsm_outs16;
 } lsm6dso_fsm_out_t;
 int32_t lsm6dso_fsm_out_get(lsm6dso_ctx_t *ctx, lsm6dso_fsm_out_t *val);
 
@@ -2575,37 +2577,17 @@ int32_t lsm6dso_fsm_data_rate_get(lsm6dso_ctx_t *ctx, lsm6dso_fsm_odr_t *val);
 int32_t lsm6dso_fsm_init_set(lsm6dso_ctx_t *ctx, uint8_t val);
 int32_t lsm6dso_fsm_init_get(lsm6dso_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6dso_long_cnt_int_value_set(lsm6dso_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dso_long_cnt_int_value_get(lsm6dso_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dso_long_cnt_int_value_set(lsm6dso_ctx_t *ctx, uint16_t val);
+int32_t lsm6dso_long_cnt_int_value_get(lsm6dso_ctx_t *ctx, uint16_t *val);
 
-int32_t lsm6dso_fsm_number_of_programs_set(lsm6dso_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dso_fsm_number_of_programs_get(lsm6dso_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dso_fsm_number_of_programs_set(lsm6dso_ctx_t *ctx, uint8_t val);
+int32_t lsm6dso_fsm_number_of_programs_get(lsm6dso_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6dso_fsm_start_address_set(lsm6dso_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dso_fsm_start_address_get(lsm6dso_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dso_fsm_start_address_set(lsm6dso_ctx_t *ctx, uint16_t val);
+int32_t lsm6dso_fsm_start_address_get(lsm6dso_ctx_t *ctx, uint16_t *val);
 
-typedef struct {
-    lsm6dso_sensor_hub_1_t   sh_byte_1;
-    lsm6dso_sensor_hub_2_t   sh_byte_2;
-    lsm6dso_sensor_hub_3_t   sh_byte_3;
-    lsm6dso_sensor_hub_4_t   sh_byte_4;
-    lsm6dso_sensor_hub_5_t   sh_byte_5;
-    lsm6dso_sensor_hub_6_t   sh_byte_6;
-    lsm6dso_sensor_hub_7_t   sh_byte_7;
-    lsm6dso_sensor_hub_8_t   sh_byte_8;
-    lsm6dso_sensor_hub_9_t   sh_byte_9;
-    lsm6dso_sensor_hub_10_t  sh_byte_10;
-    lsm6dso_sensor_hub_11_t  sh_byte_11;
-    lsm6dso_sensor_hub_12_t  sh_byte_12;
-    lsm6dso_sensor_hub_13_t  sh_byte_13;
-    lsm6dso_sensor_hub_14_t  sh_byte_14;
-    lsm6dso_sensor_hub_15_t  sh_byte_15;
-    lsm6dso_sensor_hub_16_t  sh_byte_16;
-    lsm6dso_sensor_hub_17_t  sh_byte_17;
-    lsm6dso_sensor_hub_18_t  sh_byte_18;
-} lsm6dso_emb_sh_read_t;
-int32_t lsm6dso_sh_read_data_raw_get(lsm6dso_ctx_t *ctx,
-                                     lsm6dso_emb_sh_read_t *val);
+int32_t lsm6dso_sh_read_data_raw_get(lsm6dso_ctx_t *ctx, uint8_t *val,
+                                     uint8_t len);
 
 typedef enum {
   LSM6DSO_SLV_0       = 0,
