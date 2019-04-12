@@ -14,4 +14,4 @@ every hardware.
 
 www.st.com/mems
 
-LIS2DW12 DS rev4.0 
+LIS2DW12 DS rev6.0 
