@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -81,6 +81,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
+#include <stdio.h>
 #include "stm32f4xx_hal.h"
 #include "lis2dw12_reg.h"
 #include "gpio.h"
@@ -190,7 +191,7 @@ static void test_self_test_lis2dw12(lis2dw12_ctx_t *dev_ctx)
       lis2dw12_acceleration_raw_get(dev_ctx, data_raw_acceleration[i].u8bit);
       for (axis = 0; axis < 3; axis++)
         acceleration_mg[i][axis] =
-          LIS2DW12_FROM_FS_4g_TO_mg(data_raw_acceleration[i].i16bit[axis]);
+          lis2dw12_from_fs4_to_mg(data_raw_acceleration[i].i16bit[axis]);
 
         i++;
       }
@@ -230,7 +231,7 @@ static void test_self_test_lis2dw12(lis2dw12_ctx_t *dev_ctx)
       lis2dw12_acceleration_raw_get(dev_ctx, data_raw_acceleration[i].u8bit);
       for (axis = 0; axis < 3; axis++)
         acceleration_mg[i][axis] =
-          LIS2DW12_FROM_FS_4g_TO_mg(data_raw_acceleration[i].i16bit[axis]);
+          lis2dw12_from_fs4_to_mg(data_raw_acceleration[i].i16bit[axis]);
 
       i++;
     }

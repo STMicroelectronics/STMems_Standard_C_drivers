@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -81,6 +81,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
+#include <stdio.h>
 #include "stm32f4xx_hal.h"
 #include "lis2dw12_reg.h"
 #include "gpio.h"
@@ -158,7 +159,8 @@ void example_main_lis2dw12(void)
   /*
    * Set full scale
    */  
-  lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_8g);
+  //lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_8g);
+  lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_2g);
 
   /*
    * Configure filtering chain
@@ -171,8 +173,8 @@ void example_main_lis2dw12(void)
   /*
    * Configure power mode
    */    
-  //lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_HIGH_PERFORMANCE);
-  lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
+  lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_HIGH_PERFORMANCE);
+  //lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
 
   /*
    * Set Output Data Rate
@@ -197,9 +199,12 @@ void example_main_lis2dw12(void)
        */
       memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
       lis2dw12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = LIS2DW12_FROM_FS_8g_LP1_TO_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = LIS2DW12_FROM_FS_8g_LP1_TO_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = LIS2DW12_FROM_FS_8g_LP1_TO_mg(data_raw_acceleration.i16bit[2]);
+      //acceleration_mg[0] = lis2dw12_from_fs8_lp1_to_mg(data_raw_acceleration.i16bit[0]);
+      //acceleration_mg[1] = lis2dw12_from_fs8_lp1_to_mg(data_raw_acceleration.i16bit[1]);
+      //acceleration_mg[2] = lis2dw12_from_fs8_lp1_to_mg(data_raw_acceleration.i16bit[2]);
+      acceleration_mg[0] = lis2dw12_from_fs2_to_mg(data_raw_acceleration.i16bit[0]);
+      acceleration_mg[1] = lis2dw12_from_fs2_to_mg(data_raw_acceleration.i16bit[1]);
+      acceleration_mg[2] = lis2dw12_from_fs2_to_mg(data_raw_acceleration.i16bit[2]);
       
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);

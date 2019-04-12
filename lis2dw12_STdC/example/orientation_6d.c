@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -81,6 +81,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
+#include <stdio.h>
 #include "stm32f4xx_hal.h"
 #include "lis2dw12_reg.h"
 #include "gpio.h"
@@ -168,7 +169,7 @@ void example_main_orientation_6D_lis2dw12(void)
   /*
    * LPF2 on 6D function selection.
    */
-  lis2dw12_6d_feed_data_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2dw12_6d_feed_data_set(&dev_ctx, LIS2DW12_LPF2_FEED);
 
   /*
    * Enable interrupt generation on 6D INT1 pin.
