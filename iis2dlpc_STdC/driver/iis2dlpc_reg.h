@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -366,7 +366,7 @@ typedef struct {
 #define IIS2DLPC_X_OFS_USR                   0x3CU
 #define IIS2DLPC_Y_OFS_USR                   0x3DU
 #define IIS2DLPC_Z_OFS_USR                   0x3EU
-#define IIS2DLPC_CTRL_REG7                   0x3FU
+#define IIS2DLPC_CTRL7                       0x3FU
 typedef struct {
   uint8_t lpass_on6d                 : 1;
   uint8_t hp_ref_mode                : 1;
@@ -376,7 +376,7 @@ typedef struct {
   uint8_t interrupts_enable          : 1;
   uint8_t int2_on_int1               : 1;
   uint8_t drdy_pulsed                : 1;
-} iis2dlpc_ctrl_reg7_t;
+} iis2dlpc_ctrl7_t;
 
 /**
   * @defgroup IIS2DLPC_Register_Union
@@ -412,7 +412,7 @@ typedef union{
   iis2dlpc_tap_src_t                 tap_src;
   iis2dlpc_sixd_src_t                sixd_src;
   iis2dlpc_all_int_src_t             all_int_src;
-  iis2dlpc_ctrl_reg7_t               ctrl_reg7;
+  iis2dlpc_ctrl7_t                   ctrl7;
   bitwise_t                          bitwise;
   uint8_t                            byte;
 } iis2dlpc_reg_t;
