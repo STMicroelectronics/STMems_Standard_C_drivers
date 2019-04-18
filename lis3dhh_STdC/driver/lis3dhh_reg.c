@@ -218,47 +218,6 @@ int32_t lis3dhh_data_rate_get(lis3dhh_ctx_t *ctx, lis3dhh_norm_mod_en_t *val)
 }
 
 /**
-  * @brief  Offset temperature compensation enable.[set]
-  *
-  * @param  ctx    Read / write interface definitions.(ptr)
-  * @param  val    Change the values of off_tcomp_en in reg CTRL_REG4
-  * @retval        Interface status (MANDATORY: return 0 -> no Error).
-  *
-  */
-int32_t lis3dhh_offset_temp_comp_set(lis3dhh_ctx_t *ctx, uint8_t val)
-{
-  lis3dhh_ctrl_reg4_t ctrl_reg4;
-  int32_t ret;
-
-  ret = lis3dhh_read_reg(ctx, LIS3DHH_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
-  if(ret == 0){
-    ctrl_reg4.off_tcomp_en = val;
-    ret = lis3dhh_write_reg(ctx, LIS3DHH_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
-  }
-
-  return ret;
-}
-
-/**
-  * @brief  Offset temperature compensation enable.[get]
-  *
-  * @param  ctx    Read / write interface definitions.(ptr)
-  * @param  val    Get the values of off_tcomp_en in reg CTRL_REG4.(ptr)
-  * @retval        Interface status (MANDATORY: return 0 -> no Error).
-  *
-  */
-int32_t lis3dhh_offset_temp_comp_get(lis3dhh_ctx_t *ctx, uint8_t *val)
-{
-  lis3dhh_ctrl_reg4_t ctrl_reg4;
-  int32_t ret;
-
-  ret = lis3dhh_read_reg(ctx, LIS3DHH_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
-  *val = ctrl_reg4.off_tcomp_en;
-
-  return ret;
-}
-
-/**
   * @brief  Temperature output value.[get]
   *
   * @param  ctx    Read / write interface definitions.(ptr)
@@ -350,36 +309,6 @@ int32_t lis3dhh_device_id_get(lis3dhh_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lis3dhh_read_reg(ctx, LIS3DHH_WHO_AM_I, buff, 1);
-  return ret;
-}
-
-/**
-  * @brief  Asic identification.[get]
-  *
-  * @param  ctx    Read / write interface definitions.(ptr)
-  * @param  val    Get the values of asic_id in reg ID_REG.(ptr)
-  * @retval        Interface status (MANDATORY: return 0 -> no Error).
-  *
-  */
-int32_t lis3dhh_asic_id_get(lis3dhh_ctx_t *ctx, lis3dhh_asic_id_t *val)
-{
-  lis3dhh_id_reg_t id_reg;
-  int32_t ret;
-
-  ret = lis3dhh_read_reg(ctx, LIS3DHH_ID_REG, (uint8_t*)&id_reg, 1);
-
-  switch (id_reg.asic_id){
-    case LIS3DHH_VER_A:
-      *val = LIS3DHH_VER_A;
-      break;
-    case LIS3DHH_VER_B:
-      *val = LIS3DHH_VER_B;
-      break;
-    default:
-      *val = LIS3DHH_VER_A;
-      break;
-  }
-
   return ret;
 }
 

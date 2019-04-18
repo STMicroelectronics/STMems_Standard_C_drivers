@@ -156,12 +156,6 @@ typedef struct {
   */
 
 #define LIS3DHH_WHO_AM_I      0x0FU
-#define LIS3DHH_ID_REG        0x1BU
-typedef struct {
-  uint8_t not_used_01      : 7;
-  uint8_t asic_id          : 1;
-} lis3dhh_id_reg_t;
-
 #define LIS3DHH_CTRL_REG1     0x20U
 typedef struct {
   uint8_t bdu              : 1;
@@ -196,7 +190,7 @@ typedef struct {
 
 #define LIS3DHH_CTRL_REG4     0x23U
 typedef struct {
-  uint8_t off_tcomp_en     : 1;
+  uint8_t not_used_01      : 1;
   uint8_t fifo_en          : 1;
   uint8_t pp_od            : 2;
   uint8_t st               : 2;
@@ -255,7 +249,6 @@ typedef struct {
   *
   */
 typedef union{
-  lis3dhh_id_reg_t       id_reg;
   lis3dhh_ctrl_reg1_t    ctrl_reg1;
   lis3dhh_int1_ctrl_t    int1_ctrl;
   lis3dhh_int2_ctrl_t    int2_ctrl;
@@ -291,9 +284,6 @@ typedef enum {
 int32_t lis3dhh_data_rate_set(lis3dhh_ctx_t *ctx, lis3dhh_norm_mod_en_t val);
 int32_t lis3dhh_data_rate_get(lis3dhh_ctx_t *ctx, lis3dhh_norm_mod_en_t *val);
 
-int32_t lis3dhh_offset_temp_comp_set(lis3dhh_ctx_t *ctx, uint8_t val);
-int32_t lis3dhh_offset_temp_comp_get(lis3dhh_ctx_t *ctx, uint8_t *val);
-
 int32_t lis3dhh_temperature_raw_get(lis3dhh_ctx_t *ctx, uint8_t *buff);
 int32_t lis3dhh_acceleration_raw_get(lis3dhh_ctx_t *ctx, uint8_t *buff);
 
@@ -302,12 +292,6 @@ int32_t lis3dhh_xl_data_ready_get(lis3dhh_ctx_t *ctx, uint8_t *val);
 int32_t lis3dhh_xl_data_ovr_get(lis3dhh_ctx_t *ctx, uint8_t *val);
 
 int32_t lis3dhh_device_id_get(lis3dhh_ctx_t *ctx, uint8_t *buff);
-typedef enum {
-  LIS3DHH_VER_A   = 0,
-  LIS3DHH_VER_B   = 1,
-} lis3dhh_asic_id_t;
-int32_t lis3dhh_asic_id_get(lis3dhh_ctx_t *ctx, lis3dhh_asic_id_t *val);
-
 
 int32_t lis3dhh_reset_set(lis3dhh_ctx_t *ctx, uint8_t val);
 int32_t lis3dhh_reset_get(lis3dhh_ctx_t *ctx, uint8_t *val);

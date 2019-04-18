@@ -14,4 +14,4 @@ every hardware.
 
 www.st.com/mems
 
-LIS3DHH DS rev2.0 
+LIS3DHH DS rev3.0 
