@@ -83,6 +83,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
+#include <stdio.h>
+
 #include "stm32f4xx_hal.h"
 #include <lsm6dso_reg.h>
 #include <fifo_utility.h>
@@ -180,7 +182,7 @@ void example_compressed_fifo_simple_lsm6dso(void)
   /*
    * Disable I3C interface
    */
-  lsm6dso_i3c_disable_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dso_i3c_disable_set(&dev_ctx, LSM6DSO_I3C_DISABLE);
 
   /*
    *  Enable Block Data Update
@@ -307,9 +309,9 @@ void example_compressed_fifo_simple_lsm6dso(void)
         sprintf((char*)tx_buffer, "ACC:\t%u\t%d\t%4.2f\t%4.2f\t%4.2f\r\n",
                 (unsigned int)acc_slot[i].timestamp,
                  acc_slot[i].sensor_tag,
-                 LSM6DSO_FROM_FS_2g_TO_mg(acc_slot[i].sensor_data.data[0]),
-                 LSM6DSO_FROM_FS_2g_TO_mg(acc_slot[i].sensor_data.data[1]),
-                 LSM6DSO_FROM_FS_2g_TO_mg(acc_slot[i].sensor_data.data[2]));
+                 lsm6dso_from_fs2_to_mg(acc_slot[i].sensor_data.data[0]),
+                 lsm6dso_from_fs2_to_mg(acc_slot[i].sensor_data.data[1]),
+                 lsm6dso_from_fs2_to_mg(acc_slot[i].sensor_data.data[2]));
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
       }
 
@@ -318,9 +320,9 @@ void example_compressed_fifo_simple_lsm6dso(void)
         sprintf((char*)tx_buffer, "GYR:\t%u\t%d\t%4.2f\t%4.2f\t%4.2f\r\n",
                 (unsigned int)gyr_slot[i].timestamp,
                 gyr_slot[i].sensor_tag,
-                LSM6DSO_FROM_FS_2000dps_TO_mdps(gyr_slot[i].sensor_data.data[0]),
-                LSM6DSO_FROM_FS_2000dps_TO_mdps(gyr_slot[i].sensor_data.data[1]),
-                LSM6DSO_FROM_FS_2000dps_TO_mdps(gyr_slot[i].sensor_data.data[2]));
+                lsm6dso_from_fs2000_to_mdps(gyr_slot[i].sensor_data.data[0]),
+                lsm6dso_from_fs2000_to_mdps(gyr_slot[i].sensor_data.data[1]),
+                lsm6dso_from_fs2000_to_mdps(gyr_slot[i].sensor_data.data[2]));
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
       }
 

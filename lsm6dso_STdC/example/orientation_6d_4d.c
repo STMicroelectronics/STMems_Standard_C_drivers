@@ -82,6 +82,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
+#include <stdio.h>
+
 #include "stm32f4xx_hal.h"
 #include <lsm6dso_reg.h>
 #include "gpio.h"

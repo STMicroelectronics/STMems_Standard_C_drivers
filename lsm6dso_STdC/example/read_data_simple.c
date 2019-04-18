@@ -81,6 +81,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
+#include <stdio.h>
+
 #include "stm32f4xx_hal.h"
 #include <lsm6dso_reg.h>
 #include "gpio.h"
@@ -202,11 +204,11 @@ void example_main_lsm6dso(void)
       memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
       lsm6dso_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
       acceleration_mg[0] =
-    		  LSM6DSO_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[0]);
+    		  lsm6dso_from_fs2_to_mg(data_raw_acceleration.i16bit[0]);
       acceleration_mg[1] =
-    		  LSM6DSO_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[1]);
+    		  lsm6dso_from_fs2_to_mg(data_raw_acceleration.i16bit[1]);
       acceleration_mg[2] =
-    		  LSM6DSO_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[2]);
+    		  lsm6dso_from_fs2_to_mg(data_raw_acceleration.i16bit[2]);
 
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
@@ -222,11 +224,11 @@ void example_main_lsm6dso(void)
       memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
       lsm6dso_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
       angular_rate_mdps[0] =
-    		  LSM6DSO_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[0]);
+    		  lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[0]);
       angular_rate_mdps[1] =
-    		  LSM6DSO_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[1]);
+    		  lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[1]);
       angular_rate_mdps[2] =
-    		  LSM6DSO_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[2]);
+    		  lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[2]);
 
       sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
               angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
@@ -241,7 +243,7 @@ void example_main_lsm6dso(void)
        */
       memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
       lsm6dso_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = LSM6DSO_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
+      temperature_degC = lsm6dso_from_lsb_to_celsius(data_raw_temperature.i16bit);
 
       sprintf((char*)tx_buffer,
     		  "Temperature [degC]:%6.2f\r\n", temperature_degC);

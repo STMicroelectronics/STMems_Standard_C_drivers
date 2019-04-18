@@ -82,6 +82,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
+#include <stdio.h>
+
 #include "stm32f4xx_hal.h"
 #include <lsm6dso_reg.h>
 #include "gpio.h"
@@ -222,11 +224,11 @@ void example_main_interrupt_lsm6dso(void)
       memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
       lsm6dso_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
       acceleration_mg[0] =
-        LSM6DSO_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[0]);
+        lsm6dso_from_fs2_to_mg(data_raw_acceleration.i16bit[0]);
       acceleration_mg[1] =
-        LSM6DSO_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[1]);
+        lsm6dso_from_fs2_to_mg(data_raw_acceleration.i16bit[1]);
       acceleration_mg[2] =
-        LSM6DSO_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[2]);
+        lsm6dso_from_fs2_to_mg(data_raw_acceleration.i16bit[2]);
 
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
