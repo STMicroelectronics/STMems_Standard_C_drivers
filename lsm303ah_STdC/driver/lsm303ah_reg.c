@@ -1,3355 +1,4039 @@
 /*
  ******************************************************************************
  * @file    lsm303ah_reg.c
- * @author  MEMS Software Solution Team
- * @date    19-December-2017
+ * @author  Sensor Solutions Software Team
  * @brief   LSM303AH driver file
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
  *   1. Redistributions of source code must retain the above copyright notice,
  *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ *   2. Redistributions in binary form must reproduce the above copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *   3. Neither the name of STMicroelectronics nor the names of its
+ *      contributors may be used to endorse or promote products derived from
+ *      this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  *
  */
 
 #include "lsm303ah_reg.h"
 
 /**
-  * @addtogroup  lsm303ah
-  * @brief  This file provides a set of functions needed to drive the
-  *         lsm303ah enanced inertial module.
+  * @defgroup  LSM303AH
+  * @brief     This file provides a set of functions needed to drive the
+  *            lsm303ah enhanced inertial module.
   * @{
+  *
   */
 
 /**
-  * @addtogroup  interfaces_functions
-  * @brief  This section provide a set of functions used to read and write
-  *         a generic register of the device.
+  * @defgroup  LSM303AH_Interfaces_Functions
+  * @brief     This section provide a set of functions used to read and
+  *            write a generic register of the device.
+  *            MANDATORY: return 0 -> no Error.
   * @{
+  *
   */
 
 /**
   * @brief  Read generic device register
   *
-  * @param  lsm303ah_ctx_t* ctx: read / write interface definitions
-  * @param  uint8_t reg: register to read
-  * @param  uint8_t* data: pointer to buffer that store the data read
-  * @param  uint16_t len: number of consecutive register to read
+  * @param  ctx   read / write interface definitions(ptr)
+  * @param  reg   register to read
+  * @param  data  pointer to buffer that store the data read(ptr)
+  * @param  len   number of consecutive register to read
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
 int32_t lsm303ah_read_reg(lsm303ah_ctx_t* ctx, uint8_t reg, uint8_t* data,
                           uint16_t len)
 {
-  return ctx->read_reg(ctx->handle, reg, data, len);
+  int32_t ret;
+  ret = ctx->read_reg(ctx->handle, reg, data, len);
+  return ret;
 }
 
 /**
   * @brief  Write generic device register
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t reg: register to write
-  * @param  uint8_t* data: pointer to data to write in register reg
-  * @param  uint16_t len: number of consecutive register to write
+  * @param  ctx   read / write interface definitions(ptr)
+  * @param  reg   register to write
+  * @param  data  pointer to data to write in register reg(ptr)
+  * @param  len   number of consecutive register to write
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
-*/
+  */
 int32_t lsm303ah_write_reg(lsm303ah_ctx_t* ctx, uint8_t reg, uint8_t* data,
-                           uint16_t len)
+                            uint16_t len)
 {
-  return ctx->write_reg(ctx->handle, reg, data, len);
+  int32_t ret;
+  ret = ctx->write_reg(ctx->handle, reg, data, len);
+  return ret;
 }
 
 /**
   * @}
-  */
-
-/**
-  * @addtogroup  data_generation_c
-  * @brief   This section groups all the functions concerning data generation
-  * @{
-  */
-
-/**
-  * @brief  all_sources: [get] Read all the interrupt/status flag of
-  *                            the device.
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_all_sources: FIFO_SRC, STATUS_DUP, WAKE_UP_SRC,
-  *                               TAP_SRC, 6D_SRC, FUNC_CK_GATE, FUNC_SRC.
+  */
+
+/**
+  * @defgroup    LSM303AH_Sensitivity
+  * @brief       These functions convert raw-data into engineering units.
+  * @{
+  *
+  */
+
+float_t lsm303ah_from_fs2g_to_mg(int16_t lsb)
+{
+  return ((float_t)lsb * 0.061f);
+}
+
+float_t lsm303ah_from_fs4g_to_mg(int16_t lsb)
+{
+  return ((float_t)lsb * 0.122f);
+}
+
+float_t lsm303ah_from_fs8g_to_mg(int16_t lsb)
+{
+  return ((float_t)lsb * 0.244f);
+}
+
+float_t lsm303ah_from_fs16g_to_mg(int16_t lsb)
+{
+  return ((float_t)lsb * 0.488f);
+}
+
+float_t lsm303ah_from_lsb_to_mgauss(int16_t lsb)
+{
+  return ((float_t)lsb * 1.5f);
+}
+
+float_t lsm303ah_from_lsb_to_celsius(int16_t lsb)
+{
+  return (((float_t)lsb / 256.0f) + 25.0f);
+}
+
+/**
+  * @}
+  *
+  */
+
+/**
+  * @defgroup  Data Generation
+  * @brief     This section groups all the functions concerning data generation.
+  * @{
+  *
+  */
+
+/**
+  * @brief  Read all the interrupt/status flag of the device.[get]
+  *
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    get FIFO_SRC, STATUS_DUP, WAKE_UP_SRC,
+  *                TAP_SRC, 6D_SRC, FUNC_CK_GATE, FUNC_SRC.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_all_sources_get(lsm303ah_ctx_t *ctx,
                                  lsm303ah_xl_all_sources_t *val)
 {
-  int32_t mm_error;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FIFO_SRC_A,
-                               &(val->byte[0]), 1);
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_STATUS_DUP_A,
-                               &(val->byte[1]), 4);
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CK_GATE_A,
-                               &(val->byte[5]), 2);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FIFO_SRC_A,
+                          (uint8_t*)&(val->fifo_src_a), 1);
+  if(ret == 0){
+    ret = lsm303ah_read_reg(ctx, LSM303AH_STATUS_DUP_A,
+                            (uint8_t*)&(val->status_dup_a), 1);
+  }
+  if(ret == 0){
+    ret = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_SRC_A,
+                            (uint8_t*)&(val->wake_up_src_a), 1);
+  }
+  if(ret == 0){
+    ret = lsm303ah_read_reg(ctx, LSM303AH_TAP_SRC_A,
+                            (uint8_t*)&(val->tap_src_a), 1);
+  }
+  if(ret == 0){
+    ret = lsm303ah_read_reg(ctx, LSM303AH_6D_SRC_A,
+                            (uint8_t*)&(val->_6d_src_a), 1);
+  }
+  if(ret == 0){
+    ret = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CK_GATE_A,
+                            (uint8_t*)&(val->func_ck_gate_a), 1);
+  }
+  if(ret == 0){
+    ret = lsm303ah_read_reg(ctx, LSM303AH_FUNC_SRC_A,
+                            (uint8_t*)&(val->func_src_a), 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  block_data_update: [set] Blockdataupdate.
+  * @brief  Block data update.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of bdu in reg CTRL1
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of bdu in reg CTRL1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_block_data_update_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl1_a_t ctrl1_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL1_A, &reg.byte, 1);
-  reg.ctrl1_a.bdu = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL1_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL1_A, (uint8_t*)&ctrl1_a, 1);
+  if(ret == 0){
+    ctrl1_a.bdu = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL1_A, (uint8_t*)&ctrl1_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  block_data_update: [get] Blockdataupdate.
+  * @brief  Block data update.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of bdu in reg CTRL1
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    get the values of bdu in reg CTRL1.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_block_data_update_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl1_a_t ctrl1_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL1_A, &reg.byte, 1);
-  *val = reg.ctrl1_a.bdu;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL1_A, (uint8_t*)&ctrl1_a, 1);
+  *val = ctrl1_a.bdu;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  block_data_update: [set] Blockdataupdate.
+  * @brief  Block data update.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of bdu in reg CFG_REG_C
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param val     Change the values of bdu in reg CFG_REG_C
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_block_data_update_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_c_m_t cfg_reg_c_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, &reg.byte, 1);
-  reg.cfg_reg_c_m.bdu = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_C_M, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, (uint8_t*)&cfg_reg_c_m, 1);
+  if(ret == 0){
+    cfg_reg_c_m.bdu = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_C_M, (uint8_t*)&cfg_reg_c_m, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  block_data_update: [get] Blockdataupdate.
+  * @brief  Block data update.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of bdu in reg CFG_REG_C
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    get the values of bdu in reg CFG_REG_C.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_block_data_update_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_c_m_t cfg_reg_c_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, &reg.byte, 1);
-  *val = reg.cfg_reg_c_m.bdu;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, (uint8_t*)&cfg_reg_c_m, 1);
+  *val = cfg_reg_c_m.bdu;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  data_format: [set]  Big/Little Endian data selection.
+  * @brief  Big/Little Endian data selection.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_ble_t: change the values of ble in reg CFG_REG_C
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of ble in reg CFG_REG_C
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_data_format_set(lsm303ah_ctx_t *ctx, lsm303ah_mg_ble_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_c_m_t cfg_reg_c_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, &reg.byte, 1);
-  reg.cfg_reg_c_m.ble = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_C_M, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, (uint8_t*)&cfg_reg_c_m, 1);
+  if(ret == 0){
+    cfg_reg_c_m.ble = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_C_M, (uint8_t*)&cfg_reg_c_m, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  data_format: [get]  Big/Little Endian data selection.
+  * @brief  Big/Little Endian data selection.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_ble_t: Get the values of ble in reg CFG_REG_C
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of ble in reg CFG_REG_C.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_data_format_get(lsm303ah_ctx_t *ctx,
                                     lsm303ah_mg_ble_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_c_m_t cfg_reg_c_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, &reg.byte, 1);
-  *val = (lsm303ah_mg_ble_t) reg.cfg_reg_c_m.ble;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, (uint8_t*)&cfg_reg_c_m, 1);
+  switch (cfg_reg_c_m.ble){
+    case LSM303AH_MG_LSB_AT_LOW_ADD:
+      *val = LSM303AH_MG_LSB_AT_LOW_ADD;
+      break;
+    case LSM303AH_MG_MSB_AT_LOW_ADD:
+      *val = LSM303AH_MG_MSB_AT_LOW_ADD;
+      break;
+    default:
+      *val = LSM303AH_MG_LSB_AT_LOW_ADD;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  xl_full_scale: [set]   Accelerometer full-scale selection.
+  * @brief  Accelerometer full-scale selection.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_fs_t: change the values of fs in reg CTRL1
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of fs in reg CTRL1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_full_scale_set(lsm303ah_ctx_t *ctx, lsm303ah_xl_fs_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl1_a_t ctrl1_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL1_A, &reg.byte, 1);
-  reg.ctrl1_a.fs = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL1_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL1_A, (uint8_t*)&ctrl1_a, 1);
+  if(ret == 0){
+    ctrl1_a.fs = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL1_A, (uint8_t*)&ctrl1_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  xl_full_scale: [get]   Accelerometer full-scale selection.
+  * @brief  Accelerometer full-scale selection.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_fs_t: Get the values of fs in reg CTRL1
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of fs in reg CTRL1.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_full_scale_get(lsm303ah_ctx_t *ctx, lsm303ah_xl_fs_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl1_a_t ctrl1_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL1_A, &reg.byte, 1);
-  *val = (lsm303ah_xl_fs_t) reg.ctrl1_a.fs;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL1_A, (uint8_t*)&ctrl1_a, 1);
+  switch (ctrl1_a.fs){
+    case LSM303AH_XL_2g:
+      *val = LSM303AH_XL_2g;
+      break;
+    case LSM303AH_XL_16g:
+      *val = LSM303AH_XL_16g;
+      break;
+    case LSM303AH_XL_4g:
+      *val = LSM303AH_XL_4g;
+      break;
+    case LSM303AH_XL_8g:
+      *val = LSM303AH_XL_8g;
+      break;
+    default:
+      *val = LSM303AH_XL_2g;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  xl_data_rate: [set]  Accelerometer data rate selection.
+  * @brief  Accelerometer data rate selection.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_odr_t: change the values of odr in reg CTRL1
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of odr in reg CTRL1
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_data_rate_set(lsm303ah_ctx_t *ctx, lsm303ah_xl_odr_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl1_a_t ctrl1_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL1_A, &reg.byte, 1);
-  reg.ctrl1_a.odr = val & 0x0F;
-  reg.ctrl1_a.hf_odr = (val & 0x10) >> 4;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL1_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL1_A, (uint8_t*)&ctrl1_a, 1);
+  if(ret == 0){
+    ctrl1_a.odr = (uint8_t)val & 0x0FU;
+    ctrl1_a.hf_odr = ((uint8_t)val & 0x10U) >> 4;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL1_A, (uint8_t*)&ctrl1_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  xl_data_rate: [get]  Accelerometer data rate selection.
+  * @brief  Accelerometer data rate selection.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_odr_t: Get the values of odr in reg CTRL1
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of odr in reg CTRL1.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_data_rate_get(lsm303ah_ctx_t *ctx, lsm303ah_xl_odr_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl1_a_t ctrl1_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL1_A, &reg.byte, 1);
-  *val = (lsm303ah_xl_odr_t) ((reg.ctrl1_a.hf_odr << 4) + reg.ctrl1_a.odr);
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL1_A, (uint8_t*)&ctrl1_a, 1);
+  switch ((ctrl1_a.hf_odr << 4) + ctrl1_a.odr){
+    case LSM303AH_XL_ODR_OFF:
+      *val = LSM303AH_XL_ODR_OFF;
+      break;
+    case LSM303AH_XL_ODR_1Hz_LP:
+      *val = LSM303AH_XL_ODR_1Hz_LP;
+      break;
+    case LSM303AH_XL_ODR_12Hz5_LP:
+      *val = LSM303AH_XL_ODR_12Hz5_LP;
+      break;
+    case LSM303AH_XL_ODR_25Hz_LP:
+      *val = LSM303AH_XL_ODR_25Hz_LP;
+      break;
+    case LSM303AH_XL_ODR_50Hz_LP:
+      *val = LSM303AH_XL_ODR_50Hz_LP;
+      break;
+    case LSM303AH_XL_ODR_100Hz_LP:
+      *val = LSM303AH_XL_ODR_100Hz_LP;
+      break;
+    case LSM303AH_XL_ODR_200Hz_LP:
+      *val = LSM303AH_XL_ODR_200Hz_LP;
+      break;
+    case LSM303AH_XL_ODR_400Hz_LP:
+      *val = LSM303AH_XL_ODR_400Hz_LP;
+      break;
+    case LSM303AH_XL_ODR_800Hz_LP:
+      *val = LSM303AH_XL_ODR_800Hz_LP;
+      break;
+    case LSM303AH_XL_ODR_12Hz5_HR:
+      *val = LSM303AH_XL_ODR_12Hz5_HR;
+      break;
+    case LSM303AH_XL_ODR_25Hz_HR:
+      *val = LSM303AH_XL_ODR_25Hz_HR;
+      break;
+    case LSM303AH_XL_ODR_50Hz_HR:
+      *val = LSM303AH_XL_ODR_50Hz_HR;
+      break;
+    case LSM303AH_XL_ODR_100Hz_HR:
+      *val = LSM303AH_XL_ODR_100Hz_HR;
+      break;
+    case LSM303AH_XL_ODR_200Hz_HR:
+      *val = LSM303AH_XL_ODR_200Hz_HR;
+      break;
+    case LSM303AH_XL_ODR_400Hz_HR:
+      *val = LSM303AH_XL_ODR_400Hz_HR;
+      break;
+    case LSM303AH_XL_ODR_800Hz_HR:
+      *val = LSM303AH_XL_ODR_800Hz_HR;
+      break;
+    case LSM303AH_XL_ODR_1k6Hz_HF:
+      *val = LSM303AH_XL_ODR_1k6Hz_HF;
+      break;
+    case LSM303AH_XL_ODR_3k2Hz_HF:
+      *val = LSM303AH_XL_ODR_3k2Hz_HF;
+      break;
+    case LSM303AH_XL_ODR_6k4Hz_HF:
+      *val = LSM303AH_XL_ODR_6k4Hz_HF;
+      break;
+    default:
+      *val = LSM303AH_XL_ODR_OFF;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  status_reg: [get]  The STATUS_REG register.
+  * @brief  The STATUS_REG register.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_status_reg_t: registers STATUS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get registers STATUS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_status_reg_get(lsm303ah_ctx_t *ctx,
                                    lsm303ah_status_a_t *val)
 {
-  return lsm303ah_read_reg(ctx, LSM303AH_STATUS_A, (uint8_t*) val, 1);
+  int32_t ret;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_STATUS_A, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
-  * @brief  status: [get]  Info about device status.
+  * @brief  Info about device status.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_status_reg_t: registers STATUS_REG
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get registers STATUS_REG.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_status_get(lsm303ah_ctx_t *ctx,
                                lsm303ah_status_reg_m_t *val)
 {
-  return lsm303ah_read_reg(ctx, LSM303AH_STATUS_REG_M, (uint8_t*) val, 1);
+  int32_t ret;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_STATUS_REG_M, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
-  * @brief  xl_flag_data_ready: [get]  Accelerometer new data available.
+  * @brief  Accelerometer new data available.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of drdy in reg STATUS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of drdy in reg STATUS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_flag_data_ready_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_status_a_t status_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_STATUS_A, &reg.byte, 1);
-  *val = reg.status_a.drdy;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_STATUS_A, (uint8_t*)&status_a, 1);
+  *val = status_a.drdy;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  mag_data_ready: [get]  Magnetic set of data available.
+  * @brief  Magnetic set of data available.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of zyxda in reg STATUS_REG
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of zyxda in reg STATUS_REG.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_data_ready_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_status_reg_m_t status_reg_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_STATUS_REG_M, &reg.byte, 1);
-  *val = reg.status_reg_m.zyxda;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_STATUS_REG_M, (uint8_t*)&status_reg_m, 1);
+  *val = status_reg_m.zyxda;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  mag_data_ovr: [get]  Magnetic set of data overrun.
+  * @brief  Magnetic set of data overrun.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of zyxor in reg STATUS_REG
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of zyxor in reg STATUS_REG.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_data_ovr_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_status_reg_m_t status_reg_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_STATUS_REG_M, &reg.byte, 1);
-  *val = reg.status_reg_m.zyxor;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_STATUS_REG_M, (uint8_t*)&status_reg_m, 1);
+  *val = status_reg_m.zyxor;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  mag_user_offset: [set]  These registers comprise a 3 group of
-  *                                 16-bit number and represent hard-iron
-  *                                 offset in order to compensate environmental
-  *                                 effects. Data format is the same of
-  *                                 output data raw: two’s complement with
-  *                                 1LSb = 1.5mG. These values act on the
-  *                                 magnetic output data value in order to
-  *                                 delete the environmental offset.
+  * @brief  These registers comprise a 3 group of 16-bit number and represent
+  *         hard-iron offset in order to compensate environmental effects. Data
+  *         format is the same of output data raw: two’s complement with
+  *         1LSb = 1.5mG. These values act on the magnetic output data value in
+  *         order to delete the environmental offset.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that contains data to write
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  buff   buffer that contains data to write.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_user_offset_set(lsm303ah_ctx_t *ctx, uint8_t *buff)
 {
-  return lsm303ah_write_reg(ctx, LSM303AH_OFFSET_X_REG_L_M, buff, 6);
+  int32_t ret;
+  ret = lsm303ah_write_reg(ctx, LSM303AH_OFFSET_X_REG_L_M, buff, 6);
+  return ret;
 }
 
 /**
-  * @brief  mag_user_offset: [get]  These registers comprise a 3 group of
-  *                                 16-bit number and represent hard-iron
-  *                                 offset in order to compensate environmental
-  *                                 effects. Data format is the same of
-  *                                 output data raw: two’s complement with
-  *                                 1LSb = 1.5mG. These values act on the
-  *                                 magnetic output data value in order to
-  *                                 delete the environmental offset.
+  * @brief  These registers comprise a 3 group of 16-bit number and represent
+  *         hard-iron offset in order to compensate environmental effects. Data
+  *         format is the same of output data raw: two’s complement with
+  *         1LSb = 1.5mG. These values act on the magnetic output data value in
+  *         order to delete the environmental offset.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  buff   buffer that stores data read.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_user_offset_get(lsm303ah_ctx_t *ctx, uint8_t *buff)
 {
-  return lsm303ah_read_reg(ctx, LSM303AH_OFFSET_X_REG_L_M, buff, 6);
+  int32_t ret;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_OFFSET_X_REG_L_M, buff, 6);
+  return ret;
 }
 
 /**
-  * @brief  operating_mode: [set]  Operating mode selection.
+  * @brief  Operating mode selection.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_md_t: change the values of md in reg CFG_REG_A
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of md in reg CFG_REG_A
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_operating_mode_set(lsm303ah_ctx_t *ctx,
                                        lsm303ah_mg_md_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_a_m_t cfg_reg_a_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, &reg.byte, 1);
-  reg.cfg_reg_a_m.md = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_A_M, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, (uint8_t*)&cfg_reg_a_m, 1);
+  if(ret == 0){
+    cfg_reg_a_m.md = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_A_M, (uint8_t*)&cfg_reg_a_m, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  operating_mode: [get]  Operating mode selection.
+  * @brief  Operating mode selection.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_md_t: Get the values of md in reg CFG_REG_A
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of md in reg CFG_REG_A.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_operating_mode_get(lsm303ah_ctx_t *ctx,
                                        lsm303ah_mg_md_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_a_m_t cfg_reg_a_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, &reg.byte, 1);
-  *val = (lsm303ah_mg_md_t) reg.cfg_reg_a_m.md;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, (uint8_t*)&cfg_reg_a_m, 1);
+  switch (cfg_reg_a_m.md){
+    case LSM303AH_MG_CONTINUOUS_MODE:
+      *val = LSM303AH_MG_CONTINUOUS_MODE;
+      break;
+    case LSM303AH_MG_SINGLE_TRIGGER:
+      *val = LSM303AH_MG_SINGLE_TRIGGER;
+      break;
+    case LSM303AH_MG_POWER_DOWN:
+      *val = LSM303AH_MG_POWER_DOWN;
+      break;
+    default:
+      *val = LSM303AH_MG_CONTINUOUS_MODE;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  data_rate: [set]  Output data rate selection.
+  * @brief  Output data rate selection.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_odr_t: change the values of odr in reg CFG_REG_A
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of odr in reg CFG_REG_A
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_data_rate_set(lsm303ah_ctx_t *ctx, lsm303ah_mg_odr_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_a_m_t cfg_reg_a_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, &reg.byte, 1);
-  reg.cfg_reg_a_m.odr = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_A_M, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, (uint8_t*)&cfg_reg_a_m, 1);
+  if(ret == 0){
+    cfg_reg_a_m.odr = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_A_M, (uint8_t*)&cfg_reg_a_m, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  data_rate: [get]  Output data rate selection.
+  * @brief  Output data rate selection.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_odr_t: Get the values of odr in reg CFG_REG_A
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of odr in reg CFG_REG_A.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_data_rate_get(lsm303ah_ctx_t *ctx, lsm303ah_mg_odr_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_a_m_t cfg_reg_a_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, &reg.byte, 1);
-  *val = (lsm303ah_mg_odr_t) reg.cfg_reg_a_m.odr;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, (uint8_t*)&cfg_reg_a_m, 1);
+  switch (cfg_reg_a_m.odr){
+    case LSM303AH_MG_ODR_10Hz:
+      *val = LSM303AH_MG_ODR_10Hz;
+      break;
+    case LSM303AH_MG_ODR_20Hz:
+      *val = LSM303AH_MG_ODR_20Hz;
+      break;
+    case LSM303AH_MG_ODR_50Hz:
+      *val = LSM303AH_MG_ODR_50Hz;
+      break;
+    case LSM303AH_MG_ODR_100Hz:
+      *val = LSM303AH_MG_ODR_100Hz;
+      break;
+    default:
+      *val = LSM303AH_MG_ODR_10Hz;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  power_mode: [set]  Enables high-resolution/low-power mode.
+  * @brief  Enables high-resolution/low-power mode.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_lp_t: change the values of lp in reg CFG_REG_A
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of lp in reg CFG_REG_A
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_power_mode_set(lsm303ah_ctx_t *ctx, lsm303ah_mg_lp_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_a_m_t cfg_reg_a_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, &reg.byte, 1);
-  reg.cfg_reg_a_m.lp = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_A_M, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, (uint8_t*)&cfg_reg_a_m, 1);
+  if(ret == 0){
+    cfg_reg_a_m.lp = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_A_M, (uint8_t*)&cfg_reg_a_m, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  power_mode: [get]  Enables high-resolution/low-power mode.
+  * @brief  Enables high-resolution/low-power mode.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_lp_t: Get the values of lp in reg CFG_REG_A
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of lp in reg CFG_REG_A.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_power_mode_get(lsm303ah_ctx_t *ctx, lsm303ah_mg_lp_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_a_m_t cfg_reg_a_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, &reg.byte, 1);
-  *val = (lsm303ah_mg_lp_t) reg.cfg_reg_a_m.lp;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, (uint8_t*)&cfg_reg_a_m, 1);
+  switch (cfg_reg_a_m.lp){
+    case LSM303AH_MG_HIGH_RESOLUTION:
+      *val = LSM303AH_MG_HIGH_RESOLUTION;
+      break;
+    case LSM303AH_MG_LOW_POWER:
+      *val = LSM303AH_MG_LOW_POWER;
+      break;
+    default:
+      *val = LSM303AH_MG_HIGH_RESOLUTION;
+      break;
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  offset_temp_comp: [set]  Enables the magnetometer temperature
-  *                                  compensation.
+  * @brief  Enables the magnetometer temperature compensation.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of comp_temp_en in reg CFG_REG_A
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of comp_temp_en in reg CFG_REG_A
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_offset_temp_comp_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_a_m_t cfg_reg_a_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, &reg.byte, 1);
-  reg.cfg_reg_a_m.comp_temp_en = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_A_M, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, (uint8_t*)&cfg_reg_a_m, 1);
+  if(ret == 0){
+    cfg_reg_a_m.comp_temp_en = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_A_M, (uint8_t*)&cfg_reg_a_m, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  offset_temp_comp: [get]  Enables the magnetometer temperature
-  *                                  compensation.
+  * @brief  Enables the magnetometer temperature compensation.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of comp_temp_en in reg CFG_REG_A
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of comp_temp_en in reg CFG_REG_A.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_offset_temp_comp_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_a_m_t cfg_reg_a_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, &reg.byte, 1);
-  *val = reg.cfg_reg_a_m.comp_temp_en;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, (uint8_t*)&cfg_reg_a_m, 1);
+  *val = cfg_reg_a_m.comp_temp_en;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  set_rst_mode: [set]
+  * @brief  Set/Reset mode.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_set_rst_t: change the values of set_rst in
-  *                            reg CFG_REG_B
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of set_rst in reg CFG_REG_B
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_set_rst_mode_set(lsm303ah_ctx_t *ctx,
                                      lsm303ah_mg_set_rst_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_b_m_t cfg_reg_b_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_B_M, &reg.byte, 1);
-  reg.cfg_reg_b_m.set_rst = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_B_M, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_B_M, (uint8_t*)&cfg_reg_b_m, 1);
+  if(ret == 0){
+    cfg_reg_b_m.set_rst = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_B_M, (uint8_t*)&cfg_reg_b_m, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  set_rst_mode: [get]
+  * @brief  Set/Reset mode.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_set_rst_t: Get the values of set_rst in reg CFG_REG_B
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of set_rst in reg CFG_REG_B.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_set_rst_mode_get(lsm303ah_ctx_t *ctx,
                                      lsm303ah_mg_set_rst_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_b_m_t cfg_reg_b_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_B_M, &reg.byte, 1);
-  *val = (lsm303ah_mg_set_rst_t) reg.cfg_reg_b_m.set_rst;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_B_M, (uint8_t*)&cfg_reg_b_m, 1);
+  switch (cfg_reg_b_m.set_rst){
+    case LSM303AH_MG_SET_SENS_ODR_DIV_63:
+      *val = LSM303AH_MG_SET_SENS_ODR_DIV_63;
+      break;
+    case LSM303AH_MG_SENS_OFF_CANC_EVERY_ODR:
+      *val = LSM303AH_MG_SENS_OFF_CANC_EVERY_ODR;
+      break;
+    case LSM303AH_MG_SET_SENS_ONLY_AT_POWER_ON:
+      *val = LSM303AH_MG_SET_SENS_ONLY_AT_POWER_ON;
+      break;
+    default:
+      *val = LSM303AH_MG_SET_SENS_ODR_DIV_63;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief   set_rst_sensor_single: [set] Enables offset cancellation
-  *                                       in single measurement mode.
-  *                                       The OFF_CANC bit must be set
-  *                                       to 1 when enabling offset
-  *                                       cancellation in single measurement
-  *                                       mode this means a call function:
-  *                                       set_rst_mode(SENS_OFF_CANC_EVERY_ODR)
-  *                                       is need.
+  * @brief   Enables offset cancellation in single measurement mode. The
+  *          OFF_CANC bit must be set to 1 when enabling offset cancellation
+  *          in single measurement mode this means a call function:
+  *          set_rst_mode(SENS_OFF_CANC_EVERY_ODR) is need.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of off_canc_one_shot in
-  *                      reg CFG_REG_B
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of off_canc_one_shot in reg CFG_REG_B
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_set_rst_sensor_single_set(lsm303ah_ctx_t *ctx,
                                               uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_b_m_t cfg_reg_b_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_B_M, &reg.byte, 1);
-  reg.cfg_reg_b_m.off_canc_one_shot = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_B_M, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_B_M, (uint8_t*)&cfg_reg_b_m, 1);
+  if(ret == 0){
+    cfg_reg_b_m.off_canc_one_shot = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_B_M, (uint8_t*)&cfg_reg_b_m, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief   set_rst_sensor_single: [get] Enables offset cancellation
-  *                                       in single measurement mode.
-  *                                       The OFF_CANC bit must be set to
-  *                                       1 when enabling offset cancellation
-  *                                       in single measurement mode this
-  *                                       means a call function:
-  *                                       set_rst_mode(SENS_OFF_CANC_EVERY_ODR)
-  *                                       is need.
+  * @brief   Enables offset cancellation in single measurement mode. The
+  *          OFF_CANC bit must be set to 1 when enabling offset cancellation
+  *          in single measurement mode this means a call function:
+  *          set_rst_mode(SENS_OFF_CANC_EVERY_ODR) is need.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of off_canc_one_shot in reg CFG_REG_B
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of off_canc_one_shot in reg CFG_REG_B.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_set_rst_sensor_single_get(lsm303ah_ctx_t *ctx,
                                               uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_b_m_t cfg_reg_b_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_B_M, &reg.byte, 1);
-  *val = reg.cfg_reg_b_m.off_canc_one_shot;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_B_M, (uint8_t*)&cfg_reg_b_m, 1);
+  *val = cfg_reg_b_m.off_canc_one_shot;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup  Dataoutput
+  * @defgroup  Dataoutput
   * @brief   This section groups all the data output functions.
   * @{
+  *
   */
 
 /**
-  * @brief   acceleration_module_raw: [get]   Module output value (8-bit).
+  * @brief  Module output value (8-bit).[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  buff   buffer that stores data read.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_acceleration_module_raw_get(lsm303ah_ctx_t *ctx,
                                              uint8_t *buff)
 {
-  return lsm303ah_read_reg(ctx, LSM303AH_MODULE_8BIT_A, buff, 1);
+  int32_t ret;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_MODULE_8BIT_A, buff, 1);
+  return ret;
 }
 
 /**
-  * @brief  temperature_raw: [get] Temperature data output register (r).
-  *                                L and H registers together express a 16-bit
-  *                                word in two’s complement.
+  * @brief  Temperature data output register (r). L and H registers together
+  *         express a 16-bit word in two’s complement.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  buff   buffer that stores data read.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_temperature_raw_get(lsm303ah_ctx_t *ctx, uint8_t *buff)
 {
-  return lsm303ah_read_reg(ctx, LSM303AH_OUT_T_A, buff, 1);
+  int32_t ret;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_OUT_T_A, buff, 1);
+  return ret;
 }
 
 /**
-  * @brief  acceleration_raw: [get] Linear acceleration output register.
-  *                                 The value is expressed as a 16-bit word
-  *                                 in two’s complement.
+  * @brief  Linear acceleration output register.
+  *         The value is expressed as a 16-bit word in two’s complement.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  buff   buffer that stores data read.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_acceleration_raw_get(lsm303ah_ctx_t *ctx, uint8_t *buff)
 {
-  return lsm303ah_read_reg(ctx, LSM303AH_OUT_X_L_A, buff, 6);
+  int32_t ret;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_OUT_X_L_A, buff, 6);
+  return ret;
 }
 
 /**
-  * @brief  magnetic_raw: [get]  Magnetic output value.
+  * @brief  Magnetic output value.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  buff   buffer that stores data read.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_magnetic_raw_get(lsm303ah_ctx_t *ctx, uint8_t *buff)
 {
-  return lsm303ah_read_reg(ctx, LSM303AH_OUTX_L_REG_M, buff, 6);
+  int32_t ret;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_OUTX_L_REG_M, buff, 6);
+  return ret;
 }
 
 /**
-  * @brief  number_of_steps: [get] Number of steps detected by step
-  *                                counter routine.
+  * @brief  Number of steps detected by step counter routine.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  buff   buffer that stores data read.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_number_of_steps_get(lsm303ah_ctx_t *ctx, uint8_t *buff)
 {
-  return lsm303ah_read_reg(ctx, LSM303AH_STEP_COUNTER_L_A, buff, 2);
+  int32_t ret;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_STEP_COUNTER_L_A, buff, 2);
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup  common
+  * @defgroup  common
   * @brief   This section groups common usefull functions.
   * @{
+  *
   */
 
 /**
-  * @brief  device_id: [get] DeviceWhoamI.
+  * @brief  DeviceWhoamI.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  buff   buffer that stores data read.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_device_id_get(lsm303ah_ctx_t *ctx, uint8_t *buff)
 {
-  return lsm303ah_read_reg(ctx, LSM303AH_WHO_AM_I_A, buff, 1);
+  int32_t ret;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_WHO_AM_I_A, buff, 1);
+  return ret;
 }
 
 /**
-  * @brief  device_id: [get] DeviceWhoamI.
+  * @brief  DeviceWhoamI.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  buff   buffer that stores data read.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_device_id_get(lsm303ah_ctx_t *ctx, uint8_t *buff)
 {
-  return lsm303ah_read_reg(ctx, LSM303AH_WHO_AM_I_M, buff, 1);
+  int32_t ret;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_WHO_AM_I_M, buff, 1);
+  return ret;
 }
 
 /**
-  * @brief  auto_increment: [set] Register address automatically
-  *                               incremented during a multiple byte
-  *                               access with a serial interface.
+  * @brief  Register address automatically incremented during a multiple byte
+  *         access with a serial interface.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of if_add_inc in reg CTRL2
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of if_add_inc in reg CTRL2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_auto_increment_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl2_a_t ctrl2_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
-  reg.ctrl2_a.if_add_inc = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+  if(ret == 0){
+    ctrl2_a.if_add_inc = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  auto_increment: [get] Register address automatically incremented
-  *                               during a multiple byte access with a
-  *                               serial interface.
+  * @brief  Register address automatically incremented during a multiple byte
+  *         access with a serial interface.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of if_add_inc in reg CTRL2
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of if_add_inc in reg CTRL2.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_auto_increment_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl2_a_t ctrl2_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
-  *val = reg.ctrl2_a.if_add_inc;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+  *val = ctrl2_a.if_add_inc;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  mem_bank: [set] Enable access to the embedded functions/sensor
-  *                         hub configuration registers.
+  * @brief  Enable access to the embedded functions/sensor
+  *         hub configuration registers.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_func_cfg_en_t: change the values of func_cfg_en in
-  *                                 reg CTRL2
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of func_cfg_en in reg CTRL2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_mem_bank_set(lsm303ah_ctx_t *ctx,
                                  lsm303ah_xl_func_cfg_en_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl2_a_t ctrl2_a;
+  lsm303ah_ctrl2_adv_a_t ctrl2_adv_a;
+  int32_t ret;
 
   if (val == LSM303AH_XL_ADV_BANK){
-    mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
-    reg.ctrl2_a.func_cfg_en = val;
-    mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
+    ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+    if(ret == 0){
+      ctrl2_a.func_cfg_en = (uint8_t)val;
+      ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+    }
   }
   else {
-    mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_ADV_A, &reg.byte, 1);
-    reg.ctrl2_a.func_cfg_en = val;
-    mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL2_ADV_A, &reg.byte, 1);
+    ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_ADV_A, (uint8_t*)&ctrl2_adv_a, 1);
+    if(ret == 0){
+      ctrl2_adv_a.func_cfg_en = (uint8_t)val;
+      ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL2_ADV_A, (uint8_t*)&ctrl2_adv_a, 1);
+    }
   }
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  reset: [set] Software reset. Restore the default values in
-  *                      user registers.
+  * @brief  Software reset. Restore the default values in user registers.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of soft_reset in reg CTRL2
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of soft_reset in reg CTRL2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_reset_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl2_a_t ctrl2_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
-  reg.ctrl2_a.soft_reset = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+  if(ret == 0){
+    ctrl2_a.soft_reset = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  reset: [get] Software reset. Restore the default values in
-  *                      user registers.
+  * @brief  Software reset. Restore the default values in user registers.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of soft_reset in reg CTRL2
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of soft_reset in reg CTRL2.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_reset_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl2_a_t ctrl2_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
-  *val = reg.ctrl2_a.soft_reset;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+  *val = ctrl2_a.soft_reset;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  reset: [set]  Software reset. Restore the default values in
-  *                       user registers.
+  * @brief  Software reset. Restore the default values in user registers.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of soft_rst in reg CFG_REG_A
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of soft_rst in reg CFG_REG_A
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_reset_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_a_m_t cfg_reg_a_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, &reg.byte, 1);
-  reg.cfg_reg_a_m.soft_rst = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_A_M, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, (uint8_t*)&cfg_reg_a_m, 1);
+  if(ret == 0){
+    cfg_reg_a_m.soft_rst = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_A_M, (uint8_t*)&cfg_reg_a_m, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  reset: [get]  Software reset. Restore the default values
-  *                       in user registers.
+  * @brief  Software reset. Restore the default values in user registers.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of soft_rst in reg CFG_REG_A
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of soft_rst in reg CFG_REG_A.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_reset_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_a_m_t cfg_reg_a_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, &reg.byte, 1);
-  *val = reg.cfg_reg_a_m.soft_rst;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, (uint8_t*)&cfg_reg_a_m, 1);
+  *val = cfg_reg_a_m.soft_rst;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  boot: [set] Reboot memory content. Reload the calibration
-  *                     parameters.
+  * @brief  Reboot memory content. Reload the calibration parameters.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of boot in reg CTRL2
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of boot in reg CTRL2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_boot_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl2_a_t ctrl2_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
-  reg.ctrl2_a.boot = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+  if(ret == 0){
+    ctrl2_a.boot = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  boot: [get] Reboot memory content. Reload the calibration
-  *                     parameters.
+  * @brief  Reboot memory content. Reload the calibration parameters.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of boot in reg CTRL2
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of boot in reg CTRL2.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_boot_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl2_a_t ctrl2_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
-  *val = reg.ctrl2_a.boot;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+  *val = ctrl2_a.boot;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  boot: [set]  Reboot memory content. Reload the calibration
-  *                      parameters.
+  * @brief  Reboot memory content. Reload the calibration parameters.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of reboot in reg CFG_REG_A
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of reboot in reg CFG_REG_A
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_boot_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_a_m_t cfg_reg_a_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, &reg.byte, 1);
-  reg.cfg_reg_a_m.reboot = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_A_M, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, (uint8_t*)&cfg_reg_a_m, 1);
+  if(ret == 0){
+    cfg_reg_a_m.reboot = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_A_M, (uint8_t*)&cfg_reg_a_m, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  boot: [get]  Reboot memory content. Reload the
-  *                      calibration parameters.
+  * @brief  Reboot memory content. Reload the calibration parameters.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of reboot in reg CFG_REG_A
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of reboot in reg CFG_REG_A.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_boot_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_a_m_t cfg_reg_a_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, &reg.byte, 1);
-  *val = reg.cfg_reg_a_m.reboot;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_A_M, (uint8_t*)&cfg_reg_a_m, 1);
+  *val = cfg_reg_a_m.reboot;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  xl_self_test: [set]
+  * @brief  Accelerometer Self-Test.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_st_t: change the values of st in reg CTRL3
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of st in reg CTRL3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_self_test_set(lsm303ah_ctx_t *ctx, lsm303ah_xl_st_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl3_a_t ctrl3_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
-  reg.ctrl3_a.st = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  if(ret == 0){
+    ctrl3_a.st = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  xl_self_test: [get]
+  * @brief  Accelerometer Self-Test.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_st_t: Get the values of st in reg CTRL3
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of st in reg CTRL3.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_self_test_get(lsm303ah_ctx_t *ctx, lsm303ah_xl_st_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl3_a_t ctrl3_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
-  *val = (lsm303ah_xl_st_t) reg.ctrl3_a.st;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  switch (ctrl3_a.st){
+    case LSM303AH_XL_ST_DISABLE:
+      *val = LSM303AH_XL_ST_DISABLE;
+      break;
+    case LSM303AH_XL_ST_POSITIVE:
+      *val = LSM303AH_XL_ST_POSITIVE;
+      break;
+    case LSM303AH_XL_ST_NEGATIVE:
+      *val = LSM303AH_XL_ST_NEGATIVE;
+      break;
+    default:
+      *val = LSM303AH_XL_ST_DISABLE;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  self_test: [set] Selftest.
+  * @brief  Magnetometer self-test.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of self_test in reg CFG_REG_C
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of self_test in reg CFG_REG_C
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_self_test_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_c_m_t cfg_reg_c_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, &reg.byte, 1);
-  reg.cfg_reg_c_m.self_test = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_C_M, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, (uint8_t*)&cfg_reg_c_m, 1);
+  if(ret == 0){
+    cfg_reg_c_m.self_test = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_C_M, (uint8_t*)&cfg_reg_c_m, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  self_test: [get] Selftest.
+  * @brief  Magnetometer self-test.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of self_test in reg CFG_REG_C
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of self_test in reg CFG_REG_C.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_self_test_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_c_m_t cfg_reg_c_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, &reg.byte, 1);
-  *val = reg.cfg_reg_c_m.self_test;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, (uint8_t*)&cfg_reg_c_m, 1);
+  *val = cfg_reg_c_m.self_test;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  data_ready_mode: [set]
+  * @brief  Accelerometer data ready mode.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_drdy_pulsed_t: change the values of drdy_pulsed in
-  *                                 reg CTRL5
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of drdy_pulsed in reg CTRL5
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_data_ready_mode_set(lsm303ah_ctx_t *ctx,
                                      lsm303ah_xl_drdy_pulsed_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl5_a_t ctrl5_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL5_A, &reg.byte, 1);
-  reg.ctrl5_a.drdy_pulsed = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL5_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL5_A, (uint8_t*)&ctrl5_a, 1);
+  if(ret == 0){
+    ctrl5_a.drdy_pulsed = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL5_A, (uint8_t*)&ctrl5_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  data_ready_mode: [get]
+  * @brief  Accelerometer data ready mode.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_drdy_pulsed_t: Get the values of drdy_pulsed in
-  *                                    reg CTRL5
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of drdy_pulsed in reg CTRL5.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_data_ready_mode_get(lsm303ah_ctx_t *ctx,
                                      lsm303ah_xl_drdy_pulsed_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl5_a_t ctrl5_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL5_A, &reg.byte, 1);
-  *val = (lsm303ah_xl_drdy_pulsed_t) reg.ctrl5_a.drdy_pulsed;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL5_A, (uint8_t*)&ctrl5_a, 1);
+  switch (ctrl5_a.drdy_pulsed){
+    case LSM303AH_XL_DRDY_LATCHED:
+      *val = LSM303AH_XL_DRDY_LATCHED;
+      break;
+    case LSM303AH_XL_DRDY_PULSED:
+      *val = LSM303AH_XL_DRDY_PULSED;
+      break;
+    default:
+      *val = LSM303AH_XL_DRDY_LATCHED;
+      break;
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup  Filters
+  * @defgroup  Filters
   * @brief   This section group all the functions concerning the filters
   *          configuration.
   * @{
+  *
   */
 
 /**
-  * @brief  xl_hp_path: [set] High-pass filter data selection on output
-  *                           register and FIFO.
+  * @brief  High-pass filter data selection on output register and FIFO.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_fds_slope_t: change the values of fds_slope in
-  *                                  reg CTRL2
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of fds_slope in reg CTRL2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_hp_path_set(lsm303ah_ctx_t *ctx,
                                 lsm303ah_xl_fds_slope_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl2_a_t ctrl2_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
-  reg.ctrl2_a.fds_slope = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+  if(ret == 0){
+    ctrl2_a.fds_slope = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  xl_hp_path: [get] High-pass filter data selection on output
-  *                           register and FIFO.
+  * @brief  High-pass filter data selection on output register and FIFO.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_fds_slope_t: Get the values of fds_slope in reg CTRL2
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of fds_slope in reg CTRL2.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_hp_path_get(lsm303ah_ctx_t *ctx,
                                 lsm303ah_xl_fds_slope_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl2_a_t ctrl2_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
-  *val = (lsm303ah_xl_fds_slope_t) reg.ctrl2_a.fds_slope;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+  switch (ctrl2_a.fds_slope){
+    case LSM303AH_XL_HP_INTERNAL_ONLY:
+      *val = LSM303AH_XL_HP_INTERNAL_ONLY;
+      break;
+    case LSM303AH_XL_HP_ON_OUTPUTS:
+      *val = LSM303AH_XL_HP_ON_OUTPUTS;
+      break;
+    default:
+      *val = LSM303AH_XL_HP_INTERNAL_ONLY;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  low_pass_bandwidth: [set]  Low-pass bandwidth selection.
+  * @brief  Low-pass bandwidth selection.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_lpf_t: change the values of lpf in reg CFG_REG_B
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of lpf in reg CFG_REG_B
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_low_pass_bandwidth_set(lsm303ah_ctx_t *ctx,
                                        lsm303ah_mg_lpf_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_b_m_t cfg_reg_b_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_B_M, &reg.byte, 1);
-  reg.cfg_reg_b_m.lpf = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_B_M, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_B_M, (uint8_t*)&cfg_reg_b_m, 1);
+  if(ret == 0){
+    cfg_reg_b_m.lpf = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_B_M, (uint8_t*)&cfg_reg_b_m, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  low_pass_bandwidth: [get]  Low-pass bandwidth selection.
+  * @brief  Low-pass bandwidth selection.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_lpf_t: Get the values of lpf in reg CFG_REG_B
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of lpf in reg CFG_REG_B.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_low_pass_bandwidth_get(lsm303ah_ctx_t *ctx,
                                        lsm303ah_mg_lpf_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_b_m_t cfg_reg_b_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_B_M, &reg.byte, 1);
-  *val = (lsm303ah_mg_lpf_t) reg.cfg_reg_b_m.lpf;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_B_M, (uint8_t*)&cfg_reg_b_m, 1);
+  switch (cfg_reg_b_m.lpf){
+    case LSM303AH_MG_ODR_DIV_2:
+      *val = LSM303AH_MG_ODR_DIV_2;
+      break;
+    case LSM303AH_MG_ODR_DIV_4:
+      *val = LSM303AH_MG_ODR_DIV_4;
+      break;
+    default:
+      *val = LSM303AH_MG_ODR_DIV_2;
+      break;
+  }
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup   Auxiliary_interface
+  * @defgroup   Auxiliary_interface
   * @brief   This section groups all the functions concerning auxiliary
   *          interface.
   * @{
+  *
   */
 
 /**
-  * @brief  spi_mode: [set]  SPI Serial Interface Mode selection.
+  * @brief  SPI Serial Interface Mode selection.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_sim_t: change the values of sim in reg CTRL2
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of sim in reg CTRL2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_spi_mode_set(lsm303ah_ctx_t *ctx, lsm303ah_xl_sim_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl2_a_t ctrl2_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
-  reg.ctrl2_a.sim = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+  if(ret == 0){
+    ctrl2_a.sim = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  spi_mode: [get]  SPI Serial Interface Mode selection.
+  * @brief  SPI Serial Interface Mode selection.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_sim_t: Get the values of sim in reg CTRL2
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of sim in reg CTRL2.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_spi_mode_get(lsm303ah_ctx_t *ctx, lsm303ah_xl_sim_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl2_a_t ctrl2_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
-  *val = (lsm303ah_xl_sim_t) reg.ctrl2_a.sim;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+  switch (ctrl2_a.sim){
+    case LSM303AH_XL_SPI_4_WIRE:
+      *val = LSM303AH_XL_SPI_4_WIRE;
+      break;
+    case LSM303AH_XL_SPI_3_WIRE:
+      *val = LSM303AH_XL_SPI_3_WIRE;
+      break;
+    default:
+      *val = LSM303AH_XL_SPI_4_WIRE;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  i2c_interface: [set]  Disable / Enable I2C interface.
+  * @brief  Disable / Enable I2C interface.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_i2c_disable_t: change the values of i2c_disable
-  *                                 in reg CTRL2
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of i2c_disable in reg CTRL2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_i2c_interface_set(lsm303ah_ctx_t *ctx,
                                    lsm303ah_xl_i2c_disable_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl2_a_t ctrl2_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
-  reg.ctrl2_a.i2c_disable = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+  if(ret == 0){
+    ctrl2_a.i2c_disable = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  i2c_interface: [get]  Disable / Enable I2C interface.
+  * @brief  Disable / Enable I2C interface.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_i2c_disable_t: Get the values of i2c_disable in
-  *                                 reg CTRL2
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of i2c_disable in reg CTRL2.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_i2c_interface_get(lsm303ah_ctx_t *ctx,
                                    lsm303ah_xl_i2c_disable_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl2_a_t ctrl2_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, &reg.byte, 1);
-  *val = (lsm303ah_xl_i2c_disable_t) reg.ctrl2_a.i2c_disable;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL2_A, (uint8_t*)&ctrl2_a, 1);
+  switch (ctrl2_a.i2c_disable){
+    case LSM303AH_XL_I2C_ENABLE:
+      *val = LSM303AH_XL_I2C_ENABLE;
+      break;
+    case LSM303AH_XL_I2C_DISABLE:
+      *val = LSM303AH_XL_I2C_DISABLE;
+      break;
+    default:
+      *val = LSM303AH_XL_I2C_ENABLE;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  i2c_interface: [set]  Enable/Disable I2C interface.
+  * @brief  Enable/Disable I2C interface.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_i2c_dis_t: change the values of i2c_dis in
-  *                                reg CFG_REG_C
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of i2c_dis in reg CFG_REG_C
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_i2c_interface_set(lsm303ah_ctx_t *ctx,
                                       lsm303ah_mg_i2c_dis_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_c_m_t cfg_reg_c_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, &reg.byte, 1);
-  reg.cfg_reg_c_m.i2c_dis = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_C_M, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, (uint8_t*)&cfg_reg_c_m, 1);
+  if(ret == 0){
+    cfg_reg_c_m.i2c_dis = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_C_M, (uint8_t*)&cfg_reg_c_m, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  i2c_interface: [get]  Enable/Disable I2C interface.
+  * @brief  Enable/Disable I2C interface.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_i2c_dis_t: Get the values of i2c_dis in reg CFG_REG_C
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of i2c_dis in reg CFG_REG_C.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_i2c_interface_get(lsm303ah_ctx_t *ctx,
                                       lsm303ah_mg_i2c_dis_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_c_m_t cfg_reg_c_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, &reg.byte, 1);
-  *val = (lsm303ah_mg_i2c_dis_t) reg.cfg_reg_c_m.i2c_dis;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, (uint8_t*)&cfg_reg_c_m, 1);
+  switch (cfg_reg_c_m.i2c_dis){
+    case LSM303AH_MG_I2C_ENABLE:
+      *val = LSM303AH_MG_I2C_ENABLE;
+      break;
+    case LSM303AH_MG_I2C_DISABLE:
+      *val = LSM303AH_MG_I2C_DISABLE;
+      break;
+    default:
+      *val = LSM303AH_MG_I2C_ENABLE;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  cs_mode: [set]  Connect/Disconnects pull-up in if_cs pad.
+  * @brief  Connect/Disconnects pull-up in if_cs pad.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_if_cs_pu_dis_t: change the values of if_cs_pu_dis
-  *                                  in reg FIFO_CTRL
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of if_cs_pu_dis in reg FIFO_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_cs_mode_set(lsm303ah_ctx_t *ctx,
                              lsm303ah_xl_if_cs_pu_dis_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_fifo_ctrl_a_t fifo_ctrl_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FIFO_CTRL_A, &reg.byte, 1);
-  reg.fifo_ctrl_a.if_cs_pu_dis = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_FIFO_CTRL_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FIFO_CTRL_A, (uint8_t*)&fifo_ctrl_a, 1);
+  if(ret == 0){
+    fifo_ctrl_a.if_cs_pu_dis = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_FIFO_CTRL_A, (uint8_t*)&fifo_ctrl_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  cs_mode: [get]  Connect/Disconnects pull-up in if_cs pad.
+  * @brief  Connect/Disconnects pull-up in if_cs pad.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_if_cs_pu_dis_t: Get the values of if_cs_pu_dis in
-  *                                  reg FIFO_CTRL
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of if_cs_pu_dis in reg FIFO_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_cs_mode_get(lsm303ah_ctx_t *ctx,
                              lsm303ah_xl_if_cs_pu_dis_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_fifo_ctrl_a_t fifo_ctrl_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FIFO_CTRL_A, &reg.byte, 1);
-  *val = (lsm303ah_xl_if_cs_pu_dis_t) reg.fifo_ctrl_a.if_cs_pu_dis;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FIFO_CTRL_A, (uint8_t*)&fifo_ctrl_a, 1);
+  switch (fifo_ctrl_a.if_cs_pu_dis){
+    case LSM303AH_XL_PULL_UP_CONNECTED:
+      *val = LSM303AH_XL_PULL_UP_CONNECTED;
+      break;
+    case LSM303AH_XL_PULL_UP_DISCONNECTED:
+      *val = LSM303AH_XL_PULL_UP_DISCONNECTED;
+      break;
+    default:
+      *val = LSM303AH_XL_PULL_UP_CONNECTED;
+      break;
+  }
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup   main_serial_interface
+  * @defgroup   main_serial_interface
   * @brief   This section groups all the functions concerning main serial
   *          interface management (not auxiliary)
   * @{
+  *
   */
 
 /**
-  * @brief  pin_mode: [set]  Push-pull/open-drain selection on interrupt pad.
+  * @brief  Push-pull/open-drain selection on interrupt pad.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_pp_od_t: change the values of pp_od in reg CTRL3
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of pp_od in reg CTRL3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pin_mode_set(lsm303ah_ctx_t *ctx, lsm303ah_xl_pp_od_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl3_a_t ctrl3_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
-  reg.ctrl3_a.pp_od = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  if(ret == 0){
+    ctrl3_a.pp_od = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pin_mode: [get]  Push-pull/open-drain selection on interrupt pad.
+  * @brief  Push-pull/open-drain selection on interrupt pad.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_pp_od_t: Get the values of pp_od in reg CTRL3
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of pp_od in reg CTRL3.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pin_mode_get(lsm303ah_ctx_t *ctx,
                                  lsm303ah_xl_pp_od_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl3_a_t ctrl3_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
-  *val = (lsm303ah_xl_pp_od_t) reg.ctrl3_a.pp_od;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  switch (ctrl3_a.pp_od){
+    case LSM303AH_XL_PUSH_PULL:
+      *val = LSM303AH_XL_PUSH_PULL;
+      break;
+    case LSM303AH_XL_OPEN_DRAIN:
+      *val = LSM303AH_XL_OPEN_DRAIN;
+      break;
+    default:
+      *val = LSM303AH_XL_PUSH_PULL;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  pin_polarity: [set]  Interrupt active-high/low.
+  * @brief  Interrupt active-high/low.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_h_lactive_t: change the values of h_lactive in
-  *                                  reg CTRL3
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of h_lactive in reg CTRL3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pin_polarity_set(lsm303ah_ctx_t *ctx,
                                   lsm303ah_xl_h_lactive_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl3_a_t ctrl3_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
-  reg.ctrl3_a.h_lactive = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  if(ret == 0){
+    ctrl3_a.h_lactive = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pin_polarity: [get]  Interrupt active-high/low.
+  * @brief  Interrupt active-high/low.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_h_lactive_t: Get the values of h_lactive in reg CTRL3
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of h_lactive in reg CTRL3.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pin_polarity_get(lsm303ah_ctx_t *ctx,
                                   lsm303ah_xl_h_lactive_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl3_a_t ctrl3_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
-  *val = (lsm303ah_xl_h_lactive_t) reg.ctrl3_a.h_lactive;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  switch (ctrl3_a.h_lactive){
+    case LSM303AH_XL_ACTIVE_HIGH:
+      *val = LSM303AH_XL_ACTIVE_HIGH;
+      break;
+    case LSM303AH_XL_ACTIVE_LOW:
+      *val = LSM303AH_XL_ACTIVE_LOW;
+      break;
+    default:
+      *val = LSM303AH_XL_ACTIVE_HIGH;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  int_notification: [set]  Latched/pulsed interrupt.
+  * @brief  Latched/pulsed interrupt.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_lir_t: change the values of lir in reg CTRL3
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of lir in reg CTRL3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_int_notification_set(lsm303ah_ctx_t *ctx,
                                       lsm303ah_xl_lir_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl3_a_t ctrl3_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
-  reg.ctrl3_a.lir = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  if(ret == 0){
+    ctrl3_a.lir = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  int_notification: [get]  Latched/pulsed interrupt.
+  * @brief  Latched/pulsed interrupt.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_lir_t: Get the values of lir in reg CTRL3
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of lir in reg CTRL3.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_int_notification_get(lsm303ah_ctx_t *ctx,
                                       lsm303ah_xl_lir_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl3_a_t ctrl3_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
-  *val = (lsm303ah_xl_lir_t) reg.ctrl3_a.lir;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  switch (ctrl3_a.lir){
+    case LSM303AH_XL_INT_PULSED:
+      *val = LSM303AH_XL_INT_PULSED;
+      break;
+    case LSM303AH_XL_INT_LATCHED:
+      *val = LSM303AH_XL_INT_LATCHED;
+      break;
+    default:
+      *val = LSM303AH_XL_INT_PULSED;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  pin_int1_route: [set] Select the signal that need to route
-  *                               on int1 pad.
+  * @brief  Select the signal that need to route on int1 pad.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_pin_int1_route_t: union of registers from CTRL4 to
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change union of registers from CTRL4 to
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pin_int1_route_set(lsm303ah_ctx_t *ctx,
                                     lsm303ah_xl_pin_int1_route_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl4_a_t ctrl4_a;
+  lsm303ah_wake_up_dur_a_t wake_up_dur_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL4_A, &reg.byte, 1);
-  reg.ctrl4_a.int1_drdy         = val.int1_drdy;
-  reg.ctrl4_a.int1_fth          = val.int1_fth;
-  reg.ctrl4_a.int1_6d           = val.int1_6d;
-  reg.ctrl4_a.int1_tap          = val.int1_tap;
-  reg.ctrl4_a.int1_ff           = val.int1_ff;
-  reg.ctrl4_a.int1_wu           = val.int1_wu;
-  reg.ctrl4_a.int1_s_tap        = val.int1_s_tap;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL4_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL4_A, (uint8_t*)&ctrl4_a, 1);
+  if(ret == 0){
+    ctrl4_a.int1_drdy         = val.int1_drdy;
+    ctrl4_a.int1_fth          = val.int1_fth;
+    ctrl4_a.int1_6d           = val.int1_6d;
+    ctrl4_a.int1_tap          = val.int1_tap;
+    ctrl4_a.int1_ff           = val.int1_ff;
+    ctrl4_a.int1_wu           = val.int1_wu;
+    ctrl4_a.int1_s_tap        = val.int1_s_tap;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL4_A, (uint8_t*)&ctrl4_a, 1);
+  }
+  if(ret == 0){
+    ret = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_DUR_A, (uint8_t*)&wake_up_dur_a, 1);
+  }
+  if(ret == 0){
+  	wake_up_dur_a.int1_fss7   = val.int1_fss7;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_WAKE_UP_DUR_A, (uint8_t*)&wake_up_dur_a, 1);
+  }
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg.byte, 1);
-  reg.wake_up_dur_a.int1_fss7   = val.int1_fss7;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg.byte, 1);
-
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pin_int1_route: [get] Select the signal that need to route on
-  *                               int1 pad.
+  * @brief  Select the signal that need to route on int1 pad.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_pin_int1_route_t: union of registers from CTRL4 to
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get union of registers from CTRL4 to.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pin_int1_route_get(lsm303ah_ctx_t *ctx,
                                     lsm303ah_xl_pin_int1_route_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl4_a_t ctrl4_a;
+  lsm303ah_wake_up_dur_a_t wake_up_dur_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL4_A, &reg.byte, 1);
-  val->int1_drdy          = reg.ctrl4_a.int1_drdy;
-  val->int1_fth           = reg.ctrl4_a.int1_fth;
-  val->int1_6d            = reg.ctrl4_a.int1_6d;
-  val->int1_tap           = reg.ctrl4_a.int1_tap;
-  val->int1_ff            = reg.ctrl4_a.int1_ff;
-  val->int1_wu            = reg.ctrl4_a.int1_wu;
-  val->int1_s_tap         = reg.ctrl4_a.int1_s_tap;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL4_A, (uint8_t*)&ctrl4_a, 1);
+  if(ret == 0){
+    val->int1_drdy          = ctrl4_a.int1_drdy;
+    val->int1_fth           = ctrl4_a.int1_fth;
+    val->int1_6d            = ctrl4_a.int1_6d;
+    val->int1_tap           = ctrl4_a.int1_tap;
+    val->int1_ff            = ctrl4_a.int1_ff;
+    val->int1_wu            = ctrl4_a.int1_wu;
+    val->int1_s_tap         = ctrl4_a.int1_s_tap;
+  }
+  if(ret == 0){
+    ret = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_DUR_A, (uint8_t*)&wake_up_dur_a, 1);
+  }
+  val->int1_fss7 = wake_up_dur_a.int1_fss7;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg.byte, 1);
-  val->int1_fss7 = reg.wake_up_dur_a.int1_fss7;
-
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pin_int2_route: [set] Select the signal that need to route on
-  *                               int2 pad.
+  * @brief  Select the signal that need to route on int2 pad.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_pin_int2_route_t: union of registers from CTRL5 to
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change union of registers from CTRL5 to
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pin_int2_route_set(lsm303ah_ctx_t *ctx,
                                     lsm303ah_xl_pin_int2_route_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl5_a_t ctrl5_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL5_A, &reg.byte, 1);
-  reg.ctrl5_a.int2_boot       = val.int2_boot;
-  reg.ctrl5_a.int2_tilt       = val.int2_tilt;
-  reg.ctrl5_a.int2_sig_mot    = val.int2_sig_mot;
-  reg.ctrl5_a.int2_step       = val.int2_step;
-  reg.ctrl5_a.int2_fth        = val.int2_fth;
-  reg.ctrl5_a.int2_drdy       = val.int2_drdy;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL5_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL5_A, (uint8_t*)&ctrl5_a, 1);
+  if(ret == 0){
+    ctrl5_a.int2_boot       = val.int2_boot;
+    ctrl5_a.int2_tilt       = val.int2_tilt;
+    ctrl5_a.int2_sig_mot    = val.int2_sig_mot;
+    ctrl5_a.int2_step       = val.int2_step;
+    ctrl5_a.int2_fth        = val.int2_fth;
+    ctrl5_a.int2_drdy       = val.int2_drdy;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL5_A, (uint8_t*)&ctrl5_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pin_int2_route: [get] Select the signal that need to route on
-  *                               int2 pad.
+  * @brief  Select the signal that need to route on int2 pad.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_pin_int2_route_t: union of registers from CTRL5 to
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get union of registers from CTRL5 to.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pin_int2_route_get(lsm303ah_ctx_t *ctx,
                                     lsm303ah_xl_pin_int2_route_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl5_a_t ctrl5_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL5_A, &reg.byte, 1);
-  val->int2_boot     = reg.ctrl5_a.int2_boot;
-  val->int2_tilt     = reg.ctrl5_a.int2_tilt;
-  val->int2_sig_mot  = reg.ctrl5_a.int2_sig_mot;
-  val->int2_step     = reg.ctrl5_a.int2_step;
-  val->int2_fth      = reg.ctrl5_a.int2_fth;
-  val->int2_drdy     = reg.ctrl5_a.int2_drdy;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL5_A, (uint8_t*)&ctrl5_a, 1);
+  val->int2_boot     = ctrl5_a.int2_boot;
+  val->int2_tilt     = ctrl5_a.int2_tilt;
+  val->int2_sig_mot  = ctrl5_a.int2_sig_mot;
+  val->int2_step     = ctrl5_a.int2_step;
+  val->int2_fth      = ctrl5_a.int2_fth;
+  val->int2_drdy     = ctrl5_a.int2_drdy;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  all_on_int1: [set] All interrupt signals become available on
-  *                            INT1 pin.
+  * @brief  All interrupt signals become available on INT1 pin.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of int2_on_int1 in reg CTRL5
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of int2_on_int1 in reg CTRL5
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_all_on_int1_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl5_a_t ctrl5_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL5_A, &reg.byte, 1);
-  reg.ctrl5_a.int2_on_int1 = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL5_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL5_A, (uint8_t*)&ctrl5_a, 1);
+  if(ret == 0){
+    ctrl5_a.int2_on_int1 = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL5_A, (uint8_t*)&ctrl5_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  all_on_int1: [get] All interrupt signals become available on
-  *                            INT1 pin.
+  * @brief  All interrupt signals become available on INT1 pin.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of int2_on_int1 in reg CTRL5
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of int2_on_int1 in reg CTRL5.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_all_on_int1_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl5_a_t ctrl5_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL5_A, &reg.byte, 1);
-  *val = reg.ctrl5_a.int2_on_int1;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL5_A, (uint8_t*)&ctrl5_a, 1);
+  *val = ctrl5_a.int2_on_int1;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  drdy_on_pin: [set]  Data-ready signal on INT_DRDY pin.
+  * @brief  Data-ready signal on INT_DRDY pin.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of drdy_on_pin in reg CFG_REG_C
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of drdy_on_pin in reg CFG_REG_C
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_drdy_on_pin_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_c_m_t cfg_reg_c_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, &reg.byte, 1);
-  reg.cfg_reg_c_m.int_mag = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_C_M, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, (uint8_t*)&cfg_reg_c_m, 1);
+  if(ret == 0){
+    cfg_reg_c_m.int_mag = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_C_M, (uint8_t*)&cfg_reg_c_m, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  drdy_on_pin: [get]  Data-ready signal on INT_DRDY pin.
+  * @brief  Data-ready signal on INT_DRDY pin.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of drdy_on_pin in reg CFG_REG_C_M
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of drdy_on_pin in reg CFG_REG_C_M.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_drdy_on_pin_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_c_m_t cfg_reg_c_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, &reg.byte, 1);
-  *val = reg.cfg_reg_c_m.int_mag;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, (uint8_t*)&cfg_reg_c_m, 1);
+  *val = cfg_reg_c_m.int_mag;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  int_on_pin: [set]  Interrupt signal on INT_DRDY pin.
+  * @brief  Interrupt signal on INT_DRDY pin.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of int_on_pin in reg CFG_REG_C_M
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of int_on_pin in reg CFG_REG_C_M
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_int_on_pin_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_c_m_t cfg_reg_c_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, &reg.byte, 1);
-  reg.cfg_reg_c_m.int_mag_pin = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_C_M, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, (uint8_t*)&cfg_reg_c_m, 1);
+  if(ret == 0){
+    cfg_reg_c_m.int_mag_pin = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_C_M, (uint8_t*)&cfg_reg_c_m, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  int_on_pin: [get]  Interrupt signal on INT_DRDY pin.
+  * @brief  Interrupt signal on INT_DRDY pin.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of int_on_pin in reg CFG_REG_C_M
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of int_on_pin in reg CFG_REG_C_M
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_int_on_pin_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_c_m_t cfg_reg_c_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, &reg.byte, 1);
-  *val = reg.cfg_reg_c_m.int_mag_pin;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_C_M, (uint8_t*)&cfg_reg_c_m, 1);
+  *val = cfg_reg_c_m.int_mag_pin;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  int_gen_conf: [set]  Interrupt generator configuration register
+  * @brief  Interrupt generator configuration register.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_int_crtl_reg_m_t: registers INT_CRTL_REG
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change registers INT_CRTL_REG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_int_gen_conf_set(lsm303ah_ctx_t *ctx,
                                  lsm303ah_int_crtl_reg_m_t *val)
 {
-  return lsm303ah_write_reg(ctx, LSM303AH_INT_CRTL_REG_M, (uint8_t*) val, 1);
+  int32_t ret;
+  ret = lsm303ah_write_reg(ctx, LSM303AH_INT_CRTL_REG_M, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
-  * @brief  int_gen_conf: [get]  Interrupt generator configuration register
+  * @brief  Interrupt generator configuration register.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_int_crtl_reg_m_t: registers INT_CRTL_REG
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get registers INT_CRTL_REG.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_int_gen_conf_get(lsm303ah_ctx_t *ctx,
                                  lsm303ah_int_crtl_reg_m_t *val)
 {
-  return lsm303ah_read_reg(ctx, LSM303AH_INT_CRTL_REG_M, (uint8_t*) val, 1);
+  int32_t ret;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_INT_CRTL_REG_M, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
-  * @brief  int_gen_source: [get]  Interrupt generator source register
+  * @brief  Interrupt generator source register.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_int_source_reg_m_t: registers INT_SOURCE_REG
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get registers INT_SOURCE_REG.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_int_gen_source_get(lsm303ah_ctx_t *ctx,
                                    lsm303ah_int_source_reg_m_t *val)
 {
-  return lsm303ah_read_reg(ctx, LSM303AH_INT_SOURCE_REG_M, (uint8_t*) val, 1);
+  int32_t ret;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_INT_SOURCE_REG_M, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
-  * @brief  int_gen_treshold: [set]  User-defined threshold value for xl
-  *                                  interrupt event on generator.
-  *                                  Data format is the same of output
-  *                                  data raw: two’s complement with
-  *                                  1LSb = 1.5mG.
+  * @brief  User-defined threshold value for xl interrupt event on generator.
+  *         Data format is the same of output data raw: two’s complement with
+  *         1LSb = 1.5mG.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that contains data to write
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  buff   buffer that contains data to write.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_int_gen_treshold_set(lsm303ah_ctx_t *ctx, uint8_t *buff)
 {
-  return lsm303ah_write_reg(ctx, LSM303AH_INT_THS_L_REG_M, buff, 2);
+  int32_t ret;
+  ret = lsm303ah_write_reg(ctx, LSM303AH_INT_THS_L_REG_M, buff, 2);
+  return ret;
 }
 
 /**
-  * @brief  int_gen_treshold: [get]  User-defined threshold value for
-  *                                  xl interrupt event on generator.
-  *                                  Data format is the same of output
-  *                                  data raw: two’s complement with
-  *                                  1LSb = 1.5mG.
+  * @brief  User-defined threshold value for xl interrupt event on generator.
+  *         Data format is the same of output data raw: two’s complement with
+  *         1LSb = 1.5mG.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  buff   buffer that stores data read.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_int_gen_treshold_get(lsm303ah_ctx_t *ctx, uint8_t *buff)
 {
-  return lsm303ah_read_reg(ctx, LSM303AH_INT_THS_L_REG_M, buff, 2);
+  int32_t ret;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_INT_THS_L_REG_M, buff, 2);
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup  interrupt_pins
+  * @defgroup  interrupt_pins
   * @brief   This section groups all the functions that manage interrup pins
   * @{
+  *
   */
 
 
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup  Wake_Up_event
+  * @defgroup  Wake_Up_event
   * @brief   This section groups all the functions that manage the Wake Up
   *          event generation.
   * @{
+  *
   */
 
 /**
-  * @brief  offset_int_conf: [set]  The interrupt block recognition checks
-  *                                 data after/before the hard-iron correction
-  *                                 to discover the interrupt.
+  * @brief  The interrupt block recognition checks data after/before the
+  *         hard-iron correction to discover the interrupt.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_int_on_dataoff_t: change the values of int_on_dataoff
-  *                                       in reg CFG_REG_B
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of int_on_dataoff in reg CFG_REG_B
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_offset_int_conf_set(lsm303ah_ctx_t *ctx,
                                     lsm303ah_mg_int_on_dataoff_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_b_m_t cfg_reg_b_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_B_M, &reg.byte, 1);
-  reg.cfg_reg_b_m.int_on_dataoff = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_B_M, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_B_M, (uint8_t*)&cfg_reg_b_m, 1);
+  if(ret == 0){
+    cfg_reg_b_m.int_on_dataoff = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CFG_REG_B_M, (uint8_t*)&cfg_reg_b_m, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  offset_int_conf: [get]  The interrupt block recognition checks
-  *                                 data after/before the hard-iron correction
-  *                                 to discover the interrupt.
+  * @brief  The interrupt block recognition checks data after/before the
+  *         hard-iron correction to discover the interrupt.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_mg_int_on_dataoff_t: Get the values of int_on_dataoff in
-  *                                   reg CFG_REG_B
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of int_on_dataoff in reg CFG_REG_B.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_mg_offset_int_conf_get(lsm303ah_ctx_t *ctx,
                                     lsm303ah_mg_int_on_dataoff_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_cfg_reg_b_m_t cfg_reg_b_m;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_B_M, &reg.byte, 1);
-  *val = (lsm303ah_mg_int_on_dataoff_t) reg.cfg_reg_b_m.int_on_dataoff;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CFG_REG_B_M, (uint8_t*)&cfg_reg_b_m, 1);
+  switch (cfg_reg_b_m.int_on_dataoff){
+    case LSM303AH_MG_CHECK_BEFORE:
+      *val = LSM303AH_MG_CHECK_BEFORE;
+      break;
+    case LSM303AH_MG_CHECK_AFTER:
+      *val = LSM303AH_MG_CHECK_AFTER;
+      break;
+    default:
+      *val = LSM303AH_MG_CHECK_BEFORE;
+      break;
+  }
+  return ret;
 }
 
   /**
-  * @brief  wkup_threshold: [set]  Threshold for wakeup [1 LSb = FS_XL / 64].
+  * @brief  Threshold for wakeup [1 LSb = FS_XL / 64].[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of wu_ths in reg WAKE_UP_THS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of wu_ths in reg WAKE_UP_THS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_wkup_threshold_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_wake_up_ths_a_t wake_up_ths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg.byte, 1);
-  reg.wake_up_ths_a.wu_ths = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, (uint8_t*)&wake_up_ths_a, 1);
+  if(ret == 0){
+    wake_up_ths_a.wu_ths = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_WAKE_UP_THS_A, (uint8_t*)&wake_up_ths_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  wkup_threshold: [get]  Threshold for wakeup [1 LSb = FS_XL / 64].
+  * @brief  Threshold for wakeup [1 LSb = FS_XL / 64].[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of wu_ths in reg WAKE_UP_THS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of wu_ths in reg WAKE_UP_THS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_wkup_threshold_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_wake_up_ths_a_t wake_up_ths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg.byte, 1);
-  *val = reg.wake_up_ths_a.wu_ths;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, (uint8_t*)&wake_up_ths_a, 1);
+  *val = wake_up_ths_a.wu_ths;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  wkup_dur: [set]  Wakeup duration [1 LSb = 1 / ODR].
+  * @brief  Wakeup duration [1 LSb = 1 / ODR].[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of wu_dur in reg WAKE_UP_DUR
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of wu_dur in reg WAKE_UP_DUR
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_wkup_dur_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_wake_up_dur_a_t wake_up_dur_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg.byte, 1);
-  reg.wake_up_dur_a.wu_dur = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_DUR_A, (uint8_t*)&wake_up_dur_a, 1);
+  if(ret == 0){
+    wake_up_dur_a.wu_dur = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_WAKE_UP_DUR_A, (uint8_t*)&wake_up_dur_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  wkup_dur: [get]  Wakeup duration [1 LSb = 1 / ODR].
+  * @brief  Wakeup duration [1 LSb = 1 / ODR].[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of wu_dur in reg WAKE_UP_DUR
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of wu_dur in reg WAKE_UP_DUR.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_wkup_dur_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_wake_up_dur_a_t wake_up_dur_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg.byte, 1);
-  *val = reg.wake_up_dur_a.wu_dur;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_DUR_A, (uint8_t*)&wake_up_dur_a, 1);
+  *val = wake_up_dur_a.wu_dur;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup   Activity/Inactivity_detection
+  * @defgroup   Activity/Inactivity_detection
   * @brief   This section groups all the functions concerning
   *          activity/inactivity detection.
   * @{
+  *
   */
 /**
-  * @brief  sleep_mode: [set]  Enables gyroscope Sleep mode.
+  * @brief  Enables gyroscope Sleep mode.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of sleep_on in reg WAKE_UP_THS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of sleep_on in reg WAKE_UP_THS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_sleep_mode_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_wake_up_ths_a_t wake_up_ths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg.byte, 1);
-  reg.wake_up_ths_a.sleep_on = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, (uint8_t*)&wake_up_ths_a, 1);
+  if(ret == 0){
+    wake_up_ths_a.sleep_on = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_WAKE_UP_THS_A, (uint8_t*)&wake_up_ths_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  sleep_mode: [get]  Enables gyroscope Sleep mode.
+  * @brief  Enables gyroscope Sleep mode.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of sleep_on in reg WAKE_UP_THS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of sleep_on in reg WAKE_UP_THS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_sleep_mode_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_wake_up_ths_a_t wake_up_ths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg.byte, 1);
-  *val = reg.wake_up_ths_a.sleep_on;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, (uint8_t*)&wake_up_ths_a, 1);
+  *val = wake_up_ths_a.sleep_on;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  act_sleep_dur: [set] Duration to go in sleep mode
-  *                              [1 LSb = 512 / ODR].
+  * @brief  Duration to go in sleep mode [1 LSb = 512 / ODR].[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of sleep_dur in reg WAKE_UP_DUR
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of sleep_dur in reg WAKE_UP_DUR
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_act_sleep_dur_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_wake_up_dur_a_t wake_up_dur_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg.byte, 1);
-  reg.wake_up_dur_a.sleep_dur = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_DUR_A, (uint8_t*)&wake_up_dur_a, 1);
+  if(ret == 0){
+    wake_up_dur_a.sleep_dur = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_WAKE_UP_DUR_A, (uint8_t*)&wake_up_dur_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  act_sleep_dur: [get] Duration to go in sleep mode
-  *                              [1 LSb = 512 / ODR].
+  * @brief  Duration to go in sleep mode [1 LSb = 512 / ODR].[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of sleep_dur in reg WAKE_UP_DUR
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of sleep_dur in reg WAKE_UP_DUR.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_act_sleep_dur_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_wake_up_dur_a_t wake_up_dur_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg.byte, 1);
-  *val = reg.wake_up_dur_a.sleep_dur;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_DUR_A, (uint8_t*)&wake_up_dur_a, 1);
+  *val = wake_up_dur_a.sleep_dur;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup  tap_generator
+  * @defgroup  tap_generator
   * @brief   This section groups all the functions that manage the tap and
   *          double tap event generation.
   * @{
+  *
   */
 
 /**
-  * @brief  tap_detection_on_z: [set]  Enable Z direction in tap recognition.
+  * @brief  Enable Z direction in tap recognition.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of tap_z_en in reg CTRL3
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of tap_z_en in reg CTRL3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tap_detection_on_z_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl3_a_t ctrl3_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
-  reg.ctrl3_a.tap_z_en = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  if(ret == 0){
+    ctrl3_a.tap_z_en = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  tap_detection_on_z: [get]  Enable Z direction in tap recognition.
+  * @brief  Enable Z direction in tap recognition.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of tap_z_en in reg CTRL3
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of tap_z_en in reg CTRL3.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tap_detection_on_z_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl3_a_t ctrl3_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
-  *val = reg.ctrl3_a.tap_z_en;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  *val = ctrl3_a.tap_z_en;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  tap_detection_on_y: [set]  Enable Y direction in tap recognition.
+  * @brief  Enable Y direction in tap recognition.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of tap_y_en in reg CTRL3
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of tap_y_en in reg CTRL3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tap_detection_on_y_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl3_a_t ctrl3_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
-  reg.ctrl3_a.tap_y_en = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  if(ret == 0){
+    ctrl3_a.tap_y_en = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  tap_detection_on_y: [get]  Enable Y direction in tap recognition.
+  * @brief  Enable Y direction in tap recognition.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of tap_y_en in reg CTRL3
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of tap_y_en in reg CTRL3.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tap_detection_on_y_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl3_a_t ctrl3_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
-  *val = reg.ctrl3_a.tap_y_en;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  *val = ctrl3_a.tap_y_en;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  tap_detection_on_x: [set]  Enable X direction in tap recognition.
+  * @brief  Enable X direction in tap recognition.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of tap_x_en in reg CTRL3
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of tap_x_en in reg CTRL3
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tap_detection_on_x_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl3_a_t ctrl3_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
-  reg.ctrl3_a.tap_x_en = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  if(ret == 0){
+    ctrl3_a.tap_x_en = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  tap_detection_on_x: [get]  Enable X direction in tap recognition.
+  * @brief  Enable X direction in tap recognition.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of tap_x_en in reg CTRL3
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of tap_x_en in reg CTRL3.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tap_detection_on_x_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_ctrl3_a_t ctrl3_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, &reg.byte, 1);
-  *val = reg.ctrl3_a.tap_x_en;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_CTRL3_A, (uint8_t*)&ctrl3_a, 1);
+  *val = ctrl3_a.tap_x_en;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  tap_threshold: [set] Threshold for tap recognition
-  *                              [1 LSb = FS/32].
+  * @brief  Threshold for tap recognition [1 LSb = FS/32].[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of tap_ths in reg TAP_6D_THS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of tap_ths in reg TAP_6D_THS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tap_threshold_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_tap_6d_ths_a_t tap_6d_ths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_TAP_6D_THS_A, &reg.byte, 1);
-  reg.tap_6d_ths_a.tap_ths = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_TAP_6D_THS_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_TAP_6D_THS_A, (uint8_t*)&tap_6d_ths_a, 1);
+  if(ret == 0){
+    tap_6d_ths_a.tap_ths = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_TAP_6D_THS_A, (uint8_t*)&tap_6d_ths_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  tap_threshold: [get] Threshold for tap recognition
-  *                              [1 LSb = FS/32].
+  * @brief  Threshold for tap recognition [1 LSb = FS/32].[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of tap_ths in reg TAP_6D_THS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of tap_ths in reg TAP_6D_THS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tap_threshold_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_tap_6d_ths_a_t tap_6d_ths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_TAP_6D_THS_A, &reg.byte, 1);
-  *val = reg.tap_6d_ths_a.tap_ths;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_TAP_6D_THS_A, (uint8_t*)&tap_6d_ths_a, 1);
+  *val = tap_6d_ths_a.tap_ths;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  tap_shock: [set] Maximum duration is the maximum time of
-  *                          an overthreshold signal detection to be
-  *                          recognized as a tap event. The default value
-  *                          of these bits is 00b which corresponds to
-  *                          4*ODR_XL time. If the SHOCK[1:0] bits are set
-  *                          to a different value, 1LSB corresponds to
-  *                          8*ODR_XL time.
+  * @brief  Maximum duration is the maximum time of an overthreshold signal
+  *         detection to be recognized as a tap event. The default value of
+  *         these bits is 00b which corresponds to 4*ODR_XL time. If the
+  *         SHOCK[1:0] bits are set to a different value, 1LSB corresponds to
+  *         8*ODR_XL time.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of shock in reg INT_DUR
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of shock in reg INT_DUR
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tap_shock_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_int_dur_a_t int_dur_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_INT_DUR_A, &reg.byte, 1);
-  reg.int_dur_a.shock = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_INT_DUR_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_INT_DUR_A, (uint8_t*)&int_dur_a, 1);
+  if(ret == 0){
+    int_dur_a.shock = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_INT_DUR_A, (uint8_t*)&int_dur_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  tap_shock: [get] Maximum duration is the maximum time of an
-  *                          overthreshold signal detection to be recognized
-  *                          as a tap event. The default value of these bits
-  *                          is 00b which corresponds to 4*ODR_XL time.
-  *                          If the SHOCK[1:0] bits are set to a different
-                             value, 1LSB corresponds to 8*ODR_XL time.
+  * @brief  Maximum duration is the maximum time of an overthreshold signal
+  *         detection to be recognized as a tap event. The default value of
+  *         these bits is 00b which corresponds to 4*ODR_XL time. If the
+  *         SHOCK[1:0] bits are set to a different value, 1LSB corresponds to
+  *         8*ODR_XL time.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of shock in reg INT_DUR
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of shock in reg INT_DUR.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tap_shock_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_int_dur_a_t int_dur_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_INT_DUR_A, &reg.byte, 1);
-  *val = reg.int_dur_a.shock;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_INT_DUR_A, (uint8_t*)&int_dur_a, 1);
+  *val = int_dur_a.shock;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  tap_quiet: [set] Quiet time is the time after the first
-  *                          detected tap in which there must not be any
-  *                          overthreshold event. The default value of these
-  *                          bits is 00b which corresponds to 2*ODR_XL time.
-  *                          If the QUIET[1:0] bits are set to a different
-  *                          value, 1LSB corresponds to 4*ODR_XL time.
+  * @brief  Quiet time is the time after the first detected tap in which there
+  *         must not be any overthreshold event. The default value of these
+  *         bits is 00b which corresponds to 2*ODR_XL time. If the QUIET[1:0]
+  *         bits are set to a different value, 1LSB corresponds to
+  *         4*ODR_XL time.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of quiet in reg INT_DUR
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of quiet in reg INT_DUR
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tap_quiet_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_int_dur_a_t int_dur_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_INT_DUR_A, &reg.byte, 1);
-  reg.int_dur_a.quiet = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_INT_DUR_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_INT_DUR_A, (uint8_t*)&int_dur_a, 1);
+  if(ret == 0){
+    int_dur_a.quiet = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_INT_DUR_A, (uint8_t*)&int_dur_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  tap_quiet: [get] Quiet time is the time after the first detected
-  *                          tap in which there must not be any overthreshold
-  *                          event. The default value of these bits is 00b
-  *                          which corresponds to 2*ODR_XL time.
-  *                          If the QUIET[1:0] bits are set to a different
-  *                          value, 1LSB corresponds to 4*ODR_XL time.
+  * @brief  Quiet time is the time after the first detected tap in which there
+  *         must not be any overthreshold event. The default value of these
+  *         bits is 00b which corresponds to 2*ODR_XL time. If the QUIET[1:0]
+  *         bits are set to a different value, 1LSB corresponds to
+  *         4*ODR_XL time.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of quiet in reg INT_DUR
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of quiet in reg INT_DUR.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tap_quiet_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_int_dur_a_t int_dur_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_INT_DUR_A, &reg.byte, 1);
-  *val = reg.int_dur_a.quiet;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_INT_DUR_A, (uint8_t*)&int_dur_a, 1);
+  *val = int_dur_a.quiet;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  tap_dur: [set] When double tap recognition is enabled, this
-  *                        register expresses the maximum time between two
-  *                        consecutive detected taps to determine a double
-  *                        tap event. The default value of these bits is
-  *                        0000b which corresponds to 16*ODR_XL time.
-  *                        If the DUR[3:0] bits are set to a different value,
-  *                        1LSB corresponds to 32*ODR_XL time.
+  * @brief  When double tap recognition is enabled, this register expresses the
+  *         maximum time between two consecutive detected taps to determine a
+  *         double tap event. The default value of these bits is 0000b which
+  *         corresponds to 16*ODR_XL time. If the DUR[3:0] bits are set to a
+  *         different value, 1LSB corresponds to 32*ODR_XL time.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of lat in reg INT_DUR
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of lat in reg INT_DUR
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tap_dur_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_int_dur_a_t int_dur_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_INT_DUR_A, &reg.byte, 1);
-  reg.int_dur_a.lat = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_INT_DUR_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_INT_DUR_A, (uint8_t*)&int_dur_a, 1);
+  if(ret == 0){
+    int_dur_a.lat = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_INT_DUR_A, (uint8_t*)&int_dur_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  tap_dur: [get] When double tap recognition is enabled,
-  *                        this register expresses the maximum time
-  *                        between two consecutive detected taps to
-  *                        determine a double tap event. The default
-  *                        value of these bits is 0000b which corresponds
-  *                        to 16*ODR_XL time. If the DUR[3:0] bits are set
-  *                        to a different value, 1LSB corresponds to
-  *                        32*ODR_XL time.
+  * @brief  When double tap recognition is enabled, this register expresses the
+  *         maximum time between two consecutive detected taps to determine a
+  *         double tap event. The default value of these bits is 0000b which
+  *         corresponds to 16*ODR_XL time. If the DUR[3:0] bits are set to a
+  *         different value, 1LSB corresponds to 32*ODR_XL time.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of lat in reg INT_DUR
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of lat in reg INT_DUR.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tap_dur_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_int_dur_a_t int_dur_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_INT_DUR_A, &reg.byte, 1);
-  *val = reg.int_dur_a.lat;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_INT_DUR_A, (uint8_t*)&int_dur_a, 1);
+  *val = int_dur_a.lat;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  tap_mode: [set]  Single/double-tap event enable/disable.
+  * @brief  Single/double-tap event enable/disable.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_single_double_tap_t: change the values of
-  *                                       single_double_tap in regWAKE_UP_THS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of single_double_tap in regWAKE_UP_THS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tap_mode_set(lsm303ah_ctx_t *ctx,
                               lsm303ah_xl_single_double_tap_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_wake_up_ths_a_t wake_up_ths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg.byte, 1);
-  reg.wake_up_ths_a.single_double_tap = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, (uint8_t*)&wake_up_ths_a, 1);
+  if(ret == 0){
+    wake_up_ths_a.single_double_tap = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_WAKE_UP_THS_A, (uint8_t*)&wake_up_ths_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  tap_mode: [get]  Single/double-tap event enable/disable.
+  * @brief  Single/double-tap event enable/disable.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_single_double_tap_t: Get the values of
-  *                                        single_double_tap in
-  *                                        reg WAKE_UP_THS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of single_double_tap in reg WAKE_UP_THS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tap_mode_get(lsm303ah_ctx_t *ctx,
                               lsm303ah_xl_single_double_tap_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_wake_up_ths_a_t wake_up_ths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg.byte, 1);
-  *val = (lsm303ah_xl_single_double_tap_t)reg.wake_up_ths_a.single_double_tap;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, (uint8_t*)&wake_up_ths_a, 1);
+  switch (wake_up_ths_a.single_double_tap){
+    case LSM303AH_XL_ONLY_SINGLE:
+      *val = LSM303AH_XL_ONLY_SINGLE;
+      break;
+    case LSM303AH_XL_ONLY_DOUBLE:
+      *val = LSM303AH_XL_ONLY_DOUBLE;
+      break;
+    default:
+      *val = LSM303AH_XL_ONLY_SINGLE;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  tap_src: [get]  TAP source register
+  * @brief  TAP source register[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_tap_src_t: registers TAP_SRC
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get registers TAP_SRC.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tap_src_get(lsm303ah_ctx_t *ctx,
                                 lsm303ah_tap_src_a_t *val)
 {
-  return lsm303ah_read_reg(ctx, LSM303AH_TAP_SRC_A, (uint8_t*) val, 1);
+  int32_t ret;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_TAP_SRC_A, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup   Six_position_detection(6D/4D)
+  * @defgroup   Six_position_detection(6D/4D)
   * @brief   This section groups all the functions concerning six
   *          position detection (6D).
   * @{
+  *
   */
 
 /**
-  * @brief  6d_threshold: [set]  Threshold for 4D/6D function.
+  * @brief  Threshold for 4D/6D function.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_6d_ths_t: change the values of 6d_ths in reg TAP_6D_THS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of 6d_ths in reg TAP_6D_THS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_6d_threshold_set(lsm303ah_ctx_t *ctx,
                                      lsm303ah_xl_6d_ths_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_tap_6d_ths_a_t tap_6d_ths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_TAP_6D_THS_A, &reg.byte, 1);
-  reg.tap_6d_ths_a._6d_ths = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_TAP_6D_THS_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_TAP_6D_THS_A, (uint8_t*)&tap_6d_ths_a, 1);
+  if(ret == 0){
+    tap_6d_ths_a._6d_ths = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_TAP_6D_THS_A, (uint8_t*)&tap_6d_ths_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  6d_threshold: [get]  Threshold for 4D/6D function.
+  * @brief  Threshold for 4D/6D function.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_6d_ths_t: Get the values of 6d_ths in reg TAP_6D_THS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of 6d_ths in reg TAP_6D_THS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_6d_threshold_get(lsm303ah_ctx_t *ctx,
                                      lsm303ah_xl_6d_ths_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_tap_6d_ths_a_t tap_6d_ths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_TAP_6D_THS_A, &reg.byte, 1);
-  *val = (lsm303ah_xl_6d_ths_t) reg.tap_6d_ths_a._6d_ths;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_TAP_6D_THS_A, (uint8_t*)&tap_6d_ths_a, 1);
+  switch (tap_6d_ths_a._6d_ths){
+    case LSM303AH_XL_DEG_80:
+      *val = LSM303AH_XL_DEG_80;
+      break;
+    case LSM303AH_XL_DEG_70:
+      *val = LSM303AH_XL_DEG_70;
+      break;
+    case LSM303AH_XL_DEG_60:
+      *val = LSM303AH_XL_DEG_60;
+      break;
+    case LSM303AH_XL_DEG_50:
+      *val = LSM303AH_XL_DEG_50;
+      break;
+    default:
+      *val = LSM303AH_XL_DEG_80;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  4d_mode: [set]  4D orientation detection enable.
+  * @brief  4D orientation detection enable.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of 4d_en in reg TAP_6D_THS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of 4d_en in reg TAP_6D_THS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_4d_mode_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_tap_6d_ths_a_t tap_6d_ths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_TAP_6D_THS_A, &reg.byte, 1);
-  reg.tap_6d_ths_a._4d_en = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_TAP_6D_THS_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_TAP_6D_THS_A, (uint8_t*)&tap_6d_ths_a, 1);
+  if(ret == 0){
+    tap_6d_ths_a._4d_en = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_TAP_6D_THS_A, (uint8_t*)&tap_6d_ths_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  4d_mode: [get]  4D orientation detection enable.
+  * @brief  4D orientation detection enable.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of 4d_en in reg TAP_6D_THS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of 4d_en in reg TAP_6D_THS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_4d_mode_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_tap_6d_ths_a_t tap_6d_ths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_TAP_6D_THS_A, &reg.byte, 1);
-  *val = reg.tap_6d_ths_a._4d_en;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_TAP_6D_THS_A, (uint8_t*)&tap_6d_ths_a, 1);
+  *val = tap_6d_ths_a._4d_en;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  6d_src: [get]  6D source register.
+  * @brief  6D source register.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_6d_src_t: union of registers from 6D_SRC to
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get union of registers from 6D_SRC to.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_6d_src_get(lsm303ah_ctx_t *ctx, lsm303ah_6d_src_a_t *val)
 {
-  return lsm303ah_read_reg(ctx, LSM303AH_6D_SRC_A, (uint8_t*) val, 1);
+  int32_t ret;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_6D_SRC_A, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup  free_fall
+  * @defgroup  free_fall
   * @brief   This section group all the functions concerning the
   *          free fall detection.
   * @{
+  *
   */
 
 /**
-  * @brief  ff_dur: [set]  Free-fall duration [1 LSb = 1 / ODR].
+  * @brief  Free-fall duration [1 LSb = 1 / ODR].[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of ff_dur in reg
-  *                      WAKE_UP_DUR/FREE_FALL
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of ff_dur in reg WAKE_UP_DUR/FREE_FALL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_ff_dur_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg[2];
-  int32_t mm_error;
+  lsm303ah_wake_up_dur_a_t wake_up_dur_a;
+  lsm303ah_free_fall_a_t free_fall_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg[0].byte, 2);
-  reg[1].free_fall_a.ff_dur = 0x1F & val;
-  reg[0].wake_up_dur_a.ff_dur = (val & 0x20) >> 5;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg[0].byte, 2);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_DUR_A, (uint8_t*)&wake_up_dur_a, 1);
+  if(ret == 0){
+    wake_up_dur_a.ff_dur = (val & 0x20U) >> 5;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_WAKE_UP_DUR_A, (uint8_t*)&wake_up_dur_a, 1);
+  }
+  if(ret == 0){
+    ret = lsm303ah_read_reg(ctx, LSM303AH_FREE_FALL_A, (uint8_t*)&free_fall_a, 1);
+  }
+  if(ret == 0){
+    free_fall_a.ff_dur = 0x1FU & val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_FREE_FALL_A, (uint8_t*)&free_fall_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  ff_dur: [get]  Free-fall duration [1 LSb = 1 / ODR].
+  * @brief  Free-fall duration [1 LSb = 1 / ODR].[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of ff_dur in reg WAKE_UP_DUR/FREE_FALL
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of ff_dur in reg WAKE_UP_DUR/FREE_FALL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_ff_dur_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg[2];
-  int32_t mm_error;
+  lsm303ah_wake_up_dur_a_t wake_up_dur_a;
+  lsm303ah_free_fall_a_t free_fall_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_THS_A, &reg[0].byte, 2);
-  *val = (reg[0].wake_up_dur_a.ff_dur << 5) + reg[1].free_fall_a.ff_dur;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_WAKE_UP_DUR_A, (uint8_t*)&wake_up_dur_a, 1);
+  if(ret == 0){
+    ret = lsm303ah_read_reg(ctx, LSM303AH_FREE_FALL_A, (uint8_t*)&free_fall_a, 1);
+  }
+  *val = (wake_up_dur_a.ff_dur << 5) + free_fall_a.ff_dur;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  ff_threshold: [set]  Free-fall threshold [1 LSB = 31.25 mg].
+  * @brief  Free-fall threshold [1 LSB = 31.25 mg].[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of ff_ths in reg FREE_FALL
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of ff_ths in reg FREE_FALL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_ff_threshold_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_free_fall_a_t free_fall_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FREE_FALL_A, &reg.byte, 1);
-  reg.free_fall_a.ff_ths = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_FREE_FALL_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FREE_FALL_A, (uint8_t*)&free_fall_a, 1);
+  if(ret == 0){
+    free_fall_a.ff_ths = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_FREE_FALL_A, (uint8_t*)&free_fall_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  ff_threshold: [get]  Free-fall threshold [1 LSB = 31.25 mg].
+  * @brief  Free-fall threshold [1 LSB = 31.25 mg].[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of ff_ths in reg FREE_FALL
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of ff_ths in reg FREE_FALL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_ff_threshold_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_free_fall_a_t free_fall_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FREE_FALL_A, &reg.byte, 1);
-  *val = reg.free_fall_a.ff_ths;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FREE_FALL_A, (uint8_t*)&free_fall_a, 1);
+  *val = free_fall_a.ff_ths;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup  Fifo
+  * @defgroup  Fifo
   * @brief   This section group all the functions concerning the fifo usage
   * @{
+  *
   */
 
 /**
-  * @brief   fifo_xl_module_batch: [set]  Module routine result is send to
-  *          FIFO instead of X,Y,Z acceleration data
+  * @brief   Module routine result is send to
+  *          FIFO instead of X,Y,Z acceleration data.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of module_to_fifo in reg FIFO_CTRL
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of module_to_fifo in reg FIFO_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_fifo_xl_module_batch_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_fifo_ctrl_a_t fifo_ctrl_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FIFO_CTRL_A, &reg.byte, 1);
-  reg.fifo_ctrl_a.module_to_fifo = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_FIFO_CTRL_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FIFO_CTRL_A, (uint8_t*)&fifo_ctrl_a, 1);
+  if(ret == 0){
+    fifo_ctrl_a.module_to_fifo = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_FIFO_CTRL_A, (uint8_t*)&fifo_ctrl_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief   fifo_xl_module_batch: [get]  Module routine result is send to
-  *                                       FIFO instead of X,Y,Z acceleration
-  *                                       data
+  * @brief   Module routine result is send to
+  *          FIFO instead of X,Y,Z acceleration data.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of module_to_fifo in reg FIFO_CTRL
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of module_to_fifo in reg FIFO_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_fifo_xl_module_batch_get(lsm303ah_ctx_t *ctx,
                                              uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_fifo_ctrl_a_t fifo_ctrl_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FIFO_CTRL_A, &reg.byte, 1);
-  *val = reg.fifo_ctrl_a.module_to_fifo;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FIFO_CTRL_A, (uint8_t*)&fifo_ctrl_a, 1);
+  *val = fifo_ctrl_a.module_to_fifo;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_mode: [set]  FIFO mode selection.
+  * @brief  FIFO mode selection.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_fmode_t: change the values of fmode in reg FIFO_CTRL
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of fmode in reg FIFO_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_fifo_mode_set(lsm303ah_ctx_t *ctx,
                                   lsm303ah_xl_fmode_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_fifo_ctrl_a_t fifo_ctrl_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FIFO_CTRL_A, &reg.byte, 1);
-  reg.fifo_ctrl_a.fmode = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_FIFO_CTRL_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FIFO_CTRL_A, (uint8_t*)&fifo_ctrl_a, 1);
+  if(ret == 0){
+    fifo_ctrl_a.fmode = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_FIFO_CTRL_A, (uint8_t*)&fifo_ctrl_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_mode: [get]  FIFO mode selection.
+  * @brief  FIFO mode selection.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_fmode_t: Get the values of fmode in reg FIFO_CTRL
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of fmode in reg FIFO_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_fifo_mode_get(lsm303ah_ctx_t *ctx,
                                   lsm303ah_xl_fmode_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_fifo_ctrl_a_t fifo_ctrl_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FIFO_CTRL_A, &reg.byte, 1);
-  *val = (lsm303ah_xl_fmode_t) reg.fifo_ctrl_a.fmode;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FIFO_CTRL_A, (uint8_t*)&fifo_ctrl_a, 1);
+  switch (fifo_ctrl_a.fmode){
+    case LSM303AH_XL_BYPASS_MODE:
+      *val = LSM303AH_XL_BYPASS_MODE;
+      break;
+    case LSM303AH_XL_FIFO_MODE:
+      *val = LSM303AH_XL_FIFO_MODE;
+      break;
+    case LSM303AH_XL_STREAM_TO_FIFO_MODE:
+      *val = LSM303AH_XL_STREAM_TO_FIFO_MODE;
+      break;
+    case LSM303AH_XL_BYPASS_TO_STREAM_MODE:
+      *val = LSM303AH_XL_BYPASS_TO_STREAM_MODE;
+      break;
+    case LSM303AH_XL_STREAM_MODE:
+      *val = LSM303AH_XL_STREAM_MODE;
+      break;
+    default:
+      *val = LSM303AH_XL_BYPASS_MODE;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  fifo_watermark: [set]  FIFO watermark level selection.
+  * @brief  FIFO watermark level selection.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of fifo_watermark in reg FIFO_THS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of fifo_watermark in reg FIFO_THS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_fifo_watermark_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  int32_t mm_error;
-
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_FIFO_THS_A, &val, 1);
-
-  return mm_error;
+  int32_t ret;
+  ret = lsm303ah_write_reg(ctx, LSM303AH_FIFO_THS_A, (uint8_t*)&val, 1);
+  return ret;
 }
 
 /**
-  * @brief  fifo_watermark: [get]  FIFO watermark level selection.
+  * @brief  FIFO watermark level selection.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of fifo_watermark in reg FIFO_THS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of fifo_watermark in reg FIFO_THS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_fifo_watermark_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  int32_t mm_error;
-
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FIFO_THS_A, val, 1);
-
-  return mm_error;
+  int32_t ret;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FIFO_THS_A, val, 1);
+  return ret;
 }
 
 /**
-  * @brief  fifo_full_flag: [get]  FIFO full, 256 unread samples.
+  * @brief  FIFO full, 256 unread samples.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of diff in reg FIFO_SRC
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of diff in reg FIFO_SRC.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_fifo_full_flag_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_fifo_src_a_t fifo_src_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FIFO_SRC_A, &reg.byte, 1);
-  *val = reg.fifo_src_a.diff;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FIFO_SRC_A, (uint8_t*)&fifo_src_a, 1);
+  *val = fifo_src_a.diff;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_ovr_flag: [get]  FIFO overrun status.
+  * @brief  FIFO overrun status.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of fifo_ovr in reg FIFO_SRC
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of fifo_ovr in reg FIFO_SRC.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_fifo_ovr_flag_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_fifo_src_a_t fifo_src_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FIFO_SRC_A, &reg.byte, 1);
-  *val = reg.fifo_src_a.fifo_ovr;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FIFO_SRC_A, (uint8_t*)&fifo_src_a, 1);
+  *val = fifo_src_a.fifo_ovr;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_wtm_flag: [get]  FIFO threshold status.
+  * @brief  FIFO threshold status.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of fth in reg FIFO_SRC
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of fth in reg FIFO_SRC.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_fifo_wtm_flag_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_fifo_src_a_t fifo_src_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FIFO_SRC_A, &reg.byte, 1);
-  *val = reg.fifo_src_a.fth;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FIFO_SRC_A, (uint8_t*)&fifo_src_a, 1);
+  *val = fifo_src_a.fth;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  fifo_data_level: [get] The number of unread samples
-  *                                stored in FIFO.
+  * @brief  The number of unread samples stored in FIFO.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint16_t: change the values of diff in reg FIFO_SAMPLES
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of diff in reg FIFO_SAMPLES.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_fifo_data_level_get(lsm303ah_ctx_t *ctx, uint16_t *val)
 {
-  lsm303ah_reg_t reg[2];
-  int32_t mm_error;
+  lsm303ah_fifo_src_a_t fifo_src_a;
+  uint8_t fifo_sample_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FIFO_SRC_A, &reg[0].byte, 2);
-  *val = (reg[1].fifo_src_a.diff << 7) + reg[0].byte;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FIFO_SRC_A, (uint8_t*)&fifo_src_a, 1);
+  if(ret == 0){
+    ret = lsm303ah_read_reg(ctx, LSM303AH_FIFO_SRC_A, &fifo_sample_a, 1);
+    *val = fifo_src_a.diff;
+    *val = *val << 7;
+    *val += fifo_sample_a;
+  }
+  return ret;
 }
 
 /**
-  * @brief  fifo_src: [get] FIFO_SRCregister.
+  * @brief  FIFO_SRCregister.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_fifo_src_t: registers FIFO_SRC
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get registers FIFO_SRC.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_fifo_src_get(lsm303ah_ctx_t *ctx,
                                  lsm303ah_fifo_src_a_t *val)
 {
-  return lsm303ah_read_reg(ctx, LSM303AH_FIFO_SRC_A, (uint8_t*) val, 1);
+  int32_t ret;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FIFO_SRC_A, (uint8_t*) val, 1);
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup  Pedometer
+  * @defgroup  Pedometer
   * @brief   This section groups all the functions that manage pedometer.
   * @{
+  *
   */
 
 /**
-  * @brief  pedo_threshold: [set] Minimum threshold value for step
-  *                               counter routine.
+  * @brief  Minimum threshold value for step counter routine.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of sc_mths in
-  *                      reg STEP_COUNTER_MINTHS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of sc_mths in reg STEP_COUNTER_MINTHS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pedo_threshold_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_step_counter_minths_a_t step_counter_minths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_STEP_COUNTER_MINTHS_A,
-                               &reg.byte, 1);
-  reg. step_counter_minths_a.sc_mths = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_STEP_COUNTER_MINTHS_A,
-                                &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_STEP_COUNTER_MINTHS_A,
+                               (uint8_t*)&step_counter_minths_a, 1);
+  if(ret == 0){
+    step_counter_minths_a.sc_mths = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_STEP_COUNTER_MINTHS_A,
+                                (uint8_t*)&step_counter_minths_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pedo_threshold: [get] Minimum threshold value for step
-  *                               counter routine.
+  * @brief  Minimum threshold value for step counter routine.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of sc_mths in reg  STEP_COUNTER_MINTHS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of sc_mths in reg  STEP_COUNTER_MINTHS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pedo_threshold_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_step_counter_minths_a_t step_counter_minths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_STEP_COUNTER_MINTHS_A,
-                               &reg.byte, 1);
-  *val = reg. step_counter_minths_a.sc_mths;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_STEP_COUNTER_MINTHS_A,
+                               (uint8_t*)&step_counter_minths_a, 1);
+  *val = step_counter_minths_a.sc_mths;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pedo_full_scale: [set]  Pedometer data range.
+  * @brief  Pedometer data range.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_pedo4g_t: change the values of pedo4g in
-  *                            reg STEP_COUNTER_MINTHS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of pedo4g in reg STEP_COUNTER_MINTHS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pedo_full_scale_set(lsm303ah_ctx_t *ctx,
                                      lsm303ah_xl_pedo4g_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_step_counter_minths_a_t step_counter_minths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_STEP_COUNTER_MINTHS_A,
-                               &reg.byte, 1);
-  reg. step_counter_minths_a.pedo4g = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_STEP_COUNTER_MINTHS_A,
-                                &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_STEP_COUNTER_MINTHS_A,
+                               (uint8_t*)&step_counter_minths_a, 1);
+  if(ret == 0){
+    step_counter_minths_a.pedo4g = (uint8_t)val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_STEP_COUNTER_MINTHS_A,
+                                (uint8_t*)&step_counter_minths_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pedo_full_scale: [get]  Pedometer data range.
+  * @brief  Pedometer data range.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  lsm303ah_xl_pedo4g_t: Get the values of pedo4g in
-  *                            reg STEP_COUNTER_MINTHS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of pedo4g in reg STEP_COUNTER_MINTHS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pedo_full_scale_get(lsm303ah_ctx_t *ctx,
                                      lsm303ah_xl_pedo4g_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_step_counter_minths_a_t step_counter_minths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_STEP_COUNTER_MINTHS_A,
-                               &reg.byte, 1);
-  *val = (lsm303ah_xl_pedo4g_t) reg. step_counter_minths_a.pedo4g;
-
-  return mm_error;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_STEP_COUNTER_MINTHS_A, (uint8_t*)&step_counter_minths_a, 1);
+  switch (step_counter_minths_a.pedo4g){
+    case LSM303AH_XL_PEDO_AT_2g:
+      *val = LSM303AH_XL_PEDO_AT_2g;
+      break;
+    case LSM303AH_XL_PEDO_AT_4g:
+      *val = LSM303AH_XL_PEDO_AT_4g;
+      break;
+    default:
+      *val = LSM303AH_XL_PEDO_AT_2g;
+      break;
+  }
+  return ret;
 }
 
 /**
-  * @brief  pedo_step_reset: [set]  Reset pedometer step counter.
+  * @brief  Reset pedometer step counter.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of rst_nstep in
-  *                      reg STEP_COUNTER_MINTHS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of rst_nstep in reg STEP_COUNTER_MINTHS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pedo_step_reset_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_step_counter_minths_a_t step_counter_minths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_STEP_COUNTER_MINTHS_A,
-                               &reg.byte, 1);
-  reg. step_counter_minths_a.rst_nstep = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_STEP_COUNTER_MINTHS_A,
-                                &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_STEP_COUNTER_MINTHS_A,
+                               (uint8_t*)&step_counter_minths_a, 1);
+  if(ret == 0){
+    step_counter_minths_a.rst_nstep = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_STEP_COUNTER_MINTHS_A,
+                                (uint8_t*)&step_counter_minths_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pedo_step_reset: [get]  Reset pedometer step counter.
+  * @brief  Reset pedometer step counter.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of rst_nstep in
-  *                  reg STEP_COUNTER_MINTHS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of rst_nstep in reg STEP_COUNTER_MINTHS.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pedo_step_reset_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_step_counter_minths_a_t step_counter_minths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_STEP_COUNTER_MINTHS_A,
-                               &reg.byte, 1);
-  *val = reg. step_counter_minths_a.rst_nstep;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_STEP_COUNTER_MINTHS_A,
+                               (uint8_t*)&step_counter_minths_a, 1);
+  *val = step_counter_minths_a.rst_nstep;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief   pedo_step_detect_flag: [get]  Step detection flag.
+  * @brief  Step detection flag.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of step_detect in reg FUNC_CK_GATE
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of step_detect in reg FUNC_CK_GATE.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pedo_step_detect_flag_get(lsm303ah_ctx_t *ctx,
                                               uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_func_ck_gate_a_t func_ck_gate_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CK_GATE_A, &reg.byte, 1);
-  *val = reg.func_ck_gate_a.step_detect;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CK_GATE_A, (uint8_t*)&func_ck_gate_a, 1);
+  *val = func_ck_gate_a.step_detect;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pedo_sens: [set]  Enable pedometer algorithm.
+  * @brief  Enable pedometer algorithm.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of step_cnt_on in reg FUNC_CTRL
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of step_cnt_on in reg FUNC_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pedo_sens_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_func_ctrl_a_t func_ctrl_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CTRL_A, &reg.byte, 1);
-  reg.func_ctrl_a.step_cnt_on = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_FUNC_CTRL_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CTRL_A, (uint8_t*)&func_ctrl_a, 1);
+  if(ret == 0){
+    func_ctrl_a.step_cnt_on = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_FUNC_CTRL_A, (uint8_t*)&func_ctrl_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pedo_sens: [get]  Enable pedometer algorithm.
+  * @brief  Enable pedometer algorithm.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of step_cnt_on in reg FUNC_CTRL
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of step_cnt_on in reg FUNC_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pedo_sens_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_func_ctrl_a_t func_ctrl_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CTRL_A, &reg.byte, 1);
-  *val = reg.func_ctrl_a.step_cnt_on;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CTRL_A, (uint8_t*)&func_ctrl_a, 1);
+  *val = func_ctrl_a.step_cnt_on;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief   pedo_debounce_steps: [set] Minimum number of steps to start
-  *                                     the increment step counter.
+  * @brief  Minimum number of steps to start the increment step counter.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of deb_step in reg PEDO_DEB_REG
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of deb_step in reg PEDO_DEB_REG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pedo_debounce_steps_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_pedo_deb_reg_a_t pedo_deb_reg_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_ADV_BANK);
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_PEDO_DEB_REG_A, &reg.byte, 1);
-  reg.pedo_deb_reg_a.deb_step = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_PEDO_DEB_REG_A, &reg.byte, 1);
-  mm_error = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_USER_BANK);
+  ret = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_ADV_BANK);
+  if(ret == 0){
+    ret = lsm303ah_read_reg(ctx, LSM303AH_PEDO_DEB_REG_A, (uint8_t*)&pedo_deb_reg_a, 1);
+  }
+  if(ret == 0){
+    pedo_deb_reg_a.deb_step = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_PEDO_DEB_REG_A, (uint8_t*)&pedo_deb_reg_a, 1);
+  }
+  if(ret == 0){
+    ret = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_USER_BANK);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief   pedo_debounce_steps: [get] Minimum number of steps to start
-  *                                     the increment step counter.
+  * @brief  Minimum number of steps to start the increment step counter.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of deb_step in reg PEDO_DEB_REG
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of deb_step in reg PEDO_DEB_REG.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pedo_debounce_steps_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_pedo_deb_reg_a_t pedo_deb_reg_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_ADV_BANK);
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_PEDO_DEB_REG_A, &reg.byte, 1);
-  *val = reg.pedo_deb_reg_a.deb_step;
-  mm_error = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_USER_BANK);
+  ret = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_ADV_BANK);
+  if(ret == 0){
+    ret = lsm303ah_read_reg(ctx, LSM303AH_PEDO_DEB_REG_A, (uint8_t*)&pedo_deb_reg_a, 1);
+  }
+  if(ret == 0){
+    *val = pedo_deb_reg_a.deb_step;
+    ret = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_USER_BANK);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pedo_timeout: [set] Debounce time. If the time between two
-  *                             consecutive steps is greater than
-  *                             DEB_TIME*80ms, the debouncer is reactivated.
-  *                             Default value: 01101
+  * @brief  Debounce time. If the time between two consecutive steps is greater
+  *         than DEB_TIME*80ms, the debouncer is reactivated.
+  *         Default value: 01101[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of deb_time in reg PEDO_DEB_REG
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of deb_time in reg PEDO_DEB_REG
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pedo_timeout_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_pedo_deb_reg_a_t pedo_deb_reg_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_ADV_BANK);
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_PEDO_DEB_REG_A, &reg.byte, 1);
-  reg.pedo_deb_reg_a.deb_time = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_PEDO_DEB_REG_A, &reg.byte, 1);
-  mm_error = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_USER_BANK);
+  ret = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_ADV_BANK);
+  if(ret == 0){
+    ret = lsm303ah_read_reg(ctx, LSM303AH_PEDO_DEB_REG_A, (uint8_t*)&pedo_deb_reg_a, 1);
+  }
+  if(ret == 0){
+    pedo_deb_reg_a.deb_time = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_PEDO_DEB_REG_A, (uint8_t*)&pedo_deb_reg_a, 1);
+  }
+  if(ret == 0){
+    ret = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_USER_BANK);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pedo_timeout: [get] Debounce time. If the time between two
-  *                             consecutive steps is greater than
-  *                             DEB_TIME*80ms, the debouncer is reactivated.
-  *                             Default value: 01101
+  * @brief  Debounce time. If the time between two consecutive steps is greater
+  *         than DEB_TIME*80ms, the debouncer is reactivated.
+  *         Default value: 01101[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of deb_time in reg PEDO_DEB_REG
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of deb_time in reg PEDO_DEB_REG.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pedo_timeout_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_pedo_deb_reg_a_t pedo_deb_reg_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_ADV_BANK);
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_PEDO_DEB_REG_A, &reg.byte, 1);
-  *val = reg.pedo_deb_reg_a.deb_time;
-  mm_error = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_USER_BANK);
+  ret = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_ADV_BANK);
+  if(ret == 0){
+    ret = lsm303ah_read_reg(ctx, LSM303AH_PEDO_DEB_REG_A, (uint8_t*)&pedo_deb_reg_a, 1);
+  }
+  if(ret == 0){
+    *val = pedo_deb_reg_a.deb_time;
+    ret = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_USER_BANK);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pedo_steps_period: [set] Period of time to detect at
-  *                                  least one step to generate step
-  *                                  recognition [1 LSb = 1.6384 s].
+  * @brief  Period of time to detect at least one step to generate step
+  *         recognition [1 LSb = 1.6384 s].[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that contains data to write
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  buff   buffer that contains data to write
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pedo_steps_period_set(lsm303ah_ctx_t *ctx, uint8_t *buff)
 {
-  int32_t mm_error;
+  int32_t ret;
 
-  mm_error = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_ADV_BANK);
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_STEP_COUNT_DELTA_A, buff, 1);
-  mm_error = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_USER_BANK);
+  ret = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_ADV_BANK);
+  if(ret == 0){
+    ret = lsm303ah_write_reg(ctx, LSM303AH_STEP_COUNT_DELTA_A, buff, 1);
+  }
+  if(ret == 0){
+    ret = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_USER_BANK);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  pedo_steps_period: [get] Period of time to detect at least
-  *                                  one step to generate step recognition
-  *                                  [1 LSb = 1.6384 s].
+  * @brief  Period of time to detect at least one step to generate step
+  *         recognition [1 LSb = 1.6384 s].[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t * : buffer that stores data read
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  buff   buffer that stores data read
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_pedo_steps_period_get(lsm303ah_ctx_t *ctx, uint8_t *buff)
 {
-  int32_t mm_error;
+  int32_t ret;
 
-  mm_error = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_ADV_BANK);
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_STEP_COUNT_DELTA_A, buff, 1);
-  mm_error = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_USER_BANK);
+  ret = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_ADV_BANK);
+  if(ret == 0){
+    ret = lsm303ah_read_reg(ctx, LSM303AH_STEP_COUNT_DELTA_A, buff, 1);
+  }
+  if(ret == 0){
+    ret = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_USER_BANK);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup  significant_motion
+  * @defgroup  significant_motion
   * @brief   This section groups all the functions that manage the
   *          significant motion detection.
   * @{
+  *
   */
 
 /**
-  * @brief   motion_data_ready_flag: [get] Significant motion event
-  *                                        detection status.
+  * @brief   Significant motion event detection status.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of sig_mot_detect in reg FUNC_CK_GATE
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of sig_mot_detect in reg FUNC_CK_GATE.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_motion_data_ready_flag_get(lsm303ah_ctx_t *ctx,
                                                uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_func_ck_gate_a_t func_ck_gate_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CK_GATE_A, &reg.byte, 1);
-  *val = reg.func_ck_gate_a.sig_mot_detect;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CK_GATE_A, (uint8_t*)&func_ck_gate_a, 1);
+  *val = func_ck_gate_a.sig_mot_detect;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  motion_sens: [set]  Enable significant motion detection function.
+  * @brief  Enable significant motion detection function.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of sign_mot_on in reg FUNC_CTRL
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of sign_mot_on in reg FUNC_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_motion_sens_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_func_ctrl_a_t func_ctrl_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CTRL_A, &reg.byte, 1);
-  reg.func_ctrl_a.sign_mot_on = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_FUNC_CTRL_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CTRL_A, (uint8_t*)&func_ctrl_a, 1);
+  if(ret == 0){
+    func_ctrl_a.sign_mot_on = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_FUNC_CTRL_A, (uint8_t*)&func_ctrl_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  motion_sens: [get]  Enable significant motion detection function.
+  * @brief  Enable significant motion detection function.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of sign_mot_on in reg FUNC_CTRL
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of sign_mot_on in reg FUNC_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_motion_sens_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_func_ctrl_a_t func_ctrl_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CTRL_A, &reg.byte, 1);
-  *val = reg.func_ctrl_a.sign_mot_on;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CTRL_A, (uint8_t*)&func_ctrl_a, 1);
+  *val = func_ctrl_a.sign_mot_on;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  motion_threshold: [set] These bits define the threshold value
-  *                                 which corresponds to the number of steps
-  *                                 to be performed by the user upon a change
-  *                                 of location before the significant motion
-  *                                 interrupt is generated. It is expressed
-  *                                 as an 8-bit unsigned value.
-  *                                 The default value of this field is equal
-  *                                 to 6 (= 00000110b).
+  * @brief  These bits define the threshold value which corresponds to the
+  *         number of steps to be performed by the user upon a change of
+  *         location before the significant motion interrupt is generated.
+  *         It is expressed as an 8-bit unsigned value.
+  *         The default value of this field is equal to 6 (= 00000110b).[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of sm_ths in reg SM_THS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of sm_ths in reg SM_THS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_motion_threshold_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_sm_ths_a_t sm_ths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_ADV_BANK);
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_SM_THS_A, &reg.byte, 1);
-  reg.sm_ths_a.sm_ths = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_SM_THS_A, &reg.byte, 1);
-  mm_error = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_USER_BANK);
+  ret = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_ADV_BANK);
+  if(ret == 0){
+    ret = lsm303ah_read_reg(ctx, LSM303AH_SM_THS_A, (uint8_t*)&sm_ths_a, 1);
+  }
+  if(ret == 0){
+    sm_ths_a.sm_ths = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_SM_THS_A, (uint8_t*)&sm_ths_a, 1);
+  }
+  if(ret == 0){
+    ret = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_USER_BANK);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  motion_threshold: [get] These bits define the threshold value
-  *                                 which corresponds to the number of steps
-  *                                 to be performed by the user upon a change
-  *                                 of location before the significant motion
-  *                                 interrupt is generated. It is expressed as
-  *                                 an 8-bit unsigned value. The default value
-  *                                 of this field is equal to 6 (= 00000110b).
+  * @brief  These bits define the threshold value which corresponds to the
+  *         number of steps to be performed by the user upon a change of
+  *         location before the significant motion interrupt is generated.
+  *         It is expressed as an 8-bit unsigned value.
+  *         The default value of this field is equal to 6 (= 00000110b).[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of sm_ths in reg SM_THS
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of sm_ths in reg SM_THS
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_motion_threshold_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_sm_ths_a_t sm_ths_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_ADV_BANK);
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_SM_THS_A, &reg.byte, 1);
-  *val = reg.sm_ths_a.sm_ths;
-  mm_error = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_USER_BANK);
+  ret = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_ADV_BANK);
+  if(ret == 0){
+    ret = lsm303ah_read_reg(ctx, LSM303AH_SM_THS_A, (uint8_t*)&sm_ths_a, 1);
+  }
+  if(ret == 0){
+    *val = sm_ths_a.sm_ths;
+    ret = lsm303ah_xl_mem_bank_set(ctx, LSM303AH_XL_USER_BANK);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup  tilt_detection
+  * @defgroup  tilt_detection
   * @brief   This section groups all the functions that manage the tilt
   *          event detection.
   * @{
+  *
   */
 
 /**
-  * @brief   tilt_data_ready_flag: [get]  Tilt event detection status.
+  * @brief  Tilt event detection status.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of tilt_int in reg FUNC_CK_GATE
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of tilt_int in reg FUNC_CK_GATE
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tilt_data_ready_flag_get(lsm303ah_ctx_t *ctx,
                                              uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_func_ck_gate_a_t func_ck_gate_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CK_GATE_A, &reg.byte, 1);
-  *val = reg.func_ck_gate_a.tilt_int;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CK_GATE_A, (uint8_t*)&func_ck_gate_a, 1);
+  *val = func_ck_gate_a.tilt_int;
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  tilt_sens: [set]  Enable tilt calculation.
+  * @brief  Enable tilt calculation.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of tilt_on in reg FUNC_CTRL
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of tilt_on in reg FUNC_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tilt_sens_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_func_ctrl_a_t func_ctrl_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CTRL_A, &reg.byte, 1);
-  reg.func_ctrl_a.tilt_on = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_FUNC_CTRL_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CTRL_A, (uint8_t*)&func_ctrl_a, 1);
+  if(ret == 0){
+    func_ctrl_a.tilt_on = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_FUNC_CTRL_A, (uint8_t*)&func_ctrl_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  tilt_sens: [get]  Enable tilt calculation.
+  * @brief  Enable tilt calculation.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of tilt_on in reg FUNC_CTRL
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of tilt_on in reg FUNC_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_tilt_sens_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_func_ctrl_a_t func_ctrl_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CTRL_A, &reg.byte, 1);
-  *val = reg.func_ctrl_a.tilt_on;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CTRL_A, (uint8_t*)&func_ctrl_a, 1);
+  *val = func_ctrl_a.tilt_on;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
-  * @addtogroup  module
+  * @defgroup  module
   * @brief   This section groups all the functions that manage
   *          module calculation
   * @{
+  *
   */
 
 /**
-  * @brief  module_sens: [set]  Module processing enable.
+  * @brief  Module processing enable.[set]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t val: change the values of module_on in reg FUNC_CTRL
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Change the values of module_on in reg FUNC_CTRL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_module_sens_set(lsm303ah_ctx_t *ctx, uint8_t val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_func_ctrl_a_t func_ctrl_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CTRL_A, &reg.byte, 1);
-  reg.func_ctrl_a.module_on = val;
-  mm_error = lsm303ah_write_reg(ctx, LSM303AH_FUNC_CTRL_A, &reg.byte, 1);
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CTRL_A, (uint8_t*)&func_ctrl_a, 1);
+  if(ret == 0){
+    func_ctrl_a.module_on = val;
+    ret = lsm303ah_write_reg(ctx, LSM303AH_FUNC_CTRL_A, (uint8_t*)&func_ctrl_a, 1);
+  }
 
-  return mm_error;
+  return ret;
 }
 
 /**
-  * @brief  module_sens: [get]  Module processing enable.
+  * @brief  Module processing enable.[get]
   *
-  * @param  lsm303ah_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t: change the values of module_on in reg FUNC_CTRL
+  * @param  ctx    read / write interface definitions.(ptr)
+  * @param  val    Get the values of module_on in reg FUNC_CTRL.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
 int32_t lsm303ah_xl_module_sens_get(lsm303ah_ctx_t *ctx, uint8_t *val)
 {
-  lsm303ah_reg_t reg;
-  int32_t mm_error;
+  lsm303ah_func_ctrl_a_t func_ctrl_a;
+  int32_t ret;
 
-  mm_error = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CTRL_A, &reg.byte, 1);
-  *val = reg.func_ctrl_a.module_on;
+  ret = lsm303ah_read_reg(ctx, LSM303AH_FUNC_CTRL_A, (uint8_t*)&func_ctrl_a, 1);
+  *val = func_ctrl_a.module_on;
 
-  return mm_error;
+  return ret;
 }
 
 /**
   * @}
+  *
   */
 
 /**
   * @}
+  *
   */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
