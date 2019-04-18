@@ -35,11 +35,12 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include "..\..\stdc\lsm303ah_STdC\driver\lsm303ah_reg.h"
+#include <lsm303ah_reg.h>
 #include <string.h>
+#include <stdio.h>
 
-#define MKI109V2
-//#define NUCLEO_STM32F411RE
+//#define MKI109V2
+#define NUCLEO_STM32F411RE
 
 #ifdef MKI109V2
 #include "stm32f1xx_hal.h"
@@ -220,9 +221,9 @@ void example_main(void)
       /* Read acceleration data */
       memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
       lsm303ah_acceleration_raw_get(&dev_ctx_xl, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = LSM303AH_FROM_FS_2g_TO_mg( data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = LSM303AH_FROM_FS_2g_TO_mg( data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = LSM303AH_FROM_FS_2g_TO_mg( data_raw_acceleration.i16bit[2]);
+      acceleration_mg[0] = lsm303ah_from_fs2g_to_mg( data_raw_acceleration.i16bit[0]);
+      acceleration_mg[1] = lsm303ah_from_fs2g_to_mg( data_raw_acceleration.i16bit[1]);
+      acceleration_mg[2] = lsm303ah_from_fs2g_to_mg( data_raw_acceleration.i16bit[2]);
       
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
@@ -235,9 +236,9 @@ void example_main(void)
       /* Read magnetic field data */
       memset(data_raw_magnetic.u8bit, 0x00, 3*sizeof(int16_t));
       lsm303ah_magnetic_raw_get(&dev_ctx_mg, data_raw_magnetic.u8bit);
-      magnetic_mG[0] = LSM303AH_FROM_LSB_TO_mG( data_raw_magnetic.i16bit[0]);
-      magnetic_mG[1] = LSM303AH_FROM_LSB_TO_mG( data_raw_magnetic.i16bit[1]);
-      magnetic_mG[2] = LSM303AH_FROM_LSB_TO_mG( data_raw_magnetic.i16bit[2]);
+      magnetic_mG[0] = lsm303ah_from_lsb_to_mgauss( data_raw_magnetic.i16bit[0]);
+      magnetic_mG[1] = lsm303ah_from_lsb_to_mgauss( data_raw_magnetic.i16bit[1]);
+      magnetic_mG[2] = lsm303ah_from_lsb_to_mgauss( data_raw_magnetic.i16bit[2]);
       
       sprintf((char*)tx_buffer, "Magnetic field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
