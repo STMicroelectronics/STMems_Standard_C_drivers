@@ -14,4 +14,4 @@ every hardware.
 
 www.st.com/mems
 
-LSM303AH DS rev6.0 
+LSM303AH DS rev7.0 
