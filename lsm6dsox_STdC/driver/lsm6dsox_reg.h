@@ -502,7 +502,7 @@ typedef struct {
 #define LSM6DSOX_TIMESTAMP3                   0x43U
 #define LSM6DSOX_UI_STATUS_REG_OIS            0x49U
 typedef struct {
-  uint8_t xlda                     : 3;
+  uint8_t xlda                     : 1;
   uint8_t gda                      : 1;
   uint8_t gyro_settling            : 1;
   uint8_t not_used_01              : 5;
