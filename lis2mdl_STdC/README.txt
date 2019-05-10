@@ -15,4 +15,4 @@ every hardware.
 www.st.com/mems
 
 
-LIS2MDL DS rev3.0 
+LIS2MDL DS rev5.0 

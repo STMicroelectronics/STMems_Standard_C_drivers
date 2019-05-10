@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -187,7 +187,7 @@ typedef struct {
 typedef struct {
   uint8_t drdy_on_pin            : 1;
   uint8_t self_test              : 1;
-  uint8_t not_used_01            : 1;
+  uint8_t _4wspi                 : 1;
   uint8_t ble                    : 1;
   uint8_t bdu                    : 1;
   uint8_t i2c_dis                : 1;
@@ -273,7 +273,7 @@ int32_t lis2mdl_read_reg(lis2mdl_ctx_t *ctx, uint8_t reg, uint8_t* data,
                          uint16_t len);
 int32_t lis2mdl_write_reg(lis2mdl_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
-                          
+                       
 extern float_t lis2mdl_from_lsb_to_mgauss(int16_t lsb);
 extern float_t lis2mdl_from_lsb_to_celsius(int16_t lsb);
 
@@ -387,6 +387,13 @@ int32_t lis2mdl_int_gen_source_get(lis2mdl_ctx_t *ctx,
 
 int32_t lis2mdl_int_gen_treshold_set(lis2mdl_ctx_t *ctx, uint8_t *buff);
 int32_t lis2mdl_int_gen_treshold_get(lis2mdl_ctx_t *ctx, uint8_t *buff);
+
+typedef enum {
+  LIS2MDL_SPI_4_WIRE   = 1,
+  LIS2MDL_SPI_3_WIRE   = 0,
+} lis2mdl_sim_t;
+int32_t lis2mdl_spi_mode_set(lis2mdl_ctx_t *ctx, lis2mdl_sim_t val);
+int32_t lis2mdl_spi_mode_get(lis2mdl_ctx_t *ctx, lis2mdl_sim_t *val);
 
 typedef enum {
   LIS2MDL_I2C_ENABLE   = 0,
