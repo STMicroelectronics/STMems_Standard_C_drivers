@@ -14,4 +14,4 @@ every hardware.
 
 www.st.com/mems
 
-ASM330LHH DS rev2.00(d)
+ASM330LHH DS rev3.00
