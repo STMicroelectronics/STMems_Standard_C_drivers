@@ -14,4 +14,4 @@ every hardware.
 
 www.st.com/mems
 
-LSM6DSR DS rev0.99d
+LSM6DSR DS rev1.00
