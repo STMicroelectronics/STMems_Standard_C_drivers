@@ -1574,6 +1574,8 @@ typedef struct {
   uint8_t wr_once_done             : 1;
 } lsm6dsox_status_master_t;
 
+#define LSM6DSOX_START_FSM_ADD                0x0400U
+
 /**
   * @defgroup LSM6DSOX_Register_Union
   * @brief    This union group all the registers that has a bitfield
@@ -2780,14 +2782,14 @@ int32_t lsm6dsox_fsm_data_rate_get(lsm6dsox_ctx_t *ctx, lsm6dsox_fsm_odr_t *val)
 int32_t lsm6dsox_fsm_init_set(lsm6dsox_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsox_fsm_init_get(lsm6dsox_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6dsox_long_cnt_int_value_set(lsm6dsox_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dsox_long_cnt_int_value_get(lsm6dsox_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dsox_long_cnt_int_value_set(lsm6dsox_ctx_t *ctx, uint16_t val);
+int32_t lsm6dsox_long_cnt_int_value_get(lsm6dsox_ctx_t *ctx, uint16_t *val);
 
-int32_t lsm6dsox_fsm_number_of_programs_set(lsm6dsox_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dsox_fsm_number_of_programs_get(lsm6dsox_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dsox_fsm_number_of_programs_set(lsm6dsox_ctx_t *ctx, uint8_t val);
+int32_t lsm6dsox_fsm_number_of_programs_get(lsm6dsox_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6dsox_fsm_start_address_set(lsm6dsox_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dsox_fsm_start_address_get(lsm6dsox_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dsox_fsm_start_address_set(lsm6dsox_ctx_t *ctx, uint16_t val);
+int32_t lsm6dsox_fsm_start_address_get(lsm6dsox_ctx_t *ctx, uint16_t *val);
 
 int32_t lsm6dsox_mlc_set(lsm6dsox_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsox_mlc_get(lsm6dsox_ctx_t *ctx, uint8_t *val);

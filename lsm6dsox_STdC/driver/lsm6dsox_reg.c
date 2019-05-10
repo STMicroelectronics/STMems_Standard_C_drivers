@@ -7899,8 +7899,8 @@ int32_t lsm6dsox_fsm_enable_set(lsm6dsox_ctx_t *ctx,
                                 lsm6dsox_emb_fsm_enable_t *val)
 {
   int32_t ret;
-  lsm6dsox_emb_func_en_b_t emb_func_en_b;
-  lsm6dsox_emb_func_init_b_t emb_func_init_b;
+  lsm6dsox_emb_func_en_b_t reg;
+
 
   ret = lsm6dsox_mem_bank_set(ctx, LSM6DSOX_EMBEDDED_FUNC_BANK);
   if (ret == 0) {
@@ -7912,12 +7912,8 @@ int32_t lsm6dsox_fsm_enable_set(lsm6dsox_ctx_t *ctx,
                             (uint8_t*)&val->fsm_enable_b, 1);
   }
   if (ret == 0) {
-    ret = lsm6dsox_read_reg(ctx, LSM6DSOX_EMB_FUNC_INIT_B, 
-                            (uint8_t*)&emb_func_init_b, 1);
-  }
-  if (ret == 0) {
     ret = lsm6dsox_read_reg(ctx, LSM6DSOX_EMB_FUNC_EN_B,
-                            (uint8_t*)&emb_func_en_b, 1);
+                            (uint8_t*)&reg, 1);
   }
   if (ret == 0) {
     if ( (val->fsm_enable_a.fsm1_en   |
@@ -7936,22 +7932,14 @@ int32_t lsm6dsox_fsm_enable_set(lsm6dsox_ctx_t *ctx,
           val->fsm_enable_b.fsm14_en  |
           val->fsm_enable_b.fsm15_en  |
           val->fsm_enable_b.fsm16_en  )
-          != PROPERTY_DISABLE)
-    {
-      emb_func_en_b.fsm_en = PROPERTY_ENABLE;
-      emb_func_init_b.fsm_init = PROPERTY_ENABLE;
+          != PROPERTY_DISABLE){
+      reg.fsm_en = PROPERTY_ENABLE;
     }
-    else
-    {
-      emb_func_en_b.fsm_en = PROPERTY_DISABLE;
-      emb_func_init_b.fsm_init = PROPERTY_DISABLE;
+    else{
+      reg.fsm_en = PROPERTY_DISABLE;
     }
-    ret = lsm6dsox_write_reg(ctx, LSM6DSOX_EMB_FUNC_EN_B,
-                             (uint8_t*)&emb_func_en_b, 1);
-    if (ret == 0) {
-      ret = lsm6dsox_write_reg(ctx, LSM6DSOX_EMB_FUNC_INIT_B,
-                               (uint8_t*)&emb_func_init_b, 1);
-    }
+
+    ret = lsm6dsox_write_reg(ctx, LSM6DSOX_EMB_FUNC_EN_B, (uint8_t*)&reg, 1);
   }
   if (ret == 0) {
     ret = lsm6dsox_mem_bank_set(ctx, LSM6DSOX_USER_BANK);
@@ -8112,7 +8100,7 @@ int32_t lsm6dsox_fsm_out_get(lsm6dsox_ctx_t *ctx, lsm6dsox_fsm_out_t *val)
 
   ret = lsm6dsox_mem_bank_set(ctx, LSM6DSOX_EMBEDDED_FUNC_BANK);
   if (ret == 0) {
-    ret = lsm6dsox_read_reg(ctx, LSM6DSOX_FSM_OUTS1, (uint8_t*) &val, 16);
+    ret = lsm6dsox_read_reg(ctx, LSM6DSOX_FSM_OUTS1, (uint8_t*)val, 16);
   }
   if (ret == 0) {
     ret = lsm6dsox_mem_bank_set(ctx, LSM6DSOX_USER_BANK);
@@ -8140,7 +8128,7 @@ int32_t lsm6dsox_fsm_data_rate_set(lsm6dsox_ctx_t *ctx, lsm6dsox_fsm_odr_t val)
   }
   if (ret == 0) {
     reg.not_used_01 = 3; /* set default values */
-    reg.not_used_02 = 1; /* set default values */
+    reg.not_used_02 = 2; /* set default values */
     reg.fsm_odr = (uint8_t)val;
     ret = lsm6dsox_write_reg(ctx, LSM6DSOX_EMB_FUNC_ODR_CFG_B,
                             (uint8_t*)&reg, 1);
@@ -8249,20 +8237,21 @@ int32_t lsm6dsox_fsm_init_get(lsm6dsox_ctx_t *ctx, uint8_t *val)
   *         the FSM generates an interrupt.[set]
   *
   * @param  ctx      read / write interface definitions
-  * @param  buff     buffer that contains data to write
+  * @param  val      the value of long counter
   *
   */
-int32_t lsm6dsox_long_cnt_int_value_set(lsm6dsox_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsox_long_cnt_int_value_set(lsm6dsox_ctx_t *ctx, uint16_t val)
 {
   int32_t ret;
-  uint8_t index;
+  uint8_t add_l;
+  uint8_t add_h;
 
-  index = 0x00U;
-  ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_FSM_LC_TIMEOUT_L, &buff[index]);
+  add_h = (uint8_t)( ( val & 0xFF00U ) >> 8 );
+  add_l = (uint8_t)( val & 0x00FFU );
+
+  ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_FSM_LC_TIMEOUT_L, &add_l);
   if (ret == 0) {
-    index++;
-    ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_FSM_LC_TIMEOUT_H,
-                                   &buff[index]);
+    ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_FSM_LC_TIMEOUT_H, &add_h);
   }
 
   return ret;
@@ -8274,21 +8263,22 @@ int32_t lsm6dsox_long_cnt_int_value_set(lsm6dsox_ctx_t *ctx, uint8_t *buff)
   *         When the long counter value reached this value,
   *         the FSM generates an interrupt.[get]
   *
-  * @param  ctx      read / write interface definitions
-  * @param  buff     buffer that stores data read
+  * @param  ctx     read / write interface definitions
+  * @param  val     buffer that stores the value of long counter
   *
   */
-int32_t lsm6dsox_long_cnt_int_value_get(lsm6dsox_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsox_long_cnt_int_value_get(lsm6dsox_ctx_t *ctx, uint16_t *val)
 {
   int32_t ret;
-  uint8_t index;
+  uint8_t add_l;
+  uint8_t add_h;
 
-  index = 0x00U;
-  ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_FSM_LC_TIMEOUT_L, &buff[index]);
+  ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_FSM_LC_TIMEOUT_L, &add_l);
   if (ret == 0) {
-    index++;
-    ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_FSM_LC_TIMEOUT_H,
-                                  &buff[index]);
+    ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_FSM_LC_TIMEOUT_H, &add_h);
+    *val = add_h;
+    *val = *val << 8;
+    *val += add_l;
   }
 
   return ret;
@@ -8298,14 +8288,14 @@ int32_t lsm6dsox_long_cnt_int_value_get(lsm6dsox_ctx_t *ctx, uint8_t *buff)
   * @brief  FSM number of programs register.[set]
   *
   * @param  ctx      read / write interface definitions
-  * @param  buff     buffer that contains data to write
+  * @param  val      value to write
   *
   */
-int32_t lsm6dsox_fsm_number_of_programs_set(lsm6dsox_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsox_fsm_number_of_programs_set(lsm6dsox_ctx_t *ctx, uint8_t val)
 {
   int32_t ret;
 
-  ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_FSM_PROGRAMS, buff);
+  ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_FSM_PROGRAMS, &val);
 
   return ret;
 }
@@ -8314,14 +8304,14 @@ int32_t lsm6dsox_fsm_number_of_programs_set(lsm6dsox_ctx_t *ctx, uint8_t *buff)
   * @brief  FSM number of programs register.[get]
   *
   * @param  ctx      read / write interface definitions
-  * @param  buff     buffer that stores data read
+  * @param  val      buffer that stores data read.
   *
   */
-int32_t lsm6dsox_fsm_number_of_programs_get(lsm6dsox_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsox_fsm_number_of_programs_get(lsm6dsox_ctx_t *ctx, uint8_t *val)
 {
   int32_t ret;
 
-  ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_FSM_PROGRAMS, buff);
+  ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_FSM_PROGRAMS, val);
 
   return ret;
 }
@@ -8331,20 +8321,21 @@ int32_t lsm6dsox_fsm_number_of_programs_get(lsm6dsox_ctx_t *ctx, uint8_t *buff)
   *         First available address is 0x033C.[set]
   *
   * @param  ctx      read / write interface definitions
-  * @param  buff     buffer that contains data to write
+  * @param  val      the value of start address
   *
   */
-int32_t lsm6dsox_fsm_start_address_set(lsm6dsox_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsox_fsm_start_address_set(lsm6dsox_ctx_t *ctx, uint16_t val)
 {
   int32_t ret;
-  uint8_t index;
+  uint8_t add_l;
+  uint8_t add_h;
 
-  index = 0x00U;
-  ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_FSM_START_ADD_L, &buff[index]);
+  add_h = (uint8_t)( ( val & 0xFF00U ) >> 8 );
+  add_l = (uint8_t)( val & 0x00FFU );
+
+  ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_FSM_START_ADD_L, &add_l);
   if (ret == 0) {
-    index++;
-    ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_FSM_START_ADD_H,
-                                   &buff[index]);
+    ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_FSM_START_ADD_H, &add_h);
   }
   return ret;
 }
@@ -8354,19 +8345,21 @@ int32_t lsm6dsox_fsm_start_address_set(lsm6dsox_ctx_t *ctx, uint8_t *buff)
   *         First available address is 0x033C.[get]
   *
   * @param  ctx      read / write interface definitions
-  * @param  buff     buffer that stores data read
+  * @param  val      buffer the value of start address.
   *
   */
-int32_t lsm6dsox_fsm_start_address_get(lsm6dsox_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsox_fsm_start_address_get(lsm6dsox_ctx_t *ctx, uint16_t *val)
 {
   int32_t ret;
-  uint8_t index;
+  uint8_t add_l;
+  uint8_t add_h;
 
-  index = 0x00U;
-  ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_FSM_START_ADD_L, buff);
+  ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_FSM_START_ADD_L, &add_l);
   if (ret == 0) {
-    index++;
-    ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_FSM_START_ADD_H, buff);
+    ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_FSM_START_ADD_H, &add_h);
+    *val = add_h;
+    *val = *val << 8;
+    *val += add_l;
   }
   return ret;
 }
