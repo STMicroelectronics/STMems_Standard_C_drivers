@@ -684,10 +684,15 @@ int32_t lsm6dsox_all_sources_get(lsm6dsox_ctx_t *ctx,
   if (ret == 0) {
     ret = lsm6dsox_read_reg(ctx, LSM6DSOX_FSM_STATUS_B,
                            (uint8_t*)&val->fsm_status_b, 1);
+  }  
+  if (ret == 0) {
+    ret = lsm6dsox_read_reg(ctx, LSM6DSOX_MLC_STATUS,
+                           (uint8_t*)&val->mlc_status, 1);
   }
   if (ret == 0) {
     ret = lsm6dsox_mem_bank_set(ctx, LSM6DSOX_USER_BANK);
   }
+
   return ret;
 }
 
@@ -1036,7 +1041,7 @@ int32_t lsm6dsox_rounding_mode_get(lsm6dsox_ctx_t *ctx,
   *                                   EMB_FUNC_STATUS_MAINPAGE(35h),
   *                                   FSM_STATUS_A_MAINPAGE (36h),
   *                                   FSM_STATUS_B_MAINPAGE (37h),
-  *                                   PROGSENS_STATUS_MAINPAGE (38h),
+  *                                   MLC_STATUS_MAINPAGE (38h),
   *                                   STATUS_MASTER_MAINPAGE (39h),
   *                                   FIFO_STATUS1 (3Ah), FIFO_STATUS2(3Bh).
   *
@@ -1068,7 +1073,7 @@ int32_t lsm6dsox_rounding_on_status_set(lsm6dsox_ctx_t *ctx,
   *                                   EMB_FUNC_STATUS_MAINPAGE(35h),
   *                                   FSM_STATUS_A_MAINPAGE (36h),
   *                                   FSM_STATUS_B_MAINPAGE (37h),
-  *                                   PROGSENS_STATUS_MAINPAGE (38h),
+  *                                   MLC_STATUS_MAINPAGE (38h),
   *                                   STATUS_MASTER_MAINPAGE (39h),
   *                                   FIFO_STATUS1 (3Ah), FIFO_STATUS2(3Bh).
   *
@@ -1278,7 +1283,7 @@ int32_t lsm6dsox_steps_reset(lsm6dsox_ctx_t *ctx)
 }
 
 /**
-  * @brief  prgsens_out: [get] Output value of all PROGSENSx decision trees.
+  * @brief  prgsens_out: [get] Output value of all MLCx decision trees.
   *
   * @param  ctx_t *ctx: read / write interface definitions
   * @param  uint8_t * : buffer that stores data read
@@ -7836,7 +7841,7 @@ int32_t lsm6dsox_long_cnt_flag_data_ready_get(lsm6dsox_ctx_t *ctx, uint8_t *val)
 }
 
 /**
-  * @brief  Final State Machine global enable.[set]
+  * @brief  Finite State Machine global enable.[set]
   *
   * @param  ctx      read / write interface definitions
   * @param  val      change the values of fsm_en in reg EMB_FUNC_EN_B
@@ -7862,7 +7867,7 @@ int32_t lsm6dsox_emb_fsm_en_set(lsm6dsox_ctx_t *ctx, uint8_t val)
 }
 
 /**
-  * @brief  Final State Machine global enable.[get]
+  * @brief  Finite State Machine global enable.[get]
   *
   * @param  ctx      read / write interface definitions
   * @param  uint8_t *: return the values of fsm_en in reg EMB_FUNC_EN_B
@@ -7949,7 +7954,7 @@ int32_t lsm6dsox_fsm_enable_set(lsm6dsox_ctx_t *ctx,
 }
 
 /**
-  * @brief  Final State Machine enable.[get]
+  * @brief  Finite State Machine enable.[get]
   *
   * @param  ctx      read / write interface definitions
   * @param  val      union of registers from FSM_ENABLE_A to FSM_ENABLE_B
@@ -8382,7 +8387,7 @@ int32_t lsm6dsox_fsm_start_address_get(lsm6dsox_ctx_t *ctx, uint16_t *val)
   *
   * @param  ctx      read / write interface definitions
   * @param  val      change the values of mlc_en in
-  *                  reg EMB_FUNC_EN_B and progsens_init
+  *                  reg EMB_FUNC_EN_B and mlc_init
   *                  in EMB_FUNC_INIT_B
   *
   */
@@ -8442,13 +8447,13 @@ int32_t lsm6dsox_mlc_get(lsm6dsox_ctx_t *ctx, uint8_t *val)
   * @brief  Machine Learning Core status register[get]
   *
   * @param  ctx      read / write interface definitions
-  * @param  val      register PROGSENS_STATUS_MAINPAGE
+  * @param  val      register MLC_STATUS_MAINPAGE
   *
   */
 int32_t lsm6dsox_mlc_status_get(lsm6dsox_ctx_t *ctx,
-                                    lsm6dsox_progsens_status_mainpage_t *val)
+                                lsm6dsox_mlc_status_mainpage_t *val)
 {
-  return lsm6dsox_read_reg(ctx, LSM6DSOX_PROGSENS_STATUS_MAINPAGE,
+  return lsm6dsox_read_reg(ctx, LSM6DSOX_MLC_STATUS_MAINPAGE,
                            (uint8_t*) val, 1);
 }
 
@@ -8456,7 +8461,7 @@ int32_t lsm6dsox_mlc_status_get(lsm6dsox_ctx_t *ctx,
   * @brief  Machine Learning Core data rate selection.[set]
   *
   * @param  ctx      read / write interface definitions
-  * @param  val      get the values of progsens_odr in
+  * @param  val      get the values of mlc_odr in
   *                  reg EMB_FUNC_ODR_CFG_C
   *
   */
@@ -8486,7 +8491,7 @@ int32_t lsm6dsox_mlc_data_rate_set(lsm6dsox_ctx_t *ctx,
   * @brief  Machine Learning Core data rate selection.[get]
   *
   * @param  ctx      read / write interface definitions
-  * @param  val      change the values of progsens_odr in
+  * @param  val      change the values of mlc_odr in
   *                  reg EMB_FUNC_ODR_CFG_C
   *
   */

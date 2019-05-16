@@ -457,7 +457,7 @@ typedef struct {
   uint8_t is_fsm16                : 1;
 } lsm6dsox_fsm_status_b_mainpage_t;
 
-#define LSM6DSOX_PROGSENS_STATUS_MAINPAGE     0x38U
+#define LSM6DSOX_MLC_STATUS_MAINPAGE     0x38U
 typedef struct {
   uint8_t is_mlc1             : 1;
   uint8_t is_mlc2             : 1;
@@ -467,7 +467,7 @@ typedef struct {
   uint8_t is_mlc6             : 1;
   uint8_t is_mlc7             : 1;
   uint8_t is_mlc8             : 1;
-} lsm6dsox_progsens_status_mainpage_t;
+} lsm6dsox_mlc_status_mainpage_t;
 
 #define LSM6DSOX_STATUS_MASTER_MAINPAGE       0x39U
 typedef struct {
@@ -1830,14 +1830,15 @@ int32_t lsm6dsox_gy_power_mode_get(lsm6dsox_ctx_t *ctx,
                                    lsm6dsox_g_hm_mode_t *val);
 
 typedef struct {
-  lsm6dsox_all_int_src_t       all_int_src;
-  lsm6dsox_wake_up_src_t       wake_up_src;
-  lsm6dsox_tap_src_t           tap_src;
-  lsm6dsox_d6d_src_t           d6d_src;
-  lsm6dsox_status_reg_t        status_reg;
-  lsm6dsox_emb_func_status_t   emb_func_status;
-  lsm6dsox_fsm_status_a_t      fsm_status_a;
-  lsm6dsox_fsm_status_b_t      fsm_status_b;
+  lsm6dsox_all_int_src_t           all_int_src;
+  lsm6dsox_wake_up_src_t           wake_up_src;
+  lsm6dsox_tap_src_t               tap_src;
+  lsm6dsox_d6d_src_t               d6d_src;
+  lsm6dsox_status_reg_t            status_reg;
+  lsm6dsox_emb_func_status_t       emb_func_status;
+  lsm6dsox_fsm_status_a_t          fsm_status_a;
+  lsm6dsox_fsm_status_b_t          fsm_status_b;
+  lsm6dsox_mlc_status_mainpage_t   mlc_status;
 } lsm6dsox_all_sources_t;
 int32_t lsm6dsox_all_sources_get(lsm6dsox_ctx_t *ctx,
                                  lsm6dsox_all_sources_t *val);
@@ -2795,7 +2796,7 @@ int32_t lsm6dsox_mlc_set(lsm6dsox_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsox_mlc_get(lsm6dsox_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm6dsox_mlc_status_get(lsm6dsox_ctx_t *ctx,
-                                    lsm6dsox_progsens_status_mainpage_t *val);
+                                lsm6dsox_mlc_status_mainpage_t *val);
 
 typedef enum {
   LSM6DSOX_ODR_PRGS_12Hz5 = 0,
