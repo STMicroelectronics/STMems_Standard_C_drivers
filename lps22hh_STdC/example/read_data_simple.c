@@ -37,7 +37,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "lps22hh_reg.h"
 #include <string.h>
-
+#include <stdio.h>
 //#define MKI109V2
 #define NUCLEO_STM32F411RE
 
@@ -173,7 +173,7 @@ void example_main(void)
   lps22hh_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hspi2;  
+  dev_ctx.handle = &hi2c1;  
   /*
    *  Check device ID
    */
