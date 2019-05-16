@@ -684,7 +684,7 @@ int32_t lsm6dsox_all_sources_get(lsm6dsox_ctx_t *ctx,
   if (ret == 0) {
     ret = lsm6dsox_read_reg(ctx, LSM6DSOX_FSM_STATUS_B,
                            (uint8_t*)&val->fsm_status_b, 1);
-  }  
+  }
   if (ret == 0) {
     ret = lsm6dsox_read_reg(ctx, LSM6DSOX_MLC_STATUS,
                            (uint8_t*)&val->mlc_status, 1);
@@ -3775,7 +3775,7 @@ int32_t lsm6dsox_pin_int2_route_set(lsm6dsox_ctx_t *ctx,
 
   ret = lsm6dsox_mem_bank_set(ctx, LSM6DSOX_EMBEDDED_FUNC_BANK);
   if (ret == 0) {
-    ret = lsm6dsox_write_reg(ctx, LSM6DSOX_MLC_INT1,
+    ret = lsm6dsox_write_reg(ctx, LSM6DSOX_MLC_INT2,
                             (uint8_t*)&val->mlc_int2, 1);
   }
   if (ret == 0) {
@@ -3972,7 +3972,7 @@ int32_t lsm6dsox_pin_mode_get(lsm6dsox_ctx_t *ctx, lsm6dsox_pp_od_t *val)
     ret = lsm6dsox_read_reg(ctx, LSM6DSOX_I3C_BUS_AVB,
                             (uint8_t*)&i3c_bus_avb, 1);
   }
-  
+
   switch ( (i3c_bus_avb.pd_dis_int1 << 1) + ctrl3_c.pp_od) {
     case LSM6DSOX_PUSH_PULL:
       *val = LSM6DSOX_PUSH_PULL;
@@ -8502,8 +8502,8 @@ int32_t lsm6dsox_mlc_data_rate_get(lsm6dsox_ctx_t *ctx,
   int32_t ret;
 
   ret = lsm6dsox_mem_bank_set(ctx, LSM6DSOX_EMBEDDED_FUNC_BANK);
-  if (ret == 0) {  
-    ret = lsm6dsox_read_reg(ctx, LSM6DSOX_EMB_FUNC_ODR_CFG_C, 
+  if (ret == 0) {
+    ret = lsm6dsox_read_reg(ctx, LSM6DSOX_EMB_FUNC_ODR_CFG_C,
                             (uint8_t*)&reg, 1);
   }
   if (ret == 0) {
@@ -9460,7 +9460,7 @@ int32_t lsm6dsox_s4s_command_set(lsm6dsox_ctx_t *ctx, uint8_t val)
   int32_t ret;
 
   ret = lsm6dsox_read_reg(ctx, LSM6DSOX_S4S_ST_CMD_CODE, (uint8_t*)&reg, 1);
- 
+
   if (ret == 0) {
     reg.s4s_st_cmd_code = val;
     ret = lsm6dsox_write_reg(ctx, LSM6DSOX_S4S_ST_CMD_CODE, (uint8_t*)&reg, 1);

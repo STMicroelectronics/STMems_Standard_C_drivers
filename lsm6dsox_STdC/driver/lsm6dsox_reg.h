@@ -632,7 +632,7 @@ typedef struct {
 typedef struct {
   uint8_t not_used_01              : 3;
   uint8_t spi2_read_en             : 1;
-  uint8_t not_used_02              : 1;  
+  uint8_t not_used_02              : 1;
   uint8_t den_lh_ois               : 1;
   uint8_t lvl2_ois                 : 1;
   uint8_t int2_drdy_ois            : 1;
@@ -1680,7 +1680,7 @@ typedef union{
   lsm6dsox_fsm_outs15_t                    fsm_outs15;
   lsm6dsox_fsm_outs16_t                    fsm_outs16;
   lsm6dsox_emb_func_odr_cfg_b_t            emb_func_odr_cfg_b;
-  lsm6dsox_emb_func_odr_cfg_c_t            emb_func_odr_cfg_c;  
+  lsm6dsox_emb_func_odr_cfg_c_t            emb_func_odr_cfg_c;
   lsm6dsox_emb_func_src_t                  emb_func_src;
   lsm6dsox_emb_func_init_a_t               emb_func_init_a;
   lsm6dsox_emb_func_init_b_t               emb_func_init_b;
@@ -1928,7 +1928,7 @@ int32_t lsm6dsox_ln_pg_write_byte(lsm6dsox_ctx_t *ctx, uint16_t address,
                                   uint8_t *val);
 int32_t lsm6dsox_ln_pg_read_byte(lsm6dsox_ctx_t *ctx, uint16_t address,
                                  uint8_t *val);
-                                
+
 int32_t lsm6dsox_ln_pg_write(lsm6dsox_ctx_t *ctx, uint16_t address,
                              uint8_t *buf, uint8_t len);
 int32_t lsm6dsox_ln_pg_read(lsm6dsox_ctx_t *ctx, uint16_t address,
