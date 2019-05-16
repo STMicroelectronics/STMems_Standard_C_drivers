@@ -6983,7 +6983,7 @@ int32_t lsm6dsr_pedo_sens_get(lsm6dsr_ctx_t *ctx, uint8_t *val)
 }
 
 /**
-  * @brief  Pedometer algorithm working mode.[set] 
+  * @brief  Pedometer algorithm working mode.[set]
   *
   * @param  ctx    read / write interface definitions
   * @param  val    Change the values of:
@@ -7021,7 +7021,7 @@ int32_t lsm6dsr_pedo_mode_set(lsm6dsr_ctx_t *ctx, lsm6dsr_pedo_mode_t val)
     ret = lsm6dsr_mem_bank_set(ctx, LSM6DSR_USER_BANK);
   }
   if(ret == 0){
-    ret = lsm6dsr_ln_pg_read_byte(ctx, LSM6DSR_PEDO_CMD_REG, 
+    ret = lsm6dsr_ln_pg_read_byte(ctx, LSM6DSR_PEDO_CMD_REG,
                                   (uint8_t*)&pedo_cmd_reg);
     pedo_cmd_reg.fp_rejection_en = ((uint8_t)val & 0x01U);
     pedo_cmd_reg.ad_det_en = ((uint8_t)val & 0x02U)>>1;
@@ -7034,7 +7034,7 @@ int32_t lsm6dsr_pedo_mode_set(lsm6dsr_ctx_t *ctx, lsm6dsr_pedo_mode_t val)
 }
 
 /**
-  * @brief  Pedometer algorithm working mode.[get] 
+  * @brief  Pedometer algorithm working mode.[get]
   *
   * @param  ctx    read / write interface definitions
   * @param  val    Get the values of:
@@ -7048,7 +7048,7 @@ int32_t lsm6dsr_pedo_mode_get(lsm6dsr_ctx_t *ctx, lsm6dsr_pedo_mode_t *val)
 {
   lsm6dsr_pedo_cmd_reg_t pedo_cmd_reg;
   int32_t ret;
-  
+
   ret = lsm6dsr_ln_pg_read_byte(ctx, LSM6DSR_PEDO_CMD_REG,
                                 (uint8_t*)&pedo_cmd_reg);
 

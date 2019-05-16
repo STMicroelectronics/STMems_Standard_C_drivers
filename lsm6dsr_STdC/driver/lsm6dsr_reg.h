@@ -2010,14 +2010,14 @@ int32_t lsm6dsr_aux_gy_self_test_get(lsm6dsr_ctx_t *ctx,
                                      lsm6dsr_st_ois_t *val);
 
 typedef enum {
-  LSM6DSR_289Hz = 0,
-  LSM6DSR_258Hz = 1,
-  LSM6DSR_120Hz = 2,
-  LSM6DSR_65Hz2 = 3,
-  LSM6DSR_33Hz2 = 4,
-  LSM6DSR_16Hz6 = 5,
-  LSM6DSR_8Hz30 = 6,
-  LSM6DSR_4Hz15 = 7,
+  LSM6DSR_631Hz = 0,
+  LSM6DSR_295Hz = 1,
+  LSM6DSR_140Hz = 2,
+  LSM6DSR_68Hz2 = 3,
+  LSM6DSR_33Hz6 = 4,
+  LSM6DSR_16Hz7 = 5,
+  LSM6DSR_8Hz3  = 6,
+  LSM6DSR_4Hz11 = 7,
 } lsm6dsr_filter_xl_conf_ois_t;
 int32_t lsm6dsr_aux_xl_bandwidth_set(lsm6dsr_ctx_t *ctx,
                                      lsm6dsr_filter_xl_conf_ois_t val);
