@@ -471,8 +471,8 @@ typedef enum {
   IIS2DLPC_XL_ODR_400Hz          = 0x07,
   IIS2DLPC_XL_ODR_800Hz          = 0x08,
   IIS2DLPC_XL_ODR_1k6Hz          = 0x09,
-  IIS2DLPC_XL_SET_SW_TRIG        = 0x10,  /* Use this only in SINGLE mode */
-  IIS2DLPC_XL_SET_PIN_TRIG       = 0x20,  /* Use this only in SINGLE mode */
+  IIS2DLPC_XL_SET_SW_TRIG        = 0x12,  /* Use this only in SINGLE mode */
+  IIS2DLPC_XL_SET_PIN_TRIG       = 0x22,  /* Use this only in SINGLE mode */
 } iis2dlpc_odr_t;
 int32_t iis2dlpc_data_rate_set(iis2dlpc_ctx_t *ctx, iis2dlpc_odr_t val);
 int32_t iis2dlpc_data_rate_get(iis2dlpc_ctx_t *ctx, iis2dlpc_odr_t *val);
