@@ -3210,32 +3210,32 @@ int32_t lsm6dsr_aux_xl_bandwidth_get(lsm6dsr_ctx_t *ctx,
   ret = lsm6dsr_read_reg(ctx, LSM6DSR_CTRL3_OIS, (uint8_t*)&ctrl3_ois, 1);
 
   switch (ctrl3_ois.filter_xl_conf_ois){
-    case LSM6DSR_289Hz:
-      *val = LSM6DSR_289Hz;
+    case LSM6DSR_631Hz:
+      *val = LSM6DSR_631Hz;
       break;
-    case LSM6DSR_258Hz:
-      *val = LSM6DSR_258Hz;
+    case LSM6DSR_295Hz:
+      *val = LSM6DSR_295Hz;
       break;
-    case LSM6DSR_120Hz:
-      *val = LSM6DSR_120Hz;
+    case LSM6DSR_140Hz:
+      *val = LSM6DSR_140Hz;
       break;
-    case LSM6DSR_65Hz2:
-      *val = LSM6DSR_65Hz2;
+    case LSM6DSR_68Hz2:
+      *val = LSM6DSR_68Hz2;
       break;
-    case LSM6DSR_33Hz2:
-      *val = LSM6DSR_33Hz2;
+    case LSM6DSR_33Hz6:
+      *val = LSM6DSR_33Hz6;
       break;
-    case LSM6DSR_16Hz6:
-      *val = LSM6DSR_16Hz6;
+    case LSM6DSR_16Hz7:
+      *val = LSM6DSR_16Hz7;
       break;
-    case LSM6DSR_8Hz30:
-      *val = LSM6DSR_8Hz30;
+    case LSM6DSR_8Hz3:
+      *val = LSM6DSR_8Hz3;
       break;
-    case LSM6DSR_4Hz15:
-      *val = LSM6DSR_4Hz15;
+    case LSM6DSR_4Hz11:
+      *val = LSM6DSR_4Hz11;
       break;
     default:
-      *val = LSM6DSR_289Hz;
+      *val = LSM6DSR_631Hz;
       break;
   }
   return ret;
