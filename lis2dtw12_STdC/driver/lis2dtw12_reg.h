@@ -470,8 +470,8 @@ typedef enum {
   LIS2DTW12_XL_ODR_400Hz          = 0x07,
   LIS2DTW12_XL_ODR_800Hz          = 0x08,
   LIS2DTW12_XL_ODR_1k6Hz          = 0x09,
-  LIS2DTW12_XL_SET_SW_TRIG        = 0x10,  /* Use this only in SINGLE mode */
-  LIS2DTW12_XL_SET_PIN_TRIG       = 0x20,  /* Use this only in SINGLE mode */
+  LIS2DTW12_XL_SET_SW_TRIG        = 0x12,  /* Use this only in SINGLE mode */
+  LIS2DTW12_XL_SET_PIN_TRIG       = 0x22,  /* Use this only in SINGLE mode */
 } lis2dtw12_odr_t;
 int32_t lis2dtw12_data_rate_set(lis2dtw12_ctx_t *ctx, lis2dtw12_odr_t val);
 int32_t lis2dtw12_data_rate_get(lis2dtw12_ctx_t *ctx, lis2dtw12_odr_t *val);
