@@ -494,7 +494,7 @@ int32_t iis3dwb_xl_full_scale_get(iis3dwb_ctx_t *ctx, iis3dwb_fs_xl_t *val);
 
 typedef enum {
   IIS3DWB_XL_ODR_OFF    = 0,
-  IIS3DWB_XL_ODR_6667Hz = 10,
+  IIS3DWB_XL_ODR_26k7Hz = 5,
 } iis3dwb_odr_xl_t;
 int32_t iis3dwb_xl_data_rate_set(iis3dwb_ctx_t *ctx, iis3dwb_odr_xl_t val);
 int32_t iis3dwb_xl_data_rate_get(iis3dwb_ctx_t *ctx, iis3dwb_odr_xl_t *val);

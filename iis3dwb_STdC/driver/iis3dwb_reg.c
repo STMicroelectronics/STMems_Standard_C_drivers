@@ -244,8 +244,8 @@ int32_t iis3dwb_xl_data_rate_get(iis3dwb_ctx_t *ctx,
     case IIS3DWB_XL_ODR_OFF:
       *val = IIS3DWB_XL_ODR_OFF;
       break;
-    case IIS3DWB_XL_ODR_6667Hz:
-      *val = IIS3DWB_XL_ODR_6667Hz;
+    case IIS3DWB_XL_ODR_26k7Hz:
+      *val = IIS3DWB_XL_ODR_26k7Hz;
       break;
     default:
       *val = IIS3DWB_XL_ODR_OFF;
