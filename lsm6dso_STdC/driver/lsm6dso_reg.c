@@ -231,12 +231,101 @@ int32_t lsm6dso_xl_full_scale_get(lsm6dso_ctx_t *ctx, lsm6dso_fs_xl_t *val)
   */
 int32_t lsm6dso_xl_data_rate_set(lsm6dso_ctx_t *ctx, lsm6dso_odr_xl_t val)
 {
+  lsm6dso_odr_xl_t odr_xl =  val;
+  lsm6dso_emb_fsm_enable_t fsm_enable;
+  lsm6dso_fsm_odr_t fsm_odr;
   lsm6dso_ctrl1_xl_t reg;
   int32_t ret;
 
-  ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL1_XL, (uint8_t*)&reg, 1);
+  /* Check the Finite State Machine data rate constraints */
+  ret =  lsm6dso_fsm_enable_get(ctx, &fsm_enable);
   if (ret == 0) {
-    reg.odr_xl = (uint8_t) val;
+    if ( (fsm_enable.fsm_enable_a.fsm1_en  |
+          fsm_enable.fsm_enable_a.fsm2_en  |
+          fsm_enable.fsm_enable_a.fsm3_en  |
+          fsm_enable.fsm_enable_a.fsm4_en  |
+          fsm_enable.fsm_enable_a.fsm5_en  |
+          fsm_enable.fsm_enable_a.fsm6_en  |
+          fsm_enable.fsm_enable_a.fsm7_en  |
+          fsm_enable.fsm_enable_a.fsm8_en  |
+          fsm_enable.fsm_enable_b.fsm9_en  |
+          fsm_enable.fsm_enable_b.fsm10_en |
+          fsm_enable.fsm_enable_b.fsm11_en |
+          fsm_enable.fsm_enable_b.fsm12_en |
+          fsm_enable.fsm_enable_b.fsm13_en |
+          fsm_enable.fsm_enable_b.fsm14_en |
+          fsm_enable.fsm_enable_b.fsm15_en |
+          fsm_enable.fsm_enable_b.fsm16_en ) == PROPERTY_ENABLE ){
+
+      ret =  lsm6dso_fsm_data_rate_get(ctx, &fsm_odr);
+      if (ret == 0) {
+        switch (fsm_odr) {
+          case LSM6DSO_ODR_FSM_12Hz5:
+
+            if (val == LSM6DSO_XL_ODR_OFF){
+              odr_xl = LSM6DSO_XL_ODR_12Hz5;
+
+            } else {
+              odr_xl = val;
+            }
+            break;
+          case LSM6DSO_ODR_FSM_26Hz:
+
+            if (val == LSM6DSO_XL_ODR_OFF){
+              odr_xl = LSM6DSO_XL_ODR_26Hz;
+
+            } else if (val == LSM6DSO_XL_ODR_12Hz5){
+              odr_xl = LSM6DSO_XL_ODR_26Hz;
+
+            } else {
+              odr_xl = val;
+            }
+            break;
+          case LSM6DSO_ODR_FSM_52Hz:
+
+            if (val == LSM6DSO_XL_ODR_OFF){
+              odr_xl = LSM6DSO_XL_ODR_52Hz;
+
+            } else if (val == LSM6DSO_XL_ODR_12Hz5){
+              odr_xl = LSM6DSO_XL_ODR_52Hz;
+
+            } else if (val == LSM6DSO_XL_ODR_26Hz){
+              odr_xl = LSM6DSO_XL_ODR_52Hz;
+
+            } else {
+              odr_xl = val;
+            }
+            break;
+          case LSM6DSO_ODR_FSM_104Hz:
+
+            if (val == LSM6DSO_XL_ODR_OFF){
+              odr_xl = LSM6DSO_XL_ODR_104Hz;
+
+            } else if (val == LSM6DSO_XL_ODR_12Hz5){
+              odr_xl = LSM6DSO_XL_ODR_104Hz;
+
+            } else if (val == LSM6DSO_XL_ODR_26Hz){
+              odr_xl = LSM6DSO_XL_ODR_104Hz;
+
+            } else if (val == LSM6DSO_XL_ODR_52Hz){
+              odr_xl = LSM6DSO_XL_ODR_104Hz;
+
+            } else {
+              odr_xl = val;
+            }
+            break;
+          default:
+            odr_xl = val;
+            break;
+        }
+      }
+    }
+  }
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL1_XL, (uint8_t*)&reg, 1);
+  }
+  if (ret == 0) {
+    reg.odr_xl = (uint8_t) odr_xl;
     ret = lsm6dso_write_reg(ctx, LSM6DSO_CTRL1_XL, (uint8_t*)&reg, 1);
   }
   return ret;
@@ -367,12 +456,102 @@ int32_t lsm6dso_gy_full_scale_get(lsm6dso_ctx_t *ctx, lsm6dso_fs_g_t *val)
   */
 int32_t lsm6dso_gy_data_rate_set(lsm6dso_ctx_t *ctx, lsm6dso_odr_g_t val)
 {
+  lsm6dso_odr_g_t odr_gy =  val;
+  lsm6dso_emb_fsm_enable_t fsm_enable;
+  lsm6dso_fsm_odr_t fsm_odr;
   lsm6dso_ctrl2_g_t reg;
   int32_t ret;
 
-  ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL2_G, (uint8_t*)&reg, 1);
+  /* Check the Finite State Machine data rate constraints */
+  ret =  lsm6dso_fsm_enable_get(ctx, &fsm_enable);
   if (ret == 0) {
-    reg.odr_g = (uint8_t) val;
+    if ( (fsm_enable.fsm_enable_a.fsm1_en  |
+          fsm_enable.fsm_enable_a.fsm2_en  |
+          fsm_enable.fsm_enable_a.fsm3_en  |
+          fsm_enable.fsm_enable_a.fsm4_en  |
+          fsm_enable.fsm_enable_a.fsm5_en  |
+          fsm_enable.fsm_enable_a.fsm6_en  |
+          fsm_enable.fsm_enable_a.fsm7_en  |
+          fsm_enable.fsm_enable_a.fsm8_en  |
+          fsm_enable.fsm_enable_b.fsm9_en  |
+          fsm_enable.fsm_enable_b.fsm10_en |
+          fsm_enable.fsm_enable_b.fsm11_en |
+          fsm_enable.fsm_enable_b.fsm12_en |
+          fsm_enable.fsm_enable_b.fsm13_en |
+          fsm_enable.fsm_enable_b.fsm14_en |
+          fsm_enable.fsm_enable_b.fsm15_en |
+          fsm_enable.fsm_enable_b.fsm16_en ) == PROPERTY_ENABLE ){
+
+      ret =  lsm6dso_fsm_data_rate_get(ctx, &fsm_odr);
+      if (ret == 0) {
+        switch (fsm_odr) {
+          case LSM6DSO_ODR_FSM_12Hz5:
+
+            if (val == LSM6DSO_GY_ODR_OFF){
+              odr_gy = LSM6DSO_GY_ODR_12Hz5;
+
+            } else {
+              odr_gy = val;
+            }
+            break;
+          case LSM6DSO_ODR_FSM_26Hz:
+
+            if (val == LSM6DSO_GY_ODR_OFF){
+              odr_gy = LSM6DSO_GY_ODR_26Hz;
+
+            } else if (val == LSM6DSO_GY_ODR_12Hz5){
+              odr_gy = LSM6DSO_GY_ODR_26Hz;
+
+            } else {
+              odr_gy = val;
+            }
+            break;
+          case LSM6DSO_ODR_FSM_52Hz:
+
+            if (val == LSM6DSO_GY_ODR_OFF){
+              odr_gy = LSM6DSO_GY_ODR_52Hz;
+
+            } else if (val == LSM6DSO_GY_ODR_12Hz5){
+              odr_gy = LSM6DSO_GY_ODR_52Hz;
+
+            } else if (val == LSM6DSO_GY_ODR_26Hz){
+              odr_gy = LSM6DSO_GY_ODR_52Hz;
+
+            } else {
+              odr_gy = val;
+            }
+            break;
+          case LSM6DSO_ODR_FSM_104Hz:
+
+            if (val == LSM6DSO_GY_ODR_OFF){
+              odr_gy = LSM6DSO_GY_ODR_104Hz;
+
+            } else if (val == LSM6DSO_GY_ODR_12Hz5){
+              odr_gy = LSM6DSO_GY_ODR_104Hz;
+
+            } else if (val == LSM6DSO_GY_ODR_26Hz){
+              odr_gy = LSM6DSO_GY_ODR_104Hz;
+
+            } else if (val == LSM6DSO_GY_ODR_52Hz){
+              odr_gy = LSM6DSO_GY_ODR_104Hz;
+
+            } else {
+              odr_gy = val;
+            }
+            break;
+          default:
+            odr_gy = val;
+            break;
+        }
+      }
+    }
+  }
+
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL2_G, (uint8_t*)&reg, 1);
+  }
+  if (ret == 0) {
+    reg.odr_g = (uint8_t) odr_gy;
     ret = lsm6dso_write_reg(ctx, LSM6DSO_CTRL2_G, (uint8_t*)&reg, 1);
   }
 
@@ -7608,7 +7787,7 @@ int32_t lsm6dso_mag_x_orient_get(lsm6dso_ctx_t *ctx,
   */
 
 /**
-  * @defgroup  LSM6DSO_significant_motion
+  * @defgroup  LSM6DSO_finite_state_machine
   * @brief     This section groups all the functions that manage the
   *            state_machine.
   * @{
