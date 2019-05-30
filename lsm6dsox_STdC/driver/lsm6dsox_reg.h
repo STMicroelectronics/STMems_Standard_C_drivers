@@ -1659,7 +1659,7 @@ typedef union{
   lsm6dsox_fsm_status_a_t                  fsm_status_a;
   lsm6dsox_fsm_status_b_t                  fsm_status_b;
   lsm6dsox_page_rw_t                       page_rw;
-  lsm6dsox_emb_func_fifo_cfg_t	           emb_func_fifo_cfg;
+  lsm6dsox_emb_func_fifo_cfg_t             emb_func_fifo_cfg;
   lsm6dsox_fsm_enable_a_t                  fsm_enable_a;
   lsm6dsox_fsm_enable_b_t                  fsm_enable_b;
   lsm6dsox_fsm_long_counter_clear_t        fsm_long_counter_clear;
@@ -2454,7 +2454,7 @@ int32_t lsm6dsox_fifo_stop_on_wtm_set(lsm6dsox_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsox_fifo_stop_on_wtm_get(lsm6dsox_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
-  LSM6DSOX_XL_NOT_BATCHED     	=  0,
+  LSM6DSOX_XL_NOT_BATCHED       =  0,
   LSM6DSOX_XL_BATCHED_AT_12Hz5   =  1,
   LSM6DSOX_XL_BATCHED_AT_26Hz    =  2,
   LSM6DSOX_XL_BATCHED_AT_52Hz    =  3,
@@ -2526,7 +2526,7 @@ typedef enum {
 } lsm6dsox_trig_counter_bdr_t;
 
 typedef enum {
-  LSM6DSOX_GYRO_NC_TAG		= 1,
+  LSM6DSOX_GYRO_NC_TAG    = 1,
   LSM6DSOX_XL_NC_TAG,
   LSM6DSOX_TEMPERATURE_TAG,
   LSM6DSOX_TIMESTAMP_TAG,
@@ -2547,7 +2547,7 @@ typedef enum {
   LSM6DSOX_GAME_ROTATION_TAG,
   LSM6DSOX_GEOMAG_ROTATION_TAG,
   LSM6DSOX_ROTATION_TAG,
-  LSM6DSOX_SENSORHUB_NACK_TAG	= 0x19,
+  LSM6DSOX_SENSORHUB_NACK_TAG  = 0x19,
 } lsm6dsox_fifo_tag_t;
 int32_t lsm6dsox_fifo_cnt_event_batch_set(lsm6dsox_ctx_t *ctx,
                                           lsm6dsox_trig_counter_bdr_t val);
@@ -2574,7 +2574,7 @@ int32_t lsm6dsox_fifo_ovr_flag_get(lsm6dsox_ctx_t *ctx, uint8_t *val);
 int32_t lsm6dsox_fifo_wtm_flag_get(lsm6dsox_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm6dsox_fifo_sensor_tag_get(lsm6dsox_ctx_t *ctx,
-				    lsm6dsox_fifo_tag_t *val);
+            lsm6dsox_fifo_tag_t *val);
 
 int32_t lsm6dsox_fifo_pedo_batch_set(lsm6dsox_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsox_fifo_pedo_batch_get(lsm6dsox_ctx_t *ctx, uint8_t *val);
