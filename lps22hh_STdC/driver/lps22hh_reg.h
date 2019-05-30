@@ -317,8 +317,8 @@ int32_t lps22hh_read_reg(lps22hh_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lps22hh_write_reg(lps22hh_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
-extern float lps22hh_from_lsb_to_hpa(int32_t lsb);
-extern float lps22hh_from_lsb_to_celsius(int16_t lsb);
+extern float_t lps22hh_from_lsb_to_hpa(int32_t lsb);
+extern float_t lps22hh_from_lsb_to_celsius(int16_t lsb);
 
 int32_t lps22hh_autozero_rst_set(lps22hh_ctx_t *ctx, uint8_t val);
 int32_t lps22hh_autozero_rst_get(lps22hh_ctx_t *ctx, uint8_t *val);
