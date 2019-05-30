@@ -294,7 +294,7 @@ int32_t lps22hb_read_reg(lps22hb_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lps22hb_write_reg(lps22hb_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
-extern float_t lps22hb_from_lsb_to_hpa(uint32_t lsb);
+extern float_t lps22hb_from_lsb_to_hpa(int32_t lsb);
 extern float_t lps22hb_from_lsb_to_degc(int16_t lsb);
 
 int32_t lps22hb_autozero_rst_set(lps22hb_ctx_t *ctx, uint8_t val);

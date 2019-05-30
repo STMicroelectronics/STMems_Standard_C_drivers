@@ -100,7 +100,7 @@ int32_t lps22hb_write_reg(lps22hb_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-float_t lps22hb_from_lsb_to_hpa(uint32_t lsb)
+float_t lps22hb_from_lsb_to_hpa(int32_t lsb)
 {
   return ( (float_t)lsb / 4096.0f );
 }
