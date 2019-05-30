@@ -64,7 +64,7 @@
   *
   */
 int32_t ism330dhcx_read_reg(ism330dhcx_ctx_t* ctx, uint8_t reg, uint8_t* data,
-                           uint16_t len)
+                            uint16_t len)
 {
   int32_t ret;
   ret = ctx->read_reg(ctx->handle, reg, data, len);
@@ -82,7 +82,7 @@ int32_t ism330dhcx_read_reg(ism330dhcx_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 int32_t ism330dhcx_write_reg(ism330dhcx_ctx_t* ctx, uint8_t reg, uint8_t* data,
-                            uint16_t len)
+                             uint16_t len)
 {
   int32_t ret;
   ret = ctx->write_reg(ctx->handle, reg, data, len);
@@ -183,7 +183,7 @@ float_t ism330dhcx_from_lsb_to_nsec(int32_t lsb)
   *
   */
 int32_t ism330dhcx_xl_full_scale_set(ism330dhcx_ctx_t *ctx,
-                                    ism330dhcx_fs_xl_t val)
+                                     ism330dhcx_fs_xl_t val)
 {
   ism330dhcx_ctrl1_xl_t ctrl1_xl;
   int32_t ret;
@@ -192,7 +192,7 @@ int32_t ism330dhcx_xl_full_scale_set(ism330dhcx_ctx_t *ctx,
   if(ret == 0){
     ctrl1_xl.fs_xl = (uint8_t)val;
     ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL1_XL,
-                              (uint8_t*)&ctrl1_xl, 1);
+                               (uint8_t*)&ctrl1_xl, 1);
   }
   return ret;
 }
@@ -206,7 +206,7 @@ int32_t ism330dhcx_xl_full_scale_set(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_xl_full_scale_get(ism330dhcx_ctx_t *ctx,
-                                    ism330dhcx_fs_xl_t *val)
+                                     ism330dhcx_fs_xl_t *val)
 {
   ism330dhcx_ctrl1_xl_t ctrl1_xl;
   int32_t ret;
@@ -241,16 +241,176 @@ int32_t ism330dhcx_xl_full_scale_get(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_xl_data_rate_set(ism330dhcx_ctx_t *ctx,
-                                   ism330dhcx_odr_xl_t val)
+                                    ism330dhcx_odr_xl_t val)
 {
+  ism330dhcx_odr_xl_t odr_xl =  val;
+  ism330dhcx_emb_fsm_enable_t fsm_enable;
+  ism330dhcx_fsm_odr_t fsm_odr;
+  uint8_t mlc_enable;
+  ism330dhcx_mlc_odr_t mlc_odr;
   ism330dhcx_ctrl1_xl_t ctrl1_xl;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL1_XL, (uint8_t*)&ctrl1_xl, 1);
+  /* Check the Finite State Machine data rate constraints */
+  ret =  ism330dhcx_fsm_enable_get(ctx, &fsm_enable);
+  if (ret == 0) {
+    if ( (fsm_enable.fsm_enable_a.fsm1_en  |
+          fsm_enable.fsm_enable_a.fsm2_en  |
+          fsm_enable.fsm_enable_a.fsm3_en  |
+          fsm_enable.fsm_enable_a.fsm4_en  |
+          fsm_enable.fsm_enable_a.fsm5_en  |
+          fsm_enable.fsm_enable_a.fsm6_en  |
+          fsm_enable.fsm_enable_a.fsm7_en  |
+          fsm_enable.fsm_enable_a.fsm8_en  |
+          fsm_enable.fsm_enable_b.fsm9_en  |
+          fsm_enable.fsm_enable_b.fsm10_en |
+          fsm_enable.fsm_enable_b.fsm11_en |
+          fsm_enable.fsm_enable_b.fsm12_en |
+          fsm_enable.fsm_enable_b.fsm13_en |
+          fsm_enable.fsm_enable_b.fsm14_en |
+          fsm_enable.fsm_enable_b.fsm15_en |
+          fsm_enable.fsm_enable_b.fsm16_en ) == PROPERTY_ENABLE ){
+
+      ret =  ism330dhcx_fsm_data_rate_get(ctx, &fsm_odr);
+      if (ret == 0) {
+        switch (fsm_odr) {
+          case ISM330DHCX_ODR_FSM_12Hz5:
+
+            if (val == ISM330DHCX_XL_ODR_OFF){
+              odr_xl = ISM330DHCX_XL_ODR_12Hz5;
+
+            } else {
+              odr_xl = val;
+            }
+            break;
+          case ISM330DHCX_ODR_FSM_26Hz:
+
+            if (val == ISM330DHCX_XL_ODR_OFF){
+              odr_xl = ISM330DHCX_XL_ODR_26Hz;
+
+            } else if (val == ISM330DHCX_XL_ODR_12Hz5){
+              odr_xl = ISM330DHCX_XL_ODR_26Hz;
+
+            } else {
+              odr_xl = val;
+            }
+            break;
+          case ISM330DHCX_ODR_FSM_52Hz:
+
+            if (val == ISM330DHCX_XL_ODR_OFF){
+              odr_xl = ISM330DHCX_XL_ODR_52Hz;
+
+            } else if (val == ISM330DHCX_XL_ODR_12Hz5){
+              odr_xl = ISM330DHCX_XL_ODR_52Hz;
+
+            } else if (val == ISM330DHCX_XL_ODR_26Hz){
+              odr_xl = ISM330DHCX_XL_ODR_52Hz;
+
+            } else {
+              odr_xl = val;
+            }
+            break;
+          case ISM330DHCX_ODR_FSM_104Hz:
+
+            if (val == ISM330DHCX_XL_ODR_OFF){
+              odr_xl = ISM330DHCX_XL_ODR_104Hz;
+
+            } else if (val == ISM330DHCX_XL_ODR_12Hz5){
+              odr_xl = ISM330DHCX_XL_ODR_104Hz;
+
+            } else if (val == ISM330DHCX_XL_ODR_26Hz){
+              odr_xl = ISM330DHCX_XL_ODR_104Hz;
+
+            } else if (val == ISM330DHCX_XL_ODR_52Hz){
+              odr_xl = ISM330DHCX_XL_ODR_104Hz;
+
+            } else {
+              odr_xl = val;
+            }
+            break;
+          default:
+            odr_xl = val;
+            break;
+        }
+      }
+    }
+  }
+
+  /* Check the Machine Learning Core data rate constraints */
+  if (ret == 0) {
+    ret =  ism330dhcx_mlc_get(ctx, &mlc_enable);
+    if ( mlc_enable == PROPERTY_ENABLE ){
+
+      ret =  ism330dhcx_mlc_data_rate_get(ctx, &mlc_odr);
+      if (ret == 0) {
+        switch (mlc_odr) {
+          case ISM330DHCX_ODR_PRGS_12Hz5:
+
+            if (val == ISM330DHCX_XL_ODR_OFF){
+              odr_xl = ISM330DHCX_XL_ODR_12Hz5;
+
+            } else {
+              odr_xl = val;
+            }
+            break;
+          case ISM330DHCX_ODR_PRGS_26Hz:
+            if (val == ISM330DHCX_XL_ODR_OFF){
+              odr_xl = ISM330DHCX_XL_ODR_26Hz;
+
+            } else if (val == ISM330DHCX_XL_ODR_12Hz5){
+              odr_xl = ISM330DHCX_XL_ODR_26Hz;
+
+            } else {
+              odr_xl = val;
+            }
+            break;
+          case ISM330DHCX_ODR_PRGS_52Hz:
+
+            if (val == ISM330DHCX_XL_ODR_OFF){
+              odr_xl = ISM330DHCX_XL_ODR_52Hz;
+
+            } else if (val == ISM330DHCX_XL_ODR_12Hz5){
+              odr_xl = ISM330DHCX_XL_ODR_52Hz;
+
+            } else if (val == ISM330DHCX_XL_ODR_26Hz){
+              odr_xl = ISM330DHCX_XL_ODR_52Hz;
+
+            } else {
+              odr_xl = val;
+            }
+            break;
+          case ISM330DHCX_ODR_PRGS_104Hz:
+            if (val == ISM330DHCX_XL_ODR_OFF){
+              odr_xl = ISM330DHCX_XL_ODR_104Hz;
+
+            } else if (val == ISM330DHCX_XL_ODR_12Hz5){
+              odr_xl = ISM330DHCX_XL_ODR_104Hz;
+
+            } else if (val == ISM330DHCX_XL_ODR_26Hz){
+              odr_xl = ISM330DHCX_XL_ODR_104Hz;
+
+            } else if (val == ISM330DHCX_XL_ODR_52Hz){
+              odr_xl = ISM330DHCX_XL_ODR_104Hz;
+
+            } else {
+              odr_xl = val;
+            }
+            break;
+          default:
+            odr_xl = val;
+            break;
+        }
+      }
+    }
+  }
   if(ret == 0){
-    ctrl1_xl.odr_xl= (uint8_t)val;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL1_XL,
+    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL1_XL,
                               (uint8_t*)&ctrl1_xl, 1);
+  }
+  if(ret == 0){
+    ctrl1_xl.odr_xl= (uint8_t)odr_xl;
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL1_XL,
+                               (uint8_t*)&ctrl1_xl, 1);
   }
   return ret;
 }
@@ -323,7 +483,7 @@ int32_t ism330dhcx_xl_data_rate_get(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_gy_full_scale_set(ism330dhcx_ctx_t *ctx,
-                                    ism330dhcx_fs_g_t val)
+                                     ism330dhcx_fs_g_t val)
 {
   ism330dhcx_ctrl2_g_t ctrl2_g;
   int32_t ret;
@@ -345,7 +505,7 @@ int32_t ism330dhcx_gy_full_scale_set(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_gy_full_scale_get(ism330dhcx_ctx_t *ctx,
-                                    ism330dhcx_fs_g_t *val)
+                                     ism330dhcx_fs_g_t *val)
 {
   ism330dhcx_ctrl2_g_t ctrl2_g;
   int32_t ret;
@@ -386,14 +546,175 @@ int32_t ism330dhcx_gy_full_scale_get(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_gy_data_rate_set(ism330dhcx_ctx_t *ctx,
-                                   ism330dhcx_odr_g_t val)
+                                    ism330dhcx_odr_g_t val)
 {
+  ism330dhcx_odr_g_t odr_gy =  val;
+  ism330dhcx_emb_fsm_enable_t fsm_enable;
+  ism330dhcx_fsm_odr_t fsm_odr;
+  uint8_t mlc_enable;
+  ism330dhcx_mlc_odr_t mlc_odr;
   ism330dhcx_ctrl2_g_t ctrl2_g;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL2_G, (uint8_t*)&ctrl2_g, 1);
+  /* Check the Finite State Machine data rate constraints */
+  ret =  ism330dhcx_fsm_enable_get(ctx, &fsm_enable);
+  if (ret == 0) {
+    if ( (fsm_enable.fsm_enable_a.fsm1_en  |
+          fsm_enable.fsm_enable_a.fsm2_en  |
+          fsm_enable.fsm_enable_a.fsm3_en  |
+          fsm_enable.fsm_enable_a.fsm4_en  |
+          fsm_enable.fsm_enable_a.fsm5_en  |
+          fsm_enable.fsm_enable_a.fsm6_en  |
+          fsm_enable.fsm_enable_a.fsm7_en  |
+          fsm_enable.fsm_enable_a.fsm8_en  |
+          fsm_enable.fsm_enable_b.fsm9_en  |
+          fsm_enable.fsm_enable_b.fsm10_en |
+          fsm_enable.fsm_enable_b.fsm11_en |
+          fsm_enable.fsm_enable_b.fsm12_en |
+          fsm_enable.fsm_enable_b.fsm13_en |
+          fsm_enable.fsm_enable_b.fsm14_en |
+          fsm_enable.fsm_enable_b.fsm15_en |
+          fsm_enable.fsm_enable_b.fsm16_en ) == PROPERTY_ENABLE ){
+
+      ret =  ism330dhcx_fsm_data_rate_get(ctx, &fsm_odr);
+      if (ret == 0) {
+        switch (fsm_odr) {
+          case ISM330DHCX_ODR_FSM_12Hz5:
+
+            if (val == ISM330DHCX_GY_ODR_OFF){
+              odr_gy = ISM330DHCX_GY_ODR_12Hz5;
+
+            } else {
+              odr_gy = val;
+            }
+            break;
+          case ISM330DHCX_ODR_FSM_26Hz:
+
+            if (val == ISM330DHCX_GY_ODR_OFF){
+              odr_gy = ISM330DHCX_GY_ODR_26Hz;
+
+            } else if (val == ISM330DHCX_GY_ODR_12Hz5){
+              odr_gy = ISM330DHCX_GY_ODR_26Hz;
+
+            } else {
+              odr_gy = val;
+            }
+            break;
+          case ISM330DHCX_ODR_FSM_52Hz:
+
+            if (val == ISM330DHCX_GY_ODR_OFF){
+              odr_gy = ISM330DHCX_GY_ODR_52Hz;
+
+            } else if (val == ISM330DHCX_GY_ODR_12Hz5){
+              odr_gy = ISM330DHCX_GY_ODR_52Hz;
+
+            } else if (val == ISM330DHCX_GY_ODR_26Hz){
+              odr_gy = ISM330DHCX_GY_ODR_52Hz;
+
+            } else {
+              odr_gy = val;
+            }
+            break;
+          case ISM330DHCX_ODR_FSM_104Hz:
+
+            if (val == ISM330DHCX_GY_ODR_OFF){
+              odr_gy = ISM330DHCX_GY_ODR_104Hz;
+
+            } else if (val == ISM330DHCX_GY_ODR_12Hz5){
+              odr_gy = ISM330DHCX_GY_ODR_104Hz;
+
+            } else if (val == ISM330DHCX_GY_ODR_26Hz){
+              odr_gy = ISM330DHCX_GY_ODR_104Hz;
+
+            } else if (val == ISM330DHCX_GY_ODR_52Hz){
+              odr_gy = ISM330DHCX_GY_ODR_104Hz;
+
+            } else {
+              odr_gy = val;
+            }
+            break;
+          default:
+            odr_gy = val;
+            break;
+        }
+      }
+    }
+  }
+
+  /* Check the Machine Learning Core data rate constraints */
+  if (ret == 0) {
+    ret =  ism330dhcx_mlc_get(ctx, &mlc_enable);
+    if ( mlc_enable == PROPERTY_ENABLE ){
+
+      ret =  ism330dhcx_mlc_data_rate_get(ctx, &mlc_odr);
+      if (ret == 0) {
+        switch (mlc_odr) {
+          case ISM330DHCX_ODR_PRGS_12Hz5:
+
+            if (val == ISM330DHCX_GY_ODR_OFF){
+              odr_gy = ISM330DHCX_GY_ODR_12Hz5;
+
+            } else {
+              odr_gy = val;
+            }
+            break;
+          case ISM330DHCX_ODR_PRGS_26Hz:
+
+            if (val == ISM330DHCX_GY_ODR_OFF){
+              odr_gy = ISM330DHCX_GY_ODR_26Hz;
+
+            } else if (val == ISM330DHCX_GY_ODR_12Hz5){
+              odr_gy = ISM330DHCX_GY_ODR_26Hz;
+
+            } else {
+              odr_gy = val;
+            }
+            break;
+          case ISM330DHCX_ODR_PRGS_52Hz:
+
+            if (val == ISM330DHCX_GY_ODR_OFF){
+              odr_gy = ISM330DHCX_GY_ODR_52Hz;
+
+            } else if (val == ISM330DHCX_GY_ODR_12Hz5){
+              odr_gy = ISM330DHCX_GY_ODR_52Hz;
+
+            } else if (val == ISM330DHCX_GY_ODR_26Hz){
+              odr_gy = ISM330DHCX_GY_ODR_52Hz;
+
+            } else {
+              odr_gy = val;
+            }
+            break;
+          case ISM330DHCX_ODR_PRGS_104Hz:
+
+            if (val == ISM330DHCX_GY_ODR_OFF){
+              odr_gy = ISM330DHCX_GY_ODR_104Hz;
+
+            } else if (val == ISM330DHCX_GY_ODR_12Hz5){
+              odr_gy = ISM330DHCX_GY_ODR_104Hz;
+
+            } else if (val == ISM330DHCX_GY_ODR_26Hz){
+              odr_gy = ISM330DHCX_GY_ODR_104Hz;
+
+            } else if (val == ISM330DHCX_GY_ODR_52Hz){
+              odr_gy = ISM330DHCX_GY_ODR_104Hz;
+
+            } else {
+              odr_gy = val;
+            }
+            break;
+          default:
+            odr_gy = val;
+            break;
+        }
+      }
+    }
+  }
+  if (ret == 0) {
+    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL2_G, (uint8_t*)&ctrl2_g, 1);
+  }
   if(ret == 0){
-   ctrl2_g.odr_g= (uint8_t)val;
+   ctrl2_g.odr_g= (uint8_t)odr_gy;
    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL2_G, (uint8_t*)&ctrl2_g, 1);
   }
   return ret;
@@ -408,7 +729,7 @@ int32_t ism330dhcx_gy_data_rate_set(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_gy_data_rate_get(ism330dhcx_ctx_t *ctx,
-                                   ism330dhcx_odr_g_t *val)
+                                    ism330dhcx_odr_g_t *val)
 {
   ism330dhcx_ctrl2_g_t ctrl2_g;
   int32_t ret;
@@ -505,7 +826,7 @@ int32_t ism330dhcx_block_data_update_get(ism330dhcx_ctx_t *ctx, uint8_t *val)
   *
   */
 int32_t ism330dhcx_xl_offset_weight_set(ism330dhcx_ctx_t *ctx,
-                                     ism330dhcx_usr_off_w_t val)
+                                        ism330dhcx_usr_off_w_t val)
 {
   ism330dhcx_ctrl6_c_t ctrl6_c;
   int32_t ret;
@@ -528,7 +849,7 @@ int32_t ism330dhcx_xl_offset_weight_set(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_xl_offset_weight_get(ism330dhcx_ctx_t *ctx,
-                                       ism330dhcx_usr_off_w_t *val)
+                                        ism330dhcx_usr_off_w_t *val)
 {
   ism330dhcx_ctrl6_c_t ctrl6_c;
   int32_t ret;
@@ -558,7 +879,7 @@ int32_t ism330dhcx_xl_offset_weight_get(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_xl_power_mode_set(ism330dhcx_ctx_t *ctx,
-                                    ism330dhcx_xl_hm_mode_t val)
+                                     ism330dhcx_xl_hm_mode_t val)
 {
   ism330dhcx_ctrl6_c_t ctrl6_c;
   int32_t ret;
@@ -580,7 +901,7 @@ int32_t ism330dhcx_xl_power_mode_set(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_xl_power_mode_get(ism330dhcx_ctx_t *ctx,
-                                    ism330dhcx_xl_hm_mode_t *val)
+                                     ism330dhcx_xl_hm_mode_t *val)
 {
   ism330dhcx_ctrl6_c_t ctrl6_c;
   int32_t ret;
@@ -609,7 +930,7 @@ int32_t ism330dhcx_xl_power_mode_get(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_gy_power_mode_set(ism330dhcx_ctx_t *ctx,
-                                    ism330dhcx_g_hm_mode_t val)
+                                     ism330dhcx_g_hm_mode_t val)
 {
   ism330dhcx_ctrl7_g_t ctrl7_g;
   int32_t ret;
@@ -631,7 +952,7 @@ int32_t ism330dhcx_gy_power_mode_set(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_gy_power_mode_get(ism330dhcx_ctx_t *ctx,
-                                    ism330dhcx_g_hm_mode_t *val)
+                                     ism330dhcx_g_hm_mode_t *val)
 {
   ism330dhcx_ctrl7_g_t ctrl7_g;
   int32_t ret;
@@ -662,7 +983,7 @@ int32_t ism330dhcx_gy_power_mode_get(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_all_sources_get(ism330dhcx_ctx_t *ctx,
-                                  ism330dhcx_all_sources_t *val)
+                                   ism330dhcx_all_sources_t *val)
 {
   int32_t ret;
 
@@ -715,7 +1036,7 @@ int32_t ism330dhcx_all_sources_get(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_status_reg_get(ism330dhcx_ctx_t *ctx,
-                                 ism330dhcx_status_reg_t *val)
+                                  ism330dhcx_status_reg_t *val)
 {
   int32_t ret;
   ret = ism330dhcx_read_reg(ctx, ISM330DHCX_STATUS_REG, (uint8_t*) val, 1);
@@ -770,7 +1091,8 @@ int32_t ism330dhcx_gy_flag_data_ready_get(ism330dhcx_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dhcx_temp_flag_data_ready_get(ism330dhcx_ctx_t *ctx, uint8_t *val)
+int32_t ism330dhcx_temp_flag_data_ready_get(ism330dhcx_ctx_t *ctx,
+                                            uint8_t *val)
 {
   ism330dhcx_status_reg_t status_reg;
   int32_t ret;
@@ -900,7 +1222,8 @@ int32_t ism330dhcx_xl_usr_offset_set(ism330dhcx_ctx_t *ctx, uint8_t val)
   ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL7_G, (uint8_t*)&ctrl7_g, 1);
   if(ret == 0){
     ctrl7_g.usr_off_on_out= (uint8_t)val;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL7_G, (uint8_t*)&ctrl7_g, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL7_G,
+                               (uint8_t*)&ctrl7_g, 1);
   }
   return ret;
 }
@@ -1016,7 +1339,7 @@ int32_t ism330dhcx_timestamp_raw_get(ism330dhcx_ctx_t *ctx, uint8_t *buff)
   *
   */
 int32_t ism330dhcx_rounding_mode_set(ism330dhcx_ctx_t *ctx,
-                                    ism330dhcx_rounding_t val)
+                                     ism330dhcx_rounding_t val)
 {
   ism330dhcx_ctrl5_c_t ctrl5_c;
   int32_t ret;
@@ -1024,7 +1347,8 @@ int32_t ism330dhcx_rounding_mode_set(ism330dhcx_ctx_t *ctx,
   ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL5_C, (uint8_t*)&ctrl5_c, 1);
   if(ret == 0){
     ctrl5_c.rounding= (uint8_t)val;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL5_C, (uint8_t*)&ctrl5_c, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL5_C,
+                               (uint8_t*)&ctrl5_c, 1);
   }
   return ret;
 }
@@ -1038,7 +1362,7 @@ int32_t ism330dhcx_rounding_mode_set(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_rounding_mode_get(ism330dhcx_ctx_t *ctx,
-                                    ism330dhcx_rounding_t *val)
+                                     ism330dhcx_rounding_t *val)
 {
   ism330dhcx_ctrl5_c_t ctrl5_c;
   int32_t ret;
@@ -1207,11 +1531,11 @@ int32_t ism330dhcx_odr_cal_reg_set(ism330dhcx_ctx_t *ctx, uint8_t val)
   int32_t ret;
 
   ret = ism330dhcx_read_reg(ctx, ISM330DHCX_INTERNAL_FREQ_FINE,
-                           (uint8_t*)&internal_freq_fine, 1);
+                            (uint8_t*)&internal_freq_fine, 1);
   if(ret == 0){
     internal_freq_fine.freq_fine= (uint8_t)val;
     ret = ism330dhcx_write_reg(ctx, ISM330DHCX_INTERNAL_FREQ_FINE,
-                              (uint8_t*)&internal_freq_fine, 1);
+                               (uint8_t*)&internal_freq_fine, 1);
   }
   return ret;
 }
@@ -1232,7 +1556,7 @@ int32_t ism330dhcx_odr_cal_reg_get(ism330dhcx_ctx_t *ctx, uint8_t *val)
   int32_t ret;
 
   ret = ism330dhcx_read_reg(ctx, ISM330DHCX_INTERNAL_FREQ_FINE,
-                           (uint8_t*)&internal_freq_fine, 1);
+                            (uint8_t*)&internal_freq_fine, 1);
   *val = internal_freq_fine.freq_fine;
 
   return ret;
@@ -1248,7 +1572,7 @@ int32_t ism330dhcx_odr_cal_reg_get(ism330dhcx_ctx_t *ctx, uint8_t *val)
   *
   */
 int32_t ism330dhcx_mem_bank_set(ism330dhcx_ctx_t *ctx,
-                               ism330dhcx_reg_access_t val)
+                                ism330dhcx_reg_access_t val)
 {
   ism330dhcx_func_cfg_access_t func_cfg_access;
   int32_t ret;
@@ -1323,7 +1647,8 @@ int32_t ism330dhcx_ln_pg_write_byte(ism330dhcx_ctx_t *ctx, uint16_t add,
     ret = ism330dhcx_write_reg(ctx, ISM330DHCX_PAGE_RW, (uint8_t*)&page_rw, 1);
   }
   if(ret == 0){
-    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_PAGE_SEL, (uint8_t*)&page_sel, 1);
+    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_PAGE_SEL,
+                              (uint8_t*)&page_sel, 1);
   }
   if(ret == 0){
     page_sel.page_sel = (uint8_t)((add >> 8) & 0x0FU);
@@ -1340,11 +1665,13 @@ int32_t ism330dhcx_ln_pg_write_byte(ism330dhcx_ctx_t *ctx, uint16_t add,
     ret = ism330dhcx_write_reg(ctx, ISM330DHCX_PAGE_VALUE, val, 1);
   }
   if(ret == 0){
-    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_PAGE_RW, (uint8_t*)&page_rw, 1);
+    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_PAGE_RW,
+                              (uint8_t*)&page_rw, 1);
   }
   if(ret == 0){
     page_rw.page_rw = 0x00; /* page_write disable */
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_PAGE_RW, (uint8_t*)&page_rw, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_PAGE_RW,
+                               (uint8_t*)&page_rw, 1);
   }
   if(ret == 0){
     ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_USER_BANK);
@@ -1363,7 +1690,7 @@ int32_t ism330dhcx_ln_pg_write_byte(ism330dhcx_ctx_t *ctx, uint16_t add,
   *
   */
 int32_t ism330dhcx_ln_pg_write(ism330dhcx_ctx_t *ctx, uint16_t add,
-                              uint8_t *buf, uint8_t len)
+                               uint8_t *buf, uint8_t len)
 {
   ism330dhcx_page_rw_t page_rw;
   ism330dhcx_page_sel_t page_sel;
@@ -1381,10 +1708,12 @@ int32_t ism330dhcx_ln_pg_write(ism330dhcx_ctx_t *ctx, uint16_t add,
   }
   if(ret == 0){
     page_rw.page_rw = 0x02U; /* page_write enable*/
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_PAGE_RW, (uint8_t*)&page_rw, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_PAGE_RW,
+                               (uint8_t*)&page_rw, 1);
   }
   if(ret == 0){
-    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_PAGE_SEL, (uint8_t*)&page_sel, 1);
+    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_PAGE_SEL,
+                              (uint8_t*)&page_sel, 1);
   }
   if(ret == 0){
     page_sel.page_sel = msb;
@@ -1460,10 +1789,12 @@ int32_t ism330dhcx_ln_pg_read_byte(ism330dhcx_ctx_t *ctx, uint16_t add,
   }
   if(ret == 0){
     page_rw.page_rw = 0x01U; /* page_read enable*/
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_PAGE_RW, (uint8_t*)&page_rw, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_PAGE_RW,
+                               (uint8_t*)&page_rw, 1);
   }
   if(ret == 0){
-    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_PAGE_SEL, (uint8_t*)&page_sel, 1);
+    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_PAGE_SEL,
+                              (uint8_t*)&page_sel, 1);
   }
   if(ret == 0){
     page_sel.page_sel = (uint8_t)((add >> 8) & 0x0FU);
@@ -1579,7 +1910,8 @@ int32_t ism330dhcx_reset_set(ism330dhcx_ctx_t *ctx, uint8_t val)
   ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_C, (uint8_t*)&ctrl3_c, 1);
   if(ret == 0){
     ctrl3_c.sw_reset= (uint8_t)val;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL3_C, (uint8_t*)&ctrl3_c, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL3_C,
+                               (uint8_t*)&ctrl3_c, 1);
   }
   return ret;
 }
@@ -2517,7 +2849,8 @@ int32_t ism330dhcx_aux_gy_flag_data_ready_get(ism330dhcx_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dhcx_aux_gy_flag_settling_get(ism330dhcx_ctx_t *ctx, uint8_t *val)
+int32_t ism330dhcx_aux_gy_flag_settling_get(ism330dhcx_ctx_t *ctx,
+                                            uint8_t *val)
 {
   ism330dhcx_status_spiaux_t status_spiaux;
   int32_t ret;
@@ -2603,7 +2936,8 @@ int32_t ism330dhcx_aux_den_polarity_set(ism330dhcx_ctx_t *ctx,
   ret = ism330dhcx_read_reg(ctx, ISM330DHCX_INT_OIS, (uint8_t*)&int_ois, 1);
   if(ret == 0){
     int_ois.den_lh_ois= (uint8_t)val;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_INT_OIS, (uint8_t*)&int_ois, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_INT_OIS,
+                               (uint8_t*)&int_ois, 1);
   }
   return ret;
 }
@@ -2656,7 +2990,8 @@ int32_t ism330dhcx_aux_den_mode_set(ism330dhcx_ctx_t *ctx,
   ret = ism330dhcx_read_reg(ctx, ISM330DHCX_INT_OIS, (uint8_t*)&int_ois, 1);
   if(ret == 0){
     int_ois.lvl2_ois = (uint8_t)val & 0x01U;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_INT_OIS, (uint8_t*)&int_ois, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_INT_OIS,
+                               (uint8_t*)&int_ois, 1);
   }
   if(ret == 0){
     ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL1_OIS,
@@ -2769,7 +3104,8 @@ int32_t ism330dhcx_aux_mode_set(ism330dhcx_ctx_t *ctx,
   ism330dhcx_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL1_OIS,
+                            (uint8_t*)&ctrl1_ois, 1);
   if(ret == 0){
     ctrl1_ois.ois_en_spi2 = (uint8_t)val & 0x01U;
     ctrl1_ois.mode4_en = ((uint8_t)val & 0x02U) >> 1;
@@ -2794,12 +3130,13 @@ int32_t ism330dhcx_aux_mode_set(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_aux_mode_get(ism330dhcx_ctx_t *ctx,
-                               ism330dhcx_ois_en_spi2_t *val)
+                                ism330dhcx_ois_en_spi2_t *val)
 {
   ism330dhcx_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL1_OIS,
+                            (uint8_t*)&ctrl1_ois, 1);
 
   switch (((ctrl1_ois.mode4_en << 1) + ctrl1_ois.ois_en_spi2)){
     case ISM330DHCX_AUX_DISABLE:
@@ -2832,7 +3169,8 @@ int32_t ism330dhcx_aux_gy_full_scale_set(ism330dhcx_ctx_t *ctx,
   ism330dhcx_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL1_OIS,
+                            (uint8_t*)&ctrl1_ois, 1);
   if(ret == 0){
     ctrl1_ois.fs_g_ois= (uint8_t)val;
     ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL1_OIS,
@@ -2850,13 +3188,13 @@ int32_t ism330dhcx_aux_gy_full_scale_set(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_aux_gy_full_scale_get(ism330dhcx_ctx_t *ctx,
-                                        ism330dhcx_fs_g_ois_t *val)
+                                         ism330dhcx_fs_g_ois_t *val)
 {
   ism330dhcx_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
 
   ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL1_OIS,
-                           (uint8_t*)&ctrl1_ois, 1);
+                            (uint8_t*)&ctrl1_ois, 1);
 
   switch (ctrl1_ois.fs_g_ois){
     case ISM330DHCX_250dps_AUX:
@@ -2895,7 +3233,8 @@ int32_t ism330dhcx_aux_spi_mode_set(ism330dhcx_ctx_t *ctx,
   ism330dhcx_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL1_OIS,
+                            (uint8_t*)&ctrl1_ois, 1);
   if(ret == 0){
     ctrl1_ois.sim_ois= (uint8_t)val;
     ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL1_OIS,
@@ -2918,7 +3257,8 @@ int32_t ism330dhcx_aux_spi_mode_get(ism330dhcx_ctx_t *ctx,
   ism330dhcx_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL1_OIS,
+                            (uint8_t*)&ctrl1_ois, 1);
 
   switch (ctrl1_ois.sim_ois){
     case ISM330DHCX_AUX_SPI_4_WIRE:
@@ -2948,7 +3288,8 @@ int32_t ism330dhcx_aux_gy_lp1_bandwidth_set(ism330dhcx_ctx_t *ctx,
   ism330dhcx_ctrl2_ois_t ctrl2_ois;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL2_OIS,
+                            (uint8_t*)&ctrl2_ois, 1);
   if(ret == 0){
     ctrl2_ois.ftype_ois= (uint8_t)val;
     ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL2_OIS,
@@ -2971,7 +3312,8 @@ int32_t ism330dhcx_aux_gy_lp1_bandwidth_get(ism330dhcx_ctx_t *ctx,
   ism330dhcx_ctrl2_ois_t ctrl2_ois;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL2_OIS,
+                            (uint8_t*)&ctrl2_ois, 1);
 
   switch (ctrl2_ois.ftype_ois){
     case ISM330DHCX_351Hz39:
@@ -3002,12 +3344,13 @@ int32_t ism330dhcx_aux_gy_lp1_bandwidth_get(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_aux_gy_hp_bandwidth_set(ism330dhcx_ctx_t *ctx,
-                                          ism330dhcx_hpm_ois_t val)
+                                           ism330dhcx_hpm_ois_t val)
 {
   ism330dhcx_ctrl2_ois_t ctrl2_ois;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL2_OIS,
+                            (uint8_t*)&ctrl2_ois, 1);
   if(ret == 0){
     ctrl2_ois.hpm_ois = (uint8_t)val & 0x03U;
     ctrl2_ois.hp_en_ois = ((uint8_t)val & 0x10U) >> 4;
@@ -3026,12 +3369,13 @@ int32_t ism330dhcx_aux_gy_hp_bandwidth_set(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_aux_gy_hp_bandwidth_get(ism330dhcx_ctx_t *ctx,
-                                          ism330dhcx_hpm_ois_t *val)
+                                           ism330dhcx_hpm_ois_t *val)
 {
   ism330dhcx_ctrl2_ois_t ctrl2_ois;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL2_OIS,
+                            (uint8_t*)&ctrl2_ois, 1);
 
   switch ((ctrl2_ois.hp_en_ois << 4) + ctrl2_ois.hpm_ois){
     case ISM330DHCX_AUX_HP_DISABLE:
@@ -3067,12 +3411,13 @@ int32_t ism330dhcx_aux_gy_hp_bandwidth_get(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_aux_gy_clamp_set(ism330dhcx_ctx_t *ctx,
-                                   ism330dhcx_st_ois_clampdis_t val)
+                                    ism330dhcx_st_ois_clampdis_t val)
 {
   ism330dhcx_ctrl3_ois_t ctrl3_ois;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_OIS, (uint8_t*)&ctrl3_ois, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_OIS,
+                            (uint8_t*)&ctrl3_ois, 1);
   if(ret == 0){
     ctrl3_ois.st_ois_clampdis= (uint8_t)val;
     ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL3_OIS,
@@ -3097,7 +3442,8 @@ int32_t ism330dhcx_aux_gy_clamp_get(ism330dhcx_ctx_t *ctx,
   ism330dhcx_ctrl3_ois_t ctrl3_ois;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_OIS, (uint8_t*)&ctrl3_ois, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_OIS,
+                            (uint8_t*)&ctrl3_ois, 1);
 
   switch (ctrl3_ois.st_ois_clampdis){
     case ISM330DHCX_ENABLE_CLAMP:
@@ -3127,7 +3473,8 @@ int32_t ism330dhcx_aux_gy_self_test_set(ism330dhcx_ctx_t *ctx,
   ism330dhcx_ctrl3_ois_t ctrl3_ois;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_OIS, (uint8_t*)&ctrl3_ois, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_OIS,
+                            (uint8_t*)&ctrl3_ois, 1);
   if(ret == 0){
     ctrl3_ois.st_ois= (uint8_t)val;
     ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL3_OIS,
@@ -3150,7 +3497,8 @@ int32_t ism330dhcx_aux_gy_self_test_get(ism330dhcx_ctx_t *ctx,
   ism330dhcx_ctrl3_ois_t ctrl3_ois;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_OIS, (uint8_t*)&ctrl3_ois, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_OIS,
+                            (uint8_t*)&ctrl3_ois, 1);
 
   switch (ctrl3_ois.st_ois){
     case ISM330DHCX_AUX_GY_DISABLE:
@@ -3178,12 +3526,13 @@ int32_t ism330dhcx_aux_gy_self_test_get(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_aux_xl_bandwidth_set(ism330dhcx_ctx_t *ctx,
-                                       ism330dhcx_filter_xl_conf_ois_t val)
+                                        ism330dhcx_filter_xl_conf_ois_t val)
 {
   ism330dhcx_ctrl3_ois_t ctrl3_ois;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_OIS, (uint8_t*)&ctrl3_ois, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_OIS,
+                            (uint8_t*)&ctrl3_ois, 1);
   if(ret == 0){
     ctrl3_ois.filter_xl_conf_ois= (uint8_t)val;
     ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL3_OIS,
@@ -3201,12 +3550,13 @@ int32_t ism330dhcx_aux_xl_bandwidth_set(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_aux_xl_bandwidth_get(ism330dhcx_ctx_t *ctx,
-                                       ism330dhcx_filter_xl_conf_ois_t *val)
+                                        ism330dhcx_filter_xl_conf_ois_t *val)
 {
   ism330dhcx_ctrl3_ois_t ctrl3_ois;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_OIS, (uint8_t*)&ctrl3_ois, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_OIS,
+                            (uint8_t*)&ctrl3_ois, 1);
 
   switch (ctrl3_ois.filter_xl_conf_ois){
     case ISM330DHCX_631Hz:
@@ -3254,7 +3604,8 @@ int32_t ism330dhcx_aux_xl_full_scale_set(ism330dhcx_ctx_t *ctx,
   ism330dhcx_ctrl3_ois_t ctrl3_ois;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_OIS, (uint8_t*)&ctrl3_ois, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_OIS,
+                            (uint8_t*)&ctrl3_ois, 1);
   if(ret == 0){
     ctrl3_ois.fs_xl_ois= (uint8_t)val;
     ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL3_OIS,
@@ -3277,7 +3628,8 @@ int32_t ism330dhcx_aux_xl_full_scale_get(ism330dhcx_ctx_t *ctx,
   ism330dhcx_ctrl3_ois_t ctrl3_ois;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_OIS, (uint8_t*)&ctrl3_ois, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_OIS,
+                            (uint8_t*)&ctrl3_ois, 1);
 
   switch (ctrl3_ois.fs_xl_ois){
     case ISM330DHCX_AUX_2g:
@@ -3321,15 +3673,17 @@ int32_t ism330dhcx_aux_xl_full_scale_get(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_sdo_sa0_mode_set(ism330dhcx_ctx_t *ctx,
-                                   ism330dhcx_sdo_pu_en_t val)
+                                    ism330dhcx_sdo_pu_en_t val)
 {
   ism330dhcx_pin_ctrl_t pin_ctrl;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_PIN_CTRL, (uint8_t*)&pin_ctrl, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_PIN_CTRL,
+                            (uint8_t*)&pin_ctrl, 1);
   if(ret == 0){
     pin_ctrl.sdo_pu_en= (uint8_t)val;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_PIN_CTRL, (uint8_t*)&pin_ctrl, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_PIN_CTRL,
+                               (uint8_t*)&pin_ctrl, 1);
   }
   return ret;
 }
@@ -3348,7 +3702,8 @@ int32_t ism330dhcx_sdo_sa0_mode_get(ism330dhcx_ctx_t *ctx,
   ism330dhcx_pin_ctrl_t pin_ctrl;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_PIN_CTRL, (uint8_t*)&pin_ctrl, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_PIN_CTRL,
+                            (uint8_t*)&pin_ctrl, 1);
 
   switch (pin_ctrl.sdo_pu_en){
     case ISM330DHCX_PULL_UP_DISC:
@@ -3380,7 +3735,8 @@ int32_t ism330dhcx_spi_mode_set(ism330dhcx_ctx_t *ctx, ism330dhcx_sim_t val)
   ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_C, (uint8_t*)&ctrl3_c, 1);
   if(ret == 0){
     ctrl3_c.sim= (uint8_t)val;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL3_C, (uint8_t*)&ctrl3_c, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL3_C,
+                               (uint8_t*)&ctrl3_c, 1);
   }
   return ret;
 }
@@ -3431,7 +3787,8 @@ int32_t ism330dhcx_i2c_interface_set(ism330dhcx_ctx_t *ctx,
   ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL4_C, (uint8_t*)&ctrl4_c, 1);
   if(ret == 0){
     ctrl4_c.i2c_disable= (uint8_t)val;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL4_C, (uint8_t*)&ctrl4_c, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL4_C,
+                               (uint8_t*)&ctrl4_c, 1);
   }
   return ret;
 }
@@ -3556,7 +3913,8 @@ int32_t ism330dhcx_pin_int1_route_set(ism330dhcx_ctx_t *ctx,
                               (uint8_t*)&val->md1_cfg, 1);
   }
   if(ret == 0){
-    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_TAP_CFG2, (uint8_t*)&tap_cfg2, 1);
+    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_TAP_CFG2,
+                              (uint8_t*)&tap_cfg2, 1);
     if ((val->int1_ctrl.den_drdy_flag |
          val->int1_ctrl.int1_boot |
          val->int1_ctrl.int1_cnt_bdr |
@@ -3809,7 +4167,8 @@ int32_t ism330dhcx_pin_mode_set(ism330dhcx_ctx_t *ctx, ism330dhcx_pp_od_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dhcx_pin_mode_get(ism330dhcx_ctx_t *ctx, ism330dhcx_pp_od_t *val)
+int32_t ism330dhcx_pin_mode_get(ism330dhcx_ctx_t *ctx,
+                                ism330dhcx_pp_od_t *val)
 {
   ism330dhcx_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -3847,7 +4206,8 @@ int32_t ism330dhcx_pin_polarity_set(ism330dhcx_ctx_t *ctx,
   ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL3_C, (uint8_t*)&ctrl3_c, 1);
   if(ret == 0){
     ctrl3_c.h_lactive= (uint8_t)val;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL3_C, (uint8_t*)&ctrl3_c, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL3_C,
+                               (uint8_t*)&ctrl3_c, 1);
   }
   return ret;
 }
@@ -3898,7 +4258,8 @@ int32_t ism330dhcx_all_on_int1_set(ism330dhcx_ctx_t *ctx, uint8_t val)
   ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL4_C, (uint8_t*)&ctrl4_c, 1);
   if(ret == 0){
     ctrl4_c.int2_on_int1= (uint8_t)val;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL4_C, (uint8_t*)&ctrl4_c, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL4_C,
+                               (uint8_t*)&ctrl4_c, 1);
   }
   return ret;
 }
@@ -3952,7 +4313,8 @@ int32_t ism330dhcx_int_notification_set(ism330dhcx_ctx_t *ctx,
   }
   if(ret == 0){
     page_rw.emb_func_lir = ((uint8_t)val & 0x02U) >> 1;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_PAGE_RW, (uint8_t*)&page_rw, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_PAGE_RW,
+                               (uint8_t*)&page_rw, 1);
   }
   if(ret == 0){
     ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_USER_BANK);
@@ -3976,13 +4338,15 @@ int32_t ism330dhcx_int_notification_get(ism330dhcx_ctx_t *ctx,
   int32_t ret;
 
   *val = ISM330DHCX_ALL_INT_PULSED;
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_TAP_CFG0, (uint8_t*)&tap_cfg0, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_TAP_CFG0,
+                            (uint8_t*)&tap_cfg0, 1);
 
   if(ret == 0){
     ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_EMBEDDED_FUNC_BANK);
   }
   if(ret == 0){
-    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_PAGE_RW, (uint8_t*)&page_rw, 1);
+    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_PAGE_RW,
+                              (uint8_t*)&page_rw, 1);
   }
   if(ret == 0){
     ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_USER_BANK);
@@ -4132,7 +4496,8 @@ int32_t ism330dhcx_wkup_threshold_get(ism330dhcx_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dhcx_xl_usr_offset_on_wkup_set(ism330dhcx_ctx_t *ctx, uint8_t val)
+int32_t ism330dhcx_xl_usr_offset_on_wkup_set(ism330dhcx_ctx_t *ctx,
+                                             uint8_t val)
 {
   ism330dhcx_wake_up_ths_t wake_up_ths;
   int32_t ret;
@@ -4156,7 +4521,7 @@ int32_t ism330dhcx_xl_usr_offset_on_wkup_set(ism330dhcx_ctx_t *ctx, uint8_t val)
   *
   */
 int32_t ism330dhcx_xl_usr_offset_on_wkup_get(ism330dhcx_ctx_t *ctx,
-                                            uint8_t *val)
+                                             uint8_t *val)
 {
   ism330dhcx_wake_up_ths_t wake_up_ths;
   int32_t ret;
@@ -4328,7 +4693,8 @@ int32_t ism330dhcx_act_pin_notification_get(ism330dhcx_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dhcx_act_mode_set(ism330dhcx_ctx_t *ctx, ism330dhcx_inact_en_t val)
+int32_t ism330dhcx_act_mode_set(ism330dhcx_ctx_t *ctx,
+                                ism330dhcx_inact_en_t val)
 {
   ism330dhcx_tap_cfg2_t tap_cfg2;
   int32_t ret;
@@ -4336,7 +4702,8 @@ int32_t ism330dhcx_act_mode_set(ism330dhcx_ctx_t *ctx, ism330dhcx_inact_en_t val
   ret = ism330dhcx_read_reg(ctx, ISM330DHCX_TAP_CFG2, (uint8_t*)&tap_cfg2, 1);
   if(ret == 0){
     tap_cfg2.inact_en= (uint8_t)val;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_TAP_CFG2, (uint8_t*)&tap_cfg2, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_TAP_CFG2,
+                               (uint8_t*)&tap_cfg2, 1);
   }
   return ret;
 }
@@ -4350,7 +4717,7 @@ int32_t ism330dhcx_act_mode_set(ism330dhcx_ctx_t *ctx, ism330dhcx_inact_en_t val
   *
   */
 int32_t ism330dhcx_act_mode_get(ism330dhcx_ctx_t *ctx,
-                               ism330dhcx_inact_en_t *val)
+                                ism330dhcx_inact_en_t *val)
 {
   ism330dhcx_tap_cfg2_t tap_cfg2;
   int32_t ret;
@@ -4614,7 +4981,8 @@ int32_t ism330dhcx_tap_axis_priority_set(ism330dhcx_ctx_t *ctx,
   ret = ism330dhcx_read_reg(ctx, ISM330DHCX_TAP_CFG1, (uint8_t*)&tap_cfg1, 1);
   if(ret == 0){
     tap_cfg1.tap_priority= (uint8_t)val;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_TAP_CFG1, (uint8_t*)&tap_cfg1, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_TAP_CFG1,
+                               (uint8_t*)&tap_cfg1, 1);
   }
   return ret;
 }
@@ -5093,7 +5461,8 @@ int32_t ism330dhcx_ff_threshold_set(ism330dhcx_ctx_t *ctx,
   ism330dhcx_free_fall_t free_fall;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_FREE_FALL, (uint8_t*)&free_fall, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_FREE_FALL,
+                            (uint8_t*)&free_fall, 1);
   if(ret == 0){
     free_fall.ff_ths= (uint8_t)val;
     ret = ism330dhcx_write_reg(ctx, ISM330DHCX_FREE_FALL,
@@ -5116,7 +5485,8 @@ int32_t ism330dhcx_ff_threshold_get(ism330dhcx_ctx_t *ctx,
   ism330dhcx_free_fall_t free_fall;
   int32_t ret;
 
-  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_FREE_FALL, (uint8_t*)&free_fall, 1);
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_FREE_FALL,
+                            (uint8_t*)&free_fall, 1);
 
   switch (free_fall.ff_ths){
     case ISM330DHCX_FF_TSH_156mg:
@@ -5991,7 +6361,8 @@ int32_t ism330dhcx_batch_counter_threshold_set(ism330dhcx_ctx_t *ctx,
                            (uint8_t*)&counter_bdr_reg1, 1);
   if (ret == 0){
     counter_bdr_reg1.cnt_bdr_th = (uint8_t)((0x0700U & val) >> 8);
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_COUNTER_BDR_REG1, (uint8_t*)&counter_bdr_reg1, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_COUNTER_BDR_REG1,
+                               (uint8_t*)&counter_bdr_reg1, 1);
   }
   if (ret == 0){
     counter_bdr_reg2.cnt_bdr_th = (uint8_t)(0x00FFU & val);
@@ -6788,7 +7159,8 @@ int32_t ism330dhcx_den_mark_axis_z_set(ism330dhcx_ctx_t *ctx, uint8_t val)
   ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL9_XL, (uint8_t*)&ctrl9_xl, 1);
   if(ret == 0){
     ctrl9_xl.den_x= (uint8_t)val;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL9_XL, (uint8_t*)&ctrl9_xl, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL9_XL,
+                               (uint8_t*)&ctrl9_xl, 1);
   }
   return ret;
 }
@@ -6881,7 +7253,7 @@ int32_t ism330dhcx_pedo_sens_get(ism330dhcx_ctx_t *ctx, uint8_t *val)
 }
 
 /**
-  * @brief  Pedometer algorithm working mode.[set] 
+  * @brief  Pedometer algorithm working mode.[set]
   *
   * @param  ctx    read / write interface definitions
   * @param  val    Change the values of:
@@ -6922,7 +7294,7 @@ int32_t ism330dhcx_pedo_mode_set(ism330dhcx_ctx_t *ctx,
     ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_USER_BANK);
   }
   if(ret == 0){
-    ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_CMD_REG, 
+    ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
                                   (uint8_t*)&pedo_cmd_reg);
     pedo_cmd_reg.fp_rejection_en = ((uint8_t)val & 0x01U);
     pedo_cmd_reg.ad_det_en = ((uint8_t)val & 0x02U)>>1;
@@ -6935,7 +7307,7 @@ int32_t ism330dhcx_pedo_mode_set(ism330dhcx_ctx_t *ctx,
 }
 
 /**
-  * @brief  Pedometer algorithm working mode.[get] 
+  * @brief  Pedometer algorithm working mode.[get]
   *
   * @param  ctx    read / write interface definitions
   * @param  val    Get the values of:
@@ -6950,7 +7322,7 @@ int32_t ism330dhcx_pedo_mode_get(ism330dhcx_ctx_t *ctx,
 {
   ism330dhcx_pedo_cmd_reg_t pedo_cmd_reg;
   int32_t ret;
-  
+
   ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
                                 (uint8_t*)&pedo_cmd_reg);
 
@@ -7005,10 +7377,12 @@ int32_t ism330dhcx_pedo_step_detect_get(ism330dhcx_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dhcx_pedo_debounce_steps_set(ism330dhcx_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dhcx_pedo_debounce_steps_set(ism330dhcx_ctx_t *ctx,
+                                           uint8_t *buff)
 {
   int32_t ret;
-  ret = ism330dhcx_ln_pg_write_byte(ctx, ISM330DHCX_PEDO_DEB_STEPS_CONF, buff);
+  ret = ism330dhcx_ln_pg_write_byte(ctx, ISM330DHCX_PEDO_DEB_STEPS_CONF,
+                                    buff);
   return ret;
 }
 
@@ -7020,10 +7394,12 @@ int32_t ism330dhcx_pedo_debounce_steps_set(ism330dhcx_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dhcx_pedo_debounce_steps_get(ism330dhcx_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dhcx_pedo_debounce_steps_get(ism330dhcx_ctx_t *ctx,
+                                           uint8_t *buff)
 {
   int32_t ret;
-  ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_DEB_STEPS_CONF, buff);
+  ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_DEB_STEPS_CONF,
+                                   buff);
   return ret;
 }
 
@@ -7041,7 +7417,8 @@ int32_t ism330dhcx_pedo_steps_period_set(ism330dhcx_ctx_t *ctx, uint8_t *buff)
   uint8_t i;
 
   i = 0x00U;
-  ret = ism330dhcx_ln_pg_write_byte(ctx, ISM330DHCX_PEDO_SC_DELTAT_L, &buff[i]);
+  ret = ism330dhcx_ln_pg_write_byte(ctx, ISM330DHCX_PEDO_SC_DELTAT_L,
+                                    &buff[i]);
   if(ret == 0){
     i++;
     ret = ism330dhcx_ln_pg_write_byte(ctx, ISM330DHCX_PEDO_SC_DELTAT_H,
@@ -7067,7 +7444,8 @@ int32_t ism330dhcx_pedo_steps_period_get(ism330dhcx_ctx_t *ctx, uint8_t *buff)
   ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_SC_DELTAT_L, &buff[i]);
   if(ret == 0){
     i++;
-    ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_SC_DELTAT_H, &buff[i]);
+    ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_SC_DELTAT_H,
+                                     &buff[i]);
   }
   return ret;
 }
@@ -7086,12 +7464,12 @@ int32_t ism330dhcx_pedo_adv_detection_set(ism330dhcx_ctx_t *ctx, uint8_t val)
   int32_t ret;
 
   ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
-                                  (uint8_t*)&pedo_cmd_reg);
+                                   (uint8_t*)&pedo_cmd_reg);
 
   if(ret == 0){
     pedo_cmd_reg.ad_det_en= (uint8_t)val;
     ret = ism330dhcx_ln_pg_write_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
-                                     (uint8_t*)&pedo_cmd_reg);
+                                      (uint8_t*)&pedo_cmd_reg);
   }
   return ret;
 }
@@ -7109,7 +7487,8 @@ int32_t ism330dhcx_pedo_adv_detection_get(ism330dhcx_ctx_t *ctx, uint8_t *val)
   ism330dhcx_pedo_cmd_reg_t pedo_cmd_reg;
   int32_t ret;
 
-  ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_CMD_REG, (uint8_t*)&pedo_cmd_reg);
+  ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
+                                   (uint8_t*)&pedo_cmd_reg);
   *val = pedo_cmd_reg.ad_det_en;
 
   return ret;
@@ -7130,12 +7509,12 @@ int32_t ism330dhcx_pedo_false_step_rejection_set(ism330dhcx_ctx_t *ctx,
   int32_t ret;
 
   ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
-                                  (uint8_t*)&pedo_cmd_reg);
+                                   (uint8_t*)&pedo_cmd_reg);
 
   if(ret == 0){
     pedo_cmd_reg.fp_rejection_en= (uint8_t)val;
     ret = ism330dhcx_ln_pg_write_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
-                                     (uint8_t*)&pedo_cmd_reg);
+                                      (uint8_t*)&pedo_cmd_reg);
   }
   return ret;
 }
@@ -7149,13 +7528,13 @@ int32_t ism330dhcx_pedo_false_step_rejection_set(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_pedo_false_step_rejection_get(ism330dhcx_ctx_t *ctx,
-                                                uint8_t *val)
+                                                 uint8_t *val)
 {
   ism330dhcx_pedo_cmd_reg_t pedo_cmd_reg;
   int32_t ret;
 
   ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
-                                  (uint8_t*)&pedo_cmd_reg);
+                                   (uint8_t*)&pedo_cmd_reg);
   *val = pedo_cmd_reg.fp_rejection_en;
 
   return ret;
@@ -7171,18 +7550,18 @@ int32_t ism330dhcx_pedo_false_step_rejection_get(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_pedo_int_mode_set(ism330dhcx_ctx_t *ctx,
-                                    ism330dhcx_carry_count_en_t val)
+                                     ism330dhcx_carry_count_en_t val)
 {
   ism330dhcx_pedo_cmd_reg_t pedo_cmd_reg;
   int32_t ret;
 
   ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
-                                  (uint8_t*)&pedo_cmd_reg);
+                                   (uint8_t*)&pedo_cmd_reg);
 
   if(ret == 0){
     pedo_cmd_reg.carry_count_en= (uint8_t)val;
     ret = ism330dhcx_ln_pg_write_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
-                                     (uint8_t*)&pedo_cmd_reg);
+                                      (uint8_t*)&pedo_cmd_reg);
   }
   return ret;
 }
@@ -7197,13 +7576,13 @@ int32_t ism330dhcx_pedo_int_mode_set(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_pedo_int_mode_get(ism330dhcx_ctx_t *ctx,
-                                    ism330dhcx_carry_count_en_t *val)
+                                     ism330dhcx_carry_count_en_t *val)
 {
   ism330dhcx_pedo_cmd_reg_t pedo_cmd_reg;
   int32_t ret;
 
   ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
-                                  (uint8_t*)&pedo_cmd_reg);
+                                   (uint8_t*)&pedo_cmd_reg);
 
   switch (pedo_cmd_reg.carry_count_en){
     case ISM330DHCX_EVERY_STEP:
@@ -7249,12 +7628,12 @@ int32_t ism330dhcx_motion_sens_set(ism330dhcx_ctx_t *ctx, uint8_t val)
 
   if(ret == 0){
     ret = ism330dhcx_read_reg(ctx, ISM330DHCX_EMB_FUNC_EN_A,
-                             (uint8_t*)&emb_func_en_a, 1);
+                              (uint8_t*)&emb_func_en_a, 1);
   }
   if(ret == 0){
     emb_func_en_a.sign_motion_en= (uint8_t)val;
     ret = ism330dhcx_write_reg(ctx, ISM330DHCX_EMB_FUNC_EN_A,
-                              (uint8_t*)&emb_func_en_a, 1);
+                               (uint8_t*)&emb_func_en_a, 1);
   }
   if(ret == 0){
     ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_USER_BANK);
@@ -7279,7 +7658,7 @@ int32_t ism330dhcx_motion_sens_get(ism330dhcx_ctx_t *ctx, uint8_t *val)
 
   if(ret == 0){
     ret = ism330dhcx_read_reg(ctx, ISM330DHCX_EMB_FUNC_EN_A,
-                             (uint8_t*)&emb_func_en_a, 1);
+                              (uint8_t*)&emb_func_en_a, 1);
   }
   if(ret == 0){
     *val = emb_func_en_a.sign_motion_en;
@@ -7297,7 +7676,7 @@ int32_t ism330dhcx_motion_sens_get(ism330dhcx_ctx_t *ctx, uint8_t *val)
   *
   */
 int32_t ism330dhcx_motion_flag_data_ready_get(ism330dhcx_ctx_t *ctx,
-                                             uint8_t *val)
+                                              uint8_t *val)
 {
   ism330dhcx_emb_func_status_t emb_func_status;
   int32_t ret;
@@ -7305,7 +7684,7 @@ int32_t ism330dhcx_motion_flag_data_ready_get(ism330dhcx_ctx_t *ctx,
   ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_EMBEDDED_FUNC_BANK);
   if(ret == 0){
     ret = ism330dhcx_read_reg(ctx, ISM330DHCX_EMB_FUNC_STATUS,
-                             (uint8_t*)&emb_func_status, 1);
+                              (uint8_t*)&emb_func_status, 1);
   }
   if(ret == 0){
     *val = emb_func_status.is_sigmot;
@@ -7343,12 +7722,12 @@ int32_t ism330dhcx_tilt_sens_set(ism330dhcx_ctx_t *ctx, uint8_t val)
   ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_EMBEDDED_FUNC_BANK);
   if(ret == 0){
     ret = ism330dhcx_read_reg(ctx, ISM330DHCX_EMB_FUNC_EN_A,
-                             (uint8_t*)&emb_func_en_a, 1);
+                              (uint8_t*)&emb_func_en_a, 1);
   }
   if(ret == 0){
     emb_func_en_a.tilt_en= (uint8_t)val;
     ret = ism330dhcx_write_reg(ctx, ISM330DHCX_EMB_FUNC_EN_A,
-                              (uint8_t*)&emb_func_en_a, 1);
+                               (uint8_t*)&emb_func_en_a, 1);
   }
   if(ret == 0){
     ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_USER_BANK);
@@ -7371,7 +7750,8 @@ int32_t ism330dhcx_tilt_sens_get(ism330dhcx_ctx_t *ctx, uint8_t *val)
 
   ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_EMBEDDED_FUNC_BANK);
   if(ret == 0){
-    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_EMB_FUNC_EN_A, (uint8_t*)&emb_func_en_a, 1);
+    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_EMB_FUNC_EN_A,
+                              (uint8_t*)&emb_func_en_a, 1);
   }
   if(ret == 0){
     *val = emb_func_en_a.tilt_en;
@@ -7388,7 +7768,8 @@ int32_t ism330dhcx_tilt_sens_get(ism330dhcx_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dhcx_tilt_flag_data_ready_get(ism330dhcx_ctx_t *ctx, uint8_t *val)
+int32_t ism330dhcx_tilt_flag_data_ready_get(ism330dhcx_ctx_t *ctx,
+                                            uint8_t *val)
 {
   ism330dhcx_emb_func_status_t emb_func_status;
   int32_t ret;
@@ -7457,11 +7838,13 @@ int32_t ism330dhcx_mag_sensitivity_get(ism330dhcx_ctx_t *ctx, uint8_t *buff)
   uint8_t i;
 
   i = 0x00U;
-  ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_MAG_SENSITIVITY_L, &buff[i]);
+  ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_MAG_SENSITIVITY_L,
+                                   &buff[i]);
 
 if(ret == 0){
   i++;
-  ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_MAG_SENSITIVITY_H, &buff[i]);
+  ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_MAG_SENSITIVITY_H,
+                                   &buff[i]);
 }
   return ret;
 }
@@ -8197,7 +8580,8 @@ int32_t ism330dhcx_long_clr_get(ism330dhcx_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dhcx_fsm_out_get(ism330dhcx_ctx_t *ctx, ism330dhcx_fsm_out_t *val)
+int32_t ism330dhcx_fsm_out_get(ism330dhcx_ctx_t *ctx,
+                               ism330dhcx_fsm_out_t *val)
 {
   int32_t ret;
 
@@ -8355,13 +8739,15 @@ int32_t ism330dhcx_fsm_init_get(ism330dhcx_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dhcx_long_cnt_int_value_set(ism330dhcx_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dhcx_long_cnt_int_value_set(ism330dhcx_ctx_t *ctx,
+                                          uint8_t *buff)
 {
   int32_t ret;
   uint8_t i;
 
   i = 0x00U;
-  ret = ism330dhcx_ln_pg_write_byte(ctx, ISM330DHCX_FSM_LC_TIMEOUT_L, &buff[i]);
+  ret = ism330dhcx_ln_pg_write_byte(ctx, ISM330DHCX_FSM_LC_TIMEOUT_L,
+                                    &buff[i]);
 
   if(ret == 0){
     i++;
@@ -8382,13 +8768,15 @@ int32_t ism330dhcx_long_cnt_int_value_set(ism330dhcx_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dhcx_long_cnt_int_value_get(ism330dhcx_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dhcx_long_cnt_int_value_get(ism330dhcx_ctx_t *ctx,
+                                          uint8_t *buff)
 {
   int32_t ret;
   uint8_t i;
 
   i = 0x00U;
-  ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_FSM_LC_TIMEOUT_L, &buff[i]);
+  ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_FSM_LC_TIMEOUT_L,
+                                   &buff[i]);
 
   if(ret == 0){
     i++;
@@ -8482,7 +8870,8 @@ int32_t ism330dhcx_fsm_start_address_get(ism330dhcx_ctx_t *ctx, uint8_t *buff)
 
   if(ret == 0){
     i++;
-    ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_FSM_START_ADD_H, &buff[i]);
+    ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_FSM_START_ADD_H,
+                                     &buff[i]);
   }
   return ret;
 }
@@ -8491,7 +8880,7 @@ int32_t ism330dhcx_fsm_start_address_get(ism330dhcx_ctx_t *ctx, uint8_t *buff)
   * @}
   *
   */
-  
+
 /**
   * @addtogroup  Machine Learning Core
   * @brief   This section group all the functions concerning the
@@ -8516,11 +8905,13 @@ int32_t ism330dhcx_mlc_set(ism330dhcx_ctx_t *ctx, uint8_t val)
 
   ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_EMBEDDED_FUNC_BANK);
   if (ret == 0) {
-    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_EMB_FUNC_EN_B, (uint8_t*)&reg, 1);
+    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_EMB_FUNC_EN_B,
+                              (uint8_t*)&reg, 1);
   }
   if (ret == 0) {
     reg.mlc_en = val;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_EMB_FUNC_EN_B, (uint8_t*)&reg, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_EMB_FUNC_EN_B,
+                               (uint8_t*)&reg, 1);
   }
   if ((val != PROPERTY_DISABLE) && (ret == 0)){
     ret = ism330dhcx_read_reg(ctx, ISM330DHCX_EMB_FUNC_INIT_B,
@@ -8552,7 +8943,8 @@ int32_t ism330dhcx_mlc_get(ism330dhcx_ctx_t *ctx, uint8_t *val)
 
   ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_EMBEDDED_FUNC_BANK);
   if (ret == 0) {
-    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_EMB_FUNC_EN_B, (uint8_t*)&reg, 1);
+    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_EMB_FUNC_EN_B,
+                              (uint8_t*)&reg, 1);
   }
   if (ret == 0) {
     ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_USER_BANK);
@@ -8596,7 +8988,8 @@ int32_t ism330dhcx_mlc_data_rate_set(ism330dhcx_ctx_t *ctx,
   }
   if (ret == 0) {
     reg.mlc_odr = (uint8_t)val;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_EMB_FUNC_ODR_CFG_C, (uint8_t*)&reg, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_EMB_FUNC_ODR_CFG_C,
+                               (uint8_t*)&reg, 1);
   }
   if (ret == 0) {
     ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_USER_BANK);
@@ -8620,9 +9013,9 @@ int32_t ism330dhcx_mlc_data_rate_get(ism330dhcx_ctx_t *ctx,
   int32_t ret;
 
   ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_EMBEDDED_FUNC_BANK);
-  if (ret == 0) {  
-    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_EMB_FUNC_ODR_CFG_C, 
-                            (uint8_t*)&reg, 1);
+  if (ret == 0) {
+    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_EMB_FUNC_ODR_CFG_C,
+                              (uint8_t*)&reg, 1);
   }
   if (ret == 0) {
     switch (reg.mlc_odr) {
@@ -8676,7 +9069,8 @@ int32_t ism330dhcx_sh_read_data_raw_get(ism330dhcx_ctx_t *ctx,
   ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_SENSOR_HUB_BANK);
 
   if(ret == 0){
-    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_SENSOR_HUB_1, (uint8_t*)val, 18);
+    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_SENSOR_HUB_1,
+                              (uint8_t*)val, 18);
   }
   if(ret == 0){
     ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_USER_BANK);
@@ -8693,7 +9087,7 @@ int32_t ism330dhcx_sh_read_data_raw_get(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_sh_slave_connected_set(ism330dhcx_ctx_t *ctx,
-                                         ism330dhcx_aux_sens_on_t val)
+                                          ism330dhcx_aux_sens_on_t val)
 {
   ism330dhcx_master_config_t master_config;
   int32_t ret;
@@ -8702,12 +9096,12 @@ int32_t ism330dhcx_sh_slave_connected_set(ism330dhcx_ctx_t *ctx,
 
   if(ret == 0){
     ret = ism330dhcx_read_reg(ctx, ISM330DHCX_MASTER_CONFIG,
-                             (uint8_t*)&master_config, 1);
+                              (uint8_t*)&master_config, 1);
   }
   if(ret == 0){
     master_config.aux_sens_on= (uint8_t)val;
     ret = ism330dhcx_write_reg(ctx, ISM330DHCX_MASTER_CONFIG,
-                              (uint8_t*)&master_config, 1);
+                               (uint8_t*)&master_config, 1);
   }
   if(ret == 0){
     ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_USER_BANK);
@@ -8724,7 +9118,7 @@ int32_t ism330dhcx_sh_slave_connected_set(ism330dhcx_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_sh_slave_connected_get(ism330dhcx_ctx_t *ctx,
-                                         ism330dhcx_aux_sens_on_t *val)
+                                          ism330dhcx_aux_sens_on_t *val)
 {
   ism330dhcx_master_config_t master_config;
   int32_t ret;
@@ -9315,7 +9709,8 @@ int32_t ism330dhcx_sh_slv1_cfg_read(ism330dhcx_ctx_t *ctx,
   if(ret == 0){
     slv1_add.slave1_add = (uint8_t) (val->slv_add >> 1);
     slv1_add.r_1 = 1;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_SLV1_ADD, (uint8_t*)&slv1_add, 1);
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_SLV1_ADD,
+                               (uint8_t*)&slv1_add, 1);
   }
   if(ret == 0){
     ret = ism330dhcx_write_reg(ctx, ISM330DHCX_SLV1_SUBADD,
@@ -9442,7 +9837,8 @@ int32_t ism330dhcx_sh_status_get(ism330dhcx_ctx_t *ctx,
   ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_SENSOR_HUB_BANK);
 
   if(ret == 0){
-    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_STATUS_MASTER, (uint8_t*)val, 1);
+    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_STATUS_MASTER,
+                              (uint8_t*)val, 1);
   }
   if(ret == 0){
     ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_USER_BANK);
