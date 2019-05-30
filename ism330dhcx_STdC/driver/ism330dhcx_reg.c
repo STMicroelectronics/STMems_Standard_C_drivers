@@ -8274,7 +8274,7 @@ int32_t ism330dhcx_mag_x_orient_get(ism330dhcx_ctx_t *ctx,
   */
 
 /**
-  * @defgroup   ISM330DHCX_significant_motion
+  * @defgroup   ISM330DHCX_finite_state_machine
   * @brief      This section groups all the functions that manage the
   *             state_machine.
   * @{
