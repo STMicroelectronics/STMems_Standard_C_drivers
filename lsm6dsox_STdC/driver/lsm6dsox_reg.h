@@ -2235,11 +2235,11 @@ int32_t lsm6dsox_i2c_interface_get(lsm6dsox_ctx_t *ctx,
                                    lsm6dsox_i2c_disable_t *val);
 
 typedef enum {
-  LSM6DSOX_I3C_DISABLE         = 0x00,
-  LSM6DSOX_I3C_ENABLE_T_50us   = 0x80,
-  LSM6DSOX_I3C_ENABLE_T_2us    = 0x81,
-  LSM6DSOX_I3C_ENABLE_T_1ms    = 0x82,
-  LSM6DSOX_I3C_ENABLE_T_25ms   = 0x83,
+  LSM6DSOX_I3C_DISABLE         = 0x80,
+  LSM6DSOX_I3C_ENABLE_T_50us   = 0x00,
+  LSM6DSOX_I3C_ENABLE_T_2us    = 0x01,
+  LSM6DSOX_I3C_ENABLE_T_1ms    = 0x02,
+  LSM6DSOX_I3C_ENABLE_T_25ms   = 0x03,
 } lsm6dsox_i3c_disable_t;
 int32_t lsm6dsox_i3c_disable_set(lsm6dsox_ctx_t *ctx,
                                  lsm6dsox_i3c_disable_t val);
