@@ -2036,11 +2036,11 @@ int32_t lsm6dso_i2c_interface_get(lsm6dso_ctx_t *ctx,
                                   lsm6dso_i2c_disable_t *val);
 
 typedef enum {
-  LSM6DSO_I3C_DISABLE         = 0x00,
-  LSM6DSO_I3C_ENABLE_T_50us   = 0x80,
-  LSM6DSO_I3C_ENABLE_T_2us    = 0x81,
-  LSM6DSO_I3C_ENABLE_T_1ms    = 0x82,
-  LSM6DSO_I3C_ENABLE_T_25ms   = 0x83,
+  LSM6DSO_I3C_DISABLE         = 0x80,
+  LSM6DSO_I3C_ENABLE_T_50us   = 0x00,
+  LSM6DSO_I3C_ENABLE_T_2us    = 0x01,
+  LSM6DSO_I3C_ENABLE_T_1ms    = 0x02,
+  LSM6DSO_I3C_ENABLE_T_25ms   = 0x03,
 } lsm6dso_i3c_disable_t;
 int32_t lsm6dso_i3c_disable_set(lsm6dso_ctx_t *ctx,
                                 lsm6dso_i3c_disable_t val);
