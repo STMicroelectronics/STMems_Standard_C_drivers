@@ -742,8 +742,8 @@ int32_t iis3dwb_fifo_stop_on_wtm_set(iis3dwb_ctx_t *ctx, uint8_t val);
 int32_t iis3dwb_fifo_stop_on_wtm_get(iis3dwb_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
-  IIS3DWB_XL_NOT_BATCHED     	  =  0,
-  IIS3DWB_XL_BATCHED_AT_6667Hz    = 10,
+  IIS3DWB_XL_NOT_BATCHED          =  0,
+  IIS3DWB_XL_BATCHED_AT_26k7Hz    = 10,
 } iis3dwb_bdr_xl_t;
 int32_t iis3dwb_fifo_xl_batch_set(iis3dwb_ctx_t *ctx, iis3dwb_bdr_xl_t val);
 int32_t iis3dwb_fifo_xl_batch_get(iis3dwb_ctx_t *ctx, iis3dwb_bdr_xl_t *val);
