@@ -325,6 +325,7 @@ int32_t lsm6dsox_xl_data_rate_set(lsm6dsox_ctx_t *ctx, lsm6dsox_odr_xl_t val)
   }
 
   /* Check the Machine Learning Core data rate constraints */
+  mlc_enable = PROPERTY_DISABLE;
   if (ret == 0) {
     ret =  lsm6dsox_mlc_get(ctx, &mlc_enable);
     if ( mlc_enable == PROPERTY_ENABLE ){
@@ -620,6 +621,7 @@ int32_t lsm6dsox_gy_data_rate_set(lsm6dsox_ctx_t *ctx, lsm6dsox_odr_g_t val)
   }
 
   /* Check the Machine Learning Core data rate constraints */
+  mlc_enable = PROPERTY_DISABLE;
   if (ret == 0) {
     ret =  lsm6dsox_mlc_get(ctx, &mlc_enable);
     if ( mlc_enable == PROPERTY_ENABLE ){
