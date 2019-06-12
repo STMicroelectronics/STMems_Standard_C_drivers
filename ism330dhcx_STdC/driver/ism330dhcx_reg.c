@@ -337,6 +337,7 @@ int32_t ism330dhcx_xl_data_rate_set(ism330dhcx_ctx_t *ctx,
   }
 
   /* Check the Machine Learning Core data rate constraints */
+  mlc_enable = PROPERTY_DISABLE;
   if (ret == 0) {
     ret =  ism330dhcx_mlc_get(ctx, &mlc_enable);
     if ( mlc_enable == PROPERTY_ENABLE ){
@@ -642,6 +643,7 @@ int32_t ism330dhcx_gy_data_rate_set(ism330dhcx_ctx_t *ctx,
   }
 
   /* Check the Machine Learning Core data rate constraints */
+  mlc_enable = PROPERTY_DISABLE;
   if (ret == 0) {
     ret =  ism330dhcx_mlc_get(ctx, &mlc_enable);
     if ( mlc_enable == PROPERTY_ENABLE ){
@@ -3172,7 +3174,8 @@ int32_t ism330dhcx_aux_gy_full_scale_set(ism330dhcx_ctx_t *ctx,
   ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL1_OIS,
                             (uint8_t*)&ctrl1_ois, 1);
   if(ret == 0){
-    ctrl1_ois.fs_g_ois= (uint8_t)val;
+    ctrl1_ois.fs_g_ois = (uint8_t)val & 0x03U;
+    ctrl1_ois.fs_125_ois = ( (uint8_t)val & 0x04U ) >> 2;
     ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL1_OIS,
                               (uint8_t*)&ctrl1_ois, 1);
   }
@@ -3196,7 +3199,7 @@ int32_t ism330dhcx_aux_gy_full_scale_get(ism330dhcx_ctx_t *ctx,
   ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL1_OIS,
                             (uint8_t*)&ctrl1_ois, 1);
 
-  switch (ctrl1_ois.fs_g_ois){
+  switch ( ( ctrl1_ois.fs_125_ois << 2 ) + ctrl1_ois.fs_g_ois ){
     case ISM330DHCX_250dps_AUX:
       *val = ISM330DHCX_250dps_AUX;
       break;
@@ -6298,7 +6301,7 @@ int32_t ism330dhcx_fifo_cnt_event_batch_get(ism330dhcx_ctx_t *ctx,
 
 /**
   * @brief  Resets the internal counter of batching events for a single sensor.
-  *         This bit is automatically reset to zero if it was set to ‘1’.[set]
+  *         This bit is automatically reset to zero if it was set to '1'.[set]
   *
   * @param  ctx    Read / write interface definitions.(ptr)
   * @param  val    Change the values of rst_counter_bdr in reg COUNTER_BDR_REG1
@@ -6322,7 +6325,7 @@ int32_t ism330dhcx_rst_batch_counter_set(ism330dhcx_ctx_t *ctx, uint8_t val)
 
 /**
   * @brief  Resets the internal counter of batching events for a single sensor.
-  *         This bit is automatically reset to zero if it was set to ‘1’.[get]
+  *         This bit is automatically reset to zero if it was set to '1'.[get]
   *
   * @param  ctx    Read / write interface definitions.(ptr)
   * @param  val    Change the values of rst_counter_bdr in reg COUNTER_BDR_REG1
