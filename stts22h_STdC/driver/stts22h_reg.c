@@ -158,7 +158,8 @@ int32_t stts22h_temp_data_rate_get(stts22h_ctx_t *ctx,
 
   ret = stts22h_read_reg(ctx, STTS22H_CTRL,
                             (uint8_t*)&ctrl, 1);
-  switch (ctrl.one_shot){
+  switch ( ctrl.one_shot | (ctrl.freerun << 1) | (ctrl.low_odr_en << 2) |
+           (ctrl.avg << 4)){
     case STTS22H_POWER_DOWN:
       *val = STTS22H_POWER_DOWN;
       break;
