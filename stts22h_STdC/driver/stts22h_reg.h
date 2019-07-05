@@ -148,10 +148,8 @@ typedef struct {
   */
 
 /** I2C Device Address 8 bit format **/
-#define STTS22H_I2C_ADD_6K8     0x71U
-#define STTS22H_I2C_ADD_12K     0x79U
-#define STTS22H_I2C_ADD_20K     0x7DU
-#define STTS22H_I2C_ADD_33K     0x7FU
+#define STTS22H_I2C_ADD_H       0x71U
+#define STTS22H_I2C_ADD_L       0x7FU
 
 /** Device Identification (Who am I) **/
 #define STTS22H_ID              0xA0U

@@ -234,9 +234,10 @@ int32_t stts22h_block_data_update_get(stts22h_ctx_t *ctx, uint8_t *val)
   */
 int32_t stts22h_temp_flag_data_ready_get(stts22h_ctx_t *ctx, uint8_t *val)
 {
+  stts22h_status_t status;
   int32_t ret;
-  ret = stts22h_read_reg(ctx, STTS22H_STATUS, (uint8_t*)&val, 1);
-  if (*val == PROPERTY_DISABLE){
+  ret = stts22h_read_reg(ctx, STTS22H_STATUS, (uint8_t*)&status, 1);
+  if (status.busy == PROPERTY_DISABLE){
     *val = PROPERTY_ENABLE;
   }
   else{
