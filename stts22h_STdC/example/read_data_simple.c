@@ -69,6 +69,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
+#include <stdio.h>
 #include "stm32f4xx_hal.h"
 #include "stts22h_reg.h"
 #include "gpio.h"
@@ -111,15 +112,15 @@ void example_main_stts22h(void)
 
   /* Check device ID */
   stts22h_dev_id_get(&dev_ctx, &whoamI);
-  if (whoamI != STTS22H_ID) 
+  if (whoamI != STTS22H_ID)
     while(1); /* manage here device not found */
 
   /* Enable interrupt on high(=49.5 degC)/low(=2.5 degC) temperature. */
-  float temperature_high_limit = 49.5f;
-  stts22h_temp_trshld_high_set(&dev_ctx, (int8_t)(temperature_high_limit / 64.0f) + 64 );
+  //float temperature_high_limit = 49.5f;
+  //stts22h_temp_trshld_high_set(&dev_ctx, (int8_t)(temperature_high_limit / 64.0f) + 64 );
 
-  float temperature_low_limit = 2.5f;
-  stts22h_temp_trshld_low_set(&dev_ctx, (int8_t)(temperature_low_limit / 64.0f) + 64 );
+  //float temperature_low_limit = 2.5f;
+  //stts22h_temp_trshld_low_set(&dev_ctx, (int8_t)(temperature_low_limit / 64.0f) + 64 );
 
   /* Set Output Data Rate */
   stts22h_temp_data_rate_set(&dev_ctx, STTS22H_1Hz);
@@ -127,7 +128,12 @@ void example_main_stts22h(void)
   /* Read samples in polling mode */
   while(1)
   {
-    /* Read output only if not busy */
+    /*
+     * Read output only if not busy
+     * WARNING: _flag_data_ready_get works only when the device is in single
+     *          mode or with data rate set at 1Hz (this function use the busy
+     *          bit in status register please see the DS for details)
+     */
     uint8_t flag;
     stts22h_temp_flag_data_ready_get(&dev_ctx, &flag);
     if (flag)
@@ -158,7 +164,7 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 {
 #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
   /** I2C Device Address 8 bit format **/
-  HAL_I2C_Mem_Write(handle, STTS22H_I2C_ADD_6K8, reg,
+  HAL_I2C_Mem_Write(handle, STTS22H_I2C_ADD_H, reg,
                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #endif
   return 0;
@@ -179,7 +185,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 {
 #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
   /** I2C Device Address 8 bit format **/
-  HAL_I2C_Mem_Read(handle, STTS22H_I2C_ADD_6K8, reg,
+  HAL_I2C_Mem_Read(handle, STTS22H_I2C_ADD_H, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #endif
   return 0;
