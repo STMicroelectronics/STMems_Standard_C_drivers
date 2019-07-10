@@ -2305,8 +2305,8 @@ int32_t iis3dwb_fifo_xl_batch_get(iis3dwb_ctx_t *ctx,
     case IIS3DWB_XL_NOT_BATCHED:
       *val = IIS3DWB_XL_NOT_BATCHED;
       break;
-    case IIS3DWB_XL_BATCHED_AT_6667Hz:
-      *val = IIS3DWB_XL_BATCHED_AT_6667Hz;
+    case IIS3DWB_XL_BATCHED_AT_26k7Hz:
+      *val = IIS3DWB_XL_BATCHED_AT_26k7Hz;
       break;
     default:
       *val = IIS3DWB_XL_NOT_BATCHED;
