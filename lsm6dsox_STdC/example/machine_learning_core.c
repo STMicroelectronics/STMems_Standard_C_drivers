@@ -35,199 +35,32 @@
  */
 
 /*
+ * The purpose of this example is to show how use the device Machine Learning
+ * Core (MLC) starting from an ".h" file generated through with the tool
+ * "Machine Learning Core" of Unico GUI.
+ *
+ * Some MLC examples are available at:
+ * https://github.com/STMicroelectronics/STMems_Machine_Learning_Core
+ * the same repository is linked to this repository in folder "_resources"
+ *
+ * For more information about Machine Learning Core tool please refer
+ * to AN5259 "LSM6DSOX: Machine Learning Core".
+ *
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A3
+ * - NUCLEO_F411RE + X_NUCLEO_IKS01A3 + STEVAL-MKI197V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
  * Used interfaces:
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A3 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default)
+ * - Host side: UART(COM) to USB bridge @ 115200 Baud Rate
+ * - Sensor Side: I2C(Default)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
  * `tx_com` is required.
- *
- * The purpose of this example is to show how use the device Machine Learning
- * Core (MLC) starting from an ".ucf" file generated with the "Machine
- * Learning Core" tool.
- *
- * Below is showed an ".ucf" file generated with the "Machine Learning Core"
- * tool available in the Unico GUI.
- * For more information about Machine Learning Core tool please refer
- * to AN5259 "LSM6DSOX: Machine Learning Core".
- *
- *   --->  Filename: LSM6DSOX_VibrationMonitoring.ucf <----
- * -- MLC GUI v1.2.0.0 Beta, LSM6DSOX
- *
- * Ac 10 00
- * Ac 11 00
- * Ac 01 80
- * Ac 17 10
- * WAIT 50 ms
- * Ac 05 00
- * Ac 17 00
- * Ac 01 00
- * Ac 10 A0
- * Ac 11 A0
- * Ac 10 00
- * Ac 11 00
- * Ac 01 80
- * Ac 17 40
- * Ac 02 11
- * Ac 08 EA
- * Ac 09 46
- * Ac 02 11
- * Ac 08 EB
- * Ac 09 03
- * Ac 02 11
- * Ac 08 EC
- * Ac 09 50
- * Ac 02 11
- * Ac 08 ED
- * Ac 09 03
- * Ac 02 11
- * Ac 08 EE
- * Ac 09 00
- * Ac 02 11
- * Ac 08 EF
- * Ac 09 00
- * Ac 02 11
- * Ac 08 F0
- * Ac 09 0A
- * Ac 02 11
- * Ac 08 F2
- * Ac 09 10
- * Ac 02 11
- * Ac 08 FA
- * Ac 09 3C
- * Ac 02 11
- * Ac 08 FB
- * Ac 09 03
- * Ac 02 11
- * Ac 08 FC
- * Ac 09 52
- * Ac 02 11
- * Ac 08 FD
- * Ac 09 03
- * Ac 02 11
- * Ac 08 FE
- * Ac 09 5E
- * Ac 02 11
- * Ac 08 FF
- * Ac 09 03
- * Ac 02 31
- * Ac 08 3C
- * Ac 09 3F
- * Ac 02 31
- * Ac 08 3D
- * Ac 09 00
- * Ac 02 31
- * Ac 08 3E
- * Ac 09 03
- * Ac 02 31
- * Ac 08 3F
- * Ac 09 94
- * Ac 02 31
- * Ac 08 40
- * Ac 09 00
- * Ac 02 31
- * Ac 08 41
- * Ac 09 FC
- * Ac 02 31
- * Ac 08 42
- * Ac 09 00
- * Ac 02 31
- * Ac 08 43
- * Ac 09 7C
- * Ac 02 31
- * Ac 08 44
- * Ac 09 1F
- * Ac 02 31
- * Ac 08 45
- * Ac 09 00
- * Ac 02 31
- * Ac 08 52
- * Ac 09 00
- * Ac 02 31
- * Ac 08 53
- * Ac 09 00
- * Ac 02 31
- * Ac 08 54
- * Ac 09 00
- * Ac 02 31
- * Ac 08 55
- * Ac 09 00
- * Ac 02 31
- * Ac 08 56
- * Ac 09 00
- * Ac 02 31
- * Ac 08 57
- * Ac 09 00
- * Ac 02 31
- * Ac 08 58
- * Ac 09 00
- * Ac 02 31
- * Ac 08 59
- * Ac 09 00
- * Ac 02 31
- * Ac 08 5A
- * Ac 09 00
- * Ac 02 31
- * Ac 08 5B
- * Ac 09 00
- * Ac 02 31
- * Ac 08 5C
- * Ac 09 00
- * Ac 01 00
- * Ac 12 00
- * Ac 01 80
- * Ac 17 40
- * Ac 02 31
- * Ac 08 5E
- * Ac 09 AE
- * Ac 02 31
- * Ac 08 5F
- * Ac 09 27
- * Ac 02 31
- * Ac 08 60
- * Ac 09 10
- * Ac 02 31
- * Ac 08 61
- * Ac 09 C0
- * Ac 09 00
- * Ac 09 00
- * Ac 02 31
- * Ac 08 62
- * Ac 09 00
- * Ac 02 31
- * Ac 08 63
- * Ac 09 3E
- * Ac 02 31
- * Ac 08 64
- * Ac 09 21
- * Ac 02 31
- * Ac 08 65
- * Ac 09 E0
- * Ac 09 00
- * Ac 09 00
- * Ac 01 80
- * Ac 17 00
- * Ac 04 00
- * Ac 05 10
- * Ac 02 01
- * Ac 01 00
- * Ac 12 04
- * Ac 01 80
- * Ac 60 15
- * Ac 01 00
- * Ac 10 28
- * Ac 11 00
- *
- *   ---> End File <---
  *
  */
 
@@ -236,183 +69,10 @@
 #include <stdio.h>
 #include "stm32f4xx_hal.h"
 #include <lsm6dsox_reg.h>
+#include <lsm6dsox_vibration_monitoring.h>
 #include "gpio.h"
 #include "i2c.h"
 #include "usart.h"
-
-/* This structure is used to import one line of.ucf file*/
-typedef struct {
-  enum { REG, WAIT} type;
-  uint8_t reg;
-  uint8_t data;
-} ucf_line_t;
-
-/* Decision tree: vibration_monitoring - all the .ucf file*/
-const ucf_line_t lsm6dsox_mlc_vibration_monitoring[] = {
- { .type = REG,  .reg = 0x10, .data = 0x00 },
- { .type = REG,  .reg = 0x11, .data = 0x00 },
- { .type = REG,  .reg = 0x01, .data = 0x80 },
- { .type = REG,  .reg = 0x17, .data = 0x10 },
- { .type = WAIT, .reg = 0x00, .data = 50   }, //ms
- { .type = REG,  .reg = 0x05, .data = 0x00 },
- { .type = REG,  .reg = 0x17, .data = 0x00 },
- { .type = REG,  .reg = 0x01, .data = 0x00 },
- { .type = REG,  .reg = 0x10, .data = 0xA0 },
- { .type = REG,  .reg = 0x11, .data = 0xA0 },
- { .type = REG,  .reg = 0x10, .data = 0x00 },
- { .type = REG,  .reg = 0x11, .data = 0x00 },
- { .type = REG,  .reg = 0x01, .data = 0x80 },
- { .type = REG,  .reg = 0x17, .data = 0x40 },
- { .type = REG,  .reg = 0x02, .data = 0x11 },
- { .type = REG,  .reg = 0x08, .data = 0xEA },
- { .type = REG,  .reg = 0x09, .data = 0x46 },
- { .type = REG,  .reg = 0x02, .data = 0x11 },
- { .type = REG,  .reg = 0x08, .data = 0xEB },
- { .type = REG,  .reg = 0x09, .data = 0x03 },
- { .type = REG,  .reg = 0x02, .data = 0x11 },
- { .type = REG,  .reg = 0x08, .data = 0xEC },
- { .type = REG,  .reg = 0x09, .data = 0x50 },
- { .type = REG,  .reg = 0x02, .data = 0x11 },
- { .type = REG,  .reg = 0x08, .data = 0xED },
- { .type = REG,  .reg = 0x09, .data = 0x03 },
- { .type = REG,  .reg = 0x02, .data = 0x11 },
- { .type = REG,  .reg = 0x08, .data = 0xEE },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x02, .data = 0x11 },
- { .type = REG,  .reg = 0x08, .data = 0xEF },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x02, .data = 0x11 },
- { .type = REG,  .reg = 0x08, .data = 0xF0 },
- { .type = REG,  .reg = 0x09, .data = 0x0A },
- { .type = REG,  .reg = 0x02, .data = 0x11 },
- { .type = REG,  .reg = 0x08, .data = 0xF2 },
- { .type = REG,  .reg = 0x09, .data = 0x10 },
- { .type = REG,  .reg = 0x02, .data = 0x11 },
- { .type = REG,  .reg = 0x08, .data = 0xFA },
- { .type = REG,  .reg = 0x09, .data = 0x3C },
- { .type = REG,  .reg = 0x02, .data = 0x11 },
- { .type = REG,  .reg = 0x08, .data = 0xFB },
- { .type = REG,  .reg = 0x09, .data = 0x03 },
- { .type = REG,  .reg = 0x02, .data = 0x11 },
- { .type = REG,  .reg = 0x08, .data = 0xFC },
- { .type = REG,  .reg = 0x09, .data = 0x52 },
- { .type = REG,  .reg = 0x02, .data = 0x11 },
- { .type = REG,  .reg = 0x08, .data = 0xFD },
- { .type = REG,  .reg = 0x09, .data = 0x03 },
- { .type = REG,  .reg = 0x02, .data = 0x11 },
- { .type = REG,  .reg = 0x08, .data = 0xFE },
- { .type = REG,  .reg = 0x09, .data = 0x5E },
- { .type = REG,  .reg = 0x02, .data = 0x11 },
- { .type = REG,  .reg = 0x08, .data = 0xFF },
- { .type = REG,  .reg = 0x09, .data = 0x03 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x3C },
- { .type = REG,  .reg = 0x09, .data = 0x3F },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x3D },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x3E },
- { .type = REG,  .reg = 0x09, .data = 0x03 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x3F },
- { .type = REG,  .reg = 0x09, .data = 0x94 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x40 },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x41 },
- { .type = REG,  .reg = 0x09, .data = 0xFC },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x42 },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x43 },
- { .type = REG,  .reg = 0x09, .data = 0x7C },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x44 },
- { .type = REG,  .reg = 0x09, .data = 0x1F },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x45 },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x52 },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x53 },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x54 },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x55 },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x56 },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x57 },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x58 },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x59 },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x5A },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x5B },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x5C },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x01, .data = 0x00 },
- { .type = REG,  .reg = 0x12, .data = 0x00 },
- { .type = REG,  .reg = 0x01, .data = 0x80 },
- { .type = REG,  .reg = 0x17, .data = 0x40 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x5E },
- { .type = REG,  .reg = 0x09, .data = 0xAE },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x5F },
- { .type = REG,  .reg = 0x09, .data = 0x27 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x60 },
- { .type = REG,  .reg = 0x09, .data = 0x10 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x61 },
- { .type = REG,  .reg = 0x09, .data = 0xC0 },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x62 },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x63 },
- { .type = REG,  .reg = 0x09, .data = 0x3E },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x64 },
- { .type = REG,  .reg = 0x09, .data = 0x21 },
- { .type = REG,  .reg = 0x02, .data = 0x31 },
- { .type = REG,  .reg = 0x08, .data = 0x65 },
- { .type = REG,  .reg = 0x09, .data = 0xE0 },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x09, .data = 0x00 },
- { .type = REG,  .reg = 0x01, .data = 0x80 },
- { .type = REG,  .reg = 0x17, .data = 0x00 },
- { .type = REG,  .reg = 0x04, .data = 0x00 },
- { .type = REG,  .reg = 0x05, .data = 0x10 },
- { .type = REG,  .reg = 0x02, .data = 0x01 },
- { .type = REG,  .reg = 0x01, .data = 0x00 },
- { .type = REG,  .reg = 0x12, .data = 0x04 },
- { .type = REG,  .reg = 0x01, .data = 0x80 },
- { .type = REG,  .reg = 0x60, .data = 0x15 },
- { .type = REG,  .reg = 0x01, .data = 0x00 },
- { .type = REG,  .reg = 0x10, .data = 0x28 },
- { .type = REG,  .reg = 0x11, .data = 0x00 },
-};
 
 /* Private macro -------------------------------------------------------------*/
 
@@ -444,7 +104,8 @@ void lsm6dsox_mlc(void)
   lsm6dsox_ctx_t              dev_ctx;
   lsm6dsox_pin_int1_route_t   pin_int1_route;
   lsm6dsox_all_sources_t      status;
-  uint8_t                     i, mlc_out[8];
+  uint8_t                     mlc_out[8];
+  uint32_t                    i;
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
@@ -456,34 +117,32 @@ void lsm6dsox_mlc(void)
   if (whoamI != LSM6DSOX_ID)
     while(1);
 
-  /* Restore default configuration (not FSM) */
+  /* Restore default configuration */
   lsm6dsox_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lsm6dsox_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /* Start Machine Learning Core configuration */  
-  for ( i = 0; i < (sizeof(lsm6dsox_mlc_vibration_monitoring) / 
+  /* Start Machine Learning Core configuration */
+  for ( i = 0; i < (sizeof(lsm6dsox_vibration_monitoring) / 
                     sizeof(ucf_line_t) ); i++ ){
-                     
-    if ( lsm6dsox_mlc_vibration_monitoring[i].type == REG ){ 
+   
+    lsm6dsox_write_reg(&dev_ctx, lsm6dsox_vibration_monitoring[i].address, 
+                       (uint8_t*)&lsm6dsox_vibration_monitoring[i].data, 1); 
       
-      lsm6dsox_write_reg(&dev_ctx, lsm6dsox_mlc_vibration_monitoring[i].reg, 
-                         (uint8_t*)&lsm6dsox_mlc_vibration_monitoring[i].data, 1); 
-      
-    }
-    else {
-      
-      HAL_Delay(lsm6dsox_mlc_vibration_monitoring[i].data); 
-      
-    }
-    
-  }
+  }  
   /* End Machine Learning Core configuration */
+
+  /* At this point the device is ready to run but if you need you can also
+   * interact with the device but taking in account the MLC configuration.
+   *
+   * For more information about Machine Learning Core tool please refer
+   * to AN5259 "LSM6DSOX: Machine Learning Core".
+   */
 
   /* Turn off Sensors */ 
   lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_OFF);
-  lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_OFF);  
+  lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_OFF);
   
   /* Disable I3C interface */
   lsm6dsox_i3c_disable_set(&dev_ctx, LSM6DSOX_I3C_DISABLE);
@@ -539,7 +198,7 @@ void lsm6dsox_mlc(void)
 static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
-    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_H, reg,
+    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_L, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   return 0;
 }
@@ -557,7 +216,7 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-    HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_H, reg,
+    HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_L, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   return 0;
 }
