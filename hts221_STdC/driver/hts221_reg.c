@@ -1,38 +1,21 @@
 /*
  ******************************************************************************
  * @file    hts221_reg.c
- * @author  MEMS Software Solution Team
+ * @author  Sensors Software Solution Team
  * @brief   HTS221 driver file
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
-*/
+ ******************************************************************************
+ */
 
 #include "hts221_reg.h"
 
@@ -62,7 +45,7 @@
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_read_reg(hts221_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t hts221_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                         uint16_t len)
 {
   int32_t ret;
@@ -80,7 +63,7 @@ int32_t hts221_read_reg(hts221_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_write_reg(hts221_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t hts221_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                          uint16_t len)
 {
   int32_t ret;
@@ -108,7 +91,7 @@ int32_t hts221_write_reg(hts221_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_humidity_avg_set(hts221_ctx_t *ctx, hts221_avgh_t val)
+int32_t hts221_humidity_avg_set(stmdev_ctx_t *ctx, hts221_avgh_t val)
 {
   hts221_av_conf_t reg;
   int32_t ret;
@@ -131,7 +114,7 @@ int32_t hts221_humidity_avg_set(hts221_ctx_t *ctx, hts221_avgh_t val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_humidity_avg_get(hts221_ctx_t *ctx, hts221_avgh_t *val)
+int32_t hts221_humidity_avg_get(stmdev_ctx_t *ctx, hts221_avgh_t *val)
 {
   hts221_av_conf_t reg;
   int32_t ret;
@@ -179,7 +162,7 @@ int32_t hts221_humidity_avg_get(hts221_ctx_t *ctx, hts221_avgh_t *val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_temperature_avg_set(hts221_ctx_t *ctx, hts221_avgt_t val)
+int32_t hts221_temperature_avg_set(stmdev_ctx_t *ctx, hts221_avgt_t val)
 {
   hts221_av_conf_t reg;
   int32_t ret;
@@ -202,7 +185,7 @@ int32_t hts221_temperature_avg_set(hts221_ctx_t *ctx, hts221_avgt_t val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_temperature_avg_get(hts221_ctx_t *ctx, hts221_avgt_t *val)
+int32_t hts221_temperature_avg_get(stmdev_ctx_t *ctx, hts221_avgt_t *val)
 {
   hts221_av_conf_t reg;
   int32_t ret;
@@ -250,7 +233,7 @@ int32_t hts221_temperature_avg_get(hts221_ctx_t *ctx, hts221_avgt_t *val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_data_rate_set(hts221_ctx_t *ctx, hts221_odr_t val)
+int32_t hts221_data_rate_set(stmdev_ctx_t *ctx, hts221_odr_t val)
 {
   hts221_ctrl_reg1_t reg;
   int32_t ret;
@@ -273,7 +256,7 @@ int32_t hts221_data_rate_set(hts221_ctx_t *ctx, hts221_odr_t val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_data_rate_get(hts221_ctx_t *ctx, hts221_odr_t *val)
+int32_t hts221_data_rate_get(stmdev_ctx_t *ctx, hts221_odr_t *val)
 {
   hts221_ctrl_reg1_t reg;
   int32_t ret;
@@ -309,7 +292,7 @@ int32_t hts221_data_rate_get(hts221_ctx_t *ctx, hts221_odr_t *val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_block_data_update_set(hts221_ctx_t *ctx, uint8_t val)
+int32_t hts221_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   hts221_ctrl_reg1_t reg;
   int32_t ret;
@@ -332,7 +315,7 @@ int32_t hts221_block_data_update_set(hts221_ctx_t *ctx, uint8_t val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_block_data_update_get(hts221_ctx_t *ctx, uint8_t *val)
+int32_t hts221_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   hts221_ctrl_reg1_t reg;
   int32_t ret;
@@ -351,7 +334,7 @@ int32_t hts221_block_data_update_get(hts221_ctx_t *ctx, uint8_t *val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_one_shoot_trigger_set(hts221_ctx_t *ctx, uint8_t val)
+int32_t hts221_one_shoot_trigger_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   hts221_ctrl_reg2_t reg;
   int32_t ret;
@@ -374,7 +357,7 @@ int32_t hts221_one_shoot_trigger_set(hts221_ctx_t *ctx, uint8_t val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_one_shoot_trigger_get(hts221_ctx_t *ctx, uint8_t *val)
+int32_t hts221_one_shoot_trigger_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   hts221_ctrl_reg2_t reg;
   int32_t ret;
@@ -393,7 +376,7 @@ int32_t hts221_one_shoot_trigger_get(hts221_ctx_t *ctx, uint8_t *val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_temp_data_ready_get(hts221_ctx_t *ctx, uint8_t *val)
+int32_t hts221_temp_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   hts221_status_reg_t reg;
   int32_t ret;
@@ -412,7 +395,7 @@ int32_t hts221_temp_data_ready_get(hts221_ctx_t *ctx, uint8_t *val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_hum_data_ready_get(hts221_ctx_t *ctx, uint8_t *val)
+int32_t hts221_hum_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   hts221_status_reg_t reg;
   int32_t ret;
@@ -431,7 +414,7 @@ int32_t hts221_hum_data_ready_get(hts221_ctx_t *ctx, uint8_t *val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_humidity_raw_get(hts221_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_humidity_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = hts221_read_reg(ctx, HTS221_HUMIDITY_OUT_L, buff, 2);
@@ -446,7 +429,7 @@ int32_t hts221_humidity_raw_get(hts221_ctx_t *ctx, uint8_t *buff)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_temperature_raw_get(hts221_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = hts221_read_reg(ctx, HTS221_TEMP_OUT_L, buff, 2);
@@ -473,7 +456,7 @@ int32_t hts221_temperature_raw_get(hts221_ctx_t *ctx, uint8_t *buff)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_device_id_get(hts221_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = hts221_read_reg(ctx, HTS221_WHO_AM_I, buff, 1);
@@ -488,7 +471,7 @@ int32_t hts221_device_id_get(hts221_ctx_t *ctx, uint8_t *buff)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_power_on_set(hts221_ctx_t *ctx, uint8_t val)
+int32_t hts221_power_on_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   hts221_ctrl_reg1_t reg;
   int32_t ret;
@@ -510,7 +493,7 @@ int32_t hts221_power_on_set(hts221_ctx_t *ctx, uint8_t val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_power_on_get(hts221_ctx_t *ctx, uint8_t *val)
+int32_t hts221_power_on_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   hts221_ctrl_reg1_t reg;
   int32_t mm_error;
@@ -529,7 +512,7 @@ int32_t hts221_power_on_get(hts221_ctx_t *ctx, uint8_t *val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_heater_set(hts221_ctx_t *ctx, uint8_t val)
+int32_t hts221_heater_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   hts221_ctrl_reg2_t reg;
   int32_t ret;
@@ -552,7 +535,7 @@ int32_t hts221_heater_set(hts221_ctx_t *ctx, uint8_t val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_heater_get(hts221_ctx_t *ctx, uint8_t *val)
+int32_t hts221_heater_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   hts221_ctrl_reg2_t reg;
   int32_t ret;
@@ -571,7 +554,7 @@ int32_t hts221_heater_get(hts221_ctx_t *ctx, uint8_t *val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_boot_set(hts221_ctx_t *ctx, uint8_t val)
+int32_t hts221_boot_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   hts221_ctrl_reg2_t reg;
   int32_t ret;
@@ -594,7 +577,7 @@ int32_t hts221_boot_set(hts221_ctx_t *ctx, uint8_t val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_boot_get(hts221_ctx_t *ctx, uint8_t *val)
+int32_t hts221_boot_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   hts221_ctrl_reg2_t reg;
   int32_t ret;
@@ -613,7 +596,7 @@ int32_t hts221_boot_get(hts221_ctx_t *ctx, uint8_t *val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_status_get(hts221_ctx_t *ctx, hts221_status_reg_t *val)
+int32_t hts221_status_get(stmdev_ctx_t *ctx, hts221_status_reg_t *val)
 {
   int32_t ret;
   ret = hts221_read_reg(ctx, HTS221_STATUS_REG, (uint8_t*) val, 1);
@@ -640,7 +623,7 @@ int32_t hts221_status_get(hts221_ctx_t *ctx, hts221_status_reg_t *val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_drdy_on_int_set(hts221_ctx_t *ctx, uint8_t val)
+int32_t hts221_drdy_on_int_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   hts221_ctrl_reg3_t reg;
   int32_t ret;
@@ -663,7 +646,7 @@ int32_t hts221_drdy_on_int_set(hts221_ctx_t *ctx, uint8_t val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_drdy_on_int_get(hts221_ctx_t *ctx, uint8_t *val)
+int32_t hts221_drdy_on_int_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   hts221_ctrl_reg3_t reg;
   int32_t ret;
@@ -681,7 +664,7 @@ int32_t hts221_drdy_on_int_get(hts221_ctx_t *ctx, uint8_t *val)
   * @param  val     change the values of pp_od in reg CTRL_REG3
   *
   */
-int32_t hts221_pin_mode_set(hts221_ctx_t *ctx, hts221_pp_od_t val)
+int32_t hts221_pin_mode_set(stmdev_ctx_t *ctx, hts221_pp_od_t val)
 {
   hts221_ctrl_reg3_t reg;
   int32_t ret;
@@ -704,7 +687,7 @@ int32_t hts221_pin_mode_set(hts221_ctx_t *ctx, hts221_pp_od_t val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_pin_mode_get(hts221_ctx_t *ctx, hts221_pp_od_t *val)
+int32_t hts221_pin_mode_get(stmdev_ctx_t *ctx, hts221_pp_od_t *val)
 {
   hts221_ctrl_reg3_t reg;
   int32_t ret;
@@ -734,7 +717,7 @@ int32_t hts221_pin_mode_get(hts221_ctx_t *ctx, hts221_pp_od_t *val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_int_polarity_set(hts221_ctx_t *ctx, hts221_drdy_h_l_t val)
+int32_t hts221_int_polarity_set(stmdev_ctx_t *ctx, hts221_drdy_h_l_t val)
 {
   hts221_ctrl_reg3_t reg;
   int32_t ret;
@@ -757,7 +740,7 @@ int32_t hts221_int_polarity_set(hts221_ctx_t *ctx, hts221_drdy_h_l_t val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_int_polarity_get(hts221_ctx_t *ctx, hts221_drdy_h_l_t *val)
+int32_t hts221_int_polarity_get(stmdev_ctx_t *ctx, hts221_drdy_h_l_t *val)
 {
   hts221_ctrl_reg3_t reg;
   int32_t ret;
@@ -800,7 +783,7 @@ int32_t hts221_int_polarity_get(hts221_ctx_t *ctx, hts221_drdy_h_l_t *val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_hum_rh_point_0_get(hts221_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_hum_rh_point_0_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
 
@@ -818,7 +801,7 @@ int32_t hts221_hum_rh_point_0_get(hts221_ctx_t *ctx, uint8_t *buff)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_hum_rh_point_1_get(hts221_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_hum_rh_point_1_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
 
@@ -836,7 +819,7 @@ int32_t hts221_hum_rh_point_1_get(hts221_ctx_t *ctx, uint8_t *buff)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_temp_deg_point_0_get(hts221_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_temp_deg_point_0_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   hts221_t1_t0_msb_t reg;
   uint8_t coeff_h, coeff_l;
@@ -861,7 +844,7 @@ int32_t hts221_temp_deg_point_0_get(hts221_ctx_t *ctx, uint8_t *buff)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_temp_deg_point_1_get(hts221_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_temp_deg_point_1_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   hts221_t1_t0_msb_t reg;
   uint8_t coeff_h, coeff_l;
@@ -886,7 +869,7 @@ int32_t hts221_temp_deg_point_1_get(hts221_ctx_t *ctx, uint8_t *buff)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_hum_adc_point_0_get(hts221_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_hum_adc_point_0_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = hts221_read_reg(ctx, HTS221_H0_T0_OUT_L, buff, 2);
@@ -901,7 +884,7 @@ int32_t hts221_hum_adc_point_0_get(hts221_ctx_t *ctx, uint8_t *buff)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_hum_adc_point_1_get(hts221_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_hum_adc_point_1_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = hts221_read_reg(ctx, HTS221_H1_T0_OUT_L, buff, 2);
@@ -916,7 +899,7 @@ int32_t hts221_hum_adc_point_1_get(hts221_ctx_t *ctx, uint8_t *buff)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_temp_adc_point_0_get(hts221_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_temp_adc_point_0_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = hts221_read_reg(ctx, HTS221_T0_OUT_L, buff, 2);
@@ -931,7 +914,7 @@ int32_t hts221_temp_adc_point_0_get(hts221_ctx_t *ctx, uint8_t *buff)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_temp_adc_point_1_get(hts221_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_temp_adc_point_1_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = hts221_read_reg(ctx, HTS221_T1_OUT_L, buff, 2);

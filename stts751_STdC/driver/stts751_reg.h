@@ -7,32 +7,15 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
+ ******************************************************************************
  */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
@@ -52,50 +35,13 @@
   *
   */
 
-/** @defgroup STTS751_sensors_common_types
+/** @defgroup STMicroelectronics sensors common types
   * @{
   *
   */
 
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
-
-/**
-  * @defgroup axisXbitXX_t
-  * @brief    These unions are useful to represent different sensors data type.
-  *           These unions are not need by the driver.
-  *
-  *           REMOVING the unions you are compliant with:
-  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
-  *
-  * @{
-  *
-  */
-
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
-
-typedef union{
-  int32_t i32bit[3];
-  uint8_t u8bit[12];
-} axis3bit32_t;
-
-typedef union{
-  int32_t i32bit;
-  uint8_t u8bit[4];
-} axis1bit32_t;
-
-/**
-  * @}
-  *
-  */
 
 typedef struct{
   uint8_t bit0       : 1;
@@ -111,14 +57,7 @@ typedef struct{
 #define PROPERTY_DISABLE                (0U)
 #define PROPERTY_ENABLE                 (1U)
 
-#endif /* MEMS_SHARED_TYPES */
-
-/**
-  * @}
-  *
-  */
-
-/** @addtogroup  STTS751_Interfaces_Functions
+/** @addtogroup  Interfaces_Functions
   * @brief       This section provide a set of functions used to read and
   *              write a generic register of the device.
   *              MANDATORY: return 0 -> no Error.
@@ -126,16 +65,49 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stts751_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stts751_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
-  stts751_write_ptr  write_reg;
-  stts751_read_ptr   read_reg;
+  stmdev_write_ptr  write_reg;
+  stmdev_read_ptr   read_reg;
   /** Customizable optional pointer **/
   void *handle;
-} stts751_ctx_t;
+} stmdev_ctx_t;
+
+/**
+  * @}
+  *
+  */
+
+#endif /* MEMS_SHARED_TYPES */
+
+#ifndef MEMS_UCF_SHARED_TYPES
+#define MEMS_UCF_SHARED_TYPES
+
+/** @defgroup    Generic address-data structure definition
+  * @brief       This structure is useful to load a predefined configuration
+  *              of a sensor.
+	*              You can create a sensor configuration by your own or using 
+	*              Unico / Unicleo tools available on STMicroelectronics
+	*              web site.
+  *
+  * @{
+  *
+  */
+
+typedef struct {
+  uint8_t address;
+  uint8_t data;
+} ucf_line_t;
+
+/**
+  * @}
+  *
+  */
+
+#endif /* MEMS_UCF_SHARED_TYPES */
 
 /**
   * @}
@@ -241,9 +213,9 @@ typedef union{
   *
   */
 
-int32_t stts751_read_reg(stts751_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t stts751_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
-int32_t stts751_write_reg(stts751_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t stts751_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                            uint16_t len);
 
 extern float stts751_from_lsb_to_celsius(int16_t lsb);
@@ -263,8 +235,8 @@ typedef enum {
   STTS751_TEMP_ODR_16Hz       = 0x08, /* 9, 10, or 11-bit resolutions only */
   STTS751_TEMP_ODR_32Hz       = 0x09, /* 9 or 10-bit resolutions only */
 } stts751_odr_t;
-int32_t stts751_temp_data_rate_set(stts751_ctx_t *ctx, stts751_odr_t val);
-int32_t stts751_temp_data_rate_get(stts751_ctx_t *ctx, stts751_odr_t *val);
+int32_t stts751_temp_data_rate_set(stmdev_ctx_t *ctx, stts751_odr_t val);
+int32_t stts751_temp_data_rate_get(stmdev_ctx_t *ctx, stts751_odr_t *val);
 
 typedef enum {
   STTS751_9bit      = 2,
@@ -272,44 +244,44 @@ typedef enum {
   STTS751_11bit     = 1,
   STTS751_12bit     = 3,
 } stts751_tres_t;
-int32_t stts751_resolution_set(stts751_ctx_t *ctx, stts751_tres_t val);
-int32_t stts751_resolution_get(stts751_ctx_t *ctx, stts751_tres_t *val);
+int32_t stts751_resolution_set(stmdev_ctx_t *ctx, stts751_tres_t val);
+int32_t stts751_resolution_get(stmdev_ctx_t *ctx, stts751_tres_t *val);
 
-int32_t stts751_status_reg_get(stts751_ctx_t *ctx, stts751_status_t *val);
+int32_t stts751_status_reg_get(stmdev_ctx_t *ctx, stts751_status_t *val);
 
-int32_t stts751_flag_busy_get(stts751_ctx_t *ctx, uint8_t *val);
+int32_t stts751_flag_busy_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t stts751_temperature_raw_get(stts751_ctx_t *ctx, int16_t *buff);
+int32_t stts751_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff);
 
-int32_t stts751_pin_event_route_set(stts751_ctx_t *ctx, uint8_t val);
-int32_t stts751_pin_event_route_get(stts751_ctx_t *ctx, uint8_t *val);
+int32_t stts751_pin_event_route_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t stts751_pin_event_route_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 
-int32_t stts751_high_temperature_threshold_set(stts751_ctx_t *ctx,
+int32_t stts751_high_temperature_threshold_set(stmdev_ctx_t *ctx,
                                                int16_t buff);
-int32_t stts751_high_temperature_threshold_get(stts751_ctx_t *ctx,
+int32_t stts751_high_temperature_threshold_get(stmdev_ctx_t *ctx,
                                                int16_t *buff);
 
-int32_t stts751_low_temperature_threshold_set(stts751_ctx_t *ctx,
+int32_t stts751_low_temperature_threshold_set(stmdev_ctx_t *ctx,
                                               int16_t buff);
-int32_t stts751_low_temperature_threshold_get(stts751_ctx_t *ctx,
+int32_t stts751_low_temperature_threshold_get(stmdev_ctx_t *ctx,
                                               int16_t *buff);
 
-int32_t stts751_ota_thermal_limit_set(stts751_ctx_t *ctx, int8_t val);
-int32_t stts751_ota_thermal_limit_get(stts751_ctx_t *ctx, int8_t *val);
+int32_t stts751_ota_thermal_limit_set(stmdev_ctx_t *ctx, int8_t val);
+int32_t stts751_ota_thermal_limit_get(stmdev_ctx_t *ctx, int8_t *val);
 
-int32_t stts751_ota_thermal_hyst_set(stts751_ctx_t *ctx, int8_t val);
-int32_t stts751_ota_thermal_hyst_get(stts751_ctx_t *ctx, int8_t *val);
+int32_t stts751_ota_thermal_hyst_set(stmdev_ctx_t *ctx, int8_t val);
+int32_t stts751_ota_thermal_hyst_get(stmdev_ctx_t *ctx, int8_t *val);
 
-int32_t stts751_smbus_timeout_set(stts751_ctx_t *ctx, uint8_t val);
-int32_t stts751_smbus_timeout_get(stts751_ctx_t *ctx, uint8_t *val);
+int32_t stts751_smbus_timeout_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t stts751_smbus_timeout_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef struct {
   uint8_t product_id;
   uint8_t manufacturer_id;
   uint8_t revision_id;
 } stts751_id_t;
-int32_t stts751_device_id_get(stts751_ctx_t *ctx, stts751_id_t *buff);
+int32_t stts751_device_id_get(stmdev_ctx_t *ctx, stts751_id_t *buff);
 
 /**
   * @}

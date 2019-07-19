@@ -1,38 +1,21 @@
 /*
-  ******************************************************************************
-  * @file    lsm303agr_reg.c
-  * @author  Sensor Solutions Software Team
-  * @brief   LSM303AGR driver file
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
-  *
-  * Redistribution and use in source and binary forms, with or without
-  * modification, are permitted provided that the following conditions
-  * are met:
-  *   1. Redistributions of source code must retain the above copyright notice,
-  *      this list of conditions and the following disclaimer.
-  *   2. Redistributions in binary form must reproduce the above copyright
-  *      notice, this list of conditions and the following disclaimer in the
-  *      documentation and/or other materials provided with the distribution.
-  *   3. Neither the name of STMicroelectronics nor the names of its
-  *      contributors may be used to endorse or promote products derived from
-  *      this software without specific prior written permission.
-  *
-  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-  * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-  * POSSIBILITY OF SUCH DAMAGE.
-  *
-  */
+ ******************************************************************************
+ * @file    lsm303agr_reg.c
+ * @author  Sensors Software Solution Team
+ * @brief   LSM303AGR driver file
+ ******************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
+ *
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
+ *
+ ******************************************************************************
+ */
 
 #include "lsm303agr_reg.h"
 
@@ -63,7 +46,7 @@
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lsm303agr_read_reg(lsm303agr_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t lsm303agr_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                          uint16_t len)
 {
   int32_t ret;
@@ -81,7 +64,7 @@ int32_t lsm303agr_read_reg(lsm303agr_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lsm303agr_write_reg(lsm303agr_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t lsm303agr_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                           uint16_t len)
 {
   int32_t ret;
@@ -201,7 +184,7 @@ float_t lsm303agr_from_lsb_to_mgauss(int16_t lsb)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_temp_status_reg_get(lsm303agr_ctx_t *ctx, uint8_t *buff)
+int32_t lsm303agr_temp_status_reg_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm303agr_read_reg(ctx, LSM303AGR_STATUS_REG_AUX_A, buff, 1);
@@ -216,7 +199,7 @@ int32_t lsm303agr_temp_status_reg_get(lsm303agr_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_temp_data_ready_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_temp_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_status_reg_aux_a_t status_reg_aux_a;
   int32_t ret;
@@ -236,7 +219,7 @@ int32_t lsm303agr_temp_data_ready_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_temp_data_ovr_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_temp_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_status_reg_aux_a_t status_reg_aux_a;
   int32_t ret;
@@ -256,7 +239,7 @@ int32_t lsm303agr_temp_data_ovr_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_temperature_raw_get(lsm303agr_ctx_t *ctx, uint8_t *buff)
+int32_t lsm303agr_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm303agr_read_reg(ctx, LSM303AGR_OUT_TEMP_L_A, buff, 2);
@@ -271,7 +254,7 @@ int32_t lsm303agr_temperature_raw_get(lsm303agr_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_temperature_meas_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_temperature_meas_set(stmdev_ctx_t *ctx,
                                        lsm303agr_temp_en_a_t val)
 {
   lsm303agr_temp_cfg_reg_a_t temp_cfg_reg_a;
@@ -296,7 +279,7 @@ int32_t lsm303agr_temperature_meas_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_temperature_meas_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_temperature_meas_get(stmdev_ctx_t *ctx,
                                       lsm303agr_temp_en_a_t *val)
 {
   lsm303agr_temp_cfg_reg_a_t temp_cfg_reg_a;
@@ -328,7 +311,7 @@ int32_t lsm303agr_temperature_meas_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_operating_mode_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_operating_mode_set(stmdev_ctx_t *ctx,
                                         lsm303agr_op_md_a_t val)
 {
   lsm303agr_ctrl_reg1_a_t ctrl_reg1_a;
@@ -376,7 +359,7 @@ int32_t lsm303agr_xl_operating_mode_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_operating_mode_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_operating_mode_get(stmdev_ctx_t *ctx,
                                         lsm303agr_op_md_a_t *val)
 {
   lsm303agr_ctrl_reg4_a_t ctrl_reg4_a;
@@ -409,7 +392,7 @@ int32_t lsm303agr_xl_operating_mode_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_data_rate_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_data_rate_set(stmdev_ctx_t *ctx,
                                    lsm303agr_odr_a_t val)
 {
   lsm303agr_ctrl_reg1_a_t ctrl_reg1_a;
@@ -434,7 +417,7 @@ int32_t lsm303agr_xl_data_rate_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_data_rate_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_data_rate_get(stmdev_ctx_t *ctx,
                                    lsm303agr_odr_a_t *val)
 {
   lsm303agr_ctrl_reg1_a_t ctrl_reg1_a;
@@ -490,7 +473,7 @@ int32_t lsm303agr_xl_data_rate_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_high_pass_on_outputs_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_high_pass_on_outputs_set(stmdev_ctx_t *ctx,
                                               uint8_t val)
 {
   lsm303agr_ctrl_reg2_a_t ctrl_reg2_a;
@@ -516,7 +499,7 @@ int32_t lsm303agr_xl_high_pass_on_outputs_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_high_pass_on_outputs_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_high_pass_on_outputs_get(stmdev_ctx_t *ctx,
                                               uint8_t *val)
 {
   lsm303agr_ctrl_reg2_a_t ctrl_reg2_a;
@@ -544,7 +527,7 @@ int32_t lsm303agr_xl_high_pass_on_outputs_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_high_pass_bandwidth_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_high_pass_bandwidth_set(stmdev_ctx_t *ctx,
                                              lsm303agr_hpcf_a_t val)
 {
   lsm303agr_ctrl_reg2_a_t ctrl_reg2_a;
@@ -576,7 +559,7 @@ int32_t lsm303agr_xl_high_pass_bandwidth_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_high_pass_bandwidth_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_high_pass_bandwidth_get(stmdev_ctx_t *ctx,
                                              lsm303agr_hpcf_a_t *val)
 {
   lsm303agr_ctrl_reg2_a_t ctrl_reg2_a;
@@ -613,7 +596,7 @@ int32_t lsm303agr_xl_high_pass_bandwidth_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_high_pass_mode_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_high_pass_mode_set(stmdev_ctx_t *ctx,
                                         lsm303agr_hpm_a_t val)
 {
   lsm303agr_ctrl_reg2_a_t ctrl_reg2_a;
@@ -638,7 +621,7 @@ int32_t lsm303agr_xl_high_pass_mode_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_high_pass_mode_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_high_pass_mode_get(stmdev_ctx_t *ctx,
                                         lsm303agr_hpm_a_t *val)
 {
   lsm303agr_ctrl_reg2_a_t ctrl_reg2_a;
@@ -675,7 +658,7 @@ int32_t lsm303agr_xl_high_pass_mode_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_full_scale_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_full_scale_set(stmdev_ctx_t *ctx,
                                     lsm303agr_fs_a_t val)
 {
   lsm303agr_ctrl_reg4_a_t ctrl_reg4_a;
@@ -700,7 +683,7 @@ int32_t lsm303agr_xl_full_scale_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_full_scale_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_full_scale_get(stmdev_ctx_t *ctx,
                                     lsm303agr_fs_a_t *val)
 {
   lsm303agr_ctrl_reg4_a_t ctrl_reg4_a;
@@ -737,7 +720,7 @@ int32_t lsm303agr_xl_full_scale_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_block_data_update_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_block_data_update_set(stmdev_ctx_t *ctx,
                                            uint8_t val)
 {
   lsm303agr_ctrl_reg4_a_t ctrl_reg4_a;
@@ -762,7 +745,7 @@ int32_t lsm303agr_xl_block_data_update_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_block_data_update_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_block_data_update_get(stmdev_ctx_t *ctx,
                                            uint8_t *val)
 {
   lsm303agr_ctrl_reg4_a_t ctrl_reg4_a;
@@ -784,7 +767,7 @@ int32_t lsm303agr_xl_block_data_update_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_filter_reference_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_filter_reference_set(stmdev_ctx_t *ctx,
                                           uint8_t *buff)
 {
   int32_t ret;
@@ -801,7 +784,7 @@ int32_t lsm303agr_xl_filter_reference_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_filter_reference_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_filter_reference_get(stmdev_ctx_t *ctx,
                                           uint8_t *buff)
 {
   int32_t ret;
@@ -817,7 +800,7 @@ int32_t lsm303agr_xl_filter_reference_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_data_ready_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_xl_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_status_reg_a_t status_reg_a;
   int32_t ret;
@@ -837,7 +820,7 @@ int32_t lsm303agr_xl_data_ready_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_data_ovr_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_xl_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_status_reg_a_t status_reg_a;
   int32_t ret;
@@ -857,7 +840,7 @@ int32_t lsm303agr_xl_data_ovr_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_acceleration_raw_get(lsm303agr_ctx_t *ctx, uint8_t *buff)
+int32_t lsm303agr_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm303agr_read_reg(ctx, LSM303AGR_OUT_X_L_A, buff, 6);
@@ -879,7 +862,7 @@ int32_t lsm303agr_acceleration_raw_get(lsm303agr_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_user_offset_set(lsm303agr_ctx_t *ctx, uint8_t *buff)
+int32_t lsm303agr_mag_user_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm303agr_write_reg(ctx, LSM303AGR_OFFSET_X_REG_L_M, buff, 6);
@@ -901,7 +884,7 @@ int32_t lsm303agr_mag_user_offset_set(lsm303agr_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_user_offset_get(lsm303agr_ctx_t *ctx, uint8_t *buff)
+int32_t lsm303agr_mag_user_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm303agr_read_reg(ctx, LSM303AGR_OFFSET_X_REG_L_M, buff, 6);
@@ -916,7 +899,7 @@ int32_t lsm303agr_mag_user_offset_get(lsm303agr_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_operating_mode_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_operating_mode_set(stmdev_ctx_t *ctx,
                                          lsm303agr_md_m_t val)
 {
   lsm303agr_cfg_reg_a_m_t cfg_reg_a_m;
@@ -941,7 +924,7 @@ int32_t lsm303agr_mag_operating_mode_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_operating_mode_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_operating_mode_get(stmdev_ctx_t *ctx,
                                          lsm303agr_md_m_t *val)
 {
   lsm303agr_cfg_reg_a_m_t cfg_reg_a_m;
@@ -975,7 +958,7 @@ int32_t lsm303agr_mag_operating_mode_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_data_rate_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_data_rate_set(stmdev_ctx_t *ctx,
                                     lsm303agr_mg_odr_m_t val)
 {
   lsm303agr_cfg_reg_a_m_t cfg_reg_a_m;
@@ -1000,7 +983,7 @@ int32_t lsm303agr_mag_data_rate_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_data_rate_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_data_rate_get(stmdev_ctx_t *ctx,
                                     lsm303agr_mg_odr_m_t *val)
 {
   lsm303agr_cfg_reg_a_m_t cfg_reg_a_m;
@@ -1037,7 +1020,7 @@ int32_t lsm303agr_mag_data_rate_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_power_mode_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_power_mode_set(stmdev_ctx_t *ctx,
                                      lsm303agr_lp_m_t val)
 {
   lsm303agr_cfg_reg_a_m_t cfg_reg_a_m;
@@ -1062,7 +1045,7 @@ int32_t lsm303agr_mag_power_mode_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_power_mode_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_power_mode_get(stmdev_ctx_t *ctx,
                                      lsm303agr_lp_m_t *val)
 {
   lsm303agr_cfg_reg_a_m_t cfg_reg_a_m;
@@ -1093,7 +1076,7 @@ int32_t lsm303agr_mag_power_mode_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_offset_temp_comp_set(lsm303agr_ctx_t *ctx, uint8_t val)
+int32_t lsm303agr_mag_offset_temp_comp_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm303agr_cfg_reg_a_m_t cfg_reg_a_m;
   int32_t ret;
@@ -1117,7 +1100,7 @@ int32_t lsm303agr_mag_offset_temp_comp_set(lsm303agr_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_offset_temp_comp_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_mag_offset_temp_comp_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_cfg_reg_a_m_t cfg_reg_a_m;
   int32_t ret;
@@ -1137,7 +1120,7 @@ int32_t lsm303agr_mag_offset_temp_comp_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_low_pass_bandwidth_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_low_pass_bandwidth_set(stmdev_ctx_t *ctx,
                                              lsm303agr_lpf_m_t val)
 {
   lsm303agr_cfg_reg_b_m_t cfg_reg_b_m;
@@ -1162,7 +1145,7 @@ int32_t lsm303agr_mag_low_pass_bandwidth_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_low_pass_bandwidth_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_low_pass_bandwidth_get(stmdev_ctx_t *ctx,
                                              lsm303agr_lpf_m_t *val)
 {
   lsm303agr_cfg_reg_b_m_t cfg_reg_b_m;
@@ -1193,7 +1176,7 @@ int32_t lsm303agr_mag_low_pass_bandwidth_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_set_rst_mode_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_set_rst_mode_set(stmdev_ctx_t *ctx,
                                        lsm303agr_set_rst_m_t val)
 {
   lsm303agr_cfg_reg_b_m_t cfg_reg_b_m;
@@ -1218,7 +1201,7 @@ int32_t lsm303agr_mag_set_rst_mode_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_set_rst_mode_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_set_rst_mode_get(stmdev_ctx_t *ctx,
                                        lsm303agr_set_rst_m_t *val)
 {
   lsm303agr_cfg_reg_b_m_t cfg_reg_b_m;
@@ -1258,7 +1241,7 @@ int32_t lsm303agr_mag_set_rst_mode_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_set_rst_sensor_single_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_set_rst_sensor_single_set(stmdev_ctx_t *ctx,
                                                 uint8_t val)
 {
   lsm303agr_cfg_reg_b_m_t cfg_reg_b_m;
@@ -1290,7 +1273,7 @@ int32_t lsm303agr_mag_set_rst_sensor_single_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_set_rst_sensor_single_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_set_rst_sensor_single_get(stmdev_ctx_t *ctx,
                                                 uint8_t *val)
 {
   lsm303agr_cfg_reg_b_m_t cfg_reg_b_m;
@@ -1311,7 +1294,7 @@ int32_t lsm303agr_mag_set_rst_sensor_single_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_block_data_update_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_block_data_update_set(stmdev_ctx_t *ctx,
                                             uint8_t val)
 {
   lsm303agr_cfg_reg_c_m_t cfg_reg_c_m;
@@ -1336,7 +1319,7 @@ int32_t lsm303agr_mag_block_data_update_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_block_data_update_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_block_data_update_get(stmdev_ctx_t *ctx,
                                             uint8_t *val)
 {
   lsm303agr_cfg_reg_c_m_t cfg_reg_c_m;
@@ -1357,7 +1340,7 @@ int32_t lsm303agr_mag_block_data_update_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_data_ready_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_mag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_status_reg_m_t status_reg_m;
   int32_t ret;
@@ -1377,7 +1360,7 @@ int32_t lsm303agr_mag_data_ready_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_data_ovr_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_mag_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_status_reg_m_t status_reg_m;
   int32_t ret;
@@ -1397,7 +1380,7 @@ int32_t lsm303agr_mag_data_ovr_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_magnetic_raw_get(lsm303agr_ctx_t *ctx, uint8_t *buff)
+int32_t lsm303agr_magnetic_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm303agr_read_reg(ctx, LSM303AGR_OUTX_L_REG_M, buff, 6);
@@ -1424,7 +1407,7 @@ int32_t lsm303agr_magnetic_raw_get(lsm303agr_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_device_id_get(lsm303agr_ctx_t *ctx, uint8_t *buff)
+int32_t lsm303agr_xl_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm303agr_read_reg(ctx, LSM303AGR_WHO_AM_I_A, buff, 1);
@@ -1439,7 +1422,7 @@ int32_t lsm303agr_xl_device_id_get(lsm303agr_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_self_test_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_self_test_set(stmdev_ctx_t *ctx,
                                    lsm303agr_st_a_t val)
 {
   lsm303agr_ctrl_reg4_a_t ctrl_reg4_a;
@@ -1464,7 +1447,7 @@ int32_t lsm303agr_xl_self_test_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_self_test_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_self_test_get(stmdev_ctx_t *ctx,
                                    lsm303agr_st_a_t *val)
 {
   lsm303agr_ctrl_reg4_a_t ctrl_reg4_a;
@@ -1498,7 +1481,7 @@ int32_t lsm303agr_xl_self_test_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_data_format_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_data_format_set(stmdev_ctx_t *ctx,
                                      lsm303agr_ble_a_t val)
 {
   lsm303agr_ctrl_reg4_a_t ctrl_reg4_a;
@@ -1523,7 +1506,7 @@ int32_t lsm303agr_xl_data_format_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_data_format_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_data_format_get(stmdev_ctx_t *ctx,
                                      lsm303agr_ble_a_t *val)
 {
   lsm303agr_ctrl_reg4_a_t ctrl_reg4_a;
@@ -1554,7 +1537,7 @@ int32_t lsm303agr_xl_data_format_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_boot_set(lsm303agr_ctx_t *ctx, uint8_t val)
+int32_t lsm303agr_xl_boot_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm303agr_ctrl_reg5_a_t ctrl_reg5_a;
   int32_t ret;
@@ -1578,7 +1561,7 @@ int32_t lsm303agr_xl_boot_set(lsm303agr_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_boot_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_xl_boot_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_ctrl_reg5_a_t ctrl_reg5_a;
   int32_t ret;
@@ -1598,7 +1581,7 @@ int32_t lsm303agr_xl_boot_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_status_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_status_get(stmdev_ctx_t *ctx,
                                 lsm303agr_status_reg_a_t *val)
 {
   int32_t ret;
@@ -1614,7 +1597,7 @@ int32_t lsm303agr_xl_status_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_device_id_get(lsm303agr_ctx_t *ctx, uint8_t *buff)
+int32_t lsm303agr_mag_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm303agr_read_reg(ctx, LSM303AGR_WHO_AM_I_M, buff, 1);
@@ -1629,7 +1612,7 @@ int32_t lsm303agr_mag_device_id_get(lsm303agr_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_reset_set(lsm303agr_ctx_t *ctx, uint8_t val)
+int32_t lsm303agr_mag_reset_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm303agr_cfg_reg_a_m_t cfg_reg_a_m;
   int32_t ret;
@@ -1653,7 +1636,7 @@ int32_t lsm303agr_mag_reset_set(lsm303agr_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_reset_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_mag_reset_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_cfg_reg_a_m_t cfg_reg_a_m;
   int32_t ret;
@@ -1673,7 +1656,7 @@ int32_t lsm303agr_mag_reset_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_boot_set(lsm303agr_ctx_t *ctx, uint8_t val)
+int32_t lsm303agr_mag_boot_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm303agr_cfg_reg_a_m_t cfg_reg_a_m;
   int32_t ret;
@@ -1697,7 +1680,7 @@ int32_t lsm303agr_mag_boot_set(lsm303agr_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_boot_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_mag_boot_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_cfg_reg_a_m_t cfg_reg_a_m;
   int32_t ret;
@@ -1717,7 +1700,7 @@ int32_t lsm303agr_mag_boot_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_self_test_set(lsm303agr_ctx_t *ctx, uint8_t val)
+int32_t lsm303agr_mag_self_test_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm303agr_cfg_reg_c_m_t cfg_reg_c_m;
   int32_t ret;
@@ -1741,7 +1724,7 @@ int32_t lsm303agr_mag_self_test_set(lsm303agr_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_self_test_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_mag_self_test_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_cfg_reg_c_m_t cfg_reg_c_m;
   int32_t ret;
@@ -1761,7 +1744,7 @@ int32_t lsm303agr_mag_self_test_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_data_format_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_data_format_set(stmdev_ctx_t *ctx,
                                       lsm303agr_ble_m_t val)
 {
   lsm303agr_cfg_reg_c_m_t cfg_reg_c_m;
@@ -1786,7 +1769,7 @@ int32_t lsm303agr_mag_data_format_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_data_format_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_data_format_get(stmdev_ctx_t *ctx,
                                       lsm303agr_ble_m_t *val)
 {
   lsm303agr_cfg_reg_c_m_t cfg_reg_c_m;
@@ -1817,7 +1800,7 @@ int32_t lsm303agr_mag_data_format_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_status_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_status_get(stmdev_ctx_t *ctx,
                                  lsm303agr_status_reg_m_t *val)
 {
   int32_t ret;
@@ -1846,7 +1829,7 @@ int32_t lsm303agr_mag_status_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int1_gen_conf_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_int1_gen_conf_set(stmdev_ctx_t *ctx,
                                        lsm303agr_int1_cfg_a_t *val)
 {
   int32_t ret;
@@ -1862,7 +1845,7 @@ int32_t lsm303agr_xl_int1_gen_conf_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int1_gen_conf_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_int1_gen_conf_get(stmdev_ctx_t *ctx,
                                        lsm303agr_int1_cfg_a_t *val)
 {
   int32_t ret;
@@ -1878,7 +1861,7 @@ int32_t lsm303agr_xl_int1_gen_conf_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int1_gen_source_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_int1_gen_source_get(stmdev_ctx_t *ctx,
                                          lsm303agr_int1_src_a_t *val)
 {
   int32_t ret;
@@ -1896,7 +1879,7 @@ int32_t lsm303agr_xl_int1_gen_source_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int1_gen_threshold_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_int1_gen_threshold_set(stmdev_ctx_t *ctx,
                                             uint8_t val)
 {
   lsm303agr_int1_ths_a_t int1_ths_a;
@@ -1923,7 +1906,7 @@ int32_t lsm303agr_xl_int1_gen_threshold_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int1_gen_threshold_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_int1_gen_threshold_get(stmdev_ctx_t *ctx,
                                             uint8_t *val)
 {
   lsm303agr_int1_ths_a_t int1_ths_a;
@@ -1945,7 +1928,7 @@ int32_t lsm303agr_xl_int1_gen_threshold_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int1_gen_duration_set(lsm303agr_ctx_t *ctx, uint8_t val)
+int32_t lsm303agr_xl_int1_gen_duration_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm303agr_int1_duration_a_t int1_duration_a;
   int32_t ret;
@@ -1970,7 +1953,7 @@ int32_t lsm303agr_xl_int1_gen_duration_set(lsm303agr_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int1_gen_duration_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_xl_int1_gen_duration_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_int1_duration_a_t int1_duration_a;
   int32_t ret;
@@ -2003,7 +1986,7 @@ int32_t lsm303agr_xl_int1_gen_duration_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int2_gen_conf_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_int2_gen_conf_set(stmdev_ctx_t *ctx,
                                        lsm303agr_int2_cfg_a_t *val)
 {
   int32_t ret;
@@ -2019,7 +2002,7 @@ int32_t lsm303agr_xl_int2_gen_conf_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int2_gen_conf_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_int2_gen_conf_get(stmdev_ctx_t *ctx,
                                        lsm303agr_int2_cfg_a_t *val)
 {
   int32_t ret;
@@ -2035,7 +2018,7 @@ int32_t lsm303agr_xl_int2_gen_conf_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int2_gen_source_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_int2_gen_source_get(stmdev_ctx_t *ctx,
                                          lsm303agr_int2_src_a_t *val)
 {
   int32_t ret;
@@ -2053,7 +2036,7 @@ int32_t lsm303agr_xl_int2_gen_source_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int2_gen_threshold_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_int2_gen_threshold_set(stmdev_ctx_t *ctx,
                                             uint8_t val)
 {
   lsm303agr_int2_ths_a_t int2_ths_a;
@@ -2080,7 +2063,7 @@ int32_t lsm303agr_xl_int2_gen_threshold_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int2_gen_threshold_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_int2_gen_threshold_get(stmdev_ctx_t *ctx,
                                             uint8_t *val)
 {
   lsm303agr_int2_ths_a_t int2_ths_a;
@@ -2102,7 +2085,7 @@ int32_t lsm303agr_xl_int2_gen_threshold_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int2_gen_duration_set(lsm303agr_ctx_t *ctx, uint8_t val)
+int32_t lsm303agr_xl_int2_gen_duration_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm303agr_int2_duration_a_t int2_duration_a;
   int32_t ret;
@@ -2127,7 +2110,7 @@ int32_t lsm303agr_xl_int2_gen_duration_set(lsm303agr_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int2_gen_duration_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_int2_gen_duration_get(stmdev_ctx_t *ctx,
                                            uint8_t *val)
 {
   lsm303agr_int2_duration_a_t int2_duration_a;
@@ -2161,7 +2144,7 @@ int32_t lsm303agr_xl_int2_gen_duration_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_high_pass_int_conf_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_high_pass_int_conf_set(stmdev_ctx_t *ctx,
                                             lsm303agr_hp_a_t val)
 {
   lsm303agr_ctrl_reg2_a_t ctrl_reg2_a;
@@ -2186,7 +2169,7 @@ int32_t lsm303agr_xl_high_pass_int_conf_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_high_pass_int_conf_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_high_pass_int_conf_get(stmdev_ctx_t *ctx,
                                             lsm303agr_hp_a_t *val)
 {
   lsm303agr_ctrl_reg2_a_t ctrl_reg2_a;
@@ -2235,7 +2218,7 @@ int32_t lsm303agr_xl_high_pass_int_conf_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_pin_int1_config_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_pin_int1_config_set(stmdev_ctx_t *ctx,
                                          lsm303agr_ctrl_reg3_a_t *val)
 {
   int32_t ret;
@@ -2251,7 +2234,7 @@ int32_t lsm303agr_xl_pin_int1_config_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_pin_int1_config_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_pin_int1_config_get(stmdev_ctx_t *ctx,
                                          lsm303agr_ctrl_reg3_a_t *val)
 {
   int32_t ret;
@@ -2268,7 +2251,7 @@ int32_t lsm303agr_xl_pin_int1_config_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int2_pin_detect_4d_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_int2_pin_detect_4d_set(stmdev_ctx_t *ctx,
                                             uint8_t val)
 {
   lsm303agr_ctrl_reg5_a_t ctrl_reg5_a;
@@ -2294,7 +2277,7 @@ int32_t lsm303agr_xl_int2_pin_detect_4d_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int2_pin_detect_4d_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_int2_pin_detect_4d_get(stmdev_ctx_t *ctx,
                                             uint8_t *val)
 {
   lsm303agr_ctrl_reg5_a_t ctrl_reg5_a;
@@ -2317,7 +2300,7 @@ int32_t lsm303agr_xl_int2_pin_detect_4d_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int2pin_notification_mode_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_int2pin_notification_mode_set(stmdev_ctx_t *ctx,
                                                    lsm303agr_lir_int2_a_t val)
 {
   lsm303agr_ctrl_reg5_a_t ctrl_reg5_a;
@@ -2344,7 +2327,7 @@ int32_t lsm303agr_xl_int2pin_notification_mode_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int2pin_notification_mode_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_int2pin_notification_mode_get(stmdev_ctx_t *ctx,
                                                 lsm303agr_lir_int2_a_t *val)
 {
   lsm303agr_ctrl_reg5_a_t ctrl_reg5_a;
@@ -2376,7 +2359,7 @@ int32_t lsm303agr_xl_int2pin_notification_mode_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int1_pin_detect_4d_set(lsm303agr_ctx_t *ctx, uint8_t val)
+int32_t lsm303agr_xl_int1_pin_detect_4d_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm303agr_ctrl_reg5_a_t ctrl_reg5_a;
   int32_t ret;
@@ -2401,7 +2384,7 @@ int32_t lsm303agr_xl_int1_pin_detect_4d_set(lsm303agr_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int1_pin_detect_4d_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_xl_int1_pin_detect_4d_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_ctrl_reg5_a_t ctrl_reg5_a;
   int32_t ret;
@@ -2423,7 +2406,7 @@ int32_t lsm303agr_xl_int1_pin_detect_4d_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int1pin_notification_mode_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_int1pin_notification_mode_set(stmdev_ctx_t *ctx,
                                                    lsm303agr_lir_int1_a_t val)
 {
   lsm303agr_ctrl_reg5_a_t ctrl_reg5_a;
@@ -2450,7 +2433,7 @@ int32_t lsm303agr_xl_int1pin_notification_mode_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_int1pin_notification_mode_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_int1pin_notification_mode_get(stmdev_ctx_t *ctx,
                                                    lsm303agr_lir_int1_a_t *val)
 {
   lsm303agr_ctrl_reg5_a_t ctrl_reg5_a;
@@ -2481,7 +2464,7 @@ int32_t lsm303agr_xl_int1pin_notification_mode_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_pin_int2_config_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_pin_int2_config_set(stmdev_ctx_t *ctx,
                                          lsm303agr_ctrl_reg6_a_t *val)
 {
   int32_t ret;
@@ -2497,7 +2480,7 @@ int32_t lsm303agr_xl_pin_int2_config_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_pin_int2_config_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_pin_int2_config_get(stmdev_ctx_t *ctx,
                                          lsm303agr_ctrl_reg6_a_t *val)
 {
   int32_t ret;
@@ -2528,7 +2511,7 @@ int32_t lsm303agr_xl_pin_int2_config_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_offset_int_conf_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_offset_int_conf_set(stmdev_ctx_t *ctx,
                                           lsm303agr_int_on_dataoff_m_t val)
 {
   lsm303agr_cfg_reg_b_m_t cfg_reg_b_m;
@@ -2555,7 +2538,7 @@ int32_t lsm303agr_mag_offset_int_conf_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_offset_int_conf_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_offset_int_conf_get(stmdev_ctx_t *ctx,
                                           lsm303agr_int_on_dataoff_m_t *val)
 {
   lsm303agr_cfg_reg_b_m_t cfg_reg_b_m;
@@ -2586,7 +2569,7 @@ int32_t lsm303agr_mag_offset_int_conf_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_drdy_on_pin_set(lsm303agr_ctx_t *ctx, uint8_t val)
+int32_t lsm303agr_mag_drdy_on_pin_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm303agr_cfg_reg_c_m_t cfg_reg_c_m;
   int32_t ret;
@@ -2610,7 +2593,7 @@ int32_t lsm303agr_mag_drdy_on_pin_set(lsm303agr_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_drdy_on_pin_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_mag_drdy_on_pin_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_cfg_reg_c_m_t cfg_reg_c_m;
   int32_t ret;
@@ -2630,7 +2613,7 @@ int32_t lsm303agr_mag_drdy_on_pin_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_int_on_pin_set(lsm303agr_ctx_t *ctx, uint8_t val)
+int32_t lsm303agr_mag_int_on_pin_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm303agr_cfg_reg_c_m_t cfg_reg_c_m;
   int32_t ret;
@@ -2654,7 +2637,7 @@ int32_t lsm303agr_mag_int_on_pin_set(lsm303agr_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_int_on_pin_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_mag_int_on_pin_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_cfg_reg_c_m_t cfg_reg_c_m;
   int32_t ret;
@@ -2674,7 +2657,7 @@ int32_t lsm303agr_mag_int_on_pin_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_int_gen_conf_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_int_gen_conf_set(stmdev_ctx_t *ctx,
                                        lsm303agr_int_crtl_reg_m_t *val)
 {
   int32_t ret;
@@ -2690,7 +2673,7 @@ int32_t lsm303agr_mag_int_gen_conf_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_int_gen_conf_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_int_gen_conf_get(stmdev_ctx_t *ctx,
                                        lsm303agr_int_crtl_reg_m_t *val)
 {
   int32_t ret;
@@ -2707,7 +2690,7 @@ int32_t lsm303agr_mag_int_gen_conf_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_int_gen_source_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_int_gen_source_get(stmdev_ctx_t *ctx,
                                          lsm303agr_int_source_reg_m_t *val)
 {
   int32_t ret;
@@ -2727,7 +2710,7 @@ int32_t lsm303agr_mag_int_gen_source_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_int_gen_treshold_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_int_gen_treshold_set(stmdev_ctx_t *ctx,
                                            uint8_t *buff)
 {
   int32_t ret;
@@ -2746,7 +2729,7 @@ int32_t lsm303agr_mag_int_gen_treshold_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_int_gen_treshold_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_int_gen_treshold_get(stmdev_ctx_t *ctx,
                                            uint8_t *buff)
 {
   int32_t ret;
@@ -2775,7 +2758,7 @@ int32_t lsm303agr_mag_int_gen_treshold_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_fifo_set(lsm303agr_ctx_t *ctx, uint8_t val)
+int32_t lsm303agr_xl_fifo_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm303agr_ctrl_reg5_a_t ctrl_reg5_a;
   int32_t ret;
@@ -2799,7 +2782,7 @@ int32_t lsm303agr_xl_fifo_set(lsm303agr_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_fifo_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_xl_fifo_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_ctrl_reg5_a_t ctrl_reg5_a;
   int32_t ret;
@@ -2819,7 +2802,7 @@ int32_t lsm303agr_xl_fifo_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_fifo_watermark_set(lsm303agr_ctx_t *ctx, uint8_t val)
+int32_t lsm303agr_xl_fifo_watermark_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm303agr_fifo_ctrl_reg_a_t fifo_ctrl_reg_a;
   int32_t ret;
@@ -2843,7 +2826,7 @@ int32_t lsm303agr_xl_fifo_watermark_set(lsm303agr_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_fifo_watermark_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_xl_fifo_watermark_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_fifo_ctrl_reg_a_t fifo_ctrl_reg_a;
   int32_t ret;
@@ -2863,7 +2846,7 @@ int32_t lsm303agr_xl_fifo_watermark_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_fifo_trigger_event_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_fifo_trigger_event_set(stmdev_ctx_t *ctx,
                                         lsm303agr_tr_a_t val)
 {
   lsm303agr_fifo_ctrl_reg_a_t fifo_ctrl_reg_a;
@@ -2888,7 +2871,7 @@ int32_t lsm303agr_xl_fifo_trigger_event_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_fifo_trigger_event_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_fifo_trigger_event_get(stmdev_ctx_t *ctx,
                                             lsm303agr_tr_a_t *val)
 {
   lsm303agr_fifo_ctrl_reg_a_t fifo_ctrl_reg_a;
@@ -2919,7 +2902,7 @@ int32_t lsm303agr_xl_fifo_trigger_event_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_fifo_mode_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_fifo_mode_set(stmdev_ctx_t *ctx,
                                    lsm303agr_fm_a_t val)
 {
   lsm303agr_fifo_ctrl_reg_a_t fifo_ctrl_reg_a;
@@ -2944,7 +2927,7 @@ int32_t lsm303agr_xl_fifo_mode_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_fifo_mode_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_fifo_mode_get(stmdev_ctx_t *ctx,
                                    lsm303agr_fm_a_t *val)
 {
   lsm303agr_fifo_ctrl_reg_a_t fifo_ctrl_reg_a;
@@ -2981,7 +2964,7 @@ int32_t lsm303agr_xl_fifo_mode_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_fifo_status_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_fifo_status_get(stmdev_ctx_t *ctx,
                                      lsm303agr_fifo_src_reg_a_t *val)
 {
   int32_t ret;
@@ -2997,7 +2980,7 @@ int32_t lsm303agr_xl_fifo_status_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_fifo_data_level_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_xl_fifo_data_level_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_fifo_src_reg_a_t fifo_src_reg_a;
   int32_t ret;
@@ -3017,7 +3000,7 @@ int32_t lsm303agr_xl_fifo_data_level_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_fifo_empty_flag_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_xl_fifo_empty_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_fifo_src_reg_a_t fifo_src_reg_a;
   int32_t ret;
@@ -3037,7 +3020,7 @@ int32_t lsm303agr_xl_fifo_empty_flag_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_fifo_ovr_flag_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_xl_fifo_ovr_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_fifo_src_reg_a_t fifo_src_reg_a;
   int32_t ret;
@@ -3057,7 +3040,7 @@ int32_t lsm303agr_xl_fifo_ovr_flag_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_fifo_fth_flag_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_xl_fifo_fth_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_fifo_src_reg_a_t fifo_src_reg_a;
   int32_t ret;
@@ -3090,7 +3073,7 @@ int32_t lsm303agr_xl_fifo_fth_flag_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_tap_conf_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_tap_conf_set(stmdev_ctx_t *ctx,
                                lsm303agr_click_cfg_a_t *val)
 {
   int32_t ret;
@@ -3106,7 +3089,7 @@ int32_t lsm303agr_tap_conf_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_tap_conf_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_tap_conf_get(stmdev_ctx_t *ctx,
                                lsm303agr_click_cfg_a_t *val)
 {
   int32_t ret;
@@ -3122,7 +3105,7 @@ int32_t lsm303agr_tap_conf_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_tap_source_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_tap_source_get(stmdev_ctx_t *ctx,
                                  lsm303agr_click_src_a_t *val)
 {
   int32_t ret;
@@ -3139,7 +3122,7 @@ int32_t lsm303agr_tap_source_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_tap_threshold_set(lsm303agr_ctx_t *ctx, uint8_t val)
+int32_t lsm303agr_tap_threshold_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm303agr_click_ths_a_t click_ths_a;
   int32_t ret;
@@ -3164,7 +3147,7 @@ int32_t lsm303agr_tap_threshold_set(lsm303agr_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_tap_threshold_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_tap_threshold_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_click_ths_a_t click_ths_a;
   int32_t ret;
@@ -3186,7 +3169,7 @@ int32_t lsm303agr_tap_threshold_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_shock_dur_set(lsm303agr_ctx_t *ctx, uint8_t val)
+int32_t lsm303agr_shock_dur_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm303agr_time_limit_a_t time_limit_a;
   int32_t ret;
@@ -3212,7 +3195,7 @@ int32_t lsm303agr_shock_dur_set(lsm303agr_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_shock_dur_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_shock_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_time_limit_a_t time_limit_a;
   int32_t ret;
@@ -3235,7 +3218,7 @@ int32_t lsm303agr_shock_dur_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_quiet_dur_set(lsm303agr_ctx_t *ctx, uint8_t val)
+int32_t lsm303agr_quiet_dur_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm303agr_time_latency_a_t time_latency_a;
   int32_t ret;
@@ -3261,7 +3244,7 @@ int32_t lsm303agr_quiet_dur_set(lsm303agr_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_quiet_dur_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_quiet_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_time_latency_a_t time_latency_a;
   int32_t ret;
@@ -3284,7 +3267,7 @@ int32_t lsm303agr_quiet_dur_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_double_tap_timeout_set(lsm303agr_ctx_t *ctx, uint8_t val)
+int32_t lsm303agr_double_tap_timeout_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm303agr_time_window_a_t time_window_a;
   int32_t ret;
@@ -3311,7 +3294,7 @@ int32_t lsm303agr_double_tap_timeout_set(lsm303agr_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_double_tap_timeout_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_double_tap_timeout_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_time_window_a_t time_window_a;
   int32_t ret;
@@ -3346,7 +3329,7 @@ int32_t lsm303agr_double_tap_timeout_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_act_threshold_set(lsm303agr_ctx_t *ctx, uint8_t val)
+int32_t lsm303agr_act_threshold_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm303agr_act_ths_a_t act_ths_a;
   int32_t ret;
@@ -3372,7 +3355,7 @@ int32_t lsm303agr_act_threshold_set(lsm303agr_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_act_threshold_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_act_threshold_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_act_ths_a_t act_ths_a;
   int32_t ret;
@@ -3392,7 +3375,7 @@ int32_t lsm303agr_act_threshold_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_act_timeout_set(lsm303agr_ctx_t *ctx, uint8_t val)
+int32_t lsm303agr_act_timeout_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm303agr_act_dur_a_t act_dur_a;
   int32_t ret;
@@ -3416,7 +3399,7 @@ int32_t lsm303agr_act_timeout_set(lsm303agr_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_act_timeout_get(lsm303agr_ctx_t *ctx, uint8_t *val)
+int32_t lsm303agr_act_timeout_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm303agr_act_dur_a_t act_dur_a;
   int32_t ret;
@@ -3449,7 +3432,7 @@ int32_t lsm303agr_act_timeout_get(lsm303agr_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_spi_mode_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_spi_mode_set(stmdev_ctx_t *ctx,
                                   lsm303agr_sim_a_t val)
 {
   lsm303agr_ctrl_reg4_a_t ctrl_reg4_a;
@@ -3474,7 +3457,7 @@ int32_t lsm303agr_xl_spi_mode_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_xl_spi_mode_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_xl_spi_mode_get(stmdev_ctx_t *ctx,
                                   lsm303agr_sim_a_t *val)
 {
   lsm303agr_ctrl_reg4_a_t ctrl_reg4_a;
@@ -3505,7 +3488,7 @@ int32_t lsm303agr_xl_spi_mode_get(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_i2c_interface_set(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_i2c_interface_set(stmdev_ctx_t *ctx,
                                         lsm303agr_i2c_dis_m_t val)
 {
   lsm303agr_cfg_reg_c_m_t cfg_reg_c_m;
@@ -3530,7 +3513,7 @@ int32_t lsm303agr_mag_i2c_interface_set(lsm303agr_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303agr_mag_i2c_interface_get(lsm303agr_ctx_t *ctx,
+int32_t lsm303agr_mag_i2c_interface_get(stmdev_ctx_t *ctx,
                                         lsm303agr_i2c_dis_m_t *val)
 {
   lsm303agr_cfg_reg_c_m_t cfg_reg_c_m;

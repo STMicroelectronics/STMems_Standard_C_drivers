@@ -1,38 +1,21 @@
 /*
-  ******************************************************************************
-  * @file    lsm6dso_reg.c
-  * @author  Sensor Solutions Software Team
-  * @brief   LSM6DSO driver file
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
-  *
-  * Redistribution and use in source and binary forms, with or without
-  * modification, are permitted provided that the following conditions
-  * are met:
-  *   1. Redistributions of source code must retain the above copyright notice,
-  *      this list of conditions and the following disclaimer.
-  *   2. Redistributions in binary form must reproduce the above copyright
-  *      notice, this list of conditions and the following disclaimer in the
-  *      documentation and/or other materials provided with the distribution.
-  *   3. Neither the name of STMicroelectronics nor the names of its
-  *      contributors may be used to endorse or promote products derived from
-  *      this software without specific prior written permission.
-  *
-  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-  * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-  * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-  * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-  * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-  * POSSIBILITY OF SUCH DAMAGE.
-  *
-  */
+ ******************************************************************************
+ * @file    lsm6dso_reg.c
+ * @author  Sensors Software Solution Team
+ * @brief   LSM6DSO driver file
+ ******************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
+ *
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
+ *
+ ******************************************************************************
+ */
 
 #include "lsm6dso_reg.h"
 
@@ -63,7 +46,7 @@
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lsm6dso_read_reg(lsm6dso_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t lsm6dso_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                          uint16_t len)
 {
   int32_t ret;
@@ -81,7 +64,7 @@ int32_t lsm6dso_read_reg(lsm6dso_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lsm6dso_write_reg(lsm6dso_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t lsm6dso_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                           uint16_t len)
 {
   int32_t ret;
@@ -174,7 +157,7 @@ float_t lsm6dso_from_lsb_to_nsec(int16_t lsb)
   * @param  val      change the values of fs_xl in reg CTRL1_XL
   *
   */
-int32_t lsm6dso_xl_full_scale_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_xl_full_scale_set(stmdev_ctx_t *ctx,
                                   lsm6dso_fs_xl_t val)
 {
   lsm6dso_ctrl1_xl_t reg;
@@ -195,7 +178,7 @@ int32_t lsm6dso_xl_full_scale_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of fs_xl in reg CTRL1_XL
   *
   */
-int32_t lsm6dso_xl_full_scale_get(lsm6dso_ctx_t *ctx, lsm6dso_fs_xl_t *val)
+int32_t lsm6dso_xl_full_scale_get(stmdev_ctx_t *ctx, lsm6dso_fs_xl_t *val)
 {
   lsm6dso_ctrl1_xl_t reg;
   int32_t ret;
@@ -229,7 +212,7 @@ int32_t lsm6dso_xl_full_scale_get(lsm6dso_ctx_t *ctx, lsm6dso_fs_xl_t *val)
   * @param  val      change the values of odr_xl in reg CTRL1_XL
   *
   */
-int32_t lsm6dso_xl_data_rate_set(lsm6dso_ctx_t *ctx, lsm6dso_odr_xl_t val)
+int32_t lsm6dso_xl_data_rate_set(stmdev_ctx_t *ctx, lsm6dso_odr_xl_t val)
 {
   lsm6dso_odr_xl_t odr_xl =  val;
   lsm6dso_emb_fsm_enable_t fsm_enable;
@@ -338,7 +321,7 @@ int32_t lsm6dso_xl_data_rate_set(lsm6dso_ctx_t *ctx, lsm6dso_odr_xl_t val)
   * @param  val      Get the values of odr_xl in reg CTRL1_XL
   *
   */
-int32_t lsm6dso_xl_data_rate_get(lsm6dso_ctx_t *ctx, lsm6dso_odr_xl_t *val)
+int32_t lsm6dso_xl_data_rate_get(stmdev_ctx_t *ctx, lsm6dso_odr_xl_t *val)
 {
   lsm6dso_ctrl1_xl_t reg;
   int32_t ret;
@@ -396,7 +379,7 @@ int32_t lsm6dso_xl_data_rate_get(lsm6dso_ctx_t *ctx, lsm6dso_odr_xl_t *val)
   * @param  val      change the values of fs_g in reg CTRL2_G
   *
   */
-int32_t lsm6dso_gy_full_scale_set(lsm6dso_ctx_t *ctx, lsm6dso_fs_g_t val)
+int32_t lsm6dso_gy_full_scale_set(stmdev_ctx_t *ctx, lsm6dso_fs_g_t val)
 {
   lsm6dso_ctrl2_g_t reg;
   int32_t ret;
@@ -417,7 +400,7 @@ int32_t lsm6dso_gy_full_scale_set(lsm6dso_ctx_t *ctx, lsm6dso_fs_g_t val)
   * @param  val      Get the values of fs_g in reg CTRL2_G
   *
   */
-int32_t lsm6dso_gy_full_scale_get(lsm6dso_ctx_t *ctx, lsm6dso_fs_g_t *val)
+int32_t lsm6dso_gy_full_scale_get(stmdev_ctx_t *ctx, lsm6dso_fs_g_t *val)
 {
   lsm6dso_ctrl2_g_t reg;
   int32_t ret;
@@ -454,7 +437,7 @@ int32_t lsm6dso_gy_full_scale_get(lsm6dso_ctx_t *ctx, lsm6dso_fs_g_t *val)
   * @param  val      change the values of odr_g in reg CTRL2_G
   *
   */
-int32_t lsm6dso_gy_data_rate_set(lsm6dso_ctx_t *ctx, lsm6dso_odr_g_t val)
+int32_t lsm6dso_gy_data_rate_set(stmdev_ctx_t *ctx, lsm6dso_odr_g_t val)
 {
   lsm6dso_odr_g_t odr_gy =  val;
   lsm6dso_emb_fsm_enable_t fsm_enable;
@@ -565,7 +548,7 @@ int32_t lsm6dso_gy_data_rate_set(lsm6dso_ctx_t *ctx, lsm6dso_odr_g_t val)
   * @param  val      Get the values of odr_g in reg CTRL2_G
   *
   */
-int32_t lsm6dso_gy_data_rate_get(lsm6dso_ctx_t *ctx, lsm6dso_odr_g_t *val)
+int32_t lsm6dso_gy_data_rate_get(stmdev_ctx_t *ctx, lsm6dso_odr_g_t *val)
 {
   lsm6dso_ctrl2_g_t reg;
   int32_t ret;
@@ -619,7 +602,7 @@ int32_t lsm6dso_gy_data_rate_get(lsm6dso_ctx_t *ctx, lsm6dso_odr_g_t *val)
   * @param  val      change the values of bdu in reg CTRL3_C
   *
   */
-int32_t lsm6dso_block_data_update_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_ctrl3_c_t reg;
   int32_t ret;
@@ -639,7 +622,7 @@ int32_t lsm6dso_block_data_update_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of bdu in reg CTRL3_C
   *
   */
-int32_t lsm6dso_block_data_update_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_ctrl3_c_t reg;
   int32_t ret;
@@ -658,7 +641,7 @@ int32_t lsm6dso_block_data_update_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of usr_off_w in reg CTRL6_C
   *
   */
-int32_t lsm6dso_xl_offset_weight_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_xl_offset_weight_set(stmdev_ctx_t *ctx,
                                      lsm6dso_usr_off_w_t val)
 {
   lsm6dso_ctrl6_c_t reg;
@@ -680,7 +663,7 @@ int32_t lsm6dso_xl_offset_weight_set(lsm6dso_ctx_t *ctx,
   * @param    val      Get the values of usr_off_w in reg CTRL6_C
   *
   */
-int32_t lsm6dso_xl_offset_weight_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_xl_offset_weight_get(stmdev_ctx_t *ctx,
                                      lsm6dso_usr_off_w_t *val)
 {
   lsm6dso_ctrl6_c_t reg;
@@ -710,7 +693,7 @@ int32_t lsm6dso_xl_offset_weight_get(lsm6dso_ctx_t *ctx,
   *                               reg CTRL6_C
   *
   */
-int32_t lsm6dso_xl_power_mode_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_xl_power_mode_set(stmdev_ctx_t *ctx,
                                   lsm6dso_xl_hm_mode_t val)
 {
   lsm6dso_ctrl5_c_t ctrl5_c;
@@ -739,7 +722,7 @@ int32_t lsm6dso_xl_power_mode_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of xl_hm_mode in reg CTRL6_C
   *
   */
-int32_t lsm6dso_xl_power_mode_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_xl_power_mode_get(stmdev_ctx_t *ctx,
                                   lsm6dso_xl_hm_mode_t *val)
 {
   lsm6dso_ctrl5_c_t ctrl5_c;
@@ -774,7 +757,7 @@ int32_t lsm6dso_xl_power_mode_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of g_hm_mode in reg CTRL7_G
   *
   */
-int32_t lsm6dso_gy_power_mode_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_gy_power_mode_set(stmdev_ctx_t *ctx,
                                   lsm6dso_g_hm_mode_t val)
 {
   lsm6dso_ctrl7_g_t reg;
@@ -795,7 +778,7 @@ int32_t lsm6dso_gy_power_mode_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of g_hm_mode in reg CTRL7_G
   *
   */
-int32_t lsm6dso_gy_power_mode_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_gy_power_mode_get(stmdev_ctx_t *ctx,
                                   lsm6dso_g_hm_mode_t *val)
 {
   lsm6dso_ctrl7_g_t reg;
@@ -825,7 +808,7 @@ int32_t lsm6dso_gy_power_mode_get(lsm6dso_ctx_t *ctx,
   *                              EMB_FUNC_STATUS; FSM_STATUS_A/B
   *
   */
-int32_t lsm6dso_all_sources_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_all_sources_get(stmdev_ctx_t *ctx,
                                 lsm6dso_all_sources_t *val)
 {
   int32_t ret;
@@ -877,7 +860,7 @@ int32_t lsm6dso_all_sources_get(lsm6dso_ctx_t *ctx,
   * @param  val      register STATUS_REG
   *
   */
-int32_t lsm6dso_status_reg_get(lsm6dso_ctx_t *ctx, lsm6dso_status_reg_t *val)
+int32_t lsm6dso_status_reg_get(stmdev_ctx_t *ctx, lsm6dso_status_reg_t *val)
 {
   int32_t ret;
   ret = lsm6dso_read_reg(ctx, LSM6DSO_STATUS_REG, (uint8_t*) val, 1);
@@ -891,7 +874,7 @@ int32_t lsm6dso_status_reg_get(lsm6dso_ctx_t *ctx, lsm6dso_status_reg_t *val)
   * @param  val      change the values of xlda in reg STATUS_REG
   *
   */
-int32_t lsm6dso_xl_flag_data_ready_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_xl_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_status_reg_t reg;
   int32_t ret;
@@ -909,7 +892,7 @@ int32_t lsm6dso_xl_flag_data_ready_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of gda in reg STATUS_REG
   *
   */
-int32_t lsm6dso_gy_flag_data_ready_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_gy_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_status_reg_t reg;
   int32_t ret;
@@ -927,7 +910,7 @@ int32_t lsm6dso_gy_flag_data_ready_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of tda in reg STATUS_REG
   *
   */
-int32_t lsm6dso_temp_flag_data_ready_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_temp_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_status_reg_t reg;
   int32_t ret;
@@ -947,7 +930,7 @@ int32_t lsm6dso_temp_flag_data_ready_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  buff     buffer that contains data to write
   *
   */
-int32_t lsm6dso_xl_usr_offset_x_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_xl_usr_offset_x_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm6dso_write_reg(ctx, LSM6DSO_X_OFS_USR, buff, 1);
@@ -963,7 +946,7 @@ int32_t lsm6dso_xl_usr_offset_x_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dso_xl_usr_offset_x_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_xl_usr_offset_x_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm6dso_read_reg(ctx, LSM6DSO_X_OFS_USR, buff, 1);
@@ -979,7 +962,7 @@ int32_t lsm6dso_xl_usr_offset_x_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that contains data to write
   *
   */
-int32_t lsm6dso_xl_usr_offset_y_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_xl_usr_offset_y_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm6dso_write_reg(ctx, LSM6DSO_Y_OFS_USR, buff, 1);
@@ -995,7 +978,7 @@ int32_t lsm6dso_xl_usr_offset_y_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dso_xl_usr_offset_y_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_xl_usr_offset_y_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm6dso_read_reg(ctx, LSM6DSO_Y_OFS_USR, buff, 1);
@@ -1011,7 +994,7 @@ int32_t lsm6dso_xl_usr_offset_y_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that contains data to write
   *
   */
-int32_t lsm6dso_xl_usr_offset_z_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_xl_usr_offset_z_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm6dso_write_reg(ctx, LSM6DSO_Z_OFS_USR, buff, 1);
@@ -1027,7 +1010,7 @@ int32_t lsm6dso_xl_usr_offset_z_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dso_xl_usr_offset_z_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_xl_usr_offset_z_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm6dso_read_reg(ctx, LSM6DSO_Z_OFS_USR, buff, 1);
@@ -1041,7 +1024,7 @@ int32_t lsm6dso_xl_usr_offset_z_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  val      change the values of usr_off_on_out in reg CTRL7_G
   *
   */
-int32_t lsm6dso_xl_usr_offset_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_xl_usr_offset_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_ctrl7_g_t reg;
   int32_t ret;
@@ -1061,7 +1044,7 @@ int32_t lsm6dso_xl_usr_offset_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      values of usr_off_on_out in reg CTRL7_G
   *
   */
-int32_t lsm6dso_xl_usr_offset_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_xl_usr_offset_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_ctrl7_g_t reg;
   int32_t ret;
@@ -1092,7 +1075,7 @@ int32_t lsm6dso_xl_usr_offset_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of timestamp_en in reg CTRL10_C
   *
   */
-int32_t lsm6dso_timestamp_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_timestamp_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_ctrl10_c_t reg;
   int32_t ret;
@@ -1112,7 +1095,7 @@ int32_t lsm6dso_timestamp_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of timestamp_en in reg CTRL10_C
   *
   */
-int32_t lsm6dso_timestamp_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_timestamp_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_ctrl10_c_t reg;
   int32_t ret;
@@ -1132,7 +1115,7 @@ int32_t lsm6dso_timestamp_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dso_timestamp_raw_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_timestamp_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm6dso_read_reg(ctx, LSM6DSO_TIMESTAMP0, buff, 4);
@@ -1159,7 +1142,7 @@ int32_t lsm6dso_timestamp_raw_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  val      change the values of rounding in reg CTRL5_C
   *
   */
-int32_t lsm6dso_rounding_mode_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_rounding_mode_set(stmdev_ctx_t *ctx,
                                   lsm6dso_rounding_t val)
 {
   lsm6dso_ctrl5_c_t reg;
@@ -1180,7 +1163,7 @@ int32_t lsm6dso_rounding_mode_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of rounding in reg CTRL5_C
   *
   */
-int32_t lsm6dso_rounding_mode_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_rounding_mode_get(stmdev_ctx_t *ctx,
                                   lsm6dso_rounding_t *val)
 {
   lsm6dso_ctrl5_c_t reg;
@@ -1216,7 +1199,7 @@ int32_t lsm6dso_rounding_mode_get(lsm6dso_ctx_t *ctx,
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dso_temperature_raw_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm6dso_read_reg(ctx, LSM6DSO_OUT_TEMP_L, buff, 2);
@@ -1231,7 +1214,7 @@ int32_t lsm6dso_temperature_raw_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dso_angular_rate_raw_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm6dso_read_reg(ctx, LSM6DSO_OUTX_L_G, buff, 6);
@@ -1246,7 +1229,7 @@ int32_t lsm6dso_angular_rate_raw_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dso_acceleration_raw_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm6dso_read_reg(ctx, LSM6DSO_OUTX_L_A, buff, 6);
@@ -1260,7 +1243,7 @@ int32_t lsm6dso_acceleration_raw_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dso_fifo_out_raw_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_fifo_out_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm6dso_read_reg(ctx, LSM6DSO_FIFO_DATA_OUT_X_L, buff, 6);
@@ -1274,7 +1257,7 @@ int32_t lsm6dso_fifo_out_raw_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dso_number_of_steps_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_number_of_steps_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
 
@@ -1294,7 +1277,7 @@ int32_t lsm6dso_number_of_steps_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  ctx      read / write interface definitions
   *
   */
-int32_t lsm6dso_steps_reset(lsm6dso_ctx_t *ctx)
+int32_t lsm6dso_steps_reset(stmdev_ctx_t *ctx)
 {
   lsm6dso_emb_func_src_t reg;
   int32_t ret;
@@ -1335,7 +1318,7 @@ int32_t lsm6dso_steps_reset(lsm6dso_ctx_t *ctx)
   *                      INTERNAL_FREQ_FINE
   *
   */
-int32_t lsm6dso_odr_cal_reg_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_odr_cal_reg_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_internal_freq_fine_t reg;
   int32_t ret;
@@ -1358,7 +1341,7 @@ int32_t lsm6dso_odr_cal_reg_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of freq_fine in reg INTERNAL_FREQ_FINE
   *
   */
-int32_t lsm6dso_odr_cal_reg_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_odr_cal_reg_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_internal_freq_fine_t reg;
   int32_t ret;
@@ -1379,7 +1362,7 @@ int32_t lsm6dso_odr_cal_reg_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   *                               reg FUNC_CFG_ACCESS
   *
   */
-int32_t lsm6dso_mem_bank_set(lsm6dso_ctx_t *ctx, lsm6dso_reg_access_t val)
+int32_t lsm6dso_mem_bank_set(stmdev_ctx_t *ctx, lsm6dso_reg_access_t val)
 {
   lsm6dso_func_cfg_access_t reg;
   int32_t ret;
@@ -1401,7 +1384,7 @@ int32_t lsm6dso_mem_bank_set(lsm6dso_ctx_t *ctx, lsm6dso_reg_access_t val)
   *                               reg FUNC_CFG_ACCESS
   *
   */
-int32_t lsm6dso_mem_bank_get(lsm6dso_ctx_t *ctx, lsm6dso_reg_access_t *val)
+int32_t lsm6dso_mem_bank_get(stmdev_ctx_t *ctx, lsm6dso_reg_access_t *val)
 {
   lsm6dso_func_cfg_access_t reg;
   int32_t ret;
@@ -1432,7 +1415,7 @@ int32_t lsm6dso_mem_bank_get(lsm6dso_ctx_t *ctx, lsm6dso_reg_access_t *val)
   * @param  val      value to write
   *
   */
-int32_t lsm6dso_ln_pg_write_byte(lsm6dso_ctx_t *ctx, uint16_t address,
+int32_t lsm6dso_ln_pg_write_byte(stmdev_ctx_t *ctx, uint16_t address,
                                  uint8_t *val)
 {
   lsm6dso_page_rw_t page_rw;
@@ -1489,7 +1472,7 @@ int32_t lsm6dso_ln_pg_write_byte(lsm6dso_ctx_t *ctx, uint16_t address,
   * @param  uint8_t len: buffer len
   *
   */
-int32_t lsm6dso_ln_pg_write(lsm6dso_ctx_t *ctx, uint16_t address,
+int32_t lsm6dso_ln_pg_write(stmdev_ctx_t *ctx, uint16_t address,
                             uint8_t *buf, uint8_t len)
 {
   lsm6dso_page_rw_t page_rw;
@@ -1564,7 +1547,7 @@ int32_t lsm6dso_ln_pg_write(lsm6dso_ctx_t *ctx, uint16_t address,
   * @param  val      read value
   *
   */
-int32_t lsm6dso_ln_pg_read_byte(lsm6dso_ctx_t *ctx, uint16_t address,
+int32_t lsm6dso_ln_pg_read_byte(stmdev_ctx_t *ctx, uint16_t address,
                                 uint8_t *val)
 {
   lsm6dso_page_rw_t page_rw;
@@ -1622,7 +1605,7 @@ int32_t lsm6dso_ln_pg_read_byte(lsm6dso_ctx_t *ctx, uint16_t address,
   *                                     reg COUNTER_BDR_REG1
   *
   */
-int32_t lsm6dso_data_ready_mode_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_data_ready_mode_set(stmdev_ctx_t *ctx,
                                     lsm6dso_dataready_pulsed_t val)
 {
   lsm6dso_counter_bdr_reg1_t reg;
@@ -1645,7 +1628,7 @@ int32_t lsm6dso_data_ready_mode_set(lsm6dso_ctx_t *ctx,
   *                                     reg COUNTER_BDR_REG1
   *
   */
-int32_t lsm6dso_data_ready_mode_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_data_ready_mode_get(stmdev_ctx_t *ctx,
                                     lsm6dso_dataready_pulsed_t *val)
 {
   lsm6dso_counter_bdr_reg1_t reg;
@@ -1673,7 +1656,7 @@ int32_t lsm6dso_data_ready_mode_get(lsm6dso_ctx_t *ctx,
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dso_device_id_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm6dso_read_reg(ctx, LSM6DSO_WHO_AM_I, buff, 1);
@@ -1688,7 +1671,7 @@ int32_t lsm6dso_device_id_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  val      change the values of sw_reset in reg CTRL3_C
   *
   */
-int32_t lsm6dso_reset_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_reset_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_ctrl3_c_t reg;
   int32_t ret;
@@ -1709,7 +1692,7 @@ int32_t lsm6dso_reset_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of sw_reset in reg CTRL3_C
   *
   */
-int32_t lsm6dso_reset_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_reset_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_ctrl3_c_t reg;
   int32_t ret;
@@ -1728,7 +1711,7 @@ int32_t lsm6dso_reset_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of if_inc in reg CTRL3_C
   *
   */
-int32_t lsm6dso_auto_increment_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_auto_increment_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_ctrl3_c_t reg;
   int32_t ret;
@@ -1749,7 +1732,7 @@ int32_t lsm6dso_auto_increment_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of if_inc in reg CTRL3_C
   *
   */
-int32_t lsm6dso_auto_increment_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_auto_increment_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_ctrl3_c_t reg;
   int32_t ret;
@@ -1767,7 +1750,7 @@ int32_t lsm6dso_auto_increment_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of boot in reg CTRL3_C
   *
   */
-int32_t lsm6dso_boot_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_boot_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_ctrl3_c_t reg;
   int32_t ret;
@@ -1787,7 +1770,7 @@ int32_t lsm6dso_boot_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of boot in reg CTRL3_C
   *
   */
-int32_t lsm6dso_boot_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_boot_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_ctrl3_c_t reg;
   int32_t ret;
@@ -1805,7 +1788,7 @@ int32_t lsm6dso_boot_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of st_xl in reg CTRL5_C
   *
   */
-int32_t lsm6dso_xl_self_test_set(lsm6dso_ctx_t *ctx, lsm6dso_st_xl_t val)
+int32_t lsm6dso_xl_self_test_set(stmdev_ctx_t *ctx, lsm6dso_st_xl_t val)
 {
   lsm6dso_ctrl5_c_t reg;
   int32_t ret;
@@ -1825,7 +1808,7 @@ int32_t lsm6dso_xl_self_test_set(lsm6dso_ctx_t *ctx, lsm6dso_st_xl_t val)
   * @param  val      Get the values of st_xl in reg CTRL5_C
   *
   */
-int32_t lsm6dso_xl_self_test_get(lsm6dso_ctx_t *ctx, lsm6dso_st_xl_t *val)
+int32_t lsm6dso_xl_self_test_get(stmdev_ctx_t *ctx, lsm6dso_st_xl_t *val)
 {
   lsm6dso_ctrl5_c_t reg;
   int32_t ret;
@@ -1855,7 +1838,7 @@ int32_t lsm6dso_xl_self_test_get(lsm6dso_ctx_t *ctx, lsm6dso_st_xl_t *val)
   * @param  val      change the values of st_g in reg CTRL5_C
   *
   */
-int32_t lsm6dso_gy_self_test_set(lsm6dso_ctx_t *ctx, lsm6dso_st_g_t val)
+int32_t lsm6dso_gy_self_test_set(stmdev_ctx_t *ctx, lsm6dso_st_g_t val)
 {
   lsm6dso_ctrl5_c_t reg;
   int32_t ret;
@@ -1875,7 +1858,7 @@ int32_t lsm6dso_gy_self_test_set(lsm6dso_ctx_t *ctx, lsm6dso_st_g_t val)
   * @param  val      Get the values of st_g in reg CTRL5_C
   *
   */
-int32_t lsm6dso_gy_self_test_get(lsm6dso_ctx_t *ctx, lsm6dso_st_g_t *val)
+int32_t lsm6dso_gy_self_test_get(stmdev_ctx_t *ctx, lsm6dso_st_g_t *val)
 {
   lsm6dso_ctrl5_c_t reg;
   int32_t ret;
@@ -1918,7 +1901,7 @@ int32_t lsm6dso_gy_self_test_get(lsm6dso_ctx_t *ctx, lsm6dso_st_g_t *val)
   * @param  val      change the values of lpf2_xl_en in reg CTRL1_XL
   *
   */
-int32_t lsm6dso_xl_filter_lp2_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_xl_filter_lp2_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_ctrl1_xl_t reg;
   int32_t ret;
@@ -1938,7 +1921,7 @@ int32_t lsm6dso_xl_filter_lp2_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of lpf2_xl_en in reg CTRL1_XL
   *
   */
-int32_t lsm6dso_xl_filter_lp2_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_xl_filter_lp2_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_ctrl1_xl_t reg;
   int32_t ret;
@@ -1958,7 +1941,7 @@ int32_t lsm6dso_xl_filter_lp2_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of lpf1_sel_g in reg CTRL4_C
   *
   */
-int32_t lsm6dso_gy_filter_lp1_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_gy_filter_lp1_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_ctrl4_c_t reg;
   int32_t ret;
@@ -1980,7 +1963,7 @@ int32_t lsm6dso_gy_filter_lp1_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of lpf1_sel_g in reg CTRL4_C
   *
   */
-int32_t lsm6dso_gy_filter_lp1_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_gy_filter_lp1_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_ctrl4_c_t reg;
   int32_t ret;
@@ -1999,7 +1982,7 @@ int32_t lsm6dso_gy_filter_lp1_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of drdy_mask in reg CTRL4_C
   *
   */
-int32_t lsm6dso_filter_settling_mask_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_filter_settling_mask_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_ctrl4_c_t reg;
   int32_t ret;
@@ -2020,7 +2003,7 @@ int32_t lsm6dso_filter_settling_mask_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of drdy_mask in reg CTRL4_C
   *
   */
-int32_t lsm6dso_filter_settling_mask_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_filter_settling_mask_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_ctrl4_c_t reg;
   int32_t ret;
@@ -2038,7 +2021,7 @@ int32_t lsm6dso_filter_settling_mask_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of ftype in reg CTRL6_C
   *
   */
-int32_t lsm6dso_gy_lp1_bandwidth_set(lsm6dso_ctx_t *ctx, lsm6dso_ftype_t val)
+int32_t lsm6dso_gy_lp1_bandwidth_set(stmdev_ctx_t *ctx, lsm6dso_ftype_t val)
 {
   lsm6dso_ctrl6_c_t reg;
   int32_t ret;
@@ -2058,7 +2041,7 @@ int32_t lsm6dso_gy_lp1_bandwidth_set(lsm6dso_ctx_t *ctx, lsm6dso_ftype_t val)
   * @param  val       Get the values of ftype in reg CTRL6_C
   *
   */
-int32_t lsm6dso_gy_lp1_bandwidth_get(lsm6dso_ctx_t *ctx, lsm6dso_ftype_t *val)
+int32_t lsm6dso_gy_lp1_bandwidth_get(stmdev_ctx_t *ctx, lsm6dso_ftype_t *val)
 {
   lsm6dso_ctrl6_c_t reg;
   int32_t ret;
@@ -2103,7 +2086,7 @@ int32_t lsm6dso_gy_lp1_bandwidth_get(lsm6dso_ctx_t *ctx, lsm6dso_ftype_t *val)
   * @param  val      change the values of low_pass_on_6d in reg CTRL8_XL
   *
   */
-int32_t lsm6dso_xl_lp2_on_6d_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_xl_lp2_on_6d_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_ctrl8_xl_t reg;
   int32_t ret;
@@ -2123,7 +2106,7 @@ int32_t lsm6dso_xl_lp2_on_6d_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of low_pass_on_6d in reg CTRL8_XL
   *
   */
-int32_t lsm6dso_xl_lp2_on_6d_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_xl_lp2_on_6d_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_ctrl8_xl_t reg;
   int32_t ret;
@@ -2143,7 +2126,7 @@ int32_t lsm6dso_xl_lp2_on_6d_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   *                                   in reg CTRL8_XL
   *
   */
-int32_t lsm6dso_xl_hp_path_on_out_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_xl_hp_path_on_out_set(stmdev_ctx_t *ctx,
                                       lsm6dso_hp_slope_xl_en_t val)
 {
   lsm6dso_ctrl8_xl_t reg;
@@ -2168,7 +2151,7 @@ int32_t lsm6dso_xl_hp_path_on_out_set(lsm6dso_ctx_t *ctx,
   *                                   in reg CTRL8_XL
   *
   */
-int32_t lsm6dso_xl_hp_path_on_out_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_xl_hp_path_on_out_get(stmdev_ctx_t *ctx,
                                       lsm6dso_hp_slope_xl_en_t *val)
 {
   lsm6dso_ctrl8_xl_t reg;
@@ -2264,7 +2247,7 @@ int32_t lsm6dso_xl_hp_path_on_out_get(lsm6dso_ctx_t *ctx,
   *                  reg CTRL8_XL
   *
   */
-int32_t lsm6dso_xl_fast_settling_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_xl_fast_settling_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_ctrl8_xl_t reg;
   int32_t ret;
@@ -2286,7 +2269,7 @@ int32_t lsm6dso_xl_fast_settling_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of fastsettl_mode_xl in reg CTRL8_XL
   *
   */
-int32_t lsm6dso_xl_fast_settling_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_xl_fast_settling_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_ctrl8_xl_t reg;
   int32_t ret;
@@ -2305,7 +2288,7 @@ int32_t lsm6dso_xl_fast_settling_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of slope_fds in reg TAP_CFG0
   *
   */
-int32_t lsm6dso_xl_hp_path_internal_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_xl_hp_path_internal_set(stmdev_ctx_t *ctx,
                                         lsm6dso_slope_fds_t val)
 {
   lsm6dso_tap_cfg0_t reg;
@@ -2327,7 +2310,7 @@ int32_t lsm6dso_xl_hp_path_internal_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of slope_fds in reg TAP_CFG0
   *
   */
-int32_t lsm6dso_xl_hp_path_internal_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_xl_hp_path_internal_get(stmdev_ctx_t *ctx,
                                         lsm6dso_slope_fds_t *val)
 {
   lsm6dso_tap_cfg0_t reg;
@@ -2357,7 +2340,7 @@ int32_t lsm6dso_xl_hp_path_internal_get(lsm6dso_ctx_t *ctx,
   *                            in reg CTRL7_G
   *
   */
-int32_t lsm6dso_gy_hp_path_internal_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_gy_hp_path_internal_set(stmdev_ctx_t *ctx,
                                         lsm6dso_hpm_g_t val)
 {
   lsm6dso_ctrl7_g_t reg;
@@ -2381,7 +2364,7 @@ int32_t lsm6dso_gy_hp_path_internal_set(lsm6dso_ctx_t *ctx,
   *                            in reg CTRL7_G
   *
   */
-int32_t lsm6dso_gy_hp_path_internal_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_gy_hp_path_internal_get(stmdev_ctx_t *ctx,
                                         lsm6dso_hpm_g_t *val)
 {
   lsm6dso_ctrl7_g_t reg;
@@ -2433,7 +2416,7 @@ int32_t lsm6dso_gy_hp_path_internal_get(lsm6dso_ctx_t *ctx,
   *                               reg PIN_CTRL
   *
   */
-int32_t lsm6dso_aux_sdo_ocs_mode_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_sdo_ocs_mode_set(stmdev_ctx_t *ctx,
                                      lsm6dso_ois_pu_dis_t val)
 {
   lsm6dso_pin_ctrl_t reg;
@@ -2455,7 +2438,7 @@ int32_t lsm6dso_aux_sdo_ocs_mode_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of ois_pu_dis in reg PIN_CTRL
   *
   */
-int32_t lsm6dso_aux_sdo_ocs_mode_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_sdo_ocs_mode_get(stmdev_ctx_t *ctx,
                                      lsm6dso_ois_pu_dis_t *val)
 {
   lsm6dso_pin_ctrl_t reg;
@@ -2483,7 +2466,7 @@ int32_t lsm6dso_aux_sdo_ocs_mode_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of ois_on in reg CTRL7_G
   *
   */
-int32_t lsm6dso_aux_pw_on_ctrl_set(lsm6dso_ctx_t *ctx, lsm6dso_ois_on_t val)
+int32_t lsm6dso_aux_pw_on_ctrl_set(stmdev_ctx_t *ctx, lsm6dso_ois_on_t val)
 {
   lsm6dso_ctrl7_g_t reg;
   int32_t ret;
@@ -2504,7 +2487,7 @@ int32_t lsm6dso_aux_pw_on_ctrl_set(lsm6dso_ctx_t *ctx, lsm6dso_ois_on_t val)
   * @param  val      Get the values of ois_on in reg CTRL7_G
   *
   */
-int32_t lsm6dso_aux_pw_on_ctrl_get(lsm6dso_ctx_t *ctx, lsm6dso_ois_on_t *val)
+int32_t lsm6dso_aux_pw_on_ctrl_get(stmdev_ctx_t *ctx, lsm6dso_ois_on_t *val)
 {
   lsm6dso_ctrl7_g_t reg;
   int32_t ret;
@@ -2538,7 +2521,7 @@ int32_t lsm6dso_aux_pw_on_ctrl_get(lsm6dso_ctx_t *ctx, lsm6dso_ois_on_t *val)
   *                               reg CTRL8_XL
   *
   */
-int32_t lsm6dso_aux_xl_fs_mode_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_xl_fs_mode_set(stmdev_ctx_t *ctx,
                                    lsm6dso_xl_fs_mode_t val)
 {
   lsm6dso_ctrl8_xl_t reg;
@@ -2564,7 +2547,7 @@ int32_t lsm6dso_aux_xl_fs_mode_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of xl_fs_mode in reg CTRL8_XL
   *
   */
-int32_t lsm6dso_aux_xl_fs_mode_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_xl_fs_mode_get(stmdev_ctx_t *ctx,
                                    lsm6dso_xl_fs_mode_t *val)
 {
   lsm6dso_ctrl8_xl_t reg;
@@ -2593,7 +2576,7 @@ int32_t lsm6dso_aux_xl_fs_mode_get(lsm6dso_ctx_t *ctx,
   * @param  lsm6dso_status_spiaux_t: registers STATUS_SPIAUX
   *
   */
-int32_t lsm6dso_aux_status_reg_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_status_reg_get(stmdev_ctx_t *ctx,
                                    lsm6dso_status_spiaux_t *val)
 {
   int32_t ret;
@@ -2608,7 +2591,7 @@ int32_t lsm6dso_aux_status_reg_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of xlda in reg STATUS_SPIAUX
   *
   */
-int32_t lsm6dso_aux_xl_flag_data_ready_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_aux_xl_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_status_spiaux_t reg;
   int32_t ret;
@@ -2626,7 +2609,7 @@ int32_t lsm6dso_aux_xl_flag_data_ready_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of gda in reg STATUS_SPIAUX
   *
   */
-int32_t lsm6dso_aux_gy_flag_data_ready_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_aux_gy_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_status_spiaux_t reg;
   int32_t ret;
@@ -2644,7 +2627,7 @@ int32_t lsm6dso_aux_gy_flag_data_ready_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of gyro_settling in reg STATUS_SPIAUX
   *
   */
-int32_t lsm6dso_aux_gy_flag_settling_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_aux_gy_flag_settling_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_status_spiaux_t reg;
   int32_t ret;
@@ -2663,7 +2646,7 @@ int32_t lsm6dso_aux_gy_flag_settling_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of st_xl_ois in reg INT_OIS
   *
   */
-int32_t lsm6dso_aux_xl_self_test_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_xl_self_test_set(stmdev_ctx_t *ctx,
                                      lsm6dso_st_xl_ois_t val)
 {
   lsm6dso_int_ois_t reg;
@@ -2685,7 +2668,7 @@ int32_t lsm6dso_aux_xl_self_test_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of st_xl_ois in reg INT_OIS
   *
   */
-int32_t lsm6dso_aux_xl_self_test_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_xl_self_test_get(stmdev_ctx_t *ctx,
                                      lsm6dso_st_xl_ois_t *val)
 {
   lsm6dso_int_ois_t reg;
@@ -2717,7 +2700,7 @@ int32_t lsm6dso_aux_xl_self_test_get(lsm6dso_ctx_t *ctx,
   *                  reg INT_OIS
   *
   */
-int32_t lsm6dso_aux_den_polarity_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_den_polarity_set(stmdev_ctx_t *ctx,
                                      lsm6dso_den_lh_ois_t val)
 {
   lsm6dso_int_ois_t reg;
@@ -2738,7 +2721,7 @@ int32_t lsm6dso_aux_den_polarity_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of den_lh_ois in reg INT_OIS
   *
   */
-int32_t lsm6dso_aux_den_polarity_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_den_polarity_get(stmdev_ctx_t *ctx,
                                      lsm6dso_den_lh_ois_t *val)
 {
   lsm6dso_int_ois_t reg;
@@ -2766,7 +2749,7 @@ int32_t lsm6dso_aux_den_polarity_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of lvl2_ois in reg INT_OIS
   *
   */
-int32_t lsm6dso_aux_den_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_lvl2_ois_t val)
+int32_t lsm6dso_aux_den_mode_set(stmdev_ctx_t *ctx, lsm6dso_lvl2_ois_t val)
 {
   lsm6dso_ctrl1_ois_t ctrl1_ois;
   lsm6dso_int_ois_t int_ois;
@@ -2794,7 +2777,7 @@ int32_t lsm6dso_aux_den_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_lvl2_ois_t val)
   * @param  val      Get the values of lvl2_ois in reg INT_OIS
   *
   */
-int32_t lsm6dso_aux_den_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_lvl2_ois_t *val)
+int32_t lsm6dso_aux_den_mode_get(stmdev_ctx_t *ctx, lsm6dso_lvl2_ois_t *val)
 {
   lsm6dso_ctrl1_ois_t ctrl1_ois;
   lsm6dso_int_ois_t int_ois;
@@ -2829,7 +2812,7 @@ int32_t lsm6dso_aux_den_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_lvl2_ois_t *val)
   * @param  val      change the values of int2_drdy_ois in reg INT_OIS
   *
   */
-int32_t lsm6dso_aux_drdy_on_int2_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_aux_drdy_on_int2_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_int_ois_t reg;
   int32_t ret;
@@ -2850,7 +2833,7 @@ int32_t lsm6dso_aux_drdy_on_int2_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of int2_drdy_ois in reg INT_OIS
   *
   */
-int32_t lsm6dso_aux_drdy_on_int2_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_aux_drdy_on_int2_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_int_ois_t reg;
   int32_t ret;
@@ -2874,7 +2857,7 @@ int32_t lsm6dso_aux_drdy_on_int2_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   *                                reg CTRL1_OIS
   *
   */
-int32_t lsm6dso_aux_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_ois_en_spi2_t val)
+int32_t lsm6dso_aux_mode_set(stmdev_ctx_t *ctx, lsm6dso_ois_en_spi2_t val)
 {
   lsm6dso_ctrl1_ois_t reg;
   int32_t ret;
@@ -2901,7 +2884,7 @@ int32_t lsm6dso_aux_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_ois_en_spi2_t val)
   *                                reg CTRL1_OIS
   *
   */
-int32_t lsm6dso_aux_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_ois_en_spi2_t *val)
+int32_t lsm6dso_aux_mode_get(stmdev_ctx_t *ctx, lsm6dso_ois_en_spi2_t *val)
 {
   lsm6dso_ctrl1_ois_t reg;
   int32_t ret;
@@ -2931,7 +2914,7 @@ int32_t lsm6dso_aux_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_ois_en_spi2_t *val)
   * @param  val      change the values of fs_g_ois in reg CTRL1_OIS
   *
   */
-int32_t lsm6dso_aux_gy_full_scale_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_gy_full_scale_set(stmdev_ctx_t *ctx,
                                       lsm6dso_fs_g_ois_t val)
 {
   lsm6dso_ctrl1_ois_t reg;
@@ -2952,7 +2935,7 @@ int32_t lsm6dso_aux_gy_full_scale_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of fs_g_ois in reg CTRL1_OIS
   *
   */
-int32_t lsm6dso_aux_gy_full_scale_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_gy_full_scale_get(stmdev_ctx_t *ctx,
                                       lsm6dso_fs_g_ois_t *val)
 {
   lsm6dso_ctrl1_ois_t reg;
@@ -2989,7 +2972,7 @@ int32_t lsm6dso_aux_gy_full_scale_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of sim_ois in reg CTRL1_OIS
   *
   */
-int32_t lsm6dso_aux_spi_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_sim_ois_t val)
+int32_t lsm6dso_aux_spi_mode_set(stmdev_ctx_t *ctx, lsm6dso_sim_ois_t val)
 {
   lsm6dso_ctrl1_ois_t reg;
   int32_t ret;
@@ -3009,7 +2992,7 @@ int32_t lsm6dso_aux_spi_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_sim_ois_t val)
   * @param  val      Get the values of sim_ois in reg CTRL1_OIS
   *
   */
-int32_t lsm6dso_aux_spi_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_sim_ois_t *val)
+int32_t lsm6dso_aux_spi_mode_get(stmdev_ctx_t *ctx, lsm6dso_sim_ois_t *val)
 {
   lsm6dso_ctrl1_ois_t reg;
   int32_t ret;
@@ -3037,7 +3020,7 @@ int32_t lsm6dso_aux_spi_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_sim_ois_t *val)
   *                              reg CTRL2_OIS
   *
   */
-int32_t lsm6dso_aux_gy_lp1_bandwidth_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_gy_lp1_bandwidth_set(stmdev_ctx_t *ctx,
                                          lsm6dso_ftype_ois_t val)
 {
   lsm6dso_ctrl2_ois_t reg;
@@ -3058,7 +3041,7 @@ int32_t lsm6dso_aux_gy_lp1_bandwidth_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of ftype_ois in reg CTRL2_OIS
   *
   */
-int32_t lsm6dso_aux_gy_lp1_bandwidth_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_gy_lp1_bandwidth_get(stmdev_ctx_t *ctx,
                                          lsm6dso_ftype_ois_t *val)
 {
   lsm6dso_ctrl2_ois_t reg;
@@ -3092,7 +3075,7 @@ int32_t lsm6dso_aux_gy_lp1_bandwidth_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of hpm_ois in reg CTRL2_OIS
   *
   */
-int32_t lsm6dso_aux_gy_hp_bandwidth_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_gy_hp_bandwidth_set(stmdev_ctx_t *ctx,
                                         lsm6dso_hpm_ois_t val)
 {
   lsm6dso_ctrl2_ois_t reg;
@@ -3114,7 +3097,7 @@ int32_t lsm6dso_aux_gy_hp_bandwidth_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of hpm_ois in reg CTRL2_OIS
   *
   */
-int32_t lsm6dso_aux_gy_hp_bandwidth_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_gy_hp_bandwidth_get(stmdev_ctx_t *ctx,
                                         lsm6dso_hpm_ois_t *val)
 {
   lsm6dso_ctrl2_ois_t reg;
@@ -3156,7 +3139,7 @@ int32_t lsm6dso_aux_gy_hp_bandwidth_get(lsm6dso_ctx_t *ctx,
   *                                    reg CTRL3_OIS
   *
   */
-int32_t lsm6dso_aux_gy_clamp_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_gy_clamp_set(stmdev_ctx_t *ctx,
                                  lsm6dso_st_ois_clampdis_t val)
 {
   lsm6dso_ctrl3_ois_t reg;
@@ -3182,7 +3165,7 @@ int32_t lsm6dso_aux_gy_clamp_set(lsm6dso_ctx_t *ctx,
   *                                    reg CTRL3_OIS
   *
   */
-int32_t lsm6dso_aux_gy_clamp_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_gy_clamp_get(stmdev_ctx_t *ctx,
                                  lsm6dso_st_ois_clampdis_t *val)
 {
   lsm6dso_ctrl3_ois_t reg;
@@ -3210,7 +3193,7 @@ int32_t lsm6dso_aux_gy_clamp_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of st_ois in reg CTRL3_OIS
   *
   */
-int32_t lsm6dso_aux_gy_self_test_set(lsm6dso_ctx_t *ctx, lsm6dso_st_ois_t val)
+int32_t lsm6dso_aux_gy_self_test_set(stmdev_ctx_t *ctx, lsm6dso_st_ois_t val)
 {
   lsm6dso_ctrl3_ois_t reg;
   int32_t ret;
@@ -3230,7 +3213,7 @@ int32_t lsm6dso_aux_gy_self_test_set(lsm6dso_ctx_t *ctx, lsm6dso_st_ois_t val)
   * @param  val      Get the values of st_ois in reg CTRL3_OIS
   *
   */
-int32_t lsm6dso_aux_gy_self_test_get(lsm6dso_ctx_t *ctx, lsm6dso_st_ois_t *val)
+int32_t lsm6dso_aux_gy_self_test_get(stmdev_ctx_t *ctx, lsm6dso_st_ois_t *val)
 {
   lsm6dso_ctrl3_ois_t reg;
   int32_t ret;
@@ -3261,7 +3244,7 @@ int32_t lsm6dso_aux_gy_self_test_get(lsm6dso_ctx_t *ctx, lsm6dso_st_ois_t *val)
   *                                       filter_xl_conf_ois in reg CTRL3_OIS
   *
   */
-int32_t lsm6dso_aux_xl_bandwidth_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_xl_bandwidth_set(stmdev_ctx_t *ctx,
                                      lsm6dso_filter_xl_conf_ois_t val)
 {
   lsm6dso_ctrl3_ois_t reg;
@@ -3283,7 +3266,7 @@ int32_t lsm6dso_aux_xl_bandwidth_set(lsm6dso_ctx_t *ctx,
   *                                       filter_xl_conf_ois in reg CTRL3_OIS
   *
   */
-int32_t lsm6dso_aux_xl_bandwidth_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_xl_bandwidth_get(stmdev_ctx_t *ctx,
                                      lsm6dso_filter_xl_conf_ois_t *val)
 {
   lsm6dso_ctrl3_ois_t reg;
@@ -3331,7 +3314,7 @@ int32_t lsm6dso_aux_xl_bandwidth_get(lsm6dso_ctx_t *ctx,
   *                              reg CTRL3_OIS
   *
   */
-int32_t lsm6dso_aux_xl_full_scale_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_xl_full_scale_set(stmdev_ctx_t *ctx,
                                       lsm6dso_fs_xl_ois_t val)
 {
   lsm6dso_ctrl3_ois_t reg;
@@ -3352,7 +3335,7 @@ int32_t lsm6dso_aux_xl_full_scale_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of fs_xl_ois in reg CTRL3_OIS
   *
   */
-int32_t lsm6dso_aux_xl_full_scale_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_aux_xl_full_scale_get(stmdev_ctx_t *ctx,
                                       lsm6dso_fs_xl_ois_t *val)
 {
   lsm6dso_ctrl3_ois_t reg;
@@ -3400,7 +3383,7 @@ int32_t lsm6dso_aux_xl_full_scale_get(lsm6dso_ctx_t *ctx,
   *                              reg PIN_CTRL
   *
   */
-int32_t lsm6dso_sdo_sa0_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_sdo_pu_en_t val)
+int32_t lsm6dso_sdo_sa0_mode_set(stmdev_ctx_t *ctx, lsm6dso_sdo_pu_en_t val)
 {
   lsm6dso_pin_ctrl_t reg;
   int32_t ret;
@@ -3420,7 +3403,7 @@ int32_t lsm6dso_sdo_sa0_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_sdo_pu_en_t val)
   * @param  val      Get the values of sdo_pu_en in reg PIN_CTRL
   *
   */
-int32_t lsm6dso_sdo_sa0_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_sdo_pu_en_t *val)
+int32_t lsm6dso_sdo_sa0_mode_get(stmdev_ctx_t *ctx, lsm6dso_sdo_pu_en_t *val)
 {
   lsm6dso_pin_ctrl_t reg;
   int32_t ret;
@@ -3447,7 +3430,7 @@ int32_t lsm6dso_sdo_sa0_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_sdo_pu_en_t *val)
   * @param  val      change the values of sim in reg CTRL3_C
   *
   */
-int32_t lsm6dso_spi_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_sim_t val)
+int32_t lsm6dso_spi_mode_set(stmdev_ctx_t *ctx, lsm6dso_sim_t val)
 {
   lsm6dso_ctrl3_c_t reg;
   int32_t ret;
@@ -3467,7 +3450,7 @@ int32_t lsm6dso_spi_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_sim_t val)
   * @param  val      Get the values of sim in reg CTRL3_C
   *
   */
-int32_t lsm6dso_spi_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_sim_t *val)
+int32_t lsm6dso_spi_mode_get(stmdev_ctx_t *ctx, lsm6dso_sim_t *val)
 {
   lsm6dso_ctrl3_c_t reg;
   int32_t ret;
@@ -3495,7 +3478,7 @@ int32_t lsm6dso_spi_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_sim_t *val)
   *                                reg CTRL4_C
   *
   */
-int32_t lsm6dso_i2c_interface_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_i2c_interface_set(stmdev_ctx_t *ctx,
                                   lsm6dso_i2c_disable_t val)
 {
   lsm6dso_ctrl4_c_t reg;
@@ -3517,7 +3500,7 @@ int32_t lsm6dso_i2c_interface_set(lsm6dso_ctx_t *ctx,
   *                                reg CTRL4_C
   *
   */
-int32_t lsm6dso_i2c_interface_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_i2c_interface_get(stmdev_ctx_t *ctx,
                                   lsm6dso_i2c_disable_t *val)
 {
   lsm6dso_ctrl4_c_t reg;
@@ -3546,7 +3529,7 @@ int32_t lsm6dso_i2c_interface_get(lsm6dso_ctx_t *ctx,
   *                                    in reg CTRL9_XL
   *
   */
-int32_t lsm6dso_i3c_disable_set(lsm6dso_ctx_t *ctx, lsm6dso_i3c_disable_t val)
+int32_t lsm6dso_i3c_disable_set(stmdev_ctx_t *ctx, lsm6dso_i3c_disable_t val)
 {
   lsm6dso_i3c_bus_avb_t i3c_bus_avb;
   lsm6dso_ctrl9_xl_t ctrl9_xl;
@@ -3579,7 +3562,7 @@ int32_t lsm6dso_i3c_disable_set(lsm6dso_ctx_t *ctx, lsm6dso_i3c_disable_t val)
   *                                reg CTRL9_XL
   *
   */
-int32_t lsm6dso_i3c_disable_get(lsm6dso_ctx_t *ctx, lsm6dso_i3c_disable_t *val)
+int32_t lsm6dso_i3c_disable_get(stmdev_ctx_t *ctx, lsm6dso_i3c_disable_t *val)
 {
   lsm6dso_ctrl9_xl_t ctrl9_xl;
   lsm6dso_i3c_bus_avb_t i3c_bus_avb;
@@ -3633,7 +3616,7 @@ int32_t lsm6dso_i3c_disable_get(lsm6dso_ctx_t *ctx, lsm6dso_i3c_disable_t *val)
   * @param  val      change the values of pd_dis_int1 in reg I3C_BUS_AVB
   *
   */
-int32_t lsm6dso_int1_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_int1_pd_en_t val)
+int32_t lsm6dso_int1_mode_set(stmdev_ctx_t *ctx, lsm6dso_int1_pd_en_t val)
 {
   lsm6dso_i3c_bus_avb_t reg;
   int32_t ret;
@@ -3653,7 +3636,7 @@ int32_t lsm6dso_int1_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_int1_pd_en_t val)
   * @param  val      Get the values of pd_dis_int1 in reg I3C_BUS_AVB
   *
   */
-int32_t lsm6dso_int1_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_int1_pd_en_t *val)
+int32_t lsm6dso_int1_mode_get(stmdev_ctx_t *ctx, lsm6dso_int1_pd_en_t *val)
 {
   lsm6dso_i3c_bus_avb_t reg;
   int32_t ret;
@@ -3682,7 +3665,7 @@ int32_t lsm6dso_int1_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_int1_pd_en_t *val)
   *                  FSM_INT1_B
   *
   */
-int32_t lsm6dso_pin_int1_route_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_pin_int1_route_set(stmdev_ctx_t *ctx,
                                    lsm6dso_pin_int1_route_t *val)
 {
   lsm6dso_pin_int2_route_t pin_int2_route;
@@ -3791,7 +3774,7 @@ int32_t lsm6dso_pin_int1_route_set(lsm6dso_ctx_t *ctx,
   *                  EMB_FUNC_INT1, FSM_INT1_A, FSM_INT1_B
   *
   */
-int32_t lsm6dso_pin_int1_route_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_pin_int1_route_get(stmdev_ctx_t *ctx,
                                    lsm6dso_pin_int1_route_t *val)
 {
   int32_t ret;
@@ -3832,7 +3815,7 @@ int32_t lsm6dso_pin_int1_route_get(lsm6dso_ctx_t *ctx,
   *                  EMB_FUNC_INT2, FSM_INT2_A, FSM_INT2_B
   *
   */
-int32_t lsm6dso_pin_int2_route_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_pin_int2_route_set(stmdev_ctx_t *ctx,
                                    lsm6dso_pin_int2_route_t *val)
 {
   lsm6dso_pin_int1_route_t pin_int1_route;
@@ -3942,7 +3925,7 @@ int32_t lsm6dso_pin_int2_route_set(lsm6dso_ctx_t *ctx,
   *                  EMB_FUNC_INT2, FSM_INT2_A, FSM_INT2_B
   *
   */
-int32_t lsm6dso_pin_int2_route_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_pin_int2_route_get(stmdev_ctx_t *ctx,
                                    lsm6dso_pin_int2_route_t *val)
 {
   int32_t ret;
@@ -3981,7 +3964,7 @@ int32_t lsm6dso_pin_int2_route_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of pp_od in reg CTRL3_C
   *
   */
-int32_t lsm6dso_pin_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_pp_od_t val)
+int32_t lsm6dso_pin_mode_set(stmdev_ctx_t *ctx, lsm6dso_pp_od_t val)
 {
   lsm6dso_ctrl3_c_t reg;
   int32_t ret;
@@ -4001,7 +3984,7 @@ int32_t lsm6dso_pin_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_pp_od_t val)
   * @param  val      Get the values of pp_od in reg CTRL3_C
   *
   */
-int32_t lsm6dso_pin_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_pp_od_t *val)
+int32_t lsm6dso_pin_mode_get(stmdev_ctx_t *ctx, lsm6dso_pp_od_t *val)
 {
   lsm6dso_ctrl3_c_t reg;
   int32_t ret;
@@ -4029,7 +4012,7 @@ int32_t lsm6dso_pin_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_pp_od_t *val)
   * @param  val      change the values of h_lactive in reg CTRL3_C
   *
   */
-int32_t lsm6dso_pin_polarity_set(lsm6dso_ctx_t *ctx, lsm6dso_h_lactive_t val)
+int32_t lsm6dso_pin_polarity_set(stmdev_ctx_t *ctx, lsm6dso_h_lactive_t val)
 {
   lsm6dso_ctrl3_c_t reg;
   int32_t ret;
@@ -4050,7 +4033,7 @@ int32_t lsm6dso_pin_polarity_set(lsm6dso_ctx_t *ctx, lsm6dso_h_lactive_t val)
   * @param  val      Get the values of h_lactive in reg CTRL3_C
   *
   */
-int32_t lsm6dso_pin_polarity_get(lsm6dso_ctx_t *ctx, lsm6dso_h_lactive_t *val)
+int32_t lsm6dso_pin_polarity_get(stmdev_ctx_t *ctx, lsm6dso_h_lactive_t *val)
 {
   lsm6dso_ctrl3_c_t reg;
   int32_t ret;
@@ -4078,7 +4061,7 @@ int32_t lsm6dso_pin_polarity_get(lsm6dso_ctx_t *ctx, lsm6dso_h_lactive_t *val)
   * @param  val      change the values of int2_on_int1 in reg CTRL4_C
   *
   */
-int32_t lsm6dso_all_on_int1_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_all_on_int1_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_ctrl4_c_t reg;
   int32_t ret;
@@ -4099,7 +4082,7 @@ int32_t lsm6dso_all_on_int1_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of int2_on_int1 in reg CTRL4_C
   *
   */
-int32_t lsm6dso_all_on_int1_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_all_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_ctrl4_c_t reg;
   int32_t ret;
@@ -4117,7 +4100,7 @@ int32_t lsm6dso_all_on_int1_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of lir in reg TAP_CFG0
   *
   */
-int32_t lsm6dso_int_notification_set(lsm6dso_ctx_t *ctx, lsm6dso_lir_t val)
+int32_t lsm6dso_int_notification_set(stmdev_ctx_t *ctx, lsm6dso_lir_t val)
 {
   lsm6dso_tap_cfg0_t tap_cfg0;
   lsm6dso_page_rw_t page_rw;
@@ -4154,7 +4137,7 @@ int32_t lsm6dso_int_notification_set(lsm6dso_ctx_t *ctx, lsm6dso_lir_t val)
   * @param  val      Get the values of lir in reg TAP_CFG0
   *
   */
-int32_t lsm6dso_int_notification_get(lsm6dso_ctx_t *ctx, lsm6dso_lir_t *val)
+int32_t lsm6dso_int_notification_get(stmdev_ctx_t *ctx, lsm6dso_lir_t *val)
 {
   lsm6dso_tap_cfg0_t tap_cfg0;
   lsm6dso_page_rw_t page_rw;
@@ -4225,7 +4208,7 @@ int32_t lsm6dso_int_notification_get(lsm6dso_ctx_t *ctx, lsm6dso_lir_t *val)
   *                                 reg WAKE_UP_DUR
   *
   */
-int32_t lsm6dso_wkup_ths_weight_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_wkup_ths_weight_set(stmdev_ctx_t *ctx,
                                     lsm6dso_wake_ths_w_t val)
 {
   lsm6dso_wake_up_dur_t reg;
@@ -4249,7 +4232,7 @@ int32_t lsm6dso_wkup_ths_weight_set(lsm6dso_ctx_t *ctx,
   *                                 reg WAKE_UP_DUR
   *
   */
-int32_t lsm6dso_wkup_ths_weight_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_wkup_ths_weight_get(stmdev_ctx_t *ctx,
                                     lsm6dso_wake_ths_w_t *val)
 {
   lsm6dso_wake_up_dur_t reg;
@@ -4279,7 +4262,7 @@ int32_t lsm6dso_wkup_ths_weight_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of wk_ths in reg WAKE_UP_THS
   *
   */
-int32_t lsm6dso_wkup_threshold_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_wkup_threshold_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_wake_up_ths_t reg;
   int32_t ret;
@@ -4300,7 +4283,7 @@ int32_t lsm6dso_wkup_threshold_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of wk_ths in reg WAKE_UP_THS
   *
   */
-int32_t lsm6dso_wkup_threshold_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_wkup_threshold_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_wake_up_ths_t reg;
   int32_t ret;
@@ -4319,7 +4302,7 @@ int32_t lsm6dso_wkup_threshold_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of usr_off_on_wu in reg WAKE_UP_THS
   *
   */
-int32_t lsm6dso_xl_usr_offset_on_wkup_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_xl_usr_offset_on_wkup_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_wake_up_ths_t reg;
   int32_t ret;
@@ -4340,7 +4323,7 @@ int32_t lsm6dso_xl_usr_offset_on_wkup_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of usr_off_on_wu in reg WAKE_UP_THS
   *
   */
-int32_t lsm6dso_xl_usr_offset_on_wkup_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_xl_usr_offset_on_wkup_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_wake_up_ths_t reg;
   int32_t ret;
@@ -4359,7 +4342,7 @@ int32_t lsm6dso_xl_usr_offset_on_wkup_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of wake_dur in reg WAKE_UP_DUR
   *
   */
-int32_t lsm6dso_wkup_dur_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_wkup_dur_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_wake_up_dur_t reg;
   int32_t ret;
@@ -4380,7 +4363,7 @@ int32_t lsm6dso_wkup_dur_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of wake_dur in reg WAKE_UP_DUR
   *
   */
-int32_t lsm6dso_wkup_dur_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_wkup_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_wake_up_dur_t reg;
   int32_t ret;
@@ -4411,7 +4394,7 @@ int32_t lsm6dso_wkup_dur_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of sleep_g in reg CTRL4_C
   *
   */
-int32_t lsm6dso_gy_sleep_mode_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_gy_sleep_mode_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_ctrl4_c_t reg;
   int32_t ret;
@@ -4431,7 +4414,7 @@ int32_t lsm6dso_gy_sleep_mode_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of sleep_g in reg CTRL4_C
   *
   */
-int32_t lsm6dso_gy_sleep_mode_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_gy_sleep_mode_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_ctrl4_c_t reg;
   int32_t ret;
@@ -4452,7 +4435,7 @@ int32_t lsm6dso_gy_sleep_mode_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of sleep_status_on_int in reg TAP_CFG0
   *
   */
-int32_t lsm6dso_act_pin_notification_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_act_pin_notification_set(stmdev_ctx_t *ctx,
                                          lsm6dso_sleep_status_on_int_t val)
 {
   lsm6dso_tap_cfg0_t reg;
@@ -4476,7 +4459,7 @@ int32_t lsm6dso_act_pin_notification_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of sleep_status_on_int in reg TAP_CFG0
   *
   */
-int32_t lsm6dso_act_pin_notification_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_act_pin_notification_get(stmdev_ctx_t *ctx,
                                          lsm6dso_sleep_status_on_int_t *val)
 {
   lsm6dso_tap_cfg0_t reg;
@@ -4504,7 +4487,7 @@ int32_t lsm6dso_act_pin_notification_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of inact_en in reg TAP_CFG2
   *
   */
-int32_t lsm6dso_act_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_inact_en_t val)
+int32_t lsm6dso_act_mode_set(stmdev_ctx_t *ctx, lsm6dso_inact_en_t val)
 {
   lsm6dso_tap_cfg2_t reg;
   int32_t ret;
@@ -4524,7 +4507,7 @@ int32_t lsm6dso_act_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_inact_en_t val)
   * @param  val      Get the values of inact_en in reg TAP_CFG2
   *
   */
-int32_t lsm6dso_act_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_inact_en_t *val)
+int32_t lsm6dso_act_mode_get(stmdev_ctx_t *ctx, lsm6dso_inact_en_t *val)
 {
   lsm6dso_tap_cfg2_t reg;
   int32_t ret;
@@ -4558,7 +4541,7 @@ int32_t lsm6dso_act_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_inact_en_t *val)
   * @param  val      change the values of sleep_dur in reg WAKE_UP_DUR
   *
   */
-int32_t lsm6dso_act_sleep_dur_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_act_sleep_dur_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_wake_up_dur_t reg;
   int32_t ret;
@@ -4579,7 +4562,7 @@ int32_t lsm6dso_act_sleep_dur_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of sleep_dur in reg WAKE_UP_DUR
   *
   */
-int32_t lsm6dso_act_sleep_dur_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_act_sleep_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_wake_up_dur_t reg;
   int32_t ret;
@@ -4610,7 +4593,7 @@ int32_t lsm6dso_act_sleep_dur_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of tap_z_en in reg TAP_CFG0
   *
   */
-int32_t lsm6dso_tap_detection_on_z_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_tap_detection_on_z_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_tap_cfg0_t reg;
   int32_t ret;
@@ -4630,7 +4613,7 @@ int32_t lsm6dso_tap_detection_on_z_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of tap_z_en in reg TAP_CFG0
   *
   */
-int32_t lsm6dso_tap_detection_on_z_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_tap_detection_on_z_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_tap_cfg0_t reg;
   int32_t ret;
@@ -4648,7 +4631,7 @@ int32_t lsm6dso_tap_detection_on_z_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of tap_y_en in reg TAP_CFG0
   *
   */
-int32_t lsm6dso_tap_detection_on_y_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_tap_detection_on_y_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_tap_cfg0_t reg;
   int32_t ret;
@@ -4668,7 +4651,7 @@ int32_t lsm6dso_tap_detection_on_y_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of tap_y_en in reg TAP_CFG0
   *
   */
-int32_t lsm6dso_tap_detection_on_y_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_tap_detection_on_y_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_tap_cfg0_t reg;
   int32_t ret;
@@ -4686,7 +4669,7 @@ int32_t lsm6dso_tap_detection_on_y_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of tap_x_en in reg TAP_CFG0
   *
   */
-int32_t lsm6dso_tap_detection_on_x_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_tap_detection_on_x_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_tap_cfg0_t reg;
   int32_t ret;
@@ -4706,7 +4689,7 @@ int32_t lsm6dso_tap_detection_on_x_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of tap_x_en in reg TAP_CFG0
   *
   */
-int32_t lsm6dso_tap_detection_on_x_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_tap_detection_on_x_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_tap_cfg0_t reg;
   int32_t ret;
@@ -4724,7 +4707,7 @@ int32_t lsm6dso_tap_detection_on_x_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of tap_ths_x in reg TAP_CFG1
   *
   */
-int32_t lsm6dso_tap_threshold_x_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_tap_threshold_x_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_tap_cfg1_t reg;
   int32_t ret;
@@ -4744,7 +4727,7 @@ int32_t lsm6dso_tap_threshold_x_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of tap_ths_x in reg TAP_CFG1
   *
   */
-int32_t lsm6dso_tap_threshold_x_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_tap_threshold_x_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_tap_cfg1_t reg;
   int32_t ret;
@@ -4763,7 +4746,7 @@ int32_t lsm6dso_tap_threshold_x_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   *                                 reg TAP_CFG1
   *
   */
-int32_t lsm6dso_tap_axis_priority_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_tap_axis_priority_set(stmdev_ctx_t *ctx,
                                       lsm6dso_tap_priority_t val)
 {
   lsm6dso_tap_cfg1_t reg;
@@ -4785,7 +4768,7 @@ int32_t lsm6dso_tap_axis_priority_set(lsm6dso_ctx_t *ctx,
   *                                 reg TAP_CFG1
   *
   */
-int32_t lsm6dso_tap_axis_priority_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_tap_axis_priority_get(stmdev_ctx_t *ctx,
                                       lsm6dso_tap_priority_t *val)
 {
   lsm6dso_tap_cfg1_t reg;
@@ -4825,7 +4808,7 @@ int32_t lsm6dso_tap_axis_priority_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of tap_ths_y in reg TAP_CFG2
   *
   */
-int32_t lsm6dso_tap_threshold_y_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_tap_threshold_y_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_tap_cfg2_t reg;
   int32_t ret;
@@ -4845,7 +4828,7 @@ int32_t lsm6dso_tap_threshold_y_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of tap_ths_y in reg TAP_CFG2
   *
   */
-int32_t lsm6dso_tap_threshold_y_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_tap_threshold_y_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_tap_cfg2_t reg;
   int32_t ret;
@@ -4863,7 +4846,7 @@ int32_t lsm6dso_tap_threshold_y_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of tap_ths_z in reg TAP_THS_6D
   *
   */
-int32_t lsm6dso_tap_threshold_z_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_tap_threshold_z_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_tap_ths_6d_t reg;
   int32_t ret;
@@ -4883,7 +4866,7 @@ int32_t lsm6dso_tap_threshold_z_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of tap_ths_z in reg TAP_THS_6D
   *
   */
-int32_t lsm6dso_tap_threshold_z_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_tap_threshold_z_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_tap_ths_6d_t reg;
   int32_t ret;
@@ -4906,7 +4889,7 @@ int32_t lsm6dso_tap_threshold_z_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of shock in reg INT_DUR2
   *
   */
-int32_t lsm6dso_tap_shock_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_tap_shock_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_int_dur2_t reg;
   int32_t ret;
@@ -4931,7 +4914,7 @@ int32_t lsm6dso_tap_shock_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of shock in reg INT_DUR2
   *
   */
-int32_t lsm6dso_tap_shock_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_tap_shock_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_int_dur2_t reg;
   int32_t ret;
@@ -4955,7 +4938,7 @@ int32_t lsm6dso_tap_shock_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of quiet in reg INT_DUR2
   *
   */
-int32_t lsm6dso_tap_quiet_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_tap_quiet_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_int_dur2_t reg;
   int32_t ret;
@@ -4981,7 +4964,7 @@ int32_t lsm6dso_tap_quiet_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of quiet in reg INT_DUR2
   *
   */
-int32_t lsm6dso_tap_quiet_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_tap_quiet_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_int_dur2_t reg;
   int32_t ret;
@@ -5006,7 +4989,7 @@ int32_t lsm6dso_tap_quiet_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of dur in reg INT_DUR2
   *
   */
-int32_t lsm6dso_tap_dur_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_tap_dur_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_int_dur2_t reg;
   int32_t ret;
@@ -5033,7 +5016,7 @@ int32_t lsm6dso_tap_dur_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of dur in reg INT_DUR2
   *
   */
-int32_t lsm6dso_tap_dur_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_tap_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_int_dur2_t reg;
   int32_t ret;
@@ -5051,7 +5034,7 @@ int32_t lsm6dso_tap_dur_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of single_double_tap in reg WAKE_UP_THS
   *
   */
-int32_t lsm6dso_tap_mode_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_tap_mode_set(stmdev_ctx_t *ctx,
                              lsm6dso_single_double_tap_t val)
 {
   lsm6dso_wake_up_ths_t reg;
@@ -5072,7 +5055,7 @@ int32_t lsm6dso_tap_mode_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of single_double_tap in reg WAKE_UP_THS
   *
   */
-int32_t lsm6dso_tap_mode_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_tap_mode_get(stmdev_ctx_t *ctx,
                              lsm6dso_single_double_tap_t *val)
 {
   lsm6dso_wake_up_ths_t reg;
@@ -5115,7 +5098,7 @@ int32_t lsm6dso_tap_mode_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of sixd_ths in reg TAP_THS_6D
   *
   */
-int32_t lsm6dso_6d_threshold_set(lsm6dso_ctx_t *ctx, lsm6dso_sixd_ths_t val)
+int32_t lsm6dso_6d_threshold_set(stmdev_ctx_t *ctx, lsm6dso_sixd_ths_t val)
 {
   lsm6dso_tap_ths_6d_t reg;
   int32_t ret;
@@ -5135,7 +5118,7 @@ int32_t lsm6dso_6d_threshold_set(lsm6dso_ctx_t *ctx, lsm6dso_sixd_ths_t val)
   * @param  val      Get the values of sixd_ths in reg TAP_THS_6D
   *
   */
-int32_t lsm6dso_6d_threshold_get(lsm6dso_ctx_t *ctx, lsm6dso_sixd_ths_t *val)
+int32_t lsm6dso_6d_threshold_get(stmdev_ctx_t *ctx, lsm6dso_sixd_ths_t *val)
 {
   lsm6dso_tap_ths_6d_t reg;
   int32_t ret;
@@ -5168,7 +5151,7 @@ int32_t lsm6dso_6d_threshold_get(lsm6dso_ctx_t *ctx, lsm6dso_sixd_ths_t *val)
   * @param  val      change the values of d4d_en in reg TAP_THS_6D
   *
   */
-int32_t lsm6dso_4d_mode_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_4d_mode_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_tap_ths_6d_t reg;
   int32_t ret;
@@ -5188,7 +5171,7 @@ int32_t lsm6dso_4d_mode_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of d4d_en in reg TAP_THS_6D
   *
   */
-int32_t lsm6dso_4d_mode_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_4d_mode_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_tap_ths_6d_t reg;
   int32_t ret;
@@ -5218,7 +5201,7 @@ int32_t lsm6dso_4d_mode_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of ff_ths in reg FREE_FALL
   *
   */
-int32_t lsm6dso_ff_threshold_set(lsm6dso_ctx_t *ctx, lsm6dso_ff_ths_t val)
+int32_t lsm6dso_ff_threshold_set(stmdev_ctx_t *ctx, lsm6dso_ff_ths_t val)
 {
   lsm6dso_free_fall_t reg;
   int32_t ret;
@@ -5238,7 +5221,7 @@ int32_t lsm6dso_ff_threshold_set(lsm6dso_ctx_t *ctx, lsm6dso_ff_ths_t val)
   * @param  val      Get the values of ff_ths in reg FREE_FALL
   *
   */
-int32_t lsm6dso_ff_threshold_get(lsm6dso_ctx_t *ctx, lsm6dso_ff_ths_t *val)
+int32_t lsm6dso_ff_threshold_get(stmdev_ctx_t *ctx, lsm6dso_ff_ths_t *val)
 {
   lsm6dso_free_fall_t reg;
   int32_t ret;
@@ -5284,7 +5267,7 @@ int32_t lsm6dso_ff_threshold_get(lsm6dso_ctx_t *ctx, lsm6dso_ff_ths_t *val)
   * @param  val      change the values of ff_dur in reg FREE_FALL
   *
   */
-int32_t lsm6dso_ff_dur_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_ff_dur_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_wake_up_dur_t wake_up_dur;
   lsm6dso_free_fall_t free_fall;
@@ -5314,7 +5297,7 @@ int32_t lsm6dso_ff_dur_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of ff_dur in reg FREE_FALL
   *
   */
-int32_t lsm6dso_ff_dur_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_ff_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_wake_up_dur_t wake_up_dur;
   lsm6dso_free_fall_t free_fall;
@@ -5347,7 +5330,7 @@ int32_t lsm6dso_ff_dur_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of wtm in reg FIFO_CTRL1
   *
   */
-int32_t lsm6dso_fifo_watermark_set(lsm6dso_ctx_t *ctx, uint16_t val)
+int32_t lsm6dso_fifo_watermark_set(stmdev_ctx_t *ctx, uint16_t val)
 {
   lsm6dso_fifo_ctrl1_t fifo_ctrl1;
   lsm6dso_fifo_ctrl2_t fifo_ctrl2;
@@ -5372,7 +5355,7 @@ int32_t lsm6dso_fifo_watermark_set(lsm6dso_ctx_t *ctx, uint16_t val)
   * @param  val      change the values of wtm in reg FIFO_CTRL1
   *
   */
-int32_t lsm6dso_fifo_watermark_get(lsm6dso_ctx_t *ctx, uint16_t *val)
+int32_t lsm6dso_fifo_watermark_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
   lsm6dso_fifo_ctrl1_t fifo_ctrl1;
   lsm6dso_fifo_ctrl2_t fifo_ctrl2;
@@ -5394,7 +5377,7 @@ int32_t lsm6dso_fifo_watermark_get(lsm6dso_ctx_t *ctx, uint16_t *val)
   *                   reg EMB_FUNC_INIT_B
   *
   */
-int32_t lsm6dso_compression_algo_init_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_compression_algo_init_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_emb_func_init_b_t reg;
   int32_t ret;
@@ -5422,7 +5405,7 @@ int32_t lsm6dso_compression_algo_init_set(lsm6dso_ctx_t *ctx, uint8_t val)
   *                reg EMB_FUNC_INIT_B
   *
   */
-int32_t lsm6dso_compression_algo_init_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_compression_algo_init_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_emb_func_init_b_t reg;
   int32_t ret;
@@ -5447,7 +5430,7 @@ int32_t lsm6dso_compression_algo_init_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   *                  reg FIFO_CTRL2
   *
   */
-int32_t lsm6dso_compression_algo_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_compression_algo_set(stmdev_ctx_t *ctx,
                                      lsm6dso_uncoptr_rate_t val)
 {
   lsm6dso_emb_func_en_b_t emb_func_en_b;
@@ -5489,7 +5472,7 @@ int32_t lsm6dso_compression_algo_set(lsm6dso_ctx_t *ctx,
   *                  reg FIFO_CTRL2
   *
   */
-int32_t lsm6dso_compression_algo_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_compression_algo_get(stmdev_ctx_t *ctx,
                                      lsm6dso_uncoptr_rate_t *val)
 {
   lsm6dso_fifo_ctrl2_t reg;
@@ -5527,7 +5510,7 @@ int32_t lsm6dso_compression_algo_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of odrchg_en in reg FIFO_CTRL2
   *
   */
-int32_t lsm6dso_fifo_virtual_sens_odr_chg_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_fifo_virtual_sens_odr_chg_set(stmdev_ctx_t *ctx,
                                               uint8_t val)
 {
   lsm6dso_fifo_ctrl2_t reg;
@@ -5548,7 +5531,7 @@ int32_t lsm6dso_fifo_virtual_sens_odr_chg_set(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of odrchg_en in reg FIFO_CTRL2
   *
   */
-int32_t lsm6dso_fifo_virtual_sens_odr_chg_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_fifo_virtual_sens_odr_chg_get(stmdev_ctx_t *ctx,
                                               uint8_t *val)
 {
   lsm6dso_fifo_ctrl2_t reg;
@@ -5568,7 +5551,7 @@ int32_t lsm6dso_fifo_virtual_sens_odr_chg_get(lsm6dso_ctx_t *ctx,
   *                  reg FIFO_CTRL2
   *
   */
-int32_t lsm6dso_compression_algo_real_time_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_compression_algo_real_time_set(stmdev_ctx_t *ctx,
                                                uint8_t val)
 {
   lsm6dso_fifo_ctrl2_t reg;
@@ -5589,7 +5572,7 @@ int32_t lsm6dso_compression_algo_real_time_set(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of fifo_compr_rt_en in reg FIFO_CTRL2
   *
   */
-int32_t lsm6dso_compression_algo_real_time_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_compression_algo_real_time_get(stmdev_ctx_t *ctx,
                                                uint8_t *val)
 {
   lsm6dso_fifo_ctrl2_t reg;
@@ -5609,7 +5592,7 @@ int32_t lsm6dso_compression_algo_real_time_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of stop_on_wtm in reg FIFO_CTRL2
   *
   */
-int32_t lsm6dso_fifo_stop_on_wtm_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_fifo_stop_on_wtm_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_fifo_ctrl2_t reg;
   int32_t ret;
@@ -5630,7 +5613,7 @@ int32_t lsm6dso_fifo_stop_on_wtm_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of stop_on_wtm in reg FIFO_CTRL2
   *
   */
-int32_t lsm6dso_fifo_stop_on_wtm_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_fifo_stop_on_wtm_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_fifo_ctrl2_t reg;
   int32_t ret;
@@ -5649,7 +5632,7 @@ int32_t lsm6dso_fifo_stop_on_wtm_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of bdr_xl in reg FIFO_CTRL3
   *
   */
-int32_t lsm6dso_fifo_xl_batch_set(lsm6dso_ctx_t *ctx, lsm6dso_bdr_xl_t val)
+int32_t lsm6dso_fifo_xl_batch_set(stmdev_ctx_t *ctx, lsm6dso_bdr_xl_t val)
 {
   lsm6dso_fifo_ctrl3_t reg;
   int32_t ret;
@@ -5670,7 +5653,7 @@ int32_t lsm6dso_fifo_xl_batch_set(lsm6dso_ctx_t *ctx, lsm6dso_bdr_xl_t val)
   * @param  val      Get the values of bdr_xl in reg FIFO_CTRL3
   *
   */
-int32_t lsm6dso_fifo_xl_batch_get(lsm6dso_ctx_t *ctx, lsm6dso_bdr_xl_t *val)
+int32_t lsm6dso_fifo_xl_batch_get(stmdev_ctx_t *ctx, lsm6dso_bdr_xl_t *val)
 {
   lsm6dso_fifo_ctrl3_t reg;
   int32_t ret;
@@ -5729,7 +5712,7 @@ int32_t lsm6dso_fifo_xl_batch_get(lsm6dso_ctx_t *ctx, lsm6dso_bdr_xl_t *val)
   * @param  val      change the values of bdr_gy in reg FIFO_CTRL3
   *
   */
-int32_t lsm6dso_fifo_gy_batch_set(lsm6dso_ctx_t *ctx, lsm6dso_bdr_gy_t val)
+int32_t lsm6dso_fifo_gy_batch_set(stmdev_ctx_t *ctx, lsm6dso_bdr_gy_t val)
 {
   lsm6dso_fifo_ctrl3_t reg;
   int32_t ret;
@@ -5750,7 +5733,7 @@ int32_t lsm6dso_fifo_gy_batch_set(lsm6dso_ctx_t *ctx, lsm6dso_bdr_gy_t val)
   * @param  val      Get the values of bdr_gy in reg FIFO_CTRL3
   *
   */
-int32_t lsm6dso_fifo_gy_batch_get(lsm6dso_ctx_t *ctx, lsm6dso_bdr_gy_t *val)
+int32_t lsm6dso_fifo_gy_batch_get(stmdev_ctx_t *ctx, lsm6dso_bdr_gy_t *val)
 {
   lsm6dso_fifo_ctrl3_t reg;
   int32_t ret;
@@ -5807,7 +5790,7 @@ int32_t lsm6dso_fifo_gy_batch_get(lsm6dso_ctx_t *ctx, lsm6dso_bdr_gy_t *val)
   * @param  val      change the values of fifo_mode in reg FIFO_CTRL4
   *
   */
-int32_t lsm6dso_fifo_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_fifo_mode_t val)
+int32_t lsm6dso_fifo_mode_set(stmdev_ctx_t *ctx, lsm6dso_fifo_mode_t val)
 {
   lsm6dso_fifo_ctrl4_t reg;
   int32_t ret;
@@ -5827,7 +5810,7 @@ int32_t lsm6dso_fifo_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_fifo_mode_t val)
   * @param  val      Get the values of fifo_mode in reg FIFO_CTRL4
   *
   */
-int32_t lsm6dso_fifo_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_fifo_mode_t *val)
+int32_t lsm6dso_fifo_mode_get(stmdev_ctx_t *ctx, lsm6dso_fifo_mode_t *val)
 {
   lsm6dso_fifo_ctrl4_t reg;
   int32_t ret;
@@ -5868,7 +5851,7 @@ int32_t lsm6dso_fifo_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_fifo_mode_t *val)
   * @param  val      change the values of odr_t_batch in reg FIFO_CTRL4
   *
   */
-int32_t lsm6dso_fifo_temp_batch_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_fifo_temp_batch_set(stmdev_ctx_t *ctx,
                                     lsm6dso_odr_t_batch_t val)
 {
   lsm6dso_fifo_ctrl4_t reg;
@@ -5890,7 +5873,7 @@ int32_t lsm6dso_fifo_temp_batch_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of odr_t_batch in reg FIFO_CTRL4
   *
   */
-int32_t lsm6dso_fifo_temp_batch_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_fifo_temp_batch_get(stmdev_ctx_t *ctx,
                                     lsm6dso_odr_t_batch_t *val)
 {
   lsm6dso_fifo_ctrl4_t reg;
@@ -5927,7 +5910,7 @@ int32_t lsm6dso_fifo_temp_batch_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of odr_ts_batch in reg FIFO_CTRL4
   *
   */
-int32_t lsm6dso_fifo_timestamp_decimation_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_fifo_timestamp_decimation_set(stmdev_ctx_t *ctx,
                                               lsm6dso_odr_ts_batch_t val)
 {
   lsm6dso_fifo_ctrl4_t reg;
@@ -5950,7 +5933,7 @@ int32_t lsm6dso_fifo_timestamp_decimation_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of odr_ts_batch in reg FIFO_CTRL4
   *
   */
-int32_t lsm6dso_fifo_timestamp_decimation_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_fifo_timestamp_decimation_get(stmdev_ctx_t *ctx,
                                               lsm6dso_odr_ts_batch_t *val)
 {
   lsm6dso_fifo_ctrl4_t reg;
@@ -5986,7 +5969,7 @@ int32_t lsm6dso_fifo_timestamp_decimation_get(lsm6dso_ctx_t *ctx,
   *                  in reg COUNTER_BDR_REG1
   *
   */
-int32_t lsm6dso_fifo_cnt_event_batch_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_fifo_cnt_event_batch_set(stmdev_ctx_t *ctx,
                                          lsm6dso_trig_counter_bdr_t val)
 {
   lsm6dso_counter_bdr_reg1_t reg;
@@ -6009,7 +5992,7 @@ int32_t lsm6dso_fifo_cnt_event_batch_set(lsm6dso_ctx_t *ctx,
   *                                     in reg COUNTER_BDR_REG1
   *
   */
-int32_t lsm6dso_fifo_cnt_event_batch_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_fifo_cnt_event_batch_get(stmdev_ctx_t *ctx,
                                          lsm6dso_trig_counter_bdr_t *val)
 {
   lsm6dso_counter_bdr_reg1_t reg;
@@ -6039,7 +6022,7 @@ int32_t lsm6dso_fifo_cnt_event_batch_get(lsm6dso_ctx_t *ctx,
   *                      reg COUNTER_BDR_REG1
   *
   */
-int32_t lsm6dso_rst_batch_counter_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_rst_batch_counter_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_counter_bdr_reg1_t reg;
   int32_t ret;
@@ -6061,7 +6044,7 @@ int32_t lsm6dso_rst_batch_counter_set(lsm6dso_ctx_t *ctx, uint8_t val)
   *                  reg COUNTER_BDR_REG1
   *
   */
-int32_t lsm6dso_rst_batch_counter_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_rst_batch_counter_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_counter_bdr_reg1_t reg;
   int32_t ret;
@@ -6080,7 +6063,7 @@ int32_t lsm6dso_rst_batch_counter_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   *                  reg COUNTER_BDR_REG2 and COUNTER_BDR_REG1.
   *
   */
-int32_t lsm6dso_batch_counter_threshold_set(lsm6dso_ctx_t *ctx, uint16_t val)
+int32_t lsm6dso_batch_counter_threshold_set(stmdev_ctx_t *ctx, uint16_t val)
 {
   lsm6dso_counter_bdr_reg1_t counter_bdr_reg1;
   lsm6dso_counter_bdr_reg2_t counter_bdr_reg2;
@@ -6109,7 +6092,7 @@ int32_t lsm6dso_batch_counter_threshold_set(lsm6dso_ctx_t *ctx, uint16_t val)
   *                  reg COUNTER_BDR_REG2 and COUNTER_BDR_REG1.
   *
   */
-int32_t lsm6dso_batch_counter_threshold_get(lsm6dso_ctx_t *ctx, uint16_t *val)
+int32_t lsm6dso_batch_counter_threshold_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
   lsm6dso_counter_bdr_reg1_t counter_bdr_reg1;
   lsm6dso_counter_bdr_reg2_t counter_bdr_reg2;
@@ -6135,7 +6118,7 @@ int32_t lsm6dso_batch_counter_threshold_get(lsm6dso_ctx_t *ctx, uint16_t *val)
   * @param  val      change the values of diff_fifo in reg FIFO_STATUS1
   *
   */
-int32_t lsm6dso_fifo_data_level_get(lsm6dso_ctx_t *ctx, uint16_t *val)
+int32_t lsm6dso_fifo_data_level_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
   lsm6dso_fifo_status1_t fifo_status1;
   lsm6dso_fifo_status2_t fifo_status2;
@@ -6159,7 +6142,7 @@ int32_t lsm6dso_fifo_data_level_get(lsm6dso_ctx_t *ctx, uint16_t *val)
   * @param  val      registers FIFO_STATUS2
   *
   */
-int32_t lsm6dso_fifo_status_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_fifo_status_get(stmdev_ctx_t *ctx,
                                 lsm6dso_fifo_status2_t *val)
 {
   int32_t ret;
@@ -6174,7 +6157,7 @@ int32_t lsm6dso_fifo_status_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of fifo_full_ia in reg FIFO_STATUS2
   *
   */
-int32_t lsm6dso_fifo_full_flag_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_fifo_full_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_fifo_status2_t reg;
   int32_t ret;
@@ -6193,7 +6176,7 @@ int32_t lsm6dso_fifo_full_flag_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   *                  reg FIFO_STATUS2
   *
   */
-int32_t lsm6dso_fifo_ovr_flag_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_fifo_ovr_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_fifo_status2_t reg;
   int32_t ret;
@@ -6211,7 +6194,7 @@ int32_t lsm6dso_fifo_ovr_flag_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of fifo_wtm_ia in reg FIFO_STATUS2
   *
   */
-int32_t lsm6dso_fifo_wtm_flag_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_fifo_wtm_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_fifo_status2_t reg;
   int32_t ret;
@@ -6229,7 +6212,7 @@ int32_t lsm6dso_fifo_wtm_flag_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of tag_sensor in reg FIFO_DATA_OUT_TAG
   *
   */
-int32_t lsm6dso_fifo_sensor_tag_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_fifo_sensor_tag_get(stmdev_ctx_t *ctx,
                                     lsm6dso_fifo_tag_t *val)
 {
   lsm6dso_fifo_data_out_tag_t reg;
@@ -6316,7 +6299,7 @@ int32_t lsm6dso_fifo_sensor_tag_get(lsm6dso_ctx_t *ctx,
   *                  reg LSM6DSO_EMB_FUNC_FIFO_CFG
   *
   */
-int32_t lsm6dso_fifo_pedo_batch_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_fifo_pedo_batch_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_emb_func_fifo_cfg_t reg;
   int32_t ret;
@@ -6344,7 +6327,7 @@ int32_t lsm6dso_fifo_pedo_batch_set(lsm6dso_ctx_t *ctx, uint8_t val)
   *                  reg LSM6DSO_EMB_FUNC_FIFO_CFG
   *
   */
-int32_t lsm6dso_fifo_pedo_batch_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_fifo_pedo_batch_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_emb_func_fifo_cfg_t reg;
   int32_t ret;
@@ -6368,7 +6351,7 @@ int32_t lsm6dso_fifo_pedo_batch_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   *                  reg SLV0_CONFIG
   *
   */
-int32_t lsm6dso_sh_batch_slave_0_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_sh_batch_slave_0_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_slv0_config_t reg;
   int32_t ret;
@@ -6395,7 +6378,7 @@ int32_t lsm6dso_sh_batch_slave_0_set(lsm6dso_ctx_t *ctx, uint8_t val)
   *                  reg SLV0_CONFIG
   *
   */
-int32_t lsm6dso_sh_batch_slave_0_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_sh_batch_slave_0_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_slv0_config_t reg;
   int32_t ret;
@@ -6419,7 +6402,7 @@ int32_t lsm6dso_sh_batch_slave_0_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   *                  reg SLV1_CONFIG
   *
   */
-int32_t lsm6dso_sh_batch_slave_1_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_sh_batch_slave_1_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_slv1_config_t reg;
   int32_t ret;
@@ -6447,7 +6430,7 @@ int32_t lsm6dso_sh_batch_slave_1_set(lsm6dso_ctx_t *ctx, uint8_t val)
   *                  reg SLV1_CONFIG
   *
   */
-int32_t lsm6dso_sh_batch_slave_1_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_sh_batch_slave_1_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_slv1_config_t reg;
   int32_t ret;
@@ -6471,7 +6454,7 @@ int32_t lsm6dso_sh_batch_slave_1_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   *                  reg SLV2_CONFIG
   *
   */
-int32_t lsm6dso_sh_batch_slave_2_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_sh_batch_slave_2_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_slv2_config_t reg;
   int32_t ret;
@@ -6499,7 +6482,7 @@ int32_t lsm6dso_sh_batch_slave_2_set(lsm6dso_ctx_t *ctx, uint8_t val)
   *                  reg SLV2_CONFIG
   *
   */
-int32_t lsm6dso_sh_batch_slave_2_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_sh_batch_slave_2_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_slv2_config_t reg;
   int32_t ret;
@@ -6524,7 +6507,7 @@ int32_t lsm6dso_sh_batch_slave_2_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   *                  in reg SLV3_CONFIG
   *
   */
-int32_t lsm6dso_sh_batch_slave_3_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_sh_batch_slave_3_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_slv3_config_t reg;
   int32_t ret;
@@ -6552,7 +6535,7 @@ int32_t lsm6dso_sh_batch_slave_3_set(lsm6dso_ctx_t *ctx, uint8_t val)
   *                  reg SLV3_CONFIG
   *
   */
-int32_t lsm6dso_sh_batch_slave_3_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_sh_batch_slave_3_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_slv3_config_t reg;
   int32_t ret;
@@ -6589,7 +6572,7 @@ int32_t lsm6dso_sh_batch_slave_3_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of den_mode in reg CTRL6_C
   *
   */
-int32_t lsm6dso_den_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_den_mode_t val)
+int32_t lsm6dso_den_mode_set(stmdev_ctx_t *ctx, lsm6dso_den_mode_t val)
 {
   lsm6dso_ctrl6_c_t reg;
   int32_t ret;
@@ -6610,7 +6593,7 @@ int32_t lsm6dso_den_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_den_mode_t val)
   * @param  val      Get the values of den_mode in reg CTRL6_C
   *
   */
-int32_t lsm6dso_den_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_den_mode_t *val)
+int32_t lsm6dso_den_mode_get(stmdev_ctx_t *ctx, lsm6dso_den_mode_t *val)
 {
   lsm6dso_ctrl6_c_t reg;
   int32_t ret;
@@ -6647,7 +6630,7 @@ int32_t lsm6dso_den_mode_get(lsm6dso_ctx_t *ctx, lsm6dso_den_mode_t *val)
   * @param  val      change the values of den_lh in reg CTRL9_XL
   *
   */
-int32_t lsm6dso_den_polarity_set(lsm6dso_ctx_t *ctx, lsm6dso_den_lh_t val)
+int32_t lsm6dso_den_polarity_set(stmdev_ctx_t *ctx, lsm6dso_den_lh_t val)
 {
   lsm6dso_ctrl9_xl_t reg;
   int32_t ret;
@@ -6668,7 +6651,7 @@ int32_t lsm6dso_den_polarity_set(lsm6dso_ctx_t *ctx, lsm6dso_den_lh_t val)
   * @param  val      Get the values of den_lh in reg CTRL9_XL
   *
   */
-int32_t lsm6dso_den_polarity_get(lsm6dso_ctx_t *ctx, lsm6dso_den_lh_t *val)
+int32_t lsm6dso_den_polarity_get(stmdev_ctx_t *ctx, lsm6dso_den_lh_t *val)
 {
   lsm6dso_ctrl9_xl_t reg;
   int32_t ret;
@@ -6696,7 +6679,7 @@ int32_t lsm6dso_den_polarity_get(lsm6dso_ctx_t *ctx, lsm6dso_den_lh_t *val)
   * @param  val      change the values of den_xl_g in reg CTRL9_XL
   *
   */
-int32_t lsm6dso_den_enable_set(lsm6dso_ctx_t *ctx, lsm6dso_den_xl_g_t val)
+int32_t lsm6dso_den_enable_set(stmdev_ctx_t *ctx, lsm6dso_den_xl_g_t val)
 {
   lsm6dso_ctrl9_xl_t reg;
   int32_t ret;
@@ -6717,7 +6700,7 @@ int32_t lsm6dso_den_enable_set(lsm6dso_ctx_t *ctx, lsm6dso_den_xl_g_t val)
   * @param  val      Get the values of den_xl_g in reg CTRL9_XL
   *
   */
-int32_t lsm6dso_den_enable_get(lsm6dso_ctx_t *ctx, lsm6dso_den_xl_g_t *val)
+int32_t lsm6dso_den_enable_get(stmdev_ctx_t *ctx, lsm6dso_den_xl_g_t *val)
 {
   lsm6dso_ctrl9_xl_t reg;
   int32_t ret;
@@ -6748,7 +6731,7 @@ int32_t lsm6dso_den_enable_get(lsm6dso_ctx_t *ctx, lsm6dso_den_xl_g_t *val)
   * @param  val      change the values of den_z in reg CTRL9_XL
   *
   */
-int32_t lsm6dso_den_mark_axis_x_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_den_mark_axis_x_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_ctrl9_xl_t reg;
   int32_t ret;
@@ -6769,7 +6752,7 @@ int32_t lsm6dso_den_mark_axis_x_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of den_z in reg CTRL9_XL
   *
   */
-int32_t lsm6dso_den_mark_axis_x_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_den_mark_axis_x_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_ctrl9_xl_t reg;
   int32_t ret;
@@ -6787,7 +6770,7 @@ int32_t lsm6dso_den_mark_axis_x_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of den_y in reg CTRL9_XL
   *
   */
-int32_t lsm6dso_den_mark_axis_y_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_den_mark_axis_y_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_ctrl9_xl_t reg;
   int32_t ret;
@@ -6808,7 +6791,7 @@ int32_t lsm6dso_den_mark_axis_y_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of den_y in reg CTRL9_XL
   *
   */
-int32_t lsm6dso_den_mark_axis_y_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_den_mark_axis_y_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_ctrl9_xl_t reg;
   int32_t ret;
@@ -6826,7 +6809,7 @@ int32_t lsm6dso_den_mark_axis_y_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of den_x in reg CTRL9_XL
   *
   */
-int32_t lsm6dso_den_mark_axis_z_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_den_mark_axis_z_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_ctrl9_xl_t reg;
   int32_t ret;
@@ -6847,7 +6830,7 @@ int32_t lsm6dso_den_mark_axis_z_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of den_x in reg CTRL9_XL
   *
   */
-int32_t lsm6dso_den_mark_axis_z_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_den_mark_axis_z_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_ctrl9_xl_t reg;
   int32_t ret;
@@ -6877,7 +6860,7 @@ int32_t lsm6dso_den_mark_axis_z_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      turn on and configure pedometer
   *
   */
-int32_t lsm6dso_pedo_sens_set(lsm6dso_ctx_t *ctx, lsm6dso_pedo_md_t val)
+int32_t lsm6dso_pedo_sens_set(stmdev_ctx_t *ctx, lsm6dso_pedo_md_t val)
 {
   lsm6dso_emb_func_en_a_t emb_func_en_a;
   lsm6dso_emb_func_en_b_t emb_func_en_b;
@@ -6927,7 +6910,7 @@ int32_t lsm6dso_pedo_sens_set(lsm6dso_ctx_t *ctx, lsm6dso_pedo_md_t val)
   * @param  val      turn on and configure pedometer
   *
   */
-int32_t lsm6dso_pedo_sens_get(lsm6dso_ctx_t *ctx, lsm6dso_pedo_md_t *val)
+int32_t lsm6dso_pedo_sens_get(stmdev_ctx_t *ctx, lsm6dso_pedo_md_t *val)
 {
   lsm6dso_emb_func_en_a_t emb_func_en_a;
   lsm6dso_emb_func_en_b_t emb_func_en_b;
@@ -6978,7 +6961,7 @@ int32_t lsm6dso_pedo_sens_get(lsm6dso_ctx_t *ctx, lsm6dso_pedo_md_t *val)
   * @param  val      change the values of is_step_det in reg EMB_FUNC_STATUS
   *
   */
-int32_t lsm6dso_pedo_step_detect_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_pedo_step_detect_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_emb_func_status_t reg;
   int32_t ret;
@@ -7002,7 +6985,7 @@ int32_t lsm6dso_pedo_step_detect_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  buff     buffer that contains data to write
   *
   */
-int32_t lsm6dso_pedo_debounce_steps_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_pedo_debounce_steps_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_PEDO_DEB_STEPS_CONF, buff);
@@ -7016,7 +6999,7 @@ int32_t lsm6dso_pedo_debounce_steps_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dso_pedo_debounce_steps_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_pedo_debounce_steps_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_PEDO_DEB_STEPS_CONF, buff);
@@ -7030,7 +7013,7 @@ int32_t lsm6dso_pedo_debounce_steps_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that contains data to write
   *
   */
-int32_t lsm6dso_pedo_steps_period_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_pedo_steps_period_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   uint8_t index;
@@ -7052,7 +7035,7 @@ int32_t lsm6dso_pedo_steps_period_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dso_pedo_steps_period_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_pedo_steps_period_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   uint8_t index;
@@ -7075,7 +7058,7 @@ int32_t lsm6dso_pedo_steps_period_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  val      change the values of carry_count_en in reg PEDO_CMD_REG
   *
   */
-int32_t lsm6dso_pedo_int_mode_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_pedo_int_mode_set(stmdev_ctx_t *ctx,
                                   lsm6dso_carry_count_en_t val)
 {
   lsm6dso_pedo_cmd_reg_t reg;
@@ -7098,7 +7081,7 @@ int32_t lsm6dso_pedo_int_mode_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of carry_count_en in reg PEDO_CMD_REG
   *
   */
-int32_t lsm6dso_pedo_int_mode_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_pedo_int_mode_get(stmdev_ctx_t *ctx,
                                   lsm6dso_carry_count_en_t *val)
 {
   lsm6dso_pedo_cmd_reg_t reg;
@@ -7139,7 +7122,7 @@ int32_t lsm6dso_pedo_int_mode_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of sign_motion_en in reg EMB_FUNC_EN_A
   *
   */
-int32_t lsm6dso_motion_sens_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_motion_sens_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_emb_func_en_a_t reg;
   int32_t ret;
@@ -7165,7 +7148,7 @@ int32_t lsm6dso_motion_sens_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of sign_motion_en in reg EMB_FUNC_EN_A
   *
   */
-int32_t lsm6dso_motion_sens_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_motion_sens_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_emb_func_en_a_t reg;
   int32_t ret;
@@ -7188,7 +7171,7 @@ int32_t lsm6dso_motion_sens_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of is_sigmot in reg EMB_FUNC_STATUS
   *
   */
-int32_t lsm6dso_motion_flag_data_ready_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_motion_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_emb_func_status_t reg;
   int32_t ret;
@@ -7225,7 +7208,7 @@ int32_t lsm6dso_motion_flag_data_ready_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of tilt_en in reg EMB_FUNC_EN_A
   *
   */
-int32_t lsm6dso_tilt_sens_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_tilt_sens_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_emb_func_en_a_t reg;
   int32_t ret;
@@ -7251,7 +7234,7 @@ int32_t lsm6dso_tilt_sens_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of tilt_en in reg EMB_FUNC_EN_A
   *
   */
-int32_t lsm6dso_tilt_sens_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_tilt_sens_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_emb_func_en_a_t reg;
   int32_t ret;
@@ -7275,7 +7258,7 @@ int32_t lsm6dso_tilt_sens_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of is_tilt in reg EMB_FUNC_STATUS
   *
   */
-int32_t lsm6dso_tilt_flag_data_ready_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_tilt_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_emb_func_status_t reg;
   int32_t ret;
@@ -7312,7 +7295,7 @@ int32_t lsm6dso_tilt_flag_data_ready_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  buff     buffer that contains data to write
   *
   */
-int32_t lsm6dso_mag_sensitivity_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_mag_sensitivity_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   uint8_t index;
@@ -7336,7 +7319,7 @@ int32_t lsm6dso_mag_sensitivity_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dso_mag_sensitivity_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_mag_sensitivity_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   uint8_t index;
@@ -7360,7 +7343,7 @@ int32_t lsm6dso_mag_sensitivity_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that contains data to write
   *
   */
-int32_t lsm6dso_mag_offset_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   uint8_t index;
@@ -7399,7 +7382,7 @@ int32_t lsm6dso_mag_offset_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dso_mag_offset_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_mag_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   uint8_t index;
@@ -7444,7 +7427,7 @@ int32_t lsm6dso_mag_offset_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that contains data to write
   *
   */
-int32_t lsm6dso_mag_soft_iron_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_mag_soft_iron_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   uint8_t index;
@@ -7518,7 +7501,7 @@ int32_t lsm6dso_mag_soft_iron_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dso_mag_soft_iron_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_mag_soft_iron_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   uint8_t index;
@@ -7588,7 +7571,7 @@ int32_t lsm6dso_mag_soft_iron_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  val      change the values of mag_z_axis in reg MAG_CFG_A
   *
   */
-int32_t lsm6dso_mag_z_orient_set(lsm6dso_ctx_t *ctx, lsm6dso_mag_z_axis_t val)
+int32_t lsm6dso_mag_z_orient_set(stmdev_ctx_t *ctx, lsm6dso_mag_z_axis_t val)
 {
   lsm6dso_mag_cfg_a_t reg;
   int32_t ret;
@@ -7612,7 +7595,7 @@ int32_t lsm6dso_mag_z_orient_set(lsm6dso_ctx_t *ctx, lsm6dso_mag_z_axis_t val)
   * @param  val      Get the values of mag_z_axis in reg MAG_CFG_A
   *
   */
-int32_t lsm6dso_mag_z_orient_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_mag_z_orient_get(stmdev_ctx_t *ctx,
                                  lsm6dso_mag_z_axis_t *val)
 {
   lsm6dso_mag_cfg_a_t reg;
@@ -7654,7 +7637,7 @@ int32_t lsm6dso_mag_z_orient_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of mag_y_axis in reg MAG_CFG_A
   *
   */
-int32_t lsm6dso_mag_y_orient_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_mag_y_orient_set(stmdev_ctx_t *ctx,
                                  lsm6dso_mag_y_axis_t val)
 {
   lsm6dso_mag_cfg_a_t reg;
@@ -7678,7 +7661,7 @@ int32_t lsm6dso_mag_y_orient_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of mag_y_axis in reg MAG_CFG_A
   *
   */
-int32_t lsm6dso_mag_y_orient_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_mag_y_orient_get(stmdev_ctx_t *ctx,
                                  lsm6dso_mag_y_axis_t *val)
 {
   lsm6dso_mag_cfg_a_t reg;
@@ -7721,7 +7704,7 @@ int32_t lsm6dso_mag_y_orient_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of mag_x_axis in reg MAG_CFG_B
   *
   */
-int32_t lsm6dso_mag_x_orient_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_mag_x_orient_set(stmdev_ctx_t *ctx,
                                  lsm6dso_mag_x_axis_t val)
 {
   lsm6dso_mag_cfg_b_t reg;
@@ -7745,7 +7728,7 @@ int32_t lsm6dso_mag_x_orient_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of mag_x_axis in reg MAG_CFG_B
   *
   */
-int32_t lsm6dso_mag_x_orient_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_mag_x_orient_get(stmdev_ctx_t *ctx,
                                  lsm6dso_mag_x_axis_t *val)
 {
   lsm6dso_mag_cfg_b_t reg;
@@ -7799,7 +7782,7 @@ int32_t lsm6dso_mag_x_orient_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of is_fsm_lc in reg EMB_FUNC_STATUS
   *
   */
-int32_t lsm6dso_long_cnt_flag_data_ready_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_long_cnt_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_emb_func_status_t reg;
   int32_t ret;
@@ -7822,7 +7805,7 @@ int32_t lsm6dso_long_cnt_flag_data_ready_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of fsm_en in reg EMB_FUNC_EN_B
   *
   */
-int32_t lsm6dso_emb_fsm_en_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_emb_fsm_en_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   int32_t ret;
   lsm6dso_emb_func_en_b_t reg;
@@ -7848,7 +7831,7 @@ int32_t lsm6dso_emb_fsm_en_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  uint8_t *: return the values of fsm_en in reg EMB_FUNC_EN_B
   *
   */
-int32_t lsm6dso_emb_fsm_en_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_emb_fsm_en_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   int32_t ret;
   lsm6dso_emb_func_en_b_t reg;
@@ -7875,7 +7858,7 @@ int32_t lsm6dso_emb_fsm_en_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      union of registers from FSM_ENABLE_A to FSM_ENABLE_B
   *
   */
-int32_t lsm6dso_fsm_enable_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_fsm_enable_set(stmdev_ctx_t *ctx,
                                lsm6dso_emb_fsm_enable_t *val)
 {
   int32_t ret;
@@ -7935,7 +7918,7 @@ int32_t lsm6dso_fsm_enable_set(lsm6dso_ctx_t *ctx,
   * @param  val      union of registers from FSM_ENABLE_A to FSM_ENABLE_B
   *
   */
-int32_t lsm6dso_fsm_enable_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_fsm_enable_get(stmdev_ctx_t *ctx,
                                lsm6dso_emb_fsm_enable_t *val)
 {
   int32_t ret;
@@ -7958,7 +7941,7 @@ int32_t lsm6dso_fsm_enable_get(lsm6dso_ctx_t *ctx,
   * @param  buff     buffer that contains data to write
   *
   */
-int32_t lsm6dso_long_cnt_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_long_cnt_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
 
@@ -7981,7 +7964,7 @@ int32_t lsm6dso_long_cnt_set(lsm6dso_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dso_long_cnt_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dso_long_cnt_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
 
@@ -8004,7 +7987,7 @@ int32_t lsm6dso_long_cnt_get(lsm6dso_ctx_t *ctx, uint8_t *buff)
   *                  reg FSM_LONG_COUNTER_CLEAR
   *
   */
-int32_t lsm6dso_long_clr_set(lsm6dso_ctx_t *ctx, lsm6dso_fsm_lc_clr_t val)
+int32_t lsm6dso_long_clr_set(stmdev_ctx_t *ctx, lsm6dso_fsm_lc_clr_t val)
 {
   lsm6dso_fsm_long_counter_clear_t reg;
   int32_t ret;
@@ -8033,7 +8016,7 @@ int32_t lsm6dso_long_clr_set(lsm6dso_ctx_t *ctx, lsm6dso_fsm_lc_clr_t val)
   *                  reg FSM_LONG_COUNTER_CLEAR
   *
   */
-int32_t lsm6dso_long_clr_get(lsm6dso_ctx_t *ctx, lsm6dso_fsm_lc_clr_t *val)
+int32_t lsm6dso_long_clr_get(stmdev_ctx_t *ctx, lsm6dso_fsm_lc_clr_t *val)
 {
   lsm6dso_fsm_long_counter_clear_t reg;
   int32_t ret;
@@ -8074,7 +8057,7 @@ int32_t lsm6dso_long_clr_get(lsm6dso_ctx_t *ctx, lsm6dso_fsm_lc_clr_t *val)
   * @param  val      struct of registers from FSM_OUTS1 to FSM_OUTS16
   *
   */
-int32_t lsm6dso_fsm_out_get(lsm6dso_ctx_t *ctx, lsm6dso_fsm_out_t *val)
+int32_t lsm6dso_fsm_out_get(stmdev_ctx_t *ctx, lsm6dso_fsm_out_t *val)
 {
   int32_t ret;
 
@@ -8096,7 +8079,7 @@ int32_t lsm6dso_fsm_out_get(lsm6dso_ctx_t *ctx, lsm6dso_fsm_out_t *val)
   * @param  val      change the values of fsm_odr in reg EMB_FUNC_ODR_CFG_B
   *
   */
-int32_t lsm6dso_fsm_data_rate_set(lsm6dso_ctx_t *ctx, lsm6dso_fsm_odr_t val)
+int32_t lsm6dso_fsm_data_rate_set(stmdev_ctx_t *ctx, lsm6dso_fsm_odr_t val)
 {
   lsm6dso_emb_func_odr_cfg_b_t reg;
   int32_t ret;
@@ -8126,7 +8109,7 @@ int32_t lsm6dso_fsm_data_rate_set(lsm6dso_ctx_t *ctx, lsm6dso_fsm_odr_t val)
   * @param  val      Get the values of fsm_odr in reg EMB_FUNC_ODR_CFG_B
   *
   */
-int32_t lsm6dso_fsm_data_rate_get(lsm6dso_ctx_t *ctx, lsm6dso_fsm_odr_t *val)
+int32_t lsm6dso_fsm_data_rate_get(stmdev_ctx_t *ctx, lsm6dso_fsm_odr_t *val)
 {
   lsm6dso_emb_func_odr_cfg_b_t reg;
   int32_t ret;
@@ -8167,7 +8150,7 @@ int32_t lsm6dso_fsm_data_rate_get(lsm6dso_ctx_t *ctx, lsm6dso_fsm_odr_t *val)
   * @param  val      change the values of fsm_init in reg FSM_INIT
   *
   */
-int32_t lsm6dso_fsm_init_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_fsm_init_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_emb_func_init_b_t reg;
   int32_t ret;
@@ -8194,7 +8177,7 @@ int32_t lsm6dso_fsm_init_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of fsm_init in reg FSM_INIT
   *
   */
-int32_t lsm6dso_fsm_init_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_fsm_init_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_emb_func_init_b_t reg;
   int32_t ret;
@@ -8220,7 +8203,7 @@ int32_t lsm6dso_fsm_init_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      the value of long counter
   *
   */
-int32_t lsm6dso_long_cnt_int_value_set(lsm6dso_ctx_t *ctx, uint16_t val)
+int32_t lsm6dso_long_cnt_int_value_set(stmdev_ctx_t *ctx, uint16_t val)
 {
   int32_t ret;
   uint8_t add_l;
@@ -8247,7 +8230,7 @@ int32_t lsm6dso_long_cnt_int_value_set(lsm6dso_ctx_t *ctx, uint16_t val)
   * @param  val     buffer that stores the value of long counter
   *
   */
-int32_t lsm6dso_long_cnt_int_value_get(lsm6dso_ctx_t *ctx, uint16_t *val)
+int32_t lsm6dso_long_cnt_int_value_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
   int32_t ret;
   uint8_t add_l;
@@ -8271,7 +8254,7 @@ int32_t lsm6dso_long_cnt_int_value_get(lsm6dso_ctx_t *ctx, uint16_t *val)
   * @param  val      value to write
   *
   */
-int32_t lsm6dso_fsm_number_of_programs_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_fsm_number_of_programs_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   int32_t ret;
 
@@ -8287,7 +8270,7 @@ int32_t lsm6dso_fsm_number_of_programs_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      buffer that stores data read.
   *
   */
-int32_t lsm6dso_fsm_number_of_programs_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_fsm_number_of_programs_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   int32_t ret;
 
@@ -8304,7 +8287,7 @@ int32_t lsm6dso_fsm_number_of_programs_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      the value of start address
   *
   */
-int32_t lsm6dso_fsm_start_address_set(lsm6dso_ctx_t *ctx, uint16_t val)
+int32_t lsm6dso_fsm_start_address_set(stmdev_ctx_t *ctx, uint16_t val)
 {
   int32_t ret;
   uint8_t add_l;
@@ -8328,7 +8311,7 @@ int32_t lsm6dso_fsm_start_address_set(lsm6dso_ctx_t *ctx, uint16_t val)
   * @param  val      buffer the value of start address.
   *
   */
-int32_t lsm6dso_fsm_start_address_get(lsm6dso_ctx_t *ctx, uint16_t *val)
+int32_t lsm6dso_fsm_start_address_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
   int32_t ret;
   uint8_t add_l;
@@ -8365,7 +8348,7 @@ int32_t lsm6dso_fsm_start_address_get(lsm6dso_ctx_t *ctx, uint16_t *val)
   * @param  len      number of consecutive register to read (max 18)
   *
   */
-int32_t lsm6dso_sh_read_data_raw_get(lsm6dso_ctx_t *ctx, uint8_t *val,
+int32_t lsm6dso_sh_read_data_raw_get(stmdev_ctx_t *ctx, uint8_t *val,
                                      uint8_t len)
 {
   int32_t ret;
@@ -8388,7 +8371,7 @@ int32_t lsm6dso_sh_read_data_raw_get(lsm6dso_ctx_t *ctx, uint8_t *val,
   * @param  val      change the values of aux_sens_on in reg MASTER_CONFIG
   *
   */
-int32_t lsm6dso_sh_slave_connected_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_sh_slave_connected_set(stmdev_ctx_t *ctx,
                                        lsm6dso_aux_sens_on_t val)
 {
   lsm6dso_master_config_t reg;
@@ -8415,7 +8398,7 @@ int32_t lsm6dso_sh_slave_connected_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of aux_sens_on in reg MASTER_CONFIG
   *
   */
-int32_t lsm6dso_sh_slave_connected_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_sh_slave_connected_get(stmdev_ctx_t *ctx,
                                        lsm6dso_aux_sens_on_t *val)
 {
   lsm6dso_master_config_t reg;
@@ -8456,7 +8439,7 @@ int32_t lsm6dso_sh_slave_connected_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of master_on in reg MASTER_CONFIG
   *
   */
-int32_t lsm6dso_sh_master_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_sh_master_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_master_config_t reg;
   int32_t ret;
@@ -8482,7 +8465,7 @@ int32_t lsm6dso_sh_master_set(lsm6dso_ctx_t *ctx, uint8_t val)
   * @param  val      change the values of master_on in reg MASTER_CONFIG
   *
   */
-int32_t lsm6dso_sh_master_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_sh_master_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_master_config_t reg;
   int32_t ret;
@@ -8506,7 +8489,7 @@ int32_t lsm6dso_sh_master_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of shub_pu_en in reg MASTER_CONFIG
   *
   */
-int32_t lsm6dso_sh_pin_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_shub_pu_en_t val)
+int32_t lsm6dso_sh_pin_mode_set(stmdev_ctx_t *ctx, lsm6dso_shub_pu_en_t val)
 {
   lsm6dso_master_config_t reg;
   int32_t ret;
@@ -8533,7 +8516,7 @@ int32_t lsm6dso_sh_pin_mode_set(lsm6dso_ctx_t *ctx, lsm6dso_shub_pu_en_t val)
   * @param  val      Get the values of shub_pu_en in reg MASTER_CONFIG
   *
   */
-int32_t lsm6dso_sh_pin_mode_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_sh_pin_mode_get(stmdev_ctx_t *ctx,
                                 lsm6dso_shub_pu_en_t *val)
 {
   lsm6dso_master_config_t reg;
@@ -8569,7 +8552,7 @@ int32_t lsm6dso_sh_pin_mode_get(lsm6dso_ctx_t *ctx,
   *                  reg MASTER_CONFIG
   *
   */
-int32_t lsm6dso_sh_pass_through_set(lsm6dso_ctx_t *ctx, uint8_t val)
+int32_t lsm6dso_sh_pass_through_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lsm6dso_master_config_t reg;
   int32_t ret;
@@ -8597,7 +8580,7 @@ int32_t lsm6dso_sh_pass_through_set(lsm6dso_ctx_t *ctx, uint8_t val)
   *                  reg MASTER_CONFIG
   *
   */
-int32_t lsm6dso_sh_pass_through_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_sh_pass_through_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_master_config_t reg;
   int32_t ret;
@@ -8621,7 +8604,7 @@ int32_t lsm6dso_sh_pass_through_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of start_config in reg MASTER_CONFIG
   *
   */
-int32_t lsm6dso_sh_syncro_mode_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_sh_syncro_mode_set(stmdev_ctx_t *ctx,
                                    lsm6dso_start_config_t val)
 {
   lsm6dso_master_config_t reg;
@@ -8649,7 +8632,7 @@ int32_t lsm6dso_sh_syncro_mode_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of start_config in reg MASTER_CONFIG
   *
   */
-int32_t lsm6dso_sh_syncro_mode_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_sh_syncro_mode_get(stmdev_ctx_t *ctx,
                                    lsm6dso_start_config_t *val)
 {
   lsm6dso_master_config_t reg;
@@ -8684,7 +8667,7 @@ int32_t lsm6dso_sh_syncro_mode_get(lsm6dso_ctx_t *ctx,
   * @param  val      change the values of write_once in reg MASTER_CONFIG
   *
   */
-int32_t lsm6dso_sh_write_mode_set(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_sh_write_mode_set(stmdev_ctx_t *ctx,
                                   lsm6dso_write_once_t val)
 {
   lsm6dso_master_config_t reg;
@@ -8713,7 +8696,7 @@ int32_t lsm6dso_sh_write_mode_set(lsm6dso_ctx_t *ctx,
   * @param  val      Get the values of write_once in reg MASTER_CONFIG
   *
   */
-int32_t lsm6dso_sh_write_mode_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_sh_write_mode_get(stmdev_ctx_t *ctx,
                                   lsm6dso_write_once_t *val)
 {
   lsm6dso_master_config_t reg;
@@ -8747,7 +8730,7 @@ int32_t lsm6dso_sh_write_mode_get(lsm6dso_ctx_t *ctx,
   * @param  ctx      read / write interface definitions
   *
   */
-int32_t lsm6dso_sh_reset_set(lsm6dso_ctx_t *ctx)
+int32_t lsm6dso_sh_reset_set(stmdev_ctx_t *ctx)
 {
   lsm6dso_master_config_t reg;
   int32_t ret;
@@ -8778,7 +8761,7 @@ int32_t lsm6dso_sh_reset_set(lsm6dso_ctx_t *ctx)
   * @param  val      change the values of rst_master_regs in reg MASTER_CONFIG
   *
   */
-int32_t lsm6dso_sh_reset_get(lsm6dso_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dso_sh_reset_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dso_master_config_t reg;
   int32_t ret;
@@ -8801,7 +8784,7 @@ int32_t lsm6dso_sh_reset_get(lsm6dso_ctx_t *ctx, uint8_t *val)
   * @param  val      change the values of shub_odr in reg slv1_CONFIG
   *
   */
-int32_t lsm6dso_sh_data_rate_set(lsm6dso_ctx_t *ctx, lsm6dso_shub_odr_t val)
+int32_t lsm6dso_sh_data_rate_set(stmdev_ctx_t *ctx, lsm6dso_shub_odr_t val)
 {
   lsm6dso_slv0_config_t reg;
   int32_t ret;
@@ -8828,7 +8811,7 @@ int32_t lsm6dso_sh_data_rate_set(lsm6dso_ctx_t *ctx, lsm6dso_shub_odr_t val)
   * @param  val      Get the values of shub_odr in reg slv1_CONFIG
   *
   */
-int32_t lsm6dso_sh_data_rate_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_sh_data_rate_get(stmdev_ctx_t *ctx,
                                  lsm6dso_shub_odr_t *val)
 {
   lsm6dso_slv0_config_t reg;
@@ -8872,7 +8855,7 @@ int32_t lsm6dso_sh_data_rate_get(lsm6dso_ctx_t *ctx,
   *                      - uint8_t slv1_data;   8 bit data to write
   *
   */
-int32_t lsm6dso_sh_cfg_write(lsm6dso_ctx_t *ctx, lsm6dso_sh_cfg_write_t *val)
+int32_t lsm6dso_sh_cfg_write(stmdev_ctx_t *ctx, lsm6dso_sh_cfg_write_t *val)
 {
   lsm6dso_slv0_add_t reg;
   int32_t ret;
@@ -8907,7 +8890,7 @@ int32_t lsm6dso_sh_cfg_write(lsm6dso_ctx_t *ctx, lsm6dso_sh_cfg_write_t *val)
   *                      - uint8_t slv1_len;    num of bit to read
   *
   */
-int32_t lsm6dso_sh_slv0_cfg_read(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_sh_slv0_cfg_read(stmdev_ctx_t *ctx,
                                  lsm6dso_sh_cfg_read_t *val)
 {
   lsm6dso_slv0_add_t slv0_add;
@@ -8950,7 +8933,7 @@ int32_t lsm6dso_sh_slv0_cfg_read(lsm6dso_ctx_t *ctx,
   *                      - uint8_t slv1_len;    num of bit to read
   *
   */
-int32_t lsm6dso_sh_slv1_cfg_read(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_sh_slv1_cfg_read(stmdev_ctx_t *ctx,
                                  lsm6dso_sh_cfg_read_t *val)
 {
   lsm6dso_slv1_add_t slv1_add;
@@ -8993,7 +8976,7 @@ int32_t lsm6dso_sh_slv1_cfg_read(lsm6dso_ctx_t *ctx,
   *                      - uint8_t slv2_len;    num of bit to read
   *
   */
-int32_t lsm6dso_sh_slv2_cfg_read(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_sh_slv2_cfg_read(stmdev_ctx_t *ctx,
                                  lsm6dso_sh_cfg_read_t *val)
 {
   lsm6dso_slv2_add_t slv2_add;
@@ -9035,7 +9018,7 @@ int32_t lsm6dso_sh_slv2_cfg_read(lsm6dso_ctx_t *ctx,
   *                      - uint8_t slv3_len;    num of bit to read
   *
   */
-int32_t lsm6dso_sh_slv3_cfg_read(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_sh_slv3_cfg_read(stmdev_ctx_t *ctx,
                                  lsm6dso_sh_cfg_read_t *val)
 {
   lsm6dso_slv3_add_t slv3_add;
@@ -9074,7 +9057,7 @@ int32_t lsm6dso_sh_slv3_cfg_read(lsm6dso_ctx_t *ctx,
   * @param  val      union of registers from STATUS_MASTER to
   *
   */
-int32_t lsm6dso_sh_status_get(lsm6dso_ctx_t *ctx,
+int32_t lsm6dso_sh_status_get(stmdev_ctx_t *ctx,
                               lsm6dso_status_master_t *val)
 {
   int32_t ret;

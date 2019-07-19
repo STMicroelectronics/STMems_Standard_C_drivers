@@ -7,33 +7,17 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
+ ******************************************************************************
  */
+
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef LSM9DS1_REGS_H
 #define LSM9DS1_REGS_H
@@ -51,50 +35,13 @@
   *
   */
 
-/** @defgroup LSM9DS1_sensors_common_types
+/** @defgroup STMicroelectronics sensors common types
   * @{
   *
   */
 
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
-
-/**
-  * @defgroup axisXbitXX_t
-  * @brief    These unions are useful to represent different sensors data type.
-  *           These unions are not need by the driver.
-  *
-  *           REMOVING the unions you are compliant with:
-  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
-  *
-  * @{
-  *
-  */
-
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
-
-typedef union{
-  int32_t i32bit[3];
-  uint8_t u8bit[12];
-} axis3bit32_t;
-
-typedef union{
-  int32_t i32bit;
-  uint8_t u8bit[4];
-} axis1bit32_t;
-
-/**
-  * @}
-  *
-  */
 
 typedef struct{
   uint8_t bit0       : 1;
@@ -110,14 +57,7 @@ typedef struct{
 #define PROPERTY_DISABLE                (0U)
 #define PROPERTY_ENABLE                 (1U)
 
-#endif /* MEMS_SHARED_TYPES */
-
-/**
-  * @}
-  *
-  */
-
-  /** @addtogroup  LSM9DS1_Interfaces_Functions
+/** @addtogroup  Interfaces_Functions
   * @brief       This section provide a set of functions used to read and
   *              write a generic register of the device.
   *              MANDATORY: return 0 -> no Error.
@@ -125,16 +65,49 @@ typedef struct{
   *
   */
 
-typedef int32_t (*lsm9ds1_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*lsm9ds1_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
-  lsm9ds1_write_ptr  write_reg;
-  lsm9ds1_read_ptr   read_reg;
+  stmdev_write_ptr  write_reg;
+  stmdev_read_ptr   read_reg;
   /** Customizable optional pointer **/
   void *handle;
-} lsm9ds1_ctx_t;
+} stmdev_ctx_t;
+
+/**
+  * @}
+  *
+  */
+
+#endif /* MEMS_SHARED_TYPES */
+
+#ifndef MEMS_UCF_SHARED_TYPES
+#define MEMS_UCF_SHARED_TYPES
+
+/** @defgroup    Generic address-data structure definition
+  * @brief       This structure is useful to load a predefined configuration
+  *              of a sensor.
+	*              You can create a sensor configuration by your own or using 
+	*              Unico / Unicleo tools available on STMicroelectronics
+	*              web site.
+  *
+  * @{
+  *
+  */
+
+typedef struct {
+  uint8_t address;
+  uint8_t data;
+} ucf_line_t;
+
+/**
+  * @}
+  *
+  */
+
+#endif /* MEMS_UCF_SHARED_TYPES */
 
 /**
   * @}
@@ -597,9 +570,9 @@ typedef union{
   *
   */
 
-int32_t lsm9ds1_read_reg(lsm9ds1_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lsm9ds1_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                          uint16_t len);
-int32_t lsm9ds1_write_reg(lsm9ds1_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lsm9ds1_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
 extern float_t lsm9ds1_from_fs2g_to_mg(int16_t lsb);
@@ -623,8 +596,8 @@ typedef enum {
   LSM9DS1_500dps = 1,
   LSM9DS1_2000dps = 3,
 } lsm9ds1_gy_fs_t;
-int32_t lsm9ds1_gy_full_scale_set(lsm9ds1_ctx_t *ctx, lsm9ds1_gy_fs_t val);
-int32_t lsm9ds1_gy_full_scale_get(lsm9ds1_ctx_t *ctx, lsm9ds1_gy_fs_t *val);
+int32_t lsm9ds1_gy_full_scale_set(stmdev_ctx_t *ctx, lsm9ds1_gy_fs_t val);
+int32_t lsm9ds1_gy_full_scale_get(stmdev_ctx_t *ctx, lsm9ds1_gy_fs_t *val);
 
 typedef enum {
   LSM9DS1_IMU_OFF              = 0x00,
@@ -653,9 +626,9 @@ typedef enum {
   LSM9DS1_IMU_59Hz5_LP         = 0xA2,
   LSM9DS1_IMU_119Hz_LP         = 0xB3,
 } lsm9ds1_imu_odr_t;
-int32_t lsm9ds1_imu_data_rate_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_imu_data_rate_set(stmdev_ctx_t *ctx,
                                   lsm9ds1_imu_odr_t val);
-int32_t lsm9ds1_imu_data_rate_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_imu_data_rate_get(stmdev_ctx_t *ctx,
                                   lsm9ds1_imu_odr_t *val);
 
 typedef struct {
@@ -664,30 +637,30 @@ typedef struct {
   uint8_t signy_g             : 1; /*(0: positive; 1: negative)*/
   uint8_t signx_g             : 1; /*(0: positive; 1: negative)*/
 } lsm9ds1_gy_orient_t;
-int32_t lsm9ds1_gy_orient_set(lsm9ds1_ctx_t *ctx, lsm9ds1_gy_orient_t val);
-int32_t lsm9ds1_gy_orient_get(lsm9ds1_ctx_t *ctx, lsm9ds1_gy_orient_t *val);
+int32_t lsm9ds1_gy_orient_set(stmdev_ctx_t *ctx, lsm9ds1_gy_orient_t val);
+int32_t lsm9ds1_gy_orient_get(stmdev_ctx_t *ctx, lsm9ds1_gy_orient_t *val);
 
-int32_t lsm9ds1_xl_flag_data_ready_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_xl_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm9ds1_gy_flag_data_ready_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_gy_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm9ds1_temp_flag_data_ready_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_temp_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef struct {
   uint8_t xen_g             : 1;
   uint8_t yen_g             : 1;
   uint8_t zen_g             : 1;
 } lsm9ds1_gy_axis_t;
-int32_t lsm9ds1_gy_axis_set(lsm9ds1_ctx_t *ctx, lsm9ds1_gy_axis_t val);
-int32_t lsm9ds1_gy_axis_get(lsm9ds1_ctx_t *ctx, lsm9ds1_gy_axis_t *val);
+int32_t lsm9ds1_gy_axis_set(stmdev_ctx_t *ctx, lsm9ds1_gy_axis_t val);
+int32_t lsm9ds1_gy_axis_get(stmdev_ctx_t *ctx, lsm9ds1_gy_axis_t *val);
 
 typedef struct {
   uint8_t xen_xl             : 1;
   uint8_t yen_xl             : 1;
   uint8_t zen_xl             : 1;
 } lsm9ds1_xl_axis_t;
-int32_t lsm9ds1_xl_axis_set(lsm9ds1_ctx_t *ctx, lsm9ds1_xl_axis_t val);
-int32_t lsm9ds1_xl_axis_get(lsm9ds1_ctx_t *ctx, lsm9ds1_xl_axis_t *val);
+int32_t lsm9ds1_xl_axis_set(stmdev_ctx_t *ctx, lsm9ds1_xl_axis_t val);
+int32_t lsm9ds1_xl_axis_get(stmdev_ctx_t *ctx, lsm9ds1_xl_axis_t *val);
 
 typedef enum {
   LSM9DS1_NO_DECIMATION     = 0,
@@ -695,8 +668,8 @@ typedef enum {
   LSM9DS1_EVERY_4_SAMPLES   = 2,
   LSM9DS1_EVERY_8_SAMPLES   = 3,
 } lsm9ds1_dec_t;
-int32_t lsm9ds1_xl_decimation_set(lsm9ds1_ctx_t *ctx, lsm9ds1_dec_t val);
-int32_t lsm9ds1_xl_decimation_get(lsm9ds1_ctx_t *ctx, lsm9ds1_dec_t *val);
+int32_t lsm9ds1_xl_decimation_set(stmdev_ctx_t *ctx, lsm9ds1_dec_t val);
+int32_t lsm9ds1_xl_decimation_get(stmdev_ctx_t *ctx, lsm9ds1_dec_t *val);
 
 typedef enum {
   LSM9DS1_2g     = 0,
@@ -704,16 +677,16 @@ typedef enum {
   LSM9DS1_4g     = 2,
   LSM9DS1_8g     = 3,
 } lsm9ds1_xl_fs_t;
-int32_t lsm9ds1_xl_full_scale_set(lsm9ds1_ctx_t *ctx, lsm9ds1_xl_fs_t val);
-int32_t lsm9ds1_xl_full_scale_get(lsm9ds1_ctx_t *ctx, lsm9ds1_xl_fs_t *val);
+int32_t lsm9ds1_xl_full_scale_set(stmdev_ctx_t *ctx, lsm9ds1_xl_fs_t val);
+int32_t lsm9ds1_xl_full_scale_get(stmdev_ctx_t *ctx, lsm9ds1_xl_fs_t *val);
 
-int32_t lsm9ds1_block_data_update_set(lsm9ds1_ctx_t *ctx_mag,
-                                      lsm9ds1_ctx_t *ctx_imu, uint8_t val);
-int32_t lsm9ds1_block_data_update_get(lsm9ds1_ctx_t *ctx_mag,
-                                      lsm9ds1_ctx_t *ctx_imu, uint8_t *val);
+int32_t lsm9ds1_block_data_update_set(stmdev_ctx_t *ctx_mag,
+                                      stmdev_ctx_t *ctx_imu, uint8_t val);
+int32_t lsm9ds1_block_data_update_get(stmdev_ctx_t *ctx_mag,
+                                      stmdev_ctx_t *ctx_imu, uint8_t *val);
 
-int32_t lsm9ds1_mag_offset_set(lsm9ds1_ctx_t *ctx, uint8_t *buff);
-int32_t lsm9ds1_mag_offset_get(lsm9ds1_ctx_t *ctx, uint8_t *buff);
+int32_t lsm9ds1_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm9ds1_mag_offset_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
 typedef enum {
   LSM9DS1_MAG_POWER_DOWN    = 0xC0,
@@ -755,9 +728,9 @@ typedef enum {
   LSM9DS1_MAG_LP_1000Hz     = 0x08,
   LSM9DS1_MAG_ONE_SHOT      = 0x70,
 } lsm9ds1_mag_data_rate_t;
-int32_t lsm9ds1_mag_data_rate_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_mag_data_rate_set(stmdev_ctx_t *ctx,
                                   lsm9ds1_mag_data_rate_t val);
-int32_t lsm9ds1_mag_data_rate_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_mag_data_rate_get(stmdev_ctx_t *ctx,
                                   lsm9ds1_mag_data_rate_t *val);
 
 typedef enum {
@@ -766,60 +739,60 @@ typedef enum {
   LSM9DS1_12Ga   = 2,
   LSM9DS1_16Ga   = 3,
 } lsm9ds1_mag_fs_t;
-int32_t lsm9ds1_mag_full_scale_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_mag_full_scale_set(stmdev_ctx_t *ctx,
                                    lsm9ds1_mag_fs_t val);
-int32_t lsm9ds1_mag_full_scale_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_mag_full_scale_get(stmdev_ctx_t *ctx,
                                    lsm9ds1_mag_fs_t *val);
 
-int32_t lsm9ds1_mag_flag_data_ready_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_mag_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm9ds1_temperature_raw_get(lsm9ds1_ctx_t *ctx, uint8_t *buff);
+int32_t lsm9ds1_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t lsm9ds1_angular_rate_raw_get(lsm9ds1_ctx_t *ctx, uint8_t *buff);
+int32_t lsm9ds1_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t lsm9ds1_acceleration_raw_get(lsm9ds1_ctx_t *ctx, uint8_t *buff);
+int32_t lsm9ds1_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t lsm9ds1_magnetic_raw_get(lsm9ds1_ctx_t *ctx, uint8_t *buff);
+int32_t lsm9ds1_magnetic_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t lsm9ds1_magnetic_overflow_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_magnetic_overflow_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef struct {
   uint8_t imu;
   uint8_t mag;
 } lsm9ds1_id_t;
-int32_t lsm9ds1_dev_id_get(lsm9ds1_ctx_t *ctx_mag, lsm9ds1_ctx_t *ctx_imu,
+int32_t lsm9ds1_dev_id_get(stmdev_ctx_t *ctx_mag, stmdev_ctx_t *ctx_imu,
                            lsm9ds1_id_t *buff);
 
 typedef struct {
   lsm9ds1_status_reg_m_t status_mag;
   lsm9ds1_status_reg_t   status_imu;
 } lsm9ds1_status_t;
-int32_t lsm9ds1_dev_status_get(lsm9ds1_ctx_t *ctx_mag, lsm9ds1_ctx_t *ctx_imu,
+int32_t lsm9ds1_dev_status_get(stmdev_ctx_t *ctx_mag, stmdev_ctx_t *ctx_imu,
                                lsm9ds1_status_t *val);
 
-int32_t lsm9ds1_dev_reset_set(lsm9ds1_ctx_t *ctx_mag, lsm9ds1_ctx_t *ctx_imu,
+int32_t lsm9ds1_dev_reset_set(stmdev_ctx_t *ctx_mag, stmdev_ctx_t *ctx_imu,
                               uint8_t val);
-int32_t lsm9ds1_dev_reset_get(lsm9ds1_ctx_t *ctx_mag, lsm9ds1_ctx_t *ctx_imu,
+int32_t lsm9ds1_dev_reset_get(stmdev_ctx_t *ctx_mag, stmdev_ctx_t *ctx_imu,
                               uint8_t *val);
 
 typedef enum {
   LSM9DS1_LSB_LOW_ADDRESS = 0,
   LSM9DS1_MSB_LOW_ADDRESS = 1,
 } lsm9ds1_ble_t;
-int32_t lsm9ds1_dev_data_format_set(lsm9ds1_ctx_t *ctx_mag,
-                                    lsm9ds1_ctx_t *ctx_imu,
+int32_t lsm9ds1_dev_data_format_set(stmdev_ctx_t *ctx_mag,
+                                    stmdev_ctx_t *ctx_imu,
                                     lsm9ds1_ble_t val);
-int32_t lsm9ds1_dev_data_format_get(lsm9ds1_ctx_t *ctx_mag,
-                                    lsm9ds1_ctx_t *ctx_imu,
+int32_t lsm9ds1_dev_data_format_get(stmdev_ctx_t *ctx_mag,
+                                    stmdev_ctx_t *ctx_imu,
                                     lsm9ds1_ble_t *val);
 
-int32_t lsm9ds1_dev_boot_set(lsm9ds1_ctx_t *ctx_mag, lsm9ds1_ctx_t *ctx_imu,
+int32_t lsm9ds1_dev_boot_set(stmdev_ctx_t *ctx_mag, stmdev_ctx_t *ctx_imu,
                              uint8_t val);
-int32_t lsm9ds1_dev_boot_get(lsm9ds1_ctx_t *ctx_mag, lsm9ds1_ctx_t *ctx_imu,
+int32_t lsm9ds1_dev_boot_get(stmdev_ctx_t *ctx_mag, stmdev_ctx_t *ctx_imu,
                              uint8_t *val);
 
-int32_t lsm9ds1_gy_filter_reference_set(lsm9ds1_ctx_t *ctx, uint8_t *buff);
-int32_t lsm9ds1_gy_filter_reference_get(lsm9ds1_ctx_t *ctx, uint8_t *buff);
+int32_t lsm9ds1_gy_filter_reference_set(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm9ds1_gy_filter_reference_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
 typedef enum {
   LSM9DS1_LP_STRONG        = 0,
@@ -827,9 +800,9 @@ typedef enum {
   LSM9DS1_LP_LIGHT         = 2,
   LSM9DS1_LP_ULTRA_LIGHT   = 3,
 } lsm9ds1_gy_lp_bw_t;
-int32_t lsm9ds1_gy_filter_lp_bandwidth_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_gy_filter_lp_bandwidth_set(stmdev_ctx_t *ctx,
                                            lsm9ds1_gy_lp_bw_t val);
-int32_t lsm9ds1_gy_filter_lp_bandwidth_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_gy_filter_lp_bandwidth_get(stmdev_ctx_t *ctx,
                                            lsm9ds1_gy_lp_bw_t *val);
 
 typedef enum {
@@ -838,9 +811,9 @@ typedef enum {
   LSM9DS1_LPF1_LPF2_OUT         = 0x02,
   LSM9DS1_LPF1_HPF_LPF2_OUT     = 0x12,
 } lsm9ds1_gy_out_path_t;
-int32_t lsm9ds1_gy_filter_out_path_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_gy_filter_out_path_set(stmdev_ctx_t *ctx,
                                        lsm9ds1_gy_out_path_t val);
-int32_t lsm9ds1_gy_filter_out_path_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_gy_filter_out_path_get(stmdev_ctx_t *ctx,
                                        lsm9ds1_gy_out_path_t *val);
 
 typedef enum {
@@ -849,9 +822,9 @@ typedef enum {
   LSM9DS1_LPF1_LPF2_INT         = 0x02,
   LSM9DS1_LPF1_HPF_LPF2_INT     = 0x12,
 } lsm9ds1_gy_int_path_t;
-int32_t lsm9ds1_gy_filter_int_path_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_gy_filter_int_path_set(stmdev_ctx_t *ctx,
                                        lsm9ds1_gy_int_path_t val);
-int32_t lsm9ds1_gy_filter_int_path_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_gy_filter_int_path_get(stmdev_ctx_t *ctx,
                                        lsm9ds1_gy_int_path_t *val);
 
 typedef enum {
@@ -866,9 +839,9 @@ typedef enum {
   LSM9DS1_HP_LIGHT         = 8,
   LSM9DS1_HP_ULTRA_LIGHT   = 9,
 } lsm9ds1_gy_hp_bw_t;
-int32_t lsm9ds1_gy_filter_hp_bandwidth_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_gy_filter_hp_bandwidth_set(stmdev_ctx_t *ctx,
                                            lsm9ds1_gy_hp_bw_t val);
-int32_t lsm9ds1_gy_filter_hp_bandwidth_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_gy_filter_hp_bandwidth_get(stmdev_ctx_t *ctx,
                                            lsm9ds1_gy_hp_bw_t *val);
 
 typedef enum {
@@ -878,26 +851,26 @@ typedef enum {
   LSM9DS1_105Hz     = 0x12,
   LSM9DS1_50Hz      = 0x13,
 } lsm9ds1_xl_aa_bw_t;
-int32_t lsm9ds1_xl_filter_aalias_bandwidth_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_xl_filter_aalias_bandwidth_set(stmdev_ctx_t *ctx,
                                                lsm9ds1_xl_aa_bw_t val);
-int32_t lsm9ds1_xl_filter_aalias_bandwidth_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_xl_filter_aalias_bandwidth_get(stmdev_ctx_t *ctx,
                                                lsm9ds1_xl_aa_bw_t *val);
 typedef enum {
   LSM9DS1_HP_DIS  = 0,
   LSM9DS1_HP_EN   = 1,
 } lsm9ds1_xl_hp_path_t;
-int32_t lsm9ds1_xl_filter_int_path_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_xl_filter_int_path_set(stmdev_ctx_t *ctx,
                                        lsm9ds1_xl_hp_path_t val);
-int32_t lsm9ds1_xl_filter_int_path_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_xl_filter_int_path_get(stmdev_ctx_t *ctx,
                                        lsm9ds1_xl_hp_path_t *val);
 
 typedef enum {
   LSM9DS1_LP_OUT     = 0,
   LSM9DS1_HP_OUT     = 1,
 } lsm9ds1_xl_out_path_t;
-int32_t lsm9ds1_xl_filter_out_path_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_xl_filter_out_path_set(stmdev_ctx_t *ctx,
                                        lsm9ds1_xl_out_path_t val);
-int32_t lsm9ds1_xl_filter_out_path_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_xl_filter_out_path_get(stmdev_ctx_t *ctx,
                                        lsm9ds1_xl_out_path_t *val);
 
 typedef enum {
@@ -907,9 +880,9 @@ typedef enum {
   LSM9DS1_LP_ODR_DIV_9      = 0x12,
   LSM9DS1_LP_ODR_DIV_400    = 0x13,
 } lsm9ds1_xl_lp_bw_t;
-int32_t lsm9ds1_xl_filter_lp_bandwidth_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_xl_filter_lp_bandwidth_set(stmdev_ctx_t *ctx,
                                            lsm9ds1_xl_lp_bw_t val);
-int32_t lsm9ds1_xl_filter_lp_bandwidth_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_xl_filter_lp_bandwidth_get(stmdev_ctx_t *ctx,
                                            lsm9ds1_xl_lp_bw_t *val);
 
 typedef enum {
@@ -918,43 +891,43 @@ typedef enum {
   LSM9DS1_HP_ODR_DIV_9    = 2,
   LSM9DS1_HP_ODR_DIV_400  = 3,
 } lsm9ds1_xl_hp_bw_t;
-int32_t lsm9ds1_xl_filter_hp_bandwidth_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_xl_filter_hp_bandwidth_set(stmdev_ctx_t *ctx,
                                            lsm9ds1_xl_hp_bw_t val);
-int32_t lsm9ds1_xl_filter_hp_bandwidth_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_xl_filter_hp_bandwidth_get(stmdev_ctx_t *ctx,
                                            lsm9ds1_xl_hp_bw_t *val);
 
-int32_t lsm9ds1_filter_settling_mask_set(lsm9ds1_ctx_t *ctx, uint8_t val);
-int32_t lsm9ds1_filter_settling_mask_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_filter_settling_mask_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lsm9ds1_filter_settling_mask_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm9ds1_auto_increment_set(lsm9ds1_ctx_t *ctx, uint8_t val);
-int32_t lsm9ds1_auto_increment_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_auto_increment_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lsm9ds1_auto_increment_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
   LSM9DS1_SPI_4_WIRE = 0,
   LSM9DS1_SPI_3_WIRE = 1,
 } lsm9ds1_sim_t;
-int32_t lsm9ds1_spi_mode_set(lsm9ds1_ctx_t *ctx_mag, lsm9ds1_ctx_t *ctx_imu,
+int32_t lsm9ds1_spi_mode_set(stmdev_ctx_t *ctx_mag, stmdev_ctx_t *ctx_imu,
                              lsm9ds1_sim_t val);
-int32_t lsm9ds1_spi_mode_get(lsm9ds1_ctx_t *ctx_mag, lsm9ds1_ctx_t *ctx_imu,
+int32_t lsm9ds1_spi_mode_get(stmdev_ctx_t *ctx_mag, stmdev_ctx_t *ctx_imu,
                              lsm9ds1_sim_t *val);
 
 typedef enum {
   LSM9DS1_I2C_ENABLE = 0,
   LSM9DS1_I2C_DISABLE = 1,
 } lsm9ds1_i2c_dis_t;
-int32_t lsm9ds1_i2c_interface_set(lsm9ds1_ctx_t *ctx_mag,
-                                  lsm9ds1_ctx_t *ctx_imu,
+int32_t lsm9ds1_i2c_interface_set(stmdev_ctx_t *ctx_mag,
+                                  stmdev_ctx_t *ctx_imu,
                                   lsm9ds1_i2c_dis_t val);
-int32_t lsm9ds1_i2c_interface_get(lsm9ds1_ctx_t *ctx_mag,
-                                  lsm9ds1_ctx_t *ctx_imu,
+int32_t lsm9ds1_i2c_interface_get(stmdev_ctx_t *ctx_mag,
+                                  stmdev_ctx_t *ctx_imu,
                                   lsm9ds1_i2c_dis_t *val);
 
 typedef enum {
   LSM9DS1_LOGIC_OR    = 0,
   LSM9DS1_LOGIC_AND   = 1,
 } lsm9ds1_pin_logic_t;
-int32_t lsm9ds1_pin_logic_set(lsm9ds1_ctx_t *ctx, lsm9ds1_pin_logic_t val);
-int32_t lsm9ds1_pin_logic_get(lsm9ds1_ctx_t *ctx, lsm9ds1_pin_logic_t *val);
+int32_t lsm9ds1_pin_logic_set(stmdev_ctx_t *ctx, lsm9ds1_pin_logic_t val);
+int32_t lsm9ds1_pin_logic_get(stmdev_ctx_t *ctx, lsm9ds1_pin_logic_t *val);
 
 typedef struct {
   uint8_t int1_drdy_xl      : 1;
@@ -966,9 +939,9 @@ typedef struct {
   uint8_t int1_ig_xl        : 1;
   uint8_t int1_ig_g         : 1;
 } lsm9ds1_pin_int1_route_t;
-int32_t lsm9ds1_pin_int1_route_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_pin_int1_route_set(stmdev_ctx_t *ctx,
                                    lsm9ds1_pin_int1_route_t val);
-int32_t lsm9ds1_pin_int1_route_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_pin_int1_route_get(stmdev_ctx_t *ctx,
                                    lsm9ds1_pin_int1_route_t *val);
 typedef struct {
   uint8_t int2_drdy_xl       : 1;
@@ -979,45 +952,45 @@ typedef struct {
   uint8_t int2_fss5          : 1;
   uint8_t int2_inact         : 1;
 } lsm9ds1_pin_int2_route_t;
-int32_t lsm9ds1_pin_int2_route_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_pin_int2_route_set(stmdev_ctx_t *ctx,
                                    lsm9ds1_pin_int2_route_t val);
-int32_t lsm9ds1_pin_int2_route_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_pin_int2_route_get(stmdev_ctx_t *ctx,
                                    lsm9ds1_pin_int2_route_t *val);
 
 typedef enum {
   LSM9DS1_INT_PULSED  = 0,
   LSM9DS1_INT_LATCHED = 1,
 } lsm9ds1_lir_t;
-int32_t lsm9ds1_pin_notification_set(lsm9ds1_ctx_t *ctx_mag,
-                                     lsm9ds1_ctx_t *ctx_imu,
+int32_t lsm9ds1_pin_notification_set(stmdev_ctx_t *ctx_mag,
+                                     stmdev_ctx_t *ctx_imu,
                                      lsm9ds1_lir_t val);
-int32_t lsm9ds1_pin_notification_get(lsm9ds1_ctx_t *ctx_mag,
-                                     lsm9ds1_ctx_t *ctx_imu,
+int32_t lsm9ds1_pin_notification_get(stmdev_ctx_t *ctx_mag,
+                                     stmdev_ctx_t *ctx_imu,
                                      lsm9ds1_lir_t *val);
 
 typedef enum {
   LSM9DS1_PUSH_PULL   = 0,
   LSM9DS1_OPEN_DRAIN  = 1,
 } lsm9ds1_pp_od_t;
-int32_t lsm9ds1_pin_mode_set(lsm9ds1_ctx_t *ctx, lsm9ds1_pp_od_t val);
-int32_t lsm9ds1_pin_mode_get(lsm9ds1_ctx_t *ctx, lsm9ds1_pp_od_t *val);
+int32_t lsm9ds1_pin_mode_set(stmdev_ctx_t *ctx, lsm9ds1_pp_od_t val);
+int32_t lsm9ds1_pin_mode_get(stmdev_ctx_t *ctx, lsm9ds1_pp_od_t *val);
 
 typedef struct {
   uint8_t ien             : 1;
 } lsm9ds1_pin_m_route_t;
-int32_t lsm9ds1_pin_int_m_route_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_pin_int_m_route_set(stmdev_ctx_t *ctx,
                                     lsm9ds1_pin_m_route_t val);
-int32_t lsm9ds1_pin_int_m_route_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_pin_int_m_route_get(stmdev_ctx_t *ctx,
                                     lsm9ds1_pin_m_route_t *val);
 typedef enum {
   LSM9DS1_ACTIVE_LOW    = 0,
   LSM9DS1_ACTIVE_HIGH   = 1,
 } lsm9ds1_polarity_t;
-int32_t lsm9ds1_pin_polarity_set(lsm9ds1_ctx_t *ctx_mag,
-                                 lsm9ds1_ctx_t *ctx_imu,
+int32_t lsm9ds1_pin_polarity_set(stmdev_ctx_t *ctx_mag,
+                                 stmdev_ctx_t *ctx_imu,
                                  lsm9ds1_polarity_t val);
-int32_t lsm9ds1_pin_polarity_get(lsm9ds1_ctx_t *ctx_mag,
-                                 lsm9ds1_ctx_t *ctx_imu,
+int32_t lsm9ds1_pin_polarity_get(stmdev_ctx_t *ctx_mag,
+                                 stmdev_ctx_t *ctx_imu,
                                  lsm9ds1_polarity_t *val);
 
 typedef struct {
@@ -1028,16 +1001,16 @@ typedef struct {
   uint8_t zlie_xl             : 1;
   uint8_t zhie_xl             : 1;
 } lsm9ds1_xl_trshld_en_t;
-int32_t lsm9ds1_xl_trshld_axis_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_xl_trshld_axis_set(stmdev_ctx_t *ctx,
                                    lsm9ds1_xl_trshld_en_t val);
-int32_t lsm9ds1_xl_trshld_axis_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_xl_trshld_axis_get(stmdev_ctx_t *ctx,
                                    lsm9ds1_xl_trshld_en_t *val);
 
-int32_t lsm9ds1_xl_trshld_set(lsm9ds1_ctx_t *ctx, uint8_t *buff);
-int32_t lsm9ds1_xl_trshld_get(lsm9ds1_ctx_t *ctx, uint8_t *buff);
+int32_t lsm9ds1_xl_trshld_set(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm9ds1_xl_trshld_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t lsm9ds1_xl_trshld_min_sample_set(lsm9ds1_ctx_t *ctx, uint8_t val);
-int32_t lsm9ds1_xl_trshld_min_sample_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_xl_trshld_min_sample_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lsm9ds1_xl_trshld_min_sample_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef struct {
   uint8_t xl_g             : 1;
@@ -1048,7 +1021,7 @@ typedef struct {
   uint8_t zh_g             : 1;
   uint8_t ia_g             : 1;
 } lsm9ds1_gy_trshld_src_t;
-int32_t lsm9ds1_gy_trshld_src_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_gy_trshld_src_get(stmdev_ctx_t *ctx,
                                   lsm9ds1_gy_trshld_src_t *val);
 
 typedef struct {
@@ -1060,7 +1033,7 @@ typedef struct {
   uint8_t zh_xl             : 1;
   uint8_t ia_xl             : 1;
 } lsm9ds1_xl_trshld_src_t;
-int32_t lsm9ds1_xl_trshld_src_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_xl_trshld_src_get(stmdev_ctx_t *ctx,
                                          lsm9ds1_xl_trshld_src_t *val);
 
 typedef struct {
@@ -1071,40 +1044,40 @@ typedef struct {
   uint8_t zlie_g             : 1;
   uint8_t zhie_g             : 1;
 } lsm9ds1_gy_trshld_en_t;
-int32_t lsm9ds1_gy_trshld_axis_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_gy_trshld_axis_set(stmdev_ctx_t *ctx,
                                    lsm9ds1_gy_trshld_en_t val);
-int32_t lsm9ds1_gy_trshld_axis_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_gy_trshld_axis_get(stmdev_ctx_t *ctx,
                                    lsm9ds1_gy_trshld_en_t *val);
 
 typedef enum {
   LSM9DS1_RESET_MODE = 0,
   LSM9DS1_DECREMENT_MODE = 1,
 } lsm9ds1_dcrm_g_t;
-int32_t lsm9ds1_gy_trshld_mode_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_gy_trshld_mode_set(stmdev_ctx_t *ctx,
                                    lsm9ds1_dcrm_g_t val);
-int32_t lsm9ds1_gy_trshld_mode_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_gy_trshld_mode_get(stmdev_ctx_t *ctx,
                                    lsm9ds1_dcrm_g_t *val);
 
-int32_t lsm9ds1_gy_trshld_x_set(lsm9ds1_ctx_t *ctx, uint16_t val);
-int32_t lsm9ds1_gy_trshld_x_get(lsm9ds1_ctx_t *ctx, uint16_t *val);
+int32_t lsm9ds1_gy_trshld_x_set(stmdev_ctx_t *ctx, uint16_t val);
+int32_t lsm9ds1_gy_trshld_x_get(stmdev_ctx_t *ctx, uint16_t *val);
 
-int32_t lsm9ds1_gy_trshld_y_set(lsm9ds1_ctx_t *ctx, uint16_t val);
-int32_t lsm9ds1_gy_trshld_y_get(lsm9ds1_ctx_t *ctx, uint16_t *val);
+int32_t lsm9ds1_gy_trshld_y_set(stmdev_ctx_t *ctx, uint16_t val);
+int32_t lsm9ds1_gy_trshld_y_get(stmdev_ctx_t *ctx, uint16_t *val);
 
-int32_t lsm9ds1_gy_trshld_z_set(lsm9ds1_ctx_t *ctx, uint16_t val);
-int32_t lsm9ds1_gy_trshld_z_get(lsm9ds1_ctx_t *ctx, uint16_t *val);
+int32_t lsm9ds1_gy_trshld_z_set(stmdev_ctx_t *ctx, uint16_t val);
+int32_t lsm9ds1_gy_trshld_z_get(stmdev_ctx_t *ctx, uint16_t *val);
 
-int32_t lsm9ds1_gy_trshld_min_sample_set(lsm9ds1_ctx_t *ctx, uint8_t val);
-int32_t lsm9ds1_gy_trshld_min_sample_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_gy_trshld_min_sample_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lsm9ds1_gy_trshld_min_sample_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef struct {
   uint8_t zien             : 1;
   uint8_t yien             : 1;
   uint8_t xien             : 1;
 } lsm9ds1_mag_trshld_axis_t;
-int32_t lsm9ds1_mag_trshld_axis_set(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_mag_trshld_axis_set(stmdev_ctx_t *ctx,
                                     lsm9ds1_mag_trshld_axis_t val);
-int32_t lsm9ds1_mag_trshld_axis_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_mag_trshld_axis_get(stmdev_ctx_t *ctx,
                                     lsm9ds1_mag_trshld_axis_t *val);
 typedef struct {
   uint8_t _int              : 1;
@@ -1115,30 +1088,30 @@ typedef struct {
   uint8_t pth_y             : 1;
   uint8_t pth_x             : 1;
 } lsm9ds1_mag_trshld_src_t;
-int32_t lsm9ds1_mag_trshld_src_get(lsm9ds1_ctx_t *ctx,
+int32_t lsm9ds1_mag_trshld_src_get(stmdev_ctx_t *ctx,
                                    lsm9ds1_mag_trshld_src_t *val);
 
-int32_t lsm9ds1_mag_trshld_set(lsm9ds1_ctx_t *ctx, uint8_t *val);
-int32_t lsm9ds1_mag_trshld_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_mag_trshld_set(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_mag_trshld_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm9ds1_act_threshold_set(lsm9ds1_ctx_t *ctx, uint8_t val);
-int32_t lsm9ds1_act_threshold_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_act_threshold_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lsm9ds1_act_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
   LSM9DS1_GYRO_POWER_DOWN = 0,
   LSM9DS1_GYRO_SLEEP = 1,
 } lsm9ds1_act_mode_t;
-int32_t lsm9ds1_act_mode_set(lsm9ds1_ctx_t *ctx, lsm9ds1_act_mode_t val);
-int32_t lsm9ds1_act_mode_get(lsm9ds1_ctx_t *ctx, lsm9ds1_act_mode_t *val);
+int32_t lsm9ds1_act_mode_set(stmdev_ctx_t *ctx, lsm9ds1_act_mode_t val);
+int32_t lsm9ds1_act_mode_get(stmdev_ctx_t *ctx, lsm9ds1_act_mode_t *val);
 
-int32_t lsm9ds1_act_duration_set(lsm9ds1_ctx_t *ctx, uint8_t *buff);
-int32_t lsm9ds1_act_duration_get(lsm9ds1_ctx_t *ctx, uint8_t *buff);
+int32_t lsm9ds1_act_duration_set(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm9ds1_act_duration_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
 typedef enum {
   LSM9DS1_ACTIVITY    = 0,
   LSM9DS1_INACTIVITY  = 1,
 } lsm9ds1_inact_t;
-int32_t lsm9ds1_act_src_get(lsm9ds1_ctx_t *ctx, lsm9ds1_inact_t *val);
+int32_t lsm9ds1_act_src_get(stmdev_ctx_t *ctx, lsm9ds1_inact_t *val);
 
 typedef enum {
   LSM9DS1_POS_MOVE_RECO_DISABLE   = 0x00,
@@ -1147,11 +1120,11 @@ typedef enum {
   LSM9DS1_6D_POS_RECO             = 0x03,
   LSM9DS1_4D_POS_RECO             = 0x07,
 } lsm9ds1_6d_mode_t;
-int32_t lsm9ds1_6d_mode_set(lsm9ds1_ctx_t *ctx, lsm9ds1_6d_mode_t val);
-int32_t lsm9ds1_6d_mode_get(lsm9ds1_ctx_t *ctx, lsm9ds1_6d_mode_t *val);
+int32_t lsm9ds1_6d_mode_set(stmdev_ctx_t *ctx, lsm9ds1_6d_mode_t val);
+int32_t lsm9ds1_6d_mode_get(stmdev_ctx_t *ctx, lsm9ds1_6d_mode_t *val);
 
-int32_t lsm9ds1_6d_threshold_set(lsm9ds1_ctx_t *ctx, uint8_t *buff);
-int32_t lsm9ds1_6d_threshold_get(lsm9ds1_ctx_t *ctx, uint8_t *buff);
+int32_t lsm9ds1_6d_threshold_set(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm9ds1_6d_threshold_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
 typedef struct {
   uint8_t xl_xl             : 1;
@@ -1162,10 +1135,10 @@ typedef struct {
   uint8_t zh_xl             : 1;
   uint8_t ia_xl             : 1;
 } lsm9ds1_6d_src_t;
-int32_t lsm9ds1_6d_src_get(lsm9ds1_ctx_t *ctx, lsm9ds1_6d_src_t *val);
+int32_t lsm9ds1_6d_src_get(stmdev_ctx_t *ctx, lsm9ds1_6d_src_t *val);
 
-int32_t lsm9ds1_fifo_stop_on_wtm_set(lsm9ds1_ctx_t *ctx, uint8_t val);
-int32_t lsm9ds1_fifo_stop_on_wtm_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_fifo_stop_on_wtm_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lsm9ds1_fifo_stop_on_wtm_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
   LSM9DS1_FIFO_OFF                = 0x00,
@@ -1175,31 +1148,31 @@ typedef enum {
   LSM9DS1_BYPASS_TO_STREAM_MODE   = 0x14,
   LSM9DS1_STREAM_MODE             = 0x16,
 } lsm9ds1_fifo_md_t;
-int32_t lsm9ds1_fifo_mode_set(lsm9ds1_ctx_t *ctx, lsm9ds1_fifo_md_t val);
-int32_t lsm9ds1_fifo_mode_get(lsm9ds1_ctx_t *ctx, lsm9ds1_fifo_md_t *val);
+int32_t lsm9ds1_fifo_mode_set(stmdev_ctx_t *ctx, lsm9ds1_fifo_md_t val);
+int32_t lsm9ds1_fifo_mode_get(stmdev_ctx_t *ctx, lsm9ds1_fifo_md_t *val);
 
-int32_t lsm9ds1_fifo_temp_batch_set(lsm9ds1_ctx_t *ctx, uint8_t val);
-int32_t lsm9ds1_fifo_temp_batch_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_fifo_temp_batch_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lsm9ds1_fifo_temp_batch_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm9ds1_fifo_watermark_set(lsm9ds1_ctx_t *ctx, uint8_t val);
-int32_t lsm9ds1_fifo_watermark_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_fifo_watermark_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lsm9ds1_fifo_watermark_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm9ds1_fifo_full_flag_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_fifo_full_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm9ds1_fifo_data_level_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_fifo_data_level_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm9ds1_fifo_ovr_flag_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_fifo_ovr_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm9ds1_fifo_wtm_flag_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_fifo_wtm_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm9ds1_xl_self_test_set(lsm9ds1_ctx_t *ctx, uint8_t val);
-int32_t lsm9ds1_xl_self_test_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_xl_self_test_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lsm9ds1_xl_self_test_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm9ds1_gy_self_test_set(lsm9ds1_ctx_t *ctx, uint8_t val);
-int32_t lsm9ds1_gy_self_test_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_gy_self_test_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lsm9ds1_gy_self_test_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm9ds1_mag_self_test_set(lsm9ds1_ctx_t *ctx, uint8_t val);
-int32_t lsm9ds1_mag_self_test_get(lsm9ds1_ctx_t *ctx, uint8_t *val);
+int32_t lsm9ds1_mag_self_test_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lsm9ds1_mag_self_test_get(stmdev_ctx_t *ctx, uint8_t *val);
 /**
   *@}
   *

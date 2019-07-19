@@ -6,33 +6,16 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
-*/
+ ******************************************************************************
+ */
 
 #include "ism330dlc_reg.h"
 
@@ -63,7 +46,7 @@
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t ism330dlc_read_reg(ism330dlc_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t ism330dlc_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                          uint16_t len)
 {
   int32_t ret;
@@ -81,7 +64,7 @@ int32_t ism330dlc_read_reg(ism330dlc_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t ism330dlc_write_reg(ism330dlc_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t ism330dlc_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                           uint16_t len)
 {
   int32_t ret;
@@ -172,7 +155,7 @@ float_t ism330dlc_from_lsb_to_celsius(int16_t lsb)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_full_scale_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_full_scale_set(stmdev_ctx_t *ctx,
                                     ism330dlc_fs_xl_t val)
 {
   ism330dlc_ctrl1_xl_t ctrl1_xl;
@@ -196,7 +179,7 @@ int32_t ism330dlc_xl_full_scale_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_full_scale_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_full_scale_get(stmdev_ctx_t *ctx,
                                     ism330dlc_fs_xl_t *val)
 {
   ism330dlc_ctrl1_xl_t ctrl1_xl;
@@ -233,7 +216,7 @@ int32_t ism330dlc_xl_full_scale_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_data_rate_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_data_rate_set(stmdev_ctx_t *ctx,
                                    ism330dlc_odr_xl_t val)
 {
   ism330dlc_ctrl1_xl_t ctrl1_xl;
@@ -256,7 +239,7 @@ int32_t ism330dlc_xl_data_rate_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_data_rate_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_data_rate_get(stmdev_ctx_t *ctx,
                                    ism330dlc_odr_xl_t *val)
 {
   ism330dlc_ctrl1_xl_t ctrl1_xl;
@@ -316,7 +299,7 @@ int32_t ism330dlc_xl_data_rate_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_gy_full_scale_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_gy_full_scale_set(stmdev_ctx_t *ctx,
                                     ism330dlc_fs_g_t val)
 {
   ism330dlc_ctrl2_g_t ctrl2_g;
@@ -338,7 +321,7 @@ int32_t ism330dlc_gy_full_scale_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_gy_full_scale_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_gy_full_scale_get(stmdev_ctx_t *ctx,
                                     ism330dlc_fs_g_t *val)
 {
   ism330dlc_ctrl2_g_t ctrl2_g;
@@ -377,7 +360,7 @@ int32_t ism330dlc_gy_full_scale_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_gy_data_rate_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_gy_data_rate_set(stmdev_ctx_t *ctx,
                                    ism330dlc_odr_g_t val)
 {
   ism330dlc_ctrl2_g_t ctrl2_g;
@@ -399,7 +382,7 @@ int32_t ism330dlc_gy_data_rate_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_gy_data_rate_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_gy_data_rate_get(stmdev_ctx_t *ctx,
                                    ism330dlc_odr_g_t *val)
 {
   ism330dlc_ctrl2_g_t ctrl2_g;
@@ -456,7 +439,7 @@ int32_t ism330dlc_gy_data_rate_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_block_data_update_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -477,7 +460,7 @@ int32_t ism330dlc_block_data_update_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_block_data_update_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -497,7 +480,7 @@ int32_t ism330dlc_block_data_update_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_offset_weight_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_offset_weight_set(stmdev_ctx_t *ctx,
                                        ism330dlc_usr_off_w_t val)
 {
   ism330dlc_ctrl6_c_t ctrl6_c;
@@ -520,7 +503,7 @@ int32_t ism330dlc_xl_offset_weight_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_offset_weight_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_offset_weight_get(stmdev_ctx_t *ctx,
                                        ism330dlc_usr_off_w_t *val)
 {
   ism330dlc_ctrl6_c_t ctrl6_c;
@@ -550,7 +533,7 @@ int32_t ism330dlc_xl_offset_weight_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_power_mode_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_power_mode_set(stmdev_ctx_t *ctx,
                                     ism330dlc_xl_hm_mode_t val)
 {
   ism330dlc_ctrl6_c_t ctrl6_c;
@@ -572,7 +555,7 @@ int32_t ism330dlc_xl_power_mode_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_power_mode_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_power_mode_get(stmdev_ctx_t *ctx,
                                     ism330dlc_xl_hm_mode_t *val)
 {
   ism330dlc_ctrl6_c_t ctrl6_c;
@@ -604,7 +587,7 @@ int32_t ism330dlc_xl_power_mode_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_rounding_on_status_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_rounding_on_status_set(stmdev_ctx_t *ctx,
                                          ism330dlc_rounding_status_t val)
 {
   ism330dlc_ctrl7_g_t ctrl7_g;
@@ -628,7 +611,7 @@ int32_t ism330dlc_rounding_on_status_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_rounding_on_status_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_rounding_on_status_get(stmdev_ctx_t *ctx,
                                          ism330dlc_rounding_status_t *val)
 {
   ism330dlc_ctrl7_g_t ctrl7_g;
@@ -658,7 +641,7 @@ int32_t ism330dlc_rounding_on_status_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_gy_power_mode_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_gy_power_mode_set(stmdev_ctx_t *ctx,
                                     ism330dlc_g_hm_mode_t val)
 {
   ism330dlc_ctrl7_g_t ctrl7_g;
@@ -680,7 +663,7 @@ int32_t ism330dlc_gy_power_mode_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_gy_power_mode_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_gy_power_mode_get(stmdev_ctx_t *ctx,
                                     ism330dlc_g_hm_mode_t *val)
 {
   ism330dlc_ctrl7_g_t ctrl7_g;
@@ -711,7 +694,7 @@ int32_t ism330dlc_gy_power_mode_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_all_sources_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_all_sources_get(stmdev_ctx_t *ctx,
                                   ism330dlc_all_sources_t *val)
 {
   int32_t ret;
@@ -752,7 +735,7 @@ int32_t ism330dlc_all_sources_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_status_reg_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_status_reg_get(stmdev_ctx_t *ctx,
                                  ism330dlc_status_reg_t *val)
 {
   int32_t ret;
@@ -768,7 +751,7 @@ int32_t ism330dlc_status_reg_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_flag_data_ready_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_xl_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_status_reg_t status_reg;
   int32_t ret;
@@ -788,7 +771,7 @@ int32_t ism330dlc_xl_flag_data_ready_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_gy_flag_data_ready_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_gy_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_status_reg_t status_reg;
   int32_t ret;
@@ -808,7 +791,7 @@ int32_t ism330dlc_gy_flag_data_ready_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_temp_flag_data_ready_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_temp_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_status_reg_t status_reg;
   int32_t ret;
@@ -830,7 +813,7 @@ int32_t ism330dlc_temp_flag_data_ready_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_usr_offset_set(ism330dlc_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dlc_xl_usr_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = ism330dlc_write_reg(ctx, ISM330DLC_X_OFS_USR, buff, 3);
@@ -847,7 +830,7 @@ int32_t ism330dlc_xl_usr_offset_set(ism330dlc_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_usr_offset_get(ism330dlc_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dlc_xl_usr_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = ism330dlc_read_reg(ctx, ISM330DLC_X_OFS_USR, buff, 3);
@@ -876,7 +859,7 @@ int32_t ism330dlc_xl_usr_offset_get(ism330dlc_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_timestamp_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_timestamp_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_ctrl10_c_t ctrl10_c;
   int32_t ret;
@@ -902,7 +885,7 @@ int32_t ism330dlc_timestamp_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_timestamp_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_timestamp_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_ctrl10_c_t ctrl10_c;
   int32_t ret;
@@ -926,7 +909,7 @@ int32_t ism330dlc_timestamp_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_timestamp_res_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_timestamp_res_set(stmdev_ctx_t *ctx,
                                     ism330dlc_timer_hr_t val)
 {
   ism330dlc_wake_up_dur_t wake_up_dur;
@@ -955,7 +938,7 @@ int32_t ism330dlc_timestamp_res_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_timestamp_res_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_timestamp_res_get(stmdev_ctx_t *ctx,
                                     ism330dlc_timer_hr_t *val)
 {
   ism330dlc_wake_up_dur_t wake_up_dur;
@@ -999,7 +982,7 @@ int32_t ism330dlc_timestamp_res_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_rounding_mode_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_rounding_mode_set(stmdev_ctx_t *ctx,
                                     ism330dlc_rounding_t val)
 {
   ism330dlc_ctrl5_c_t ctrl5_c;
@@ -1022,7 +1005,7 @@ int32_t ism330dlc_rounding_mode_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_rounding_mode_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_rounding_mode_get(stmdev_ctx_t *ctx,
                                     ism330dlc_rounding_t *val)
 {
   ism330dlc_ctrl5_c_t ctrl5_c;
@@ -1071,7 +1054,7 @@ int32_t ism330dlc_rounding_mode_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_temperature_raw_get(ism330dlc_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dlc_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = ism330dlc_read_reg(ctx, ISM330DLC_OUT_TEMP_L, buff, 2);
@@ -1087,7 +1070,7 @@ int32_t ism330dlc_temperature_raw_get(ism330dlc_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_angular_rate_raw_get(ism330dlc_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dlc_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = ism330dlc_read_reg(ctx, ISM330DLC_OUTX_L_G, buff, 6);
@@ -1103,7 +1086,7 @@ int32_t ism330dlc_angular_rate_raw_get(ism330dlc_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_acceleration_raw_get(ism330dlc_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dlc_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = ism330dlc_read_reg(ctx, ISM330DLC_OUTX_L_XL, buff, 6);
@@ -1118,7 +1101,7 @@ int32_t ism330dlc_acceleration_raw_get(ism330dlc_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_mag_calibrated_raw_get(ism330dlc_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dlc_mag_calibrated_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = ism330dlc_read_reg(ctx, ISM330DLC_OUT_MAG_RAW_X_L, buff, 6);
@@ -1134,7 +1117,7 @@ int32_t ism330dlc_mag_calibrated_raw_get(ism330dlc_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_raw_data_get(ism330dlc_ctx_t *ctx, uint8_t *buffer,
+int32_t ism330dlc_fifo_raw_data_get(stmdev_ctx_t *ctx, uint8_t *buffer,
                                   uint8_t len)
 {
   int32_t ret;
@@ -1163,7 +1146,7 @@ int32_t ism330dlc_fifo_raw_data_get(ism330dlc_ctx_t *ctx, uint8_t *buffer,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_mem_bank_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_mem_bank_set(stmdev_ctx_t *ctx,
                                ism330dlc_func_cfg_en_t val)
 {
   ism330dlc_func_cfg_access_t func_cfg_access;
@@ -1189,7 +1172,7 @@ int32_t ism330dlc_mem_bank_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_mem_bank_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_mem_bank_get(stmdev_ctx_t *ctx,
                                ism330dlc_func_cfg_en_t *val)
 {
   ism330dlc_func_cfg_access_t func_cfg_access;
@@ -1217,7 +1200,7 @@ int32_t ism330dlc_mem_bank_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_data_ready_mode_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_data_ready_mode_set(stmdev_ctx_t *ctx,
                                       ism330dlc_drdy_pulsed_t val)
 {
   ism330dlc_drdy_pulse_cfg_t drdy_pulse_cfg_g;
@@ -1241,7 +1224,7 @@ int32_t ism330dlc_data_ready_mode_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_data_ready_mode_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_data_ready_mode_get(stmdev_ctx_t *ctx,
                                       ism330dlc_drdy_pulsed_t *val)
 {
   ism330dlc_drdy_pulse_cfg_t drdy_pulse_cfg_g;
@@ -1272,7 +1255,7 @@ int32_t ism330dlc_data_ready_mode_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_device_id_get(ism330dlc_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dlc_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = ism330dlc_read_reg(ctx, ISM330DLC_WHO_AM_I, buff, 1);
@@ -1287,7 +1270,7 @@ int32_t ism330dlc_device_id_get(ism330dlc_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_reset_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_reset_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -1308,7 +1291,7 @@ int32_t ism330dlc_reset_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_reset_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_reset_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -1327,7 +1310,7 @@ int32_t ism330dlc_reset_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_data_format_set(ism330dlc_ctx_t *ctx, ism330dlc_ble_t val)
+int32_t ism330dlc_data_format_set(stmdev_ctx_t *ctx, ism330dlc_ble_t val)
 {
   ism330dlc_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -1348,7 +1331,7 @@ int32_t ism330dlc_data_format_set(ism330dlc_ctx_t *ctx, ism330dlc_ble_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_data_format_get(ism330dlc_ctx_t *ctx, ism330dlc_ble_t *val)
+int32_t ism330dlc_data_format_get(stmdev_ctx_t *ctx, ism330dlc_ble_t *val)
 {
   ism330dlc_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -1378,7 +1361,7 @@ int32_t ism330dlc_data_format_get(ism330dlc_ctx_t *ctx, ism330dlc_ble_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_auto_increment_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_auto_increment_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -1400,7 +1383,7 @@ int32_t ism330dlc_auto_increment_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_auto_increment_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_auto_increment_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -1419,7 +1402,7 @@ int32_t ism330dlc_auto_increment_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_boot_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_boot_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -1440,7 +1423,7 @@ int32_t ism330dlc_boot_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_boot_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_boot_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -1459,7 +1442,7 @@ int32_t ism330dlc_boot_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_self_test_set(ism330dlc_ctx_t *ctx, ism330dlc_st_xl_t val)
+int32_t ism330dlc_xl_self_test_set(stmdev_ctx_t *ctx, ism330dlc_st_xl_t val)
 {
   ism330dlc_ctrl5_c_t ctrl5_c;
   int32_t ret;
@@ -1480,7 +1463,7 @@ int32_t ism330dlc_xl_self_test_set(ism330dlc_ctx_t *ctx, ism330dlc_st_xl_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_self_test_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_self_test_get(stmdev_ctx_t *ctx,
                                    ism330dlc_st_xl_t *val)
 {
   ism330dlc_ctrl5_c_t ctrl5_c;
@@ -1512,7 +1495,7 @@ int32_t ism330dlc_xl_self_test_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_gy_self_test_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_gy_self_test_set(stmdev_ctx_t *ctx,
                                    ism330dlc_st_g_t val)
 {
   ism330dlc_ctrl5_c_t ctrl5_c;
@@ -1534,7 +1517,7 @@ int32_t ism330dlc_gy_self_test_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_gy_self_test_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_gy_self_test_get(stmdev_ctx_t *ctx,
                                    ism330dlc_st_g_t *val)
 {
   ism330dlc_ctrl5_c_t ctrl5_c;
@@ -1581,7 +1564,7 @@ int32_t ism330dlc_gy_self_test_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_filter_settling_mask_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_filter_settling_mask_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_ctrl4_c_t ctrl4_c;
   int32_t ret;
@@ -1603,7 +1586,7 @@ int32_t ism330dlc_filter_settling_mask_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_filter_settling_mask_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_filter_settling_mask_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_ctrl4_c_t ctrl4_c;
   int32_t ret;
@@ -1623,7 +1606,7 @@ int32_t ism330dlc_filter_settling_mask_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_hp_path_internal_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_hp_path_internal_set(stmdev_ctx_t *ctx,
                                         ism330dlc_slope_fds_t val)
 {
   ism330dlc_tap_cfg_t tap_cfg;
@@ -1646,7 +1629,7 @@ int32_t ism330dlc_xl_hp_path_internal_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_hp_path_internal_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_hp_path_internal_get(stmdev_ctx_t *ctx,
                                           ism330dlc_slope_fds_t *val)
 {
   ism330dlc_tap_cfg_t tap_cfg;
@@ -1690,7 +1673,7 @@ int32_t ism330dlc_xl_hp_path_internal_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_filter_analog_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_filter_analog_set(stmdev_ctx_t *ctx,
                                        ism330dlc_bw0_xl_t val)
 {
   ism330dlc_ctrl1_xl_t ctrl1_xl;
@@ -1713,7 +1696,7 @@ int32_t ism330dlc_xl_filter_analog_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_filter_analog_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_filter_analog_get(stmdev_ctx_t *ctx,
                                        ism330dlc_bw0_xl_t *val)
 {
   ism330dlc_ctrl1_xl_t ctrl1_xl;
@@ -1758,7 +1741,7 @@ int32_t ism330dlc_xl_filter_analog_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_lp1_bandwidth_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_lp1_bandwidth_set(stmdev_ctx_t *ctx,
                                        ism330dlc_lpf1_bw_sel_t val)
 {
   ism330dlc_ctrl1_xl_t ctrl1_xl;
@@ -1793,7 +1776,7 @@ int32_t ism330dlc_xl_lp1_bandwidth_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_lp1_bandwidth_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_lp1_bandwidth_get(stmdev_ctx_t *ctx,
                                        ism330dlc_lpf1_bw_sel_t *val)
 {
   ism330dlc_ctrl1_xl_t ctrl1_xl;
@@ -1833,7 +1816,7 @@ int32_t ism330dlc_xl_lp1_bandwidth_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_lp2_bandwidth_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_lp2_bandwidth_set(stmdev_ctx_t *ctx,
                                        ism330dlc_input_composite_t val)
 {
   ism330dlc_ctrl8_xl_t ctrl8_xl;
@@ -1859,7 +1842,7 @@ int32_t ism330dlc_xl_lp2_bandwidth_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_lp2_bandwidth_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_lp2_bandwidth_get(stmdev_ctx_t *ctx,
                                        ism330dlc_input_composite_t *val)
 {
   ism330dlc_ctrl8_xl_t ctrl8_xl;
@@ -1915,7 +1898,7 @@ int32_t ism330dlc_xl_lp2_bandwidth_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_reference_mode_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_xl_reference_mode_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_ctrl8_xl_t ctrl8_xl;
   int32_t ret;
@@ -1936,7 +1919,7 @@ int32_t ism330dlc_xl_reference_mode_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_reference_mode_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_xl_reference_mode_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_ctrl8_xl_t ctrl8_xl;
   int32_t ret;
@@ -1955,7 +1938,7 @@ int32_t ism330dlc_xl_reference_mode_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_hp_bandwidth_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_hp_bandwidth_set(stmdev_ctx_t *ctx,
                                       ism330dlc_hpcf_xl_t val)
 {
   ism330dlc_ctrl8_xl_t ctrl8_xl;
@@ -1980,7 +1963,7 @@ int32_t ism330dlc_xl_hp_bandwidth_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_hp_bandwidth_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_hp_bandwidth_get(stmdev_ctx_t *ctx,
                                       ism330dlc_hpcf_xl_t *val)
 {
   ism330dlc_ctrl8_xl_t ctrl8_xl;
@@ -2034,7 +2017,7 @@ int32_t ism330dlc_xl_hp_bandwidth_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_ui_lp1_bandwidth_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_ui_lp1_bandwidth_set(stmdev_ctx_t *ctx,
                                           ism330dlc_ui_lpf1_bw_sel_t val)
 {
   ism330dlc_ctrl1_xl_t ctrl1_xl;
@@ -2070,7 +2053,7 @@ int32_t ism330dlc_xl_ui_lp1_bandwidth_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_ui_lp1_bandwidth_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_ui_lp1_bandwidth_get(stmdev_ctx_t *ctx,
                                           ism330dlc_ui_lpf1_bw_sel_t *val)
 {
   ism330dlc_ctrl1_xl_t ctrl1_xl;
@@ -2110,7 +2093,7 @@ int32_t ism330dlc_xl_ui_lp1_bandwidth_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_ui_slope_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_xl_ui_slope_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_ctrl8_xl_t reg;
   int32_t ret;
@@ -2131,7 +2114,7 @@ int32_t ism330dlc_xl_ui_slope_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_ui_slope_get(ism330dlc_ctx_t *ctx,  uint8_t *val)
+int32_t ism330dlc_xl_ui_slope_get(stmdev_ctx_t *ctx,  uint8_t *val)
 {
   ism330dlc_ctrl8_xl_t reg;
   int32_t ret;
@@ -2163,7 +2146,7 @@ int32_t ism330dlc_xl_ui_slope_get(ism330dlc_ctx_t *ctx,  uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_aux_lp_bandwidth_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_aux_lp_bandwidth_set(stmdev_ctx_t *ctx,
                                           ism330dlc_filter_xl_conf_ois_t val)
 {
   ism330dlc_ctrl3_ois_t reg;
@@ -2198,7 +2181,7 @@ int32_t ism330dlc_xl_aux_lp_bandwidth_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_xl_aux_lp_bandwidth_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_xl_aux_lp_bandwidth_get(stmdev_ctx_t *ctx,
                                           ism330dlc_filter_xl_conf_ois_t *val)
 {
   ism330dlc_ctrl3_ois_t reg;
@@ -2247,7 +2230,7 @@ int32_t ism330dlc_xl_aux_lp_bandwidth_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_gy_band_pass_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_gy_band_pass_set(stmdev_ctx_t *ctx,
                                    ism330dlc_lpf1_sel_g_t val)
 {
   ism330dlc_ctrl4_c_t ctrl4_c;
@@ -2289,7 +2272,7 @@ int32_t ism330dlc_gy_band_pass_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_gy_band_pass_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_gy_band_pass_get(stmdev_ctx_t *ctx,
                                    ism330dlc_lpf1_sel_g_t *val)
 {
   ism330dlc_ctrl4_c_t ctrl4_c;
@@ -2373,7 +2356,7 @@ int32_t ism330dlc_gy_band_pass_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_gy_ui_high_pass_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_gy_ui_high_pass_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_ctrl7_g_t reg;
   int32_t ret;
@@ -2395,7 +2378,7 @@ int32_t ism330dlc_gy_ui_high_pass_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_gy_ui_high_pass_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_gy_ui_high_pass_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_ctrl7_g_t reg;
   int32_t ret;
@@ -2418,7 +2401,7 @@ int32_t ism330dlc_gy_ui_high_pass_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_gy_aux_bandwidth_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_gy_aux_bandwidth_set(stmdev_ctx_t *ctx,
                                        ism330dlc_hp_en_ois_t val)
 {
   ism330dlc_ctrl7_g_t ctrl7_g;
@@ -2455,7 +2438,7 @@ int32_t ism330dlc_gy_aux_bandwidth_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_gy_aux_bandwidth_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_gy_aux_bandwidth_get(stmdev_ctx_t *ctx,
                                        ism330dlc_hp_en_ois_t *val)
 {
   ism330dlc_ctrl2_ois_t reg;
@@ -2517,7 +2500,7 @@ int32_t ism330dlc_gy_aux_bandwidth_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_status_reg_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_status_reg_get(stmdev_ctx_t *ctx,
                                      ism330dlc_status_spiaux_t *val)
 {
   int32_t ret;
@@ -2533,7 +2516,7 @@ int32_t ism330dlc_aux_status_reg_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_xl_flag_data_ready_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_xl_flag_data_ready_get(stmdev_ctx_t *ctx,
                                              uint8_t *val)
 {
   ism330dlc_status_spiaux_t reg;
@@ -2553,7 +2536,7 @@ int32_t ism330dlc_aux_xl_flag_data_ready_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_gy_flag_data_ready_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_gy_flag_data_ready_get(stmdev_ctx_t *ctx,
                                              uint8_t *val)
 {
   ism330dlc_status_spiaux_t reg;
@@ -2573,7 +2556,7 @@ int32_t ism330dlc_aux_gy_flag_data_ready_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_gy_flag_settling_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_aux_gy_flag_settling_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_status_spiaux_t reg;
   int32_t ret;
@@ -2592,7 +2575,7 @@ int32_t ism330dlc_aux_gy_flag_settling_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_den_mode_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_den_mode_set(stmdev_ctx_t *ctx,
                                    ism330dlc_lvl_ois_t val)
 {
   ism330dlc_ctrl1_ois_t ctrl1_ois;
@@ -2627,7 +2610,7 @@ int32_t ism330dlc_aux_den_mode_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_den_mode_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_den_mode_get(stmdev_ctx_t *ctx,
                                    ism330dlc_lvl_ois_t *val)
 {
   ism330dlc_ctrl1_ois_t ctrl1_ois;
@@ -2665,7 +2648,7 @@ int32_t ism330dlc_aux_den_mode_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_drdy_on_int2_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_aux_drdy_on_int2_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_int_ois_t reg;
   int32_t ret;
@@ -2687,7 +2670,7 @@ int32_t ism330dlc_aux_drdy_on_int2_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_drdy_on_int2_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_aux_drdy_on_int2_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_int_ois_t reg;
   int32_t ret;
@@ -2713,7 +2696,7 @@ int32_t ism330dlc_aux_drdy_on_int2_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_mode_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_mode_set(stmdev_ctx_t *ctx,
                                ism330dlc_ois_en_spi2_t val)
 {
   ism330dlc_ctrl1_ois_t reg;
@@ -2743,7 +2726,7 @@ int32_t ism330dlc_aux_mode_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_mode_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_mode_get(stmdev_ctx_t *ctx,
                                ism330dlc_ois_en_spi2_t *val)
 {
   ism330dlc_ctrl1_ois_t reg;
@@ -2775,7 +2758,7 @@ int32_t ism330dlc_aux_mode_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_gy_full_scale_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_gy_full_scale_set(stmdev_ctx_t *ctx,
                                         ism330dlc_fs_g_ois_t val)
 {
   ism330dlc_ctrl1_ois_t reg;
@@ -2797,7 +2780,7 @@ int32_t ism330dlc_aux_gy_full_scale_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_gy_full_scale_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_gy_full_scale_get(stmdev_ctx_t *ctx,
                                         ism330dlc_fs_g_ois_t *val)
 {
   ism330dlc_ctrl1_ois_t reg;
@@ -2835,7 +2818,7 @@ int32_t ism330dlc_aux_gy_full_scale_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_spi_mode_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_spi_mode_set(stmdev_ctx_t *ctx,
                                    ism330dlc_sim_ois_t val)
 {
   ism330dlc_ctrl1_ois_t reg;
@@ -2857,7 +2840,7 @@ int32_t ism330dlc_aux_spi_mode_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_spi_mode_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_spi_mode_get(stmdev_ctx_t *ctx,
                                    ism330dlc_sim_ois_t *val)
 {
   ism330dlc_ctrl1_ois_t reg;
@@ -2886,7 +2869,7 @@ int32_t ism330dlc_aux_spi_mode_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_data_format_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_data_format_set(stmdev_ctx_t *ctx,
                                       ism330dlc_ble_ois_t val)
 {
   ism330dlc_ctrl1_ois_t reg;
@@ -2908,7 +2891,7 @@ int32_t ism330dlc_aux_data_format_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_data_format_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_data_format_get(stmdev_ctx_t *ctx,
                                       ism330dlc_ble_ois_t *val)
 {
   ism330dlc_ctrl1_ois_t reg;
@@ -2940,7 +2923,7 @@ int32_t ism330dlc_aux_data_format_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_gy_clamp_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_gy_clamp_set(stmdev_ctx_t *ctx,
                                    ism330dlc_st_ois_clampdis_t val)
 {
   ism330dlc_ctrl3_ois_t reg;
@@ -2965,7 +2948,7 @@ int32_t ism330dlc_aux_gy_clamp_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_gy_clamp_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_gy_clamp_get(stmdev_ctx_t *ctx,
                                    ism330dlc_st_ois_clampdis_t *val)
 {
   ism330dlc_ctrl3_ois_t reg;
@@ -2994,7 +2977,7 @@ int32_t ism330dlc_aux_gy_clamp_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_gy_self_test_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_gy_self_test_set(stmdev_ctx_t *ctx,
                                        ism330dlc_st_ois_t val)
 {
   ism330dlc_ctrl3_ois_t reg;
@@ -3016,7 +2999,7 @@ int32_t ism330dlc_aux_gy_self_test_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_gy_self_test_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_gy_self_test_get(stmdev_ctx_t *ctx,
                                        ism330dlc_st_ois_t *val)
 {
   ism330dlc_ctrl3_ois_t reg;
@@ -3048,7 +3031,7 @@ int32_t ism330dlc_aux_gy_self_test_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_xl_full_scale_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_xl_full_scale_set(stmdev_ctx_t *ctx,
                                         ism330dlc_fs_xl_ois_t val)
 {
   ism330dlc_ctrl3_ois_t reg;
@@ -3070,7 +3053,7 @@ int32_t ism330dlc_aux_xl_full_scale_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_xl_full_scale_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_xl_full_scale_get(stmdev_ctx_t *ctx,
                                         ism330dlc_fs_xl_ois_t *val)
 {
   ism330dlc_ctrl3_ois_t reg;
@@ -3105,7 +3088,7 @@ int32_t ism330dlc_aux_xl_full_scale_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_den_polarity_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_den_polarity_set(stmdev_ctx_t *ctx,
                                        ism330dlc_den_lh_ois_t val)
 {
   ism330dlc_ctrl3_ois_t reg;
@@ -3127,7 +3110,7 @@ int32_t ism330dlc_aux_den_polarity_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_aux_den_polarity_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_aux_den_polarity_get(stmdev_ctx_t *ctx,
                                        ism330dlc_den_lh_ois_t *val)
 {
   ism330dlc_ctrl3_ois_t reg;
@@ -3169,7 +3152,7 @@ int32_t ism330dlc_aux_den_polarity_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_spi_mode_set(ism330dlc_ctx_t *ctx, ism330dlc_sim_t val)
+int32_t ism330dlc_spi_mode_set(stmdev_ctx_t *ctx, ism330dlc_sim_t val)
 {
   ism330dlc_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -3190,7 +3173,7 @@ int32_t ism330dlc_spi_mode_set(ism330dlc_ctx_t *ctx, ism330dlc_sim_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_spi_mode_get(ism330dlc_ctx_t *ctx, ism330dlc_sim_t *val)
+int32_t ism330dlc_spi_mode_get(stmdev_ctx_t *ctx, ism330dlc_sim_t *val)
 {
   ism330dlc_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -3218,7 +3201,7 @@ int32_t ism330dlc_spi_mode_get(ism330dlc_ctx_t *ctx, ism330dlc_sim_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_i2c_interface_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_i2c_interface_set(stmdev_ctx_t *ctx,
                                     ism330dlc_i2c_disable_t val)
 {
   ism330dlc_ctrl4_c_t ctrl4_c;
@@ -3240,7 +3223,7 @@ int32_t ism330dlc_i2c_interface_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_i2c_interface_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_i2c_interface_get(stmdev_ctx_t *ctx,
                                     ism330dlc_i2c_disable_t *val)
 {
   ism330dlc_ctrl4_c_t ctrl4_c;
@@ -3284,7 +3267,7 @@ int32_t ism330dlc_i2c_interface_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_pin_int1_route_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_pin_int1_route_set(stmdev_ctx_t *ctx,
                                      ism330dlc_int1_route_t val)
 {
   ism330dlc_master_config_t master_config;
@@ -3375,7 +3358,7 @@ int32_t ism330dlc_pin_int1_route_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_pin_int1_route_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_pin_int1_route_get(stmdev_ctx_t *ctx,
                                      ism330dlc_int1_route_t *val)
 {
   ism330dlc_master_config_t master_config;
@@ -3424,7 +3407,7 @@ int32_t ism330dlc_pin_int1_route_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_pin_int2_route_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_pin_int2_route_set(stmdev_ctx_t *ctx,
                                      ism330dlc_int2_route_t val)
 {
   ism330dlc_int2_ctrl_t int2_ctrl;
@@ -3508,7 +3491,7 @@ int32_t ism330dlc_pin_int2_route_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_pin_int2_route_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_pin_int2_route_get(stmdev_ctx_t *ctx,
                                      ism330dlc_int2_route_t *val)
 {
   ism330dlc_int2_ctrl_t int2_ctrl;
@@ -3548,7 +3531,7 @@ int32_t ism330dlc_pin_int2_route_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_pin_mode_set(ism330dlc_ctx_t *ctx, ism330dlc_pp_od_t val)
+int32_t ism330dlc_pin_mode_set(stmdev_ctx_t *ctx, ism330dlc_pp_od_t val)
 {
   ism330dlc_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -3569,7 +3552,7 @@ int32_t ism330dlc_pin_mode_set(ism330dlc_ctx_t *ctx, ism330dlc_pp_od_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_pin_mode_get(ism330dlc_ctx_t *ctx, ism330dlc_pp_od_t *val)
+int32_t ism330dlc_pin_mode_get(stmdev_ctx_t *ctx, ism330dlc_pp_od_t *val)
 {
   ism330dlc_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -3598,7 +3581,7 @@ int32_t ism330dlc_pin_mode_get(ism330dlc_ctx_t *ctx, ism330dlc_pp_od_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_pin_polarity_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_pin_polarity_set(stmdev_ctx_t *ctx,
                                    ism330dlc_h_lactive_t val)
 {
   ism330dlc_ctrl3_c_t ctrl3_c;
@@ -3620,7 +3603,7 @@ int32_t ism330dlc_pin_polarity_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_pin_polarity_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_pin_polarity_get(stmdev_ctx_t *ctx,
                                    ism330dlc_h_lactive_t *val)
 {
   ism330dlc_ctrl3_c_t ctrl3_c;
@@ -3650,7 +3633,7 @@ int32_t ism330dlc_pin_polarity_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_all_on_int1_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_all_on_int1_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_ctrl4_c_t ctrl4_c;
   int32_t ret;
@@ -3671,7 +3654,7 @@ int32_t ism330dlc_all_on_int1_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_all_on_int1_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_all_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_ctrl4_c_t ctrl4_c;
   int32_t ret;
@@ -3690,7 +3673,7 @@ int32_t ism330dlc_all_on_int1_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_int_notification_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_int_notification_set(stmdev_ctx_t *ctx,
                                        ism330dlc_lir_t val)
 {
   ism330dlc_tap_cfg_t tap_cfg;
@@ -3712,7 +3695,7 @@ int32_t ism330dlc_int_notification_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_int_notification_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_int_notification_get(stmdev_ctx_t *ctx,
                                        ism330dlc_lir_t *val)
 {
   ism330dlc_tap_cfg_t tap_cfg;
@@ -3755,7 +3738,7 @@ int32_t ism330dlc_int_notification_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_wkup_threshold_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_wkup_threshold_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_wake_up_ths_t wake_up_ths;
   int32_t ret;
@@ -3778,7 +3761,7 @@ int32_t ism330dlc_wkup_threshold_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_wkup_threshold_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_wkup_threshold_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_wake_up_ths_t wake_up_ths;
   int32_t ret;
@@ -3798,7 +3781,7 @@ int32_t ism330dlc_wkup_threshold_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_wkup_dur_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_wkup_dur_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_wake_up_dur_t wake_up_dur;
   int32_t ret;
@@ -3821,7 +3804,7 @@ int32_t ism330dlc_wkup_dur_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_wkup_dur_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_wkup_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_wake_up_dur_t wake_up_dur;
   int32_t ret;
@@ -3854,7 +3837,7 @@ int32_t ism330dlc_wkup_dur_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_gy_sleep_mode_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_gy_sleep_mode_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_ctrl4_c_t ctrl4_c;
   int32_t ret;
@@ -3875,7 +3858,7 @@ int32_t ism330dlc_gy_sleep_mode_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_gy_sleep_mode_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_gy_sleep_mode_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_ctrl4_c_t ctrl4_c;
   int32_t ret;
@@ -3894,7 +3877,7 @@ int32_t ism330dlc_gy_sleep_mode_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_act_mode_set(ism330dlc_ctx_t *ctx, ism330dlc_inact_en_t val)
+int32_t ism330dlc_act_mode_set(stmdev_ctx_t *ctx, ism330dlc_inact_en_t val)
 {
   ism330dlc_tap_cfg_t tap_cfg;
   int32_t ret;
@@ -3915,7 +3898,7 @@ int32_t ism330dlc_act_mode_set(ism330dlc_ctx_t *ctx, ism330dlc_inact_en_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_act_mode_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_act_mode_get(stmdev_ctx_t *ctx,
                                ism330dlc_inact_en_t *val)
 {
   ism330dlc_tap_cfg_t tap_cfg;
@@ -3951,7 +3934,7 @@ int32_t ism330dlc_act_mode_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_act_sleep_dur_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_act_sleep_dur_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_wake_up_dur_t wake_up_dur;
   int32_t ret;
@@ -3974,7 +3957,7 @@ int32_t ism330dlc_act_sleep_dur_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_act_sleep_dur_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_act_sleep_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_wake_up_dur_t wake_up_dur;
   int32_t ret;
@@ -4007,7 +3990,7 @@ int32_t ism330dlc_act_sleep_dur_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_tap_src_get(ism330dlc_ctx_t *ctx, ism330dlc_tap_src_t *val)
+int32_t ism330dlc_tap_src_get(stmdev_ctx_t *ctx, ism330dlc_tap_src_t *val)
 {
   int32_t ret;
   ret = ism330dlc_read_reg(ctx, ISM330DLC_TAP_SRC, (uint8_t*) val, 1);
@@ -4021,7 +4004,7 @@ int32_t ism330dlc_tap_src_get(ism330dlc_ctx_t *ctx, ism330dlc_tap_src_t *val)
   * @param  val    Change the values of tap_z_en in reg TAP_CFG
   *
   */
-int32_t ism330dlc_tap_detection_on_z_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_tap_detection_on_z_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_tap_cfg_t tap_cfg;
   int32_t ret;
@@ -4042,7 +4025,7 @@ int32_t ism330dlc_tap_detection_on_z_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_tap_detection_on_z_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_tap_detection_on_z_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_tap_cfg_t tap_cfg;
   int32_t ret;
@@ -4061,7 +4044,7 @@ int32_t ism330dlc_tap_detection_on_z_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_tap_detection_on_y_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_tap_detection_on_y_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_tap_cfg_t tap_cfg;
   int32_t ret;
@@ -4082,7 +4065,7 @@ int32_t ism330dlc_tap_detection_on_y_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_tap_detection_on_y_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_tap_detection_on_y_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_tap_cfg_t tap_cfg;
   int32_t ret;
@@ -4101,7 +4084,7 @@ int32_t ism330dlc_tap_detection_on_y_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_tap_detection_on_x_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_tap_detection_on_x_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_tap_cfg_t tap_cfg;
   int32_t ret;
@@ -4122,7 +4105,7 @@ int32_t ism330dlc_tap_detection_on_x_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_tap_detection_on_x_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_tap_detection_on_x_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_tap_cfg_t tap_cfg;
   int32_t ret;
@@ -4141,7 +4124,7 @@ int32_t ism330dlc_tap_detection_on_x_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_tap_threshold_x_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_tap_threshold_x_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_tap_ths_6d_t tap_ths_6d;
   int32_t ret;
@@ -4164,7 +4147,7 @@ int32_t ism330dlc_tap_threshold_x_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_tap_threshold_x_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_tap_threshold_x_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_tap_ths_6d_t tap_ths_6d;
   int32_t ret;
@@ -4189,7 +4172,7 @@ int32_t ism330dlc_tap_threshold_x_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_tap_shock_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_tap_shock_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_int_dur2_t int_dur2;
   int32_t ret;
@@ -4216,7 +4199,7 @@ int32_t ism330dlc_tap_shock_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_tap_shock_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_tap_shock_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_int_dur2_t int_dur2;
   int32_t ret;
@@ -4240,7 +4223,7 @@ int32_t ism330dlc_tap_shock_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_tap_quiet_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_tap_quiet_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_int_dur2_t int_dur2;
   int32_t ret;
@@ -4266,7 +4249,7 @@ int32_t ism330dlc_tap_quiet_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_tap_quiet_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_tap_quiet_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_int_dur2_t int_dur2;
   int32_t ret;
@@ -4291,7 +4274,7 @@ int32_t ism330dlc_tap_quiet_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_tap_dur_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_tap_dur_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_int_dur2_t int_dur2;
   int32_t ret;
@@ -4318,7 +4301,7 @@ int32_t ism330dlc_tap_dur_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_tap_dur_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_tap_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_int_dur2_t int_dur2;
   int32_t ret;
@@ -4337,7 +4320,7 @@ int32_t ism330dlc_tap_dur_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_tap_mode_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_tap_mode_set(stmdev_ctx_t *ctx,
                              ism330dlc_single_double_tap_t val)
 {
   ism330dlc_wake_up_ths_t wake_up_ths;
@@ -4361,7 +4344,7 @@ int32_t ism330dlc_tap_mode_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_tap_mode_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_tap_mode_get(stmdev_ctx_t *ctx,
                                ism330dlc_single_double_tap_t *val)
 {
   ism330dlc_wake_up_ths_t wake_up_ths;
@@ -4405,7 +4388,7 @@ int32_t ism330dlc_tap_mode_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_6d_feed_data_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_6d_feed_data_set(stmdev_ctx_t *ctx,
                                    ism330dlc_low_pass_on_6d_t val)
 {
   ism330dlc_ctrl8_xl_t ctrl8_xl;
@@ -4428,7 +4411,7 @@ int32_t ism330dlc_6d_feed_data_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_6d_feed_data_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_6d_feed_data_get(stmdev_ctx_t *ctx,
                                    ism330dlc_low_pass_on_6d_t *val)
 {
   ism330dlc_ctrl8_xl_t ctrl8_xl;
@@ -4458,7 +4441,7 @@ int32_t ism330dlc_6d_feed_data_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_6d_threshold_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_6d_threshold_set(stmdev_ctx_t *ctx,
                                    ism330dlc_sixd_ths_t val)
 {
   ism330dlc_tap_ths_6d_t tap_ths_6d;
@@ -4482,7 +4465,7 @@ int32_t ism330dlc_6d_threshold_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_6d_threshold_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_6d_threshold_get(stmdev_ctx_t *ctx,
                                    ism330dlc_sixd_ths_t *val)
 {
   ism330dlc_tap_ths_6d_t tap_ths_6d;
@@ -4519,7 +4502,7 @@ int32_t ism330dlc_6d_threshold_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_4d_mode_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_4d_mode_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_tap_ths_6d_t tap_ths_6d;
   int32_t ret;
@@ -4542,7 +4525,7 @@ int32_t ism330dlc_4d_mode_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_4d_mode_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_4d_mode_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_tap_ths_6d_t tap_ths_6d;
   int32_t ret;
@@ -4575,7 +4558,7 @@ int32_t ism330dlc_4d_mode_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_ff_dur_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_ff_dur_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_wake_up_dur_t wake_up_dur;
   ism330dlc_free_fall_t free_fall;
@@ -4607,7 +4590,7 @@ int32_t ism330dlc_ff_dur_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_ff_dur_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_ff_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_wake_up_dur_t wake_up_dur;
   ism330dlc_free_fall_t free_fall;
@@ -4632,7 +4615,7 @@ int32_t ism330dlc_ff_dur_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_ff_threshold_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_ff_threshold_set(stmdev_ctx_t *ctx,
                                    ism330dlc_ff_ths_t val)
 {
   ism330dlc_free_fall_t free_fall;
@@ -4655,7 +4638,7 @@ int32_t ism330dlc_ff_threshold_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_ff_threshold_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_ff_threshold_get(stmdev_ctx_t *ctx,
                                    ism330dlc_ff_ths_t *val)
 {
   ism330dlc_free_fall_t free_fall;
@@ -4716,7 +4699,7 @@ int32_t ism330dlc_ff_threshold_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_watermark_set(ism330dlc_ctx_t *ctx, uint16_t val)
+int32_t ism330dlc_fifo_watermark_set(stmdev_ctx_t *ctx, uint16_t val)
 {
   ism330dlc_fifo_ctrl1_t fifo_ctrl1;
   ism330dlc_fifo_ctrl2_t fifo_ctrl2;
@@ -4745,7 +4728,7 @@ int32_t ism330dlc_fifo_watermark_set(ism330dlc_ctx_t *ctx, uint16_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_watermark_get(ism330dlc_ctx_t *ctx, uint16_t *val)
+int32_t ism330dlc_fifo_watermark_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
   ism330dlc_fifo_ctrl1_t fifo_ctrl1;
   ism330dlc_fifo_ctrl2_t fifo_ctrl2;
@@ -4772,7 +4755,7 @@ int32_t ism330dlc_fifo_watermark_get(ism330dlc_ctx_t *ctx, uint16_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_data_level_get(ism330dlc_ctx_t *ctx, uint16_t *val)
+int32_t ism330dlc_fifo_data_level_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
   ism330dlc_fifo_status1_t fifo_status1;
   ism330dlc_fifo_status2_t fifo_status2;
@@ -4798,7 +4781,7 @@ int32_t ism330dlc_fifo_data_level_get(ism330dlc_ctx_t *ctx, uint16_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_wtm_flag_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_fifo_wtm_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_fifo_status2_t fifo_status2;
   int32_t ret;
@@ -4819,7 +4802,7 @@ int32_t ism330dlc_fifo_wtm_flag_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_pattern_get(ism330dlc_ctx_t *ctx, uint16_t *val)
+int32_t ism330dlc_fifo_pattern_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
   ism330dlc_fifo_status3_t fifo_status3;
   ism330dlc_fifo_status4_t fifo_status4;
@@ -4844,7 +4827,7 @@ int32_t ism330dlc_fifo_pattern_get(ism330dlc_ctx_t *ctx, uint16_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_temp_batch_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_fifo_temp_batch_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_fifo_ctrl2_t fifo_ctrl2;
   int32_t ret;
@@ -4868,7 +4851,7 @@ int32_t ism330dlc_fifo_temp_batch_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_temp_batch_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_fifo_temp_batch_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_fifo_ctrl2_t fifo_ctrl2;
   int32_t ret;
@@ -4889,7 +4872,7 @@ int32_t ism330dlc_fifo_temp_batch_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_write_trigger_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_fifo_write_trigger_set(stmdev_ctx_t *ctx,
                                          ism330dlc_trigger_fifo_t val)
 {
   ism330dlc_master_config_t master_config;
@@ -4914,7 +4897,7 @@ int32_t ism330dlc_fifo_write_trigger_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_xl_batch_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_fifo_xl_batch_set(stmdev_ctx_t *ctx,
                                     ism330dlc_dec_fifo_xl_t val)
 {
   ism330dlc_fifo_ctrl3_t fifo_ctrl3;
@@ -4939,7 +4922,7 @@ int32_t ism330dlc_fifo_xl_batch_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_xl_batch_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_fifo_xl_batch_get(stmdev_ctx_t *ctx,
                                     ism330dlc_dec_fifo_xl_t *val)
 {
   ism330dlc_fifo_ctrl3_t fifo_ctrl3;
@@ -4989,7 +4972,7 @@ int32_t ism330dlc_fifo_xl_batch_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_gy_batch_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_fifo_gy_batch_set(stmdev_ctx_t *ctx,
                                     ism330dlc_dec_fifo_gyro_t val)
 {
   ism330dlc_fifo_ctrl3_t fifo_ctrl3;
@@ -5014,7 +4997,7 @@ int32_t ism330dlc_fifo_gy_batch_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_gy_batch_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_fifo_gy_batch_get(stmdev_ctx_t *ctx,
                                     ism330dlc_dec_fifo_gyro_t *val)
 {
   ism330dlc_fifo_ctrl3_t fifo_ctrl3;
@@ -5064,7 +5047,7 @@ int32_t ism330dlc_fifo_gy_batch_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_dataset_3_batch_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_fifo_dataset_3_batch_set(stmdev_ctx_t *ctx,
                                            ism330dlc_dec_ds3_fifo_t val)
 {
   ism330dlc_fifo_ctrl4_t fifo_ctrl4;
@@ -5089,7 +5072,7 @@ int32_t ism330dlc_fifo_dataset_3_batch_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_dataset_3_batch_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_fifo_dataset_3_batch_get(stmdev_ctx_t *ctx,
                                            ism330dlc_dec_ds3_fifo_t *val)
 {
   ism330dlc_fifo_ctrl4_t fifo_ctrl4;
@@ -5139,7 +5122,7 @@ int32_t ism330dlc_fifo_dataset_3_batch_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_dataset_4_batch_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_fifo_dataset_4_batch_set(stmdev_ctx_t *ctx,
                                            ism330dlc_dec_ds4_fifo_t val)
 {
   ism330dlc_fifo_ctrl4_t fifo_ctrl4;
@@ -5164,7 +5147,7 @@ int32_t ism330dlc_fifo_dataset_4_batch_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_dataset_4_batch_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_fifo_dataset_4_batch_get(stmdev_ctx_t *ctx,
                                            ism330dlc_dec_ds4_fifo_t *val)
 {
   ism330dlc_fifo_ctrl4_t fifo_ctrl4;
@@ -5213,7 +5196,7 @@ int32_t ism330dlc_fifo_dataset_4_batch_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_xl_gy_8bit_format_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_fifo_xl_gy_8bit_format_set(stmdev_ctx_t *ctx,
                                              uint8_t val)
 {
   ism330dlc_fifo_ctrl4_t fifo_ctrl4;
@@ -5237,7 +5220,7 @@ int32_t ism330dlc_fifo_xl_gy_8bit_format_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_xl_gy_8bit_format_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_fifo_xl_gy_8bit_format_get(stmdev_ctx_t *ctx,
                                              uint8_t *val)
 {
   ism330dlc_fifo_ctrl4_t fifo_ctrl4;
@@ -5259,7 +5242,7 @@ int32_t ism330dlc_fifo_xl_gy_8bit_format_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_stop_on_wtm_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_fifo_stop_on_wtm_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_fifo_ctrl4_t fifo_ctrl4;
   int32_t ret;
@@ -5283,7 +5266,7 @@ int32_t ism330dlc_fifo_stop_on_wtm_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_stop_on_wtm_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_fifo_stop_on_wtm_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_fifo_ctrl4_t fifo_ctrl4;
   int32_t ret;
@@ -5303,7 +5286,7 @@ int32_t ism330dlc_fifo_stop_on_wtm_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_mode_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_fifo_mode_set(stmdev_ctx_t *ctx,
                                 ism330dlc_fifo_mode_t val)
 {
   ism330dlc_fifo_ctrl5_t fifo_ctrl5;
@@ -5327,7 +5310,7 @@ int32_t ism330dlc_fifo_mode_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_mode_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_fifo_mode_get(stmdev_ctx_t *ctx,
                                 ism330dlc_fifo_mode_t *val)
 {
   ism330dlc_fifo_ctrl5_t fifo_ctrl5;
@@ -5367,7 +5350,7 @@ int32_t ism330dlc_fifo_mode_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_data_rate_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_fifo_data_rate_set(stmdev_ctx_t *ctx,
                                      ism330dlc_odr_fifo_t val)
 {
   ism330dlc_fifo_ctrl5_t fifo_ctrl5;
@@ -5391,7 +5374,7 @@ int32_t ism330dlc_fifo_data_rate_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_fifo_data_rate_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_fifo_data_rate_get(stmdev_ctx_t *ctx,
                                      ism330dlc_odr_fifo_t *val)
 {
   ism330dlc_fifo_ctrl5_t fifo_ctrl5;
@@ -5462,7 +5445,7 @@ int32_t ism330dlc_fifo_data_rate_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
- int32_t ism330dlc_den_polarity_set(ism330dlc_ctx_t *ctx,
+ int32_t ism330dlc_den_polarity_set(stmdev_ctx_t *ctx,
                                     ism330dlc_den_lh_t val)
 {
   ism330dlc_ctrl5_c_t ctrl5_c;
@@ -5484,7 +5467,7 @@ int32_t ism330dlc_fifo_data_rate_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_den_polarity_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_den_polarity_get(stmdev_ctx_t *ctx,
                                    ism330dlc_den_lh_t *val)
 {
   ism330dlc_ctrl5_c_t ctrl5_c;
@@ -5514,7 +5497,7 @@ int32_t ism330dlc_den_polarity_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_den_mode_set(ism330dlc_ctx_t *ctx, ism330dlc_den_mode_t val)
+int32_t ism330dlc_den_mode_set(stmdev_ctx_t *ctx, ism330dlc_den_mode_t val)
 {
   ism330dlc_ctrl6_c_t ctrl6_c;
   int32_t ret;
@@ -5535,7 +5518,7 @@ int32_t ism330dlc_den_mode_set(ism330dlc_ctx_t *ctx, ism330dlc_den_mode_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_den_mode_get(ism330dlc_ctx_t *ctx, ism330dlc_den_mode_t *val)
+int32_t ism330dlc_den_mode_get(stmdev_ctx_t *ctx, ism330dlc_den_mode_t *val)
 {
   ism330dlc_ctrl6_c_t ctrl6_c;
   int32_t ret;
@@ -5571,7 +5554,7 @@ int32_t ism330dlc_den_mode_get(ism330dlc_ctx_t *ctx, ism330dlc_den_mode_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_den_enable_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_den_enable_set(stmdev_ctx_t *ctx,
                                  ism330dlc_den_xl_en_t val)
 {
   ism330dlc_ctrl4_c_t ctrl4_c;
@@ -5605,7 +5588,7 @@ int32_t ism330dlc_den_enable_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_den_enable_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_den_enable_get(stmdev_ctx_t *ctx,
                                  ism330dlc_den_xl_en_t *val)
 {
   ism330dlc_ctrl4_c_t ctrl4_c;
@@ -5641,7 +5624,7 @@ int32_t ism330dlc_den_enable_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_den_mark_axis_z_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_den_mark_axis_z_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_ctrl9_xl_t ctrl9_xl;
   int32_t ret;
@@ -5663,7 +5646,7 @@ int32_t ism330dlc_den_mark_axis_z_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_den_mark_axis_z_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_den_mark_axis_z_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_ctrl9_xl_t ctrl9_xl;
   int32_t ret;
@@ -5682,7 +5665,7 @@ int32_t ism330dlc_den_mark_axis_z_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_den_mark_axis_y_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_den_mark_axis_y_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_ctrl9_xl_t ctrl9_xl;
   int32_t ret;
@@ -5704,7 +5687,7 @@ int32_t ism330dlc_den_mark_axis_y_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_den_mark_axis_y_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_den_mark_axis_y_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_ctrl9_xl_t ctrl9_xl;
   int32_t ret;
@@ -5723,7 +5706,7 @@ int32_t ism330dlc_den_mark_axis_y_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_den_mark_axis_x_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_den_mark_axis_x_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_ctrl9_xl_t ctrl9_xl;
   int32_t ret;
@@ -5744,7 +5727,7 @@ int32_t ism330dlc_den_mark_axis_x_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_den_mark_axis_x_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_den_mark_axis_x_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_ctrl9_xl_t ctrl9_xl;
   int32_t ret;
@@ -5776,7 +5759,7 @@ int32_t ism330dlc_den_mark_axis_x_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_mag_soft_iron_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_mag_soft_iron_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_ctrl9_xl_t ctrl9_xl;
   int32_t ret;
@@ -5797,7 +5780,7 @@ int32_t ism330dlc_mag_soft_iron_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_mag_soft_iron_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_mag_soft_iron_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_ctrl9_xl_t ctrl9_xl;
   int32_t ret;
@@ -5816,7 +5799,7 @@ int32_t ism330dlc_mag_soft_iron_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_mag_hard_iron_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_mag_hard_iron_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_master_config_t master_config;
   ism330dlc_ctrl10_c_t ctrl10_c;
@@ -5851,7 +5834,7 @@ int32_t ism330dlc_mag_hard_iron_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_mag_hard_iron_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_mag_hard_iron_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_master_config_t master_config;
   int32_t ret;
@@ -5872,7 +5855,7 @@ int32_t ism330dlc_mag_hard_iron_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_mag_soft_iron_mat_set(ism330dlc_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dlc_mag_soft_iron_mat_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
 
@@ -5895,7 +5878,7 @@ int32_t ism330dlc_mag_soft_iron_mat_set(ism330dlc_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_mag_soft_iron_mat_get(ism330dlc_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dlc_mag_soft_iron_mat_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
 
@@ -5918,7 +5901,7 @@ int32_t ism330dlc_mag_soft_iron_mat_get(ism330dlc_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_mag_offset_set(ism330dlc_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dlc_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
 
@@ -5941,7 +5924,7 @@ int32_t ism330dlc_mag_offset_set(ism330dlc_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_mag_offset_get(ism330dlc_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dlc_mag_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
 
@@ -5977,7 +5960,7 @@ int32_t ism330dlc_mag_offset_get(ism330dlc_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_sync_sens_frame_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_sh_sync_sens_frame_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_sensor_sync_time_frame_t sensor_sync_time_frame;
   int32_t ret;
@@ -6001,7 +5984,7 @@ int32_t ism330dlc_sh_sync_sens_frame_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_sync_sens_frame_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_sh_sync_sens_frame_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_sensor_sync_time_frame_t sensor_sync_time_frame;
   int32_t ret;
@@ -6021,7 +6004,7 @@ int32_t ism330dlc_sh_sync_sens_frame_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_sync_sens_ratio_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_sync_sens_ratio_set(stmdev_ctx_t *ctx,
                                          ism330dlc_rr_t val)
 {
   ism330dlc_sensor_sync_res_ratio_t sensor_sync_res_ratio;
@@ -6045,7 +6028,7 @@ int32_t ism330dlc_sh_sync_sens_ratio_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_sync_sens_ratio_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_sync_sens_ratio_get(stmdev_ctx_t *ctx,
                                          ism330dlc_rr_t *val)
 {
   ism330dlc_sensor_sync_res_ratio_t sensor_sync_res_ratio;
@@ -6083,7 +6066,7 @@ int32_t ism330dlc_sh_sync_sens_ratio_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_master_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_sh_master_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_master_config_t master_config;
   int32_t ret;
@@ -6106,7 +6089,7 @@ int32_t ism330dlc_sh_master_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_master_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_sh_master_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_master_config_t master_config;
   int32_t ret;
@@ -6126,7 +6109,7 @@ int32_t ism330dlc_sh_master_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_pass_through_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_sh_pass_through_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_master_config_t master_config;
   int32_t ret;
@@ -6149,7 +6132,7 @@ int32_t ism330dlc_sh_pass_through_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_pass_through_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_sh_pass_through_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_master_config_t master_config;
   int32_t ret;
@@ -6169,7 +6152,7 @@ int32_t ism330dlc_sh_pass_through_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_pin_mode_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_pin_mode_set(stmdev_ctx_t *ctx,
                                   ism330dlc_pull_up_en_t val)
 {
   ism330dlc_master_config_t master_config;
@@ -6194,7 +6177,7 @@ int32_t ism330dlc_sh_pin_mode_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_pin_mode_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_pin_mode_get(stmdev_ctx_t *ctx,
                                   ism330dlc_pull_up_en_t *val)
 {
   ism330dlc_master_config_t master_config;
@@ -6224,7 +6207,7 @@ int32_t ism330dlc_sh_pin_mode_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_syncro_mode_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_syncro_mode_set(stmdev_ctx_t *ctx,
                                      ism330dlc_start_config_t val)
 {
   ism330dlc_master_config_t master_config;
@@ -6248,7 +6231,7 @@ int32_t ism330dlc_sh_syncro_mode_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_syncro_mode_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_syncro_mode_get(stmdev_ctx_t *ctx,
                                      ism330dlc_start_config_t *val)
 {
   ism330dlc_master_config_t master_config;
@@ -6279,7 +6262,7 @@ int32_t ism330dlc_sh_syncro_mode_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_drdy_on_int1_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_sh_drdy_on_int1_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_master_config_t master_config;
   int32_t ret;
@@ -6302,7 +6285,7 @@ int32_t ism330dlc_sh_drdy_on_int1_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_drdy_on_int1_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_sh_drdy_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_master_config_t master_config;
   int32_t ret;
@@ -6322,7 +6305,7 @@ int32_t ism330dlc_sh_drdy_on_int1_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_read_data_raw_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_read_data_raw_get(stmdev_ctx_t *ctx,
                                        ism330dlc_emb_sh_read_t *val)
 {
   int32_t ret;
@@ -6344,7 +6327,7 @@ int32_t ism330dlc_sh_read_data_raw_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_cmd_sens_sync_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_sh_cmd_sens_sync_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_master_cmd_code_t master_cmd_code;
   int32_t ret;
@@ -6368,7 +6351,7 @@ int32_t ism330dlc_sh_cmd_sens_sync_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_cmd_sens_sync_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_sh_cmd_sens_sync_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_master_cmd_code_t master_cmd_code;
   int32_t ret;
@@ -6389,7 +6372,7 @@ int32_t ism330dlc_sh_cmd_sens_sync_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_spi_sync_error_set(ism330dlc_ctx_t *ctx, uint8_t val)
+int32_t ism330dlc_sh_spi_sync_error_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   ism330dlc_sens_sync_spi_error_code_t sens_sync_spi_error_code;
   int32_t ret;
@@ -6413,7 +6396,7 @@ int32_t ism330dlc_sh_spi_sync_error_set(ism330dlc_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_spi_sync_error_get(ism330dlc_ctx_t *ctx, uint8_t *val)
+int32_t ism330dlc_sh_spi_sync_error_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   ism330dlc_sens_sync_spi_error_code_t sens_sync_spi_error_code;
   int32_t ret;
@@ -6433,7 +6416,7 @@ int32_t ism330dlc_sh_spi_sync_error_get(ism330dlc_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_num_of_dev_connected_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_num_of_dev_connected_set(stmdev_ctx_t *ctx,
                                             ism330dlc_aux_sens_on_t val)
 {
   ism330dlc_slave0_config_t slave0_config;
@@ -6463,7 +6446,7 @@ int32_t ism330dlc_sh_num_of_dev_connected_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_num_of_dev_connected_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_num_of_dev_connected_get(stmdev_ctx_t *ctx,
                                               ism330dlc_aux_sens_on_t *val)
 {
   ism330dlc_slave0_config_t slave0_config;
@@ -6509,7 +6492,7 @@ int32_t ism330dlc_sh_num_of_dev_connected_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_cfg_write(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_cfg_write(stmdev_ctx_t *ctx,
                                ism330dlc_sh_cfg_write_t *val)
 {
   ism330dlc_slv0_add_t slv0_add;
@@ -6547,7 +6530,7 @@ int32_t ism330dlc_sh_cfg_write(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_slv0_cfg_read(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_slv0_cfg_read(stmdev_ctx_t *ctx,
                                    ism330dlc_sh_cfg_read_t *val)
 {
   ism330dlc_slave0_config_t slave0_config;
@@ -6591,7 +6574,7 @@ int32_t ism330dlc_sh_slv0_cfg_read(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_slv1_cfg_read(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_slv1_cfg_read(stmdev_ctx_t *ctx,
                                    ism330dlc_sh_cfg_read_t *val)
 {
   ism330dlc_slave1_config_t slave1_config;
@@ -6635,7 +6618,7 @@ int32_t ism330dlc_sh_slv1_cfg_read(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_slv2_cfg_read(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_slv2_cfg_read(stmdev_ctx_t *ctx,
                                    ism330dlc_sh_cfg_read_t *val)
 {
   ism330dlc_slv2_add_t slv2_add;
@@ -6680,7 +6663,7 @@ int32_t ism330dlc_sh_slv2_cfg_read(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_slv3_cfg_read(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_slv3_cfg_read(stmdev_ctx_t *ctx,
                                    ism330dlc_sh_cfg_read_t *val)
 {
   ism330dlc_slave3_config_t slave3_config;
@@ -6722,7 +6705,7 @@ int32_t ism330dlc_sh_slv3_cfg_read(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_slave_0_dec_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_slave_0_dec_set(stmdev_ctx_t *ctx,
                                      ism330dlc_slave0_rate_t val)
 {
   ism330dlc_slave0_config_t slave0_config;
@@ -6753,7 +6736,7 @@ int32_t ism330dlc_sh_slave_0_dec_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_slave_0_dec_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_slave_0_dec_get(stmdev_ctx_t *ctx,
                                      ism330dlc_slave0_rate_t *val)
 {
   ism330dlc_slave0_config_t slave0_config;
@@ -6799,7 +6782,7 @@ int32_t ism330dlc_sh_slave_0_dec_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_write_mode_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_write_mode_set(stmdev_ctx_t *ctx,
                                     ism330dlc_write_once_t val)
 {
   ism330dlc_slave1_config_t slave1_config;
@@ -6832,7 +6815,7 @@ int32_t ism330dlc_sh_write_mode_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_write_mode_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_write_mode_get(stmdev_ctx_t *ctx,
                                     ism330dlc_write_once_t *val)
 {
   ism330dlc_slave1_config_t slave1_config;
@@ -6870,7 +6853,7 @@ int32_t ism330dlc_sh_write_mode_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_slave_1_dec_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_slave_1_dec_set(stmdev_ctx_t *ctx,
                                      ism330dlc_slave1_rate_t val)
 {
   ism330dlc_slave1_config_t slave1_config;
@@ -6900,7 +6883,7 @@ int32_t ism330dlc_sh_slave_1_dec_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_slave_1_dec_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_slave_1_dec_get(stmdev_ctx_t *ctx,
                                      ism330dlc_slave1_rate_t *val)
 {
   ism330dlc_slave1_config_t slave1_config;
@@ -6944,7 +6927,7 @@ int32_t ism330dlc_sh_slave_1_dec_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_slave_2_dec_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_slave_2_dec_set(stmdev_ctx_t *ctx,
                                      ism330dlc_slave2_rate_t val)
 {
   ism330dlc_slave2_config_t slave2_config;
@@ -6975,7 +6958,7 @@ int32_t ism330dlc_sh_slave_2_dec_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_slave_2_dec_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_slave_2_dec_get(stmdev_ctx_t *ctx,
                                      ism330dlc_slave2_rate_t *val)
 {
   ism330dlc_slave2_config_t slave2_config;
@@ -7019,7 +7002,7 @@ int32_t ism330dlc_sh_slave_2_dec_get(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_slave_3_dec_set(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_slave_3_dec_set(stmdev_ctx_t *ctx,
                                      ism330dlc_slave3_rate_t val)
 {
   ism330dlc_slave3_config_t slave3_config;
@@ -7050,7 +7033,7 @@ int32_t ism330dlc_sh_slave_3_dec_set(ism330dlc_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_sh_slave_3_dec_get(ism330dlc_ctx_t *ctx,
+int32_t ism330dlc_sh_slave_3_dec_get(stmdev_ctx_t *ctx,
                                      ism330dlc_slave3_rate_t *val)
 {
   ism330dlc_slave3_config_t slave3_config;

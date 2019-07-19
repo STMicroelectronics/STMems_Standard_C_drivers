@@ -6,33 +6,16 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
-*/
+ ******************************************************************************
+ */
 
 #include "stts751_reg.h"
 
@@ -63,7 +46,7 @@
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_read_reg(stts751_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t stts751_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                           uint16_t len)
 {
   int32_t ret;
@@ -81,7 +64,7 @@ int32_t stts751_read_reg(stts751_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_write_reg(stts751_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t stts751_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                            uint16_t len)
 {
   int32_t ret;
@@ -150,7 +133,7 @@ int16_t stts751_from_celsius_to_lsb(float celsius)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_temp_data_rate_set(stts751_ctx_t *ctx, stts751_odr_t val)
+int32_t stts751_temp_data_rate_set(stmdev_ctx_t *ctx, stts751_odr_t val)
 {
   stts751_configuration_t configuration;
   stts751_conversion_rate_t conversion_rate;
@@ -187,7 +170,7 @@ int32_t stts751_temp_data_rate_set(stts751_ctx_t *ctx, stts751_odr_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_temp_data_rate_get(stts751_ctx_t *ctx, stts751_odr_t *val)
+int32_t stts751_temp_data_rate_get(stmdev_ctx_t *ctx, stts751_odr_t *val)
 {
   stts751_conversion_rate_t conversion_rate;
   stts751_configuration_t configuration;
@@ -251,7 +234,7 @@ int32_t stts751_temp_data_rate_get(stts751_ctx_t *ctx, stts751_odr_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_resolution_set(stts751_ctx_t *ctx, stts751_tres_t val)
+int32_t stts751_resolution_set(stmdev_ctx_t *ctx, stts751_tres_t val)
 {
   stts751_configuration_t reg;
   int32_t ret;
@@ -272,7 +255,7 @@ int32_t stts751_resolution_set(stts751_ctx_t *ctx, stts751_tres_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_resolution_get(stts751_ctx_t *ctx, stts751_tres_t *val)
+int32_t stts751_resolution_get(stmdev_ctx_t *ctx, stts751_tres_t *val)
 {
   stts751_configuration_t reg;
   int32_t ret;
@@ -307,7 +290,7 @@ int32_t stts751_resolution_get(stts751_ctx_t *ctx, stts751_tres_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_status_reg_get(stts751_ctx_t *ctx, stts751_status_t *val)
+int32_t stts751_status_reg_get(stmdev_ctx_t *ctx, stts751_status_t *val)
 {
   int32_t ret;
   ret = stts751_read_reg(ctx, STTS751_STATUS, (uint8_t*) val, 1);
@@ -322,7 +305,7 @@ int32_t stts751_status_reg_get(stts751_ctx_t *ctx, stts751_status_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_flag_busy_get(stts751_ctx_t *ctx, uint8_t *val)
+int32_t stts751_flag_busy_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   stts751_status_t reg;
   int32_t ret;
@@ -354,7 +337,7 @@ int32_t stts751_flag_busy_get(stts751_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_temperature_raw_get(stts751_ctx_t *ctx, int16_t *buff)
+int32_t stts751_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff)
 {
   uint16_t temperature;
   uint8_t temperature_low;
@@ -392,7 +375,7 @@ int32_t stts751_temperature_raw_get(stts751_ctx_t *ctx, int16_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_pin_event_route_set(stts751_ctx_t *ctx, uint8_t val)
+int32_t stts751_pin_event_route_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   stts751_configuration_t reg;
   int32_t ret;
@@ -413,7 +396,7 @@ int32_t stts751_pin_event_route_set(stts751_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_pin_event_route_get(stts751_ctx_t *ctx, uint8_t *val)
+int32_t stts751_pin_event_route_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   stts751_configuration_t reg;
   int32_t ret;
@@ -443,7 +426,7 @@ int32_t stts751_pin_event_route_get(stts751_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_high_temperature_threshold_set(stts751_ctx_t *ctx,
+int32_t stts751_high_temperature_threshold_set(stmdev_ctx_t *ctx,
                                                int16_t buff)
 {
   uint8_t *temperature_ptr;
@@ -470,7 +453,7 @@ int32_t stts751_high_temperature_threshold_set(stts751_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_high_temperature_threshold_get(stts751_ctx_t *ctx,
+int32_t stts751_high_temperature_threshold_get(stmdev_ctx_t *ctx,
                                                int16_t *buff)
 {
   uint16_t temperature;
@@ -497,7 +480,7 @@ int32_t stts751_high_temperature_threshold_get(stts751_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_low_temperature_threshold_set(stts751_ctx_t *ctx,
+int32_t stts751_low_temperature_threshold_set(stmdev_ctx_t *ctx,
                                               int16_t buff)
 {
 
@@ -525,7 +508,7 @@ int32_t stts751_low_temperature_threshold_set(stts751_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_low_temperature_threshold_get(stts751_ctx_t *ctx,
+int32_t stts751_low_temperature_threshold_get(stmdev_ctx_t *ctx,
                                               int16_t *buff)
 {
   uint16_t temperature;
@@ -567,7 +550,7 @@ int32_t stts751_low_temperature_threshold_get(stts751_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_ota_thermal_limit_set(stts751_ctx_t *ctx, int8_t val)
+int32_t stts751_ota_thermal_limit_set(stmdev_ctx_t *ctx, int8_t val)
 {
   int32_t ret;
   ret = stts751_write_reg(ctx, STTS751_THERM_LIMIT, (uint8_t*)&val, 1);
@@ -582,7 +565,7 @@ int32_t stts751_ota_thermal_limit_set(stts751_ctx_t *ctx, int8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_ota_thermal_limit_get(stts751_ctx_t *ctx, int8_t *val)
+int32_t stts751_ota_thermal_limit_get(stmdev_ctx_t *ctx, int8_t *val)
 {
   int32_t ret;
 
@@ -599,7 +582,7 @@ int32_t stts751_ota_thermal_limit_get(stts751_ctx_t *ctx, int8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_ota_thermal_hyst_set(stts751_ctx_t *ctx, int8_t val)
+int32_t stts751_ota_thermal_hyst_set(stmdev_ctx_t *ctx, int8_t val)
 {
   int32_t ret;
 
@@ -616,7 +599,7 @@ int32_t stts751_ota_thermal_hyst_set(stts751_ctx_t *ctx, int8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_ota_thermal_hyst_get(stts751_ctx_t *ctx, int8_t *val)
+int32_t stts751_ota_thermal_hyst_get(stmdev_ctx_t *ctx, int8_t *val)
 {
   int32_t ret;
 
@@ -645,7 +628,7 @@ int32_t stts751_ota_thermal_hyst_get(stts751_ctx_t *ctx, int8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_smbus_timeout_set(stts751_ctx_t *ctx, uint8_t val)
+int32_t stts751_smbus_timeout_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   stts751_smbus_timeout_t reg;
   int32_t ret;
@@ -667,7 +650,7 @@ int32_t stts751_smbus_timeout_set(stts751_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_smbus_timeout_get(stts751_ctx_t *ctx, uint8_t *val)
+int32_t stts751_smbus_timeout_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   stts751_smbus_timeout_t reg;
   int32_t ret;
@@ -684,7 +667,7 @@ int32_t stts751_smbus_timeout_get(stts751_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_device_id_get(stts751_ctx_t *ctx, stts751_id_t *buff)
+int32_t stts751_device_id_get(stmdev_ctx_t *ctx, stts751_id_t *buff)
 {
   int32_t ret;
   ret = stts751_read_reg(ctx, STTS751_PRODUCT_ID,

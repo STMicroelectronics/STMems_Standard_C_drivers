@@ -6,32 +6,15 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
+ ******************************************************************************
  */
 #include "l3gd20h_reg.h"
 
@@ -62,7 +45,7 @@
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t l3gd20h_read_reg(l3gd20h_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t l3gd20h_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                          uint16_t len)
 {
   int32_t ret;
@@ -80,7 +63,7 @@ int32_t l3gd20h_read_reg(l3gd20h_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t l3gd20h_write_reg(l3gd20h_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t l3gd20h_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                           uint16_t len)
 {
   int32_t ret;
@@ -100,24 +83,24 @@ int32_t l3gd20h_write_reg(l3gd20h_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-float32_t l3gd20h_from_fs245_to_mdps(int16_t lsb)
+float_t l3gd20h_from_fs245_to_mdps(int16_t lsb)
 {
-  return ((float32_t)lsb * 8.75f);
+  return ((float_t)lsb * 8.75f);
 }
 
-float32_t l3gd20h_from_fs500_to_mdps(int16_t lsb)
+float_t l3gd20h_from_fs500_to_mdps(int16_t lsb)
 {
-  return ((float32_t)lsb * 17.50f);
+  return ((float_t)lsb * 17.50f);
 }
 
-float32_t l3gd20h_from_fs2000_to_mdps(int16_t lsb)
+float_t l3gd20h_from_fs2000_to_mdps(int16_t lsb)
 {
-  return ((float32_t)lsb * 70.0f);
+  return ((float_t)lsb * 70.0f);
 }
 
-float32_t l3gd20h_from_lsb_to_celsius(int16_t lsb)
+float_t l3gd20h_from_lsb_to_celsius(int16_t lsb)
 {
-  return ((float32_t)lsb +25.0f);
+  return ((float_t)lsb +25.0f);
 }
 /**
   * @}
@@ -139,7 +122,7 @@ float32_t l3gd20h_from_lsb_to_celsius(int16_t lsb)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_axis_set(l3gd20h_ctx_t *ctx, l3gd20h_gy_axis_t val)
+int32_t l3gd20h_gy_axis_set(stmdev_ctx_t *ctx, l3gd20h_gy_axis_t val)
 {
   l3gd20h_ctrl1_t ctrl1;
   int32_t ret;
@@ -162,7 +145,7 @@ int32_t l3gd20h_gy_axis_set(l3gd20h_ctx_t *ctx, l3gd20h_gy_axis_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_axis_get(l3gd20h_ctx_t *ctx, l3gd20h_gy_axis_t *val)
+int32_t l3gd20h_gy_axis_get(stmdev_ctx_t *ctx, l3gd20h_gy_axis_t *val)
 {
   l3gd20h_ctrl1_t ctrl1;
   int32_t ret;
@@ -183,7 +166,7 @@ int32_t l3gd20h_gy_axis_get(l3gd20h_ctx_t *ctx, l3gd20h_gy_axis_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_data_rate_set(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_data_rate_set(stmdev_ctx_t *ctx,
                                  l3gd20h_gy_data_rate_t val)
 {
   l3gd20h_low_odr_t low_odr;
@@ -214,7 +197,7 @@ int32_t l3gd20h_gy_data_rate_set(l3gd20h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_data_rate_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_data_rate_get(stmdev_ctx_t *ctx,
                                  l3gd20h_gy_data_rate_t *val)
 {
   l3gd20h_low_odr_t low_odr;
@@ -265,7 +248,7 @@ int32_t l3gd20h_gy_data_rate_get(l3gd20h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_full_scale_set(l3gd20h_ctx_t *ctx, l3gd20h_gy_fs_t val)
+int32_t l3gd20h_gy_full_scale_set(stmdev_ctx_t *ctx, l3gd20h_gy_fs_t val)
 {
   l3gd20h_ctrl4_t ctrl4;
   int32_t ret;
@@ -286,7 +269,7 @@ int32_t l3gd20h_gy_full_scale_set(l3gd20h_ctx_t *ctx, l3gd20h_gy_fs_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_full_scale_get(l3gd20h_ctx_t *ctx, l3gd20h_gy_fs_t *val)
+int32_t l3gd20h_gy_full_scale_get(stmdev_ctx_t *ctx, l3gd20h_gy_fs_t *val)
 {
   l3gd20h_ctrl4_t ctrl4;
   int32_t ret;
@@ -298,9 +281,6 @@ int32_t l3gd20h_gy_full_scale_get(l3gd20h_ctx_t *ctx, l3gd20h_gy_fs_t *val)
       break;
     case L3GD20H_500dps:
       *val = L3GD20H_500dps;
-      break;
-    case L3GD20H_2000dps:
-      *val = L3GD20H_2000dps;
       break;
     default:
       *val = L3GD20H_245dps;
@@ -316,7 +296,7 @@ int32_t l3gd20h_gy_full_scale_get(l3gd20h_ctx_t *ctx, l3gd20h_gy_fs_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_block_data_update_set(l3gd20h_ctx_t *ctx, uint8_t val)
+int32_t l3gd20h_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   l3gd20h_ctrl4_t ctrl4;
   int32_t ret;
@@ -337,7 +317,7 @@ int32_t l3gd20h_block_data_update_set(l3gd20h_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_block_data_update_get(l3gd20h_ctx_t *ctx, uint8_t *val)
+int32_t l3gd20h_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   l3gd20h_ctrl4_t ctrl4;
   int32_t ret;
@@ -355,7 +335,7 @@ int32_t l3gd20h_block_data_update_get(l3gd20h_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_flag_data_ready_get(l3gd20h_ctx_t *ctx, uint8_t *val)
+int32_t l3gd20h_gy_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   l3gd20h_status_t status;
   int32_t ret;
@@ -387,7 +367,7 @@ int32_t l3gd20h_gy_flag_data_ready_get(l3gd20h_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_temperature_raw_get(l3gd20h_ctx_t *ctx, uint8_t *buff)
+int32_t l3gd20h_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = l3gd20h_read_reg(ctx, L3GD20H_OUT_TEMP, buff, 1);
@@ -403,7 +383,7 @@ int32_t l3gd20h_temperature_raw_get(l3gd20h_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_angular_rate_raw_get(l3gd20h_ctx_t *ctx, uint8_t *buff)
+int32_t l3gd20h_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = l3gd20h_read_reg(ctx, L3GD20H_OUT_X_L, buff, 6);
@@ -430,7 +410,7 @@ int32_t l3gd20h_angular_rate_raw_get(l3gd20h_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_dev_id_get(l3gd20h_ctx_t *ctx, uint8_t *buff)
+int32_t l3gd20h_dev_id_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = l3gd20h_read_reg(ctx, L3GD20H_WHO_AM_I, buff, 1);
@@ -445,7 +425,7 @@ int32_t l3gd20h_dev_id_get(l3gd20h_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_dev_data_format_set(l3gd20h_ctx_t *ctx, l3gd20h_ble_t val)
+int32_t l3gd20h_dev_data_format_set(stmdev_ctx_t *ctx, l3gd20h_ble_t val)
 {
   l3gd20h_ctrl4_t ctrl4;
   int32_t ret;
@@ -466,7 +446,7 @@ int32_t l3gd20h_dev_data_format_set(l3gd20h_ctx_t *ctx, l3gd20h_ble_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_dev_data_format_get(l3gd20h_ctx_t *ctx, l3gd20h_ble_t *val)
+int32_t l3gd20h_dev_data_format_get(stmdev_ctx_t *ctx, l3gd20h_ble_t *val)
 {
   l3gd20h_ctrl4_t ctrl4;
   int32_t ret;
@@ -494,7 +474,7 @@ int32_t l3gd20h_dev_data_format_get(l3gd20h_ctx_t *ctx, l3gd20h_ble_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_dev_boot_set(l3gd20h_ctx_t *ctx, uint8_t val)
+int32_t l3gd20h_dev_boot_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   l3gd20h_ctrl5_t ctrl5;
   int32_t ret;
@@ -515,7 +495,7 @@ int32_t l3gd20h_dev_boot_set(l3gd20h_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_dev_boot_get(l3gd20h_ctx_t *ctx, uint8_t *val)
+int32_t l3gd20h_dev_boot_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   l3gd20h_ctrl5_t ctrl5;
   int32_t ret;
@@ -533,7 +513,7 @@ int32_t l3gd20h_dev_boot_get(l3gd20h_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_dev_status_get(l3gd20h_ctx_t *ctx, l3gd20h_status_reg_t *val)
+int32_t l3gd20h_dev_status_get(stmdev_ctx_t *ctx, l3gd20h_status_reg_t *val)
 {
   l3gd20h_status_t status;
   int32_t ret;
@@ -559,7 +539,7 @@ int32_t l3gd20h_dev_status_get(l3gd20h_ctx_t *ctx, l3gd20h_status_reg_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_dev_reset_set(l3gd20h_ctx_t *ctx, uint8_t val)
+int32_t l3gd20h_dev_reset_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   l3gd20h_low_odr_t low_odr;
   int32_t ret;
@@ -580,7 +560,7 @@ int32_t l3gd20h_dev_reset_set(l3gd20h_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_dev_reset_get(l3gd20h_ctx_t *ctx, uint8_t *val)
+int32_t l3gd20h_dev_reset_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   l3gd20h_low_odr_t low_odr;
   int32_t ret;
@@ -612,7 +592,7 @@ int32_t l3gd20h_dev_reset_get(l3gd20h_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_filter_lp_bandwidth_set(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_filter_lp_bandwidth_set(stmdev_ctx_t *ctx,
                                            l3gd20h_lpbw_t val)
 {
   l3gd20h_ctrl1_t ctrl1;
@@ -634,7 +614,7 @@ int32_t l3gd20h_gy_filter_lp_bandwidth_set(l3gd20h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_filter_lp_bandwidth_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_filter_lp_bandwidth_get(stmdev_ctx_t *ctx,
                                            l3gd20h_lpbw_t *val)
 {
   l3gd20h_low_odr_t low_odr;
@@ -697,7 +677,7 @@ int32_t l3gd20h_gy_filter_lp_bandwidth_get(l3gd20h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_filter_hp_bandwidth_set(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_filter_hp_bandwidth_set(stmdev_ctx_t *ctx,
                                             l3gd20h_gy_hp_bw_t val)
 {
   l3gd20h_ctrl2_t ctrl2;
@@ -720,7 +700,7 @@ int32_t l3gd20h_gy_filter_hp_bandwidth_set(l3gd20h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_filter_hp_bandwidth_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_filter_hp_bandwidth_get(stmdev_ctx_t *ctx,
                                             l3gd20h_gy_hp_bw_t *val)
 {
   l3gd20h_ctrl2_t ctrl2;
@@ -782,7 +762,7 @@ int32_t l3gd20h_gy_filter_hp_bandwidth_get(l3gd20h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_filter_out_path_set(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_filter_out_path_set(stmdev_ctx_t *ctx,
                                        l3gd20h_gy_out_path_t val)
 {
   l3gd20h_ctrl5_t ctrl5;
@@ -805,7 +785,7 @@ int32_t l3gd20h_gy_filter_out_path_set(l3gd20h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_filter_out_path_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_filter_out_path_get(stmdev_ctx_t *ctx,
                                        l3gd20h_gy_out_path_t *val)
 {
   l3gd20h_ctrl5_t ctrl5;
@@ -839,7 +819,7 @@ int32_t l3gd20h_gy_filter_out_path_get(l3gd20h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_filter_int_path_set(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_filter_int_path_set(stmdev_ctx_t *ctx,
                                        l3gd20h_gy_int_path_t val)
 {
   l3gd20h_ctrl5_t ctrl5;
@@ -862,7 +842,7 @@ int32_t l3gd20h_gy_filter_int_path_set(l3gd20h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_filter_int_path_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_filter_int_path_get(stmdev_ctx_t *ctx,
                                        l3gd20h_gy_int_path_t *val)
 {
   l3gd20h_ctrl5_t ctrl5;
@@ -898,7 +878,7 @@ int32_t l3gd20h_gy_filter_int_path_get(l3gd20h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_filter_reference_set(l3gd20h_ctx_t *ctx, uint8_t *buff)
+int32_t l3gd20h_gy_filter_reference_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = l3gd20h_write_reg(ctx, L3GD20H_REFERENCE, buff, 1);
@@ -913,7 +893,7 @@ int32_t l3gd20h_gy_filter_reference_set(l3gd20h_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_filter_reference_get(l3gd20h_ctx_t *ctx, uint8_t *buff)
+int32_t l3gd20h_gy_filter_reference_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = l3gd20h_read_reg(ctx, L3GD20H_REFERENCE,
@@ -942,7 +922,7 @@ int32_t l3gd20h_gy_filter_reference_get(l3gd20h_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_spi_mode_set(l3gd20h_ctx_t *ctx, l3gd20h_sim_t val)
+int32_t l3gd20h_spi_mode_set(stmdev_ctx_t *ctx, l3gd20h_sim_t val)
 {
   l3gd20h_ctrl4_t ctrl4;
   int32_t ret;
@@ -963,7 +943,7 @@ int32_t l3gd20h_spi_mode_set(l3gd20h_ctx_t *ctx, l3gd20h_sim_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_spi_mode_get(l3gd20h_ctx_t *ctx, l3gd20h_sim_t *val)
+int32_t l3gd20h_spi_mode_get(stmdev_ctx_t *ctx, l3gd20h_sim_t *val)
 {
   l3gd20h_ctrl4_t ctrl4;
   int32_t ret;
@@ -991,7 +971,7 @@ int32_t l3gd20h_spi_mode_get(l3gd20h_ctx_t *ctx, l3gd20h_sim_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_i2c_interface_set(l3gd20h_ctx_t *ctx, l3gd20h_i2c_dis_t val)
+int32_t l3gd20h_i2c_interface_set(stmdev_ctx_t *ctx, l3gd20h_i2c_dis_t val)
 {
   l3gd20h_low_odr_t low_odr;
   int32_t ret;
@@ -1012,7 +992,7 @@ int32_t l3gd20h_i2c_interface_set(l3gd20h_ctx_t *ctx, l3gd20h_i2c_dis_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_i2c_interface_get(l3gd20h_ctx_t *ctx, l3gd20h_i2c_dis_t *val)
+int32_t l3gd20h_i2c_interface_get(stmdev_ctx_t *ctx, l3gd20h_i2c_dis_t *val)
 {
   l3gd20h_low_odr_t low_odr;
   int32_t ret;
@@ -1051,7 +1031,7 @@ int32_t l3gd20h_i2c_interface_get(l3gd20h_ctx_t *ctx, l3gd20h_i2c_dis_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_pin_int2_route_set(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_pin_int2_route_set(stmdev_ctx_t *ctx,
                                    l3gd20h_pin_int2_rt_t val)
 {
   l3gd20h_ctrl3_t ctrl3;
@@ -1076,7 +1056,7 @@ int32_t l3gd20h_pin_int2_route_set(l3gd20h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_pin_int2_route_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_pin_int2_route_get(stmdev_ctx_t *ctx,
                                    l3gd20h_pin_int2_rt_t *val)
 {
   l3gd20h_ctrl3_t ctrl3;
@@ -1099,7 +1079,7 @@ int32_t l3gd20h_pin_int2_route_get(l3gd20h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_pin_mode_set(l3gd20h_ctx_t *ctx, l3gd20h_pp_od_t val)
+int32_t l3gd20h_pin_mode_set(stmdev_ctx_t *ctx, l3gd20h_pp_od_t val)
 {
   l3gd20h_ctrl3_t ctrl3;
   int32_t ret;
@@ -1120,7 +1100,7 @@ int32_t l3gd20h_pin_mode_set(l3gd20h_ctx_t *ctx, l3gd20h_pp_od_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_pin_mode_get(l3gd20h_ctx_t *ctx, l3gd20h_pp_od_t *val)
+int32_t l3gd20h_pin_mode_get(stmdev_ctx_t *ctx, l3gd20h_pp_od_t *val)
 {
   l3gd20h_ctrl3_t ctrl3;
   int32_t ret;
@@ -1148,7 +1128,7 @@ int32_t l3gd20h_pin_mode_get(l3gd20h_ctx_t *ctx, l3gd20h_pp_od_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_pin_polarity_set(l3gd20h_ctx_t *ctx, l3gd20h_pin_pol_t val)
+int32_t l3gd20h_pin_polarity_set(stmdev_ctx_t *ctx, l3gd20h_pin_pol_t val)
 {
   l3gd20h_low_odr_t low_odr;
   l3gd20h_ctrl3_t ctrl3;
@@ -1177,7 +1157,7 @@ int32_t l3gd20h_pin_polarity_set(l3gd20h_ctx_t *ctx, l3gd20h_pin_pol_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_pin_polarity_get(l3gd20h_ctx_t *ctx, l3gd20h_pin_pol_t *val)
+int32_t l3gd20h_pin_polarity_get(stmdev_ctx_t *ctx, l3gd20h_pin_pol_t *val)
 {
   l3gd20h_ctrl3_t ctrl3;
   int32_t ret;
@@ -1205,7 +1185,7 @@ int32_t l3gd20h_pin_polarity_get(l3gd20h_ctx_t *ctx, l3gd20h_pin_pol_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_pin_int1_route_set(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_pin_int1_route_set(stmdev_ctx_t *ctx,
                                    l3gd20h_pin_int1_rt_t val)
 {
   l3gd20h_ctrl3_t ctrl3;
@@ -1228,7 +1208,7 @@ int32_t l3gd20h_pin_int1_route_set(l3gd20h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_pin_int1_route_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_pin_int1_route_get(stmdev_ctx_t *ctx,
                                    l3gd20h_pin_int1_rt_t *val)
 {
   l3gd20h_ctrl3_t ctrl3;
@@ -1249,7 +1229,7 @@ int32_t l3gd20h_pin_int1_route_get(l3gd20h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_pin_notification_set(l3gd20h_ctx_t *ctx, l3gd20h_lir_t val)
+int32_t l3gd20h_pin_notification_set(stmdev_ctx_t *ctx, l3gd20h_lir_t val)
 {
   l3gd20h_ig_cfg_t ig_cfg;
   int32_t ret;
@@ -1270,7 +1250,7 @@ int32_t l3gd20h_pin_notification_set(l3gd20h_ctx_t *ctx, l3gd20h_lir_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_pin_notification_get(l3gd20h_ctx_t *ctx, l3gd20h_lir_t *val)
+int32_t l3gd20h_pin_notification_get(stmdev_ctx_t *ctx, l3gd20h_lir_t *val)
 {
   l3gd20h_ig_cfg_t ig_cfg;
   int32_t ret;
@@ -1299,7 +1279,7 @@ int32_t l3gd20h_pin_notification_get(l3gd20h_ctx_t *ctx, l3gd20h_lir_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_pin_logic_set(l3gd20h_ctx_t *ctx, l3gd20h_pin_logic_t val)
+int32_t l3gd20h_pin_logic_set(stmdev_ctx_t *ctx, l3gd20h_pin_logic_t val)
 {
   l3gd20h_ig_cfg_t ig_cfg;
   int32_t ret;
@@ -1320,7 +1300,7 @@ int32_t l3gd20h_pin_logic_set(l3gd20h_ctx_t *ctx, l3gd20h_pin_logic_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_pin_logic_get(l3gd20h_ctx_t *ctx, l3gd20h_pin_logic_t *val)
+int32_t l3gd20h_pin_logic_get(stmdev_ctx_t *ctx, l3gd20h_pin_logic_t *val)
 {
   l3gd20h_ig_cfg_t ig_cfg;
   int32_t ret;
@@ -1362,7 +1342,7 @@ int32_t l3gd20h_pin_logic_get(l3gd20h_ctx_t *ctx, l3gd20h_pin_logic_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_trshld_axis_set(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_trshld_axis_set(stmdev_ctx_t *ctx,
                                    l3gd20h_gy_trshld_en_t val)
 {
   l3gd20h_ig_cfg_t ig_cfg;
@@ -1390,7 +1370,7 @@ int32_t l3gd20h_gy_trshld_axis_set(l3gd20h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_trshld_axis_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_trshld_axis_get(stmdev_ctx_t *ctx,
                                    l3gd20h_gy_trshld_en_t *val)
 {
   l3gd20h_ig_cfg_t ig_cfg;
@@ -1416,7 +1396,7 @@ int32_t l3gd20h_gy_trshld_axis_get(l3gd20h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_trshld_src_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_trshld_src_get(stmdev_ctx_t *ctx,
                                   l3gd20h_gy_trshld_src_t *val)
 {
   l3gd20h_ig_src_t ig_src;
@@ -1442,7 +1422,7 @@ int32_t l3gd20h_gy_trshld_src_get(l3gd20h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_trshld_x_set(l3gd20h_ctx_t *ctx, uint16_t val)
+int32_t l3gd20h_gy_trshld_x_set(stmdev_ctx_t *ctx, uint16_t val)
 {
   l3gd20h_ig_ths_xl_t ig_ths_xl;
   l3gd20h_ig_ths_xh_t ig_ths_xh;
@@ -1471,7 +1451,7 @@ int32_t l3gd20h_gy_trshld_x_set(l3gd20h_ctx_t *ctx, uint16_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_trshld_x_get(l3gd20h_ctx_t *ctx, uint16_t *val)
+int32_t l3gd20h_gy_trshld_x_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
   l3gd20h_ig_ths_xl_t ig_ths_xl;
   l3gd20h_ig_ths_xh_t ig_ths_xh;
@@ -1496,7 +1476,7 @@ int32_t l3gd20h_gy_trshld_x_get(l3gd20h_ctx_t *ctx, uint16_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_trshld_mode_set(l3gd20h_ctx_t *ctx, l3gd20h_dcrm_g_t val)
+int32_t l3gd20h_gy_trshld_mode_set(stmdev_ctx_t *ctx, l3gd20h_dcrm_g_t val)
 {
   l3gd20h_ig_ths_xh_t ig_ths_xh;
   int32_t ret;
@@ -1517,7 +1497,7 @@ int32_t l3gd20h_gy_trshld_mode_set(l3gd20h_ctx_t *ctx, l3gd20h_dcrm_g_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_trshld_mode_get(l3gd20h_ctx_t *ctx, l3gd20h_dcrm_g_t *val)
+int32_t l3gd20h_gy_trshld_mode_get(stmdev_ctx_t *ctx, l3gd20h_dcrm_g_t *val)
 {
   l3gd20h_ig_ths_xh_t ig_ths_xh;
   int32_t ret;
@@ -1545,7 +1525,7 @@ int32_t l3gd20h_gy_trshld_mode_get(l3gd20h_ctx_t *ctx, l3gd20h_dcrm_g_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_trshld_y_set(l3gd20h_ctx_t *ctx, uint16_t val)
+int32_t l3gd20h_gy_trshld_y_set(stmdev_ctx_t *ctx, uint16_t val)
 {
   l3gd20h_ig_ths_yh_t ig_ths_yh;
   l3gd20h_ig_ths_yl_t ig_ths_yl;
@@ -1574,7 +1554,7 @@ int32_t l3gd20h_gy_trshld_y_set(l3gd20h_ctx_t *ctx, uint16_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_trshld_y_get(l3gd20h_ctx_t *ctx, uint16_t *val)
+int32_t l3gd20h_gy_trshld_y_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
   l3gd20h_ig_ths_yh_t ig_ths_yh;
   l3gd20h_ig_ths_yl_t ig_ths_yl;
@@ -1598,7 +1578,7 @@ int32_t l3gd20h_gy_trshld_y_get(l3gd20h_ctx_t *ctx, uint16_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_trshld_z_set(l3gd20h_ctx_t *ctx, uint16_t val)
+int32_t l3gd20h_gy_trshld_z_set(stmdev_ctx_t *ctx, uint16_t val)
 {
   l3gd20h_ig_ths_zh_t ig_ths_zh;
   l3gd20h_ig_ths_zl_t ig_ths_zl;
@@ -1627,7 +1607,7 @@ int32_t l3gd20h_gy_trshld_z_set(l3gd20h_ctx_t *ctx, uint16_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_trshld_z_get(l3gd20h_ctx_t *ctx, uint16_t *val)
+int32_t l3gd20h_gy_trshld_z_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
   l3gd20h_ig_ths_zh_t ig_ths_zh;
   l3gd20h_ig_ths_zl_t ig_ths_zl;
@@ -1651,7 +1631,7 @@ int32_t l3gd20h_gy_trshld_z_get(l3gd20h_ctx_t *ctx, uint16_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_trshld_min_sample_set(l3gd20h_ctx_t *ctx, uint8_t val)
+int32_t l3gd20h_gy_trshld_min_sample_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   l3gd20h_ig_duration_t ig_duration;
   int32_t ret;
@@ -1679,7 +1659,7 @@ int32_t l3gd20h_gy_trshld_min_sample_set(l3gd20h_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_trshld_min_sample_get(l3gd20h_ctx_t *ctx, uint8_t *val)
+int32_t l3gd20h_gy_trshld_min_sample_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   l3gd20h_ig_duration_t ig_duration;
   int32_t ret;
@@ -1710,7 +1690,7 @@ int32_t l3gd20h_gy_trshld_min_sample_get(l3gd20h_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_fifo_stop_on_wtm_set(l3gd20h_ctx_t *ctx, uint8_t val)
+int32_t l3gd20h_fifo_stop_on_wtm_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   l3gd20h_ctrl5_t ctrl5;
   int32_t ret;
@@ -1731,7 +1711,7 @@ int32_t l3gd20h_fifo_stop_on_wtm_set(l3gd20h_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_fifo_stop_on_wtm_get(l3gd20h_ctx_t *ctx, uint8_t *val)
+int32_t l3gd20h_fifo_stop_on_wtm_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   l3gd20h_ctrl5_t ctrl5;
   int32_t ret;
@@ -1749,7 +1729,7 @@ int32_t l3gd20h_fifo_stop_on_wtm_get(l3gd20h_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_fifo_mode_set(l3gd20h_ctx_t *ctx, l3gd20h_fifo_m_t val)
+int32_t l3gd20h_fifo_mode_set(stmdev_ctx_t *ctx, l3gd20h_fifo_m_t val)
 {
   l3gd20h_ctrl5_t ctrl5;
   l3gd20h_fifo_ctrl_t fifo_ctrl;
@@ -1778,7 +1758,7 @@ int32_t l3gd20h_fifo_mode_set(l3gd20h_ctx_t *ctx, l3gd20h_fifo_m_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_fifo_mode_get(l3gd20h_ctx_t *ctx, l3gd20h_fifo_m_t *val)
+int32_t l3gd20h_fifo_mode_get(stmdev_ctx_t *ctx, l3gd20h_fifo_m_t *val)
 {
   l3gd20h_ctrl5_t ctrl5;
   l3gd20h_fifo_ctrl_t fifo_ctrl;
@@ -1821,7 +1801,7 @@ int32_t l3gd20h_fifo_mode_get(l3gd20h_ctx_t *ctx, l3gd20h_fifo_m_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_fifo_watermark_set(l3gd20h_ctx_t *ctx, uint8_t val)
+int32_t l3gd20h_fifo_watermark_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   l3gd20h_fifo_ctrl_t fifo_ctrl;
   int32_t ret;
@@ -1842,7 +1822,7 @@ int32_t l3gd20h_fifo_watermark_set(l3gd20h_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_fifo_watermark_get(l3gd20h_ctx_t *ctx, uint8_t *val)
+int32_t l3gd20h_fifo_watermark_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   l3gd20h_fifo_ctrl_t fifo_ctrl;
   int32_t ret;
@@ -1861,7 +1841,7 @@ int32_t l3gd20h_fifo_watermark_get(l3gd20h_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_fifo_src_get(l3gd20h_ctx_t *ctx, l3gd20h_fifo_srs_t *val)
+int32_t l3gd20h_fifo_src_get(stmdev_ctx_t *ctx, l3gd20h_fifo_srs_t *val)
 {
   l3gd20h_fifo_src_t fifo_src;
   int32_t ret;
@@ -1883,7 +1863,7 @@ int32_t l3gd20h_fifo_src_get(l3gd20h_ctx_t *ctx, l3gd20h_fifo_srs_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_fifo_data_level_get(l3gd20h_ctx_t *ctx, uint8_t *val)
+int32_t l3gd20h_fifo_data_level_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   l3gd20h_fifo_src_t fifo_src;
   int32_t ret;
@@ -1902,7 +1882,7 @@ int32_t l3gd20h_fifo_data_level_get(l3gd20h_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_fifo_full_flag_get(l3gd20h_ctx_t *ctx, uint8_t *val)
+int32_t l3gd20h_fifo_full_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   l3gd20h_fifo_src_t fifo_src;
   int32_t ret;
@@ -1921,7 +1901,7 @@ int32_t l3gd20h_fifo_full_flag_get(l3gd20h_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_fifo_wtm_flag_get(l3gd20h_ctx_t *ctx, uint8_t *val)
+int32_t l3gd20h_fifo_wtm_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   l3gd20h_fifo_src_t fifo_src;
   int32_t ret;
@@ -1952,7 +1932,7 @@ int32_t l3gd20h_fifo_wtm_flag_get(l3gd20h_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_den_mode_set(l3gd20h_ctx_t *ctx, l3gd20h_den_md_t val)
+int32_t l3gd20h_den_mode_set(stmdev_ctx_t *ctx, l3gd20h_den_md_t val)
 {
   l3gd20h_ctrl2_t ctrl2;
   l3gd20h_ctrl4_t ctrl4;
@@ -1982,7 +1962,7 @@ int32_t l3gd20h_den_mode_set(l3gd20h_ctx_t *ctx, l3gd20h_den_md_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_den_mode_get(l3gd20h_ctx_t *ctx, l3gd20h_den_md_t *val)
+int32_t l3gd20h_den_mode_get(stmdev_ctx_t *ctx, l3gd20h_den_md_t *val)
 {
   l3gd20h_ctrl2_t ctrl2;
   l3gd20h_ctrl4_t ctrl4;
@@ -2033,7 +2013,7 @@ int32_t l3gd20h_den_mode_get(l3gd20h_ctx_t *ctx, l3gd20h_den_md_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_self_test_set(l3gd20h_ctx_t *ctx, l3gd20h_st_t val)
+int32_t l3gd20h_gy_self_test_set(stmdev_ctx_t *ctx, l3gd20h_st_t val)
 {
   l3gd20h_ctrl4_t ctrl4;
   int32_t ret;
@@ -2054,7 +2034,7 @@ int32_t l3gd20h_gy_self_test_set(l3gd20h_ctx_t *ctx, l3gd20h_st_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_gy_self_test_get(l3gd20h_ctx_t *ctx, l3gd20h_st_t *val)
+int32_t l3gd20h_gy_self_test_get(stmdev_ctx_t *ctx, l3gd20h_st_t *val)
 {
   l3gd20h_ctrl4_t ctrl4;
   int32_t ret;

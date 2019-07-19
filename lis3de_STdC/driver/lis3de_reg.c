@@ -6,32 +6,15 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
+ ******************************************************************************
  */
 
 #include "lis3de_reg.h"
@@ -63,7 +46,7 @@
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_read_reg(lis3de_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t lis3de_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                           uint16_t len)
 {
   int32_t ret;
@@ -81,7 +64,7 @@ int32_t lis3de_read_reg(lis3de_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_write_reg(lis3de_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t lis3de_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                            uint16_t len)
 {
   int32_t ret;
@@ -146,7 +129,7 @@ float lis3de_from_lsb_to_celsius(int16_t lsb)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_temp_status_reg_get(lis3de_ctx_t *ctx, uint8_t *buff)
+int32_t lis3de_temp_status_reg_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lis3de_read_reg(ctx, LIS3DE_STATUS_REG_AUX, buff, 1);
@@ -160,7 +143,7 @@ int32_t lis3de_temp_status_reg_get(lis3de_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_temp_data_ready_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_temp_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_status_reg_aux_t status_reg_aux;
   int32_t ret;
@@ -179,7 +162,7 @@ int32_t lis3de_temp_data_ready_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_temp_data_ovr_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_temp_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_status_reg_aux_t status_reg_aux;
   int32_t ret;
@@ -198,7 +181,7 @@ int32_t lis3de_temp_data_ovr_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_temperature_raw_get(lis3de_ctx_t *ctx, uint8_t *buff)
+int32_t lis3de_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lis3de_read_reg(ctx, LIS3DE_OUT_ADC1_H, buff, 1);
@@ -225,7 +208,7 @@ int32_t lis3de_temperature_raw_get(lis3de_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_adc_raw_get(lis3de_ctx_t *ctx, uint8_t *buff)
+int32_t lis3de_adc_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lis3de_read_reg(ctx, LIS3DE_OUT_ADC1_L, buff, 6);
@@ -240,7 +223,7 @@ int32_t lis3de_adc_raw_get(lis3de_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_aux_adc_set(lis3de_ctx_t *ctx, lis3de_temp_en_t val)
+int32_t lis3de_aux_adc_set(stmdev_ctx_t *ctx, lis3de_temp_en_t val)
 {
   lis3de_temp_cfg_reg_t temp_cfg_reg;
   int32_t ret;
@@ -269,7 +252,7 @@ int32_t lis3de_aux_adc_set(lis3de_ctx_t *ctx, lis3de_temp_en_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_aux_adc_get(lis3de_ctx_t *ctx, lis3de_temp_en_t *val)
+int32_t lis3de_aux_adc_get(stmdev_ctx_t *ctx, lis3de_temp_en_t *val)
 {
   lis3de_temp_cfg_reg_t temp_cfg_reg;
   int32_t ret;
@@ -295,7 +278,7 @@ int32_t lis3de_aux_adc_get(lis3de_ctx_t *ctx, lis3de_temp_en_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_operating_mode_set(lis3de_ctx_t *ctx, lis3de_op_md_t val)
+int32_t lis3de_operating_mode_set(stmdev_ctx_t *ctx, lis3de_op_md_t val)
 {
   lis3de_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
@@ -316,7 +299,7 @@ int32_t lis3de_operating_mode_set(lis3de_ctx_t *ctx, lis3de_op_md_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_operating_mode_get(lis3de_ctx_t *ctx, lis3de_op_md_t *val)
+int32_t lis3de_operating_mode_get(stmdev_ctx_t *ctx, lis3de_op_md_t *val)
 {
   lis3de_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
@@ -342,7 +325,7 @@ int32_t lis3de_operating_mode_get(lis3de_ctx_t *ctx, lis3de_op_md_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_data_rate_set(lis3de_ctx_t *ctx, lis3de_odr_t val)
+int32_t lis3de_data_rate_set(stmdev_ctx_t *ctx, lis3de_odr_t val)
 {
   lis3de_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
@@ -363,7 +346,7 @@ int32_t lis3de_data_rate_set(lis3de_ctx_t *ctx, lis3de_odr_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_data_rate_get(lis3de_ctx_t *ctx, lis3de_odr_t *val)
+int32_t lis3de_data_rate_get(stmdev_ctx_t *ctx, lis3de_odr_t *val)
 {
   lis3de_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
@@ -416,7 +399,7 @@ int32_t lis3de_data_rate_get(lis3de_ctx_t *ctx, lis3de_odr_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_high_pass_on_outputs_set(lis3de_ctx_t *ctx, uint8_t val)
+int32_t lis3de_high_pass_on_outputs_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis3de_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
@@ -438,7 +421,7 @@ int32_t lis3de_high_pass_on_outputs_set(lis3de_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_high_pass_on_outputs_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_high_pass_on_outputs_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
@@ -463,7 +446,7 @@ int32_t lis3de_high_pass_on_outputs_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_high_pass_bandwidth_set(lis3de_ctx_t *ctx,
+int32_t lis3de_high_pass_bandwidth_set(stmdev_ctx_t *ctx,
                                          lis3de_hpcf_t val)
 {
   lis3de_ctrl_reg2_t ctrl_reg2;
@@ -491,7 +474,7 @@ int32_t lis3de_high_pass_bandwidth_set(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_high_pass_bandwidth_get(lis3de_ctx_t *ctx,
+int32_t lis3de_high_pass_bandwidth_get(stmdev_ctx_t *ctx,
                                          lis3de_hpcf_t *val)
 {
   lis3de_ctrl_reg2_t ctrl_reg2;
@@ -526,7 +509,7 @@ int32_t lis3de_high_pass_bandwidth_get(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_high_pass_mode_set(lis3de_ctx_t *ctx, lis3de_hpm_t val)
+int32_t lis3de_high_pass_mode_set(stmdev_ctx_t *ctx, lis3de_hpm_t val)
 {
   lis3de_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
@@ -547,7 +530,7 @@ int32_t lis3de_high_pass_mode_set(lis3de_ctx_t *ctx, lis3de_hpm_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_high_pass_mode_get(lis3de_ctx_t *ctx, lis3de_hpm_t *val)
+int32_t lis3de_high_pass_mode_get(stmdev_ctx_t *ctx, lis3de_hpm_t *val)
 {
   lis3de_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
@@ -581,7 +564,7 @@ int32_t lis3de_high_pass_mode_get(lis3de_ctx_t *ctx, lis3de_hpm_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_full_scale_set(lis3de_ctx_t *ctx, lis3de_fs_t val)
+int32_t lis3de_full_scale_set(stmdev_ctx_t *ctx, lis3de_fs_t val)
 {
   lis3de_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
@@ -602,7 +585,7 @@ int32_t lis3de_full_scale_set(lis3de_ctx_t *ctx, lis3de_fs_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_full_scale_get(lis3de_ctx_t *ctx, lis3de_fs_t *val)
+int32_t lis3de_full_scale_get(stmdev_ctx_t *ctx, lis3de_fs_t *val)
 {
   lis3de_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
@@ -636,7 +619,7 @@ int32_t lis3de_full_scale_get(lis3de_ctx_t *ctx, lis3de_fs_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_block_data_update_set(lis3de_ctx_t *ctx, uint8_t val)
+int32_t lis3de_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis3de_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
@@ -657,7 +640,7 @@ int32_t lis3de_block_data_update_set(lis3de_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_block_data_update_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
@@ -677,7 +660,7 @@ int32_t lis3de_block_data_update_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_filter_reference_set(lis3de_ctx_t *ctx, uint8_t *buff)
+int32_t lis3de_filter_reference_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lis3de_write_reg(ctx, LIS3DE_REFERENCE, buff, 1);
@@ -693,7 +676,7 @@ int32_t lis3de_filter_reference_set(lis3de_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_filter_reference_get(lis3de_ctx_t *ctx, uint8_t *buff)
+int32_t lis3de_filter_reference_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lis3de_read_reg(ctx, LIS3DE_REFERENCE, buff, 1);
@@ -707,7 +690,7 @@ int32_t lis3de_filter_reference_get(lis3de_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_xl_data_ready_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_xl_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_status_reg_t status_reg;
   int32_t ret;
@@ -725,7 +708,7 @@ int32_t lis3de_xl_data_ready_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_xl_data_ovr_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_xl_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_status_reg_t status_reg;
   int32_t ret;
@@ -743,7 +726,7 @@ int32_t lis3de_xl_data_ovr_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_acceleration_raw_get(lis3de_ctx_t *ctx, int16_t *buff)
+int32_t lis3de_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *buff)
 {
   int32_t ret;
   int8_t dummy;
@@ -780,7 +763,7 @@ int32_t lis3de_acceleration_raw_get(lis3de_ctx_t *ctx, int16_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_device_id_get(lis3de_ctx_t *ctx, uint8_t *buff)
+int32_t lis3de_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lis3de_read_reg(ctx, LIS3DE_WHO_AM_I, buff, 1);
@@ -794,7 +777,7 @@ int32_t lis3de_device_id_get(lis3de_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_self_test_set(lis3de_ctx_t *ctx, lis3de_st_t val)
+int32_t lis3de_self_test_set(stmdev_ctx_t *ctx, lis3de_st_t val)
 {
   lis3de_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
@@ -815,7 +798,7 @@ int32_t lis3de_self_test_set(lis3de_ctx_t *ctx, lis3de_st_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_self_test_get(lis3de_ctx_t *ctx, lis3de_st_t *val)
+int32_t lis3de_self_test_get(stmdev_ctx_t *ctx, lis3de_st_t *val)
 {
   lis3de_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
@@ -846,7 +829,7 @@ int32_t lis3de_self_test_get(lis3de_ctx_t *ctx, lis3de_st_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_boot_set(lis3de_ctx_t *ctx, uint8_t val)
+int32_t lis3de_boot_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis3de_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
@@ -867,7 +850,7 @@ int32_t lis3de_boot_set(lis3de_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_boot_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_boot_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
@@ -886,7 +869,7 @@ int32_t lis3de_boot_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_status_get(lis3de_ctx_t *ctx, lis3de_status_reg_t *val)
+int32_t lis3de_status_get(stmdev_ctx_t *ctx, lis3de_status_reg_t *val)
 {
   int32_t ret;
   ret = lis3de_read_reg(ctx, LIS3DE_STATUS_REG, (uint8_t*) val, 1);
@@ -913,7 +896,7 @@ int32_t lis3de_status_get(lis3de_ctx_t *ctx, lis3de_status_reg_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int1_gen_conf_set(lis3de_ctx_t *ctx,
+int32_t lis3de_int1_gen_conf_set(stmdev_ctx_t *ctx,
                                    lis3de_ig1_cfg_t *val)
 {
   int32_t ret;
@@ -929,7 +912,7 @@ int32_t lis3de_int1_gen_conf_set(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int1_gen_conf_get(lis3de_ctx_t *ctx,
+int32_t lis3de_int1_gen_conf_get(stmdev_ctx_t *ctx,
                                    lis3de_ig1_cfg_t *val)
 {
   int32_t ret;
@@ -945,7 +928,7 @@ int32_t lis3de_int1_gen_conf_get(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int1_gen_source_get(lis3de_ctx_t *ctx,
+int32_t lis3de_int1_gen_source_get(stmdev_ctx_t *ctx,
                                      lis3de_ig1_source_t *val)
 {
   int32_t ret;
@@ -962,7 +945,7 @@ int32_t lis3de_int1_gen_source_get(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int1_gen_threshold_set(lis3de_ctx_t *ctx, uint8_t val)
+int32_t lis3de_int1_gen_threshold_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis3de_ig1_ths_t int1_ths;
   int32_t ret;
@@ -985,7 +968,7 @@ int32_t lis3de_int1_gen_threshold_set(lis3de_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int1_gen_threshold_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_int1_gen_threshold_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_ig1_ths_t int1_ths;
   int32_t ret;
@@ -1005,7 +988,7 @@ int32_t lis3de_int1_gen_threshold_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int1_gen_duration_set(lis3de_ctx_t *ctx, uint8_t val)
+int32_t lis3de_int1_gen_duration_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis3de_ig1_duration_t int1_duration;
   int32_t ret;
@@ -1027,7 +1010,7 @@ int32_t lis3de_int1_gen_duration_set(lis3de_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int1_gen_duration_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_int1_gen_duration_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_ig1_duration_t int1_duration;
   int32_t ret;
@@ -1059,7 +1042,7 @@ int32_t lis3de_int1_gen_duration_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int2_gen_conf_set(lis3de_ctx_t *ctx,
+int32_t lis3de_int2_gen_conf_set(stmdev_ctx_t *ctx,
                                    lis3de_ig2_cfg_t *val)
 {
   int32_t ret;
@@ -1075,7 +1058,7 @@ int32_t lis3de_int2_gen_conf_set(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int2_gen_conf_get(lis3de_ctx_t *ctx,
+int32_t lis3de_int2_gen_conf_get(stmdev_ctx_t *ctx,
                                    lis3de_ig2_cfg_t *val)
 {
   int32_t ret;
@@ -1090,7 +1073,7 @@ int32_t lis3de_int2_gen_conf_get(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int2_gen_source_get(lis3de_ctx_t *ctx,
+int32_t lis3de_int2_gen_source_get(stmdev_ctx_t *ctx,
                                      lis3de_ig2_source_t *val)
 {
   int32_t ret;
@@ -1107,7 +1090,7 @@ int32_t lis3de_int2_gen_source_get(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int2_gen_threshold_set(lis3de_ctx_t *ctx, uint8_t val)
+int32_t lis3de_int2_gen_threshold_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis3de_ig2_ths_t int2_ths;
   int32_t ret;
@@ -1130,7 +1113,7 @@ int32_t lis3de_int2_gen_threshold_set(lis3de_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int2_gen_threshold_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_int2_gen_threshold_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_ig2_ths_t int2_ths;
   int32_t ret;
@@ -1150,7 +1133,7 @@ int32_t lis3de_int2_gen_threshold_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int2_gen_duration_set(lis3de_ctx_t *ctx, uint8_t val)
+int32_t lis3de_int2_gen_duration_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis3de_ig2_duration_t int2_duration;
   int32_t ret;
@@ -1172,7 +1155,7 @@ int32_t lis3de_int2_gen_duration_set(lis3de_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int2_gen_duration_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_int2_gen_duration_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_ig2_duration_t int2_duration;
   int32_t ret;
@@ -1203,7 +1186,7 @@ int32_t lis3de_int2_gen_duration_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_high_pass_int_conf_set(lis3de_ctx_t *ctx,
+int32_t lis3de_high_pass_int_conf_set(stmdev_ctx_t *ctx,
                                         lis3de_hp_t val)
 {
   lis3de_ctrl_reg2_t ctrl_reg2;
@@ -1225,7 +1208,7 @@ int32_t lis3de_high_pass_int_conf_set(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_high_pass_int_conf_get(lis3de_ctx_t *ctx,
+int32_t lis3de_high_pass_int_conf_get(stmdev_ctx_t *ctx,
                                         lis3de_hp_t *val)
 {
   lis3de_ctrl_reg2_t ctrl_reg2;
@@ -1272,7 +1255,7 @@ int32_t lis3de_high_pass_int_conf_get(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_pin_int1_config_set(lis3de_ctx_t *ctx,
+int32_t lis3de_pin_int1_config_set(stmdev_ctx_t *ctx,
                                      lis3de_ctrl_reg3_t *val)
 {
   int32_t ret;
@@ -1288,7 +1271,7 @@ int32_t lis3de_pin_int1_config_set(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_pin_int1_config_get(lis3de_ctx_t *ctx,
+int32_t lis3de_pin_int1_config_get(stmdev_ctx_t *ctx,
                                      lis3de_ctrl_reg3_t *val)
 {
   int32_t ret;
@@ -1305,7 +1288,7 @@ int32_t lis3de_pin_int1_config_get(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int2_pin_detect_4d_set(lis3de_ctx_t *ctx, uint8_t val)
+int32_t lis3de_int2_pin_detect_4d_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis3de_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
@@ -1327,7 +1310,7 @@ int32_t lis3de_int2_pin_detect_4d_set(lis3de_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int2_pin_detect_4d_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_int2_pin_detect_4d_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
@@ -1348,7 +1331,7 @@ int32_t lis3de_int2_pin_detect_4d_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int2_pin_notification_mode_set(lis3de_ctx_t *ctx,
+int32_t lis3de_int2_pin_notification_mode_set(stmdev_ctx_t *ctx,
                                                 lis3de_lir_int2_t val)
 {
   lis3de_ctrl_reg5_t ctrl_reg5;
@@ -1372,7 +1355,7 @@ int32_t lis3de_int2_pin_notification_mode_set(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int2_pin_notification_mode_get(lis3de_ctx_t *ctx,
+int32_t lis3de_int2_pin_notification_mode_get(stmdev_ctx_t *ctx,
                                                 lis3de_lir_int2_t *val)
 {
   lis3de_ctrl_reg5_t ctrl_reg5;
@@ -1402,7 +1385,7 @@ int32_t lis3de_int2_pin_notification_mode_get(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int1_pin_detect_4d_set(lis3de_ctx_t *ctx, uint8_t val)
+int32_t lis3de_int1_pin_detect_4d_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis3de_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
@@ -1424,7 +1407,7 @@ int32_t lis3de_int1_pin_detect_4d_set(lis3de_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int1_pin_detect_4d_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_int1_pin_detect_4d_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
@@ -1444,7 +1427,7 @@ int32_t lis3de_int1_pin_detect_4d_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int1_pin_notification_mode_set(lis3de_ctx_t *ctx,
+int32_t lis3de_int1_pin_notification_mode_set(stmdev_ctx_t *ctx,
                                                 lis3de_lir_int1_t val)
 {
   lis3de_ctrl_reg5_t ctrl_reg5;
@@ -1467,7 +1450,7 @@ int32_t lis3de_int1_pin_notification_mode_set(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_int1_pin_notification_mode_get(lis3de_ctx_t *ctx,
+int32_t lis3de_int1_pin_notification_mode_get(stmdev_ctx_t *ctx,
                                                 lis3de_lir_int1_t *val)
 {
   lis3de_ctrl_reg5_t ctrl_reg5;
@@ -1496,7 +1479,7 @@ int32_t lis3de_int1_pin_notification_mode_get(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_pin_int2_config_set(lis3de_ctx_t *ctx,
+int32_t lis3de_pin_int2_config_set(stmdev_ctx_t *ctx,
                                      lis3de_ctrl_reg6_t *val)
 {
   int32_t ret;
@@ -1512,7 +1495,7 @@ int32_t lis3de_pin_int2_config_set(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_pin_int2_config_get(lis3de_ctx_t *ctx,
+int32_t lis3de_pin_int2_config_get(stmdev_ctx_t *ctx,
                                      lis3de_ctrl_reg6_t *val)
 {
   int32_t ret;
@@ -1539,7 +1522,7 @@ int32_t lis3de_pin_int2_config_get(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_fifo_set(lis3de_ctx_t *ctx, uint8_t val)
+int32_t lis3de_fifo_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis3de_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
@@ -1560,7 +1543,7 @@ int32_t lis3de_fifo_set(lis3de_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_fifo_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_fifo_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
@@ -1579,7 +1562,7 @@ int32_t lis3de_fifo_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_fifo_watermark_set(lis3de_ctx_t *ctx, uint8_t val)
+int32_t lis3de_fifo_watermark_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis3de_fifo_ctrl_reg_t fifo_ctrl_reg;
   int32_t ret;
@@ -1600,7 +1583,7 @@ int32_t lis3de_fifo_watermark_set(lis3de_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_fifo_watermark_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_fifo_watermark_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_fifo_ctrl_reg_t fifo_ctrl_reg;
   int32_t ret;
@@ -1619,7 +1602,7 @@ int32_t lis3de_fifo_watermark_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_fifo_trigger_event_set(lis3de_ctx_t *ctx,
+int32_t lis3de_fifo_trigger_event_set(stmdev_ctx_t *ctx,
                                         lis3de_tr_t val)
 {
   lis3de_fifo_ctrl_reg_t fifo_ctrl_reg;
@@ -1641,7 +1624,7 @@ int32_t lis3de_fifo_trigger_event_set(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_fifo_trigger_event_get(lis3de_ctx_t *ctx,
+int32_t lis3de_fifo_trigger_event_get(stmdev_ctx_t *ctx,
                                         lis3de_tr_t *val)
 {
   lis3de_fifo_ctrl_reg_t fifo_ctrl_reg;
@@ -1670,7 +1653,7 @@ int32_t lis3de_fifo_trigger_event_get(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_fifo_mode_set(lis3de_ctx_t *ctx, lis3de_fm_t val)
+int32_t lis3de_fifo_mode_set(stmdev_ctx_t *ctx, lis3de_fm_t val)
 {
   lis3de_fifo_ctrl_reg_t fifo_ctrl_reg;
   int32_t ret;
@@ -1691,7 +1674,7 @@ int32_t lis3de_fifo_mode_set(lis3de_ctx_t *ctx, lis3de_fm_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_fifo_mode_get(lis3de_ctx_t *ctx, lis3de_fm_t *val)
+int32_t lis3de_fifo_mode_get(stmdev_ctx_t *ctx, lis3de_fm_t *val)
 {
   lis3de_fifo_ctrl_reg_t fifo_ctrl_reg;
   int32_t ret;
@@ -1725,7 +1708,7 @@ int32_t lis3de_fifo_mode_get(lis3de_ctx_t *ctx, lis3de_fm_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_fifo_status_get(lis3de_ctx_t *ctx,
+int32_t lis3de_fifo_status_get(stmdev_ctx_t *ctx,
                                  lis3de_fifo_src_reg_t *val)
 {
   int32_t ret;
@@ -1740,7 +1723,7 @@ int32_t lis3de_fifo_status_get(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_fifo_data_level_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_fifo_data_level_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_fifo_src_reg_t fifo_src_reg;
   int32_t ret;
@@ -1758,7 +1741,7 @@ int32_t lis3de_fifo_data_level_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_fifo_empty_flag_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_fifo_empty_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_fifo_src_reg_t fifo_src_reg;
   int32_t ret;
@@ -1776,7 +1759,7 @@ int32_t lis3de_fifo_empty_flag_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_fifo_ovr_flag_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_fifo_ovr_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_fifo_src_reg_t fifo_src_reg;
   int32_t ret;
@@ -1794,7 +1777,7 @@ int32_t lis3de_fifo_ovr_flag_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_fifo_fth_flag_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_fifo_fth_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_fifo_src_reg_t fifo_src_reg;
   int32_t ret;
@@ -1825,7 +1808,7 @@ int32_t lis3de_fifo_fth_flag_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_tap_conf_set(lis3de_ctx_t *ctx, lis3de_click_cfg_t *val)
+int32_t lis3de_tap_conf_set(stmdev_ctx_t *ctx, lis3de_click_cfg_t *val)
 {
   int32_t ret;
   ret = lis3de_write_reg(ctx, LIS3DE_CLICK_CFG, (uint8_t*) val, 1);
@@ -1840,7 +1823,7 @@ int32_t lis3de_tap_conf_set(lis3de_ctx_t *ctx, lis3de_click_cfg_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_tap_conf_get(lis3de_ctx_t *ctx, lis3de_click_cfg_t *val)
+int32_t lis3de_tap_conf_get(stmdev_ctx_t *ctx, lis3de_click_cfg_t *val)
 {
   int32_t ret;
   ret = lis3de_read_reg(ctx, LIS3DE_CLICK_CFG, (uint8_t*) val, 1);
@@ -1854,7 +1837,7 @@ int32_t lis3de_tap_conf_get(lis3de_ctx_t *ctx, lis3de_click_cfg_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_tap_source_get(lis3de_ctx_t *ctx, lis3de_click_src_t *val)
+int32_t lis3de_tap_source_get(stmdev_ctx_t *ctx, lis3de_click_src_t *val)
 {
   int32_t ret;
   ret = lis3de_read_reg(ctx, LIS3DE_CLICK_SRC, (uint8_t*) val, 1);
@@ -1869,7 +1852,7 @@ int32_t lis3de_tap_source_get(lis3de_ctx_t *ctx, lis3de_click_src_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_tap_threshold_set(lis3de_ctx_t *ctx, uint8_t val)
+int32_t lis3de_tap_threshold_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis3de_click_ths_t click_ths;
   int32_t ret;
@@ -1891,7 +1874,7 @@ int32_t lis3de_tap_threshold_set(lis3de_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_tap_threshold_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_tap_threshold_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_click_ths_t click_ths;
   int32_t ret;
@@ -1913,7 +1896,7 @@ int32_t lis3de_tap_threshold_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_tap_notification_mode_set(lis3de_ctx_t *ctx,
+int32_t lis3de_tap_notification_mode_set(stmdev_ctx_t *ctx,
                                            lis3de_lir_t val)
 {
   lis3de_click_ths_t click_ths;
@@ -1938,7 +1921,7 @@ int32_t lis3de_tap_notification_mode_set(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_tap_notification_mode_get(lis3de_ctx_t *ctx,
+int32_t lis3de_tap_notification_mode_get(stmdev_ctx_t *ctx,
                                            lis3de_lir_t *val)
 {
   lis3de_click_ths_t click_ths;
@@ -1969,7 +1952,7 @@ int32_t lis3de_tap_notification_mode_get(lis3de_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_shock_dur_set(lis3de_ctx_t *ctx, uint8_t val)
+int32_t lis3de_shock_dur_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis3de_time_limit_t time_limit;
   int32_t ret;
@@ -1992,7 +1975,7 @@ int32_t lis3de_shock_dur_set(lis3de_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_shock_dur_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_shock_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_time_limit_t time_limit;
   int32_t ret;
@@ -2014,7 +1997,7 @@ int32_t lis3de_shock_dur_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_quiet_dur_set(lis3de_ctx_t *ctx, uint8_t val)
+int32_t lis3de_quiet_dur_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis3de_time_latency_t time_latency;
   int32_t ret;
@@ -2038,7 +2021,7 @@ int32_t lis3de_quiet_dur_set(lis3de_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_quiet_dur_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_quiet_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_time_latency_t time_latency;
   int32_t ret;
@@ -2060,7 +2043,7 @@ int32_t lis3de_quiet_dur_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_double_tap_timeout_set(lis3de_ctx_t *ctx, uint8_t val)
+int32_t lis3de_double_tap_timeout_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis3de_time_window_t time_window;
   int32_t ret;
@@ -2084,7 +2067,7 @@ int32_t lis3de_double_tap_timeout_set(lis3de_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_double_tap_timeout_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_double_tap_timeout_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_time_window_t time_window;
   int32_t ret;
@@ -2118,7 +2101,7 @@ int32_t lis3de_double_tap_timeout_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_act_threshold_set(lis3de_ctx_t *ctx, uint8_t val)
+int32_t lis3de_act_threshold_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis3de_act_ths_t act_ths;
   int32_t ret;
@@ -2141,7 +2124,7 @@ int32_t lis3de_act_threshold_set(lis3de_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_act_threshold_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_act_threshold_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_act_ths_t act_ths;
   int32_t ret;
@@ -2161,7 +2144,7 @@ int32_t lis3de_act_threshold_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_act_timeout_set(lis3de_ctx_t *ctx, uint8_t val)
+int32_t lis3de_act_timeout_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis3de_act_dur_t act_dur;
   int32_t ret;
@@ -2183,7 +2166,7 @@ int32_t lis3de_act_timeout_set(lis3de_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_act_timeout_get(lis3de_ctx_t *ctx, uint8_t *val)
+int32_t lis3de_act_timeout_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis3de_act_dur_t act_dur;
   int32_t ret;
@@ -2215,7 +2198,7 @@ int32_t lis3de_act_timeout_get(lis3de_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_spi_mode_set(lis3de_ctx_t *ctx, lis3de_sim_t val)
+int32_t lis3de_spi_mode_set(stmdev_ctx_t *ctx, lis3de_sim_t val)
 {
   lis3de_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
@@ -2236,7 +2219,7 @@ int32_t lis3de_spi_mode_set(lis3de_ctx_t *ctx, lis3de_sim_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3de_spi_mode_get(lis3de_ctx_t *ctx, lis3de_sim_t *val)
+int32_t lis3de_spi_mode_get(stmdev_ctx_t *ctx, lis3de_sim_t *val)
 {
   lis3de_ctrl_reg4_t ctrl_reg4;
   int32_t ret;

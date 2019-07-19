@@ -6,32 +6,15 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
+ ******************************************************************************
  */
 
 #include "iis3dwb_reg.h"
@@ -63,7 +46,7 @@
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t iis3dwb_read_reg(iis3dwb_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t iis3dwb_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                            uint16_t len)
 {
   int32_t ret;
@@ -81,7 +64,7 @@ int32_t iis3dwb_read_reg(iis3dwb_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t iis3dwb_write_reg(iis3dwb_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t iis3dwb_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                             uint16_t len)
 {
   int32_t ret;
@@ -152,7 +135,7 @@ float_t iis3dwb_from_lsb_to_nsec(int32_t lsb)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_full_scale_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_xl_full_scale_set(stmdev_ctx_t *ctx,
                                     iis3dwb_fs_xl_t val)
 {
   iis3dwb_ctrl1_xl_t ctrl1_xl;
@@ -175,7 +158,7 @@ int32_t iis3dwb_xl_full_scale_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_full_scale_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_xl_full_scale_get(stmdev_ctx_t *ctx,
                                     iis3dwb_fs_xl_t *val)
 {
   iis3dwb_ctrl1_xl_t ctrl1_xl;
@@ -210,7 +193,7 @@ int32_t iis3dwb_xl_full_scale_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_data_rate_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_xl_data_rate_set(stmdev_ctx_t *ctx,
                                    iis3dwb_odr_xl_t val)
 {
   iis3dwb_ctrl1_xl_t ctrl1_xl;
@@ -233,7 +216,7 @@ int32_t iis3dwb_xl_data_rate_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_data_rate_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_xl_data_rate_get(stmdev_ctx_t *ctx,
                                    iis3dwb_odr_xl_t *val)
 {
   iis3dwb_ctrl1_xl_t ctrl1_xl;
@@ -262,7 +245,7 @@ int32_t iis3dwb_xl_data_rate_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_block_data_update_set(iis3dwb_ctx_t *ctx, uint8_t val)
+int32_t iis3dwb_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dwb_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -283,7 +266,7 @@ int32_t iis3dwb_block_data_update_set(iis3dwb_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_block_data_update_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -303,7 +286,7 @@ int32_t iis3dwb_block_data_update_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_offset_weight_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_xl_offset_weight_set(stmdev_ctx_t *ctx,
                                      iis3dwb_usr_off_w_t val)
 {
   iis3dwb_ctrl6_c_t ctrl6_c;
@@ -326,7 +309,7 @@ int32_t iis3dwb_xl_offset_weight_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_offset_weight_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_xl_offset_weight_get(stmdev_ctx_t *ctx,
                                        iis3dwb_usr_off_w_t *val)
 {
   iis3dwb_ctrl6_c_t ctrl6_c;
@@ -357,7 +340,7 @@ int32_t iis3dwb_xl_offset_weight_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_axis_selection_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_xl_axis_selection_set(stmdev_ctx_t *ctx,
                                      iis3dwb_xl_axis_sel_t val)
 {
   iis3dwb_ctrl4_c_t ctrl4_c;
@@ -388,7 +371,7 @@ int32_t iis3dwb_xl_axis_selection_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_axis_selection_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_xl_axis_selection_get(stmdev_ctx_t *ctx,
                                      iis3dwb_xl_axis_sel_t *val)
 {
   iis3dwb_ctrl4_c_t ctrl4_c;
@@ -438,7 +421,7 @@ int32_t iis3dwb_xl_axis_selection_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_all_sources_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_all_sources_get(stmdev_ctx_t *ctx,
                                   iis3dwb_all_sources_t *val)
 {
   int32_t ret;
@@ -465,7 +448,7 @@ int32_t iis3dwb_all_sources_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_status_reg_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_status_reg_get(stmdev_ctx_t *ctx,
                                  iis3dwb_status_reg_t *val)
 {
   int32_t ret;
@@ -481,7 +464,7 @@ int32_t iis3dwb_status_reg_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_flag_data_ready_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_xl_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_status_reg_t status_reg;
   int32_t ret;
@@ -501,7 +484,7 @@ int32_t iis3dwb_xl_flag_data_ready_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_temp_flag_data_ready_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_temp_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_status_reg_t status_reg;
   int32_t ret;
@@ -523,7 +506,7 @@ int32_t iis3dwb_temp_flag_data_ready_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_usr_offset_x_set(iis3dwb_ctx_t *ctx, uint8_t *buff)
+int32_t iis3dwb_xl_usr_offset_x_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis3dwb_write_reg(ctx, IIS3DWB_X_OFS_USR, buff, 1);
@@ -540,7 +523,7 @@ int32_t iis3dwb_xl_usr_offset_x_set(iis3dwb_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_usr_offset_x_get(iis3dwb_ctx_t *ctx, uint8_t *buff)
+int32_t iis3dwb_xl_usr_offset_x_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis3dwb_read_reg(ctx, IIS3DWB_X_OFS_USR, buff, 1);
@@ -557,7 +540,7 @@ int32_t iis3dwb_xl_usr_offset_x_get(iis3dwb_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_usr_offset_y_set(iis3dwb_ctx_t *ctx, uint8_t *buff)
+int32_t iis3dwb_xl_usr_offset_y_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis3dwb_write_reg(ctx, IIS3DWB_Y_OFS_USR, buff, 1);
@@ -574,7 +557,7 @@ int32_t iis3dwb_xl_usr_offset_y_set(iis3dwb_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_usr_offset_y_get(iis3dwb_ctx_t *ctx, uint8_t *buff)
+int32_t iis3dwb_xl_usr_offset_y_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis3dwb_read_reg(ctx, IIS3DWB_Y_OFS_USR, buff, 1);
@@ -591,7 +574,7 @@ int32_t iis3dwb_xl_usr_offset_y_get(iis3dwb_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_usr_offset_z_set(iis3dwb_ctx_t *ctx, uint8_t *buff)
+int32_t iis3dwb_xl_usr_offset_z_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis3dwb_write_reg(ctx, IIS3DWB_Z_OFS_USR, buff, 1);
@@ -608,7 +591,7 @@ int32_t iis3dwb_xl_usr_offset_z_set(iis3dwb_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_usr_offset_z_get(iis3dwb_ctx_t *ctx, uint8_t *buff)
+int32_t iis3dwb_xl_usr_offset_z_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis3dwb_read_reg(ctx, IIS3DWB_Z_OFS_USR, buff, 1);
@@ -636,7 +619,7 @@ int32_t iis3dwb_xl_usr_offset_z_get(iis3dwb_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_timestamp_set(iis3dwb_ctx_t *ctx, uint8_t val)
+int32_t iis3dwb_timestamp_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dwb_ctrl10_c_t ctrl10_c;
   int32_t ret;
@@ -658,7 +641,7 @@ int32_t iis3dwb_timestamp_set(iis3dwb_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_timestamp_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_timestamp_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_ctrl10_c_t ctrl10_c;
   int32_t ret;
@@ -679,7 +662,7 @@ int32_t iis3dwb_timestamp_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_timestamp_raw_get(iis3dwb_ctx_t *ctx, uint8_t *buff)
+int32_t iis3dwb_timestamp_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis3dwb_read_reg(ctx, IIS3DWB_TIMESTAMP0, buff, 4);
@@ -706,7 +689,7 @@ int32_t iis3dwb_timestamp_raw_get(iis3dwb_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_rounding_mode_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_rounding_mode_set(stmdev_ctx_t *ctx,
                                     iis3dwb_rounding_t val)
 {
   iis3dwb_ctrl5_c_t ctrl5_c;
@@ -728,7 +711,7 @@ int32_t iis3dwb_rounding_mode_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_rounding_mode_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_rounding_mode_get(stmdev_ctx_t *ctx,
                                     iis3dwb_rounding_t *val)
 {
   iis3dwb_ctrl5_c_t ctrl5_c;
@@ -759,7 +742,7 @@ int32_t iis3dwb_rounding_mode_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_temperature_raw_get(iis3dwb_ctx_t *ctx, uint8_t *buff)
+int32_t iis3dwb_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis3dwb_read_reg(ctx, IIS3DWB_OUT_TEMP_L, buff, 2);
@@ -775,7 +758,7 @@ int32_t iis3dwb_temperature_raw_get(iis3dwb_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_acceleration_raw_get(iis3dwb_ctx_t *ctx, uint8_t *buff)
+int32_t iis3dwb_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis3dwb_read_reg(ctx, IIS3DWB_OUTX_L_A, buff, 6);
@@ -790,7 +773,7 @@ int32_t iis3dwb_acceleration_raw_get(iis3dwb_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_out_raw_get(iis3dwb_ctx_t *ctx, uint8_t *buff)
+int32_t iis3dwb_fifo_out_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis3dwb_read_reg(ctx, IIS3DWB_FIFO_DATA_OUT_X_L, buff, 6);
@@ -819,7 +802,7 @@ int32_t iis3dwb_fifo_out_raw_get(iis3dwb_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_odr_cal_reg_set(iis3dwb_ctx_t *ctx, uint8_t val)
+int32_t iis3dwb_odr_cal_reg_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dwb_internal_freq_fine_t internal_freq_fine;
   int32_t ret;
@@ -844,7 +827,7 @@ int32_t iis3dwb_odr_cal_reg_set(iis3dwb_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_odr_cal_reg_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_odr_cal_reg_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_internal_freq_fine_t internal_freq_fine;
   int32_t ret;
@@ -865,7 +848,7 @@ int32_t iis3dwb_odr_cal_reg_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_data_ready_mode_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_data_ready_mode_set(stmdev_ctx_t *ctx,
                                       iis3dwb_dataready_pulsed_t val)
 {
   iis3dwb_counter_bdr_reg1_t counter_bdr_reg1;
@@ -890,7 +873,7 @@ int32_t iis3dwb_data_ready_mode_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_data_ready_mode_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_data_ready_mode_get(stmdev_ctx_t *ctx,
                                       iis3dwb_dataready_pulsed_t *val)
 {
   iis3dwb_counter_bdr_reg1_t counter_bdr_reg1;
@@ -920,7 +903,7 @@ int32_t iis3dwb_data_ready_mode_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_device_id_get(iis3dwb_ctx_t *ctx, uint8_t *buff)
+int32_t iis3dwb_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = iis3dwb_read_reg(ctx, IIS3DWB_WHO_AM_I, buff, 1);
@@ -935,7 +918,7 @@ int32_t iis3dwb_device_id_get(iis3dwb_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_reset_set(iis3dwb_ctx_t *ctx, uint8_t val)
+int32_t iis3dwb_reset_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dwb_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -956,7 +939,7 @@ int32_t iis3dwb_reset_set(iis3dwb_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_reset_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_reset_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -976,7 +959,7 @@ int32_t iis3dwb_reset_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_auto_increment_set(iis3dwb_ctx_t *ctx, uint8_t val)
+int32_t iis3dwb_auto_increment_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dwb_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -998,7 +981,7 @@ int32_t iis3dwb_auto_increment_set(iis3dwb_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_auto_increment_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_auto_increment_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -1017,7 +1000,7 @@ int32_t iis3dwb_auto_increment_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_boot_set(iis3dwb_ctx_t *ctx, uint8_t val)
+int32_t iis3dwb_boot_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dwb_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -1038,7 +1021,7 @@ int32_t iis3dwb_boot_set(iis3dwb_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_boot_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_boot_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -1059,7 +1042,7 @@ int32_t iis3dwb_boot_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_self_test_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_xl_self_test_set(stmdev_ctx_t *ctx,
                                    iis3dwb_st_xl_t val)
 {
   iis3dwb_ctrl5_c_t ctrl5_c;
@@ -1081,7 +1064,7 @@ int32_t iis3dwb_xl_self_test_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_self_test_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_xl_self_test_get(stmdev_ctx_t *ctx,
                                    iis3dwb_st_xl_t *val)
 {
   iis3dwb_ctrl5_c_t ctrl5_c;
@@ -1129,7 +1112,7 @@ int32_t iis3dwb_xl_self_test_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_filter_lp2_set(iis3dwb_ctx_t *ctx, uint8_t val)
+int32_t iis3dwb_xl_filter_lp2_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dwb_ctrl1_xl_t ctrl1_xl;
   int32_t ret;
@@ -1151,7 +1134,7 @@ int32_t iis3dwb_xl_filter_lp2_set(iis3dwb_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_filter_lp2_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_xl_filter_lp2_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_ctrl1_xl_t ctrl1_xl;
   int32_t ret;
@@ -1171,7 +1154,7 @@ int32_t iis3dwb_xl_filter_lp2_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_filter_settling_mask_set(iis3dwb_ctx_t *ctx, uint8_t val)
+int32_t iis3dwb_filter_settling_mask_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dwb_ctrl4_c_t ctrl4_c;
   int32_t ret;
@@ -1193,7 +1176,7 @@ int32_t iis3dwb_filter_settling_mask_set(iis3dwb_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_filter_settling_mask_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_filter_settling_mask_get(stmdev_ctx_t *ctx,
                                            uint8_t *val)
 {
   iis3dwb_ctrl4_c_t ctrl4_c;
@@ -1214,7 +1197,7 @@ int32_t iis3dwb_filter_settling_mask_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_hp_path_on_out_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_xl_hp_path_on_out_set(stmdev_ctx_t *ctx,
                                         iis3dwb_hp_slope_xl_en_t val)
 {
   iis3dwb_ctrl1_xl_t ctrl1_xl;
@@ -1247,7 +1230,7 @@ int32_t iis3dwb_xl_hp_path_on_out_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_hp_path_on_out_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_xl_hp_path_on_out_get(stmdev_ctx_t *ctx,
                                         iis3dwb_hp_slope_xl_en_t *val)
 {
   iis3dwb_ctrl1_xl_t ctrl1_xl;
@@ -1329,7 +1312,7 @@ int32_t iis3dwb_xl_hp_path_on_out_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_fast_settling_set(iis3dwb_ctx_t *ctx, uint8_t val)
+int32_t iis3dwb_xl_fast_settling_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dwb_ctrl8_xl_t ctrl8_xl;
   int32_t ret;
@@ -1353,7 +1336,7 @@ int32_t iis3dwb_xl_fast_settling_set(iis3dwb_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_fast_settling_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_xl_fast_settling_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_ctrl8_xl_t ctrl8_xl;
   int32_t ret;
@@ -1373,7 +1356,7 @@ int32_t iis3dwb_xl_fast_settling_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_hp_path_internal_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_xl_hp_path_internal_set(stmdev_ctx_t *ctx,
                                           iis3dwb_slope_fds_t val)
 {
   iis3dwb_slope_en_t int_cfg0;
@@ -1397,7 +1380,7 @@ int32_t iis3dwb_xl_hp_path_internal_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_hp_path_internal_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_xl_hp_path_internal_get(stmdev_ctx_t *ctx,
                                           iis3dwb_slope_fds_t *val)
 {
   iis3dwb_slope_en_t int_cfg0;
@@ -1439,7 +1422,7 @@ int32_t iis3dwb_xl_hp_path_internal_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_sdo_sa0_mode_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_sdo_sa0_mode_set(stmdev_ctx_t *ctx,
                                    iis3dwb_sdo_pu_en_t val)
 {
   iis3dwb_pin_ctrl_t pin_ctrl;
@@ -1461,7 +1444,7 @@ int32_t iis3dwb_sdo_sa0_mode_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_sdo_sa0_mode_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_sdo_sa0_mode_get(stmdev_ctx_t *ctx,
                                    iis3dwb_sdo_pu_en_t *val)
 {
   iis3dwb_pin_ctrl_t pin_ctrl;
@@ -1491,7 +1474,7 @@ int32_t iis3dwb_sdo_sa0_mode_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_spi_mode_set(iis3dwb_ctx_t *ctx, iis3dwb_sim_t val)
+int32_t iis3dwb_spi_mode_set(stmdev_ctx_t *ctx, iis3dwb_sim_t val)
 {
   iis3dwb_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -1512,7 +1495,7 @@ int32_t iis3dwb_spi_mode_set(iis3dwb_ctx_t *ctx, iis3dwb_sim_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_spi_mode_get(iis3dwb_ctx_t *ctx, iis3dwb_sim_t *val)
+int32_t iis3dwb_spi_mode_get(stmdev_ctx_t *ctx, iis3dwb_sim_t *val)
 {
   iis3dwb_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -1541,7 +1524,7 @@ int32_t iis3dwb_spi_mode_get(iis3dwb_ctx_t *ctx, iis3dwb_sim_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_i2c_interface_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_i2c_interface_set(stmdev_ctx_t *ctx,
                                     iis3dwb_i2c_disable_t val)
 {
   iis3dwb_ctrl4_c_t ctrl4_c;
@@ -1563,7 +1546,7 @@ int32_t iis3dwb_i2c_interface_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_i2c_interface_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_i2c_interface_get(stmdev_ctx_t *ctx,
                                     iis3dwb_i2c_disable_t *val)
 {
   iis3dwb_ctrl4_c_t ctrl4_c;
@@ -1593,7 +1576,7 @@ int32_t iis3dwb_i2c_interface_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_i3c_disable_set(iis3dwb_ctx_t *ctx, iis3dwb_i3c_disable_t val)
+int32_t iis3dwb_i3c_disable_set(stmdev_ctx_t *ctx, iis3dwb_i3c_disable_t val)
 {
   iis3dwb_ctrl9_xl_t ctrl9_xl;
   int32_t ret;
@@ -1615,7 +1598,7 @@ int32_t iis3dwb_i3c_disable_set(iis3dwb_ctx_t *ctx, iis3dwb_i3c_disable_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_i3c_disable_get(iis3dwb_ctx_t *ctx, iis3dwb_i3c_disable_t *val)
+int32_t iis3dwb_i3c_disable_get(stmdev_ctx_t *ctx, iis3dwb_i3c_disable_t *val)
 {
   iis3dwb_ctrl9_xl_t ctrl9_xl;
   int32_t ret;
@@ -1658,7 +1641,7 @@ int32_t iis3dwb_i3c_disable_get(iis3dwb_ctx_t *ctx, iis3dwb_i3c_disable_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_pin_int1_route_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_pin_int1_route_set(stmdev_ctx_t *ctx,
                                      iis3dwb_pin_int1_route_t *val)
 {
   int32_t ret;
@@ -1681,7 +1664,7 @@ int32_t iis3dwb_pin_int1_route_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_pin_int1_route_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_pin_int1_route_get(stmdev_ctx_t *ctx,
                                      iis3dwb_pin_int1_route_t *val)
 {
   int32_t ret;
@@ -1704,7 +1687,7 @@ int32_t iis3dwb_pin_int1_route_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_pin_int2_route_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_pin_int2_route_set(stmdev_ctx_t *ctx,
                                      iis3dwb_pin_int2_route_t *val)
 {
   int32_t ret;
@@ -1729,7 +1712,7 @@ int32_t iis3dwb_pin_int2_route_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_pin_int2_route_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_pin_int2_route_get(stmdev_ctx_t *ctx,
                                      iis3dwb_pin_int2_route_t *val)
 {
   int32_t ret;
@@ -1751,7 +1734,7 @@ int32_t iis3dwb_pin_int2_route_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_pin_mode_set(iis3dwb_ctx_t *ctx, iis3dwb_pp_od_t val)
+int32_t iis3dwb_pin_mode_set(stmdev_ctx_t *ctx, iis3dwb_pp_od_t val)
 {
   iis3dwb_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -1772,7 +1755,7 @@ int32_t iis3dwb_pin_mode_set(iis3dwb_ctx_t *ctx, iis3dwb_pp_od_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_pin_mode_get(iis3dwb_ctx_t *ctx, iis3dwb_pp_od_t *val)
+int32_t iis3dwb_pin_mode_get(stmdev_ctx_t *ctx, iis3dwb_pp_od_t *val)
 {
   iis3dwb_ctrl3_c_t ctrl3_c;
   int32_t ret;
@@ -1801,7 +1784,7 @@ int32_t iis3dwb_pin_mode_get(iis3dwb_ctx_t *ctx, iis3dwb_pp_od_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_pin_polarity_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_pin_polarity_set(stmdev_ctx_t *ctx,
                                    iis3dwb_h_lactive_t val)
 {
   iis3dwb_ctrl3_c_t ctrl3_c;
@@ -1823,7 +1806,7 @@ int32_t iis3dwb_pin_polarity_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_pin_polarity_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_pin_polarity_get(stmdev_ctx_t *ctx,
                                    iis3dwb_h_lactive_t *val)
 {
   iis3dwb_ctrl3_c_t ctrl3_c;
@@ -1853,7 +1836,7 @@ int32_t iis3dwb_pin_polarity_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_all_on_int1_set(iis3dwb_ctx_t *ctx, uint8_t val)
+int32_t iis3dwb_all_on_int1_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dwb_ctrl4_c_t ctrl4_c;
   int32_t ret;
@@ -1874,7 +1857,7 @@ int32_t iis3dwb_all_on_int1_set(iis3dwb_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_all_on_int1_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_all_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_ctrl4_c_t ctrl4_c;
   int32_t ret;
@@ -1908,7 +1891,7 @@ int32_t iis3dwb_all_on_int1_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_wkup_ths_weight_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_wkup_ths_weight_set(stmdev_ctx_t *ctx,
                                       iis3dwb_wake_ths_w_t val)
 {
   iis3dwb_wake_up_dur_t wake_up_dur;
@@ -1934,7 +1917,7 @@ int32_t iis3dwb_wkup_ths_weight_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_wkup_ths_weight_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_wkup_ths_weight_get(stmdev_ctx_t *ctx,
                                       iis3dwb_wake_ths_w_t *val)
 {
   iis3dwb_wake_up_dur_t wake_up_dur;
@@ -1966,7 +1949,7 @@ int32_t iis3dwb_wkup_ths_weight_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_wkup_threshold_set(iis3dwb_ctx_t *ctx, uint8_t val)
+int32_t iis3dwb_wkup_threshold_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dwb_wake_up_ths_t wake_up_ths;
   int32_t ret;
@@ -1990,7 +1973,7 @@ int32_t iis3dwb_wkup_threshold_set(iis3dwb_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_wkup_threshold_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_wkup_threshold_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_wake_up_ths_t wake_up_ths;
   int32_t ret;
@@ -2010,7 +1993,7 @@ int32_t iis3dwb_wkup_threshold_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_usr_offset_on_wkup_set(iis3dwb_ctx_t *ctx, uint8_t val)
+int32_t iis3dwb_xl_usr_offset_on_wkup_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dwb_wake_up_ths_t wake_up_ths;
   int32_t ret;
@@ -2033,7 +2016,7 @@ int32_t iis3dwb_xl_usr_offset_on_wkup_set(iis3dwb_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_xl_usr_offset_on_wkup_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_xl_usr_offset_on_wkup_get(stmdev_ctx_t *ctx,
                                             uint8_t *val)
 {
   iis3dwb_wake_up_ths_t wake_up_ths;
@@ -2054,7 +2037,7 @@ int32_t iis3dwb_xl_usr_offset_on_wkup_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_wkup_dur_set(iis3dwb_ctx_t *ctx, uint8_t val)
+int32_t iis3dwb_wkup_dur_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dwb_wake_up_dur_t wake_up_dur;
   int32_t ret;
@@ -2077,7 +2060,7 @@ int32_t iis3dwb_wkup_dur_set(iis3dwb_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_wkup_dur_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_wkup_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_wake_up_dur_t wake_up_dur;
   int32_t ret;
@@ -2110,7 +2093,7 @@ int32_t iis3dwb_wkup_dur_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_act_sleep_dur_set(iis3dwb_ctx_t *ctx, uint8_t val)
+int32_t iis3dwb_act_sleep_dur_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dwb_wake_up_dur_t wake_up_dur;
   int32_t ret;
@@ -2133,7 +2116,7 @@ int32_t iis3dwb_act_sleep_dur_set(iis3dwb_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_act_sleep_dur_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_act_sleep_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_wake_up_dur_t wake_up_dur;
   int32_t ret;
@@ -2166,7 +2149,7 @@ int32_t iis3dwb_act_sleep_dur_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_watermark_set(iis3dwb_ctx_t *ctx, uint16_t val)
+int32_t iis3dwb_fifo_watermark_set(stmdev_ctx_t *ctx, uint16_t val)
 {
   iis3dwb_fifo_ctrl1_t fifo_ctrl1;
   iis3dwb_fifo_ctrl2_t fifo_ctrl2;
@@ -2195,7 +2178,7 @@ int32_t iis3dwb_fifo_watermark_set(iis3dwb_ctx_t *ctx, uint16_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_watermark_get(iis3dwb_ctx_t *ctx, uint16_t *val)
+int32_t iis3dwb_fifo_watermark_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
   iis3dwb_fifo_ctrl1_t fifo_ctrl1;
   iis3dwb_fifo_ctrl2_t fifo_ctrl2;
@@ -2222,7 +2205,7 @@ int32_t iis3dwb_fifo_watermark_get(iis3dwb_ctx_t *ctx, uint16_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_stop_on_wtm_set(iis3dwb_ctx_t *ctx, uint8_t val)
+int32_t iis3dwb_fifo_stop_on_wtm_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dwb_fifo_ctrl2_t fifo_ctrl2;
   int32_t ret;
@@ -2246,7 +2229,7 @@ int32_t iis3dwb_fifo_stop_on_wtm_set(iis3dwb_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_stop_on_wtm_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_fifo_stop_on_wtm_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_fifo_ctrl2_t fifo_ctrl2;
   int32_t ret;
@@ -2267,7 +2250,7 @@ int32_t iis3dwb_fifo_stop_on_wtm_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_xl_batch_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_fifo_xl_batch_set(stmdev_ctx_t *ctx,
                                     iis3dwb_bdr_xl_t val)
 {
   iis3dwb_fifo_ctrl3_t fifo_ctrl3;
@@ -2292,7 +2275,7 @@ int32_t iis3dwb_fifo_xl_batch_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_xl_batch_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_fifo_xl_batch_get(stmdev_ctx_t *ctx,
                                     iis3dwb_bdr_xl_t *val)
 {
   iis3dwb_fifo_ctrl3_t fifo_ctrl3;
@@ -2323,7 +2306,7 @@ int32_t iis3dwb_fifo_xl_batch_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_mode_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_fifo_mode_set(stmdev_ctx_t *ctx,
                                 iis3dwb_fifo_mode_t val)
 {
   iis3dwb_fifo_ctrl4_t fifo_ctrl4;
@@ -2347,7 +2330,7 @@ int32_t iis3dwb_fifo_mode_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_mode_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_fifo_mode_get(stmdev_ctx_t *ctx,
                                 iis3dwb_fifo_mode_t *val)
 {
   iis3dwb_fifo_ctrl4_t fifo_ctrl4;
@@ -2391,7 +2374,7 @@ int32_t iis3dwb_fifo_mode_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_temp_batch_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_fifo_temp_batch_set(stmdev_ctx_t *ctx,
                                       iis3dwb_odr_t_batch_t val)
 {
   iis3dwb_fifo_ctrl4_t fifo_ctrl4;
@@ -2416,7 +2399,7 @@ int32_t iis3dwb_fifo_temp_batch_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_temp_batch_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_fifo_temp_batch_get(stmdev_ctx_t *ctx,
                                       iis3dwb_odr_t_batch_t *val)
 {
   iis3dwb_fifo_ctrl4_t fifo_ctrl4;
@@ -2449,7 +2432,7 @@ int32_t iis3dwb_fifo_temp_batch_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_timestamp_decimation_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_fifo_timestamp_decimation_set(stmdev_ctx_t *ctx,
                                                 iis3dwb_odr_ts_batch_t val)
 {
   iis3dwb_fifo_ctrl4_t fifo_ctrl4;
@@ -2476,7 +2459,7 @@ int32_t iis3dwb_fifo_timestamp_decimation_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_timestamp_decimation_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_fifo_timestamp_decimation_get(stmdev_ctx_t *ctx,
                                                 iis3dwb_odr_ts_batch_t *val)
 {
   iis3dwb_fifo_ctrl4_t fifo_ctrl4;
@@ -2514,7 +2497,7 @@ int32_t iis3dwb_fifo_timestamp_decimation_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_rst_batch_counter_set(iis3dwb_ctx_t *ctx, uint8_t val)
+int32_t iis3dwb_rst_batch_counter_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dwb_counter_bdr_reg1_t counter_bdr_reg1;
   int32_t ret;
@@ -2538,7 +2521,7 @@ int32_t iis3dwb_rst_batch_counter_set(iis3dwb_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_rst_batch_counter_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_rst_batch_counter_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_counter_bdr_reg1_t counter_bdr_reg1;
   int32_t ret;
@@ -2559,7 +2542,7 @@ int32_t iis3dwb_rst_batch_counter_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_batch_counter_threshold_set(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_batch_counter_threshold_set(stmdev_ctx_t *ctx,
                                               uint16_t val)
 {
   iis3dwb_counter_bdr_reg2_t counter_bdr_reg1;
@@ -2589,7 +2572,7 @@ int32_t iis3dwb_batch_counter_threshold_set(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_batch_counter_threshold_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_batch_counter_threshold_get(stmdev_ctx_t *ctx,
                                               uint16_t *val)
 {
   iis3dwb_counter_bdr_reg1_t counter_bdr_reg1;
@@ -2617,7 +2600,7 @@ int32_t iis3dwb_batch_counter_threshold_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_data_level_get(iis3dwb_ctx_t *ctx, uint16_t *val)
+int32_t iis3dwb_fifo_data_level_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
   iis3dwb_fifo_status1_t fifo_status1;
   iis3dwb_fifo_status2_t fifo_status2;
@@ -2643,7 +2626,7 @@ int32_t iis3dwb_fifo_data_level_get(iis3dwb_ctx_t *ctx, uint16_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_status_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_fifo_status_get(stmdev_ctx_t *ctx,
                                   iis3dwb_fifo_status2_t *val)
 {
   int32_t ret;
@@ -2659,7 +2642,7 @@ int32_t iis3dwb_fifo_status_get(iis3dwb_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_full_flag_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_fifo_full_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_fifo_status2_t fifo_status2;
   int32_t ret;
@@ -2680,7 +2663,7 @@ int32_t iis3dwb_fifo_full_flag_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_ovr_flag_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_fifo_ovr_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_fifo_status2_t fifo_status2;
   int32_t ret;
@@ -2700,7 +2683,7 @@ int32_t iis3dwb_fifo_ovr_flag_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_wtm_flag_get(iis3dwb_ctx_t *ctx, uint8_t *val)
+int32_t iis3dwb_fifo_wtm_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dwb_fifo_status2_t fifo_status2;
   int32_t ret;
@@ -2720,7 +2703,7 @@ int32_t iis3dwb_fifo_wtm_flag_get(iis3dwb_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb_fifo_sensor_tag_get(iis3dwb_ctx_t *ctx,
+int32_t iis3dwb_fifo_sensor_tag_get(stmdev_ctx_t *ctx,
                                       iis3dwb_fifo_tag_t *val)
 {
   iis3dwb_fifo_data_out_tag_t fifo_data_out_tag;

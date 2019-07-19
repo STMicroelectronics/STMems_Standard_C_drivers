@@ -7,32 +7,15 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions 
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright 
- *      notice, this list of conditions and the following disclaimer in the 
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its 
- *      contributors may be used to endorse or promote products derived from 
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
- * POSSIBILITY OF SUCH DAMAGE.
- *
+ ******************************************************************************
  */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
@@ -40,7 +23,7 @@
 #define LIS3MDL_REGS_H
 
 #ifdef __cplusplus
-extern "C" {
+  extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -52,50 +35,13 @@ extern "C" {
   *
   */
 
-/** @defgroup LIS3MDL_sensors_common_types
+/** @defgroup STMicroelectronics sensors common types
   * @{
   *
   */
 
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
-
-/**
-  * @defgroup axisXbitXX_t
-  * @brief    These unions are useful to represent different sensors data type.
-  *           These unions are not need by the driver.
-  *
-  *           REMOVING the unions you are compliant with:
-  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
-  *
-  * @{
-  *
-  */
-
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
-
-typedef union{
-  int32_t i32bit[3];
-  uint8_t u8bit[12];
-} axis3bit32_t;
-
-typedef union{
-  int32_t i32bit;
-  uint8_t u8bit[4];
-} axis1bit32_t;
-
-/**
-  * @}
-  *
-  */
 
 typedef struct{
   uint8_t bit0       : 1;
@@ -111,14 +57,7 @@ typedef struct{
 #define PROPERTY_DISABLE                (0U)
 #define PROPERTY_ENABLE                 (1U)
 
-#endif /* MEMS_SHARED_TYPES */
-
-/**
-  * @}
-  *
-  */
-
-/** @addtogroup  LIS3MDL_Interfaces_Functions
+/** @addtogroup  Interfaces_Functions
   * @brief       This section provide a set of functions used to read and
   *              write a generic register of the device.
   *              MANDATORY: return 0 -> no Error.
@@ -126,16 +65,49 @@ typedef struct{
   *
   */
 
-typedef int32_t (*lis3mdl_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*lis3mdl_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
-  lis3mdl_write_ptr  write_reg;
-  lis3mdl_read_ptr   read_reg;
+  stmdev_write_ptr  write_reg;
+  stmdev_read_ptr   read_reg;
   /** Customizable optional pointer **/
   void *handle;
-} lis3mdl_ctx_t;
+} stmdev_ctx_t;
+
+/**
+  * @}
+  *
+  */
+
+#endif /* MEMS_SHARED_TYPES */
+
+#ifndef MEMS_UCF_SHARED_TYPES
+#define MEMS_UCF_SHARED_TYPES
+
+/** @defgroup    Generic address-data structure definition
+  * @brief       This structure is useful to load a predefined configuration
+  *              of a sensor.
+	*              You can create a sensor configuration by your own or using 
+	*              Unico / Unicleo tools available on STMicroelectronics
+	*              web site.
+  *
+  * @{
+  *
+  */
+
+typedef struct {
+  uint8_t address;
+  uint8_t data;
+} ucf_line_t;
+
+/**
+  * @}
+  *
+  */
+
+#endif /* MEMS_UCF_SHARED_TYPES */
 
 /**
   * @}
@@ -307,9 +279,9 @@ typedef union{
   *
   */
 
-int32_t lis3mdl_read_reg(lis3mdl_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lis3mdl_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                          uint16_t len);
-int32_t lis3mdl_write_reg(lis3mdl_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lis3mdl_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
 extern float lis3mdl_from_fs4_to_gauss(int16_t lsb);
@@ -358,11 +330,11 @@ typedef enum{
   LIS3MDL_UHP_80Hz      = 0x3E,
 
 } lis3mdl_om_t;
-int32_t lis3mdl_data_rate_set(lis3mdl_ctx_t *ctx, lis3mdl_om_t val);
-int32_t lis3mdl_data_rate_get(lis3mdl_ctx_t *ctx, lis3mdl_om_t *val);
+int32_t lis3mdl_data_rate_set(stmdev_ctx_t *ctx, lis3mdl_om_t val);
+int32_t lis3mdl_data_rate_get(stmdev_ctx_t *ctx, lis3mdl_om_t *val);
 
-int32_t lis3mdl_temperature_meas_set(lis3mdl_ctx_t *ctx, uint8_t val);
-int32_t lis3mdl_temperature_meas_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_temperature_meas_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lis3mdl_temperature_meas_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef enum{
   LIS3MDL_4_GAUSS   = 0,
@@ -370,114 +342,114 @@ typedef enum{
   LIS3MDL_12_GAUSS  = 2,
   LIS3MDL_16_GAUSS  = 3,
 } lis3mdl_fs_t;
-int32_t lis3mdl_full_scale_set(lis3mdl_ctx_t *ctx, lis3mdl_fs_t val);
-int32_t lis3mdl_full_scale_get(lis3mdl_ctx_t *ctx, lis3mdl_fs_t *val);
+int32_t lis3mdl_full_scale_set(stmdev_ctx_t *ctx, lis3mdl_fs_t val);
+int32_t lis3mdl_full_scale_get(stmdev_ctx_t *ctx, lis3mdl_fs_t *val);
 
 typedef enum{
   LIS3MDL_CONTINUOUS_MODE  = 0,
   LIS3MDL_SINGLE_TRIGGER   = 1,
   LIS3MDL_POWER_DOWN       = 2,
 } lis3mdl_md_t;
-int32_t lis3mdl_operating_mode_set(lis3mdl_ctx_t *ctx, lis3mdl_md_t val);
-int32_t lis3mdl_operating_mode_get(lis3mdl_ctx_t *ctx, lis3mdl_md_t *val);
+int32_t lis3mdl_operating_mode_set(stmdev_ctx_t *ctx, lis3mdl_md_t val);
+int32_t lis3mdl_operating_mode_get(stmdev_ctx_t *ctx, lis3mdl_md_t *val);
 
-int32_t lis3mdl_fast_low_power_set(lis3mdl_ctx_t *ctx, uint8_t val);
-int32_t lis3mdl_fast_low_power_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_fast_low_power_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lis3mdl_fast_low_power_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3mdl_block_data_update_set(lis3mdl_ctx_t *ctx, uint8_t val);
-int32_t lis3mdl_block_data_update_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lis3mdl_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3mdl_high_part_cycle_set(lis3mdl_ctx_t *ctx, uint8_t val);
-int32_t lis3mdl_high_part_cycle_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_high_part_cycle_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lis3mdl_high_part_cycle_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3mdl_mag_data_ready_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_mag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3mdl_mag_data_ovr_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_mag_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3mdl_magnetic_raw_get(lis3mdl_ctx_t *ctx, uint8_t *buff);
+int32_t lis3mdl_magnetic_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t lis3mdl_temperature_raw_get(lis3mdl_ctx_t *ctx, uint8_t *buff);
+int32_t lis3mdl_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t lis3mdl_device_id_get(lis3mdl_ctx_t *ctx, uint8_t *buff);
+int32_t lis3mdl_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t lis3mdl_self_test_set(lis3mdl_ctx_t *ctx, uint8_t val);
-int32_t lis3mdl_self_test_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_self_test_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lis3mdl_self_test_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3mdl_reset_set(lis3mdl_ctx_t *ctx, uint8_t val);
-int32_t lis3mdl_reset_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_reset_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lis3mdl_reset_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3mdl_boot_set(lis3mdl_ctx_t *ctx, uint8_t val);
-int32_t lis3mdl_boot_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_boot_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lis3mdl_boot_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef enum{
   LIS3MDL_LSB_AT_LOW_ADD  = 0,
   LIS3MDL_MSB_AT_LOW_ADD  = 1,
 } lis3mdl_ble_t;
-int32_t lis3mdl_data_format_set(lis3mdl_ctx_t *ctx, lis3mdl_ble_t val);
-int32_t lis3mdl_data_format_get(lis3mdl_ctx_t *ctx, lis3mdl_ble_t *val);
+int32_t lis3mdl_data_format_set(stmdev_ctx_t *ctx, lis3mdl_ble_t val);
+int32_t lis3mdl_data_format_get(stmdev_ctx_t *ctx, lis3mdl_ble_t *val);
 
-int32_t lis3mdl_status_get(lis3mdl_ctx_t *ctx, lis3mdl_status_reg_t *val);
+int32_t lis3mdl_status_get(stmdev_ctx_t *ctx, lis3mdl_status_reg_t *val);
 
-int32_t lis3mdl_int_config_set(lis3mdl_ctx_t *ctx, lis3mdl_int_cfg_t *val);
-int32_t lis3mdl_int_config_get(lis3mdl_ctx_t *ctx, lis3mdl_int_cfg_t *val);
+int32_t lis3mdl_int_config_set(stmdev_ctx_t *ctx, lis3mdl_int_cfg_t *val);
+int32_t lis3mdl_int_config_get(stmdev_ctx_t *ctx, lis3mdl_int_cfg_t *val);
 
-int32_t lis3mdl_int_generation_set(lis3mdl_ctx_t *ctx, uint8_t val);
-int32_t lis3mdl_int_generation_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_int_generation_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lis3mdl_int_generation_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef enum{
   LIS3MDL_INT_PULSED   = 0,
   LIS3MDL_INT_LATCHED  = 1,
 } lis3mdl_lir_t;
-int32_t lis3mdl_int_notification_mode_set(lis3mdl_ctx_t *ctx,
+int32_t lis3mdl_int_notification_mode_set(stmdev_ctx_t *ctx,
                                           lis3mdl_lir_t val);
-int32_t lis3mdl_int_notification_mode_get(lis3mdl_ctx_t *ctx,
+int32_t lis3mdl_int_notification_mode_get(stmdev_ctx_t *ctx,
                                           lis3mdl_lir_t *val);
 
 typedef enum{
   LIS3MDL_ACTIVE_HIGH  = 0,
   LIS3MDL_ACTIVE_LOW   = 1,
 } lis3mdl_iea_t;
-int32_t lis3mdl_int_polarity_set(lis3mdl_ctx_t *ctx, lis3mdl_iea_t val);
-int32_t lis3mdl_int_polarity_get(lis3mdl_ctx_t *ctx, lis3mdl_iea_t *val);
+int32_t lis3mdl_int_polarity_set(stmdev_ctx_t *ctx, lis3mdl_iea_t val);
+int32_t lis3mdl_int_polarity_get(stmdev_ctx_t *ctx, lis3mdl_iea_t *val);
 
-int32_t lis3mdl_int_on_z_ax_set(lis3mdl_ctx_t *ctx, uint8_t val);
-int32_t lis3mdl_int_on_z_ax_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_int_on_z_ax_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lis3mdl_int_on_z_ax_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3mdl_int_on_y_ax_set(lis3mdl_ctx_t *ctx, uint8_t val);
-int32_t lis3mdl_int_on_y_ax_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_int_on_y_ax_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lis3mdl_int_on_y_ax_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3mdl_int_on_x_ax_set(lis3mdl_ctx_t *ctx, uint8_t val);
-int32_t lis3mdl_int_on_x_ax_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_int_on_x_ax_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lis3mdl_int_on_x_ax_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3mdl_int_source_get(lis3mdl_ctx_t *ctx, lis3mdl_int_src_t *val);
+int32_t lis3mdl_int_source_get(stmdev_ctx_t *ctx, lis3mdl_int_src_t *val);
 
-int32_t lis3mdl_interrupt_event_flag_get(lis3mdl_ctx_t *ctx,
+int32_t lis3mdl_interrupt_event_flag_get(stmdev_ctx_t *ctx,
     uint8_t *val);
 
-int32_t lis3mdl_int_mag_over_range_flag_get(lis3mdl_ctx_t *ctx,
+int32_t lis3mdl_int_mag_over_range_flag_get(stmdev_ctx_t *ctx,
     uint8_t *val);
 
-int32_t lis3mdl_int_neg_z_flag_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_int_neg_z_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3mdl_int_neg_y_flag_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_int_neg_y_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3mdl_int_neg_x_flag_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_int_neg_x_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3mdl_int_pos_z_flag_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_int_pos_z_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3mdl_int_pos_y_flag_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_int_pos_y_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3mdl_int_pos_x_flag_get(lis3mdl_ctx_t *ctx, uint8_t *val);
+int32_t lis3mdl_int_pos_x_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3mdl_int_threshold_set(lis3mdl_ctx_t *ctx, uint8_t *buff);
-int32_t lis3mdl_int_threshold_get(lis3mdl_ctx_t *ctx, uint8_t *buff);
+int32_t lis3mdl_int_threshold_set(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lis3mdl_int_threshold_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
 typedef enum{
   LIS3MDL_SPI_4_WIRE   = 0,
   LIS3MDL_SPI_3_WIRE   = 1,
 } lis3mdl_sim_t;
-int32_t lis3mdl_spi_mode_set(lis3mdl_ctx_t *ctx, lis3mdl_sim_t val);
-int32_t lis3mdl_spi_mode_get(lis3mdl_ctx_t *ctx, lis3mdl_sim_t *val);
+int32_t lis3mdl_spi_mode_set(stmdev_ctx_t *ctx, lis3mdl_sim_t val);
+int32_t lis3mdl_spi_mode_get(stmdev_ctx_t *ctx, lis3mdl_sim_t *val);
 
 /**
   *@}

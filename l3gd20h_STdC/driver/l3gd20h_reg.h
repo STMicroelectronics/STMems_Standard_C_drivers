@@ -7,33 +7,17 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
+ ******************************************************************************
  */
+
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef L3GD20H_REGS_H
 #define L3GD20H_REGS_H
@@ -44,62 +28,20 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <math.h>
 
 /** @addtogroup L3GD20H
   * @{
   *
   */
 
-/** @defgroup L3GD20H_sensors_common_types
+/** @defgroup STMicroelectronics sensors common types
   * @{
   *
   */
 
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
-/**
-  * Float typedef definition for compliance with:
-  * MISRA-C 2012 [Dir 4.6a] -> " Basic type used without typedef "
-  *
-  */
-typedef float float32_t;
-
-/**
-  * @defgroup axisXbitXX_t
-  * @brief    These unions are useful to represent different sensors data type.
-  *           These unions are not need by the driver.
-  *
-  *           REMOVING the unions you are compliant with:
-  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
-  *
-  * @{
-  *
-  */
-
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
-
-typedef union{
-  int32_t i32bit[3];
-  uint8_t u8bit[12];
-} axis3bit32_t;
-
-typedef union{
-  int32_t i32bit;
-  uint8_t u8bit[4];
-} axis1bit32_t;
-
-/**
-  * @}
-  *
-  */
 
 typedef struct{
   uint8_t bit0       : 1;
@@ -115,14 +57,7 @@ typedef struct{
 #define PROPERTY_DISABLE                (0U)
 #define PROPERTY_ENABLE                 (1U)
 
-#endif /* MEMS_SHARED_TYPES */
-
-/**
-  * @}
-  *
-  */
-
-/** @addtogroup  L3GD20H_Interfaces_Functions
+/** @addtogroup  Interfaces_Functions
   * @brief       This section provide a set of functions used to read and
   *              write a generic register of the device.
   *              MANDATORY: return 0 -> no Error.
@@ -130,16 +65,49 @@ typedef struct{
   *
   */
 
-typedef int32_t (*l3gd20h_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*l3gd20h_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
-  l3gd20h_write_ptr  write_reg;
-  l3gd20h_read_ptr   read_reg;
+  stmdev_write_ptr  write_reg;
+  stmdev_read_ptr   read_reg;
   /** Customizable optional pointer **/
   void *handle;
-} l3gd20h_ctx_t;
+} stmdev_ctx_t;
+
+/**
+  * @}
+  *
+  */
+
+#endif /* MEMS_SHARED_TYPES */
+
+#ifndef MEMS_UCF_SHARED_TYPES
+#define MEMS_UCF_SHARED_TYPES
+
+/** @defgroup    Generic address-data structure definition
+  * @brief       This structure is useful to load a predefined configuration
+  *              of a sensor.
+	*              You can create a sensor configuration by your own or using 
+	*              Unico / Unicleo tools available on STMicroelectronics
+	*              web site.
+  *
+  * @{
+  *
+  */
+
+typedef struct {
+  uint8_t address;
+  uint8_t data;
+} ucf_line_t;
+
+/**
+  * @}
+  *
+  */
+
+#endif /* MEMS_UCF_SHARED_TYPES */
 
 /**
   * @}
@@ -362,24 +330,24 @@ typedef union{
   *
   */
 
-int32_t l3gd20h_read_reg(l3gd20h_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t l3gd20h_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                          uint16_t len);
-int32_t l3gd20h_write_reg(l3gd20h_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t l3gd20h_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
-extern float32_t l3gd20h_from_fs245_to_mdps(int16_t lsb);
-extern float32_t l3gd20h_from_fs500_to_mdps(int16_t lsb);
-extern float32_t l3gd20h_from_fs2000_to_mdps(int16_t lsb);
+extern float_t l3gd20h_from_fs245_to_mdps(int16_t lsb);
+extern float_t l3gd20h_from_fs500_to_mdps(int16_t lsb);
+extern float_t l3gd20h_from_fs2000_to_mdps(int16_t lsb);
 
-extern float32_t l3gd20h_from_lsb_to_celsius(int16_t lsb);
+extern float_t l3gd20h_from_lsb_to_celsius(int16_t lsb);
 
 typedef struct {
   uint8_t xen             : 1;
   uint8_t yen             : 1;
   uint8_t zen             : 1;
 } l3gd20h_gy_axis_t;
-int32_t l3gd20h_gy_axis_set(l3gd20h_ctx_t *ctx, l3gd20h_gy_axis_t val);
-int32_t l3gd20h_gy_axis_get(l3gd20h_ctx_t *ctx, l3gd20h_gy_axis_t *val);
+int32_t l3gd20h_gy_axis_set(stmdev_ctx_t *ctx, l3gd20h_gy_axis_t val);
+int32_t l3gd20h_gy_axis_get(stmdev_ctx_t *ctx, l3gd20h_gy_axis_t *val);
 
 typedef enum {
   L3GD20H_POWER_DOWN    = 0x00,
@@ -391,9 +359,9 @@ typedef enum {
   L3GD20H_400Hz         = 0x82,
   L3GD20H_800Hz         = 0x83,
 } l3gd20h_gy_data_rate_t;
-int32_t l3gd20h_gy_data_rate_set(l3gd20h_ctx_t *ctx, 
+int32_t l3gd20h_gy_data_rate_set(stmdev_ctx_t *ctx, 
                                  l3gd20h_gy_data_rate_t val);
-int32_t l3gd20h_gy_data_rate_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_data_rate_get(stmdev_ctx_t *ctx,
                                  l3gd20h_gy_data_rate_t *val);
 
 
@@ -402,29 +370,29 @@ typedef enum {
   L3GD20H_500dps    = 0x01,
   L3GD20H_2000dps   = 0x02,
 } l3gd20h_gy_fs_t;
-int32_t l3gd20h_gy_full_scale_set(l3gd20h_ctx_t *ctx, l3gd20h_gy_fs_t val);
-int32_t l3gd20h_gy_full_scale_get(l3gd20h_ctx_t *ctx, l3gd20h_gy_fs_t *val);
+int32_t l3gd20h_gy_full_scale_set(stmdev_ctx_t *ctx, l3gd20h_gy_fs_t val);
+int32_t l3gd20h_gy_full_scale_get(stmdev_ctx_t *ctx, l3gd20h_gy_fs_t *val);
 
-int32_t l3gd20h_block_data_update_set(l3gd20h_ctx_t *ctx, uint8_t val);
-int32_t l3gd20h_block_data_update_get(l3gd20h_ctx_t *ctx, uint8_t *val);
+int32_t l3gd20h_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t l3gd20h_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t l3gd20h_gy_flag_data_ready_get(l3gd20h_ctx_t *ctx, uint8_t *val);
+int32_t l3gd20h_gy_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t l3gd20h_temperature_raw_get(l3gd20h_ctx_t *ctx, uint8_t *buff);
+int32_t l3gd20h_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t l3gd20h_angular_rate_raw_get(l3gd20h_ctx_t *ctx, uint8_t *buff);
+int32_t l3gd20h_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t l3gd20h_dev_id_get(l3gd20h_ctx_t *ctx, uint8_t *buff);
+int32_t l3gd20h_dev_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
 typedef enum {
   L3GD20H_LSB_LOW_ADDRESS = 0,
   L3GD20H_MSB_LOW_ADDRESS = 1,
 } l3gd20h_ble_t;
-int32_t l3gd20h_dev_data_format_set(l3gd20h_ctx_t *ctx, l3gd20h_ble_t val);
-int32_t l3gd20h_dev_data_format_get(l3gd20h_ctx_t *ctx, l3gd20h_ble_t *val);
+int32_t l3gd20h_dev_data_format_set(stmdev_ctx_t *ctx, l3gd20h_ble_t val);
+int32_t l3gd20h_dev_data_format_get(stmdev_ctx_t *ctx, l3gd20h_ble_t *val);
 
-int32_t l3gd20h_dev_boot_set(l3gd20h_ctx_t *ctx, uint8_t val);
-int32_t l3gd20h_dev_boot_get(l3gd20h_ctx_t *ctx, uint8_t *val);
+int32_t l3gd20h_dev_boot_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t l3gd20h_dev_boot_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef struct {
   uint8_t xda               : 1;
@@ -436,11 +404,11 @@ typedef struct {
   uint8_t zor               : 1;
   uint8_t zyxor             : 1;
 } l3gd20h_status_reg_t;
-int32_t l3gd20h_dev_status_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_dev_status_get(stmdev_ctx_t *ctx,
                                l3gd20h_status_reg_t *val);
 
-int32_t l3gd20h_dev_reset_set(l3gd20h_ctx_t *ctx, uint8_t val);
-int32_t l3gd20h_dev_reset_get(l3gd20h_ctx_t *ctx, uint8_t *val);
+int32_t l3gd20h_dev_reset_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t l3gd20h_dev_reset_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
   L3GD20H_16Hz6_USE_ODR_50Hz      = 0xA0,
@@ -456,9 +424,9 @@ typedef enum {
   L3GD20H_35Hz_USE_ODR_800Hz      = 0x31,
   L3GD20H_100Hz_USE_ODR_800Hz     = 0x33,
 } l3gd20h_lpbw_t;
-int32_t l3gd20h_gy_filter_lp_bandwidth_set(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_filter_lp_bandwidth_set(stmdev_ctx_t *ctx,
                                            l3gd20h_lpbw_t val);
-int32_t l3gd20h_gy_filter_lp_bandwidth_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_filter_lp_bandwidth_get(stmdev_ctx_t *ctx,
                                            l3gd20h_lpbw_t *val);
 
 typedef enum {
@@ -475,9 +443,9 @@ typedef enum {
   L3GD20H_AUTORESET_STRONG       = 0x32,
   L3GD20H_AUTORESET_EXTREME      = 0x33,
 } l3gd20h_gy_hp_bw_t;
-int32_t l3gd20h_gy_filter_hp_bandwidth_set(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_filter_hp_bandwidth_set(stmdev_ctx_t *ctx,
                                            l3gd20h_gy_hp_bw_t val);
-int32_t l3gd20h_gy_filter_hp_bandwidth_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_filter_hp_bandwidth_get(stmdev_ctx_t *ctx,
                                            l3gd20h_gy_hp_bw_t *val);
 
 typedef enum {
@@ -486,9 +454,9 @@ typedef enum {
   L3GD20H_LPF1_LPF2_OUT      = 0x02,
   L3GD20H_LPF1_HPF_LPF2_OUT  = 0x12,
 } l3gd20h_gy_out_path_t;
-int32_t l3gd20h_gy_filter_out_path_set(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_filter_out_path_set(stmdev_ctx_t *ctx,
                                        l3gd20h_gy_out_path_t val);
-int32_t l3gd20h_gy_filter_out_path_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_filter_out_path_get(stmdev_ctx_t *ctx,
                                        l3gd20h_gy_out_path_t *val);
 typedef enum {
   L3GD20H_LPF1_INT           = 0x00,
@@ -496,28 +464,28 @@ typedef enum {
   L3GD20H_LPF1_LPF2_INT      = 0x02,
   L3GD20H_LPF1_HPF_LPF2_INT  = 0x12,
 } l3gd20h_gy_int_path_t;
-int32_t l3gd20h_gy_filter_int_path_set(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_filter_int_path_set(stmdev_ctx_t *ctx,
                                        l3gd20h_gy_int_path_t val);
-int32_t l3gd20h_gy_filter_int_path_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_filter_int_path_get(stmdev_ctx_t *ctx,
                                        l3gd20h_gy_int_path_t *val);
 
-int32_t l3gd20h_gy_filter_reference_set(l3gd20h_ctx_t *ctx, uint8_t *buff);
-int32_t l3gd20h_gy_filter_reference_get(l3gd20h_ctx_t *ctx, uint8_t *buff);
+int32_t l3gd20h_gy_filter_reference_set(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t l3gd20h_gy_filter_reference_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
 typedef enum {
   L3GD20H_SPI_4_WIRE = 0,
   L3GD20H_SPI_3_WIRE = 1,
 } l3gd20h_sim_t;
-int32_t l3gd20h_spi_mode_set(l3gd20h_ctx_t *ctx, l3gd20h_sim_t val);
-int32_t l3gd20h_spi_mode_get(l3gd20h_ctx_t *ctx, l3gd20h_sim_t *val);
+int32_t l3gd20h_spi_mode_set(stmdev_ctx_t *ctx, l3gd20h_sim_t val);
+int32_t l3gd20h_spi_mode_get(stmdev_ctx_t *ctx, l3gd20h_sim_t *val);
 
 typedef enum {
   L3GD20H_I2C_ENABLE  = 0,
   L3GD20H_I2C_DISABLE = 1,
 } l3gd20h_i2c_dis_t;
-int32_t l3gd20h_i2c_interface_set(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_i2c_interface_set(stmdev_ctx_t *ctx,
                                   l3gd20h_i2c_dis_t val);
-int32_t l3gd20h_i2c_interface_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_i2c_interface_get(stmdev_ctx_t *ctx,
                                   l3gd20h_i2c_dis_t *val);
 
 typedef struct {
@@ -526,46 +494,46 @@ typedef struct {
   uint8_t int2_fth              : 1;
   uint8_t int2_drdy             : 1;
 } l3gd20h_pin_int2_rt_t;
-int32_t l3gd20h_pin_int2_route_set(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_pin_int2_route_set(stmdev_ctx_t *ctx,
                                    l3gd20h_pin_int2_rt_t val);
-int32_t l3gd20h_pin_int2_route_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_pin_int2_route_get(stmdev_ctx_t *ctx,
                                    l3gd20h_pin_int2_rt_t *val);
 
 typedef enum {
   L3GD20H_PUSH_PULL  = 0,
   L3GD20H_OPEN_DRAIN = 1,
 } l3gd20h_pp_od_t;
-int32_t l3gd20h_pin_mode_set(l3gd20h_ctx_t *ctx, l3gd20h_pp_od_t val);
-int32_t l3gd20h_pin_mode_get(l3gd20h_ctx_t *ctx, l3gd20h_pp_od_t *val);
+int32_t l3gd20h_pin_mode_set(stmdev_ctx_t *ctx, l3gd20h_pp_od_t val);
+int32_t l3gd20h_pin_mode_get(stmdev_ctx_t *ctx, l3gd20h_pp_od_t *val);
 
 typedef enum {
   L3GD20H_ACTIVE_HIGH = 0,
   L3GD20H_ACTIVE_LOW  = 1,
 } l3gd20h_pin_pol_t;
-int32_t l3gd20h_pin_polarity_set(l3gd20h_ctx_t *ctx, l3gd20h_pin_pol_t val);
-int32_t l3gd20h_pin_polarity_get(l3gd20h_ctx_t *ctx, l3gd20h_pin_pol_t *val);
+int32_t l3gd20h_pin_polarity_set(stmdev_ctx_t *ctx, l3gd20h_pin_pol_t val);
+int32_t l3gd20h_pin_polarity_get(stmdev_ctx_t *ctx, l3gd20h_pin_pol_t *val);
 
 typedef struct {
   uint8_t int1_boot           : 1;
   uint8_t int1_ig             : 1;
 } l3gd20h_pin_int1_rt_t;
-int32_t l3gd20h_pin_int1_route_set(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_pin_int1_route_set(stmdev_ctx_t *ctx,
                                    l3gd20h_pin_int1_rt_t val);
-int32_t l3gd20h_pin_int1_route_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_pin_int1_route_get(stmdev_ctx_t *ctx,
                                    l3gd20h_pin_int1_rt_t *val);
 
 typedef enum {
   L3GD20H_INT_PULSED  = 0,
   L3GD20H_INT_LATCHED = 1,
 } l3gd20h_lir_t;
-int32_t l3gd20h_pin_notification_set(l3gd20h_ctx_t *ctx, l3gd20h_lir_t val);
-int32_t l3gd20h_pin_notification_get(l3gd20h_ctx_t *ctx, l3gd20h_lir_t *val);
+int32_t l3gd20h_pin_notification_set(stmdev_ctx_t *ctx, l3gd20h_lir_t val);
+int32_t l3gd20h_pin_notification_get(stmdev_ctx_t *ctx, l3gd20h_lir_t *val);
 typedef enum {
   L3GD20H_LOGIC_OR  = 0,
   L3GD20H_LOGIC_AND = 1,
 } l3gd20h_pin_logic_t;
-int32_t l3gd20h_pin_logic_set(l3gd20h_ctx_t *ctx, l3gd20h_pin_logic_t val);
-int32_t l3gd20h_pin_logic_get(l3gd20h_ctx_t *ctx, l3gd20h_pin_logic_t *val);
+int32_t l3gd20h_pin_logic_set(stmdev_ctx_t *ctx, l3gd20h_pin_logic_t val);
+int32_t l3gd20h_pin_logic_get(stmdev_ctx_t *ctx, l3gd20h_pin_logic_t *val);
 
 typedef struct {
   uint8_t xlie             : 1;
@@ -575,9 +543,9 @@ typedef struct {
   uint8_t zlie             : 1;
   uint8_t zhie             : 1;
 } l3gd20h_gy_trshld_en_t;
-int32_t l3gd20h_gy_trshld_axis_set(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_trshld_axis_set(stmdev_ctx_t *ctx,
                                    l3gd20h_gy_trshld_en_t val);
-int32_t l3gd20h_gy_trshld_axis_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_trshld_axis_get(stmdev_ctx_t *ctx,
                                    l3gd20h_gy_trshld_en_t *val);
 
 typedef struct {
@@ -589,32 +557,32 @@ typedef struct {
   uint8_t zh             : 1;
   uint8_t ia             : 1;
 } l3gd20h_gy_trshld_src_t;
-int32_t l3gd20h_gy_trshld_src_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_trshld_src_get(stmdev_ctx_t *ctx,
                                   l3gd20h_gy_trshld_src_t *val);
 
-int32_t l3gd20h_gy_trshld_x_set(l3gd20h_ctx_t *ctx, uint16_t val);
-int32_t l3gd20h_gy_trshld_x_get(l3gd20h_ctx_t *ctx, uint16_t *val);
+int32_t l3gd20h_gy_trshld_x_set(stmdev_ctx_t *ctx, uint16_t val);
+int32_t l3gd20h_gy_trshld_x_get(stmdev_ctx_t *ctx, uint16_t *val);
 
 typedef enum {
   L3GD20H_RESET_MODE       = 0x00,
   L3GD20H_DECREMENT_MODE   = 0x01,
 } l3gd20h_dcrm_g_t;
-int32_t l3gd20h_gy_trshld_mode_set(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_trshld_mode_set(stmdev_ctx_t *ctx,
                                    l3gd20h_dcrm_g_t val);
-int32_t l3gd20h_gy_trshld_mode_get(l3gd20h_ctx_t *ctx,
+int32_t l3gd20h_gy_trshld_mode_get(stmdev_ctx_t *ctx,
                                    l3gd20h_dcrm_g_t *val);
 
-int32_t l3gd20h_gy_trshld_y_set(l3gd20h_ctx_t *ctx, uint16_t val);
-int32_t l3gd20h_gy_trshld_y_get(l3gd20h_ctx_t *ctx, uint16_t *val);
+int32_t l3gd20h_gy_trshld_y_set(stmdev_ctx_t *ctx, uint16_t val);
+int32_t l3gd20h_gy_trshld_y_get(stmdev_ctx_t *ctx, uint16_t *val);
 
-int32_t l3gd20h_gy_trshld_z_set(l3gd20h_ctx_t *ctx, uint16_t val);
-int32_t l3gd20h_gy_trshld_z_get(l3gd20h_ctx_t *ctx, uint16_t *val);
+int32_t l3gd20h_gy_trshld_z_set(stmdev_ctx_t *ctx, uint16_t val);
+int32_t l3gd20h_gy_trshld_z_get(stmdev_ctx_t *ctx, uint16_t *val);
 
-int32_t l3gd20h_gy_trshld_min_sample_set(l3gd20h_ctx_t *ctx, uint8_t val);
-int32_t l3gd20h_gy_trshld_min_sample_get(l3gd20h_ctx_t *ctx, uint8_t *val);
+int32_t l3gd20h_gy_trshld_min_sample_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t l3gd20h_gy_trshld_min_sample_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t l3gd20h_fifo_stop_on_wtm_set(l3gd20h_ctx_t *ctx, uint8_t val);
-int32_t l3gd20h_fifo_stop_on_wtm_get(l3gd20h_ctx_t *ctx, uint8_t *val);
+int32_t l3gd20h_fifo_stop_on_wtm_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t l3gd20h_fifo_stop_on_wtm_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
   L3GD20H_BYPASS_MODE              = 0x00,
@@ -625,11 +593,11 @@ typedef enum {
   L3GD20H_DYNAMIC_STREAM_MODE      = 0x16,
   L3GD20H_BYPASS_TO_FIFO_MODE      = 0x17,
 } l3gd20h_fifo_m_t;
-int32_t l3gd20h_fifo_mode_set(l3gd20h_ctx_t *ctx, l3gd20h_fifo_m_t val);
-int32_t l3gd20h_fifo_mode_get(l3gd20h_ctx_t *ctx, l3gd20h_fifo_m_t *val);
+int32_t l3gd20h_fifo_mode_set(stmdev_ctx_t *ctx, l3gd20h_fifo_m_t val);
+int32_t l3gd20h_fifo_mode_get(stmdev_ctx_t *ctx, l3gd20h_fifo_m_t *val);
 
-int32_t l3gd20h_fifo_watermark_set(l3gd20h_ctx_t *ctx, uint8_t val);
-int32_t l3gd20h_fifo_watermark_get(l3gd20h_ctx_t *ctx, uint8_t *val);
+int32_t l3gd20h_fifo_watermark_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t l3gd20h_fifo_watermark_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef struct {
   uint8_t fss             : 1;
@@ -637,13 +605,13 @@ typedef struct {
   uint8_t ovrn            : 1;
   uint8_t fth             : 1;
 } l3gd20h_fifo_srs_t;
-int32_t l3gd20h_fifo_src_get(l3gd20h_ctx_t *ctx, l3gd20h_fifo_srs_t *val);
+int32_t l3gd20h_fifo_src_get(stmdev_ctx_t *ctx, l3gd20h_fifo_srs_t *val);
 
-int32_t l3gd20h_fifo_data_level_get(l3gd20h_ctx_t *ctx, uint8_t *val);
+int32_t l3gd20h_fifo_data_level_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t l3gd20h_fifo_full_flag_get(l3gd20h_ctx_t *ctx, uint8_t *val);
+int32_t l3gd20h_fifo_full_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t l3gd20h_fifo_wtm_flag_get(l3gd20h_ctx_t *ctx, uint8_t *val);
+int32_t l3gd20h_fifo_wtm_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
   L3GD20H_DEN_DISABLE           = 0x00,
@@ -651,16 +619,16 @@ typedef enum {
   L3GD20H_DEN_ON_EDGE_TRIGGER   = 0x02,
   L3GD20H_DEN_IMPULSE_TRIGGER   = 0x05,
 } l3gd20h_den_md_t;
-int32_t l3gd20h_den_mode_set(l3gd20h_ctx_t *ctx, l3gd20h_den_md_t val);
-int32_t l3gd20h_den_mode_get(l3gd20h_ctx_t *ctx, l3gd20h_den_md_t *val);
+int32_t l3gd20h_den_mode_set(stmdev_ctx_t *ctx, l3gd20h_den_md_t val);
+int32_t l3gd20h_den_mode_get(stmdev_ctx_t *ctx, l3gd20h_den_md_t *val);
 
 typedef enum {
   L3GD20H_ST_DISABLE    = 0x00,
   L3GD20H_ST_POSITIVE   = 0x01,
   L3GD20H_ST_NEGATIVE   = 0x03,
 } l3gd20h_st_t;
-int32_t l3gd20h_gy_self_test_set(l3gd20h_ctx_t *ctx, l3gd20h_st_t val);
-int32_t l3gd20h_gy_self_test_get(l3gd20h_ctx_t *ctx, l3gd20h_st_t *val);
+int32_t l3gd20h_gy_self_test_set(stmdev_ctx_t *ctx, l3gd20h_st_t val);
+int32_t l3gd20h_gy_self_test_get(stmdev_ctx_t *ctx, l3gd20h_st_t *val);
 
 /**
   *@}
