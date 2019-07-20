@@ -2628,7 +2628,6 @@ int32_t lsm6dsox_den_mark_axis_z_get(lsm6dsox_ctx_t *ctx, uint8_t *val);
 typedef enum {
   LSM6DSOX_PEDO_DISABLE              = 0x00,
   LSM6DSOX_PEDO_BASE_MODE            = 0x01,
-  LSM6DSOX_PEDO_ADV_MODE             = 0x03,
   LSM6DSOX_FALSE_STEP_REJ            = 0x13,
   LSM6DSOX_FALSE_STEP_REJ_ADV_MODE   = 0x33,
 } lsm6dsox_pedo_md_t;

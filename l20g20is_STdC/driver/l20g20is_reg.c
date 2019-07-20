@@ -702,10 +702,15 @@ int32_t l20g20is_gy_filter_hp_bandwidth_get(l20g20is_ctx_t *ctx,
                                             l20g20is_gy_hp_bw_t *val)
 {
   l20g20is_ctrl2_ois_t ctrl2_ois;
+  l20g20is_ois_cfg_reg_t ois_cfg_reg;
   int32_t ret;
 
   ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
-  switch (ctrl2_ois.hpf){
+  if(ret == 0){
+    ret = l20g20is_read_reg(ctx, L20G20IS_OIS_CFG_REG,
+                            (uint8_t*)&ois_cfg_reg, 1);
+  }
+  switch ( ( ctrl2_ois.hpf << 4 ) + ois_cfg_reg.hpf_bw){
     case L20G20IS_HPF_BYPASS:
       *val = L20G20IS_HPF_BYPASS;
       break;

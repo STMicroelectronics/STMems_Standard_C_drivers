@@ -2591,22 +2591,26 @@ int32_t lsm6dsm_aux_den_mode_set(lsm6dsm_ctx_t *ctx, lsm6dsm_lvl_ois_t val)
 int32_t lsm6dsm_aux_den_mode_get(lsm6dsm_ctx_t *ctx, lsm6dsm_lvl_ois_t *val)
 {
   lsm6dsm_int_ois_t int_ois;
+  lsm6dsm_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
 
   ret = lsm6dsm_read_reg(ctx, LSM6DSM_INT_OIS, (uint8_t*)&int_ois, 1);
-  switch ( int_ois.lvl2_ois ) {
-    case LSM6DSM_AUX_DEN_DISABLE:
-      *val = LSM6DSM_AUX_DEN_DISABLE;
-      break;
-    case LSM6DSM_AUX_DEN_LEVEL_LATCH:
-      *val = LSM6DSM_AUX_DEN_LEVEL_LATCH;
-      break;
-    case LSM6DSM_AUX_DEN_LEVEL_TRIG:
-      *val = LSM6DSM_AUX_DEN_LEVEL_TRIG;
-      break;
-    default:
-      *val = LSM6DSM_AUX_DEN_DISABLE;
-      break;
+  if(ret == 0){
+    ret = lsm6dsm_read_reg(ctx, LSM6DSM_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
+    switch ( ( ctrl1_ois.lvl1_ois << 1) + int_ois.lvl2_ois ) {
+      case LSM6DSM_AUX_DEN_DISABLE:
+        *val = LSM6DSM_AUX_DEN_DISABLE;
+        break;
+      case LSM6DSM_AUX_DEN_LEVEL_LATCH:
+        *val = LSM6DSM_AUX_DEN_LEVEL_LATCH;
+        break;
+      case LSM6DSM_AUX_DEN_LEVEL_TRIG:
+        *val = LSM6DSM_AUX_DEN_LEVEL_TRIG;
+        break;
+      default:
+        *val = LSM6DSM_AUX_DEN_DISABLE;
+        break;
+    }
   }
   return ret;
 }

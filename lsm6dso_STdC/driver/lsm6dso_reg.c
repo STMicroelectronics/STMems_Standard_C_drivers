@@ -1597,7 +1597,7 @@ int32_t lsm6dso_ln_pg_read_byte(lsm6dso_ctx_t *ctx, uint16_t address,
   }
   if (ret == 0) {
 
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_PAGE_VALUE, val, 2);
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_PAGE_VALUE, val, 1);
   }
   if (ret == 0) {
     ret = lsm6dso_read_reg(ctx, LSM6DSO_PAGE_RW, (uint8_t*) &page_rw, 1);
@@ -6957,9 +6957,6 @@ int32_t lsm6dso_pedo_sens_get(lsm6dso_ctx_t *ctx, lsm6dso_pedo_md_t *val)
       break;
     case LSM6DSO_PEDO_BASE_MODE:
       *val = LSM6DSO_PEDO_BASE_MODE;
-      break;
-    case LSM6DSO_PEDO_ADV_MODE:
-      *val = LSM6DSO_PEDO_ADV_MODE;
       break;
     case LSM6DSO_FALSE_STEP_REJ:
       *val = LSM6DSO_FALSE_STEP_REJ;

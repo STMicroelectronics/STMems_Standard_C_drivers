@@ -400,7 +400,7 @@ int32_t l3gd20h_gy_data_rate_get(l3gd20h_ctx_t *ctx,
 typedef enum {
   L3GD20H_245dps    = 0x00,
   L3GD20H_500dps    = 0x01,
-  L3GD20H_2000dps   = 0x10,
+  L3GD20H_2000dps   = 0x02,
 } l3gd20h_gy_fs_t;
 int32_t l3gd20h_gy_full_scale_set(l3gd20h_ctx_t *ctx, l3gd20h_gy_fs_t val);
 int32_t l3gd20h_gy_full_scale_get(l3gd20h_ctx_t *ctx, l3gd20h_gy_fs_t *val);
