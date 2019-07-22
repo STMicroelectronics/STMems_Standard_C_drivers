@@ -248,10 +248,14 @@ int32_t lis3dh_temp_data_ovr_get(lis3dh_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis3dh_temperature_raw_get(lis3dh_ctx_t *ctx, uint8_t *buff)
+int32_t lis3dh_temperature_raw_get(lis3dh_ctx_t *ctx, uint16_t *buff)
 {
   int32_t ret;
-  ret = lis3dh_read_reg(ctx, LIS3DH_OUT_ADC1_H, buff, 1);
+  uint8_t dummy[2];
+  ret = lis3dh_read_reg(ctx, LIS3DH_OUT_ADC3_L, dummy, 2);
+  *buff = dummy[1];
+  *buff = *buff * 256;
+  *buff += dummy[0];
   return ret;
 }
 
