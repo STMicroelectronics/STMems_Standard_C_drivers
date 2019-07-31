@@ -494,7 +494,7 @@ int32_t lis3dh_temp_data_ready_get(lis3dh_ctx_t *ctx, uint8_t *val);
 
 int32_t lis3dh_temp_data_ovr_get(lis3dh_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3dh_temperature_raw_get(lis3dh_ctx_t *ctx, uint16_t *buff);
+int32_t lis3dh_temperature_raw_get(lis3dh_ctx_t *ctx, int16_t *buff);
 
 int32_t lis3dh_adc_raw_get(lis3dh_ctx_t *ctx, uint8_t *buff);
 
