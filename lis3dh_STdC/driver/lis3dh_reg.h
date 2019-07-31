@@ -214,7 +214,7 @@ typedef struct {
   uint8_t not_used_01       : 1;
   uint8_t i1_overrun        : 1;
   uint8_t i1_wtm            : 1;
-  uint8_t not_used_02       : 1;
+  uint8_t i1_321da          : 1;
   uint8_t i1_zyxda          : 1;
   uint8_t i1_ia2            : 1;
   uint8_t i1_ia1            : 1;
