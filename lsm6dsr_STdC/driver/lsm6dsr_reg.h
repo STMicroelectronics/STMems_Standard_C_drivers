@@ -1606,7 +1606,7 @@ extern float_t lsm6dsr_from_lsb_to_nsec(int32_t lsb);
 
 typedef enum {
   LSM6DSR_2g   = 0,
-  LSM6DSR_16g  = 1, /* if XL_FS_MODE = ‘1’ -> LSM6DSR_2g */
+  LSM6DSR_16g  = 1, /* if XL_FS_MODE = '1' -> LSM6DSR_2g */
   LSM6DSR_4g   = 2,
   LSM6DSR_8g   = 3,
 } lsm6dsr_fs_xl_t;
@@ -2059,11 +2059,11 @@ int32_t lsm6dsr_i2c_interface_get(lsm6dsr_ctx_t *ctx,
                                   lsm6dsr_i2c_disable_t *val);
 
 typedef enum {
-  LSM6DSR_I3C_DISABLE         = 0x00,
-  LSM6DSR_I3C_ENABLE_T_50us   = 0x80,
-  LSM6DSR_I3C_ENABLE_T_2us    = 0x81,
-  LSM6DSR_I3C_ENABLE_T_1ms    = 0x82,
-  LSM6DSR_I3C_ENABLE_T_25ms   = 0x83,
+  LSM6DSR_I3C_DISABLE         = 0x80,
+  LSM6DSR_I3C_ENABLE_T_50us   = 0x00,
+  LSM6DSR_I3C_ENABLE_T_2us    = 0x01,
+  LSM6DSR_I3C_ENABLE_T_1ms    = 0x02,
+  LSM6DSR_I3C_ENABLE_T_25ms   = 0x03,
 } lsm6dsr_i3c_disable_t;
 int32_t lsm6dsr_i3c_disable_set(lsm6dsr_ctx_t *ctx,
                                 lsm6dsr_i3c_disable_t val);

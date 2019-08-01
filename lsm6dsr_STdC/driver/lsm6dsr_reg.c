@@ -3655,7 +3655,7 @@ int32_t lsm6dsr_i2c_interface_get(lsm6dsr_ctx_t *ctx,
   *
   */
 int32_t lsm6dsr_i3c_disable_set(lsm6dsr_ctx_t *ctx,
-                                  lsm6dsr_i3c_disable_t val)
+                                lsm6dsr_i3c_disable_t val)
 {
   lsm6dsr_ctrl9_xl_t ctrl9_xl;
   lsm6dsr_i3c_bus_avb_t i3c_bus_avb;
