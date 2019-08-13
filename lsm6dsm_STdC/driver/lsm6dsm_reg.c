@@ -4742,6 +4742,25 @@ int32_t lsm6dsm_fifo_wtm_flag_get(lsm6dsm_ctx_t *ctx, uint8_t *val)
 }
 
 /**
+  * @brief  FIFO over run.[get]
+  *
+  * @param  ctx    Read / write interface definitions
+  * @param  val    get the value of over run in reg  FIFO_STATUS2
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t lsm6dsm_fifo_over_run_get(lsm6dsm_ctx_t *ctx, uint8_t *val)
+{
+  lsm6dsm_fifo_status2_t fifo_status2;
+  int32_t ret;
+
+  ret = lsm6dsm_read_reg(ctx, LSM6DSM_FIFO_STATUS2, (uint8_t*)&fifo_status2, 1);
+  *val = fifo_status2.over_run;
+
+  return ret;
+}
+
+/**
   * @brief  FIFO pattern.[get]
   *
   * @param  ctx    Read / write interface definitions
