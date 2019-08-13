@@ -1682,6 +1682,7 @@ int32_t lsm6dsm_fifo_watermark_get(lsm6dsm_ctx_t *ctx, uint16_t *val);
 int32_t lsm6dsm_fifo_data_level_get(lsm6dsm_ctx_t *ctx, uint16_t *val);
 
 int32_t lsm6dsm_fifo_wtm_flag_get(lsm6dsm_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsm_fifo_over_run_get(lsm6dsm_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm6dsm_fifo_pattern_get(lsm6dsm_ctx_t *ctx, uint16_t *val);
 
