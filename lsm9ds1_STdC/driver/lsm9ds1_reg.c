@@ -1912,8 +1912,8 @@ int32_t lsm9ds1_xl_filter_lp_bandwidth_set(lsm9ds1_ctx_t *ctx,
   ret = lsm9ds1_read_reg(ctx, LSM9DS1_CTRL_REG7_XL,
                          (uint8_t*)&ctrl_reg7_xl, 1);
   if(ret == 0){
-    ctrl_reg7_xl.dcf = ((uint8_t)val & 0x10U) >> 4;
-    ctrl_reg7_xl.hr = ((uint8_t)val & 0x03U);
+    ctrl_reg7_xl.hr = ((uint8_t)val & 0x10U) >> 4;
+    ctrl_reg7_xl.dcf = ((uint8_t)val & 0x03U);
     ret = lsm9ds1_write_reg(ctx, LSM9DS1_CTRL_REG7_XL,
                             (uint8_t*)&ctrl_reg7_xl, 1);
   }
@@ -1937,7 +1937,7 @@ int32_t lsm9ds1_xl_filter_lp_bandwidth_get(lsm9ds1_ctx_t *ctx,
 
   ret = lsm9ds1_read_reg(ctx, LSM9DS1_CTRL_REG7_XL,
                          (uint8_t*)&ctrl_reg7_xl, 1);
-  switch ((ctrl_reg7_xl.dcf << 4) + ctrl_reg7_xl.hr){
+  switch ((ctrl_reg7_xl.hr << 4) + ctrl_reg7_xl.dcf){
     case LSM9DS1_LP_DISABLE:
       *val = LSM9DS1_LP_DISABLE;
       break;
