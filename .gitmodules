@@ -1,6 +1,6 @@
-[submodule "_resources/.\\STMems_Machine_Learning_Core"]
-	path = _resources/.\\STMems_Machine_Learning_Core
+[submodule "_resources/STMems_Machine_Learning_Core"]
+	path = _resources/STMems_Machine_Learning_Core
 	url = https://github.com/STMicroelectronics/STMems_Machine_Learning_Core.git
-[submodule "_resources/.\\STMems_Finite_State_Machine"]
-	path = _resources/.\\STMems_Finite_State_Machine
+[submodule "_resources/STMems_Finite_State_Machine"]
+	path = _resources/STMems_Finite_State_Machine
 	url = https://github.com/STMicroelectronics/STMems_Finite_State_Machine
