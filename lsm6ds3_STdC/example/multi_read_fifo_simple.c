@@ -81,6 +81,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
+#include <stdio.h>
 #include "stm32f4xx_hal.h"
 #include <lsm6ds3_reg.h>
 #include "gpio.h"
@@ -91,6 +92,11 @@
 #elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
 #include "usart.h"
 #endif
+  
+typedef union{
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
+} axis3bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
 
@@ -127,7 +133,7 @@ void example_multi_read_fifo_simple_lsm6ds3(void)
   /*
    * Initialize mems driver interface
    */
-  lsm6ds3_ctx_t dev_ctx;
+  stmdev_ctx_t dev_ctx;
   uint16_t pattern_len;
   lsm6ds3_int1_route_t int_1_reg;
 
