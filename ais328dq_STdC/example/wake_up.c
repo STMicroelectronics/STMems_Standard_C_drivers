@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    wake_up.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show the simplest way to detect wake_up from sensor.
  *
  ******************************************************************************
  * @attention
@@ -16,6 +16,25 @@
  *                        opensource.org/licenses/BSD-3-Clause
  *
  ******************************************************************************
+ */
+
+/*
+ * This example was developed using the following STMicroelectronics
+ * evaluation boards:
+ *
+ * - STEVAL_MKI109V3
+ *
+ * and STM32CubeMX tool with STM32CubeF4 MCU Package
+ *
+ * Used interfaces:
+ *
+ * STEVAL_MKI109V3    - Sensor side: SPI(Default) / I2C(supported)
+ *
+ *
+ * If you need to run this example on a different hardware platform a
+ * modification of the functions: `platform_write`, `platform_read`,
+ * `device_on` and 'device_off' is required.
+ *
  */
 
 /*
@@ -65,7 +84,6 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
-#include <stdio.h>
 #include <stm32f4xx_hal.h>
 #include <ais328dq_reg.h>
 #include <gpio.h>
@@ -77,18 +95,10 @@
 #include <usart.h>
 #endif
 
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static float acceleration_mg[3];
 static uint8_t whoamI;
-static uint8_t tx_buffer[1000];
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -103,64 +113,86 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
-static void tx_com(uint8_t *tx_buffer, uint16_t len);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_ais328dq(void)
+void example_main_wake_up_ais328dq(void)
 {
+  /* Variables */
   stmdev_ctx_t dev_ctx;
+  int1_on_th_conf_t int1_on_th_conf;
+  ais328dq_int1_src_t  int1_src;
 
-  /* Uncomment to use interrupts on drdy */
-  //a3g4250d_int2_route_t int2_reg;
-
-  /* Initialize mems driver interface */
+  /* Initialize SPI mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
 
-  /* Initialize platform specific hardware */
-  platform_init();
-
-  /* Check device ID */
-  whoamI = 0;
-  ais328dq_device_id_get(&dev_ctx, &whoamI);
-  if ( whoamI != AIS328DQ_ID )
-    while(1); /*manage here device not found */
- 
-  /* Enable Block Data Update */
-  ais328dq_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
- 
-  /* Set full scale */ 
-  ais328dq_full_scale_set(&dev_ctx, AIS328DQ_2g);
- 
-  /* Configure filtering chain */ 
-  ais328dq_hp_path_set(&dev_ctx, AIS328DQ_HP_DISABLE);
-  //ais328dq_hp_path_set(&dev_ctx, AIS328DQ_HP_ON_OUT);
-  //ais328dq_hp_reset_get(&dev_ctx);
-
-  /* Set Output Data Rate */
-  ais328dq_data_rate_set(&dev_ctx, AIS328DQ_ODR_5Hz);
- 
-  /* Read samples in polling mode (no int) */
+  /* Start Main loop */
   while(1)
   {
-    /* Read output only if new value is available */
-    ais328dq_reg_t reg;
-    ais328dq_status_reg_get(&dev_ctx, &reg.status_reg);
-
-    if (reg.status_reg.zyxda){
-      /* Read acceleration data */
-      memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
-      ais328dq_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = AIS328DQ_FROM_FS_2g_TO_mg( data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = AIS328DQ_FROM_FS_2g_TO_mg( data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = AIS328DQ_FROM_FS_2g_TO_mg( data_raw_acceleration.i16bit[2]);
-     
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
+    /* turn device on  */
+    platform_init();
+    /* wait mems boot time */
+    HAL_Delay(50); 
+   
+    /* Check device ID */
+    ais328dq_device_id_get(&dev_ctx, &whoamI);
+    if (whoamI != AIS328DQ_ID)
+      while(1); /* manage here device not found */   
+   
+   
+    /* Set ODR (normal mode)*/
+    ais328dq_data_rate_set(&dev_ctx, AIS328DQ_ODR_100Hz);
+    /* Set Full scale */
+    ais328dq_full_scale_set(&dev_ctx, AIS328DQ_4g); 
+   
+    /* Enable axis: Default all axis are enabled so you can avoid this step */
+    //ais328dq_axis_x_data_set(&dev_ctx, PROPERTY_ENABLE);
+    //ais328dq_axis_y_data_set(&dev_ctx, PROPERTY_ENABLE);
+    //ais328dq_axis_z_data_set(&dev_ctx, PROPERTY_ENABLE);
+   
+    /* interrupt request latched */
+    ais328dq_int1_notification_set(&dev_ctx, AIS328DQ_INT1_LATCHED);
+   
+    /* interrupt polarity: Default is active high so you can avoid this step */
+    ais328dq_pin_polarity_set(&dev_ctx, AIS328DQ_ACTIVE_HIGH);
+   
+    /* interrupt pin routing */
+    ais328dq_pin_int1_route_set(&dev_ctx, AIS328DQ_PAD1_INT1_SRC);
+   
+    /* interrupt pin mode */
+    ais328dq_pin_mode_set(&dev_ctx, AIS328DQ_PUSH_PULL);
+   
+    /* set HP filter path on output and interrupt generator 1 */
+    ais328dq_hp_path_set(&dev_ctx, AIS328DQ_HP_ON_INT1_OUT);
+   
+    HAL_Delay(150);
+   
+    /* set interrupt threshold */
+    ais328dq_int1_treshold_set(&dev_ctx, 0x04);
+    /* set interrupt duration */
+    ais328dq_int1_dur_set(&dev_ctx, 0x01);
+   
+    /* set interrupt on pin mode */
+    ais328dq_int1_on_threshold_mode_set(&dev_ctx, AIS328DQ_INT1_ON_THRESHOLD_OR);
+    /* set interrupt on pin mode */
+    int1_on_th_conf.int1_xlie = 0;
+    int1_on_th_conf.int1_xhie = 1;
+    int1_on_th_conf.int1_ylie = 0;
+    int1_on_th_conf.int1_yhie = 1;
+    int1_on_th_conf.int1_zlie = 0;
+    int1_on_th_conf.int1_zhie = 1;
+    ais328dq_int1_on_threshold_conf_set(&dev_ctx, int1_on_th_conf);
+   
+    ais328dq_hp_reset_get(&dev_ctx);
+    ais328dq_int1_src_get(&dev_ctx, &int1_src);
+   
+    if (int1_src.xh | int1_src.yh | int1_src.zh){
+      while(1); //wake up detected
     }
+   
+    HAL_Delay(1000);
   }
 }
 
@@ -230,23 +262,6 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   }
 #endif
   return 0;
-}
-
-/*
- * @brief  Send buffer to console (platform dependent)
- *
- * @param  tx_buffer     buffer to trasmit
- * @param  len           number of byte to send
- *
- */
-static void tx_com(uint8_t *tx_buffer, uint16_t len)
-{
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
-  HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
-  #ifdef STEVAL_MKI109V3
-  CDC_Transmit_FS(tx_buffer, len);
-  #endif
 }
 
 /*
