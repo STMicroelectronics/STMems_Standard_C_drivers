@@ -7,30 +7,15 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
+ ******************************************************************************
  */
 
 /* Includes ------------------------------------------------------------------*/
@@ -53,6 +38,16 @@
 #include "usart.h"
 #include "gpio.h"
 #endif
+
+typedef union{
+  int16_t i16bit;
+  uint8_t u8bit[2];
+} axis1bit16_t;
+
+typedef union{
+  int32_t i32bit;
+  uint8_t u8bit[4];
+} axis1bit32_t;
 
 /* Private macro -------------------------------------------------------------*/
 #ifdef MKI109V2
@@ -101,7 +96,8 @@ static int32_t platform_write(void *handle, uint8_t Reg, uint8_t *Bufp,
     HAL_I2C_Mem_Write(handle, LPS27HHW_I2C_ADD_H, Reg,
                       I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
   }
-#ifdef MKI109V2 LPS27HHW  else if (handle == &hspi2)
+#ifdef MKI109V2 
+  else if (handle == &hspi2)
   {
     HAL_GPIO_WritePin(CS_SPI2_GPIO_Port, CS_SPI2_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &Reg, 1, 1000);
@@ -127,7 +123,8 @@ static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
       HAL_I2C_Mem_Read(handle, LPS27HHW_I2C_ADD_H, Reg,
                        I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
   }
-#ifdef MKI109V2  LPS27HHW  else if (handle == &hspi2)
+#ifdef MKI109V2 
+  else if (handle == &hspi2)
   {
     Reg |= 0x80;
     HAL_GPIO_WritePin(CS_DEV_GPIO_Port, CS_DEV_Pin, GPIO_PIN_RESET);
@@ -143,7 +140,8 @@ static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
     HAL_SPI_Receive(handle, Bufp, len, 1000);
     HAL_GPIO_WritePin(CS_RF_GPIO_Port, CS_RF_Pin, GPIO_PIN_SET);
   }
-#endif LPS27HHW  return 0;
+#endif
+  return 0;
 }
 
 /*
@@ -151,9 +149,11 @@ static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
  */
 void tx_com( uint8_t *tx_buffer, uint16_t len )
 {
-  #ifdef NUCLEO_STM32F411RE LPS27HHW  HAL_UART_Transmit( &huart2, tx_buffer, len, 1000 );
+  #ifdef NUCLEO_STM32F411RE
+  HAL_UART_Transmit( &huart2, tx_buffer, len, 1000 );
   #endif
-  #ifdef MKI109V2 LPS27HHW  CDC_Transmit_FS( tx_buffer, len );
+  #ifdef MKI109V2
+  CDC_Transmit_FS( tx_buffer, len );
   #endif
 }
 
@@ -164,10 +164,11 @@ void example_main(void)
   /*
    *  Initialize mems driver interface
    */
-  lps27hhw_ctx_t dev_ctx;
+  stmdev_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1; LPS27HHW  /*
+  dev_ctx.handle = &hi2c1; 
+  /*
    *  Check device ID
    */
   whoamI = 0;
@@ -189,7 +190,8 @@ void example_main(void)
    * Set Output Data Rate
    */
   lps27hhw_data_rate_set(&dev_ctx, LPS27HHW_10_Hz_LOW_NOISE);
- LPS27HHW  /*
+
+  /*
    * Read samples in polling mode (no int)
    */
   while(1)
@@ -205,7 +207,7 @@ void example_main(void)
       memset(data_raw_pressure.u8bit, 0x00, sizeof(int32_t));
       lps27hhw_pressure_raw_get(&dev_ctx, data_raw_pressure.u8bit);
       pressure_hPa = lps27hhw_from_lsb_to_hpa( data_raw_pressure.i32bit);
-     LPS27HHW      sprintf((char*)tx_buffer, "pressure [hPa]:%6.2f\r\n", pressure_hPa);
+      sprintf((char*)tx_buffer, "pressure [hPa]:%6.2f\r\n", pressure_hPa);
       tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
     }
 
@@ -214,7 +216,7 @@ void example_main(void)
       memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
       lps27hhw_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
       temperature_degC = lps27hhw_from_lsb_to_celsius( data_raw_temperature.i16bit );
-     LPS27HHW      sprintf((char*)tx_buffer, "temperature [degC]:%6.2f\r\n", temperature_degC );
+      sprintf((char*)tx_buffer, "temperature [degC]:%6.2f\r\n", temperature_degC );
       tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
     }
   }
