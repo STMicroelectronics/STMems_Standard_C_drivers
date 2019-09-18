@@ -8,31 +8,15 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
+ ******************************************************************************
  */
 
 /*
@@ -47,7 +31,7 @@
  *
  *
  * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A3 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI 
+ *                                       - I2C(Default) / SPI
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read` and
@@ -66,14 +50,19 @@
 #include "usart.h"
 #include "gpio.h"
 
+typedef union{
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
+} axis3bit16_t;
+
 /* Private macro -------------------------------------------------------------*/
 #define TX_BUF_DIM                       1000
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t tx_buffer[TX_BUF_DIM];
 
-static lsm6dso_ctx_t ag_ctx;
-static lis2mdl_ctx_t mag_ctx;
+static stmdev_ctx_t ag_ctx;
+static stmdev_ctx_t mag_ctx;
 
 static float acceleration_mg[3];
 static float angular_rate_mdps[3];
@@ -119,10 +108,10 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 void lsm6dso_hub_fifo_lis2mdl(void)
 {
   uint8_t whoamI, rst, wtm_flag;
-  
+ 
   lsm6dso_sh_cfg_read_t sh_cfg_read;
-  lsm6dso_pin_int1_route_t int1_route;  
-  
+  lsm6dso_pin_int1_route_t int1_route; 
+ 
   axis3bit16_t data_raw_magnetic;
   axis3bit16_t data_raw_acceleration;
   axis3bit16_t data_raw_angular_rate;
@@ -132,13 +121,13 @@ void lsm6dso_hub_fifo_lis2mdl(void)
   ag_ctx.write_reg = platform_write;
   ag_ctx.read_reg = platform_read;
   ag_ctx.handle = &hi2c1;
-  
+ 
   /* Initialize lis2mdl driver interface */
   mag_ctx.read_reg = lsm6dso_read_lis2mdl_cx;
   mag_ctx.write_reg = lsm6dso_write_lis2mdl_cx;
-  mag_ctx.handle = &hi2c1;  
-  
-  /* 
+  mag_ctx.handle = &hi2c1; 
+ 
+  /*
    * Check Connected devices.
    */
 
@@ -163,14 +152,14 @@ void lsm6dso_hub_fifo_lis2mdl(void)
   lis2mdl_device_id_get(&mag_ctx, &whoamI);
   if (whoamI != LIS2MDL_ID)
     while(1);
-  
+ 
   /* Configure LIS2MDL. */
   lis2mdl_block_data_update_set(&mag_ctx, PROPERTY_ENABLE);
   lis2mdl_offset_temp_comp_set(&mag_ctx, PROPERTY_ENABLE);
   lis2mdl_operating_mode_set(&mag_ctx, LIS2MDL_CONTINUOUS_MODE);
   lis2mdl_data_rate_set(&mag_ctx, LIS2MDL_ODR_20Hz);
 
-  /* 
+  /*
    * Configure LSM6DSO FIFO.
    *
    *
@@ -205,11 +194,11 @@ void lsm6dso_hub_fifo_lis2mdl(void)
 
   /* Set FIFO batch XL/Gyro ODR to 12.5Hz. */
   lsm6dso_fifo_xl_batch_set(&ag_ctx, LSM6DSO_XL_BATCHED_AT_12Hz5);
-  lsm6dso_fifo_gy_batch_set(&ag_ctx, LSM6DSO_GY_BATCHED_AT_12Hz5);  
+  lsm6dso_fifo_gy_batch_set(&ag_ctx, LSM6DSO_GY_BATCHED_AT_12Hz5); 
 
-  /* 
-   * Prepare sensor hub to read data from external Slave0 continuously 
-   * in order to store data in FIFO. 
+  /*
+   * Prepare sensor hub to read data from external Slave0 continuously
+   * in order to store data in FIFO.
    */
   sh_cfg_read.slv_add = (LIS2MDL_I2C_ADD & 0xFEU) >> 1; /* 7bit I2C address */
   sh_cfg_read.slv_subadd = LIS2MDL_OUTX_L_REG;
@@ -219,14 +208,14 @@ void lsm6dso_hub_fifo_lis2mdl(void)
   lsm6dso_sh_slave_connected_set(&ag_ctx, LSM6DSO_SLV_0);
   /* Enable I2C Master. */
   lsm6dso_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
-  
+ 
   /* Configure LSM6DSO. */
   lsm6dso_xl_full_scale_set(&ag_ctx, LSM6DSO_2g);
   lsm6dso_gy_full_scale_set(&ag_ctx, LSM6DSO_2000dps);
   lsm6dso_block_data_update_set(&ag_ctx, PROPERTY_ENABLE);
   lsm6dso_xl_data_rate_set(&ag_ctx, LSM6DSO_XL_ODR_12Hz5);
   lsm6dso_gy_data_rate_set(&ag_ctx, LSM6DSO_GY_ODR_12Hz5);
-  
+ 
   while(1) {
     uint16_t num = 0;
     lsm6dso_fifo_tag_t reg_tag;
@@ -238,7 +227,7 @@ void lsm6dso_hub_fifo_lis2mdl(void)
       lsm6dso_fifo_data_level_get(&ag_ctx, &num);
 
       while(num--) {
-        
+       
         /* Read FIFO tag. */
         lsm6dso_fifo_sensor_tag_get(&ag_ctx, &reg_tag);
 
@@ -252,43 +241,43 @@ void lsm6dso_hub_fifo_lis2mdl(void)
             acceleration_mg[1] = lsm6dso_from_fs2_to_mg(data_raw_acceleration.i16bit[1]);
             acceleration_mg[2] = lsm6dso_from_fs2_to_mg(data_raw_acceleration.i16bit[2]);
 
-            sprintf( (char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n", 
-                     acceleration_mg[0], 
-                     acceleration_mg[1], 
+            sprintf( (char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+                     acceleration_mg[0],
+                     acceleration_mg[1],
                      acceleration_mg[2] );
             tx_com(tx_buffer, strlen((char const*)tx_buffer));
             break;
-            
+           
           case LSM6DSO_GYRO_NC_TAG:
             memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
             lsm6dso_fifo_out_raw_get(&ag_ctx, data_raw_angular_rate.u8bit);
-            
+           
             angular_rate_mdps[0] = lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[0]);
             angular_rate_mdps[1] = lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[1]);
             angular_rate_mdps[2] = lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[2]);
 
             sprintf( (char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
                      angular_rate_mdps[0],
-                     angular_rate_mdps[1], 
+                     angular_rate_mdps[1],
                      angular_rate_mdps[2]);
             tx_com(tx_buffer, strlen((char const*)tx_buffer));
             break;
-            
+           
           case LSM6DSO_SENSORHUB_SLAVE0_TAG:
             memset(data_raw_magnetic.u8bit, 0x00, 3 * sizeof(int16_t));
             lsm6dso_fifo_out_raw_get(&ag_ctx, data_raw_magnetic.u8bit);
-            
+           
             magnetic_mG[0] = lis2mdl_from_lsb_to_mgauss(data_raw_magnetic.i16bit[0]);
             magnetic_mG[1] = lis2mdl_from_lsb_to_mgauss(data_raw_magnetic.i16bit[1]);
             magnetic_mG[2] = lis2mdl_from_lsb_to_mgauss(data_raw_magnetic.i16bit[2]);
 
             sprintf( (char*)tx_buffer, "Mag [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
-                     magnetic_mG[0], 
-                     magnetic_mG[1], 
+                     magnetic_mG[0],
+                     magnetic_mG[1],
                      magnetic_mG[2]);
             tx_com(tx_buffer, strlen((char const*)tx_buffer));
             break;
-              
+             
           default:
           /* Flush unused samples. */
             memset(dummy.u8bit, 0x00, 3 * sizeof(int16_t));
@@ -462,7 +451,7 @@ static int32_t lsm6dso_read_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
 
   /* Read SensorHub registers. */
   lsm6dso_sh_read_data_raw_get(&ag_ctx, data, len);
- 
+
   return ret;
 }
 
