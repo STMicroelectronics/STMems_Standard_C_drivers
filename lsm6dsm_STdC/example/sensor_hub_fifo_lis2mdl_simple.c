@@ -8,31 +8,15 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
+ ******************************************************************************
  */
 
 /*
@@ -82,6 +66,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
+#include <stdio.h>
 #include "stm32f4xx_hal.h"
 #include <lsm6dsm_reg.h>
 #include <lis2mdl_reg.h>
@@ -93,6 +78,11 @@
 #elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
 #include "usart.h"
 #endif
+  
+typedef union{
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
+} axis3bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
 
@@ -103,8 +93,8 @@ static float magnetic_mG[3];
 static axis3bit16_t data_raw_magnetic;
 static axis3bit16_t data_raw_acceleration;
 static axis3bit16_t data_raw_angular_rate;
-static lsm6dsm_ctx_t dev_ctx;
-static lis2mdl_ctx_t mag_ctx;
+static stmdev_ctx_t dev_ctx;
+static stmdev_ctx_t mag_ctx;
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -261,7 +251,7 @@ static int32_t lsm6dsm_write_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
  * enable BDU
  * set ODR to 50 Hz
  */
-static void configure_lis2mdl(lis2mdl_ctx_t* ctx)
+static void configure_lis2mdl(stmdev_ctx_t* ctx)
 {
   lsm6dsm_sh_cfg_read_t val =
   {

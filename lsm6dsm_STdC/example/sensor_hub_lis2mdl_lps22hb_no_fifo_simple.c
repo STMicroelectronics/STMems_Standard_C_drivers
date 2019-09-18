@@ -8,31 +8,15 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
+ ******************************************************************************
  */
 
 /*
@@ -82,6 +66,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
+#include <stdio.h>
 #include "stm32f4xx_hal.h"
 #include <lsm6dsm_reg.h>
 #include <lps22hb_reg.h>
@@ -94,6 +79,21 @@
 #elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
 #include "usart.h"
 #endif
+  
+typedef union{
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
+} axis3bit16_t;
+
+typedef union{
+  int16_t i16bit;
+  uint8_t u8bit[2];
+} axis1bit16_t;
+
+typedef union{
+  int32_t i32bit;
+  uint8_t u8bit[4];
+} axis1bit32_t;
 
 /* Private macro -------------------------------------------------------------*/
 #define OUT_XYZ_SIZE		6
@@ -112,9 +112,9 @@ static axis1bit32_t data_raw_pressure;
 static axis1bit16_t data_raw_temperature;
 static axis3bit16_t data_raw_acceleration;
 static axis3bit16_t data_raw_angular_rate;
-static lsm6dsm_ctx_t dev_ctx;
-static lps22hb_ctx_t press_ctx;
-static lis2mdl_ctx_t mag_ctx;
+static stmdev_ctx_t dev_ctx;
+static stmdev_ctx_t press_ctx;
+static stmdev_ctx_t mag_ctx;
 static uint8_t tx_buffer[1000];
 
 /* Extern variables ----------------------------------------------------------*/
@@ -146,7 +146,7 @@ static int32_t lsm6dsm_read_lps22hb_cx(void* ctx, uint8_t reg, uint8_t* data,
   uint8_t drdy;
   uint8_t i;
   lsm6dsm_func_src1_t func_src1;
-  lsm6dsm_emb_sh_read_t sh_reg;
+  uint8_t sh_reg[18];
   lsm6dsm_sh_cfg_read_t val =
   {
     .slv_add = LPS22HB_I2C_ADD_H,
@@ -188,13 +188,13 @@ static int32_t lsm6dsm_read_lps22hb_cx(void* ctx, uint8_t reg, uint8_t* data,
   } while (!func_src1.sensorhub_end_op);
 
   lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_OFF);
-  lsm6dsm_sh_read_data_raw_get(&dev_ctx, &sh_reg);
+  lsm6dsm_sh_read_data_raw_get(&dev_ctx, (lsm6dsm_emb_sh_read_t*)&sh_reg);
 
   lsm6dsm_func_en_set(&dev_ctx, PROPERTY_DISABLE);
   lsm6dsm_sh_master_set(&dev_ctx, PROPERTY_DISABLE);
 
   for(i = 0; i < len; i++)
-    data[i] = sh_reg.byte[i];
+    data[i] = sh_reg[i];
 
   return mm_error;
 }
@@ -274,7 +274,7 @@ static int32_t lsm6dsm_read_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
   uint8_t drdy;
   uint8_t i;
   lsm6dsm_reg_t reg_endop;
-  lsm6dsm_emb_sh_read_t sh_reg;
+  uint8_t sh_reg[18];
   lsm6dsm_sh_cfg_read_t val = {
     .slv_add = LIS2MDL_I2C_ADD,
     .slv_subadd = reg,
@@ -315,13 +315,13 @@ static int32_t lsm6dsm_read_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
   } while (!reg_endop.func_src1.sensorhub_end_op);
 
   lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_OFF);
-  lsm6dsm_sh_read_data_raw_get(&dev_ctx, &sh_reg);
+  lsm6dsm_sh_read_data_raw_get(&dev_ctx,(lsm6dsm_emb_sh_read_t*) &sh_reg);
 
   lsm6dsm_func_en_set(&dev_ctx, PROPERTY_DISABLE);
   lsm6dsm_sh_master_set(&dev_ctx, PROPERTY_DISABLE);
 
   for(i = 0; i < len; i++)
-    data[i] = sh_reg.byte[i];
+    data[i] = sh_reg[i];
 
   return mm_error;
 }
@@ -521,8 +521,8 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6dsm(void)
 
   while(1)
   {
-	uint8_t drdy;
-    lsm6dsm_emb_sh_read_t emb_sh;
+    uint8_t drdy;
+    uint8_t emb_sh[18];
 
     /*
      * Read output only if new value is available
@@ -536,11 +536,11 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6dsm(void)
       memset(data_raw_acceleration.u8bit, 0x0, 3 * sizeof(int16_t));
       lsm6dsm_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
       acceleration_mg[0] =
-        LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[0]);
+        lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
       acceleration_mg[1] =
-        LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[1]);
+        lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
       acceleration_mg[2] =
-        LSM6DSM_FROM_FS_2g_TO_mg(data_raw_acceleration.i16bit[2]);
+        lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
 
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
@@ -550,13 +550,13 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6dsm(void)
        * Read magnetic data from sensor hub register: XL trigger a new read to
        * mag sensor
        */
-      lsm6dsm_sh_read_data_raw_get(&dev_ctx, &emb_sh);
+      lsm6dsm_sh_read_data_raw_get(&dev_ctx, (lsm6dsm_emb_sh_read_t*)&emb_sh);
       memcpy((uint8_t *)&data_raw_magnetic,
-             (uint8_t *)&emb_sh.byte[0],
+             (uint8_t *)&emb_sh[0],
              OUT_XYZ_SIZE);
-      magnetic_mG[0] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[0]);
-      magnetic_mG[1] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[1]);
-      magnetic_mG[2] = LIS2MDL_FROM_LSB_TO_mG(data_raw_magnetic.i16bit[2]);
+      magnetic_mG[0] = lis2mdl_from_lsb_to_mgauss(data_raw_magnetic.i16bit[0]);
+      magnetic_mG[1] = lis2mdl_from_lsb_to_mgauss(data_raw_magnetic.i16bit[1]);
+      magnetic_mG[2] = lis2mdl_from_lsb_to_mgauss(data_raw_magnetic.i16bit[2]);
 
       sprintf((char*)tx_buffer, "Mag [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
@@ -568,13 +568,13 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6dsm(void)
        * because is a combo sensor
        */
       memcpy(data_raw_pressure.u8bit,
-             (uint8_t *)&emb_sh.byte[6],
+             (uint8_t *)&emb_sh[6],
              PRESS_OUT_XYZ_SIZE);
       memcpy(data_raw_temperature.u8bit,
-             (uint8_t *)&emb_sh.byte[9],
+             (uint8_t *)&emb_sh[9],
              TEMP_OUT_XYZ_SIZE);
-      pressure_hPa = LPS22HB_FROM_LSB_TO_hPa(data_raw_pressure.i32bit);
-      temperature_degC = LPS22HB_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
+      pressure_hPa = lps22hb_from_lsb_to_hpa(data_raw_pressure.i32bit);
+      temperature_degC = lps22hb_from_lsb_to_degc(data_raw_temperature.i16bit);
 
       sprintf((char*)tx_buffer, "Press [hPa]:%4.2f\t\r\n", pressure_hPa);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
@@ -591,11 +591,11 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6dsm(void)
       memset(data_raw_angular_rate.u8bit, 0x0, 3 * sizeof(int16_t));
       lsm6dsm_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
       angular_rate_mdps[0] =
-        LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[0]);
+        lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[0]);
       angular_rate_mdps[1] =
-        LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[1]);
+        lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[1]);
       angular_rate_mdps[2] =
-        LSM6DSM_FROM_FS_2000dps_TO_mdps(data_raw_angular_rate.i16bit[2]);
+        lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
 
       sprintf((char*)tx_buffer,
               "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",

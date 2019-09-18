@@ -9,31 +9,15 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
+ ******************************************************************************
  */
 
 /*
@@ -83,6 +67,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
+#include <stdio.h>
 #include "stm32f4xx_hal.h"
 #include <lsm6dsm_reg.h>
 #include <lps22hb_reg.h>
@@ -95,6 +80,21 @@
 #elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
 #include "usart.h"
 #endif
+  
+typedef union{
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
+} axis3bit16_t;
+
+typedef union{
+  int16_t i16bit;
+  uint8_t u8bit[2];
+} axis1bit16_t;
+
+typedef union{
+  int32_t i32bit;
+  uint8_t u8bit[4];
+} axis1bit32_t;
 
 /* Private macro -------------------------------------------------------------*/
 #define OUT_XYZ_SIZE		6
@@ -132,9 +132,9 @@ static axis1bit32_t data_raw_pressure;
 static axis1bit16_t data_raw_temperature;
 static axis3bit16_t data_raw_acceleration;
 static axis3bit16_t data_raw_angular_rate;
-static lsm6dsm_ctx_t dev_ctx;
-static lps22hb_ctx_t press_ctx;
-static lis2mdl_ctx_t mag_ctx;
+static stmdev_ctx_t dev_ctx;
+static stmdev_ctx_t press_ctx;
+static stmdev_ctx_t mag_ctx;
 
 /*
  * 6dsl Accelerometer test parameters
@@ -285,8 +285,8 @@ static void LSM6DSL_SH_Read_FIFO_Pattern(void)
       lsm6dsm_fifo_raw_data_get(&dev_ctx, dummy, OUT_XYZ_SIZE);
       memcpy(data_raw_pressure.u8bit, &dummy[0], PRESS_OUT_XYZ_SIZE);
       memcpy(data_raw_temperature.u8bit, &dummy[3], TEMP_OUT_XYZ_SIZE);
-      pressure_hPa = LPS22HB_FROM_LSB_TO_hPa(data_raw_pressure.i32bit);
-      temperature_degC = LPS22HB_FROM_LSB_TO_degC(data_raw_temperature.i16bit);
+      pressure_hPa = lps22hb_from_lsb_to_hpa(data_raw_pressure.i32bit);
+      temperature_degC = lps22hb_from_lsb_to_degc(data_raw_temperature.i16bit);
 
       sprintf((char*)tx_buffer, "Press [hPa]:%4.2f\t\r\n", pressure_hPa);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
@@ -680,7 +680,7 @@ static int32_t lsm6dsm_write_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
  * enable BDU
  * set ODR to 50 Hz
  */
-static void configure_lis2mdl(lis2mdl_ctx_t* ctx)
+static void configure_lis2mdl(stmdev_ctx_t* ctx)
 {
   lsm6dsm_sh_cfg_read_t val =
   {
@@ -707,7 +707,7 @@ static void configure_lis2mdl(lis2mdl_ctx_t* ctx)
  * set ODR to 50 Hz
  * enable BDU
  */
-static void configure_lps22hb(lps22hb_ctx_t* ctx)
+static void configure_lps22hb(stmdev_ctx_t* ctx)
 {
   lsm6dsm_sh_cfg_read_t val =
   {
