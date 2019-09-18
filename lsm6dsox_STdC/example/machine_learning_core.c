@@ -7,31 +7,15 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
+ ******************************************************************************
  */
 
 /*
@@ -101,7 +85,7 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 void lsm6dsox_mlc(void)
 {
   /* Variable declaration */
-  lsm6dsox_ctx_t              dev_ctx;
+  stmdev_ctx_t              dev_ctx;
   lsm6dsox_pin_int1_route_t   pin_int1_route;
   lsm6dsox_all_sources_t      status;
   uint8_t                     mlc_out[8];
@@ -124,13 +108,13 @@ void lsm6dsox_mlc(void)
   } while (rst);
 
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(lsm6dsox_vibration_monitoring) / 
+  for ( i = 0; i < (sizeof(lsm6dsox_vibration_monitoring) /
                     sizeof(ucf_line_t) ); i++ ){
-   
-    lsm6dsox_write_reg(&dev_ctx, lsm6dsox_vibration_monitoring[i].address, 
-                       (uint8_t*)&lsm6dsox_vibration_monitoring[i].data, 1); 
-      
-  }  
+  
+    lsm6dsox_write_reg(&dev_ctx, lsm6dsox_vibration_monitoring[i].address,
+                       (uint8_t*)&lsm6dsox_vibration_monitoring[i].data, 1);
+     
+  } 
   /* End Machine Learning Core configuration */
 
   /* At this point the device is ready to run but if you need you can also
@@ -140,10 +124,10 @@ void lsm6dsox_mlc(void)
    * to AN5259 "LSM6DSOX: Machine Learning Core".
    */
 
-  /* Turn off Sensors */ 
+  /* Turn off Sensors */
   lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_OFF);
   lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_OFF);
-  
+ 
   /* Disable I3C interface */
   lsm6dsox_i3c_disable_set(&dev_ctx, LSM6DSOX_I3C_DISABLE);
 
@@ -162,24 +146,24 @@ void lsm6dsox_mlc(void)
   /* Configure interrupt pin mode notification */
   lsm6dsox_int_notification_set(&dev_ctx, LSM6DSOX_BASE_PULSED_EMB_LATCHED);
 
-  /* Set Output Data Rate. 
+  /* Set Output Data Rate.
    * Selected data rate have to be equal or greater with respect
-   * with MLC data rate. 
+   * with MLC data rate.
    */
   lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_26Hz);
-  lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_OFF); 
-  
+  lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_OFF);
+ 
   /* Main loop */
   while(1)
   {
     /* Read interrupt source registers in polling mode (no int) */
     lsm6dsox_all_sources_get(&dev_ctx, &status);
     if (status.mlc_status.is_mlc1){
-      
+     
       lsm6dsox_mlc_out_get(&dev_ctx, mlc_out);
       sprintf((char*)tx_buffer, "Detect MLC interrupt code: %02X\r\n",
               mlc_out[0]);
-        
+       
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

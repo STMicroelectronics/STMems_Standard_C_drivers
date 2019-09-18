@@ -1,9 +1,10 @@
 /*
  ******************************************************************************
- * @file    single_double_tap.c
+ * @file    compressed_fifo.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect single and double tap
- *          from sensor.
+ * @brief   This file show the simplest way to configure compressed FIFO and
+ *          to retrieve acc and gyro data. This sample use a fifo utility
+ *          library tool for FIFO decompression.
  *
  ******************************************************************************
  * @attention
@@ -67,9 +68,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-
 #include "stm32f4xx_hal.h"
 #include <lsm6dsox_reg.h>
+#include <fifo_utility.h>
 #include "gpio.h"
 #include "i2c.h"
 #if defined(STEVAL_MKI109V3)
@@ -80,10 +81,21 @@
 #endif
 
 /* Private macro -------------------------------------------------------------*/
+/*
+ * Select FIFO samples watermark, max value is 512
+ * in FIFO are stored acc, gyro and timestamp samples
+ */
+#define FIFO_WATERMARK    10
+#define FIFO_COMPRESSION  3
+#define SLOT_NUMBER      (FIFO_WATERMARK * FIFO_COMPRESSION)
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
+static st_fifo_raw_slot raw_slot[SLOT_NUMBER];
+static st_fifo_out_slot out_slot[SLOT_NUMBER];
+static st_fifo_out_slot acc_slot[SLOT_NUMBER];
+static st_fifo_out_slot gyr_slot[SLOT_NUMBER];
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -102,172 +114,163 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
+sensor_data_t sensor_data;
+
 /* Main Example --------------------------------------------------------------*/
-void example_main_double_tap_lsm6dsox(void)
+void example_compressed_fifo_simple_lsm6dsox(void)
 {
   stmdev_ctx_t dev_ctx;
+  uint16_t out_slot_size;
 
-  /*
-   * Uncomment to configure INT 1
-   */
+  /* Uncomment to configure INT 1 */
   //lsm6dsox_pin_int1_route_t int1_route;
 
-  /*
-   * Uncomment to configure INT 2
-   */
-  lsm6dsox_pin_int2_route_t int2_route;
+  /* Uncomment to configure INT 2 */
+  //lsm6dsox_pin_int2_route_t int2_route;
 
-  /*
-   *  Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
 
-  /*
-   * Init test platform
-   */
+  /* Init test platform */
   platform_init();
 
-  /*
-   *  Check device ID
-   */
+  /* Init utility for FIFO decompression */
+  st_fifo_init(0, 0, 0);
+
+  /* Check device ID */
   lsm6dsox_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSOX_ID)
     while(1);
 
-  /*
-   *  Restore default configuration
-   */
+  /* Restore default configuration */
   lsm6dsox_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lsm6dsox_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Disable I3C interface
-   */
+  /* Disable I3C interface */
   lsm6dsox_i3c_disable_set(&dev_ctx, LSM6DSOX_I3C_DISABLE);
 
-  /*
-   * Set XL Output Data Rate to 417 Hz
-   */
-  lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_417Hz);
+  /* Enable Block Data Update */
+  lsm6dsox_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Set 2g full XL scale
-   */
+  /* Set full scale */
   lsm6dsox_xl_full_scale_set(&dev_ctx, LSM6DSOX_2g);
+  lsm6dsox_gy_full_scale_set(&dev_ctx, LSM6DSOX_2000dps);
 
   /*
-   * Enable Tap detection on X, Y, Z
+   * Set FIFO watermark (number of unread sensor data TAG + 6 bytes
+   * stored in FIFO) to FIFO_WATERMARK samples
    */
-  lsm6dsox_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6dsox_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6dsox_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsox_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
+
+  /* Set FIFO batch XL/Gyro ODR to 12.5Hz */
+  lsm6dsox_fifo_xl_batch_set(&dev_ctx, LSM6DSOX_XL_BATCHED_AT_12Hz5);
+  lsm6dsox_fifo_gy_batch_set(&dev_ctx, LSM6DSOX_GY_BATCHED_AT_12Hz5);
+
+  /* Set FIFO mode to Stream mode (aka Continuous Mode) */
+  lsm6dsox_fifo_mode_set(&dev_ctx, LSM6DSOX_STREAM_MODE);
+
+  /* Enable FIFO compression on all samples */
+  lsm6dsox_compression_algo_set(&dev_ctx, LSM6DSOX_CMP_DISABLE);
+
+  /* Enable drdy 75 μs pulse: uncomment if interrupt must be pulsed */
+  //lsm6dsox_data_ready_mode_set(&dev_ctx, LSM6DSOX_DRDY_PULSED);
 
   /*
-   * Set Tap threshold to 01000b, therefore the tap threshold
-   * is 500 mg (= 12 * FS_XL / 32 )
-   */
-  lsm6dsox_tap_threshold_x_set(&dev_ctx, 0x08);
-  lsm6dsox_tap_threshold_y_set(&dev_ctx, 0x08);
-  lsm6dsox_tap_threshold_z_set(&dev_ctx, 0x08);
-
-  /*
-   * Configure Single and Double Tap parameter
-   *
-   * For the maximum time between two consecutive detected taps, the DUR
-   * field of the INT_DUR2 register is set to 0111b, therefore the Duration
-   * time is 538.5 ms (= 7 * 32 * ODR_XL)
-   *
-   * The SHOCK field of the INT_DUR2 register is set to 11b, therefore
-   * the Shock time is 57.36 ms (= 3 * 8 * ODR_XL)
-   *
-   * The QUIET field of the INT_DUR2 register is set to 11b, therefore
-   * the Quiet time is 28.68 ms (= 3 * 4 * ODR_XL)
-   */
-  lsm6dsox_tap_dur_set(&dev_ctx, 0x07);
-  lsm6dsox_tap_quiet_set(&dev_ctx, 0x03);
-  lsm6dsox_tap_shock_set(&dev_ctx, 0x03);
-
-  /*
-   * Enable Single and Double Tap detection.
-   */
-  lsm6dsox_tap_mode_set(&dev_ctx, LSM6DSOX_BOTH_SINGLE_DOUBLE);
-
-  /*
-   * For single tap only uncomments next function
-   */
-  //lsm6dsox_tap_mode_set(&dev_ctx, LSM6DSOX_ONLY_SINGLE);
-
-  /*
-   * Enable interrupt generation on Single and Double Tap INT1 pin
+   * FIFO watermark interrupt routed on INT1 pin
+   * WARNING: INT1 pin is used by sensor to switch in I3C mode.
    */
   //lsm6dsox_pin_int1_route_get(&dev_ctx, &int1_route);
-
-  /*
-   * For single tap only comment next function
-   */
-  //int1_route.reg.md1_cfg.int1_double_tap = PROPERTY_ENABLE;
-  //int1_route.reg.md1_cfg.int1_single_tap = PROPERTY_ENABLE;
+  //int1_route.reg.int1_ctrl.int1_fifo_th = PROPERTY_ENABLE;
   //lsm6dsox_pin_int1_route_set(&dev_ctx, &int1_route);
 
-  /*
-   * Uncomment if interrupt generation on Single and Double Tap INT2 pin
-   */
-  lsm6dsox_pin_int2_route_get(&dev_ctx, &int2_route);
+  /* FIFO watermark interrupt routed on INT2 pin */
+  //lsm6dsox_pin_int2_route_get(&dev_ctx, &int2_route);
+  //int2_route.reg.int2_ctrl.int2_fifo_th = PROPERTY_ENABLE;
+  //lsm6dsox_pin_int2_route_set(&dev_ctx, &int2_route);
 
-  /*
-   * For single tap only comment next function
-   */
-  int2_route.md2_cfg.int2_double_tap = PROPERTY_ENABLE;
-  int2_route.md2_cfg.int2_single_tap = PROPERTY_ENABLE;
-  lsm6dsox_pin_int2_route_set(&dev_ctx, &int2_route);
+  /* Set Output Data Rate */
+  lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_12Hz5);
+  lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_12Hz5);
+  lsm6dsox_fifo_timestamp_decimation_set(&dev_ctx, LSM6DSOX_DEC_1);
+  lsm6dsox_timestamp_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Wait Events
-   */
+  /* Wait samples */
   while(1)
   {
-    lsm6dsox_all_sources_t all_source;
+    uint16_t num = 0;
+    uint8_t wmflag = 0;
+    uint16_t slots = 0;
+    uint16_t acc_samples;
+    uint16_t gyr_samples;
 
-    /*
-     * Check if Tap events
-     */
-    lsm6dsox_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.tap_src.double_tap)
+  /* Read watermark flag */
+    lsm6dsox_fifo_wtm_flag_get(&dev_ctx, &wmflag);
+    if (wmflag > 0)
     {
-      sprintf((char*)tx_buffer, "D-Tap: ");
-      if (all_source.tap_src.x_tap)
-        strcat((char*)tx_buffer, "x-axis");
-      else if (all_source.tap_src.y_tap)
-        strcat((char*)tx_buffer, "y-axis");
-      else
-        strcat((char*)tx_buffer, "z-axis");
-      if (all_source.tap_src.tap_sign)
-        strcat((char*)tx_buffer, " negative");
-      else
-        strcat((char*)tx_buffer, " positive");
-      strcat((char*)tx_buffer, " sign\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
+      /* Read number of samples in FIFO */
+      lsm6dsox_fifo_data_level_get(&dev_ctx, &num);
+      while(num--)
+      {
+        /*
+         * Read FIFO sensor tag
+         *
+         * To reorder data samples in FIFO is needed the register
+         * LSM6DSOX_FIFO_DATA_OUT_TAG, including tag counter and parity.
+         */
+        lsm6dsox_read_reg(&dev_ctx, LSM6DSOX_FIFO_DATA_OUT_TAG,
+                         (uint8_t *)&raw_slot[slots].fifo_data_out[0], 1);
 
-    if (all_source.tap_src.single_tap)
-    {
-      sprintf((char*)tx_buffer, "S-Tap: ");
-      if (all_source.tap_src.x_tap)
-        strcat((char*)tx_buffer, "x-axis");
-      else if (all_source.tap_src.y_tap)
-        strcat((char*)tx_buffer, "y-axis");
-      else
-        strcat((char*)tx_buffer, "z-axis");
-      if (all_source.tap_src.tap_sign)
-        strcat((char*)tx_buffer, " negative");
-      else
-        strcat((char*)tx_buffer, " positive");
-      strcat((char*)tx_buffer, " sign\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+        /* Read FIFO sensor value */
+        lsm6dsox_fifo_out_raw_get(&dev_ctx, &raw_slot[slots].fifo_data_out[1]);
+        slots++;
+      }
+
+      /* Uncompress FIFO samples and filter based on sensor type */
+      st_fifo_decompress(out_slot, raw_slot, &out_slot_size, slots);
+      st_fifo_sort(out_slot, out_slot_size);
+      acc_samples = st_fifo_get_sensor_occurrence(out_slot,
+                                                  out_slot_size,
+                                                  ST_FIFO_ACCELEROMETER);
+      gyr_samples = st_fifo_get_sensor_occurrence(out_slot,
+                                                  out_slot_size,
+                                                  ST_FIFO_GYROSCOPE);
+      /* Count how many acc and gyro samples */
+      st_fifo_extract_sensor(acc_slot, out_slot,out_slot_size,
+                             ST_FIFO_ACCELEROMETER);
+      st_fifo_extract_sensor(gyr_slot, out_slot, out_slot_size,
+                             ST_FIFO_GYROSCOPE);
+
+      for (int i = 0; i < acc_samples; i++)
+      {
+        memcpy( sensor_data.raw_data, acc_slot[i].raw_data, sizeof(sensor_data) );
+
+        sprintf((char*)tx_buffer, "ACC:\t%u\t%d\t%4.2f\t%4.2f\t%4.2f\r\n",
+                (unsigned int)acc_slot[i].timestamp,
+                 acc_slot[i].sensor_tag,
+                 lsm6dsox_from_fs2_to_mg(sensor_data.data[0]),
+                 lsm6dsox_from_fs2_to_mg(sensor_data.data[1]),
+                 lsm6dsox_from_fs2_to_mg(sensor_data.data[2]));
+        tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      }
+
+      for (int i = 0; i < gyr_samples; i++)
+      {
+        memcpy( sensor_data.raw_data, gyr_slot[i].raw_data, sizeof(sensor_data) );
+
+        sprintf((char*)tx_buffer, "GYR:\t%u\t%d\t%4.2f\t%4.2f\t%4.2f\r\n",
+                (unsigned int)gyr_slot[i].timestamp,
+                gyr_slot[i].sensor_tag,
+                lsm6dsox_from_fs2000_to_mdps(sensor_data.data[0]),
+                lsm6dsox_from_fs2000_to_mdps(sensor_data.data[1]),
+                lsm6dsox_from_fs2000_to_mdps(sensor_data.data[2]));
+        tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      }
+
+      slots = 0;
     }
   }
 }
@@ -287,7 +290,7 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 {
   if (handle == &hi2c1)
   {
-    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_L, reg,
+    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_H, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
 #ifdef STEVAL_MKI109V3
@@ -317,7 +320,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 {
   if (handle == &hi2c1)
   {
-    HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_L, reg,
+    HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_H, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
 #ifdef STEVAL_MKI109V3

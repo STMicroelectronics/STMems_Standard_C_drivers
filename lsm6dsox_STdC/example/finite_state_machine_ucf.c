@@ -8,31 +8,15 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
+ ******************************************************************************
  */
 
 /*
@@ -73,7 +57,7 @@
  *
  *   --->  Filename: wakeup.ucf <----
  *
- * STEVAL-MKI196V1 (LSM6DSOXXX)
+ * STEVAL-MKI196V1 (LSM6DSOX)
  * Ac 5F 02 // Routing of embedded functions event on INT1.
  * Ac 01 80 // Embedded functions configuration registers.
  * Ac 04 00
@@ -253,7 +237,7 @@
  */
 
 /* Program: wakeup [ array created from ".ucf" file]*/
-const uint8_t lsm6soxx_prg_wakeup[] = {
+const uint8_t lsm6so_prg_wakeup[] = {
       0x50, 0x40, 0x12, 0x00, 0x0C, 0x00, 0x00, 0x3C, 0x66, 0x2A, 0x02, 0x00,
       0x41, 0x75, 0x10, 0x10, 0x22, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
       0x00, 0x00, 0x06, 0x00, 0x06, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
@@ -293,7 +277,7 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 void lsm6dsox_fsm_ucf(void)
 {
   /* Variable declaration */
-  lsm6dsox_ctx_t              dev_ctx;
+  stmdev_ctx_t              dev_ctx;
   lsm6dsox_pin_int1_route_t   pin_int1_route;
   lsm6dsox_emb_fsm_enable_t   fsm_enable;
   lsm6dsox_all_sources_t      status;
@@ -323,7 +307,7 @@ void lsm6dsox_fsm_ucf(void)
 
   /* Set full scale */
   lsm6dsox_xl_full_scale_set(&dev_ctx, LSM6DSOX_2g);
-  //lsm6dsox_gy_full_scale_set(&dev_ctx, LSM6DSOXXX_2000dps); /*gyro not used*/
+  //lsm6dsox_gy_full_scale_set(&dev_ctx, LSM6DSOX_2000dps); /*gyro not used*/
 
   /* Route signals on interrupt pin 1 */
   lsm6dsox_pin_int1_route_get(&dev_ctx, &pin_int1_route);
@@ -362,9 +346,9 @@ void lsm6dsox_fsm_ucf(void)
   fsm_addr = 0x0400;
 
   /* wakeup */
-  lsm6dsox_ln_pg_write(&dev_ctx, fsm_addr, (uint8_t*)lsm6soxx_prg_wakeup,
-                      sizeof(lsm6soxx_prg_wakeup));
-  fsm_addr += sizeof(lsm6soxx_prg_wakeup);
+  lsm6dsox_ln_pg_write(&dev_ctx, fsm_addr, (uint8_t*)lsm6so_prg_wakeup,
+                      sizeof(lsm6so_prg_wakeup));
+  fsm_addr += sizeof(lsm6so_prg_wakeup);
 
  /*
   * End Finite State Machine configuration
