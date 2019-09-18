@@ -7,31 +7,15 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
+ ******************************************************************************
  */
 
 /*
@@ -81,6 +65,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
+#include <stdio.h>
 #include "stm32f4xx_hal.h"
 #include "lis2de12_reg.h"
 #include "gpio.h"
@@ -91,6 +76,16 @@
 #elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
 #include "usart.h"
 #endif
+
+typedef union{
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
+} axis3bit16_t;
+
+typedef union{
+  int16_t i16bit;
+  uint8_t u8bit[2];
+} axis1bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
 
@@ -122,11 +117,11 @@ static void platform_init(void);
 void example_main_lis2de12(void)
 {
   /* Initialize mems driver interface */
-  lis2de12_ctx_t dev_ctx;
+  stmdev_ctx_t dev_ctx;
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1; 
+  dev_ctx.handle = &hi2c1;
 
   /* Initialize platform specific hardware */
   platform_init();
@@ -147,12 +142,12 @@ void example_main_lis2de12(void)
   /* Set Output Data Rate to 1Hz */
   lis2de12_data_rate_set(&dev_ctx, LIS2DE12_ODR_1Hz);
 
-  /* Set full scale to 2g */ 
+  /* Set full scale to 2g */
   lis2de12_full_scale_set(&dev_ctx, LIS2DE12_2g);
 
-  /* Enable temperature sensor */  
+  /* Enable temperature sensor */ 
   lis2de12_temperature_meas_set(&dev_ctx, LIS2DE12_TEMP_ENABLE);
- 
+
   /* Read samples in polling mode (no int) */
   while(1)
   {
@@ -171,21 +166,21 @@ void example_main_lis2de12(void)
         lis2de12_from_fs2_to_mg(data_raw_acceleration.i16bit[1]);
       acceleration_mg[2] =
         lis2de12_from_fs2_to_mg(data_raw_acceleration.i16bit[2]);
-     
+    
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
-   
-    lis2de12_temp_data_ready_get(&dev_ctx, &reg.byte);     
-    if (reg.byte)     
+  
+    lis2de12_temp_data_ready_get(&dev_ctx, &reg.byte);    
+    if (reg.byte)    
     {
       /* Read temperature data */
       memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
       lis2de12_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
       temperature_degC =
         lis2de12_from_lsb_to_celsius(data_raw_temperature.i16bit);
-      
+     
       sprintf((char*)tx_buffer,
               "Temperature [degC]:%6.2f\r\n",
               temperature_degC);
