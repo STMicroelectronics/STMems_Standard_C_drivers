@@ -7,31 +7,15 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2018 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
+ ******************************************************************************
  */
 
 /*
@@ -81,6 +65,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
+#include <stdio.h>
 #include "stm32f4xx_hal.h"
 #include "iis2mdc_reg.h"
 #include "gpio.h"
@@ -91,6 +76,16 @@
 #elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
 #include "usart.h"
 #endif
+
+typedef union{
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
+} axis3bit16_t;
+
+typedef union{
+  int16_t i16bit;
+  uint8_t u8bit[2];
+} axis1bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
 
@@ -124,10 +119,10 @@ void example_main_iis2mdc(void)
   /*
    *  Initialize mems driver interface
    */
-  iis2mdc_ctx_t dev_ctx;
+  stmdev_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;  
+  dev_ctx.handle = &hi2c1; 
 
   /*
    * Initialize platform specific hardware
@@ -158,17 +153,17 @@ void example_main_iis2mdc(void)
   iis2mdc_data_rate_set(&dev_ctx, IIS2MDC_ODR_10Hz);
   /*
    * Set / Reset sensor mode
-   */  
+   */ 
   iis2mdc_set_rst_mode_set(&dev_ctx, IIS2MDC_SENS_OFF_CANC_EVERY_ODR);
   /*
    * Enable temperature compensation
-   */  
+   */ 
   iis2mdc_offset_temp_comp_set(&dev_ctx, PROPERTY_ENABLE);
   /*
    * Set device in continuos mode
-   */   
+   */  
   iis2mdc_operating_mode_set(&dev_ctx, IIS2MDC_CONTINUOUS_MODE);
-  
+ 
   /*
    * Read samples in polling mode (no int)
    */
@@ -188,16 +183,16 @@ void example_main_iis2mdc(void)
       magnetic_mG[0] = IIS2MDC_FROM_LSB_TO_mG( data_raw_magnetic.i16bit[0]);
       magnetic_mG[1] = IIS2MDC_FROM_LSB_TO_mG( data_raw_magnetic.i16bit[1]);
       magnetic_mG[2] = IIS2MDC_FROM_LSB_TO_mG( data_raw_magnetic.i16bit[2]);
-      
+     
       sprintf((char*)tx_buffer, "Magnetic field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
       tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
-      
+     
       /* Read temperature data */
       memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
       iis2mdc_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
       temperature_degC = IIS2MDC_FROM_LSB_TO_degC( data_raw_temperature.i16bit );
-       
+      
       sprintf((char*)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC );
       tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
     }
