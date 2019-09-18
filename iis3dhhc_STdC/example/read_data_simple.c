@@ -8,44 +8,86 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2017 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright notice,
- *      this list of conditions and the following disclaimer in the documentation
- *      and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its contributors
- *      may be used to endorse or promote products derived from this software
- *      without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************
+ */
+
+/*
+ * This example was developed using the following STMicroelectronics
+ * evaluation boards:
+ *
+ * - STEVAL_MKI109V3
+ * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ *
+ * and STM32CubeMX tool with STM32CubeF4 MCU Package
+ *
+ * Used interfaces:
+ *
+ * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
+ *                    - Sensor side: SPI(Default) / I2C(supported)
+ *
+ * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
+ *                                       - I2C(Default) / SPI(N/A)
+ *
+ * If you need to run this example on a different hardware platform a
+ * modification of the functions: `platform_write`, `platform_read`,
+ * `tx_com` and 'platform_init' is required.
  *
  */
 
+/* STMicroelectronics evaluation boards definition
+ *
+ * Please uncomment ONLY the evaluation boards in use.
+ * If a different hardware is used please comment all
+ * following target board and redefine yours.
+ */
+//#define STEVAL_MKI109V3
+#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+
+#if defined(STEVAL_MKI109V3)
+/* MKI109V3: Define communication interface */
+#define SENSOR_BUS hspi2
+
+/* MKI109V3: Vdd and Vddio power supply values */
+#define PWM_3V3 915
+
+#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
+#define SENSOR_BUS hi2c1
+
+#endif
+
 /* Includes ------------------------------------------------------------------*/
-#include "..\..\stdc\iis3dhhc_STdC\driver\iis3dhhc_reg.h"
+
 #include <string.h>
-
-#define MKI109V2
-
-#ifdef MKI109V2
-#include "stm32f1xx_hal.h"
+#include <stdio.h>
+#include "stm32f4xx_hal.h"
+#include "iis3dhhc_reg.h"
+#include "gpio.h"
+#include "i2c.h"
+#if defined(STEVAL_MKI109V3)
 #include "usbd_cdc_if.h"
 #include "spi.h"
-#include "i2c.h"
+#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+#include "usart.h"
 #endif
+
+typedef union{
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
+} axis3bit16_t;
+
+typedef union{
+  int16_t i16bit;
+  uint8_t u8bit[2];
+} axis1bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
 #ifdef MKI109V2
@@ -68,74 +110,18 @@ static uint8_t tx_buffer[TX_BUF_DIM];
 /* Extern variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
-
 /*
- *   Replace the functions "platform_write" and "platform_read" with your
- *   platform specific read and write function.
- *   This example use an STM32 evaluation board and CubeMX tool.
- *   In this case the "*handle" variable is useful in order to select the
- *   correct interface but the usage of "*handle" is not mandatory.
+ *   WARNING:
+ *   Functions declare in this section are defined at the end of this file
+ *   and are strictly related to the hardware platform used.
+ *
  */
-
-static int32_t platform_write(void *handle, uint8_t Reg, uint8_t *Bufp,
-                              uint16_t len)
-{
-#ifdef MKI109V2  
-  if (handle == &hspi2)
-  {
-    /* enable auto incremented in multiple read/write commands */
-    HAL_GPIO_WritePin(CS_SPI2_GPIO_Port, CS_SPI2_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &Reg, 1, 1000);
-    HAL_SPI_Transmit(handle, Bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_SPI2_GPIO_Port, CS_SPI2_Pin, GPIO_PIN_SET);
-  }
-  else if (handle == &hspi1)
-  {
-    /* enable auto incremented in multiple read/write commands */
-    HAL_GPIO_WritePin(CS_SPI1_GPIO_Port, CS_SPI1_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &Reg, 1, 1000);
-    HAL_SPI_Transmit(handle, Bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_SPI1_GPIO_Port, CS_SPI1_Pin, GPIO_PIN_SET);
-  }
-#endif
-  return 0;
-}
-
-static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
-                             uint16_t len)
-{
-#ifdef MKI109V2   
-  if (handle == &hspi2)
-  {
-    /* enable auto incremented in multiple read/write commands */
-    Reg |= 0x80;
-    HAL_GPIO_WritePin(CS_DEV_GPIO_Port, CS_DEV_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &Reg, 1, 1000);
-    HAL_SPI_Receive(handle, Bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_DEV_GPIO_Port, CS_DEV_Pin, GPIO_PIN_SET);
-  }
-  else
-  {
-    /* enable auto incremented in multiple read/write commands */
-    Reg |= 0x80;    
-    HAL_GPIO_WritePin(CS_RF_GPIO_Port, CS_RF_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &Reg, 1, 1000);
-    HAL_SPI_Receive(handle, Bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_RF_GPIO_Port, CS_RF_Pin, GPIO_PIN_SET);
-  }
-#endif  
-  return 0;
-}
-
-/*
- *  Function to print messages
- */
-static void tx_com( uint8_t *tx_buffer, uint16_t len )
-{
-  #ifdef MKI109V2  
-  CDC_Transmit_FS( tx_buffer, len );
-  #endif
-}
+static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+                              uint16_t len);
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
+                             uint16_t len);
+static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
 
@@ -144,10 +130,16 @@ void example_main(void)
   /*
    *  Initialize mems driver interface
    */
-  iis3dhhc_ctx_t dev_ctx;
+  stmdev_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hspi2;  
+  dev_ctx.handle = &hspi2; 
+
+  /*
+   * Initialize platform specific hardware
+   */ 
+  platform_init();
+ 
   /*
    *  Check device ID
    */
@@ -172,9 +164,9 @@ void example_main(void)
   iis3dhhc_data_rate_set(&dev_ctx, IIS3DHHC_1kHz1);
   /*
    * Enable temperature compensation
-   */  
+   */ 
   iis3dhhc_offset_temp_comp_set(&dev_ctx, PROPERTY_ENABLE);
-  
+ 
   /*
    * Read samples in polling mode (no int)
    */
@@ -191,22 +183,102 @@ void example_main(void)
       /* Read magnetic field data */
       memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
       iis3dhhc_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = IIS3DHHC_FROM_LSB_TO_mg( data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = IIS3DHHC_FROM_LSB_TO_mg( data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = IIS3DHHC_FROM_LSB_TO_mg( data_raw_acceleration.i16bit[2]);
-      
+      acceleration_mg[0] = iis3dhhc_from_lsb_to_mg( data_raw_acceleration.i16bit[0]);
+      acceleration_mg[1] = iis3dhhc_from_lsb_to_mg( data_raw_acceleration.i16bit[1]);
+      acceleration_mg[2] = iis3dhhc_from_lsb_to_mg( data_raw_acceleration.i16bit[2]);
+     
       sprintf((char*)tx_buffer, "Magnetic field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
-      
+     
       /* Read temperature data */
       memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
       iis3dhhc_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = IIS3DHHC_FROM_LSB_TO_degC( data_raw_temperature.i16bit );
-       
+      temperature_degC = iis3dhhc_from_lsb_to_celsius( data_raw_temperature.i16bit );
+      
       sprintf((char*)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC );
       tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
     }
   }
 }
 
+/*
+ * @brief  Write generic device register (platform dependent)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to write
+ * @param  bufp      pointer to data to write in register reg
+ * @param  len       number of consecutive register to write
+ *
+ */
+static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+                              uint16_t len)
+{
+#ifdef STEVAL_MKI109V3
+  else if (handle == &hspi2)
+  {
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+    HAL_SPI_Transmit(handle, &reg, 1, 1000);
+    HAL_SPI_Transmit(handle, bufp, len, 1000);
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  }
+#endif
+  return 0;
+}
+
+/*
+ * @brief  Read generic device register (platform dependent)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to read
+ * @param  bufp      pointer to buffer that store the data read
+ * @param  len       number of consecutive register to read
+ *
+ */
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
+                             uint16_t len)
+{
+#ifdef STEVAL_MKI109V3
+  else if (handle == &hspi2)
+  {
+	/* Read command */
+	reg |= 0x80;
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+    HAL_SPI_Transmit(handle, &reg, 1, 1000);
+    HAL_SPI_Receive(handle, bufp, len, 1000);
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  }
+#endif
+  return 0;
+}
+
+/*
+ * @brief  Write generic device register (platform dependent)
+ *
+ * @param  tx_buffer     buffer to trasmit
+ * @param  len           number of byte to send
+ *
+ */
+static void tx_com(uint8_t *tx_buffer, uint16_t len)
+{
+  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+  HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
+  #endif
+  #ifdef STEVAL_MKI109V3
+  CDC_Transmit_FS(tx_buffer, len);
+  #endif
+}
+
+/*
+ * @brief  platform specific initialization (platform dependent)
+ */
+static void platform_init(void)
+{
+#ifdef STEVAL_MKI109V3
+  TIM3->CCR1 = PWM_3V3;
+  TIM3->CCR2 = PWM_3V3;
+  HAL_Delay(1000);
+#endif
+}
