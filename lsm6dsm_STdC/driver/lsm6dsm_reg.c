@@ -4732,7 +4732,7 @@ int32_t lsm6dsm_fifo_wtm_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm6dsm_fifo_over_run_get(lsm6dsm_ctx_t *ctx, uint8_t *val)
+int32_t lsm6dsm_fifo_over_run_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lsm6dsm_fifo_status2_t fifo_status2;
   int32_t ret;
