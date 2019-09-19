@@ -6,33 +6,16 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
-*/
+ ******************************************************************************
+ */
 
 #include "lps27hhw_reg.h"
 
@@ -63,7 +46,7 @@
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_read_reg(lps27hhw_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t lps27hhw_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                          uint16_t len)
 {
   int32_t ret;
@@ -81,7 +64,7 @@ int32_t lps27hhw_read_reg(lps27hhw_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_write_reg(lps27hhw_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t lps27hhw_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                            uint16_t len)
 {
   int32_t ret;
@@ -131,7 +114,7 @@ float_t lps27hhw_from_lsb_to_celsius(int16_t lsb)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_autozero_rst_set(lps27hhw_ctx_t *ctx, uint8_t val)
+int32_t lps27hhw_autozero_rst_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps27hhw_interrupt_cfg_t reg;
   int32_t ret;
@@ -152,7 +135,7 @@ int32_t lps27hhw_autozero_rst_set(lps27hhw_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_autozero_rst_get(lps27hhw_ctx_t *ctx, uint8_t *val)
+int32_t lps27hhw_autozero_rst_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps27hhw_interrupt_cfg_t reg;
   int32_t ret;
@@ -171,7 +154,7 @@ int32_t lps27hhw_autozero_rst_get(lps27hhw_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_autozero_set(lps27hhw_ctx_t *ctx, uint8_t val)
+int32_t lps27hhw_autozero_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps27hhw_interrupt_cfg_t reg;
   int32_t ret;
@@ -192,7 +175,7 @@ int32_t lps27hhw_autozero_set(lps27hhw_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_autozero_get(lps27hhw_ctx_t *ctx, uint8_t *val)
+int32_t lps27hhw_autozero_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps27hhw_interrupt_cfg_t reg;
   int32_t ret;
@@ -211,7 +194,7 @@ int32_t lps27hhw_autozero_get(lps27hhw_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_pressure_snap_rst_set(lps27hhw_ctx_t *ctx, uint8_t val)
+int32_t lps27hhw_pressure_snap_rst_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps27hhw_interrupt_cfg_t reg;
   int32_t ret;
@@ -232,7 +215,7 @@ int32_t lps27hhw_pressure_snap_rst_set(lps27hhw_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_pressure_snap_rst_get(lps27hhw_ctx_t *ctx, uint8_t *val)
+int32_t lps27hhw_pressure_snap_rst_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps27hhw_interrupt_cfg_t reg;
   int32_t ret;
@@ -251,7 +234,7 @@ int32_t lps27hhw_pressure_snap_rst_get(lps27hhw_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_pressure_snap_set(lps27hhw_ctx_t *ctx, uint8_t val)
+int32_t lps27hhw_pressure_snap_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps27hhw_interrupt_cfg_t reg;
   int32_t ret;
@@ -272,7 +255,7 @@ int32_t lps27hhw_pressure_snap_set(lps27hhw_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_pressure_snap_get(lps27hhw_ctx_t *ctx, uint8_t *val)
+int32_t lps27hhw_pressure_snap_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps27hhw_interrupt_cfg_t reg;
   int32_t ret;
@@ -291,7 +274,7 @@ int32_t lps27hhw_pressure_snap_get(lps27hhw_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_block_data_update_set(lps27hhw_ctx_t *ctx, uint8_t val)
+int32_t lps27hhw_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps27hhw_ctrl_reg1_t reg;
   int32_t ret;
@@ -312,7 +295,7 @@ int32_t lps27hhw_block_data_update_set(lps27hhw_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_block_data_update_get(lps27hhw_ctx_t *ctx, uint8_t *val)
+int32_t lps27hhw_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps27hhw_ctrl_reg1_t reg;
   int32_t ret;
@@ -331,7 +314,7 @@ int32_t lps27hhw_block_data_update_get(lps27hhw_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_data_rate_set(lps27hhw_ctx_t *ctx, lps27hhw_odr_t val)
+int32_t lps27hhw_data_rate_set(stmdev_ctx_t *ctx, lps27hhw_odr_t val)
 {
   lps27hhw_ctrl_reg1_t ctrl_reg1;
   lps27hhw_ctrl_reg2_t ctrl_reg2;
@@ -361,7 +344,7 @@ int32_t lps27hhw_data_rate_set(lps27hhw_ctx_t *ctx, lps27hhw_odr_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_data_rate_get(lps27hhw_ctx_t *ctx, lps27hhw_odr_t *val)
+int32_t lps27hhw_data_rate_get(stmdev_ctx_t *ctx, lps27hhw_odr_t *val)
 {
   lps27hhw_ctrl_reg1_t ctrl_reg1;
   lps27hhw_ctrl_reg2_t ctrl_reg2;
@@ -435,7 +418,7 @@ int32_t lps27hhw_data_rate_get(lps27hhw_ctx_t *ctx, lps27hhw_odr_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_pressure_ref_set(lps27hhw_ctx_t *ctx, uint8_t *buff)
+int32_t lps27hhw_pressure_ref_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = lps27hhw_write_reg(ctx, LPS27HHW_REF_P_L, buff, 2);
@@ -453,7 +436,7 @@ int32_t lps27hhw_pressure_ref_set(lps27hhw_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_pressure_ref_get(lps27hhw_ctx_t *ctx, uint8_t *buff)
+int32_t lps27hhw_pressure_ref_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret =  lps27hhw_read_reg(ctx, LPS27HHW_REF_P_L, buff, 2);
@@ -470,7 +453,7 @@ int32_t lps27hhw_pressure_ref_get(lps27hhw_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_pressure_offset_set(lps27hhw_ctx_t *ctx, uint8_t *buff)
+int32_t lps27hhw_pressure_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret =  lps27hhw_write_reg(ctx, LPS27HHW_RPDS_L, buff, 2);
@@ -488,7 +471,7 @@ int32_t lps27hhw_pressure_offset_set(lps27hhw_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_pressure_offset_get(lps27hhw_ctx_t *ctx, uint8_t *buff)
+int32_t lps27hhw_pressure_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret =  lps27hhw_read_reg(ctx, LPS27HHW_RPDS_L, buff, 2);
@@ -503,7 +486,7 @@ int32_t lps27hhw_pressure_offset_get(lps27hhw_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_all_sources_get(lps27hhw_ctx_t *ctx, lps27hhw_all_sources_t *val)
+int32_t lps27hhw_all_sources_get(stmdev_ctx_t *ctx, lps27hhw_all_sources_t *val)
 {
   int32_t ret;
 
@@ -528,7 +511,7 @@ int32_t lps27hhw_all_sources_get(lps27hhw_ctx_t *ctx, lps27hhw_all_sources_t *va
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_status_reg_get(lps27hhw_ctx_t *ctx, lps27hhw_status_t *val)
+int32_t lps27hhw_status_reg_get(stmdev_ctx_t *ctx, lps27hhw_status_t *val)
 {
   int32_t ret;
   ret =  lps27hhw_read_reg(ctx, LPS27HHW_STATUS, (uint8_t*) val, 1);
@@ -543,7 +526,7 @@ int32_t lps27hhw_status_reg_get(lps27hhw_ctx_t *ctx, lps27hhw_status_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_press_flag_data_ready_get(lps27hhw_ctx_t *ctx, uint8_t *val)
+int32_t lps27hhw_press_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps27hhw_status_t reg;
   int32_t ret;
@@ -562,7 +545,7 @@ int32_t lps27hhw_press_flag_data_ready_get(lps27hhw_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_temp_flag_data_ready_get(lps27hhw_ctx_t *ctx, uint8_t *val)
+int32_t lps27hhw_temp_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps27hhw_status_t reg;
   int32_t ret;
@@ -593,7 +576,7 @@ int32_t lps27hhw_temp_flag_data_ready_get(lps27hhw_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_pressure_raw_get(lps27hhw_ctx_t *ctx, uint8_t *buff)
+int32_t lps27hhw_pressure_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret =  lps27hhw_read_reg(ctx, LPS27HHW_PRESS_OUT_XL, buff, 3);
@@ -608,7 +591,7 @@ int32_t lps27hhw_pressure_raw_get(lps27hhw_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_temperature_raw_get(lps27hhw_ctx_t *ctx, uint8_t *buff)
+int32_t lps27hhw_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret =  lps27hhw_read_reg(ctx, LPS27HHW_TEMP_OUT_L, buff, 2);
@@ -623,7 +606,7 @@ int32_t lps27hhw_temperature_raw_get(lps27hhw_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_fifo_pressure_raw_get(lps27hhw_ctx_t *ctx, uint8_t *buff)
+int32_t lps27hhw_fifo_pressure_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret =  lps27hhw_read_reg(ctx, LPS27HHW_FIFO_DATA_OUT_PRESS_XL, buff, 3);
@@ -638,7 +621,7 @@ int32_t lps27hhw_fifo_pressure_raw_get(lps27hhw_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_fifo_temperature_raw_get(lps27hhw_ctx_t *ctx, uint8_t *buff)
+int32_t lps27hhw_fifo_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret =  lps27hhw_read_reg(ctx, LPS27HHW_FIFO_DATA_OUT_TEMP_L, buff, 2);
@@ -665,7 +648,7 @@ int32_t lps27hhw_fifo_temperature_raw_get(lps27hhw_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_device_id_get(lps27hhw_ctx_t *ctx, uint8_t *buff)
+int32_t lps27hhw_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret =  lps27hhw_read_reg(ctx, LPS27HHW_WHO_AM_I, buff, 1);
@@ -681,7 +664,7 @@ int32_t lps27hhw_device_id_get(lps27hhw_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_reset_set(lps27hhw_ctx_t *ctx, uint8_t val)
+int32_t lps27hhw_reset_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps27hhw_ctrl_reg2_t reg;
   int32_t ret;
@@ -703,7 +686,7 @@ int32_t lps27hhw_reset_set(lps27hhw_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_reset_get(lps27hhw_ctx_t *ctx, uint8_t *val)
+int32_t lps27hhw_reset_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps27hhw_ctrl_reg2_t reg;
   int32_t ret;
@@ -724,7 +707,7 @@ int32_t lps27hhw_reset_get(lps27hhw_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_auto_increment_set(lps27hhw_ctx_t *ctx, uint8_t val)
+int32_t lps27hhw_auto_increment_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps27hhw_ctrl_reg2_t reg;
   int32_t ret;
@@ -747,7 +730,7 @@ int32_t lps27hhw_auto_increment_set(lps27hhw_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_auto_increment_get(lps27hhw_ctx_t *ctx, uint8_t *val)
+int32_t lps27hhw_auto_increment_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps27hhw_ctrl_reg2_t reg;
   int32_t ret;
@@ -767,7 +750,7 @@ int32_t lps27hhw_auto_increment_get(lps27hhw_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_boot_set(lps27hhw_ctx_t *ctx, uint8_t val)
+int32_t lps27hhw_boot_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps27hhw_ctrl_reg2_t reg;
   int32_t ret;
@@ -789,7 +772,7 @@ int32_t lps27hhw_boot_set(lps27hhw_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_boot_get(lps27hhw_ctx_t *ctx, uint8_t *val)
+int32_t lps27hhw_boot_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps27hhw_ctrl_reg2_t reg;
   int32_t ret;
@@ -821,7 +804,7 @@ int32_t lps27hhw_boot_get(lps27hhw_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_lp_bandwidth_set(lps27hhw_ctx_t *ctx, lps27hhw_lpfp_cfg_t val)
+int32_t lps27hhw_lp_bandwidth_set(stmdev_ctx_t *ctx, lps27hhw_lpfp_cfg_t val)
 {
   lps27hhw_ctrl_reg1_t reg;
   int32_t ret;
@@ -842,7 +825,7 @@ int32_t lps27hhw_lp_bandwidth_set(lps27hhw_ctx_t *ctx, lps27hhw_lpfp_cfg_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_lp_bandwidth_get(lps27hhw_ctx_t *ctx, lps27hhw_lpfp_cfg_t *val)
+int32_t lps27hhw_lp_bandwidth_get(stmdev_ctx_t *ctx, lps27hhw_lpfp_cfg_t *val)
 {
   lps27hhw_ctrl_reg1_t reg;
   int32_t ret;
@@ -887,7 +870,7 @@ int32_t lps27hhw_lp_bandwidth_get(lps27hhw_ctx_t *ctx, lps27hhw_lpfp_cfg_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_i2c_interface_set(lps27hhw_ctx_t *ctx,
+int32_t lps27hhw_i2c_interface_set(stmdev_ctx_t *ctx,
                                   lps27hhw_i2c_disable_t val)
 {
   lps27hhw_if_ctrl_t reg;
@@ -909,7 +892,7 @@ int32_t lps27hhw_i2c_interface_set(lps27hhw_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_i2c_interface_get(lps27hhw_ctx_t *ctx,
+int32_t lps27hhw_i2c_interface_get(stmdev_ctx_t *ctx,
                                   lps27hhw_i2c_disable_t *val)
 {
   lps27hhw_if_ctrl_t reg;
@@ -939,7 +922,7 @@ int32_t lps27hhw_i2c_interface_get(lps27hhw_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_i3c_interface_set(lps27hhw_ctx_t *ctx,
+int32_t lps27hhw_i3c_interface_set(stmdev_ctx_t *ctx,
                                   lps27hhw_i3c_disable_t val)
 {
   lps27hhw_if_ctrl_t reg;
@@ -962,7 +945,7 @@ int32_t lps27hhw_i3c_interface_set(lps27hhw_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_i3c_interface_get(lps27hhw_ctx_t *ctx,
+int32_t lps27hhw_i3c_interface_get(stmdev_ctx_t *ctx,
                                   lps27hhw_i3c_disable_t *val)
 {
   lps27hhw_if_ctrl_t reg;
@@ -995,7 +978,7 @@ int32_t lps27hhw_i3c_interface_get(lps27hhw_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_sdo_sa0_mode_set(lps27hhw_ctx_t *ctx, lps27hhw_pu_en_t val)
+int32_t lps27hhw_sdo_sa0_mode_set(stmdev_ctx_t *ctx, lps27hhw_pu_en_t val)
 {
   lps27hhw_if_ctrl_t reg;
   int32_t ret;
@@ -1016,7 +999,7 @@ int32_t lps27hhw_sdo_sa0_mode_set(lps27hhw_ctx_t *ctx, lps27hhw_pu_en_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_sdo_sa0_mode_get(lps27hhw_ctx_t *ctx, lps27hhw_pu_en_t *val)
+int32_t lps27hhw_sdo_sa0_mode_get(stmdev_ctx_t *ctx, lps27hhw_pu_en_t *val)
 {
   lps27hhw_if_ctrl_t reg;
   int32_t ret;
@@ -1045,7 +1028,7 @@ int32_t lps27hhw_sdo_sa0_mode_get(lps27hhw_ctx_t *ctx, lps27hhw_pu_en_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_sda_mode_set(lps27hhw_ctx_t *ctx, lps27hhw_pu_en_t val)
+int32_t lps27hhw_sda_mode_set(stmdev_ctx_t *ctx, lps27hhw_pu_en_t val)
 {
   lps27hhw_if_ctrl_t reg;
   int32_t ret;
@@ -1066,7 +1049,7 @@ int32_t lps27hhw_sda_mode_set(lps27hhw_ctx_t *ctx, lps27hhw_pu_en_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_sda_mode_get(lps27hhw_ctx_t *ctx, lps27hhw_pu_en_t *val)
+int32_t lps27hhw_sda_mode_get(stmdev_ctx_t *ctx, lps27hhw_pu_en_t *val)
 {
   lps27hhw_if_ctrl_t reg;
   int32_t ret;
@@ -1094,7 +1077,7 @@ int32_t lps27hhw_sda_mode_get(lps27hhw_ctx_t *ctx, lps27hhw_pu_en_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_spi_mode_set(lps27hhw_ctx_t *ctx, lps27hhw_sim_t val)
+int32_t lps27hhw_spi_mode_set(stmdev_ctx_t *ctx, lps27hhw_sim_t val)
 {
   lps27hhw_ctrl_reg1_t reg;
   int32_t ret;
@@ -1115,7 +1098,7 @@ int32_t lps27hhw_spi_mode_set(lps27hhw_ctx_t *ctx, lps27hhw_sim_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_spi_mode_get(lps27hhw_ctx_t *ctx, lps27hhw_sim_t *val)
+int32_t lps27hhw_spi_mode_get(stmdev_ctx_t *ctx, lps27hhw_sim_t *val)
 {
   lps27hhw_ctrl_reg1_t reg;
   int32_t ret;
@@ -1156,7 +1139,7 @@ int32_t lps27hhw_spi_mode_get(lps27hhw_ctx_t *ctx, lps27hhw_sim_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_int_notification_set(lps27hhw_ctx_t *ctx, lps27hhw_lir_t val)
+int32_t lps27hhw_int_notification_set(stmdev_ctx_t *ctx, lps27hhw_lir_t val)
 {
   lps27hhw_interrupt_cfg_t reg;
   int32_t ret;
@@ -1177,7 +1160,7 @@ int32_t lps27hhw_int_notification_set(lps27hhw_ctx_t *ctx, lps27hhw_lir_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_int_notification_get(lps27hhw_ctx_t *ctx, lps27hhw_lir_t *val)
+int32_t lps27hhw_int_notification_get(stmdev_ctx_t *ctx, lps27hhw_lir_t *val)
 {
   lps27hhw_interrupt_cfg_t reg;
   int32_t ret;
@@ -1206,7 +1189,7 @@ int32_t lps27hhw_int_notification_get(lps27hhw_ctx_t *ctx, lps27hhw_lir_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_pin_mode_set(lps27hhw_ctx_t *ctx, lps27hhw_pp_od_t val)
+int32_t lps27hhw_pin_mode_set(stmdev_ctx_t *ctx, lps27hhw_pp_od_t val)
 {
   lps27hhw_ctrl_reg2_t reg;
   int32_t ret;
@@ -1228,7 +1211,7 @@ int32_t lps27hhw_pin_mode_set(lps27hhw_ctx_t *ctx, lps27hhw_pp_od_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_pin_mode_get(lps27hhw_ctx_t *ctx, lps27hhw_pp_od_t *val)
+int32_t lps27hhw_pin_mode_get(stmdev_ctx_t *ctx, lps27hhw_pp_od_t *val)
 {
   lps27hhw_ctrl_reg2_t reg;
   int32_t ret;
@@ -1259,7 +1242,7 @@ int32_t lps27hhw_pin_mode_get(lps27hhw_ctx_t *ctx, lps27hhw_pp_od_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_pin_polarity_set(lps27hhw_ctx_t *ctx, lps27hhw_int_h_l_t val)
+int32_t lps27hhw_pin_polarity_set(stmdev_ctx_t *ctx, lps27hhw_int_h_l_t val)
 {
   lps27hhw_ctrl_reg2_t reg;
   int32_t ret;
@@ -1281,7 +1264,7 @@ int32_t lps27hhw_pin_polarity_set(lps27hhw_ctx_t *ctx, lps27hhw_int_h_l_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_pin_polarity_get(lps27hhw_ctx_t *ctx, lps27hhw_int_h_l_t *val)
+int32_t lps27hhw_pin_polarity_get(stmdev_ctx_t *ctx, lps27hhw_int_h_l_t *val)
 {
   lps27hhw_ctrl_reg2_t reg;
   int32_t ret;
@@ -1311,7 +1294,7 @@ int32_t lps27hhw_pin_polarity_get(lps27hhw_ctx_t *ctx, lps27hhw_int_h_l_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_pin_int_route_set(lps27hhw_ctx_t *ctx,
+int32_t lps27hhw_pin_int_route_set(stmdev_ctx_t *ctx,
                                   lps27hhw_ctrl_reg3_t *val)
 {
   int32_t ret;
@@ -1327,7 +1310,7 @@ int32_t lps27hhw_pin_int_route_set(lps27hhw_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_pin_int_route_get(lps27hhw_ctx_t *ctx,
+int32_t lps27hhw_pin_int_route_get(stmdev_ctx_t *ctx,
                                   lps27hhw_ctrl_reg3_t *val)
 {
   int32_t ret;
@@ -1356,7 +1339,7 @@ int32_t lps27hhw_pin_int_route_get(lps27hhw_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_int_on_threshold_set(lps27hhw_ctx_t *ctx, lps27hhw_pe_t val)
+int32_t lps27hhw_int_on_threshold_set(stmdev_ctx_t *ctx, lps27hhw_pe_t val)
 {
   lps27hhw_interrupt_cfg_t reg;
   int32_t ret;
@@ -1384,7 +1367,7 @@ int32_t lps27hhw_int_on_threshold_set(lps27hhw_ctx_t *ctx, lps27hhw_pe_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_int_on_threshold_get(lps27hhw_ctx_t *ctx, lps27hhw_pe_t *val)
+int32_t lps27hhw_int_on_threshold_get(stmdev_ctx_t *ctx, lps27hhw_pe_t *val)
 {
   lps27hhw_interrupt_cfg_t reg;
   int32_t ret;
@@ -1420,7 +1403,7 @@ int32_t lps27hhw_int_on_threshold_get(lps27hhw_ctx_t *ctx, lps27hhw_pe_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_int_treshold_set(lps27hhw_ctx_t *ctx, uint16_t buff)
+int32_t lps27hhw_int_treshold_set(stmdev_ctx_t *ctx, uint16_t buff)
 {
   int32_t ret;
   lps27hhw_ths_p_l_t ths_p_l;
@@ -1443,7 +1426,7 @@ int32_t lps27hhw_int_treshold_set(lps27hhw_ctx_t *ctx, uint16_t buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_int_treshold_get(lps27hhw_ctx_t *ctx, uint16_t *buff)
+int32_t lps27hhw_int_treshold_get(stmdev_ctx_t *ctx, uint16_t *buff)
 {
   int32_t ret;
   lps27hhw_ths_p_l_t ths_p_l;
@@ -1477,7 +1460,7 @@ int32_t lps27hhw_int_treshold_get(lps27hhw_ctx_t *ctx, uint16_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_fifo_mode_set(lps27hhw_ctx_t *ctx, lps27hhw_f_mode_t val)
+int32_t lps27hhw_fifo_mode_set(stmdev_ctx_t *ctx, lps27hhw_f_mode_t val)
 {
   lps27hhw_fifo_ctrl_t reg;
   int32_t ret;
@@ -1498,7 +1481,7 @@ int32_t lps27hhw_fifo_mode_set(lps27hhw_ctx_t *ctx, lps27hhw_f_mode_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_fifo_mode_get(lps27hhw_ctx_t *ctx, lps27hhw_f_mode_t *val)
+int32_t lps27hhw_fifo_mode_get(stmdev_ctx_t *ctx, lps27hhw_f_mode_t *val)
 {
   lps27hhw_fifo_ctrl_t reg;
   int32_t ret;
@@ -1544,7 +1527,7 @@ int32_t lps27hhw_fifo_mode_get(lps27hhw_ctx_t *ctx, lps27hhw_f_mode_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_fifo_stop_on_wtm_set(lps27hhw_ctx_t *ctx, uint8_t val)
+int32_t lps27hhw_fifo_stop_on_wtm_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps27hhw_fifo_ctrl_t reg;
   int32_t ret;
@@ -1566,7 +1549,7 @@ int32_t lps27hhw_fifo_stop_on_wtm_set(lps27hhw_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_fifo_stop_on_wtm_get(lps27hhw_ctx_t *ctx, uint8_t *val)
+int32_t lps27hhw_fifo_stop_on_wtm_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps27hhw_fifo_ctrl_t reg;
   int32_t ret;
@@ -1585,7 +1568,7 @@ int32_t lps27hhw_fifo_stop_on_wtm_get(lps27hhw_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_fifo_watermark_set(lps27hhw_ctx_t *ctx, uint8_t val)
+int32_t lps27hhw_fifo_watermark_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps27hhw_fifo_wtm_t reg;
   int32_t ret;
@@ -1606,7 +1589,7 @@ int32_t lps27hhw_fifo_watermark_set(lps27hhw_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_fifo_watermark_get(lps27hhw_ctx_t *ctx, uint8_t *val)
+int32_t lps27hhw_fifo_watermark_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps27hhw_fifo_wtm_t reg;
   int32_t ret;
@@ -1625,7 +1608,7 @@ int32_t lps27hhw_fifo_watermark_get(lps27hhw_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_fifo_data_level_get(lps27hhw_ctx_t *ctx, uint8_t *buff)
+int32_t lps27hhw_fifo_data_level_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret =  lps27hhw_read_reg(ctx, LPS27HHW_FIFO_STATUS1, buff, 1);
@@ -1640,7 +1623,7 @@ int32_t lps27hhw_fifo_data_level_get(lps27hhw_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_fifo_src_get(lps27hhw_ctx_t *ctx, lps27hhw_fifo_status2_t *val)
+int32_t lps27hhw_fifo_src_get(stmdev_ctx_t *ctx, lps27hhw_fifo_status2_t *val)
 {
   int32_t ret;
   ret =  lps27hhw_read_reg(ctx, LPS27HHW_FIFO_STATUS2, (uint8_t*) val, 1);
@@ -1655,7 +1638,7 @@ int32_t lps27hhw_fifo_src_get(lps27hhw_ctx_t *ctx, lps27hhw_fifo_status2_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_fifo_full_flag_get(lps27hhw_ctx_t *ctx, uint8_t *val)
+int32_t lps27hhw_fifo_full_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps27hhw_fifo_status2_t reg;
   int32_t ret;
@@ -1674,7 +1657,7 @@ int32_t lps27hhw_fifo_full_flag_get(lps27hhw_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_fifo_ovr_flag_get(lps27hhw_ctx_t *ctx, uint8_t *val)
+int32_t lps27hhw_fifo_ovr_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps27hhw_fifo_status2_t reg;
   int32_t ret;
@@ -1693,7 +1676,7 @@ int32_t lps27hhw_fifo_ovr_flag_get(lps27hhw_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps27hhw_fifo_wtm_flag_get(lps27hhw_ctx_t *ctx, uint8_t *val)
+int32_t lps27hhw_fifo_wtm_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps27hhw_fifo_status2_t reg;
   int32_t ret;
@@ -1707,11 +1690,11 @@ int32_t lps27hhw_fifo_wtm_flag_get(lps27hhw_ctx_t *ctx, uint8_t *val)
 /**
   * @brief  FIFO overrun interrupt on INT_DRDY pin.[set]
   *
-  * @param  lps27hhw_ctx_t *ctx: read / write interface definitions
+  * @param  stmdev_ctx_t *ctx: read / write interface definitions
   * @param  uint8_t val: change the values of f_ovr in reg CTRL_REG3
   *
   */
-int32_t lps27hhw_fifo_ovr_on_int_set(lps27hhw_ctx_t *ctx, uint8_t val)
+int32_t lps27hhw_fifo_ovr_on_int_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps27hhw_ctrl_reg3_t reg;
   int32_t ret;
@@ -1727,11 +1710,11 @@ int32_t lps27hhw_fifo_ovr_on_int_set(lps27hhw_ctx_t *ctx, uint8_t val)
 /**
   * @brief  FIFO overrun interrupt on INT_DRDY pin.[get]
   *
-  * @param  lps27hhw_ctx_t *ctx: read / write interface definitions
+  * @param  stmdev_ctx_t *ctx: read / write interface definitions
   * @param  uint8_t: change the values of f_ovr in reg CTRL_REG3
   *
   */
-int32_t lps27hhw_fifo_ovr_on_int_get(lps27hhw_ctx_t *ctx, uint8_t *val)
+int32_t lps27hhw_fifo_ovr_on_int_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps27hhw_ctrl_reg3_t reg;
   int32_t ret;
@@ -1745,11 +1728,11 @@ int32_t lps27hhw_fifo_ovr_on_int_get(lps27hhw_ctx_t *ctx, uint8_t *val)
 /**
   * @brief  FIFO watermark status on INT_DRDY pin.[set]
   *
-  * @param  lps27hhw_ctx_t *ctx: read / write interface definitions
+  * @param  stmdev_ctx_t *ctx: read / write interface definitions
   * @param  uint8_t val: change the values of f_fth in reg CTRL_REG3
   *
   */
-int32_t lps27hhw_fifo_threshold_on_int_set(lps27hhw_ctx_t *ctx, uint8_t val)
+int32_t lps27hhw_fifo_threshold_on_int_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps27hhw_ctrl_reg3_t reg;
   int32_t ret;
@@ -1769,7 +1752,7 @@ int32_t lps27hhw_fifo_threshold_on_int_set(lps27hhw_ctx_t *ctx, uint8_t val)
   * @param  uint8_t: change the values of f_fth in reg CTRL_REG3
   *
   */
-int32_t lps27hhw_fifo_threshold_on_int_get(lps27hhw_ctx_t *ctx, uint8_t *val)
+int32_t lps27hhw_fifo_threshold_on_int_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps27hhw_ctrl_reg3_t reg;
   int32_t ret;
@@ -1783,11 +1766,11 @@ int32_t lps27hhw_fifo_threshold_on_int_get(lps27hhw_ctx_t *ctx, uint8_t *val)
 /**
   * @brief  FIFO full flag on INT_DRDY pin.[set]
   *
-  * @param  lps27hhw_ctx_t *ctx: read / write interface definitions
+  * @param  stmdev_ctx_t *ctx: read / write interface definitions
   * @param  uint8_t val: change the values of f_fss5 in reg CTRL_REG3
   *
   */
-int32_t lps27hhw_fifo_full_on_int_set(lps27hhw_ctx_t *ctx, uint8_t val)
+int32_t lps27hhw_fifo_full_on_int_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps27hhw_ctrl_reg3_t reg;
   int32_t ret;
@@ -1803,11 +1786,11 @@ int32_t lps27hhw_fifo_full_on_int_set(lps27hhw_ctx_t *ctx, uint8_t val)
 /**
   * @brief  FIFO full flag on INT_DRDY pin.[get]
   *
-  * @param  lps27hhw_ctx_t *ctx: read / write interface definitions
+  * @param  stmdev_ctx_t *ctx: read / write interface definitions
   * @param  uint8_t: change the values of f_fss5 in reg CTRL_REG3
   *
   */
-int32_t lps27hhw_fifo_full_on_int_get(lps27hhw_ctx_t *ctx, uint8_t *val)
+int32_t lps27hhw_fifo_full_on_int_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps27hhw_ctrl_reg3_t reg;
   int32_t ret;
