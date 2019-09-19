@@ -120,7 +120,7 @@ void example_main_wake_up_ais328dq(void)
 {
   /* Variables */
   stmdev_ctx_t dev_ctx;
-  int1_on_th_conf_t int1_on_th_conf;
+  ais328dq_int1_on_th_conf_t int1_on_th_conf;
   ais328dq_int1_src_t  int1_src;
 
   /* Initialize SPI mems driver interface */
