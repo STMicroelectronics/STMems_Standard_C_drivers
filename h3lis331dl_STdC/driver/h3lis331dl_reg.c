@@ -1285,7 +1285,7 @@ int32_t h3lis331dl_pin_polarity_get(stmdev_ctx_t *ctx,
   *
   */
 int32_t h3lis331dl_int1_on_threshold_conf_set(stmdev_ctx_t *ctx,
-                                              int1_on_th_conf_t val)
+                                              h3lis331dl_int1_on_th_conf_t val)
 {
   h3lis331dl_int1_cfg_t int1_cfg;
   int32_t ret;
@@ -1312,7 +1312,7 @@ int32_t h3lis331dl_int1_on_threshold_conf_set(stmdev_ctx_t *ctx,
   *
   */
 int32_t h3lis331dl_int1_on_threshold_conf_get(stmdev_ctx_t *ctx,
-                                             int1_on_th_conf_t *val)
+                                             h3lis331dl_int1_on_th_conf_t *val)
 {
   h3lis331dl_int1_cfg_t int1_cfg;
   int32_t ret;
@@ -1484,7 +1484,7 @@ int32_t h3lis331dl_int1_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
   *
   */
 int32_t h3lis331dl_int2_on_threshold_conf_set(stmdev_ctx_t *ctx,
-                                              int2_on_th_conf_t val)
+                                              h3lis331dl_int2_on_th_conf_t val)
 {
   h3lis331dl_int2_cfg_t int2_cfg;
   int32_t ret;
@@ -1512,7 +1512,7 @@ int32_t h3lis331dl_int2_on_threshold_conf_set(stmdev_ctx_t *ctx,
   *
   */
 int32_t h3lis331dl_int2_on_threshold_conf_get(stmdev_ctx_t *ctx,
-                                              int2_on_th_conf_t *val)
+                                              h3lis331dl_int2_on_th_conf_t *val)
 {
   h3lis331dl_int2_cfg_t int2_cfg;
   int32_t ret;
