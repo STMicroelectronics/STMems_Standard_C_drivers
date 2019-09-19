@@ -507,11 +507,11 @@ typedef struct {
   uint8_t int1_yhie             : 1;
   uint8_t int1_zlie             : 1;
   uint8_t int1_zhie             : 1;
-} int1_on_th_conf_t;
+} ais328dq_int1_on_th_conf_t;
 int32_t ais328dq_int1_on_threshold_conf_set(stmdev_ctx_t *ctx,
-                                             int1_on_th_conf_t val);
+                                             ais328dq_int1_on_th_conf_t val);
 int32_t ais328dq_int1_on_threshold_conf_get(stmdev_ctx_t *ctx,
-                                             int1_on_th_conf_t *val);
+                                             ais328dq_int1_on_th_conf_t *val);
 
 typedef enum {
   AIS328DQ_INT1_ON_THRESHOLD_OR   = 0,
@@ -538,11 +538,11 @@ typedef struct {
   uint8_t int2_yhie             : 1;
   uint8_t int2_zlie             : 1;
   uint8_t int2_zhie             : 1;
-} int2_on_th_conf_t;
+} ais328dq_int2_on_th_conf_t;
 int32_t ais328dq_int2_on_threshold_conf_set(stmdev_ctx_t *ctx,
-                                             int2_on_th_conf_t val);
+                                             ais328dq_int2_on_th_conf_t val);
 int32_t ais328dq_int2_on_threshold_conf_get(stmdev_ctx_t *ctx,
-                                             int2_on_th_conf_t *val);
+                                             ais328dq_int2_on_th_conf_t *val);
 
 typedef enum {
   AIS328DQ_INT2_ON_THRESHOLD_OR   = 0,
