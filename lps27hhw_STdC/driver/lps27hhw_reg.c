@@ -1408,12 +1408,13 @@ int32_t lps27hhw_int_treshold_set(stmdev_ctx_t *ctx, uint16_t buff)
   int32_t ret;
   lps27hhw_ths_p_l_t ths_p_l;
   lps27hhw_ths_p_h_t ths_p_h;
- LPS27HHW  ths_p_l.ths = (uint8_t)(buff & 0x00FFU);
+  ths_p_l.ths = (uint8_t)(buff & 0x00FFU);
   ths_p_h.ths = (uint8_t)((buff & 0x7F00U) >> 8);
- LPS27HHW  ret =  lps27hhw_write_reg(ctx, LPS27HHW_THS_P_L,
+  ret =  lps27hhw_write_reg(ctx, LPS27HHW_THS_P_L,
                            (uint8_t*)&ths_p_l, 1);
   if (ret == 0) {
-      ret =  lps27hhw_write_reg(ctx, LPS27HHW_THS_P_H,LPS27HHW                               (uint8_t*)&ths_p_h, 1);
+      ret =  lps27hhw_write_reg(ctx, LPS27HHW_THS_P_H,
+                                (uint8_t*)&ths_p_h, 1);
   }
   return ret;
 }
@@ -1431,13 +1432,15 @@ int32_t lps27hhw_int_treshold_get(stmdev_ctx_t *ctx, uint16_t *buff)
   int32_t ret;
   lps27hhw_ths_p_l_t ths_p_l;
   lps27hhw_ths_p_h_t ths_p_h;
- LPS27HHW  ret =  lps27hhw_read_reg(ctx, LPS27HHW_THS_P_L,
+  ret =  lps27hhw_read_reg(ctx, LPS27HHW_THS_P_L,
                            (uint8_t*)&ths_p_l, 1);
   if (ret == 0) {
-      ret =  lps27hhw_read_reg(ctx, LPS27HHW_THS_P_H,LPS27HHW                               (uint8_t*)&ths_p_h, 1);
+      ret =  lps27hhw_read_reg(ctx, LPS27HHW_THS_P_H,
+                               (uint8_t*)&ths_p_h, 1);
       *buff = (uint16_t)ths_p_h.ths << 8;
       *buff |= (uint16_t)ths_p_l.ths;
-  } LPS27HHW  return ret;
+  } 
+  return ret;
 }
 
 /**
