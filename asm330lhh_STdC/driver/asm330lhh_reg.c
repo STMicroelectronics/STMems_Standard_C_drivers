@@ -1013,7 +1013,7 @@ int32_t asm330lhh_fifo_out_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t asm330lhh_odr_cal_reg_set(stmdev_ctx_t *ctx, uint8_t val)
+int32_t asm330lhh_odr_cal_reg_set(stmdev_ctx_t *ctx, int8_t val)
 {
   asm330lhh_internal_freq_fine_t internal_freq_fine;
   int32_t ret;
@@ -1038,7 +1038,7 @@ int32_t asm330lhh_odr_cal_reg_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t asm330lhh_odr_cal_reg_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t asm330lhh_odr_cal_reg_get(stmdev_ctx_t *ctx, int8_t *val)
 {
   asm330lhh_internal_freq_fine_t internal_freq_fine;
   int32_t ret;
