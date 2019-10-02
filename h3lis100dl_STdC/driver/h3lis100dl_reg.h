@@ -303,7 +303,7 @@ int32_t h3lis100dl_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t h3lis100dl_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                             uint16_t len);
 
-extern float h3lis100dl_from_fs100g_to_mg(int8_t lsb);
+extern float_t h3lis100dl_from_fs100g_to_mg(int8_t lsb);
 
 int32_t h3lis100dl_axis_x_data_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t h3lis100dl_axis_x_data_get(stmdev_ctx_t *ctx, uint8_t *val);

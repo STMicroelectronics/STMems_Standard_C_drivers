@@ -84,9 +84,9 @@ int32_t h3lis100dl_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-float h3lis100dl_from_fs100g_to_mg(int8_t lsb)
+float_t h3lis100dl_from_fs100g_to_mg(int8_t lsb)
 {
-  return ((float)lsb * 780.0f);
+  return ((float_t)lsb * 780.0f);
 }
 
 /**
@@ -405,8 +405,15 @@ int32_t h3lis100dl_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = h3lis100dl_read_reg(ctx, H3LIS100DL_OUT_X, buff, 1);
-  ret = h3lis100dl_read_reg(ctx, H3LIS100DL_OUT_Y, buff, 1);
-  ret = h3lis100dl_read_reg(ctx, H3LIS100DL_OUT_Z, buff, 1);
+  
+  if(ret == 0) {
+    ret = h3lis100dl_read_reg(ctx, H3LIS100DL_OUT_Y, buff, 1);
+  }
+  
+  if(ret == 0) {
+    ret = h3lis100dl_read_reg(ctx, H3LIS100DL_OUT_Z, buff, 1);
+  }
+  
   return ret;
 }
 
