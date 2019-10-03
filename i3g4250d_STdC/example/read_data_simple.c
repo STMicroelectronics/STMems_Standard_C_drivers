@@ -151,6 +151,11 @@ void example_main_i3g4250d(void)
   //i3g4250d_pin_int2_route_set(&dev_ctx, int2_reg);
 
   /*
+   * Set full scale
+   */
+  i3g4250d_full_scale_set(&dev_ctx, I3G4250D_245dps);
+
+  /*
    * Set Output Data Rate
    */
   i3g4250d_data_rate_set(&dev_ctx, I3G4250D_ODR_100Hz);
