@@ -126,7 +126,8 @@ static void platform_init(void);
 void example_main_read_simple_timestamp_asm330lhh(void)
 {
   stmdev_ctx_t dev_ctx;
-  int8_t odr_correction;
+  int8_t fine_frq_correction;
+  float ts_res;
 
   /*
    *  Initialize mems driver interface
@@ -171,10 +172,12 @@ void example_main_read_simple_timestamp_asm330lhh(void)
    *                        ODR (and timestamp rate) with respect
    *                        to the typical.[set]
    *                        Step:  0.15%. 8-bit format, 2's complement.
+   * The formula below can be used to calculate a better estimation of
+   * the actual timestamp:
+   * TS_Res = 1 / (40000 + (0.0015 * INTERNAL_FREQ_FINE * 40000))
    */  
-  asm330lhh_odr_cal_reg_get(&dev_ctx, &odr_correction);
-  odr_correction++;
-  asm330lhh_odr_cal_reg_set(&dev_ctx, odr_correction);
+  asm330lhh_odr_cal_reg_get(&dev_ctx, &fine_frq_correction);
+  ts_res = 1 / (40000 + ( 0.0015 * fine_frq_correction * 40000) );
 
   /*
    * Set full scale
@@ -202,15 +205,17 @@ void example_main_read_simple_timestamp_asm330lhh(void)
   {
     asm330lhh_reg_t reg;
     timestamp_t timestamp;
+    float timestamp_us;
 
     /*
      * Read output only if new value is available
      */
     asm330lhh_status_reg_get(&dev_ctx, &reg.status_reg);
 
-    if (reg.status_reg.xlda || reg.status_reg.gda || reg.status_reg.tda)
-    	asm330lhh_timestamp_raw_get(&dev_ctx, timestamp.byte);
-
+    if (reg.status_reg.xlda || reg.status_reg.gda || reg.status_reg.tda){
+      asm330lhh_timestamp_raw_get(&dev_ctx, timestamp.byte);
+      timestamp_us = timestamp.val * ts_res;
+    }
     if (reg.status_reg.xlda)
     {
       /*
@@ -225,9 +230,9 @@ void example_main_read_simple_timestamp_asm330lhh(void)
       acceleration_mg[2] =
         asm330lhh_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
 
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f %lu\r\n",
+      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f %.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2],
-              timestamp.val);
+              timestamp_us);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
@@ -245,9 +250,9 @@ void example_main_read_simple_timestamp_asm330lhh(void)
       angular_rate_mdps[2] =
         asm330lhh_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
 
-      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f %lu\r\n",
+      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f %f\r\n",
               angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2],
-			  timestamp.val);
+      timestamp_us);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
@@ -261,7 +266,7 @@ void example_main_read_simple_timestamp_asm330lhh(void)
       temperature_degC = asm330lhh_from_lsb_to_celsius(data_raw_temperature.i16bit);
 
       sprintf((char*)tx_buffer,
-              "Temperature [degC]:%6.2f %lu\r\n", temperature_degC, timestamp.val);
+              "Temperature [degC]:%6.2f %f\r\n", temperature_degC, timestamp_us);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
