@@ -173,6 +173,62 @@ int32_t i3g4250d_data_rate_get(stmdev_ctx_t *ctx, i3g4250d_dr_t *val)
 }
 
 /**
+  * @brief  Gyroscope full-scale selection.[set]
+  *
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         change the values of fs in reg CTRL_REG4
+  *
+  */
+int32_t i3g4250d_full_scale_set(stmdev_ctx_t *ctx, i3g4250d_fs_t val)
+{
+  i3g4250d_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
+
+  ret = i3g4250d_read_reg(ctx, I3G4250D_CTRL_REG4,
+                            (uint8_t*)&ctrl_reg4, 1);
+  if(ret == 0) {
+    ctrl_reg4.fs = (uint8_t)val;
+    ret = i3g4250d_write_reg(ctx, I3G4250D_CTRL_REG4,
+                              (uint8_t*)&ctrl_reg4, 1);
+  }
+  return ret;
+}
+
+/**
+  * @brief  Gyroscope full-scale selection.[get]
+  *
+  * @param  ctx         read / write interface definitions(ptr)
+  * @param  val         Get the values of fs in reg CTRL_REG4
+  *
+  */
+int32_t i3g4250d_full_scale_get(stmdev_ctx_t *ctx, i3g4250d_fs_t *val)
+{
+  i3g4250d_ctrl_reg4_t ctrl_reg4;
+  int32_t ret;
+
+  ret = i3g4250d_read_reg(ctx, I3G4250D_CTRL_REG4,
+                            (uint8_t*)&ctrl_reg4, 1);
+
+  switch (ctrl_reg4.fs)
+  {
+    case I3G4250D_245dps:
+      *val = I3G4250D_245dps;
+      break;
+    case I3G4250D_500dps:
+      *val = I3G4250D_500dps;
+      break;
+    case I3G4250D_2000dps:
+      *val = I3G4250D_2000dps;
+      break;
+    default:
+      *val = I3G4250D_245dps;
+      break;
+  }
+
+  return ret;
+}
+
+/**
   * @brief  The STATUS_REG register is read by the primary interface.[get]
   *
   * @param  ctx    Read / write interface definitions.(ptr)

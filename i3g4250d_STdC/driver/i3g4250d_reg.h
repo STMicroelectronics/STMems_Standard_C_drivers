@@ -165,6 +165,7 @@ typedef struct {
   uint8_t sim                       : 1;
   uint8_t st                        : 2;
   uint8_t not_used_01               : 3;
+  uint8_t fs                        : 2;
   uint8_t ble                       : 1;
   uint8_t not_used_02               : 1;
 } i3g4250d_ctrl_reg4_t;
@@ -348,6 +349,14 @@ typedef enum {
 } i3g4250d_dr_t;
 int32_t i3g4250d_data_rate_set(stmdev_ctx_t *ctx, i3g4250d_dr_t val);
 int32_t i3g4250d_data_rate_get(stmdev_ctx_t *ctx, i3g4250d_dr_t *val);
+
+typedef enum {
+  I3G4250D_245dps     = 0x00,
+  I3G4250D_500dps     = 0x01,
+  I3G4250D_2000dps    = 0x02,
+} i3g4250d_fs_t;
+int32_t i3g4250d_full_scale_set(stmdev_ctx_t *ctx, i3g4250d_fs_t val);
+int32_t i3g4250d_full_scale_get(stmdev_ctx_t *ctx, i3g4250d_fs_t *val);
 
 int32_t i3g4250d_status_reg_get(stmdev_ctx_t *ctx,
                                 i3g4250d_status_reg_t *val);
