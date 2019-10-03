@@ -681,7 +681,6 @@ int32_t asm330lhh_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
 int32_t asm330lhh_fifo_out_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t asm330lhh_odr_cal_reg_set(stmdev_ctx_t *ctx, int8_t val);
 int32_t asm330lhh_odr_cal_reg_get(stmdev_ctx_t *ctx, int8_t *val);
 
 typedef enum {
