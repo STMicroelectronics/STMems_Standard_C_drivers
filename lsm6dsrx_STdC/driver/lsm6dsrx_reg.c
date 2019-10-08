@@ -230,6 +230,7 @@ int32_t lsm6dsrx_xl_data_rate_set(stmdev_ctx_t *ctx,
   lsm6dsrx_emb_fsm_enable_t fsm_enable;
   lsm6dsrx_fsm_odr_t fsm_odr;
   lsm6dsrx_ctrl1_xl_t ctrl1_xl;
+  lsm6dsrx_mlc_odr_t mlc_odr;
   uint8_t mlc_enable;
   int32_t ret;
 
@@ -535,6 +536,8 @@ int32_t lsm6dsrx_gy_data_rate_set(stmdev_ctx_t *ctx,
   lsm6dsrx_emb_fsm_enable_t fsm_enable;
   lsm6dsrx_fsm_odr_t fsm_odr;
   lsm6dsrx_ctrl2_g_t ctrl2_g;
+  lsm6dsrx_mlc_odr_t mlc_odr;
+  uint8_t mlc_enable;
   int32_t ret;
 
   /* Check the Finite State Machine data rate constraints */
@@ -3668,6 +3671,57 @@ int32_t lsm6dsrx_sdo_sa0_mode_get(stmdev_ctx_t *ctx,
       break;
     default:
       *val = LSM6DSRX_PULL_UP_DISC;
+      break;
+  }
+  return ret;
+}
+
+/**
+  * @brief  Connect/Disconnect INT1 pull-down.[set]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of pd_dis_int1 in reg I3C_BUS_AVB
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t lsm6dsrx_int1_mode_set(stmdev_ctx_t *ctx, lsm6dsrx_pd_dis_int1_t val)
+{
+  lsm6dsrx_i3c_bus_avb_t i3c_bus_avb;
+  int32_t ret;
+
+  ret = lsm6dsrx_read_reg(ctx, LSM6DSRX_I3C_BUS_AVB, (uint8_t*)&i3c_bus_avb, 1);
+  if(ret == 0){
+    i3c_bus_avb.pd_dis_int1= (uint8_t)val;
+    ret = lsm6dsrx_write_reg(ctx, LSM6DSRX_I3C_BUS_AVB,
+                            (uint8_t*)&i3c_bus_avb, 1);
+  }
+  return ret;
+}
+
+/**
+  * @brief  Connect/Disconnect INT1 pull-down.[get]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of pd_dis_int1 in reg I3C_BUS_AVB
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t lsm6dsrx_int1_mode_get(stmdev_ctx_t *ctx, lsm6dsrx_pd_dis_int1_t *val)
+{
+  lsm6dsrx_i3c_bus_avb_t i3c_bus_avb;
+  int32_t ret;
+
+  ret = lsm6dsrx_read_reg(ctx, LSM6DSRX_I3C_BUS_AVB, (uint8_t*)&i3c_bus_avb, 1);
+
+  switch (i3c_bus_avb.pd_dis_int1){
+    case LSM6DSRX_PULL_DOWN_CONNECT:
+      *val = LSM6DSRX_PULL_DOWN_CONNECT;
+      break;
+    case LSM6DSRX_PULL_DOWN_DISC:
+      *val = LSM6DSRX_PULL_DOWN_DISC;
+      break;
+    default:
+      *val = LSM6DSRX_PULL_DOWN_CONNECT;
       break;
   }
   return ret;
@@ -7355,83 +7409,6 @@ int32_t lsm6dsrx_pedo_sens_get(stmdev_ctx_t *ctx, uint8_t *val)
 }
 
 /**
-  * @brief  Pedometer algorithm working mode.[set]
-  *
-  * @param  ctx    read / write interface definitions
-  * @param  val    Change the values of:
-  *                   - pedo_fpr_adf_dis in reg ADV_PEDO
-  *                   - ad_det_en in reg PEDO_CMD_REG
-  * @retval        Interface status (MANDATORY: return 0 -> no Error).
-  *
-  */
-int32_t lsm6dsrx_pedo_mode_set(stmdev_ctx_t *ctx, lsm6dsrx_pedo_mode_t val)
-{
-  lsm6dsrx_adv_pedo_t adv_pedo;
-  lsm6dsrx_emb_func_en_b_t emb_func_en_b;
-  lsm6dsrx_pedo_cmd_reg_t pedo_cmd_reg;
-  int32_t ret;
-
-  ret = lsm6dsrx_mem_bank_set(ctx, LSM6DSRX_EMBEDDED_FUNC_BANK);
-  if(ret == 0){
-    ret = lsm6dsrx_read_reg(ctx, LSM6DSRX_ADV_PEDO, (uint8_t*)&adv_pedo, 1);
-  }
-  if(ret == 0){
-    adv_pedo.pedo_fpr_adf_dis = (~((uint8_t)val) & 0x01U);
-    ret = lsm6dsrx_write_reg(ctx, LSM6DSRX_ADV_PEDO, (uint8_t*)&adv_pedo, 1);
-  }
-  if(ret == 0){
-    ret = lsm6dsrx_mem_bank_set(ctx, LSM6DSRX_USER_BANK);
-  }
-  if(ret == 0){
-    ret = lsm6dsrx_ln_pg_read_byte(ctx, LSM6DSRX_PEDO_CMD_REG,
-                                  (uint8_t*)&pedo_cmd_reg);
-    pedo_cmd_reg.fp_rejection_en = ((uint8_t)val & 0x01U); to FIX
-    pedo_cmd_reg.ad_det_en = ((uint8_t)val & 0x02U)>>1;
-  }
-  if(ret == 0){
-    ret = lsm6dsrx_ln_pg_write_byte(ctx, LSM6DSRX_PEDO_CMD_REG,
-                                   (uint8_t*)&pedo_cmd_reg);
-  }
-  return ret;
-}
-
-/**
-  * @brief  Pedometer algorithm working mode.[get]
-  *
-  * @param  ctx    read / write interface definitions
-  * @param  val    Get the values of:
-  *                   - pedo_fpr_adf_dis in reg ADV_PEDO
-  *                   - pedo_adv_en in reg EMB_FUNC_EN_B
-  *                   - ad_det_en in reg PEDO_CMD_REG
-  * @retval        Interface status (MANDATORY: return 0 -> no Error).
-  *
-  */
-int32_t lsm6dsrx_pedo_mode_get(stmdev_ctx_t *ctx, lsm6dsrx_pedo_mode_t *val)
-{
-  lsm6dsrx_pedo_cmd_reg_t pedo_cmd_reg;
-  int32_t ret;
-
-  ret = lsm6dsrx_ln_pg_read_byte(ctx, LSM6DSRX_PEDO_CMD_REG,
-                                (uint8_t*)&pedo_cmd_reg);
-
-  switch ((pedo_cmd_reg.ad_det_en << 1) | pedo_cmd_reg.fp_rejection_en){
-    case LSM6DSRX_PEDO_BASE:
-      *val = LSM6DSRX_PEDO_BASE;
-      break;
-    case LSM6DSRX_PEDO_BASE_FALSE_STEP_REJ:
-      *val = LSM6DSRX_PEDO_BASE_FALSE_STEP_REJ;
-      break;
-    case LSM6DSRX_PEDO_ADV_FALSE_STEP_REJ:
-      *val = LSM6DSRX_PEDO_ADV_FALSE_STEP_REJ;
-      break;
-    default:
-      *val = LSM6DSRX_PEDO_BASE;
-      break;
-  }
-  return ret;
-}
-
-/**
   * @brief  Interrupt status bit for step detection.[get]
   *
   * @param  ctx    Read / write interface definitions.(ptr)
@@ -7529,95 +7506,6 @@ int32_t lsm6dsrx_pedo_steps_period_get(stmdev_ctx_t *ctx, uint8_t *buff)
     i++;
     ret = lsm6dsrx_ln_pg_read_byte(ctx, LSM6DSRX_PEDO_SC_DELTAT_H, &buff[i]);
   }
-  return ret;
-}
-
-/**
-  * @brief  Enables the advanced detection feature.[set]
-  *
-  * @param  ctx    Read / write interface definitions.(ptr)
-  * @param  val    Change the values of ad_det_en in reg PEDO_CMD_REG
-  * @retval        Interface status (MANDATORY: return 0 -> no Error).
-  *
-  */
-int32_t lsm6dsrx_pedo_adv_detection_set(stmdev_ctx_t *ctx, uint8_t val)
-{
-  lsm6dsrx_pedo_cmd_reg_t pedo_cmd_reg;
-  int32_t ret;
-
-  ret = lsm6dsrx_ln_pg_read_byte(ctx, LSM6DSRX_PEDO_CMD_REG,
-                                  (uint8_t*)&pedo_cmd_reg);
-
-  if(ret == 0){
-    pedo_cmd_reg.ad_det_en= (uint8_t)val;
-    ret = lsm6dsrx_ln_pg_write_byte(ctx, LSM6DSRX_PEDO_CMD_REG,
-                                     (uint8_t*)&pedo_cmd_reg);
-  }
-  return ret;
-}
-
-/**
-  * @brief  Enables the advanced detection feature.[get]
-  *
-  * @param  ctx    Read / write interface definitions.(ptr)
-  * @param  val    Change the values of ad_det_en in reg PEDO_CMD_REG
-  * @retval        Interface status (MANDATORY: return 0 -> no Error).
-  *
-  */
-int32_t lsm6dsrx_pedo_adv_detection_get(stmdev_ctx_t *ctx, uint8_t *val)
-{
-  lsm6dsrx_pedo_cmd_reg_t pedo_cmd_reg;
-  int32_t ret;
-
-  ret = lsm6dsrx_ln_pg_read_byte(ctx, LSM6DSRX_PEDO_CMD_REG, (uint8_t*)&pedo_cmd_reg);
-  *val = pedo_cmd_reg.ad_det_en;
-
-  return ret;
-}
-
-/**
-  * @brief  Enables the false-positive rejection feature.[set]
-  *
-  * @param  ctx    Read / write interface definitions.(ptr)
-  * @param  val    Change the values of fp_rejection_en in reg PEDO_CMD_REG
-  * @retval        Interface status (MANDATORY: return 0 -> no Error).
-  *
-  */
-int32_t lsm6dsrx_pedo_false_step_rejection_set(stmdev_ctx_t *ctx,
-                                                uint8_t val)
-{
-  lsm6dsrx_pedo_cmd_reg_t pedo_cmd_reg;
-  int32_t ret;
-
-  ret = lsm6dsrx_ln_pg_read_byte(ctx, LSM6DSRX_PEDO_CMD_REG,
-                                  (uint8_t*)&pedo_cmd_reg);
-
-  if(ret == 0){
-    pedo_cmd_reg.fp_rejection_en= (uint8_t)val;
-    ret = lsm6dsrx_ln_pg_write_byte(ctx, LSM6DSRX_PEDO_CMD_REG,
-                                     (uint8_t*)&pedo_cmd_reg);
-  }
-  return ret;
-}
-
-/**
-  * @brief  Enables the false-positive rejection feature.[get]
-  *
-  * @param  ctx    Read / write interface definitions.(ptr)
-  * @param  val    Change the values of fp_rejection_en in reg PEDO_CMD_REG
-  * @retval        Interface status (MANDATORY: return 0 -> no Error).
-  *
-  */
-int32_t lsm6dsrx_pedo_false_step_rejection_get(stmdev_ctx_t *ctx,
-                                                uint8_t *val)
-{
-  lsm6dsrx_pedo_cmd_reg_t pedo_cmd_reg;
-  int32_t ret;
-
-  ret = lsm6dsrx_ln_pg_read_byte(ctx, LSM6DSRX_PEDO_CMD_REG,
-                                  (uint8_t*)&pedo_cmd_reg);
-  *val = pedo_cmd_reg.fp_rejection_en;
-
   return ret;
 }
 

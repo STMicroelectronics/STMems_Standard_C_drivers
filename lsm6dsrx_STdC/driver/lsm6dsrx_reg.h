@@ -575,7 +575,8 @@ typedef struct {
 
 #define LSM6DSRX_I3C_BUS_AVB                  0x62U
 typedef struct {
-  uint8_t not_used_01              : 3;
+  uint8_t pd_dis_int1              : 1;
+  uint8_t not_used_01              : 2;
   uint8_t i3c_bus_avb_sel          : 2;
   uint8_t not_used_02              : 3;
 } lsm6dsrx_i3c_bus_avb_t;
@@ -643,13 +644,6 @@ typedef struct {
   uint8_t not_used_01              : 4;
   uint8_t page_sel                 : 4;
 } lsm6dsrx_page_sel_t;
-
-#define LSM6DSRX_ADV_PEDO                     0x03U
-typedef struct {
-  uint8_t not_used_01              : 1;
-  uint8_t pedo_fpr_adf_dis         : 1;
-  uint8_t not_used_02              : 6;
-} lsm6dsrx_adv_pedo_t;
 
 #define LSM6DSRX_EMB_FUNC_EN_A                0x04U
 typedef struct {
@@ -1148,9 +1142,7 @@ typedef struct {
 #define LSM6DSRX_FSM_START_ADD_H              0x17FU
 #define LSM6DSRX_PEDO_CMD_REG                 0x183U
 typedef struct {
-  uint8_t ad_det_en                : 1;
-  uint8_t not_used_01              : 1;
-  uint8_t fp_rejection_en          : 1;
+  uint8_t not_used_01              : 3;
   uint8_t carry_count_en           : 1;
   uint8_t not_used_02              : 4;
 } lsm6dsrx_pedo_cmd_reg_t;
@@ -2087,6 +2079,13 @@ int32_t lsm6dsrx_sdo_sa0_mode_set(stmdev_ctx_t *ctx, lsm6dsrx_sdo_pu_en_t val);
 int32_t lsm6dsrx_sdo_sa0_mode_get(stmdev_ctx_t *ctx, lsm6dsrx_sdo_pu_en_t *val);
 
 typedef enum {
+  LSM6DSRX_PULL_DOWN_CONNECT       = 0,
+  LSM6DSRX_PULL_DOWN_DISC          = 1,
+} lsm6dsrx_pd_dis_int1_t;
+int32_t lsm6dsrx_int1_mode_set(stmdev_ctx_t *ctx, lsm6dsrx_pd_dis_int1_t val);
+int32_t lsm6dsrx_int1_mode_get(stmdev_ctx_t *ctx, lsm6dsrx_pd_dis_int1_t *val);
+
+typedef enum {
   LSM6DSRX_SPI_4_WIRE = 0,
   LSM6DSRX_SPI_3_WIRE = 1,
 } lsm6dsrx_sim_t;
@@ -2115,11 +2114,12 @@ int32_t lsm6dsrx_i3c_disable_get(stmdev_ctx_t *ctx,
                                 lsm6dsrx_i3c_disable_t *val);
 
 typedef struct {
-    lsm6dsrx_int1_ctrl_t          int1_ctrl;
-    lsm6dsrx_md1_cfg_t            md1_cfg;
-    lsm6dsrx_emb_func_int1_t      emb_func_int1;
-    lsm6dsrx_fsm_int1_a_t         fsm_int1_a;
-    lsm6dsrx_fsm_int1_b_t         fsm_int1_b;
+  lsm6dsrx_int1_ctrl_t          int1_ctrl;
+  lsm6dsrx_md1_cfg_t            md1_cfg;
+  lsm6dsrx_emb_func_int1_t      emb_func_int1;
+  lsm6dsrx_fsm_int1_a_t         fsm_int1_a;
+  lsm6dsrx_fsm_int1_b_t         fsm_int1_b;
+  lsm6dsrx_mlc_int1_t           mlc_int1;
 } lsm6dsrx_pin_int1_route_t;
 int32_t lsm6dsrx_pin_int1_route_set(stmdev_ctx_t *ctx,
                                    lsm6dsrx_pin_int1_route_t *val);
@@ -2132,6 +2132,7 @@ typedef struct {
   lsm6dsrx_emb_func_int2_t      emb_func_int2;
   lsm6dsrx_fsm_int2_a_t         fsm_int2_a;
   lsm6dsrx_fsm_int2_b_t         fsm_int2_b;
+  lsm6dsrx_mlc_int2_t           mlc_int2;
 } lsm6dsrx_pin_int2_route_t;
 int32_t lsm6dsrx_pin_int2_route_set(stmdev_ctx_t *ctx,
                                    lsm6dsrx_pin_int2_route_t *val);
@@ -2504,13 +2505,6 @@ int32_t lsm6dsrx_den_mark_axis_z_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t lsm6dsrx_pedo_sens_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_pedo_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-typedef enum {
-  LSM6DSRX_PEDO_BASE                = 0x00,
-  LSM6DSRX_PEDO_ADV_FALSE_STEP_REJ  = 0x02,
-} lsm6dsrx_pedo_mode_t;
-int32_t lsm6dsrx_pedo_mode_set(stmdev_ctx_t *ctx, lsm6dsrx_pedo_mode_t val);
-int32_t lsm6dsrx_pedo_mode_get(stmdev_ctx_t *ctx, lsm6dsrx_pedo_mode_t *val);
-
 int32_t lsm6dsrx_pedo_step_detect_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm6dsrx_pedo_debounce_steps_set(stmdev_ctx_t *ctx, uint8_t *buff);
@@ -2518,14 +2512,6 @@ int32_t lsm6dsrx_pedo_debounce_steps_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
 int32_t lsm6dsrx_pedo_steps_period_set(stmdev_ctx_t *ctx, uint8_t *buff);
 int32_t lsm6dsrx_pedo_steps_period_get(stmdev_ctx_t *ctx, uint8_t *buff);
-
-int32_t lsm6dsrx_pedo_adv_detection_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dsrx_pedo_adv_detection_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t lsm6dsrx_pedo_false_step_rejection_set(stmdev_ctx_t *ctx,
-                                              uint8_t val);
-int32_t lsm6dsrx_pedo_false_step_rejection_get(stmdev_ctx_t *ctx,
-                                              uint8_t *val);
 
 typedef enum {
   LSM6DSRX_EVERY_STEP     = 0,
