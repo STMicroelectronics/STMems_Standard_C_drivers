@@ -563,7 +563,8 @@ typedef struct {
 
 #define LSM6DSR_I3C_BUS_AVB                  0x62U
 typedef struct {
-  uint8_t not_used_01              : 3;
+  uint8_t pd_dis_int1              : 1;
+  uint8_t not_used_01              : 2;
   uint8_t i3c_bus_avb_sel          : 2;
   uint8_t not_used_02              : 3;
 } lsm6dsr_i3c_bus_avb_t;
@@ -2013,6 +2014,13 @@ typedef enum {
 } lsm6dsr_sdo_pu_en_t;
 int32_t lsm6dsr_sdo_sa0_mode_set(stmdev_ctx_t *ctx, lsm6dsr_sdo_pu_en_t val);
 int32_t lsm6dsr_sdo_sa0_mode_get(stmdev_ctx_t *ctx, lsm6dsr_sdo_pu_en_t *val);
+
+typedef enum {
+  LSM6DSR_PULL_DOWN_CONNECT       = 0,
+  LSM6DSR_PULL_DOWN_DISC          = 1,
+} lsm6dsr_pd_dis_int1_t;
+int32_t lsm6dsr_int1_mode_set(stmdev_ctx_t *ctx, lsm6dsr_pd_dis_int1_t val);
+int32_t lsm6dsr_int1_mode_get(stmdev_ctx_t *ctx, lsm6dsr_pd_dis_int1_t *val);
 
 typedef enum {
   LSM6DSR_SPI_4_WIRE = 0,

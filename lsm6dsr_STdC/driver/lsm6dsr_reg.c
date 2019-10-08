@@ -3528,6 +3528,57 @@ int32_t lsm6dsr_sdo_sa0_mode_get(stmdev_ctx_t *ctx,
 }
 
 /**
+  * @brief  Connect/Disconnect INT1 pull-down.[set]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of pd_dis_int1 in reg I3C_BUS_AVB
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t lsm6dsr_int1_mode_set(stmdev_ctx_t *ctx, lsm6dsr_pd_dis_int1_t val)
+{
+  lsm6dsr_i3c_bus_avb_t i3c_bus_avb;
+  int32_t ret;
+
+  ret = lsm6dsr_read_reg(ctx, LSM6DSR_I3C_BUS_AVB, (uint8_t*)&i3c_bus_avb, 1);
+  if(ret == 0){
+    i3c_bus_avb.pd_dis_int1= (uint8_t)val;
+    ret = lsm6dsr_write_reg(ctx, LSM6DSR_I3C_BUS_AVB,
+                            (uint8_t*)&i3c_bus_avb, 1);
+  }
+  return ret;
+}
+
+/**
+  * @brief  Connect/Disconnect INT1 pull-down.[get]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of pd_dis_int1 in reg I3C_BUS_AVB
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t lsm6dsr_int1_mode_get(stmdev_ctx_t *ctx, lsm6dsr_pd_dis_int1_t *val)
+{
+  lsm6dsr_i3c_bus_avb_t i3c_bus_avb;
+  int32_t ret;
+
+  ret = lsm6dsr_read_reg(ctx, LSM6DSR_I3C_BUS_AVB, (uint8_t*)&i3c_bus_avb, 1);
+
+  switch (i3c_bus_avb.pd_dis_int1){
+    case LSM6DSR_PULL_DOWN_CONNECT:
+      *val = LSM6DSR_PULL_DOWN_CONNECT;
+      break;
+    case LSM6DSR_PULL_DOWN_DISC:
+      *val = LSM6DSR_PULL_DOWN_DISC;
+      break;
+    default:
+      *val = LSM6DSR_PULL_DOWN_CONNECT;
+      break;
+  }
+  return ret;
+}
+
+/**
   * @brief  SPI Serial Interface Mode selection.[set]
   *
   * @param  ctx    Read / write interface definitions.(ptr)
