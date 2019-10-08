@@ -14,4 +14,4 @@ every hardware.
 
 www.st.com/mems
 
-ISM330DHCX DS rev.3
+ISM330DHCX DS rev.4

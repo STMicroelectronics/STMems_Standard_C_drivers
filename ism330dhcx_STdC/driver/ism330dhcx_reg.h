@@ -291,7 +291,8 @@ typedef struct {
 
 #define ISM330DHCX_CTRL9_XL                     0x18U
 typedef struct {
-  uint8_t not_used_01              : 2;
+  uint8_t not_used_01              : 1;
+  uint8_t device_conf              : 1;
   uint8_t den_lh                   : 1;
   uint8_t den_xl_g                 : 2;   /* den_xl_en + den_xl_g */
   uint8_t den_z                    : 1;
@@ -608,13 +609,6 @@ typedef struct {
   uint8_t not_used_01              : 4;
   uint8_t page_sel                 : 4;
 } ism330dhcx_page_sel_t;
-
-#define ISM330DHCX_ADV_PEDO                     0x03U
-typedef struct {
-  uint8_t not_used_01              : 1;
-  uint8_t pedo_fpr_adf_dis         : 1;
-  uint8_t not_used_02              : 6;
-} ism330dhcx_adv_pedo_t;
 
 #define ISM330DHCX_EMB_FUNC_EN_A                0x04U
 typedef struct {
@@ -1059,7 +1053,8 @@ typedef struct {
 #define ISM330DHCX_EMB_FUNC_INIT_B              0x67U
 typedef struct {
   uint8_t fsm_init                 : 1;
-  uint8_t not_used_01              : 3;
+  uint8_t not_used_01              : 2;
+  uint8_t fifo_compr_init          : 1;
   uint8_t mlc_init                 : 1;
   uint8_t not_used_02              : 3;
 } ism330dhcx_emb_func_init_b_t;
@@ -1113,9 +1108,7 @@ typedef struct {
 #define ISM330DHCX_FSM_START_ADD_H              0x17FU
 #define ISM330DHCX_PEDO_CMD_REG                 0x183U
 typedef struct {
-  uint8_t ad_det_en                : 1;
-  uint8_t not_used_01              : 1;
-  uint8_t fp_rejection_en          : 1;
+  uint8_t not_used_01              : 3;
   uint8_t carry_count_en           : 1;
   uint8_t not_used_02              : 4;
 } ism330dhcx_pedo_cmd_reg_t;
@@ -1499,7 +1492,6 @@ typedef union{
   ism330dhcx_ctrl3_ois_t                     ctrl3_ois;
   ism330dhcx_fifo_data_out_tag_t             fifo_data_out_tag;
   ism330dhcx_page_sel_t                      page_sel;
-  ism330dhcx_adv_pedo_t                      adv_pedo;
   ism330dhcx_emb_func_en_a_t                 emb_func_en_a;
   ism330dhcx_emb_func_en_b_t                 emb_func_en_b;
   ism330dhcx_page_address_t                  page_address;
@@ -2277,10 +2269,13 @@ int32_t ism330dhcx_ff_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t ism330dhcx_fifo_watermark_set(stmdev_ctx_t *ctx, uint16_t val);
 int32_t ism330dhcx_fifo_watermark_get(stmdev_ctx_t *ctx, uint16_t *val);
 
+int32_t ism330dhcx_compression_algo_init_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t ism330dhcx_compression_algo_init_get(stmdev_ctx_t *ctx, uint8_t *val);
+
 int32_t ism330dhcx_compression_algo_init_set(stmdev_ctx_t *ctx,
-                                            uint8_t val);
+                                             uint8_t val);
 int32_t ism330dhcx_compression_algo_init_get(stmdev_ctx_t *ctx,
-                                            uint8_t *val);
+                                             uint8_t *val);
 
 typedef enum {
   ISM330DHCX_CMP_DISABLE  = 0x00,
@@ -2493,16 +2488,6 @@ int32_t ism330dhcx_den_mark_axis_z_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t ism330dhcx_pedo_sens_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_pedo_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-typedef enum {
-  ISM330DHCX_PEDO_BASE                = 0x00,
-  ISM330DHCX_PEDO_BASE_FALSE_STEP_REJ = 0x01,
-  ISM330DHCX_PEDO_ADV_FALSE_STEP_REJ  = 0x03,
-} ism330dhcx_pedo_mode_t;
-int32_t ism330dhcx_pedo_mode_set(stmdev_ctx_t *ctx,
-                                 ism330dhcx_pedo_mode_t val);
-int32_t ism330dhcx_pedo_mode_get(stmdev_ctx_t *ctx,
-                                 ism330dhcx_pedo_mode_t *val);
-
 int32_t ism330dhcx_pedo_step_detect_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t ism330dhcx_pedo_debounce_steps_set(stmdev_ctx_t *ctx,
@@ -2512,14 +2497,6 @@ int32_t ism330dhcx_pedo_debounce_steps_get(stmdev_ctx_t *ctx,
 
 int32_t ism330dhcx_pedo_steps_period_set(stmdev_ctx_t *ctx, uint8_t *buff);
 int32_t ism330dhcx_pedo_steps_period_get(stmdev_ctx_t *ctx, uint8_t *buff);
-
-int32_t ism330dhcx_pedo_adv_detection_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_pedo_adv_detection_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t ism330dhcx_pedo_false_step_rejection_set(stmdev_ctx_t *ctx,
-                                                 uint8_t val);
-int32_t ism330dhcx_pedo_false_step_rejection_get(stmdev_ctx_t *ctx,
-                                                 uint8_t *val);
 
 typedef enum {
   ISM330DHCX_EVERY_STEP     = 0,

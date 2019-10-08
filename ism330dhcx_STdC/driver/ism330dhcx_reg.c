@@ -5634,6 +5634,62 @@ int32_t ism330dhcx_fifo_watermark_get(stmdev_ctx_t *ctx, uint16_t *val)
 }
 
 /**
+  * @brief  FIFO compression feature initialization request.[set].
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of FIFO_COMPR_INIT in reg EMB_FUNC_INIT_B
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t ism330dhcx_compression_algo_init_set(stmdev_ctx_t *ctx, uint8_t val)
+{
+  ism330dhcx_emb_func_init_b_t emb_func_init_b;
+  int32_t ret;
+
+  ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_EMBEDDED_FUNC_BANK);
+  if(ret == 0){
+    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_EMB_FUNC_INIT_B,
+                              (uint8_t*)&emb_func_init_b, 1);
+  }
+  if(ret == 0){
+    emb_func_init_b.fifo_compr_init= (uint8_t)val;
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_EMB_FUNC_INIT_B,
+                               (uint8_t*)&emb_func_init_b, 1);
+  }
+  if(ret == 0){
+    ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_USER_BANK);
+  }
+  return ret;
+}
+
+/**
+  * @brief  FIFO compression feature initialization request.[get].
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    change the values of FIFO_COMPR_INIT in
+  *                reg EMB_FUNC_INIT_B
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t ism330dhcx_compression_algo_init_get(stmdev_ctx_t *ctx,
+                                            uint8_t *val)
+{
+  ism330dhcx_emb_func_init_b_t emb_func_init_b;
+  int32_t ret;
+
+  ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_EMBEDDED_FUNC_BANK);
+  if(ret == 0){
+    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_EMB_FUNC_INIT_B,
+                             (uint8_t*)&emb_func_init_b, 1);
+  }
+  if(ret == 0){
+    *val = emb_func_init_b.fifo_compr_init;
+    ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_USER_BANK);
+  }
+  return ret;
+}
+
+/**
   * @brief  Enable and configure compression algo.[set]
   *
   * @param  ctx    Read / write interface definitions.(ptr)
@@ -7239,97 +7295,6 @@ int32_t ism330dhcx_pedo_sens_get(stmdev_ctx_t *ctx, uint8_t *val)
 }
 
 /**
-  * @brief  Pedometer algorithm working mode.[set]
-  *
-  * @param  ctx    read / write interface definitions
-  * @param  val    Change the values of:
-  *                   - pedo_fpr_adf_dis in reg ADV_PEDO
-  *                   - pedo_adv_en in reg EMB_FUNC_EN_B
-  *                   - ad_det_en in reg PEDO_CMD_REG
-  * @retval        Interface status (MANDATORY: return 0 -> no Error).
-  *
-  */
-int32_t ism330dhcx_pedo_mode_set(stmdev_ctx_t *ctx,
-                                 ism330dhcx_pedo_mode_t val)
-{
-  ism330dhcx_adv_pedo_t adv_pedo;
-  ism330dhcx_emb_func_en_b_t emb_func_en_b;
-  ism330dhcx_pedo_cmd_reg_t pedo_cmd_reg;
-  int32_t ret;
-
-  ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_EMBEDDED_FUNC_BANK);
-  if(ret == 0){
-    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_ADV_PEDO,
-                              (uint8_t*)&adv_pedo, 1);
-  }
-  if(ret == 0){
-    adv_pedo.pedo_fpr_adf_dis = (~((uint8_t)val) & 0x01U);
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_ADV_PEDO,
-                               (uint8_t*)&adv_pedo, 1);
-  }
-  if(ret == 0){
-    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_EMB_FUNC_EN_B,
-                           (uint8_t*)&emb_func_en_b, 1);
-  }
-  if(ret == 0){
-    emb_func_en_b.mlc_en = (uint8_t)val & 0x01U;
-    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_EMB_FUNC_EN_B,
-                            (uint8_t*)&emb_func_en_b, 1);
-  }
-  if(ret == 0){
-    ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_USER_BANK);
-  }
-  if(ret == 0){
-    ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
-                                  (uint8_t*)&pedo_cmd_reg);
-    pedo_cmd_reg.fp_rejection_en = ((uint8_t)val & 0x01U);
-    pedo_cmd_reg.ad_det_en = ((uint8_t)val & 0x02U)>>1;
-  }
-  if(ret == 0){
-    ret = ism330dhcx_ln_pg_write_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
-                                   (uint8_t*)&pedo_cmd_reg);
-  }
-  return ret;
-}
-
-/**
-  * @brief  Pedometer algorithm working mode.[get]
-  *
-  * @param  ctx    read / write interface definitions
-  * @param  val    Get the values of:
-  *                   - pedo_fpr_adf_dis in reg ADV_PEDO
-  *                   - pedo_adv_en in reg EMB_FUNC_EN_B
-  *                   - ad_det_en in reg PEDO_CMD_REG
-  * @retval        Interface status (MANDATORY: return 0 -> no Error).
-  *
-  */
-int32_t ism330dhcx_pedo_mode_get(stmdev_ctx_t *ctx,
-                                 ism330dhcx_pedo_mode_t *val)
-{
-  ism330dhcx_pedo_cmd_reg_t pedo_cmd_reg;
-  int32_t ret;
-
-  ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
-                                (uint8_t*)&pedo_cmd_reg);
-
-  switch ((pedo_cmd_reg.ad_det_en << 1) | pedo_cmd_reg.fp_rejection_en){
-    case ISM330DHCX_PEDO_BASE:
-      *val = ISM330DHCX_PEDO_BASE;
-      break;
-    case ISM330DHCX_PEDO_BASE_FALSE_STEP_REJ:
-      *val = ISM330DHCX_PEDO_BASE_FALSE_STEP_REJ;
-      break;
-    case ISM330DHCX_PEDO_ADV_FALSE_STEP_REJ:
-      *val = ISM330DHCX_PEDO_ADV_FALSE_STEP_REJ;
-      break;
-    default:
-      *val = ISM330DHCX_PEDO_BASE;
-      break;
-  }
-  return ret;
-}
-
-/**
   * @brief  Interrupt status bit for step detection.[get]
   *
   * @param  ctx    Read / write interface definitions.(ptr)
@@ -7433,96 +7398,6 @@ int32_t ism330dhcx_pedo_steps_period_get(stmdev_ctx_t *ctx, uint8_t *buff)
     ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_SC_DELTAT_H,
                                      &buff[i]);
   }
-  return ret;
-}
-
-/**
-  * @brief  Enables the advanced detection feature.[set]
-  *
-  * @param  ctx    Read / write interface definitions.(ptr)
-  * @param  val    Change the values of ad_det_en in reg PEDO_CMD_REG
-  * @retval        Interface status (MANDATORY: return 0 -> no Error).
-  *
-  */
-int32_t ism330dhcx_pedo_adv_detection_set(stmdev_ctx_t *ctx, uint8_t val)
-{
-  ism330dhcx_pedo_cmd_reg_t pedo_cmd_reg;
-  int32_t ret;
-
-  ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
-                                   (uint8_t*)&pedo_cmd_reg);
-
-  if(ret == 0){
-    pedo_cmd_reg.ad_det_en= (uint8_t)val;
-    ret = ism330dhcx_ln_pg_write_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
-                                      (uint8_t*)&pedo_cmd_reg);
-  }
-  return ret;
-}
-
-/**
-  * @brief  Enables the advanced detection feature.[get]
-  *
-  * @param  ctx    Read / write interface definitions.(ptr)
-  * @param  val    Change the values of ad_det_en in reg PEDO_CMD_REG
-  * @retval        Interface status (MANDATORY: return 0 -> no Error).
-  *
-  */
-int32_t ism330dhcx_pedo_adv_detection_get(stmdev_ctx_t *ctx, uint8_t *val)
-{
-  ism330dhcx_pedo_cmd_reg_t pedo_cmd_reg;
-  int32_t ret;
-
-  ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
-                                   (uint8_t*)&pedo_cmd_reg);
-  *val = pedo_cmd_reg.ad_det_en;
-
-  return ret;
-}
-
-/**
-  * @brief  Enables the false-positive rejection feature.[set]
-  *
-  * @param  ctx    Read / write interface definitions.(ptr)
-  * @param  val    Change the values of fp_rejection_en in reg PEDO_CMD_REG
-  * @retval        Interface status (MANDATORY: return 0 -> no Error).
-  *
-  */
-int32_t ism330dhcx_pedo_false_step_rejection_set(stmdev_ctx_t *ctx,
-                                                uint8_t val)
-{
-  ism330dhcx_pedo_cmd_reg_t pedo_cmd_reg;
-  int32_t ret;
-
-  ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
-                                   (uint8_t*)&pedo_cmd_reg);
-
-  if(ret == 0){
-    pedo_cmd_reg.fp_rejection_en= (uint8_t)val;
-    ret = ism330dhcx_ln_pg_write_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
-                                      (uint8_t*)&pedo_cmd_reg);
-  }
-  return ret;
-}
-
-/**
-  * @brief  Enables the false-positive rejection feature.[get]
-  *
-  * @param  ctx    Read / write interface definitions.(ptr)
-  * @param  val    Change the values of fp_rejection_en in reg PEDO_CMD_REG
-  * @retval        Interface status (MANDATORY: return 0 -> no Error).
-  *
-  */
-int32_t ism330dhcx_pedo_false_step_rejection_get(stmdev_ctx_t *ctx,
-                                                 uint8_t *val)
-{
-  ism330dhcx_pedo_cmd_reg_t pedo_cmd_reg;
-  int32_t ret;
-
-  ret = ism330dhcx_ln_pg_read_byte(ctx, ISM330DHCX_PEDO_CMD_REG,
-                                   (uint8_t*)&pedo_cmd_reg);
-  *val = pedo_cmd_reg.fp_rejection_en;
-
   return ret;
 }
 
