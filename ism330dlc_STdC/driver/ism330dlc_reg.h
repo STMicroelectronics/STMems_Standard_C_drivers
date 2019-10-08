@@ -1743,18 +1743,6 @@ int32_t ism330dlc_den_mark_axis_y_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t ism330dlc_den_mark_axis_x_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dlc_den_mark_axis_x_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t ism330dlc_tilt_sens_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dlc_tilt_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t ism330dlc_wrist_tilt_sens_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dlc_wrist_tilt_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t ism330dlc_tilt_latency_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t ism330dlc_tilt_latency_get(stmdev_ctx_t *ctx, uint8_t *buff);
-
-int32_t ism330dlc_tilt_threshold_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t ism330dlc_tilt_threshold_get(stmdev_ctx_t *ctx, uint8_t *buff);
-
 int32_t ism330dlc_mag_soft_iron_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dlc_mag_soft_iron_get(stmdev_ctx_t *ctx, uint8_t *val);
 
