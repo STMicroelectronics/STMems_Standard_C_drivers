@@ -1020,7 +1020,7 @@ int32_t asm330lhh_odr_cal_reg_get(stmdev_ctx_t *ctx, int8_t *val)
 
   ret = asm330lhh_read_reg(ctx, ASM330LHH_INTERNAL_FREQ_FINE,
                            (uint8_t*)&internal_freq_fine, 1);
-  *val = internal_freq_fine.freq_fine;
+  *val = (int8_t)internal_freq_fine.freq_fine;
 
   return ret;
 }
