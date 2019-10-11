@@ -1981,4 +1981,9 @@ int32_t lis331dlh_int2_6d_treshold_get(stmdev_ctx_t *ctx, uint8_t *val)
   *
   */
 
+/**
+  * @}
+  *
+  */
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
