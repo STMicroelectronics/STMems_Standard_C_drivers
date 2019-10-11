@@ -6792,4 +6792,14 @@ int32_t lsm6dsl_sh_slave_3_dec_get(stmdev_ctx_t *ctx,
   return ret;
 }
 
+/**
+  * @}
+  *
+  */
+
+/**
+  * @}
+  *
+  */
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
