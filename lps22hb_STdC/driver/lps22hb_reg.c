@@ -1845,4 +1845,9 @@ int32_t lps22hb_auto_add_inc_get(stmdev_ctx_t *ctx, uint8_t *val)
   *
   */
 
+/**
+  * @}
+  *
+  */
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
