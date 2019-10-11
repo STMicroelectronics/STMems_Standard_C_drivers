@@ -2172,4 +2172,9 @@ int32_t lis2hh12_xl_self_test_get(stmdev_ctx_t *ctx,
   *
   */
 
+/**
+  * @}
+  *
+  */
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
