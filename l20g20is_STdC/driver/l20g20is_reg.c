@@ -1179,4 +1179,9 @@ int32_t l20g20is_gy_self_test_get(stmdev_ctx_t *ctx,
   *
   */
 
+/**
+  * @}
+  *
+  */
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
