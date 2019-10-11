@@ -2886,6 +2886,12 @@ int32_t lis2dw12_fifo_wtm_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 
   return ret;
 }
+
+/**
+  * @}
+  *
+  */
+
 /**
   * @}
   *
