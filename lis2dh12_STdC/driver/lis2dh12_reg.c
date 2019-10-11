@@ -2374,4 +2374,10 @@ int32_t lis2dh12_spi_mode_get(stmdev_ctx_t *ctx, lis2dh12_sim_t *val)
   *
   */
 
+/**
+  * @}
+  *
+  */
+
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
