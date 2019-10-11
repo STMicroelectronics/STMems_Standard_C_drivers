@@ -3541,4 +3541,9 @@ int32_t lsm303agr_mag_i2c_interface_get(stmdev_ctx_t *ctx,
   *
   */
 
+/**
+  * @}
+  *
+  */
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
