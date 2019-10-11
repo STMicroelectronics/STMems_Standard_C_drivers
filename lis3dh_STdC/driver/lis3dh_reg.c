@@ -2410,4 +2410,9 @@ int32_t lis3dh_spi_mode_get(stmdev_ctx_t *ctx, lis3dh_sim_t *val)
   *
   */
 
+/**
+  * @}
+  *
+  */
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
