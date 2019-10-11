@@ -5902,4 +5902,9 @@ int32_t lsm6ds3_sh_num_of_dev_connected_get(stmdev_ctx_t *ctx,
   *
   */
 
+/**
+  * @}
+  *
+  */
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
