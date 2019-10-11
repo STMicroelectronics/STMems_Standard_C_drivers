@@ -1809,4 +1809,9 @@ int32_t lps27hhw_fifo_full_on_int_get(stmdev_ctx_t *ctx, uint8_t *val)
   *
   */
 
+/**
+  * @}
+  *
+  */
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
