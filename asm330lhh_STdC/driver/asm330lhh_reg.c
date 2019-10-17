@@ -1004,6 +1004,71 @@ int32_t asm330lhh_fifo_out_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   */
 
 /**
+  * @brief  DEVICE_CONF bit configuration[set]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of device_conf in reg CTRL9_XL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t asm330lhh_device_conf_set(stmdev_ctx_t *ctx, uint8_t val)
+{
+  asm330lhh_ctrl9_xl_t ctrl9_xl;
+  int32_t ret;
+
+  ret = asm330lhh_read_reg(ctx, ASM330LHH_CTRL9_XL, (uint8_t*)&ctrl9_xl, 1);
+  if(ret == 0){
+    ctrl9_xl.device_conf = (uint8_t)val;
+    ret = asm330lhh_write_reg(ctx, ASM330LHH_CTRL9_XL, (uint8_t*)&ctrl9_xl, 1);
+  }
+  return ret;
+}
+
+/**
+  * @brief  DEVICE_CONF bit configuration[get]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of device_conf in reg CTRL9_XL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t asm330lhh_device_conf_get(stmdev_ctx_t *ctx, uint8_t *val)
+{
+  asm330lhh_ctrl9_xl_t ctrl9_xl;
+  int32_t ret;
+
+  ret = asm330lhh_read_reg(ctx, ASM330LHH_CTRL9_XL, (uint8_t*)&ctrl9_xl, 1);
+  *val = ctrl9_xl.device_conf;
+
+  return ret;
+}
+
+/**
+  * @brief  Difference in percentage of the effective ODR (and timestamp rate)
+  *         with respect to the typical.[set]
+  *         Step:  0.15%. 8-bit format, 2's complement.
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of freq_fine in reg INTERNAL_FREQ_FINE
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t asm330lhh_odr_cal_reg_set(stmdev_ctx_t *ctx, uint8_t val)
+{
+  asm330lhh_internal_freq_fine_t internal_freq_fine;
+  int32_t ret;
+
+  ret = asm330lhh_read_reg(ctx, ASM330LHH_INTERNAL_FREQ_FINE,
+                           (uint8_t*)&internal_freq_fine, 1);
+  if(ret == 0){
+    internal_freq_fine.freq_fine= (uint8_t)val;
+    ret = asm330lhh_write_reg(ctx, ASM330LHH_INTERNAL_FREQ_FINE,
+                              (uint8_t*)&internal_freq_fine, 1);
+  }
+  return ret;
+}
+
+/**
   * @brief  Difference in percentage of the effective ODR (and timestamp rate)
   *         with respect to the typical.[get]
   *         Step:  0.15%. 8-bit format, 2's complement.
@@ -1013,14 +1078,14 @@ int32_t asm330lhh_fifo_out_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t asm330lhh_odr_cal_reg_get(stmdev_ctx_t *ctx, int8_t *val)
+int32_t asm330lhh_odr_cal_reg_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   asm330lhh_internal_freq_fine_t internal_freq_fine;
   int32_t ret;
 
   ret = asm330lhh_read_reg(ctx, ASM330LHH_INTERNAL_FREQ_FINE,
                            (uint8_t*)&internal_freq_fine, 1);
-  *val = (int8_t)internal_freq_fine.freq_fine;
+  *val = internal_freq_fine.freq_fine;
 
   return ret;
 }

@@ -282,7 +282,8 @@ typedef struct {
 
 #define ASM330LHH_CTRL9_XL                     0x18U
 typedef struct {
-  uint8_t not_used_01              : 2;
+  uint8_t not_used_01              : 1;
+  uint8_t device_conf              : 1;
   uint8_t den_lh                   : 1;
   uint8_t den_xl_g                 : 2;   /* den_xl_en + den_xl_g */
   uint8_t den_z                    : 1;
@@ -681,7 +682,11 @@ int32_t asm330lhh_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
 int32_t asm330lhh_fifo_out_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t asm330lhh_odr_cal_reg_get(stmdev_ctx_t *ctx, int8_t *val);
+int32_t asm330lhh_device_conf_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t asm330lhh_device_conf_get(stmdev_ctx_t *ctx, uint8_t *val);
+
+int32_t asm330lhh_odr_cal_reg_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t asm330lhh_odr_cal_reg_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
   ASM330LHH_DRDY_LATCHED = 0,
