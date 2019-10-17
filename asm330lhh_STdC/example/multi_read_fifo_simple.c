@@ -47,6 +47,7 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
+
 //#define STEVAL_MKI109V3
 #define NUCLEO_F411RE_X_NUCLEO_IKS01A2
 
@@ -114,121 +115,89 @@ void example_multi_read_fifo_simple_asm330lhh(void)
 {
   stmdev_ctx_t dev_ctx;
 
-  /*
-   * Uncomment to configure INT 1
-   */
+  /* Uncomment to configure INT 1 */
   //asm330lhh_pin_int1_route_t int1_route;
 
-  /*
-   * Uncomment to configure INT 2
-   */
+  /* Uncomment to configure INT 2 */
   //asm330lhh_pin_int2_route_t int2_route;
 
-  /*
-   *  Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
 
-  /*
-   * Init test platform
-   */
+  /* Init test platform */
   platform_init();
 
-  /*
-   *  Check device ID
-   */
+  /* Check device ID */
   asm330lhh_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != ASM330LHH_ID)
     while(1);
 
-  /*
-   *  Restore default configuration
-   */
+  /* Restore default configuration */
   asm330lhh_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     asm330lhh_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   *  Enable Block Data Update
-   */
+  /* Start device configuration. */
+  asm330lhh_device_conf_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /* Enable Block Data Update */
   asm330lhh_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Set full scale
-   */
+  /* Set full scale */
   asm330lhh_xl_full_scale_set(&dev_ctx, ASM330LHH_2g);
   asm330lhh_gy_full_scale_set(&dev_ctx, ASM330LHH_2000dps);
 
-  /*
-   * Set FIFO watermark (number of unread sensor data TAG + 6 bytes
+  /* Set FIFO watermark (number of unread sensor data TAG + 6 bytes
    * stored in FIFO) to 10 samples
    */
   asm330lhh_fifo_watermark_set(&dev_ctx, 10);
 
-  /*
-   * Set FIFO batch XL/Gyro ODR to 12.5Hz
-   */
+  /* Set FIFO batch XL/Gyro ODR to 12.5Hz */
   asm330lhh_fifo_xl_batch_set(&dev_ctx, ASM330LHH_XL_BATCHED_AT_12Hz5);
   asm330lhh_fifo_gy_batch_set(&dev_ctx, ASM330LHH_GY_BATCHED_AT_12Hz5);
 
-  /*
-   * Set FIFO mode to Stream mode (aka Continuous Mode)
-   */
+  /* Set FIFO mode to Stream mode (aka Continuous Mode)m */
   asm330lhh_fifo_mode_set(&dev_ctx, ASM330LHH_STREAM_MODE);
 
-  /*
-   * Enable drdy 75 μs pulse: uncomment if interrupt must be pulsed
-   */
+  /* Enable drdy 75 μs pulse: uncomment if interrupt must be pulsed */
   //asm330lhh_data_ready_mode_set(&dev_ctx, ASM330LHH_DRDY_PULSED);
 
-  /*
-   * Uncomment if interrupt generation on Free Fall INT1 pin
-   */
+  /* Uncomment if interrupt generation on Free Fall INT1 pin */
   //asm330lhh_pin_int1_route_get(&dev_ctx, &int1_route);
   //int1_route.reg.int1_ctrl.int1_fifo_th = PROPERTY_ENABLE;
   //asm330lhh_pin_int1_route_set(&dev_ctx, &int1_route);
 
-  /*
-   * Uncomment if interrupt generation on Free Fall INT2 pin
-   */
+  /* Uncomment if interrupt generation on Free Fall INT2 pin */
   //asm330lhh_pin_int2_route_get(&dev_ctx, &int2_route);
   //int2_route.reg.int2_ctrl.int2_fifo_th = PROPERTY_ENABLE;
   //asm330lhh_pin_int2_route_set(&dev_ctx, &int2_route);
 
-  /*
-   * Set Output Data Rate
-   */
+  /* Set Output Data Rate */
   asm330lhh_xl_data_rate_set(&dev_ctx, ASM330LHH_XL_ODR_12Hz5);
   asm330lhh_gy_data_rate_set(&dev_ctx, ASM330LHH_GY_ODR_12Hz5);
+  
+  /* End device configuration. */
+  asm330lhh_device_conf_set(&dev_ctx, PROPERTY_DISABLE);
 
-  /*
-   * Wait samples.
-   */
-  while(1)
-  {
+  /* Wait samples. */
+  while(1) {
     uint16_t num = 0;
     uint8_t wmflag = 0;
     asm330lhh_fifo_tag_t reg_tag;
     axis3bit16_t dummy;
 
-    /*
-     * Read watermark flag
-     */
+    /* Read watermark flag */
     asm330lhh_fifo_wtm_flag_get(&dev_ctx, &wmflag);
     if (wmflag > 0)
     {
-      /*
-       * Read number of samples in FIFO
-       */
+      /* Read number of samples in FIFO */
       asm330lhh_fifo_data_level_get(&dev_ctx, &num);
       while(num--)
       {
-        /*
-         * Read FIFO tag
-         */
+        /* Read FIFO tag */
         asm330lhh_fifo_sensor_tag_get(&dev_ctx, &reg_tag);
         switch(reg_tag)
         {
@@ -261,9 +230,7 @@ void example_multi_read_fifo_simple_asm330lhh(void)
             tx_com(tx_buffer, strlen((char const*)tx_buffer));
             break;
           default:
-            /*
-             * Flush unused samples
-             */
+            /* Flush unused samples */
             memset(dummy.u8bit, 0x00, 3 * sizeof(int16_t));
             asm330lhh_fifo_out_raw_get(&dev_ctx, dummy.u8bit);
             break;
@@ -286,14 +253,12 @@ void example_multi_read_fifo_simple_asm330lhh(void)
 static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     HAL_I2C_Mem_Write(handle, ASM330LHH_I2C_ADD_L, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
+  else if (handle == &hspi2) {
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Transmit(handle, bufp, len, 1000);
@@ -316,14 +281,12 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     HAL_I2C_Mem_Read(handle, ASM330LHH_I2C_ADD_L, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
+  else if (handle == &hspi2) {
     /* Read command */
     reg |= 0x80;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
