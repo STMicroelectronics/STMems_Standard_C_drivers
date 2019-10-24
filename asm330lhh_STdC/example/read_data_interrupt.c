@@ -280,9 +280,6 @@ void example_main_interrupt_asm330lhh(void)
   asm330lhh_pin_int2_route_set(&dev_ctx, &int2_route);
 #endif /* ASM330LHH_INT1 */
 
-  /* End device configuration. */
-  asm330lhh_device_conf_set(&dev_ctx, PROPERTY_DISABLE);
-
   /* Wait samples. */
   while(1) {
     asm330lhh_reg_t reg;

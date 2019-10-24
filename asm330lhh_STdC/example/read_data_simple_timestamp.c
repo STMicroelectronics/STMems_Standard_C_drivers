@@ -183,9 +183,6 @@ void example_main_read_simple_timestamp_asm330lhh(void)
   asm330lhh_xl_hp_path_on_out_set(&dev_ctx, ASM330LHH_LP_ODR_DIV_100);
   asm330lhh_xl_filter_lp2_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /* End device configuration. */
-  asm330lhh_device_conf_set(&dev_ctx, PROPERTY_DISABLE);
-
   /* Read samples in polling mode (no int) */
   while(1) {
     asm330lhh_reg_t reg;

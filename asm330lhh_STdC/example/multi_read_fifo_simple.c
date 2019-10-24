@@ -178,9 +178,6 @@ void example_multi_read_fifo_simple_asm330lhh(void)
   /* Set Output Data Rate */
   asm330lhh_xl_data_rate_set(&dev_ctx, ASM330LHH_XL_ODR_12Hz5);
   asm330lhh_gy_data_rate_set(&dev_ctx, ASM330LHH_GY_ODR_12Hz5);
-  
-  /* End device configuration. */
-  asm330lhh_device_conf_set(&dev_ctx, PROPERTY_DISABLE);
 
   /* Wait samples. */
   while(1) {

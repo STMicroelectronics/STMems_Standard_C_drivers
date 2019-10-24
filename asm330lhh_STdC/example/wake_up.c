@@ -242,9 +242,6 @@ void example_main_wake_up_asm330lhh(void)
   asm330lhh_pin_int2_route_set(&dev_ctx, &int2_route);
 #endif /* ASM330LHH_INT1 */
 
-  /* End device configuration. */
-  asm330lhh_device_conf_set(&dev_ctx, PROPERTY_DISABLE);
-
   /* Wait Events. */
   while(1) {
     asm330lhh_all_sources_t all_source;
