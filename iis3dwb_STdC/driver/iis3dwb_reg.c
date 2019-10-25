@@ -612,6 +612,20 @@ int32_t iis3dwb_xl_usr_offset_z_get(stmdev_ctx_t *ctx, uint8_t *buff)
   */
 
 /**
+  * @brief  Reset timestamp counter.[set]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t iis3dwb_timestamp_rst(stmdev_ctx_t *ctx)
+{
+  uint8_t rst_val = 0xAA;
+
+  return iis3dwb_write_reg(ctx, IIS3DWB_TIMESTAMP2, &rst_val, 1);
+}
+
+/**
   * @brief  Enables timestamp counter.[set]
   *
   * @param  ctx    Read / write interface definitions.(ptr)
