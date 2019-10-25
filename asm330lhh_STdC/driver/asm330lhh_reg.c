@@ -801,6 +801,20 @@ int32_t asm330lhh_xl_usr_offset_get(stmdev_ctx_t *ctx, uint8_t *val)
   */
 
 /**
+  * @brief  Reset timestamp counter.[set]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t asm330lhh_timestamp_rst(stmdev_ctx_t *ctx)
+{
+  uint8_t rst_val = 0xAA;
+
+  return asm330lhh_write_reg(ctx, ASM330LHH_TIMESTAMP2, &rst_val, 1);
+}
+
+/**
   * @brief  Enables timestamp counter.[set]
   *
   * @param  ctx    Read / write interface definitions.(ptr)
