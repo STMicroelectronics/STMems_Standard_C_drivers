@@ -1722,6 +1722,8 @@ int32_t ism330dhcx_xl_usr_offset_z_get(stmdev_ctx_t *ctx, uint8_t *buff);
 int32_t ism330dhcx_xl_usr_offset_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_xl_usr_offset_get(stmdev_ctx_t *ctx, uint8_t *val);
 
+int32_t ism330dhcx_timestamp_rst(stmdev_ctx_t *ctx);
+
 int32_t ism330dhcx_timestamp_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_timestamp_get(stmdev_ctx_t *ctx, uint8_t *val);
 

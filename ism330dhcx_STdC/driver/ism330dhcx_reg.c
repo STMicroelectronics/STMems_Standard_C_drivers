@@ -1246,6 +1246,20 @@ int32_t ism330dhcx_xl_usr_offset_get(stmdev_ctx_t *ctx, uint8_t *val)
   */
 
 /**
+  * @brief  Reset timestamp counter.[set]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t ism330dhcx_timestamp_rst(stmdev_ctx_t *ctx)
+{
+  uint8_t rst_val = 0xAA;
+
+  return ism330dhcx_write_reg(ctx, ISM330DHCX_TIMESTAMP2, &rst_val, 1);
+}
+
+/**
   * @brief  Enables timestamp counter.[set]
   *
   * @param  ctx    Read / write interface definitions.(ptr)
