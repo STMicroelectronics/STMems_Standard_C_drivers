@@ -1759,6 +1759,8 @@ int32_t lsm6dsrx_xl_usr_offset_z_get(stmdev_ctx_t *ctx, uint8_t *buff);
 int32_t lsm6dsrx_xl_usr_offset_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_xl_usr_offset_get(stmdev_ctx_t *ctx, uint8_t *val);
 
+int32_t lsm6dsrx_timestamp_rst(stmdev_ctx_t *ctx);
+
 int32_t lsm6dsrx_timestamp_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_timestamp_get(stmdev_ctx_t *ctx, uint8_t *val);
 
