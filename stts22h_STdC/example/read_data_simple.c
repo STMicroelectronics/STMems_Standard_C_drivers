@@ -81,6 +81,12 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
+
+typedef union{
+  int16_t i16bit;
+  uint8_t u8bit[2];
+} axis1bit16_t;
+
 static axis1bit16_t data_raw_temperature;
 static float temperature_degC;
 static uint8_t whoamI;
@@ -105,7 +111,7 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len);
 void example_main_stts22h(void)
 {
   /* Initialize mems driver interface */
-  stts22h_ctx_t dev_ctx;
+  stmdev_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;

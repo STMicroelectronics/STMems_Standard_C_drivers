@@ -14,4 +14,4 @@ every hardware.
 
 www.st.com/mems
 
-STTS22H DS rev3.0 
+STTS22H DS rev7.0 

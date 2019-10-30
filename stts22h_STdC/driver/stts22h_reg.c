@@ -6,33 +6,17 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
+ ******************************************************************************
  */
+
 #include "stts22h_reg.h"
 
 /**
@@ -62,7 +46,7 @@
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts22h_read_reg(stts22h_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t stts22h_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                            uint16_t len)
 {
   int32_t ret;
@@ -80,7 +64,7 @@ int32_t stts22h_read_reg(stts22h_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts22h_write_reg(stts22h_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t stts22h_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
                             uint16_t len)
 {
   int32_t ret;
@@ -126,7 +110,7 @@ float_t stts22h_from_lsb_to_celsius(int16_t lsb)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t stts22h_temp_data_rate_set(stts22h_ctx_t *ctx, stts22h_odr_temp_t val)
+int32_t stts22h_temp_data_rate_set(stmdev_ctx_t *ctx, stts22h_odr_temp_t val)
 {
   stts22h_ctrl_t ctrl;
   int32_t ret;
@@ -150,7 +134,7 @@ int32_t stts22h_temp_data_rate_set(stts22h_ctx_t *ctx, stts22h_odr_temp_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t stts22h_temp_data_rate_get(stts22h_ctx_t *ctx,
+int32_t stts22h_temp_data_rate_get(stmdev_ctx_t *ctx,
                                    stts22h_odr_temp_t *val)
 {
   stts22h_ctrl_t ctrl;
@@ -196,7 +180,7 @@ int32_t stts22h_temp_data_rate_get(stts22h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t stts22h_block_data_update_set(stts22h_ctx_t *ctx, uint8_t val)
+int32_t stts22h_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   stts22h_ctrl_t ctrl;
   int32_t ret;
@@ -217,7 +201,7 @@ int32_t stts22h_block_data_update_set(stts22h_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t stts22h_block_data_update_get(stts22h_ctx_t *ctx, uint8_t *val)
+int32_t stts22h_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   int32_t ret;
   ret = stts22h_read_reg(ctx, STTS22H_CTRL, (uint8_t*)val, 1);
@@ -232,7 +216,7 @@ int32_t stts22h_block_data_update_get(stts22h_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t stts22h_temp_flag_data_ready_get(stts22h_ctx_t *ctx, uint8_t *val)
+int32_t stts22h_temp_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   stts22h_status_t status;
   int32_t ret;
@@ -267,7 +251,7 @@ int32_t stts22h_temp_flag_data_ready_get(stts22h_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t stts22h_temperature_raw_get(stts22h_ctx_t *ctx, int16_t *buff)
+int32_t stts22h_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff)
 {  
   uint16_t temperature;
   uint8_t temperature_low;
@@ -305,7 +289,7 @@ int32_t stts22h_temperature_raw_get(stts22h_ctx_t *ctx, int16_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t stts22h_dev_id_get(stts22h_ctx_t *ctx, uint8_t *buff)
+int32_t stts22h_dev_id_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
   ret = stts22h_read_reg(ctx, STTS22H_WHOAMI, buff, 1);
@@ -320,7 +304,7 @@ int32_t stts22h_dev_id_get(stts22h_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t stts22h_dev_status_get(stts22h_ctx_t *ctx, stts22h_dev_status_t *val)
+int32_t stts22h_dev_status_get(stmdev_ctx_t *ctx, stts22h_dev_status_t *val)
 {
   stts22h_status_t status;
   int32_t ret;
@@ -352,7 +336,7 @@ int32_t stts22h_dev_status_get(stts22h_ctx_t *ctx, stts22h_dev_status_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t stts22h_smbus_interface_set(stts22h_ctx_t *ctx,
+int32_t stts22h_smbus_interface_set(stmdev_ctx_t *ctx,
                                     stts22h_smbus_md_t val)
 {
   stts22h_ctrl_t ctrl;
@@ -374,7 +358,7 @@ int32_t stts22h_smbus_interface_set(stts22h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t stts22h_smbus_interface_get(stts22h_ctx_t *ctx, 
+int32_t stts22h_smbus_interface_get(stmdev_ctx_t *ctx, 
                                     stts22h_smbus_md_t *val)
 {
   stts22h_ctrl_t ctrl;
@@ -405,7 +389,7 @@ int32_t stts22h_smbus_interface_get(stts22h_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t stts22h_auto_increment_set(stts22h_ctx_t *ctx, uint8_t val)
+int32_t stts22h_auto_increment_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   stts22h_ctrl_t ctrl;
   int32_t ret;
@@ -427,7 +411,7 @@ int32_t stts22h_auto_increment_set(stts22h_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t stts22h_auto_increment_get(stts22h_ctx_t *ctx, uint8_t *val)
+int32_t stts22h_auto_increment_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   int32_t ret;
   ret = stts22h_read_reg(ctx, STTS22H_CTRL, (uint8_t*)&val, 1);
@@ -455,7 +439,7 @@ int32_t stts22h_auto_increment_get(stts22h_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t stts22h_temp_trshld_high_set(stts22h_ctx_t *ctx, uint8_t val)
+int32_t stts22h_temp_trshld_high_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   stts22h_temp_h_limit_t temp_h_limit;
   int32_t ret;
@@ -478,7 +462,7 @@ int32_t stts22h_temp_trshld_high_set(stts22h_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t stts22h_temp_trshld_high_get(stts22h_ctx_t *ctx, uint8_t *val)
+int32_t stts22h_temp_trshld_high_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   stts22h_temp_h_limit_t temp_h_limit;
   int32_t ret;
@@ -498,7 +482,7 @@ int32_t stts22h_temp_trshld_high_get(stts22h_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t stts22h_temp_trshld_low_set(stts22h_ctx_t *ctx, uint8_t val)
+int32_t stts22h_temp_trshld_low_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   stts22h_temp_l_limit_t temp_l_limit;
   int32_t ret;
@@ -521,7 +505,7 @@ int32_t stts22h_temp_trshld_low_set(stts22h_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t stts22h_temp_trshld_low_get(stts22h_ctx_t *ctx, uint8_t *val)
+int32_t stts22h_temp_trshld_low_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   stts22h_temp_l_limit_t temp_l_limit;
   int32_t ret;
@@ -541,7 +525,7 @@ int32_t stts22h_temp_trshld_low_get(stts22h_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t stts22h_temp_trshld_src_get(stts22h_ctx_t *ctx,
+int32_t stts22h_temp_trshld_src_get(stmdev_ctx_t *ctx,
                                     stts22h_temp_trlhd_src_t *val)
 {
   stts22h_status_t status;
