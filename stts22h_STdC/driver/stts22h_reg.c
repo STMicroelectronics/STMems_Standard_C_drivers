@@ -112,14 +112,47 @@ float_t stts22h_from_lsb_to_celsius(int16_t lsb)
   */
 int32_t stts22h_temp_data_rate_set(stmdev_ctx_t *ctx, stts22h_odr_temp_t val)
 {
+  stts22h_software_reset_t software_reset;
   stts22h_ctrl_t ctrl;
   int32_t ret;
-
+ 
   ret = stts22h_read_reg(ctx, STTS22H_CTRL, (uint8_t*)&ctrl, 1);
-  if(ret == 0){
+  
+  if ( ( val == STTS22H_ONE_SHOT ) && ( ret == 0 ) ) {
+    software_reset.sw_reset = PROPERTY_ENABLE;
+    ret = stts22h_write_reg(ctx, STTS22H_SOFTWARE_RESET, (uint8_t*)&software_reset, 1);
+    if ( ret == 0 ) {
+      software_reset.sw_reset = PROPERTY_DISABLE;
+      ret = stts22h_write_reg(ctx, STTS22H_SOFTWARE_RESET, (uint8_t*)&software_reset, 1);
+    }
+  }
+
+  if ( ( ( val == STTS22H_25Hz )  || ( val == STTS22H_50Hz  )   ||  
+         ( val == STTS22H_100Hz ) || ( val == STTS22H_200Hz ) ) && 
+       ( ctrl.freerun == PROPERTY_DISABLE ) && ( ret == 0 ) ) {
+    software_reset.sw_reset = PROPERTY_ENABLE;
+    ret = stts22h_write_reg(ctx, STTS22H_SOFTWARE_RESET, (uint8_t*)&software_reset, 1);
+    if ( ret == 0 ) {
+      software_reset.sw_reset = PROPERTY_DISABLE;
+      ret = stts22h_write_reg(ctx, STTS22H_SOFTWARE_RESET, (uint8_t*)&software_reset, 1);
+    }
+  }
+
+  if ( ( val == STTS22H_1Hz ) && ( ret == 0 ) ) {
+    software_reset.sw_reset = PROPERTY_ENABLE;
+    software_reset.low_odr_enable = PROPERTY_ENABLE;
+    ret = stts22h_write_reg(ctx, STTS22H_SOFTWARE_RESET, (uint8_t*)&software_reset, 1);   
+    if ( ret == 0 ) {
+      software_reset.sw_reset = PROPERTY_DISABLE;
+      software_reset.low_odr_enable = PROPERTY_ENABLE;
+      ret = stts22h_write_reg(ctx, STTS22H_SOFTWARE_RESET, (uint8_t*)&software_reset, 1);
+    }
+  }
+
+  if ( ret == 0 ) {
     ctrl.one_shot = (uint8_t)val & 0x01U;
     ctrl.freerun = ((uint8_t)val & 0x02U) >> 1;
-    ctrl.low_odr_en = ((uint8_t)val & 0x04U) >> 2;
+    ctrl.low_odr_start = ((uint8_t)val & 0x04U) >> 2;
     ctrl.avg = ((uint8_t)val & 0x30U) >> 4;
     ret = stts22h_write_reg(ctx, STTS22H_CTRL, (uint8_t*)&ctrl, 1);
   }
@@ -142,7 +175,7 @@ int32_t stts22h_temp_data_rate_get(stmdev_ctx_t *ctx,
 
   ret = stts22h_read_reg(ctx, STTS22H_CTRL,
                             (uint8_t*)&ctrl, 1);
-  switch ( ctrl.one_shot | (ctrl.freerun << 1) | (ctrl.low_odr_en << 2) |
+  switch ( ctrl.one_shot | (ctrl.freerun << 1) | (ctrl.low_odr_start << 2) |
            (ctrl.avg << 4)){
     case STTS22H_POWER_DOWN:
       *val = STTS22H_POWER_DOWN;
