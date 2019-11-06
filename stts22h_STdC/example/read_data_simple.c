@@ -120,6 +120,12 @@ void example_main_stts22h(void)
   stts22h_dev_id_get(&dev_ctx, &whoamI);
   if (whoamI != STTS22H_ID)
     while(1); /* manage here device not found */
+  
+  /*  
+   * Set Output Data Rate 
+   * WARNING: this function can reset the device configuration.
+   */
+  stts22h_temp_data_rate_set(&dev_ctx, STTS22H_1Hz);  
 
   /* Enable interrupt on high(=49.5 degC)/low(=2.5 degC) temperature. */
   //float temperature_high_limit = 49.5f;
@@ -127,9 +133,6 @@ void example_main_stts22h(void)
 
   //float temperature_low_limit = 2.5f;
   //stts22h_temp_trshld_low_set(&dev_ctx, (int8_t)(temperature_low_limit / 64.0f) + 64 );
-
-  /* Set Output Data Rate */
-  stts22h_temp_data_rate_set(&dev_ctx, STTS22H_1Hz);
 
   /* Read samples in polling mode */
   while(1)
