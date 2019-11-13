@@ -78,14 +78,14 @@
 #endif
 
 typedef union{
-  int8_t i8bit[3];
-  uint8_t u8bit[3];
-} axis3bit8_t;
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
+} axis3bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit8_t data_raw_acceleration;
+static axis3bit16_t data_raw_acceleration;
 static float acceleration_mg[3];
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
@@ -109,67 +109,51 @@ static void platform_init(void);
 /* Main Example --------------------------------------------------------------*/
 void example_main_h3lis100dl(void)
 {
-  /*
-   *  Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Initialize platform specific hardware */
   platform_init();
 
-  /*
-   *  Check device ID
-   */
+  /* Check device ID */
   h3lis100dl_device_id_get(&dev_ctx, &whoamI);
-  if (whoamI != H3LIS100DL_ID)
-  {
-    while(1)
-    {
+  if (whoamI != H3LIS100DL_ID) {
+    while(1) {
       /* manage here device not found */
     }
   }
 
-  /*
-   * Configure filtering chain
-   */ 
+  /* Configure filtering chain */ 
   /* Accelerometer - High Pass / Slope path */
   h3lis100dl_hp_path_set(&dev_ctx, H3LIS100DL_HP_DISABLE);
   //h3lis100dl_hp_path_set(&dev_ctx, H3LIS100DL_HP_ON_OUT);
   //h3lis100dl_hp_reset_get(&dev_ctx);
 
-  /*
-   * Set Output Data Rate
-   */
+  /* Set Output Data Rate */
   h3lis100dl_data_rate_set(&dev_ctx, H3LIS100DL_ODR_5Hz);
 
-  /*
-   * Read samples in polling mode (no int)
-   */
+  /* Read samples in polling mode (no int) */
   while(1)
   {
-    /*
-     * Read output only if new value is available
-     */
+    /* Read output only if new value is available */
     h3lis100dl_reg_t reg;
     h3lis100dl_status_reg_get(&dev_ctx, &reg.status_reg);
 
     if (reg.status_reg.zyxda)
     {
       /* Read acceleration data */
-      memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int8_t));
+      memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
       h3lis100dl_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
 
       acceleration_mg[0] =
-        h3lis100dl_from_fs100g_to_mg(data_raw_acceleration.i8bit[0]);
+        h3lis100dl_from_fs100g_to_mg(data_raw_acceleration.u8bit[0]);
       acceleration_mg[1] =
-        h3lis100dl_from_fs100g_to_mg(data_raw_acceleration.i8bit[1]);
+        h3lis100dl_from_fs100g_to_mg(data_raw_acceleration.u8bit[1]);
       acceleration_mg[2] =
-        h3lis100dl_from_fs100g_to_mg(data_raw_acceleration.i8bit[2]);
+        h3lis100dl_from_fs100g_to_mg(data_raw_acceleration.u8bit[2]);
      
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
