@@ -299,9 +299,9 @@ int32_t lps25hb_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
 typedef enum {
   LPS25HB_POWER_DOWN = 0,
   LPS25HB_ODR_1Hz    = 9,
-  LPS25HB_ODR_7Hz    = 11,
-  LPS25HB_ODR_12Hz5  = 12,
-  LPS25HB_ODR_25Hz   = 13,
+  LPS25HB_ODR_7Hz    = 10,
+  LPS25HB_ODR_12Hz5  = 11,
+  LPS25HB_ODR_25Hz   = 12,
   LPS25HB_ONE_SHOT   = 8,
 } lps25hb_odr_t;
 int32_t lps25hb_data_rate_set(stmdev_ctx_t *ctx, lps25hb_odr_t val);
