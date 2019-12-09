@@ -1259,7 +1259,7 @@ int32_t lsm6dsrx_timestamp_rst(stmdev_ctx_t *ctx)
 {
   uint8_t rst_val = 0xAA;
 
-  return lsm6dsrx_write_reg(ctx, ASM330LHH_TIMESTAMP2, &rst_val, 1);
+  return lsm6dsrx_write_reg(ctx, LSM6DSRX_TIMESTAMP2, &rst_val, 1);
 }
 
 /**
