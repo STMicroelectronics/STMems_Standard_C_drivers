@@ -150,25 +150,17 @@ void example_main(void)
   /* Read humidity calibration coefficient */
   axis1bit16_t coeff;
   lin_t lin_hum;
-  hts221_hum_adc_point_0_get(&dev_ctx, coeff.u8bit);
-  lin_hum.x0 = (float)coeff.i16bit;
-  hts221_hum_rh_point_0_get(&dev_ctx, coeff.u8bit);
-  lin_hum.y0 = (float)coeff.u8bit[0];
-  hts221_hum_adc_point_1_get(&dev_ctx, coeff.u8bit);
-  lin_hum.x1 = (float)coeff.i16bit;
-  hts221_hum_rh_point_1_get(&dev_ctx, coeff.u8bit);
-  lin_hum.y1 = (float)coeff.u8bit[0];
+  hts221_hum_adc_point_0_get(&dev_ctx, &lin_hum.x0);
+  hts221_hum_rh_point_0_get(&dev_ctx, &lin_hum.y0);
+  hts221_hum_adc_point_1_get(&dev_ctx, &lin_hum.x1);
+  hts221_hum_rh_point_1_get(&dev_ctx, &lin_hum.y1);
 
   /* Read temperature calibration coefficient */
   lin_t lin_temp;
-  hts221_temp_adc_point_0_get(&dev_ctx, coeff.u8bit);
-  lin_temp.x0 = (float)coeff.i16bit;
-  hts221_temp_deg_point_0_get(&dev_ctx, coeff.u8bit);
-  lin_temp.y0 = (float)coeff.u8bit[0];
-  hts221_temp_adc_point_1_get(&dev_ctx, coeff.u8bit);
-  lin_temp.x1 = (float)coeff.i16bit;
-  hts221_temp_deg_point_1_get(&dev_ctx, coeff.u8bit);
-  lin_temp.y1 = (float)coeff.u8bit[0];
+  hts221_temp_adc_point_0_get(&dev_ctx, &lin_temp.x0);
+  hts221_temp_deg_point_0_get(&dev_ctx, &lin_temp.y0);
+  hts221_temp_adc_point_1_get(&dev_ctx, &lin_temp.x1);
+  hts221_temp_deg_point_1_get(&dev_ctx, &lin_temp.y1);
 
   /* Enable Block Data Update */
   hts221_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
