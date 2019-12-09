@@ -779,16 +779,17 @@ int32_t hts221_int_polarity_get(stmdev_ctx_t *ctx, hts221_drdy_h_l_t *val)
   * @brief  First calibration point for Rh Humidity.[get]
   *
   * @param  ctx     read / write interface definitions
-  * @param  buff    buffer that stores data read
+  * @param  val     buffer that stores data read
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_hum_rh_point_0_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_hum_rh_point_0_get(stmdev_ctx_t *ctx, float_t *val)
 {
+  uint8_t coeff;
   int32_t ret;
 
-  ret = hts221_read_reg(ctx, HTS221_H0_RH_X2, buff, 1);
-  *buff = (uint8_t)(((uint16_t)(*buff) >> 1) & 0x7FFFu);
+  ret = hts221_read_reg(ctx, HTS221_H0_RH_X2, &coeff, 1);
+  *val = coeff / 2.0f;
 
   return ret;
 }
@@ -797,16 +798,17 @@ int32_t hts221_hum_rh_point_0_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @brief  Second calibration point for Rh Humidity.[get]
   *
   * @param  ctx     read / write interface definitions
-  * @param  buff    buffer that stores data read
+  * @param  val     buffer that stores data read
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_hum_rh_point_1_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_hum_rh_point_1_get(stmdev_ctx_t *ctx, float_t *val)
 {
+  uint8_t coeff;
   int32_t ret;
 
-  ret = hts221_read_reg(ctx, HTS221_H1_RH_X2, buff, 1);
-  *buff = (uint8_t)(((uint16_t)(*buff) >> 1) & 0x7FFFu);
+  ret = hts221_read_reg(ctx, HTS221_H1_RH_X2, &coeff, 1);
+  *val = coeff / 2.0f;
 
   return ret;
 }
@@ -819,7 +821,7 @@ int32_t hts221_hum_rh_point_1_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_temp_deg_point_0_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_temp_deg_point_0_get(stmdev_ctx_t *ctx, float_t *val)
 {
   hts221_t1_t0_msb_t reg;
   uint8_t coeff_h, coeff_l;
@@ -830,7 +832,7 @@ int32_t hts221_temp_deg_point_0_get(stmdev_ctx_t *ctx, uint8_t *buff)
   if(ret == 0){
     ret = hts221_read_reg(ctx, HTS221_T1_T0_MSB, (uint8_t*) &reg, 1);
     coeff_h = reg.t0_msb;
-    *(buff) = (uint8_t)(((coeff_h << 8) + coeff_l) >> 3);
+    *val = ((coeff_h * 256) + coeff_l) / 8.0f;
   }
 
   return ret;
@@ -840,11 +842,11 @@ int32_t hts221_temp_deg_point_0_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @brief  Second calibration point for degC temperature.[get]
   *
   * @param  ctx     read / write interface definitions
-  * @param  buff    buffer that stores data read
+  * @param  val     buffer that stores data read
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_temp_deg_point_1_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_temp_deg_point_1_get(stmdev_ctx_t *ctx, float_t *val)
 {
   hts221_t1_t0_msb_t reg;
   uint8_t coeff_h, coeff_l;
@@ -855,7 +857,7 @@ int32_t hts221_temp_deg_point_1_get(stmdev_ctx_t *ctx, uint8_t *buff)
   if(ret == 0){
     ret = hts221_read_reg(ctx, HTS221_T1_T0_MSB, (uint8_t*) &reg, 1);
     coeff_h = reg.t1_msb;
-    *(buff) = (uint8_t)(((coeff_h << 8) + coeff_l) >> 3);
+    *val = ((coeff_h * 256) + coeff_l) / 8.0f;
   }
 
   return ret;
@@ -865,14 +867,16 @@ int32_t hts221_temp_deg_point_1_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @brief  First calibration point for humidity in LSB.[get]
   *
   * @param  ctx     read / write interface definitions
-  * @param  buff    buffer that stores data read
+  * @param  val     buffer that stores data read
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_hum_adc_point_0_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_hum_adc_point_0_get(stmdev_ctx_t *ctx, float_t *val)
 {
+  uint8_t coeff[2];
   int32_t ret;
-  ret = hts221_read_reg(ctx, HTS221_H0_T0_OUT_L, buff, 2);
+  ret = hts221_read_reg(ctx, HTS221_H0_T0_OUT_L, coeff, 2);
+  *val = (coeff[1] * 256) + coeff[0];
   return ret;
 }
 
@@ -880,14 +884,16 @@ int32_t hts221_hum_adc_point_0_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @brief  Second calibration point for humidity in LSB.[get]
   *
   * @param  ctx     read / write interface definitions
-  * @param  buff    buffer that stores data read
+  * @param  val     buffer that stores data read
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_hum_adc_point_1_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_hum_adc_point_1_get(stmdev_ctx_t *ctx, float_t *val)
 {
+  uint8_t coeff[2];
   int32_t ret;
-  ret = hts221_read_reg(ctx, HTS221_H1_T0_OUT_L, buff, 2);
+  ret = hts221_read_reg(ctx, HTS221_H1_T0_OUT_L, coeff, 2);
+  *val = (coeff[1] * 256) + coeff[0];
   return ret;
 }
 
@@ -895,14 +901,16 @@ int32_t hts221_hum_adc_point_1_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @brief  First calibration point for temperature in LSB.[get]
   *
   * @param  ctx     read / write interface definitions
-  * @param  buff    buffer that stores data read
+  * @param  val     buffer that stores data read
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_temp_adc_point_0_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_temp_adc_point_0_get(stmdev_ctx_t *ctx, float_t *val)
 {
+  uint8_t coeff[2];
   int32_t ret;
-  ret = hts221_read_reg(ctx, HTS221_T0_OUT_L, buff, 2);
+  ret = hts221_read_reg(ctx, HTS221_T0_OUT_L, coeff, 2);
+  *val = (coeff[1] * 256) + coeff[0];
   return ret;
 }
 
@@ -910,14 +918,16 @@ int32_t hts221_temp_adc_point_0_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @brief  Second calibration point for temperature in LSB.[get]
   *
   * @param  ctx     read / write interface definitions
-  * @param  buff    buffer that stores data read
+  * @param  val     buffer that stores data read
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_temp_adc_point_1_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_temp_adc_point_1_get(stmdev_ctx_t *ctx, float_t *val)
 {
+  uint8_t coeff[2];
   int32_t ret;
-  ret = hts221_read_reg(ctx, HTS221_T1_OUT_L, buff, 2);
+  ret = hts221_read_reg(ctx, HTS221_T1_OUT_L, coeff, 2);
+  *val = (coeff[1] * 256) + coeff[0];
   return ret;
 }
 

@@ -312,17 +312,17 @@ typedef enum {
 int32_t hts221_int_polarity_set(stmdev_ctx_t *ctx, hts221_drdy_h_l_t val);
 int32_t hts221_int_polarity_get(stmdev_ctx_t *ctx, hts221_drdy_h_l_t *val);
 
-int32_t hts221_hum_rh_point_0_get(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t hts221_hum_rh_point_1_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t hts221_hum_rh_point_0_get(stmdev_ctx_t *ctx, float_t *val);
+int32_t hts221_hum_rh_point_1_get(stmdev_ctx_t *ctx, float_t *val);
 
-int32_t hts221_temp_deg_point_0_get(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t hts221_temp_deg_point_1_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t hts221_temp_deg_point_0_get(stmdev_ctx_t *ctx, float_t *val);
+int32_t hts221_temp_deg_point_1_get(stmdev_ctx_t *ctx, float_t *val);
 
-int32_t hts221_hum_adc_point_0_get(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t hts221_hum_adc_point_1_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t hts221_hum_adc_point_0_get(stmdev_ctx_t *ctx, float_t *val);
+int32_t hts221_hum_adc_point_1_get(stmdev_ctx_t *ctx, float_t *val);
 
-int32_t hts221_temp_adc_point_0_get(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t hts221_temp_adc_point_1_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t hts221_temp_adc_point_0_get(stmdev_ctx_t *ctx, float_t *val);
+int32_t hts221_temp_adc_point_1_get(stmdev_ctx_t *ctx, float_t *val);
 
 /**
   * @}
