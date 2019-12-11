@@ -455,7 +455,7 @@ static int32_t lsm6dso_read_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data,
   lsm6dso_xl_data_rate_set(&ag_ctx, LSM6DSO_XL_ODR_OFF);
 
   /* Read SensorHub registers. */
-  lsm6dso_sh_read_data_raw_get(&ag_ctx,(lsm6dso_emb_sh_read_t*)data);
+  lsm6dso_sh_read_data_raw_get(&ag_ctx, data, len);
 
   return ret;
 }
