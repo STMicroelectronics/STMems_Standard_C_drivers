@@ -350,6 +350,47 @@ int32_t lis25ba_data_get(uint16_t *tdm_stream, lis25ba_bus_mode_t *md,
   return 0;
 }
 
+/**
+  * @brief  Linear acceleration sensor self-test enable.[set]
+  *
+  * @param  ctx      read / write interface definitions.(ptr)
+  * @param  val      enable/ disable selftest
+  *
+  * @retval          interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t lis25ba_self_test_set(stmdev_ctx_t *ctx, uint8_t val)
+{
+  lis25ba_test_reg_t test_reg;
+  int32_t ret;
+
+  ret = lis25ba_read_reg(ctx, LIS25BA_TEST_REG, (uint8_t*)&test_reg, 1);
+  if (ret == 0) {
+    test_reg.st = val;
+    ret = lis25ba_write_reg(ctx, LIS25BA_TEST_REG, (uint8_t*)&test_reg, 1);
+  }
+  return ret;
+}
+
+/**
+  * @brief  Linear acceleration sensor self-test enable.[get]
+  *
+  * @param  ctx      read / write interface definitions.(ptr)
+  * @param  val      enable/ disable selftest.(ptr)
+  *
+  * @retval          interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t lis25ba_self_test_get(stmdev_ctx_t *ctx, uint8_t *val)
+{
+  lis25ba_test_reg_t test_reg;
+  int32_t ret;
+
+  ret = lis25ba_read_reg(ctx, LIS25BA_TEST_REG, (uint8_t*)&test_reg, 1);
+  *val = test_reg.st;
+
+  return ret;
+}
 
 /**
   * @}

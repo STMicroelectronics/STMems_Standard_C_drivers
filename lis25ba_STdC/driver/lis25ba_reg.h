@@ -259,6 +259,9 @@ typedef struct {
 int32_t lis25ba_data_get(uint16_t *tdm_stream, lis25ba_bus_mode_t *md,
                          lis25ba_data_t *data);
 
+int32_t lis25ba_self_test_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t lis25ba_self_test_get(stmdev_ctx_t *ctx, uint8_t *val);
+
 /**
   * @}
   *
