@@ -248,7 +248,7 @@ typedef struct {
   } xl;
 } lis25ba_md_t;
 int32_t lis25ba_mode_set(stmdev_ctx_t *ctx, lis25ba_md_t *val);
-int32_t lis25ba_mode_set(stmdev_ctx_t *ctx, lis25ba_md_t *val);
+int32_t lis25ba_mode_get(stmdev_ctx_t *ctx, lis25ba_md_t *val);
 
 typedef struct {
   struct {

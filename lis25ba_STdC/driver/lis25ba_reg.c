@@ -86,7 +86,9 @@ int32_t lis25ba_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
 
 static void bytecpy(uint8_t *target, uint8_t *source)
 {
-  *target = *source;
+  if ( (target != NULL) && (source != NULL) ) {
+    *target = *source;
+  }
 }
 
 /**
@@ -168,8 +170,8 @@ int32_t lis25ba_bus_mode_set(stmdev_ctx_t *ctx, lis25ba_bus_mode_t *val)
   tdm_ctrl_reg.delayed = val->tdm.clk_edge;
   tdm_ctrl_reg.wclk_fq = val->tdm.mapping;
 
-  tdm_cmax_h.tdm_cmax = (val->tdm.cmax / 256);
-  tdm_cmax_l.tdm_cmax = val->tdm.cmax - tdm_cmax_h.tdm_cmax;
+  tdm_cmax_h.tdm_cmax = (uint8_t)(val->tdm.cmax / 256U);
+  tdm_cmax_l.tdm_cmax = (uint8_t)(val->tdm.cmax - tdm_cmax_h.tdm_cmax);
 
   if ( ret == 0 ) {
     ret = lis25ba_write_reg(ctx, LIS25BA_TDM_CTRL_REG,
@@ -214,7 +216,7 @@ int32_t lis25ba_bus_mode_get(stmdev_ctx_t *ctx, lis25ba_bus_mode_t *val)
   val->tdm.clk_edge = tdm_ctrl_reg.delayed;
   val->tdm.mapping = tdm_ctrl_reg.wclk_fq;
 
-  val->tdm.cmax = tdm_cmax_h.tdm_cmax * 256;
+  val->tdm.cmax = tdm_cmax_h.tdm_cmax * 256U;
   val->tdm.cmax += tdm_cmax_l.tdm_cmax;
 
   return ret;
@@ -335,14 +337,14 @@ int32_t lis25ba_data_get(uint16_t *tdm_stream, lis25ba_bus_mode_t *md,
   uint8_t offset;
   uint8_t i;
 
-  if (md->tdm.mapping == 0){
+  if (md->tdm.mapping == PROPERTY_DISABLE ){
     offset = 0; /* slot0-1-2 */
   }
   else {
     offset = 4; /* slot4-5-6 */
   }
 
-  for (i = 0; i < 3; i++) {
+  for (i = 0U; i < 3U; i++) {
     data->xl.raw[i] = (int16_t) tdm_stream[i + offset];
     data->xl.mg[i] = lis25ba_from_raw_to_mg(data->xl.raw[i]);
   }
