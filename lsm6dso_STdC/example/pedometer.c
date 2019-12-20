@@ -65,15 +65,9 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-lsm6dso_page_address_t  page_address;
-lsm6dso_emb_func_en_a_t emb_func_en_a;
-lsm6dso_emb_func_en_b_t emb_func_en_b;
-lsm6dso_pedo_cmd_reg_t pedo_cmd_reg;
-lsm6dso_page_rw_t page_rw;
-lsm6dso_page_sel_t page_sel;
-static uint16_t steps, i;
+static uint16_t steps;
 static uint8_t whoamI, rst;
-uint8_t tx_buffer[1000];
+static uint8_t tx_buffer[1000];
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -90,19 +84,22 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 
-void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void tx_com( uint8_t *tx_buffer, uint16_t len );
 
 /* Main Example --------------------------------------------------------------*/
 void lsm6dso_pedometer(void)
 {
-  lsm6dso_reg_t reg;
-  lsm6dso_ctx_t ag_ctx;
+  stmdev_ctx_t ag_ctx;
+  /* Uncomment to configure INT 1 */
+  //lsm6dso_pin_int1_route_t int1_route;
+  /* Uncomment to configure INT 2 */
+  //lsm6dso_pin_int2_route_t int2_route;
 
   /* Initialize driver interface */
   ag_ctx.write_reg = platform_write;
   ag_ctx.read_reg = platform_read;
   ag_ctx.handle = &hi2c1;
-
+ 
   /* Check device ID */
   lsm6dso_device_id_get(&ag_ctx, &whoamI);
   if (whoamI != LSM6DSO_ID)
@@ -123,110 +120,33 @@ void lsm6dso_pedometer(void)
   /* Enable Block Data Update */
   lsm6dso_block_data_update_set(&ag_ctx, PROPERTY_ENABLE);
 
+  /* Enable latched interrupt notification. */
+  //lsm6dso_int_notification_set(&ag_ctx, LSM6DSO_ALL_INT_LATCHED);
+
+  /* Enable drdy 75 μs pulse: uncomment if interrupt must be pulsed. */
+  //lsm6dso_data_ready_mode_set(&ag_ctx, LSM6DSO_DRDY_PULSED);
+
+  /*
+   * Uncomment to configure INT 1
+   * Remember that INT1 pin is used by sensor to switch in I3C mode
+   */
+  //lsm6dso_pin_int1_route_get(&ag_ctx, &int1_route);
+  //int1_route.reg.emb_func_int1.int1_step_detector = PROPERTY_ENABLE;
+  //lsm6dso_pin_int1_route_set(&ag_ctx, &int1_route);
+
+  /* Uncomment to configure INT 2 */
+  //lsm6dso_pin_int2_route_get(&ag_ctx, &int2_route);
+  //int2_route.reg.emb_func_int2.int2_step_detector = PROPERTY_ENABLE;
+  //lsm6dso_pin_int2_route_set(&ag_ctx, &int2_route);
+
   /* Enable xl sensor */
   lsm6dso_xl_data_rate_set(&ag_ctx, LSM6DSO_XL_ODR_26Hz); 
  
   /* Reset steps of pedometer */
   lsm6dso_steps_reset(&ag_ctx);
 
- 
-  for ( i = 0; i < 500; i++){
-
-    /* Disable Accelerometer */
-    lsm6dso_read_reg(&ag_ctx, LSM6DSO_CTRL1_XL, &reg.byte, 1);
-    reg. ctrl1_xl.odr_xl = LSM6DSO_XL_ODR_OFF;
-    lsm6dso_write_reg(&ag_ctx, LSM6DSO_CTRL1_XL, &reg.byte, 1);
-
-    /* Disable Gyro */
-    lsm6dso_read_reg(&ag_ctx, LSM6DSO_CTRL2_G, &reg.byte, 1);
-    reg. ctrl2_g.odr_g = LSM6DSO_GY_ODR_OFF;
-    lsm6dso_write_reg(&ag_ctx, LSM6DSO_CTRL2_G, &reg.byte, 1);
-
-    /* Enable pedometer */
-    /* lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_PEDO_CMD_REG, (uint8_t*)&pedo_cmd_reg); */
-    lsm6dso_mem_bank_set(&ag_ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
-   
-    lsm6dso_read_reg(&ag_ctx, LSM6DSO_PAGE_RW, (uint8_t*) &page_rw, 1);
-    page_rw.page_rw = 0x01; /* page_read enable*/
-    lsm6dso_write_reg(&ag_ctx, LSM6DSO_PAGE_RW, (uint8_t*) &page_rw, 1);
-
-    lsm6dso_read_reg(&ag_ctx, LSM6DSO_PAGE_SEL, (uint8_t*) &page_sel, 1);
-    page_sel.page_sel = ((uint8_t)(LSM6DSO_PEDO_CMD_REG >> 8) & 0x0FU);
-    page_sel.not_used_01 = 1;
-    lsm6dso_write_reg(&ag_ctx, LSM6DSO_PAGE_SEL, (uint8_t*) &page_sel, 1);
-
-    page_address.page_addr = (uint8_t)LSM6DSO_PEDO_CMD_REG & 0x00FFU;
-    lsm6dso_write_reg(&ag_ctx, LSM6DSO_PAGE_ADDRESS, (uint8_t*)&page_address, 1);
-
-    lsm6dso_read_reg(&ag_ctx, LSM6DSO_PAGE_VALUE, (uint8_t*)&pedo_cmd_reg, 1);
-
-    lsm6dso_read_reg(&ag_ctx, LSM6DSO_PAGE_RW, (uint8_t*) &page_rw, 1);
-
-    page_rw.page_rw = 0x00; /* page_read disable */
-    lsm6dso_write_reg(&ag_ctx, LSM6DSO_PAGE_RW, (uint8_t*) &page_rw, 1);
-
-    //lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
-    /* END lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_PEDO_CMD_REG, (uint8_t*)&pedo_cmd_reg); */
-
-    //lsm6dso_mem_bank_set(&ag_ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
-
-    lsm6dso_read_reg(&ag_ctx, LSM6DSO_EMB_FUNC_EN_A, (uint8_t*)&emb_func_en_a, 1);
-    lsm6dso_read_reg(&ag_ctx, LSM6DSO_EMB_FUNC_EN_B, (uint8_t*)&emb_func_en_b, 1);
-
-    emb_func_en_a.pedo_en = 1;
-    emb_func_en_b.pedo_adv_en = 1;
-    pedo_cmd_reg.fp_rejection_en = 1;
-    pedo_cmd_reg.ad_det_en = 1;
-
-    lsm6dso_write_reg(&ag_ctx, LSM6DSO_EMB_FUNC_EN_A, (uint8_t*)&emb_func_en_a, 1);
-    lsm6dso_write_reg(&ag_ctx, LSM6DSO_EMB_FUNC_EN_B, (uint8_t*)&emb_func_en_b, 1);
-    
-    //lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
-    
-    /* lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_PEDO_CMD_REG,(uint8_t*)&pedo_cmd_reg); */
-    //lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
-
-    lsm6dso_read_reg(&ag_ctx, LSM6DSO_PAGE_RW, (uint8_t*) &page_rw, 1);
-
-    page_rw.page_rw = 0x02; /* page_write enable */
-    lsm6dso_write_reg(&ag_ctx, LSM6DSO_PAGE_RW, (uint8_t*) &page_rw, 1);
-
-    lsm6dso_read_reg(&ag_ctx, LSM6DSO_PAGE_SEL, (uint8_t*) &page_sel, 1);
-
-    page_sel.page_sel = ((uint8_t)(LSM6DSO_PEDO_CMD_REG >> 8) & 0x0FU);
-    page_sel.not_used_01 = 1;
-    lsm6dso_write_reg(&ag_ctx, LSM6DSO_PAGE_SEL, (uint8_t*) &page_sel, 1);
-
-    page_address.page_addr = (uint8_t)LSM6DSO_PEDO_CMD_REG & 0xFFU;
-    lsm6dso_write_reg(&ag_ctx, LSM6DSO_PAGE_ADDRESS, (uint8_t*)&page_address, 1);
-
-    lsm6dso_write_reg(&ag_ctx, LSM6DSO_PAGE_VALUE, (uint8_t*)&pedo_cmd_reg, 1);
-
-    lsm6dso_read_reg(&ag_ctx, LSM6DSO_PAGE_RW, (uint8_t*) &page_rw, 1);
-
-    page_rw.page_rw = 0x00; /* page_write disable */
-    lsm6dso_write_reg(&ag_ctx, LSM6DSO_PAGE_RW, (uint8_t*) &page_rw, 1);
-
-    lsm6dso_mem_bank_set(&ag_ctx, LSM6DSO_USER_BANK);
-
-    /* END lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_PEDO_CMD_REG,(uint8_t*)&pedo_cmd_reg); */ 
-    /* END Enable pedometer */
- 
-    /* Enable Accelerometer */
-    lsm6dso_read_reg(&ag_ctx, LSM6DSO_CTRL1_XL, &reg.byte, 1);
-    reg. ctrl1_xl.odr_xl = LSM6DSO_XL_ODR_26Hz;
-    lsm6dso_write_reg(&ag_ctx, LSM6DSO_CTRL1_XL, &reg.byte, 1);
-
-    /* Enable Gyro */
-    lsm6dso_read_reg(&ag_ctx, LSM6DSO_CTRL2_G, &reg.byte, 1);
-    reg. ctrl2_g.odr_g = LSM6DSO_GY_ODR_26Hz;
-    lsm6dso_write_reg(&ag_ctx, LSM6DSO_CTRL2_G, &reg.byte, 1);
-
-    HAL_Delay(50); //50 ms
-  }
- 
-  sprintf((char*)tx_buffer, "START:%d\r\n", i);
-  tx_com(tx_buffer, strlen((char const*)tx_buffer)); 
+  /* Enable pedometer */
+  lsm6dso_pedo_sens_set(&ag_ctx, LSM6DSO_FALSE_STEP_REJ_ADV_MODE);
  
   while(1) {
       /* Read steps */
@@ -291,7 +211,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  * @param  len           number of byte to send
  *
  */
-void tx_com(uint8_t *tx_buffer, uint16_t len)
+static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
 }
