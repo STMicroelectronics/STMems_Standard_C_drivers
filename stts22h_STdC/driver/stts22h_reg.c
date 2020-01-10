@@ -290,11 +290,11 @@ int32_t stts22h_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff)
   uint8_t temperature_low;
   int32_t ret;
 
-  ret = stts22h_read_reg(ctx, STTS22H_TEMP_H_OUT,
-                         (uint8_t*)&temperature, 1);
+  ret = stts22h_read_reg(ctx, STTS22H_TEMP_L_OUT,
+                         (uint8_t*)&temperature_low, 1);
   if (ret == 0) {
-    ret = stts22h_read_reg(ctx, STTS22H_TEMP_L_OUT,
-                           &temperature_low, 1);
+    ret = stts22h_read_reg(ctx, STTS22H_TEMP_H_OUT,
+                           &temperature, 1);
 
     temperature  = (temperature << 8) + temperature_low;
     *buff = (int16_t)temperature;
