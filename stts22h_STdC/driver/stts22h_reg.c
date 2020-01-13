@@ -117,6 +117,10 @@ int32_t stts22h_temp_data_rate_set(stmdev_ctx_t *ctx, stts22h_odr_temp_t val)
   int32_t ret;
  
   ret = stts22h_read_reg(ctx, STTS22H_CTRL, (uint8_t*)&ctrl, 1);
+
+  if ( ret == 0 ) {
+    ret = stts22h_read_reg(ctx, STTS22H_SOFTWARE_RESET, (uint8_t*)&software_reset, 1);
+  }
   
   if ( ( val == STTS22H_ONE_SHOT ) && ( ret == 0 ) ) {
     software_reset.sw_reset = PROPERTY_ENABLE;
@@ -291,10 +295,10 @@ int32_t stts22h_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff)
   int32_t ret;
 
   ret = stts22h_read_reg(ctx, STTS22H_TEMP_L_OUT,
-                         (uint8_t*)&temperature_low, 1);
+                          &temperature_low, 1);
   if (ret == 0) {
     ret = stts22h_read_reg(ctx, STTS22H_TEMP_H_OUT,
-                           &temperature, 1);
+                           (uint8_t*)&temperature, 1);
 
     temperature  = (temperature << 8) + temperature_low;
     *buff = (int16_t)temperature;
@@ -465,7 +469,7 @@ int32_t stts22h_auto_increment_get(stmdev_ctx_t *ctx, uint8_t *val)
   */
 
 /**
-  * @brief  Over temperature interrupt value. ( degC / 0.64 ) + 64.[set]
+  * @brief  Over temperature interrupt value. ( degC / 0.64 ) + 63.[set]
   *
   * @param  ctx    Read / write interface definitions.(ptr)
   * @param  val    Change the values of thl in reg TEMP_H_LIMIT.
@@ -488,7 +492,7 @@ int32_t stts22h_temp_trshld_high_set(stmdev_ctx_t *ctx, uint8_t val)
 }
 
 /**
-  * @brief  Over temperature interrupt value. ( degC / 0.64 ) + 64.[get]
+  * @brief  Over temperature interrupt value. ( degC / 0.64 ) + 63.[get]
   *
   * @param  ctx    Read / write interface definitions.(ptr)
   * @param  val    Get the values of thl in reg TEMP_H_LIMIT.(ptr)
@@ -508,7 +512,7 @@ int32_t stts22h_temp_trshld_high_get(stmdev_ctx_t *ctx, uint8_t *val)
 }
 
 /**
-  * @brief   Under temperature interrupt value. ( degC / 0.64 ) + 64.[set]
+  * @brief   Under temperature interrupt value. ( degC / 0.64 ) + 63.[set]
   *
   * @param  ctx    Read / write interface definitions.(ptr)
   * @param  val    Change the values of tll in reg TEMP_L_LIMIT.
@@ -531,7 +535,7 @@ int32_t stts22h_temp_trshld_low_set(stmdev_ctx_t *ctx, uint8_t val)
 }
 
 /**
-  * @brief   Under temperature interrupt value. ( degC / 0.64 ) + 64.[get]
+  * @brief   Under temperature interrupt value. ( degC / 0.64 ) + 63.[get]
   *
   * @param  ctx    Read / write interface definitions.(ptr)
   * @param  val    Get the values of tll in reg TEMP_L_LIMIT.(ptr)
