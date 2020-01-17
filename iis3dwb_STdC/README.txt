@@ -14,4 +14,4 @@ every hardware.
 
 www.st.com/mems
 
-IIS3DWB DS rev.1
+IIS3DWB DS rev.2

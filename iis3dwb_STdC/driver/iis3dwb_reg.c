@@ -1583,57 +1583,6 @@ int32_t iis3dwb_i2c_interface_get(stmdev_ctx_t *ctx,
 }
 
 /**
-  * @brief  I3C Enable/Disable communication protocol.[set]
-  *
-  * @param  ctx    Read / write interface definitions.(ptr)
-  * @param  val    Change the values of i3c_disable in reg CTRL9_XL
-  * @retval        Interface status (MANDATORY: return 0 -> no Error).
-  *
-  */
-int32_t iis3dwb_i3c_disable_set(stmdev_ctx_t *ctx, iis3dwb_i3c_disable_t val)
-{
-  iis3dwb_ctrl9_xl_t ctrl9_xl;
-  int32_t ret;
-
-  ret = iis3dwb_read_reg(ctx, IIS3DWB_CTRL9_XL, (uint8_t*)&ctrl9_xl, 1);
-  if(ret == 0){
-    ctrl9_xl.i3c_disable = ((uint8_t)val & 0x80U) >> 7;
-    ret = iis3dwb_write_reg(ctx, IIS3DWB_CTRL9_XL, (uint8_t*)&ctrl9_xl, 1);
-  }
-
-  return ret;
-}
-
-/**
-  * @brief  I3C Enable/Disable communication protocol[get]
-  *
-  * @param  ctx    Read / write interface definitions.(ptr)
-  * @param  val    Get the values of i3c_disable in reg CTRL9_XL
-  * @retval        Interface status (MANDATORY: return 0 -> no Error).
-  *
-  */
-int32_t iis3dwb_i3c_disable_get(stmdev_ctx_t *ctx, iis3dwb_i3c_disable_t *val)
-{
-  iis3dwb_ctrl9_xl_t ctrl9_xl;
-  int32_t ret;
-
-  ret = iis3dwb_read_reg(ctx, IIS3DWB_CTRL9_XL, (uint8_t*)&ctrl9_xl, 1);
-
-  switch (ctrl9_xl.i3c_disable){
-    case IIS3DWB_I3C_DISABLE:
-      *val = IIS3DWB_I3C_DISABLE;
-      break;
-    case IIS3DWB_I3C_ENABLE:
-      *val = IIS3DWB_I3C_ENABLE;
-      break;
-    default:
-      *val = IIS3DWB_I3C_ENABLE;
-      break;
-  }
-  return ret;
-}
-
-/**
   * @}
   *
   */

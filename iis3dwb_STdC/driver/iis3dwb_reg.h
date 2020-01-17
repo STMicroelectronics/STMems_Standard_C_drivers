@@ -259,13 +259,6 @@ typedef struct {
   uint8_t hpcf_xl                  : 3;
 } iis3dwb_ctrl8_xl_t;
 
-#define IIS3DWB_CTRL9_XL                     0x18U
-typedef struct {
-  uint8_t not_used_01              : 1;
-  uint8_t i3c_disable              : 1;
-  uint8_t not_used_02              : 6;
-} iis3dwb_ctrl9_xl_t;
-
 #define IIS3DWB_CTRL10_C                     0x19U
 typedef struct {
   uint8_t not_used_01              : 5;
@@ -291,7 +284,7 @@ typedef struct {
   uint8_t wu_ia                    : 1;
   uint8_t sleep_state_ia           : 1;
   uint8_t not_used_01              : 1;
-  uint8_t sleep_change             : 1;
+  uint8_t sleep_change_ia          : 1;
   uint8_t not_used_02              : 1;
 } iis3dwb_wake_up_src_t;
 
@@ -420,7 +413,6 @@ typedef union{
   iis3dwb_ctrl5_c_t                       ctrl5_c;
   iis3dwb_ctrl6_c_t                       ctrl6_c;
   iis3dwb_ctrl8_xl_t                      ctrl8_xl;
-  iis3dwb_ctrl9_xl_t                      ctrl9_xl;
   iis3dwb_ctrl10_c_t                      ctrl10_c;
   iis3dwb_all_int_src_t                   all_int_src;
   iis3dwb_wake_up_src_t                   wake_up_src;
@@ -643,15 +635,6 @@ int32_t iis3dwb_i2c_interface_set(stmdev_ctx_t *ctx,
                                   iis3dwb_i2c_disable_t val);
 int32_t iis3dwb_i2c_interface_get(stmdev_ctx_t *ctx,
                                   iis3dwb_i2c_disable_t *val);
-
-typedef enum {
-  IIS3DWB_I3C_DISABLE         = 0x01,
-  IIS3DWB_I3C_ENABLE          = 0x00,
-} iis3dwb_i3c_disable_t;
-int32_t iis3dwb_i3c_disable_set(stmdev_ctx_t *ctx,
-                                iis3dwb_i3c_disable_t val);
-int32_t iis3dwb_i3c_disable_get(stmdev_ctx_t *ctx,
-                                iis3dwb_i3c_disable_t *val);
 
 typedef struct {
     iis3dwb_int1_ctrl_t          int1_ctrl;
