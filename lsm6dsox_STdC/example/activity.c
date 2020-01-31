@@ -48,8 +48,8 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-//#define STEVAL_MKI109V3
-#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#define STEVAL_MKI109V3
+//#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
@@ -75,6 +75,7 @@
 #if defined(STEVAL_MKI109V3)
 #include "usbd_cdc_if.h"
 #include "spi.h"
+#include "tim.h"
 #elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
 #include "usart.h"
 #endif
@@ -113,7 +114,7 @@ void example_main_activity_lsm6dsox(void)
    */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &hspi2;
 
   /*
    * Init test platform
@@ -291,6 +292,8 @@ static void platform_init(void)
 #ifdef STEVAL_MKI109V3
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }
