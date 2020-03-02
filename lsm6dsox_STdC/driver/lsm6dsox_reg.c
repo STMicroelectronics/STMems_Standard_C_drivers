@@ -433,8 +433,8 @@ int32_t lsm6dsox_xl_data_rate_get(stmdev_ctx_t *ctx, lsm6dsox_odr_xl_t *val)
     case LSM6DSOX_XL_ODR_6667Hz:
       *val = LSM6DSOX_XL_ODR_6667Hz;
       break;
-    case LSM6DSOX_XL_ODR_6Hz5:
-      *val = LSM6DSOX_XL_ODR_6Hz5;
+    case LSM6DSOX_XL_ODR_1Hz6:
+      *val = LSM6DSOX_XL_ODR_1Hz6;
       break;
     default:
       *val = LSM6DSOX_XL_ODR_OFF;

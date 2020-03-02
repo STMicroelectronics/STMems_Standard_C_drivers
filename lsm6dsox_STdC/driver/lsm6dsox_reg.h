@@ -1739,7 +1739,7 @@ typedef enum {
   LSM6DSOX_XL_ODR_1667Hz = 8,
   LSM6DSOX_XL_ODR_3333Hz = 9,
   LSM6DSOX_XL_ODR_6667Hz = 10,
-  LSM6DSOX_XL_ODR_6Hz5   = 11, /* (low power only) */
+  LSM6DSOX_XL_ODR_1Hz6   = 11, /* (low power only) */
 } lsm6dsox_odr_xl_t;
 int32_t lsm6dsox_xl_data_rate_set(stmdev_ctx_t *ctx, lsm6dsox_odr_xl_t val);
 int32_t lsm6dsox_xl_data_rate_get(stmdev_ctx_t *ctx, lsm6dsox_odr_xl_t *val);
