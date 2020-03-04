@@ -326,10 +326,18 @@ typedef struct {
 #define IIS3DWB_TIMESTAMP3                   0x43U
 #define IIS3DWB_SLOPE_EN                     0x56U
 typedef struct {
-  uint8_t not_used_01              : 4;
+  uint8_t lir                      : 1;
+  uint8_t not_used_01              : 3;
   uint8_t slope_fds                : 1;
-  uint8_t not_used_02              : 3;
+  uint8_t sleep_status_on_int      : 1;
+  uint8_t not_used_02              : 2;
 } iis3dwb_slope_en_t;
+
+#define IIS3DWB_INTERRUPTS_EN                0x58U
+typedef struct {
+  uint8_t not_used_01              : 7;
+  uint8_t interrupts_enable        : 1;
+} iis3dwb_interrupts_en_t;
 
 #define IIS3DWB_WAKE_UP_THS                  0x5BU
 typedef struct {
@@ -420,6 +428,7 @@ typedef union{
   iis3dwb_fifo_status1_t                  fifo_status1;
   iis3dwb_fifo_status2_t                  fifo_status2;
   iis3dwb_slope_en_t                      slope_en;
+  iis3dwb_interrupts_en_t                 interrupts_en;
   iis3dwb_wake_up_ths_t                   wake_up_ths;
   iis3dwb_wake_up_dur_t                   wake_up_dur;
   iis3dwb_md1_cfg_t                       md1_cfg;
@@ -586,7 +595,7 @@ typedef enum {
   IIS3DWB_HP_ODR_DIV_200            = 0x15,
   IIS3DWB_HP_ODR_DIV_400            = 0x16,
   IIS3DWB_HP_ODR_DIV_800            = 0x17,
-  IIS3DWB_LP_5kHz                   = 0x00,
+  IIS3DWB_LP_6k3Hz                  = 0x00,
   IIS3DWB_LP_ODR_DIV_4              = 0x80,
   IIS3DWB_LP_ODR_DIV_10             = 0x81,
   IIS3DWB_LP_ODR_DIV_20             = 0x82,
@@ -637,8 +646,15 @@ int32_t iis3dwb_i2c_interface_get(stmdev_ctx_t *ctx,
                                   iis3dwb_i2c_disable_t *val);
 
 typedef struct {
-    iis3dwb_int1_ctrl_t          int1_ctrl;
-    iis3dwb_md1_cfg_t            md1_cfg;
+  uint8_t drdy_xl       : 1; /* Accelerometer data ready */
+  uint8_t boot          : 1; /* Restoring calibration parameters */
+  uint8_t fifo_th       : 1; /* FIFO threshold reached */
+  uint8_t fifo_ovr      : 1; /* FIFO overrun */
+  uint8_t fifo_full     : 1; /* FIFO full */
+  uint8_t fifo_bdr      : 1; /* FIFO Batch counter threshold reached */
+  uint8_t wake_up       : 1; /* wake up event */
+  uint8_t sleep_change  : 1; /* Act/Inact (or Vice-versa) status changed */
+  uint8_t sleep_status  : 1; /* Act/Inact status */
 } iis3dwb_pin_int1_route_t;
 int32_t iis3dwb_pin_int1_route_set(stmdev_ctx_t *ctx,
                                    iis3dwb_pin_int1_route_t *val);
@@ -646,8 +662,16 @@ int32_t iis3dwb_pin_int1_route_get(stmdev_ctx_t *ctx,
                                    iis3dwb_pin_int1_route_t *val);
 
 typedef struct {
-  iis3dwb_int2_ctrl_t          int2_ctrl;
-  iis3dwb_md2_cfg_t            md2_cfg;
+  uint8_t drdy_xl       : 1; /* Accelerometer data ready */
+  uint8_t drdy_temp     : 1; /* Temperature data ready */
+  uint8_t fifo_th       : 1; /* FIFO threshold reached */
+  uint8_t fifo_ovr      : 1; /* FIFO overrun */
+  uint8_t fifo_full     : 1; /* FIFO full */
+  uint8_t fifo_bdr      : 1; /* FIFO Batch counter threshold reached */
+  uint8_t timestamp     : 1; /* timestamp overflow */
+  uint8_t wake_up       : 1; /* wake up event */
+  uint8_t sleep_change  : 1; /* Act/Inact (or Vice-versa) status changed */
+  uint8_t sleep_status  : 1; /* Act/Inact status */
 } iis3dwb_pin_int2_route_t;
 int32_t iis3dwb_pin_int2_route_set(stmdev_ctx_t *ctx,
                                    iis3dwb_pin_int2_route_t *val);
@@ -670,6 +694,13 @@ int32_t iis3dwb_pin_polarity_get(stmdev_ctx_t *ctx, iis3dwb_h_lactive_t *val);
 
 int32_t iis3dwb_all_on_int1_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t iis3dwb_all_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val);
+
+typedef enum {
+  IIS3DWB_INT_PULSED            = 0,
+  IIS3DWB_INT_LATCHED           = 1,
+} iis3dwb_lir_t;
+int32_t iis3dwb_int_notification_set(stmdev_ctx_t *ctx, iis3dwb_lir_t val);
+int32_t iis3dwb_int_notification_get(stmdev_ctx_t *ctx, iis3dwb_lir_t *val);
 
 typedef enum {
   IIS3DWB_LSb_FS_DIV_64       = 0,
@@ -756,12 +787,9 @@ int32_t iis3dwb_fifo_ovr_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t iis3dwb_fifo_wtm_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
-  IIS3DWB_XL_NC_TAG = 2,
+  IIS3DWB_XL_TAG = 2,
   IIS3DWB_TEMPERATURE_TAG,
   IIS3DWB_TIMESTAMP_TAG,
-  IIS3DWB_CFG_CHANGE_TAG,
-  IIS3DWB_XL_NC_T_2_TAG,
-  IIS3DWB_XL_NC_T_1_TAG,
 } iis3dwb_fifo_tag_t;
 int32_t iis3dwb_fifo_sensor_tag_get(stmdev_ctx_t *ctx,
 				                    iis3dwb_fifo_tag_t *val);
