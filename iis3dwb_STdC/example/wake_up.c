@@ -160,6 +160,7 @@ void example_main_wake_up_iis3dwb(void)
 
   /*
    * Set Wake-Up threshold: 1 LSb corresponds to FS_XL/2^6
+   * WARNING: this function is mandatory for activate the wake up logic
    */
   iis3dwb_wkup_threshold_set(&dev_ctx, 2);
 
