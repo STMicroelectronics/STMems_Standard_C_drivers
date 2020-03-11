@@ -1,9 +1,8 @@
 /*
  ******************************************************************************
- * @file    free_fall.c
+ * @file    read_data_simple.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect free fall events
- *          from sensor.
+ * @brief   This file show the simplest way to get data from sensor.
  *
  ******************************************************************************
  * @attention
@@ -78,11 +77,19 @@
 #include "usart.h"
 #endif
 
+typedef union{
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
+} axis3bit16_t;
+
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
+static axis3bit16_t data_raw_acceleration;
+static float acceleration_mg[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
+static lis2dw12_ctrl4_int1_pad_ctrl_t  ctrl4_int1_pad;
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -101,88 +108,71 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_freefall_lis2dw12(void)
+void lis2dw12_read_data_single(void)
 {
-  /*
-   *  Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
-  lis2dw12_reg_t int_route;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Initialize platform specific hardware */
   platform_init();
 
-  /*
-   *  Check device ID
-   */
+  /* Check device ID */
   lis2dw12_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LIS2DW12_ID)
-    while(1)
-    {
+    while(1){
       /* manage here device not found */
     }
 
-  /*
-   * Restore default configuration
-   */
+  /* Restore default configuration */
   lis2dw12_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lis2dw12_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Configure power mode
-   */
-  lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_HIGH_PERFORMANCE_LOW_NOISE);
-
-  /*
-   * Set Output Data Rate
-   */
-  lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_200Hz);
-
-  /*
-   * Set full scale to 2 g
-   */
+  /* Enable Block Data Update */
+  lis2dw12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  //lis2dw12_cs_mode_set(&dev_ctx, LIS2DW12_PULL_UP_DISCONNECT);
+  //lis2dw12_i2c_interface_set(&dev_ctx, LIS2DW12_I2C_DISABLE);
+  //lis2dw12_spi_mode_set(&dev_ctx, LIS2DW12_SPI_3_WIRE);
+ 
+  lis2dw12_int_notification_set(&dev_ctx, LIS2DW12_INT_LATCHED);
+  lis2dw12_pin_polarity_set(&dev_ctx, LIS2DW12_ACTIVE_LOW);
+ 
+  lis2dw12_pin_int1_route_get(&dev_ctx, &ctrl4_int1_pad);
+  ctrl4_int1_pad.int1_drdy = PROPERTY_ENABLE;
+  lis2dw12_pin_int1_route_set(&dev_ctx, &ctrl4_int1_pad);
+ 
+  /* Set full scale */ 
   lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_2g);
 
-  /*
-   * Configure Free Fall duration and samples count
-   */
-  lis2dw12_ff_dur_set(&dev_ctx, 0x06);
-  lis2dw12_ff_threshold_set(&dev_ctx, LIS2DW12_FF_TSH_10LSb_FS2g);
+  /* Configure filtering chain accelerometer */ 
+  lis2dw12_filter_path_set(&dev_ctx, LIS2DW12_LPF_ON_OUT);
+  lis2dw12_filter_bandwidth_set(&dev_ctx, LIS2DW12_ODR_DIV_10);
 
-  /*
-   * Enable free fall interrupt
-   */
-  lis2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
-  int_route.ctrl4_int1_pad_ctrl.int1_ff = PROPERTY_ENABLE;
-  lis2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
+  /* Configure power mode and Output Data Rate */
+  lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_CONT_LOW_PWR_12bit);
+  lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_SET_SW_TRIG);
 
-  /*
-   * Set latched interrupt
-   */
-  lis2dw12_int_notification_set(&dev_ctx, LIS2DW12_INT_LATCHED);
-
-  /*
-   * Wait Events
-   */
+  /* Read samples in polling mode (no int) */
   while(1)
   {
-    /*
-     * Check Free Fall events
-     */
-    lis2dw12_all_sources_t src;
-
-    lis2dw12_all_sources_get(&dev_ctx, &src);
-    if (src.wake_up_src.ff_ia)
+    /* polling on DRDY signal */
+    if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0))
     {
-      sprintf((char*)tx_buffer, "free fall detected\r\n");
+      /* Read acceleration data */
+      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
+      lis2dw12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+      acceleration_mg[0] = lis2dw12_from_fs2_lp1_to_mg(data_raw_acceleration.i16bit[0]);
+      acceleration_mg[1] = lis2dw12_from_fs2_lp1_to_mg(data_raw_acceleration.i16bit[1]);
+      acceleration_mg[2] = lis2dw12_from_fs2_lp1_to_mg(data_raw_acceleration.i16bit[2]);
+      for (int i=0; i<0x3FF; i++);
+      lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_SET_SW_TRIG);
+     
+      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
@@ -239,8 +229,8 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 #ifdef STEVAL_MKI109V3
   else if (handle == &hspi2)
   {
-    /* Read command */
-    reg |= 0x80;
+	/* Read command */
+	reg |= 0x80;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Receive(handle, bufp, len, 1000);
@@ -263,7 +253,7 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
   #endif
   #ifdef STEVAL_MKI109V3
-  CDC_Transmit_FS(tx_buffer, len);
+  //CDC_Transmit_FS(tx_buffer, len);
   #endif
 }
 

@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    test_self_test.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file run selt test procedure
  *
  ******************************************************************************
  * @attention
@@ -83,13 +83,18 @@ typedef union{
 } axis3bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
+/* Self-test recommended samples */
+#define SELF_TEST_SAMPLES	5
+
+/* Self-test positive difference */
+#define ST_MIN_POS			70.0f
+#define ST_MAX_POS			1500.0f
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static float acceleration_mg[3];
+static axis3bit16_t data_raw_acceleration[SELF_TEST_SAMPLES];
+static float acceleration_mg[SELF_TEST_SAMPLES][3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
-static lis2dw12_ctrl4_int1_pad_ctrl_t  ctrl4_int1_pad;
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -107,74 +112,187 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
-/* Main Example --------------------------------------------------------------*/
-void example_main_lis2dw12(void)
+/* Utility functions ---------------------------------------------------------*/
+static inline float ABSF(float _x)
 {
-  /* Initialize mems driver interface */
-  stmdev_ctx_t dev_ctx;
-  dev_ctx.write_reg = platform_write;
-  dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &SENSOR_BUS;
+	return (_x < 0.0f) ? -(_x) : _x;
+}
 
-  /* Initialize platform specific hardware */
-  platform_init();
+static int flush_samples(stmdev_ctx_t *dev_ctx)
+{
+  lis2dw12_reg_t reg;
+  axis3bit16_t dummy;
+  int samples = 0;
 
-  /* Check device ID */
-  lis2dw12_device_id_get(&dev_ctx, &whoamI);
-  if (whoamI != LIS2DW12_ID)
-    while(1){
-      /* manage here device not found */
-    }
+  /*
+   * Discard old samples
+   */
+  lis2dw12_status_reg_get(dev_ctx, &reg.status);
+  if (reg.status.drdy)
+  {
+    lis2dw12_acceleration_raw_get(dev_ctx, dummy.u8bit);
+    samples++;
+  }
 
-  /* Restore default configuration */
-  lis2dw12_reset_set(&dev_ctx, PROPERTY_ENABLE);
-  do {
-    lis2dw12_reset_get(&dev_ctx, &rst);
+  return samples;
+}
+
+static void test_self_test_lis2dw12(stmdev_ctx_t *dev_ctx)
+{
+  lis2dw12_reg_t reg;
+  float media[3] = { 0.0f, 0.0f, 0.0f };
+  float mediast[3] = { 0.0f, 0.0f, 0.0f };
+  uint8_t match[3] = { 0, 0, 0 };
+  uint8_t j = 0;
+  uint16_t i = 0;
+  uint8_t k = 0;
+  uint8_t axis;
+
+  /*
+   * Restore default configuration
+   */
+  lis2dw12_reset_set(dev_ctx, PROPERTY_ENABLE);
+  do
+  {
+    lis2dw12_reset_get(dev_ctx, &rst);
   } while (rst);
 
-  /* Enable Block Data Update */
-  lis2dw12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-  //lis2dw12_cs_mode_set(&dev_ctx, LIS2DW12_PULL_UP_DISCONNECT);
-  //lis2dw12_i2c_interface_set(&dev_ctx, LIS2DW12_I2C_DISABLE);
-  //lis2dw12_spi_mode_set(&dev_ctx, LIS2DW12_SPI_3_WIRE);
- 
-  lis2dw12_int_notification_set(&dev_ctx, LIS2DW12_INT_LATCHED);
-  lis2dw12_pin_polarity_set(&dev_ctx, LIS2DW12_ACTIVE_LOW);
- 
-  lis2dw12_pin_int1_route_get(&dev_ctx, &ctrl4_int1_pad);
-  ctrl4_int1_pad.int1_drdy = PROPERTY_ENABLE;
-  lis2dw12_pin_int1_route_set(&dev_ctx, &ctrl4_int1_pad);
- 
-  /* Set full scale */ 
-  lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_2g);
+  lis2dw12_block_data_update_set(dev_ctx, PROPERTY_ENABLE);
+  lis2dw12_full_scale_set(dev_ctx, LIS2DW12_4g);
+  lis2dw12_power_mode_set(dev_ctx, LIS2DW12_HIGH_PERFORMANCE);
+  lis2dw12_data_rate_set(dev_ctx, LIS2DW12_XL_ODR_50Hz);
+  HAL_Delay(100);
 
-  /* Configure filtering chain accelerometer */ 
-  lis2dw12_filter_path_set(&dev_ctx, LIS2DW12_LPF_ON_OUT);
-  lis2dw12_filter_bandwidth_set(&dev_ctx, LIS2DW12_ODR_DIV_10);
+  /*
+   * Flush old samples
+   */
+  flush_samples(dev_ctx);
 
-  /* Configure power mode and Output Data Rate */
-  lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_CONT_LOW_PWR_12bit);
-  lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_SET_SW_TRIG);
+  do
+  {
+    lis2dw12_status_reg_get(dev_ctx, &reg.status);
+    if (reg.status.drdy)
+    {
+      /*
+       * Read accelerometer data
+       */
+      memset(data_raw_acceleration[i].u8bit, 0x00, 3 * sizeof(int16_t));
+      lis2dw12_acceleration_raw_get(dev_ctx, data_raw_acceleration[i].u8bit);
+      for (axis = 0; axis < 3; axis++)
+        acceleration_mg[i][axis] =
+          lis2dw12_from_fs4_to_mg(data_raw_acceleration[i].i16bit[axis]);
 
-  /* Read samples in polling mode (no int) */
+        i++;
+      }
+  } while (i < SELF_TEST_SAMPLES);
+
+  for (k = 0; k < 3; k++)
+  {
+    for (j = 0; j < SELF_TEST_SAMPLES; j++)
+    {
+      media[k] += acceleration_mg[j][k];
+    }
+
+    media[k] = (media[k] / j);
+  }
+
+  /*
+   * Enable self test mode
+   */
+  lis2dw12_self_test_set(dev_ctx, LIS2DW12_XL_ST_POSITIVE);
+  HAL_Delay(100);
+  i = 0;
+
+  /*
+   * Flush old samples
+   */
+  flush_samples(dev_ctx);
+
+  do
+  {
+    lis2dw12_status_reg_get(dev_ctx, &reg.status);
+    if (reg.status.drdy)
+    {
+      /*
+       * Read accelerometer data
+       */
+      memset(data_raw_acceleration[i].u8bit, 0x00, 3 * sizeof(int16_t));
+      lis2dw12_acceleration_raw_get(dev_ctx, data_raw_acceleration[i].u8bit);
+      for (axis = 0; axis < 3; axis++)
+        acceleration_mg[i][axis] =
+          lis2dw12_from_fs4_to_mg(data_raw_acceleration[i].i16bit[axis]);
+
+      i++;
+    }
+  } while (i < SELF_TEST_SAMPLES);
+
+  for (k = 0; k < 3; k++)
+  {
+      for (j = 0; j < SELF_TEST_SAMPLES; j++)
+      {
+        mediast[k] += acceleration_mg[j][k];
+      }
+
+    mediast[k] = (mediast[k] / j);
+  }
+
+  /*
+   * Check for all axis self test value range
+   */
+  for (k = 0; k < 3; k++)
+  {
+    if ((ABSF(mediast[k] - media[k]) >= ST_MIN_POS) &&
+        (ABSF(mediast[k] - media[k]) <= ST_MAX_POS))
+    {
+      match[k] = 1;
+    }
+
+    sprintf((char*)tx_buffer, "%d: |%f| <= |%f| <= |%f| %s\r\n", k,
+            ST_MIN_POS, ABSF(mediast[k] - media[k]), ST_MAX_POS,
+            match[k] == 1 ? "PASSED" : "FAILED");
+    tx_com(tx_buffer, strlen((char const*)tx_buffer));
+  }
+
+  /*
+   * Disable self test mode
+   */
+  lis2dw12_data_rate_set(dev_ctx, LIS2DW12_XL_ODR_OFF);
+  lis2dw12_self_test_set(dev_ctx, LIS2DW12_XL_ST_DISABLE);
+}
+
+/* Main Example --------------------------------------------------------------*/
+void lis2dw12_self_test(void)
+{
+  /*
+   * Initialize mems driver interface
+  */
+  stmdev_ctx_t dev_ctx;
+
+  dev_ctx.write_reg = platform_write;
+  dev_ctx.read_reg = platform_read;
+  dev_ctx.handle = &hi2c1;
+
+  /*
+   * Initialize platform specific hardware
+   */
+  platform_init();
+
+  /*
+   * Check device ID
+   */
+  lis2dw12_device_id_get(&dev_ctx, &whoamI);
+  if (whoamI != LIS2DW12_ID)
   while(1)
   {
-    /* polling on DRDY signal */
-    if (GPIO_PIN_RESET == HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0))
-    {
-      /* Read acceleration data */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      lis2dw12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = lis2dw12_from_fs2_lp1_to_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = lis2dw12_from_fs2_lp1_to_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = lis2dw12_from_fs2_lp1_to_mg(data_raw_acceleration.i16bit[2]);
-      for (int i=0; i<0x3FF; i++);
-      lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_SET_SW_TRIG);
-     
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
+    /* manage here device not found */
+  }
+
+  /*
+   * Start self test
+   */
+  while(1)
+  {
+    test_self_test_lis2dw12(&dev_ctx);
   }
 }
 
@@ -253,7 +371,7 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
   #endif
   #ifdef STEVAL_MKI109V3
-  //CDC_Transmit_FS(tx_buffer, len);
+  CDC_Transmit_FS(tx_buffer, len);
   #endif
 }
 

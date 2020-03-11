@@ -1,8 +1,9 @@
 /*
  ******************************************************************************
- * @file    double_tap.c
+ * @file    free_fall.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect double tap from sensor.
+ * @brief   This file show the simplest way to detect free fall events
+ *          from sensor.
  *
  ******************************************************************************
  * @attention
@@ -100,10 +101,10 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_double_tap_lis2dw12(void)
+void lis2dw12_free_fall(void)
 {
   /*
-   * Initialize mems driver interface
+   *  Initialize mems driver interface
    */
   stmdev_ctx_t dev_ctx;
   lis2dw12_reg_t int_route;
@@ -118,7 +119,7 @@ void example_main_double_tap_lis2dw12(void)
   platform_init();
 
   /*
-   * Check device ID
+   *  Check device ID
    */
   lis2dw12_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LIS2DW12_ID)
@@ -136,92 +137,52 @@ void example_main_double_tap_lis2dw12(void)
   } while (rst);
 
   /*
-   * Set full scale
-   */
-  lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_2g);
-
-  /*
    * Configure power mode
    */
-  lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
+  lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_HIGH_PERFORMANCE_LOW_NOISE);
 
   /*
    * Set Output Data Rate
    */
-  lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_400Hz);
+  lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_200Hz);
 
   /*
-   * Enable Tap detection on X, Y, Z
+   * Set full scale to 2 g
    */
-  lis2dw12_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
-  lis2dw12_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
-  lis2dw12_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_2g);
 
   /*
-   * Set Tap threshold on all axis
+   * Configure Free Fall duration and samples count
    */
-  lis2dw12_tap_threshold_x_set(&dev_ctx, 12);
-  lis2dw12_tap_threshold_y_set(&dev_ctx, 12);
-  lis2dw12_tap_threshold_z_set(&dev_ctx, 12);
+  lis2dw12_ff_dur_set(&dev_ctx, 0x06);
+  lis2dw12_ff_threshold_set(&dev_ctx, LIS2DW12_FF_TSH_10LSb_FS2g);
 
   /*
-   * Configure Double Tap parameter
-   */
-  lis2dw12_tap_dur_set(&dev_ctx, 7);
-  lis2dw12_tap_quiet_set(&dev_ctx, 3);
-  lis2dw12_tap_shock_set(&dev_ctx, 3);
-
-  /*
-   * Enable Double Tap detection
-   */
-  lis2dw12_tap_mode_set(&dev_ctx, LIS2DW12_BOTH_SINGLE_DOUBLE);
-
-  /*
-   * Enable single tap detection interrupt
+   * Enable free fall interrupt
    */
   lis2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
-  int_route.ctrl4_int1_pad_ctrl.int1_tap = PROPERTY_ENABLE;
+  int_route.ctrl4_int1_pad_ctrl.int1_ff = PROPERTY_ENABLE;
   lis2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
 
   /*
-   * Wait Events.
+   * Set latched interrupt
+   */
+  lis2dw12_int_notification_set(&dev_ctx, LIS2DW12_INT_LATCHED);
+
+  /*
+   * Wait Events
    */
   while(1)
   {
-    lis2dw12_all_sources_t all_source;
-
     /*
-     * Check Double Tap events
+     * Check Free Fall events
      */
-    lis2dw12_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.tap_src.double_tap)
-    {
-      sprintf((char*)tx_buffer, "Double Tap Detected: Sign %s",
-              all_source.tap_src.tap_sign ? "positive" : "negative");
-      if (all_source.tap_src.x_tap)
-        sprintf((char*)tx_buffer, "%s on X", tx_buffer);
-      if (all_source.tap_src.y_tap)
-        sprintf((char*)tx_buffer, "%s on Y", tx_buffer);
-      if (all_source.tap_src.z_tap)
-        sprintf((char*)tx_buffer, "%s on Z", tx_buffer);
-      sprintf((char*)tx_buffer, "%s axis\r\n", tx_buffer);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
+    lis2dw12_all_sources_t src;
 
-    /*
-     * Check Single Tap events
-     */
-    if (all_source.tap_src.single_tap)
+    lis2dw12_all_sources_get(&dev_ctx, &src);
+    if (src.wake_up_src.ff_ia)
     {
-      sprintf((char*)tx_buffer, "Tap Detected: Sign %s",
-              all_source.tap_src.tap_sign ? "positive" : "negative");
-      if (all_source.tap_src.x_tap)
-        sprintf((char*)tx_buffer, "%s on X", tx_buffer);
-      if (all_source.tap_src.y_tap)
-        sprintf((char*)tx_buffer, "%s on Y", tx_buffer);
-      if (all_source.tap_src.z_tap)
-        sprintf((char*)tx_buffer, "%s on Z", tx_buffer);
-      sprintf((char*)tx_buffer, "%s axis\r\n", tx_buffer);
+      sprintf((char*)tx_buffer, "free fall detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

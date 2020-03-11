@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    single_tap.c
+ * @file    double_tap.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect single tap from sensor.
+ * @brief   This file show the simplest way to detect double tap from sensor.
  *
  ******************************************************************************
  * @attention
@@ -100,10 +100,10 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_single_tap_lis2dw12(void)
+void lis2dw12_double_tap(void)
 {
   /*
-   * Initialize mems driver interface.
+   * Initialize mems driver interface
    */
   stmdev_ctx_t dev_ctx;
   lis2dw12_reg_t int_route;
@@ -160,49 +160,68 @@ void example_main_single_tap_lis2dw12(void)
   /*
    * Set Tap threshold on all axis
    */
-  lis2dw12_tap_threshold_x_set(&dev_ctx, 9);
-  lis2dw12_tap_threshold_y_set(&dev_ctx, 9);
-  lis2dw12_tap_threshold_z_set(&dev_ctx, 9);
+  lis2dw12_tap_threshold_x_set(&dev_ctx, 12);
+  lis2dw12_tap_threshold_y_set(&dev_ctx, 12);
+  lis2dw12_tap_threshold_z_set(&dev_ctx, 12);
 
   /*
-   * Configure Single Tap parameter
+   * Configure Double Tap parameter
    */
-  lis2dw12_tap_quiet_set(&dev_ctx, 1);
-  lis2dw12_tap_shock_set(&dev_ctx, 2);
+  lis2dw12_tap_dur_set(&dev_ctx, 7);
+  lis2dw12_tap_quiet_set(&dev_ctx, 3);
+  lis2dw12_tap_shock_set(&dev_ctx, 3);
 
   /*
-   * Enable Single Tap detection only
+   * Enable Double Tap detection
    */
-  lis2dw12_tap_mode_set(&dev_ctx, LIS2DW12_ONLY_SINGLE);
+  lis2dw12_tap_mode_set(&dev_ctx, LIS2DW12_BOTH_SINGLE_DOUBLE);
 
   /*
    * Enable single tap detection interrupt
    */
   lis2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
-  int_route.ctrl4_int1_pad_ctrl.int1_single_tap = PROPERTY_ENABLE;
+  int_route.ctrl4_int1_pad_ctrl.int1_tap = PROPERTY_ENABLE;
   lis2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
 
   /*
-   * Wait Events
+   * Wait Events.
    */
   while(1)
   {
     lis2dw12_all_sources_t all_source;
 
     /*
-     * Check Single Tap events
+     * Check Double Tap events
      */
     lis2dw12_all_sources_get(&dev_ctx, &all_source);
+    if (all_source.tap_src.double_tap)
+    {
+      sprintf((char*)tx_buffer, "Double Tap Detected: Sign %s",
+              all_source.tap_src.tap_sign ? "positive" : "negative");
+      if (all_source.tap_src.x_tap)
+        sprintf((char*)tx_buffer, "%s on X", tx_buffer);
+      if (all_source.tap_src.y_tap)
+        sprintf((char*)tx_buffer, "%s on Y", tx_buffer);
+      if (all_source.tap_src.z_tap)
+        sprintf((char*)tx_buffer, "%s on Z", tx_buffer);
+      sprintf((char*)tx_buffer, "%s axis\r\n", tx_buffer);
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
+
+    /*
+     * Check Single Tap events
+     */
     if (all_source.tap_src.single_tap)
     {
       sprintf((char*)tx_buffer, "Tap Detected: Sign %s",
               all_source.tap_src.tap_sign ? "positive" : "negative");
       if (all_source.tap_src.x_tap)
-        sprintf((char*)tx_buffer, "%s on X axis\r\n", tx_buffer);
+        sprintf((char*)tx_buffer, "%s on X", tx_buffer);
       if (all_source.tap_src.y_tap)
-        sprintf((char*)tx_buffer, "%s on Y axis\r\n", tx_buffer);
+        sprintf((char*)tx_buffer, "%s on Y", tx_buffer);
       if (all_source.tap_src.z_tap)
-        sprintf((char*)tx_buffer, "%s on Z axis\r\n", tx_buffer);
+        sprintf((char*)tx_buffer, "%s on Z", tx_buffer);
+      sprintf((char*)tx_buffer, "%s axis\r\n", tx_buffer);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
@@ -259,8 +278,8 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 #ifdef STEVAL_MKI109V3
   else if (handle == &hspi2)
   {
-	/* Read command */
-	reg |= 0x80;
+    /* Read command */
+    reg |= 0x80;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Receive(handle, bufp, len, 1000);

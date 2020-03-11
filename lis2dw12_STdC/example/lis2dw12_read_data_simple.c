@@ -107,7 +107,7 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lis2dw12(void)
+void lis2dw12_read_data_polling(void)
 {
   /*
    *  Initialize mems driver interface

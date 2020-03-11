@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    test_self_test.c
+ * @file    single_tap.c
  * @author  Sensors Software Solution Team
- * @brief   This file run selt test procedure
+ * @brief   This file show the simplest way to detect single tap from sensor.
  *
  ******************************************************************************
  * @attention
@@ -77,22 +77,9 @@
 #include "usart.h"
 #endif
 
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
 /* Private macro -------------------------------------------------------------*/
-/* Self-test recommended samples */
-#define SELF_TEST_SAMPLES	5
-
-/* Self-test positive difference */
-#define ST_MIN_POS			70.0f
-#define ST_MAX_POS			1500.0f
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration[SELF_TEST_SAMPLES];
-static float acceleration_mg[SELF_TEST_SAMPLES][3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -112,161 +99,14 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
-/* Utility functions ---------------------------------------------------------*/
-static inline float ABSF(float _x)
-{
-	return (_x < 0.0f) ? -(_x) : _x;
-}
-
-static int flush_samples(stmdev_ctx_t *dev_ctx)
-{
-  lis2dw12_reg_t reg;
-  axis3bit16_t dummy;
-  int samples = 0;
-
-  /*
-   * Discard old samples
-   */
-  lis2dw12_status_reg_get(dev_ctx, &reg.status);
-  if (reg.status.drdy)
-  {
-    lis2dw12_acceleration_raw_get(dev_ctx, dummy.u8bit);
-    samples++;
-  }
-
-  return samples;
-}
-
-static void test_self_test_lis2dw12(stmdev_ctx_t *dev_ctx)
-{
-  lis2dw12_reg_t reg;
-  float media[3] = { 0.0f, 0.0f, 0.0f };
-  float mediast[3] = { 0.0f, 0.0f, 0.0f };
-  uint8_t match[3] = { 0, 0, 0 };
-  uint8_t j = 0;
-  uint16_t i = 0;
-  uint8_t k = 0;
-  uint8_t axis;
-
-  /*
-   * Restore default configuration
-   */
-  lis2dw12_reset_set(dev_ctx, PROPERTY_ENABLE);
-  do
-  {
-    lis2dw12_reset_get(dev_ctx, &rst);
-  } while (rst);
-
-  lis2dw12_block_data_update_set(dev_ctx, PROPERTY_ENABLE);
-  lis2dw12_full_scale_set(dev_ctx, LIS2DW12_4g);
-  lis2dw12_power_mode_set(dev_ctx, LIS2DW12_HIGH_PERFORMANCE);
-  lis2dw12_data_rate_set(dev_ctx, LIS2DW12_XL_ODR_50Hz);
-  HAL_Delay(100);
-
-  /*
-   * Flush old samples
-   */
-  flush_samples(dev_ctx);
-
-  do
-  {
-    lis2dw12_status_reg_get(dev_ctx, &reg.status);
-    if (reg.status.drdy)
-    {
-      /*
-       * Read accelerometer data
-       */
-      memset(data_raw_acceleration[i].u8bit, 0x00, 3 * sizeof(int16_t));
-      lis2dw12_acceleration_raw_get(dev_ctx, data_raw_acceleration[i].u8bit);
-      for (axis = 0; axis < 3; axis++)
-        acceleration_mg[i][axis] =
-          lis2dw12_from_fs4_to_mg(data_raw_acceleration[i].i16bit[axis]);
-
-        i++;
-      }
-  } while (i < SELF_TEST_SAMPLES);
-
-  for (k = 0; k < 3; k++)
-  {
-    for (j = 0; j < SELF_TEST_SAMPLES; j++)
-    {
-      media[k] += acceleration_mg[j][k];
-    }
-
-    media[k] = (media[k] / j);
-  }
-
-  /*
-   * Enable self test mode
-   */
-  lis2dw12_self_test_set(dev_ctx, LIS2DW12_XL_ST_POSITIVE);
-  HAL_Delay(100);
-  i = 0;
-
-  /*
-   * Flush old samples
-   */
-  flush_samples(dev_ctx);
-
-  do
-  {
-    lis2dw12_status_reg_get(dev_ctx, &reg.status);
-    if (reg.status.drdy)
-    {
-      /*
-       * Read accelerometer data
-       */
-      memset(data_raw_acceleration[i].u8bit, 0x00, 3 * sizeof(int16_t));
-      lis2dw12_acceleration_raw_get(dev_ctx, data_raw_acceleration[i].u8bit);
-      for (axis = 0; axis < 3; axis++)
-        acceleration_mg[i][axis] =
-          lis2dw12_from_fs4_to_mg(data_raw_acceleration[i].i16bit[axis]);
-
-      i++;
-    }
-  } while (i < SELF_TEST_SAMPLES);
-
-  for (k = 0; k < 3; k++)
-  {
-      for (j = 0; j < SELF_TEST_SAMPLES; j++)
-      {
-        mediast[k] += acceleration_mg[j][k];
-      }
-
-    mediast[k] = (mediast[k] / j);
-  }
-
-  /*
-   * Check for all axis self test value range
-   */
-  for (k = 0; k < 3; k++)
-  {
-    if ((ABSF(mediast[k] - media[k]) >= ST_MIN_POS) &&
-        (ABSF(mediast[k] - media[k]) <= ST_MAX_POS))
-    {
-      match[k] = 1;
-    }
-
-    sprintf((char*)tx_buffer, "%d: |%f| <= |%f| <= |%f| %s\r\n", k,
-            ST_MIN_POS, ABSF(mediast[k] - media[k]), ST_MAX_POS,
-            match[k] == 1 ? "PASSED" : "FAILED");
-    tx_com(tx_buffer, strlen((char const*)tx_buffer));
-  }
-
-  /*
-   * Disable self test mode
-   */
-  lis2dw12_data_rate_set(dev_ctx, LIS2DW12_XL_ODR_OFF);
-  lis2dw12_self_test_set(dev_ctx, LIS2DW12_XL_ST_DISABLE);
-}
-
 /* Main Example --------------------------------------------------------------*/
-void example_main_selt_test_lis2dw12(void)
+void lis2dw12_single_tap(void)
 {
   /*
-   * Initialize mems driver interface
-  */
+   * Initialize mems driver interface.
+   */
   stmdev_ctx_t dev_ctx;
+  lis2dw12_reg_t int_route;
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
@@ -282,17 +122,89 @@ void example_main_selt_test_lis2dw12(void)
    */
   lis2dw12_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LIS2DW12_ID)
-  while(1)
-  {
-    /* manage here device not found */
-  }
+    while(1)
+    {
+      /* manage here device not found */
+    }
 
   /*
-   * Start self test
+   * Restore default configuration
+   */
+  lis2dw12_reset_set(&dev_ctx, PROPERTY_ENABLE);
+  do {
+    lis2dw12_reset_get(&dev_ctx, &rst);
+  } while (rst);
+
+  /*
+   * Set full scale
+   */
+  lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_2g);
+
+  /*
+   * Configure power mode
+   */
+  lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
+
+  /*
+   * Set Output Data Rate
+   */
+  lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_400Hz);
+
+  /*
+   * Enable Tap detection on X, Y, Z
+   */
+  lis2dw12_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2dw12_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2dw12_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /*
+   * Set Tap threshold on all axis
+   */
+  lis2dw12_tap_threshold_x_set(&dev_ctx, 9);
+  lis2dw12_tap_threshold_y_set(&dev_ctx, 9);
+  lis2dw12_tap_threshold_z_set(&dev_ctx, 9);
+
+  /*
+   * Configure Single Tap parameter
+   */
+  lis2dw12_tap_quiet_set(&dev_ctx, 1);
+  lis2dw12_tap_shock_set(&dev_ctx, 2);
+
+  /*
+   * Enable Single Tap detection only
+   */
+  lis2dw12_tap_mode_set(&dev_ctx, LIS2DW12_ONLY_SINGLE);
+
+  /*
+   * Enable single tap detection interrupt
+   */
+  lis2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
+  int_route.ctrl4_int1_pad_ctrl.int1_single_tap = PROPERTY_ENABLE;
+  lis2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
+
+  /*
+   * Wait Events
    */
   while(1)
   {
-    test_self_test_lis2dw12(&dev_ctx);
+    lis2dw12_all_sources_t all_source;
+
+    /*
+     * Check Single Tap events
+     */
+    lis2dw12_all_sources_get(&dev_ctx, &all_source);
+    if (all_source.tap_src.single_tap)
+    {
+      sprintf((char*)tx_buffer, "Tap Detected: Sign %s",
+              all_source.tap_src.tap_sign ? "positive" : "negative");
+      if (all_source.tap_src.x_tap)
+        sprintf((char*)tx_buffer, "%s on X axis\r\n", tx_buffer);
+      if (all_source.tap_src.y_tap)
+        sprintf((char*)tx_buffer, "%s on Y axis\r\n", tx_buffer);
+      if (all_source.tap_src.z_tap)
+        sprintf((char*)tx_buffer, "%s on Z axis\r\n", tx_buffer);
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
   }
 }
 

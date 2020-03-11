@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    wake_up.c
+ * @file    orientation_6d.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect wake_up from sensor.
+ * @brief   This file show the simplest way to detect 6D orientation from sensor.
  *
  ******************************************************************************
  * @attention
@@ -100,7 +100,7 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_wake_up_lis2dw12(void)
+void lis2dw12_orientation_6D(void)
 {
   /*
    * Initialize mems driver interface
@@ -110,7 +110,7 @@ void example_main_wake_up_lis2dw12(void)
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &SENSOR_BUS;
+  dev_ctx.handle = &hi2c1;
 
   /*
    * Initialize platform specific hardware
@@ -146,62 +146,57 @@ void example_main_wake_up_lis2dw12(void)
   lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
 
   /*
+   * Set threshold to 60 degrees
+   */
+  lis2dw12_6d_threshold_set(&dev_ctx, 0x02);
+
+  /*
+   * LPF2 on 6D function selection.
+   */
+  lis2dw12_6d_feed_data_set(&dev_ctx, LIS2DW12_LPF2_FEED);
+
+  /*
+   * Enable interrupt generation on 6D INT1 pin.
+   */
+  lis2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
+  int_route.ctrl4_int1_pad_ctrl.int1_6d = PROPERTY_ENABLE;
+  lis2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
+
+  /*
    * Set Output Data Rate
    */
   lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_200Hz);
 
   /*
-   * Apply high-pass digital filter on Wake-Up function
-   */
-  lis2dw12_filter_path_set(&dev_ctx, LIS2DW12_HIGH_PASS_ON_OUT);
-
-  /*
-   * Apply high-pass digital filter on Wake-Up function
-   * Duration time is set to zero so Wake-Up interrupt signal
-   * is generated for each X,Y,Z filtered data exceeding the
-   * configured threshold
-   */
-  lis2dw12_wkup_dur_set(&dev_ctx, 0);
-
-  /*
-   * Set wake-up threshold
-   *
-   * Set Wake-Up threshold: 1 LSb corresponds to FS_XL/2^6
-   */
-  lis2dw12_wkup_threshold_set(&dev_ctx, 2);
-
-  /*
-   * Enable interrupt generation on Wake-Up INT1 pin
-   *
-   */
-  lis2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
-  int_route.ctrl4_int1_pad_ctrl.int1_wu = PROPERTY_ENABLE;
-  lis2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
-
-  /*
-   * Wait Events
+   * Wait Events.
    */
   while(1)
   {
-    lis2dw12_all_sources_t all_source;
+	lis2dw12_all_sources_t all_source;
 
-    /*
-     * Check Wake-Up events
-     */
-    lis2dw12_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.wake_up_src.wu_ia)
-    {
-      sprintf((char*)tx_buffer, "Wake-Up event on ");
-      if (all_source.wake_up_src.x_wu)
-        strcat((char*)tx_buffer, "X");
-      if (all_source.wake_up_src.y_wu)
-        strcat((char*)tx_buffer, "Y");
-      if (all_source.wake_up_src.z_wu)
-        strcat((char*)tx_buffer, "Z");
+	lis2dw12_all_sources_get(&dev_ctx, &all_source);
 
-      strcat((char*)tx_buffer, " direction\r\n");
+	/*
+	 * Check 6D Orientation events
+	 */
+	if (all_source.sixd_src._6d_ia)
+	{
+      sprintf((char*)tx_buffer, "6D Or. switched to ");
+      if (all_source.sixd_src.xh)
+        strcat((char*)tx_buffer, "XH");
+      if (all_source.sixd_src.xl)
+        strcat((char*)tx_buffer, "XL");
+      if (all_source.sixd_src.yh)
+        strcat((char*)tx_buffer, "YH");
+      if (all_source.sixd_src.yl)
+        strcat((char*)tx_buffer, "YL");
+      if (all_source.sixd_src.zh)
+        strcat((char*)tx_buffer, "ZH");
+      if (all_source.sixd_src.zl)
+        strcat((char*)tx_buffer, "ZL");
+      strcat((char*)tx_buffer, "\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
+	}
   }
 }
 

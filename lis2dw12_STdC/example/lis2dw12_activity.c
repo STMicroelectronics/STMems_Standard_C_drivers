@@ -1,8 +1,9 @@
 /*
  ******************************************************************************
- * @file    orientation_6d.c
+ * @file    activity.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect 6D orientation from sensor.
+ * @brief   This file show the simplest way to detect activity/inactivity
+ * 			from sensor.
  *
  ******************************************************************************
  * @attention
@@ -86,6 +87,7 @@ static uint8_t tx_buffer[1000];
 /* Extern variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
+
 /*
  *   WARNING:
  *   Functions declare in this section are defined at the end of this file
@@ -99,8 +101,9 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
+
 /* Main Example --------------------------------------------------------------*/
-void example_main_orientation_6D_lis2dw12(void)
+void lis2dw12_activity(void)
 {
   /*
    * Initialize mems driver interface
@@ -123,16 +126,16 @@ void example_main_orientation_6D_lis2dw12(void)
   lis2dw12_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LIS2DW12_ID)
     while(1)
-    {
-      /* manage here device not found */
-    }
+	{
+	  /* manage here device not found */
+	}
 
   /*
    * Restore default configuration
    */
   lis2dw12_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
-    lis2dw12_reset_get(&dev_ctx, &rst);
+	  lis2dw12_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /*
@@ -141,25 +144,53 @@ void example_main_orientation_6D_lis2dw12(void)
   lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_2g);
 
   /*
+   * Configure filtering chain
+   * Accelerometer - filter path / bandwidth
+   */
+  lis2dw12_filter_path_set(&dev_ctx, LIS2DW12_LPF_ON_OUT);
+  lis2dw12_filter_bandwidth_set(&dev_ctx, LIS2DW12_ODR_DIV_4);
+
+  /*
    * Configure power mode
    */
   lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
 
   /*
-   * Set threshold to 60 degrees
+   * Set wake-up duration
+   *
+   * Wake up duration event 1LSb = 1 / ODR
    */
-  lis2dw12_6d_threshold_set(&dev_ctx, 0x02);
+  lis2dw12_wkup_dur_set(&dev_ctx, 2);
 
   /*
-   * LPF2 on 6D function selection.
+   * Set sleep duration
+   *
+   * Duration to go in sleep mode (1 LSb = 512 / ODR)
    */
-  lis2dw12_6d_feed_data_set(&dev_ctx, LIS2DW12_LPF2_FEED);
+  lis2dw12_act_sleep_dur_set(&dev_ctx, 2);
 
   /*
-   * Enable interrupt generation on 6D INT1 pin.
+   * Set Activity wake-up threshold
+   *
+   * Threshold for wake-up 1 LSB = FS_XL / 64
+   */
+  lis2dw12_wkup_threshold_set(&dev_ctx, 2);
+
+  /*
+   * Data sent to wake-up interrupt function
+   */
+  lis2dw12_wkup_feed_data_set(&dev_ctx, LIS2DW12_HP_FEED);
+
+  /*
+   * Config activity / inactivity or stationary / motion detection
+   */
+  lis2dw12_act_mode_set(&dev_ctx, LIS2DW12_DETECT_ACT_INACT);
+
+  /*
+   * Enable activity detection interrupt
    */
   lis2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
-  int_route.ctrl4_int1_pad_ctrl.int1_6d = PROPERTY_ENABLE;
+  int_route.ctrl4_int1_pad_ctrl.int1_wu = PROPERTY_ENABLE;
   lis2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
 
   /*
@@ -168,125 +199,120 @@ void example_main_orientation_6D_lis2dw12(void)
   lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_200Hz);
 
   /*
-   * Wait Events.
+   * Wait Events
    */
   while(1)
   {
-	lis2dw12_all_sources_t all_source;
+    lis2dw12_all_sources_t all_source;
 
-	lis2dw12_all_sources_get(&dev_ctx, &all_source);
+    /*
+     * Read status register
+     */
+    lis2dw12_all_sources_get(&dev_ctx, &all_source);
 
-	/*
-	 * Check 6D Orientation events
-	 */
-	if (all_source.sixd_src._6d_ia)
-	{
-      sprintf((char*)tx_buffer, "6D Or. switched to ");
-      if (all_source.sixd_src.xh)
-        strcat((char*)tx_buffer, "XH");
-      if (all_source.sixd_src.xl)
-        strcat((char*)tx_buffer, "XL");
-      if (all_source.sixd_src.yh)
-        strcat((char*)tx_buffer, "YH");
-      if (all_source.sixd_src.yl)
-        strcat((char*)tx_buffer, "YL");
-      if (all_source.sixd_src.zh)
-        strcat((char*)tx_buffer, "ZH");
-      if (all_source.sixd_src.zl)
-        strcat((char*)tx_buffer, "ZL");
-      strcat((char*)tx_buffer, "\r\n");
+    /*
+     * Check if Activity/Inactivity events
+     */
+    if (all_source.wake_up_src.sleep_state_ia)
+    {
+      sprintf((char*)tx_buffer, "Inactivity Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
-	}
+    }
+    if (all_source.wake_up_src.wu_ia)
+    {
+      sprintf((char*)tx_buffer, "Activity Detected\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
   }
 }
 
-/*
- * @brief  Write generic device register (platform dependent)
- *
- * @param  handle    customizable argument. In this examples is used in
- *                   order to select the correct sensor bus handler.
- * @param  reg       register to write
- * @param  bufp      pointer to data to write in register reg
- * @param  len       number of consecutive register to write
- *
- */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+ /*
+  * @brief  Write generic device register (platform dependent)
+  *
+  * @param  handle    customizable argument. In this examples is used in
+  *                   order to select the correct sensor bus handler.
+  * @param  reg       register to write
+  * @param  bufp      pointer to data to write in register reg
+  * @param  len       number of consecutive register to write
+  *
+  */
+ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+                               uint16_t len)
+ {
+   if (handle == &hi2c1)
+   {
+     HAL_I2C_Mem_Write(handle, LIS2DW12_I2C_ADD_L, reg,
+                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+   }
+ #ifdef STEVAL_MKI109V3
+   else if (handle == &hspi2)
+   {
+     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+     HAL_SPI_Transmit(handle, &reg, 1, 1000);
+     HAL_SPI_Transmit(handle, bufp, len, 1000);
+     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+   }
+ #endif
+   return 0;
+ }
+
+ /*
+  * @brief  Read generic device register (platform dependent)
+  *
+  * @param  handle    customizable argument. In this examples is used in
+  *                   order to select the correct sensor bus handler.
+  * @param  reg       register to read
+  * @param  bufp      pointer to buffer that store the data read
+  * @param  len       number of consecutive register to read
+  *
+  */
+ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
-{
-  if (handle == &hi2c1)
-  {
-    HAL_I2C_Mem_Write(handle, LIS2DW12_I2C_ADD_L, reg,
+ {
+   if (handle == &hi2c1)
+   {
+     HAL_I2C_Mem_Read(handle, LIS2DW12_I2C_ADD_L, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-#ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
-#endif
-  return 0;
-}
+   }
+ #ifdef STEVAL_MKI109V3
+   else if (handle == &hspi2)
+   {
+     /* Read command */
+     reg |= 0x80;
+     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+     HAL_SPI_Transmit(handle, &reg, 1, 1000);
+     HAL_SPI_Receive(handle, bufp, len, 1000);
+     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+   }
+ #endif
+   return 0;
+ }
 
-/*
- * @brief  Read generic device register (platform dependent)
- *
- * @param  handle    customizable argument. In this examples is used in
- *                   order to select the correct sensor bus handler.
- * @param  reg       register to read
- * @param  bufp      pointer to buffer that store the data read
- * @param  len       number of consecutive register to read
- *
- */
-static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
-                             uint16_t len)
-{
-  if (handle == &hi2c1)
-  {
-    HAL_I2C_Mem_Read(handle, LIS2DW12_I2C_ADD_L, reg,
-                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-#ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
-    /* Read command */
-    reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Receive(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
-#endif
-  return 0;
-}
+ /*
+  * @brief  Write generic device register (platform dependent)
+  *
+  * @param  tx_buffer     buffer to trasmit
+  * @param  len           number of byte to send
+  *
+  */
+ static void tx_com(uint8_t *tx_buffer, uint16_t len)
+ {
+   #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
+   #endif
+   #ifdef STEVAL_MKI109V3
+   CDC_Transmit_FS(tx_buffer, len);
+   #endif
+ }
 
-/*
- * @brief  Write generic device register (platform dependent)
- *
- * @param  tx_buffer     buffer to trasmit
- * @param  len           number of byte to send
- *
- */
-static void tx_com(uint8_t *tx_buffer, uint16_t len)
-{
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
-  HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
-  #ifdef STEVAL_MKI109V3
-  CDC_Transmit_FS(tx_buffer, len);
-  #endif
-}
-
-/*
- * @brief  platform specific initialization (platform dependent)
- */
-static void platform_init(void)
-{
-#ifdef STEVAL_MKI109V3
-  TIM3->CCR1 = PWM_3V3;
-  TIM3->CCR2 = PWM_3V3;
-  HAL_Delay(1000);
-#endif
-}
+ /*
+  * @brief  platform specific initialization (platform dependent)
+  */
+ static void platform_init(void)
+ {
+ #ifdef STEVAL_MKI109V3
+   TIM3->CCR1 = PWM_3V3;
+   TIM3->CCR2 = PWM_3V3;
+   HAL_Delay(1000);
+ #endif
+ }
