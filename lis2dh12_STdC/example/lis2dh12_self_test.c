@@ -1,13 +1,13 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    self_test.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file implement the self test procedure.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,8 +22,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI151V1
+ * - NUCLEO_F411RE + X_NUCLEO_IKS01A3 + STEVAL-MKI151V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -32,8 +32,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -48,7 +48,7 @@
  * following target board and redefine yours.
  */
 //#define STEVAL_MKI109V3
-#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#define NUCLEO_F411RE
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
@@ -57,8 +57,8 @@
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
 #endif
@@ -73,7 +73,7 @@
 #if defined(STEVAL_MKI109V3)
 #include "usbd_cdc_if.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+#elif defined(NUCLEO_F411RE)
 #include "usart.h"
 #endif
 
@@ -82,20 +82,20 @@ typedef union{
   uint8_t u8bit[6];
 } axis3bit16_t;
 
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
-
 /* Private macro -------------------------------------------------------------*/
+/* Self test limits converted from 10bit right-aligned to 16bit left-aligned. */
+#define    MIN_ST_LIMIT_LSb     17*64
+#define    MAX_ST_LIMIT_LSb    360*64
 
 /* Private variables ---------------------------------------------------------*/
 static axis3bit16_t data_raw_acceleration;
-static axis1bit16_t data_raw_temperature;
+static float acceleration_st_mg[3];
 static float acceleration_mg[3];
-static float temperature_degC;
-static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
+static float test_val_mg[3];
+static float max_st_limit_mg;
+static float min_st_limit_mg;
+
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -111,105 +111,134 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com(uint8_t *tx_buffer, uint16_t len);
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lis2dh12(void)
+void lis2dh12_self_test(void)
 {
-  /*
-   *  Initialize mems driver interface
-   */
-  stmdev_ctx_t dev_ctx;
 
+  stmdev_ctx_t dev_ctx;
+  lis2dh12_reg_t reg;
+  uint8_t i, j;
+
+  /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1; 
+  dev_ctx.handle = &SENSOR_BUS; 
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Wait boot time and initialize platform specific hardware */
   platform_init();
 
-  /*
-   *  Check device ID
-   */
-  lis2dh12_device_id_get(&dev_ctx, &whoamI);
-  if (whoamI != LIS2DH12_ID)
-  {
-    while(1)
-    {
+  /* Wait sensor boot time */
+  platform_delay(5);
+
+  /* Check device ID */
+  lis2dh12_device_id_get(&dev_ctx, &reg.byte);
+  if (reg.byte != LIS2DH12_ID){
+    while(1) {
       /* manage here device not found */
     }
   }
 
-  /*
-   *  Enable Block Data Update
-   */
+  /* Enable Block Data Update. */
   lis2dh12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Set Output Data Rate to 1Hz
-   */
-  lis2dh12_data_rate_set(&dev_ctx, LIS2DH12_ODR_1Hz);
-
-  /*
-   * Set full scale to 2g
-   */ 
+  /* Set full scale to 2g. */
   lis2dh12_full_scale_set(&dev_ctx, LIS2DH12_2g);
 
-  /*
-   * Enable temperature sensor
-   */  
-  lis2dh12_temperature_meas_set(&dev_ctx, LIS2DH12_TEMP_ENABLE);
+  /* Set device in normal mode. */
+  lis2dh12_operating_mode_set(&dev_ctx, LIS2DH12_NM_10bit);
 
-  /*
-   * Set device in continuous mode with 12 bit resol.
-   */  
-  lis2dh12_operating_mode_set(&dev_ctx, LIS2DH12_HR_12bit);
- 
-  /*
-   * Read samples in polling mode (no int)
-   */
-  while(1)
-  {
-    lis2dh12_reg_t reg;
+  /* Set Output Data Rate to 1Hz. */
+  lis2dh12_data_rate_set(&dev_ctx, LIS2DH12_ODR_50Hz);
 
-    /*
-     * Read output only if new value available
-     */
-    lis2dh12_xl_data_ready_get(&dev_ctx, &reg.byte);
-    if (reg.byte)
-    {
-      /* Read accelerometer data */
-      memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
-      lis2dh12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] =
-        lis2dh12_from_fs2_hr_to_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] =
-        lis2dh12_from_fs2_hr_to_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] =
-        lis2dh12_from_fs2_hr_to_mg(data_raw_acceleration.i16bit[2]);
-     
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
-   
-    lis2dh12_temp_data_ready_get(&dev_ctx, &reg.byte);     
-    if (reg.byte)     
-    {
-      /* Read temperature data */
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      lis2dh12_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC =
-        lis2dh12_from_lsb_hr_to_celsius(data_raw_temperature.i16bit);
-      
-      sprintf((char*)tx_buffer,
-              "Temperature [degC]:%6.2f\r\n",
-              temperature_degC);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+  /* Wait stable output */
+  platform_delay(90);
+
+  /* Check if new value available */
+  do {
+	  lis2dh12_status_get(&dev_ctx, &reg.status_reg);
+  } while(!reg.status_reg.zyxda);
+  /* Read dummy data and discard it */
+  lis2dh12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+
+  /* Read 5 sample and get the average vale for each axis */
+  memset(acceleration_mg, 0x00, 3*sizeof(float));
+  for (i = 0; i < 5; i++){
+    /* Check if new value available */
+    do {
+        lis2dh12_status_get(&dev_ctx, &reg.status_reg);
+    } while(!reg.status_reg.zyxda);
+    /* Read data and accumulate the mg value */
+    lis2dh12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+    for (j=0; j<3; j++){
+      acceleration_mg[j] += lis2dh12_from_fs2_nm_to_mg(data_raw_acceleration.i16bit[j]);
     }
   }
+  /* Calculate the mg average values */
+  for (i=0; i<3; i++){
+	  acceleration_mg[i] /= 5.0f;
+  }
+
+  /* Enable Self Test positive (or negative) */
+  lis2dh12_self_test_set(&dev_ctx, LIS2DH12_ST_POSITIVE);
+  //lis2dh12_self_test_set(&dev_ctx, LIS2DH12_ST_NEGATIVE);
+
+  /* Wait stable output */
+  platform_delay(90);
+
+  /* Check if new value available */
+  do {
+	  lis2dh12_status_get(&dev_ctx, &reg.status_reg);
+  } while(!reg.status_reg.zyxda);
+  /* Read dummy data and discard it */
+  lis2dh12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+
+  /* Read 5 sample and get the average vale for each axis */
+  memset(acceleration_st_mg, 0x00, 3*sizeof(float));
+  for (i = 0; i < 5; i++){
+    /* Check if new value available */
+    do {
+        lis2dh12_status_get(&dev_ctx, &reg.status_reg);
+    } while(!reg.status_reg.zyxda);
+    /* Read data and accumulate the mg value */
+    lis2dh12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+    for (j=0; j<3; j++){
+      acceleration_st_mg[j] += lis2dh12_from_fs2_nm_to_mg(data_raw_acceleration.i16bit[j]);
+    }
+  }
+  /* Calculate the mg average values */
+  for (i=0; i<3; i++){
+    acceleration_st_mg[i] /= 5.0f;
+  }
+
+  /* Calculate the mg values for self test */
+  for (i=0; i<3; i++){
+    test_val_mg[i] = fabs((acceleration_st_mg[i] - acceleration_mg[i]));
+  }
+  min_st_limit_mg = lis2dh12_from_fs2_nm_to_mg(MIN_ST_LIMIT_LSb);
+  max_st_limit_mg = lis2dh12_from_fs2_nm_to_mg(MAX_ST_LIMIT_LSb);
+
+  /* Check self test limit */
+  for (i=0; i<3; i++){
+    if (( min_st_limit_mg < test_val_mg[i] ) && ( test_val_mg[i] < max_st_limit_mg)){
+      sprintf((char*)tx_buffer, "Axis[%d]: lmt min %4.2f mg - lmt max %4.2f mg - val %4.2f mg - PASS\r\n",
+              i, min_st_limit_mg, max_st_limit_mg, test_val_mg[i]);
+    }
+    else {
+      sprintf((char*)tx_buffer, "Axis[%d]: lmt min %4.2f mg - lmt max %4.2f mg - val %4.2f mg - FAIL\r\n",
+    		  i, min_st_limit_mg, max_st_limit_mg, test_val_mg[i]);
+    }
+    tx_com(tx_buffer, strlen((char const*)tx_buffer));
+  }
+
+  /* Disable Self Test */
+  lis2dh12_self_test_set(&dev_ctx, LIS2DH12_ST_DISABLE);
+
+  /* Disable sensor. */
+  lis2dh12_data_rate_set(&dev_ctx, LIS2DH12_POWER_DOWN);
+
 }
 
 /*
@@ -225,16 +254,14 @@ void example_main_lis2dh12(void)
 static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     /* Write multiple command */
     reg |= 0x80;
     HAL_I2C_Mem_Write(handle, LIS2DH12_I2C_ADD_L, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
-#ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
+#if defined(STEVAL_MKI109V3)
+  else if (handle == &hspi2) {
     /* Write multiple command */
     reg |= 0x40;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
@@ -259,16 +286,14 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     /* Read multiple command */
     reg |= 0x80;
     HAL_I2C_Mem_Read(handle, LIS2DH12_I2C_ADD_L, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
-#ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
+#if defined(STEVAL_MKI109V3)
+  else if (handle == &hspi2) {
     /* Read multiple command */
     reg |= 0xC0;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
@@ -289,12 +314,19 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
-  HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
-  #ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#elif defined(NUCLEO_F411RE)
+  HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
+#endif
+}
+
+/*
+ * @brief  platform specific delay (platform dependent)
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
 }
 
 /*
@@ -302,9 +334,12 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
   HAL_Delay(1000);
 #endif
+  /* Sensor boot time: 5ms */
+  HAL_Delay(5);
 }
+
