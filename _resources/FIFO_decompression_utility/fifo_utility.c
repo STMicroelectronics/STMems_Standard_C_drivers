@@ -6,36 +6,18 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; COPYRIGHT(c) 2019 STMicroelectronics</center></h2>
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+ * All rights reserved.</center></h2>
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *   1. Redistributions of source code must retain the above copyright notice,
- *      this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in the
- *      documentation and/or other materials provided with the distribution.
- *   3. Neither the name of STMicroelectronics nor the names of its
- *      contributors may be used to endorse or promote products derived from
- *      this software without specific prior written permission.
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *
+ ******************************************************************************
  */
 
 /* Includes ------------------------------------------------------------------*/
-#include <math.h>
 #include "fifo_utility.h"
 
 /**
@@ -161,7 +143,7 @@ st_fifo_status st_fifo_init(float_t    bdr_xl_in,
   uint32_t i;
   st_fifo_status ret = ST_FIFO_ERR;
 
-  if ( (bdr_xl_in < 0.0f) || (bdr_gy_in < 0.0f) || (bdr_vsens_in < 0.0f) ) {
+  if ((bdr_xl_in < 0.0f) || (bdr_gy_in < 0.0f) || (bdr_vsens_in < 0.0f)) {
     ret = ST_FIFO_ERR;
   }
   else {
@@ -222,11 +204,11 @@ st_fifo_status st_fifo_decompress(st_fifo_out_slot *fifo_out_slot,
                                208,  416    , 833, 1666, 3333,
                               6666,    1.625,   0,    0,    0,
                                  0 };
-  
+
   float_t bdr_gyr_vect[] = {   0,   13,   26,   52, 104, 208, 416,
                              833, 1666, 3333, 6666,   0,   0,   0,
                                0,    0};
-  
+
   float_t bdr_vsens_vect[] = { 0, 13, 26, 52, 104    , 208, 416,
                                0,  0,  0,  0,   1.625,   0,   0,
                                0,  0};
@@ -241,10 +223,10 @@ st_fifo_status st_fifo_decompress(st_fifo_out_slot *fifo_out_slot,
 
     if ((has_even_parity(fifo_raw_slot[i].fifo_data_out[0]) == 0U) ||
         (is_tag_valid(tag) == 0U)){
-      continue;
+      return ST_FIFO_ERR;
     }
 
-    if ((tag_counter != (tag_counter_old)) && (bdr_max != 0.0f) ) {
+    if ((tag_counter != (tag_counter_old)) && (bdr_max != 0.0f)) {
 
       if (tag_counter < tag_counter_old){
         diff_tag_counter = tag_counter + 4U - tag_counter_old;
@@ -679,77 +661,77 @@ static st_fifo_sensor_type get_sensor_type(uint8_t tag)
   st_fifo_sensor_type ret;
   switch (tag) {
     case TAG_GY:
-    ret = ST_FIFO_GYROSCOPE;
-    break;
+      ret = ST_FIFO_GYROSCOPE;
+      break;
     case TAG_XL:
-    ret =  ST_FIFO_ACCELEROMETER;
-    break;
+      ret =  ST_FIFO_ACCELEROMETER;
+      break;
     case TAG_TEMP:
-    ret =  ST_FIFO_TEMPERATURE;
-    break;
+      ret =  ST_FIFO_TEMPERATURE;
+      break;
     case TAG_EXT_SENS_0:
-    ret =  ST_FIFO_EXT_SENSOR0;
-    break;
+      ret =  ST_FIFO_EXT_SENSOR0;
+      break;
     case TAG_EXT_SENS_1:
-    ret =  ST_FIFO_EXT_SENSOR1;
-    break;
+      ret =  ST_FIFO_EXT_SENSOR1;
+      break;
     case TAG_EXT_SENS_2:
-    ret =  ST_FIFO_EXT_SENSOR2;
-    break;
+      ret =  ST_FIFO_EXT_SENSOR2;
+      break;
     case TAG_EXT_SENS_3:
-    ret =  ST_FIFO_EXT_SENSOR3;
-    break;
+      ret =  ST_FIFO_EXT_SENSOR3;
+      break;
     case TAG_STEP_COUNTER:
-    ret =  ST_FIFO_STEP_COUNTER;
-    break;
+      ret =  ST_FIFO_STEP_COUNTER;
+      break;
     case TAG_XL_UNCOMPRESSED_T_2:
-    ret =  ST_FIFO_ACCELEROMETER;
-    break;
+      ret =  ST_FIFO_ACCELEROMETER;
+      break;
     case TAG_XL_UNCOMPRESSED_T_1:
-    ret =  ST_FIFO_ACCELEROMETER;
-    break;
+      ret =  ST_FIFO_ACCELEROMETER;
+      break;
     case TAG_XL_COMPRESSED_2X:
-    ret =  ST_FIFO_ACCELEROMETER;
-    break;
+      ret =  ST_FIFO_ACCELEROMETER;
+      break;
     case TAG_XL_COMPRESSED_3X:
-    ret =  ST_FIFO_ACCELEROMETER;
-    break;
+      ret =  ST_FIFO_ACCELEROMETER;
+      break;
     case TAG_GY_UNCOMPRESSED_T_2:
-    ret =  ST_FIFO_GYROSCOPE;
-    break;
+      ret =  ST_FIFO_GYROSCOPE;
+      break;
     case TAG_GY_UNCOMPRESSED_T_1:
-    ret =  ST_FIFO_GYROSCOPE;
-    break;
+      ret =  ST_FIFO_GYROSCOPE;
+      break;
     case TAG_GY_COMPRESSED_2X:
-    ret =  ST_FIFO_GYROSCOPE;
-    break;
+      ret =  ST_FIFO_GYROSCOPE;
+      break;
     case TAG_GY_COMPRESSED_3X:
-    ret =  ST_FIFO_GYROSCOPE;
-    break;
+      ret =  ST_FIFO_GYROSCOPE;
+      break;
     case TAG_GAME_RV:
-    ret =  ST_FIFO_6X_GAME_RV;
-    break;
+      ret =  ST_FIFO_6X_GAME_RV;
+      break;
     case TAG_GEOM_RV:
-    ret =  ST_FIFO_6X_GEOM_RV;
-    break;
+      ret =  ST_FIFO_6X_GEOM_RV;
+      break;
     case TAG_NORM_RV:
-    ret =  ST_FIFO_9X_RV;
-    break;
+      ret =  ST_FIFO_9X_RV;
+      break;
     case TAG_GYRO_BIAS:
-    ret =  ST_FIFO_GYRO_BIAS;
-    break;
+      ret =  ST_FIFO_GYRO_BIAS;
+      break;
     case TAG_GRAVITIY:
-    ret =  ST_FIFO_GRAVITY;
-    break;
+      ret =  ST_FIFO_GRAVITY;
+      break;
     case TAG_MAG_CAL:
-    ret =  ST_FIFO_MAGNETOMETER_CALIB;
-    break;
+      ret =  ST_FIFO_MAGNETOMETER_CALIB;
+      break;
     case TAG_EXT_SENS_NACK:
-    ret =  ST_FIFO_EXT_SENSOR_NACK;
-    break;
+      ret =  ST_FIFO_EXT_SENSOR_NACK;
+      break;
     default:
-    ret =  ST_FIFO_NONE;
-    break;
+      ret =  ST_FIFO_NONE;
+      break;
 
   }
   return ret;
@@ -768,56 +750,56 @@ static st_fifo_compression_type get_compression_type(uint8_t tag)
   st_fifo_compression_type ret;
   switch (tag) {
     case TAG_GY:
-    ret =  ST_FIFO_COMPRESSION_NC;
-    break;
+      ret =  ST_FIFO_COMPRESSION_NC;
+      break;
     case TAG_XL:
-    ret =  ST_FIFO_COMPRESSION_NC;
-    break;
+      ret =  ST_FIFO_COMPRESSION_NC;
+      break;
     case TAG_TEMP:
-    ret =  ST_FIFO_COMPRESSION_NC;
-    break;
+      ret =  ST_FIFO_COMPRESSION_NC;
+      break;
     case TAG_EXT_SENS_0:
-    ret =  ST_FIFO_COMPRESSION_NC;
-    break;
+      ret =  ST_FIFO_COMPRESSION_NC;
+      break;
     case TAG_EXT_SENS_1:
-    ret =  ST_FIFO_COMPRESSION_NC;
-    break;
+      ret =  ST_FIFO_COMPRESSION_NC;
+      break;
     case TAG_EXT_SENS_2:
-    ret =  ST_FIFO_COMPRESSION_NC;
-    break;
+      ret =  ST_FIFO_COMPRESSION_NC;
+      break;
     case TAG_EXT_SENS_3:
-    ret =  ST_FIFO_COMPRESSION_NC;
-    break;
+      ret =  ST_FIFO_COMPRESSION_NC;
+      break;
     case TAG_STEP_COUNTER:
-    ret =  ST_FIFO_COMPRESSION_NC;
-    break;
+      ret =  ST_FIFO_COMPRESSION_NC;
+      break;
     case TAG_XL_UNCOMPRESSED_T_2:
-    ret =  ST_FIFO_COMPRESSION_NC_T_2;
-    break;
+      ret =  ST_FIFO_COMPRESSION_NC_T_2;
+      break;
     case TAG_XL_UNCOMPRESSED_T_1:
-    ret =  ST_FIFO_COMPRESSION_NC_T_1;
-    break;
+      ret =  ST_FIFO_COMPRESSION_NC_T_1;
+      break;
     case TAG_XL_COMPRESSED_2X:
-    ret =  ST_FIFO_COMPRESSION_2X;
-    break;
+      ret =  ST_FIFO_COMPRESSION_2X;
+      break;
     case TAG_XL_COMPRESSED_3X:
-    ret =  ST_FIFO_COMPRESSION_3X;
-    break;
+      ret =  ST_FIFO_COMPRESSION_3X;
+      break;
     case TAG_GY_UNCOMPRESSED_T_2:
-    ret =  ST_FIFO_COMPRESSION_NC_T_2;
-    break;
+      ret =  ST_FIFO_COMPRESSION_NC_T_2;
+      break;
     case TAG_GY_UNCOMPRESSED_T_1:
-    ret =  ST_FIFO_COMPRESSION_NC_T_1;
-    break;
+      ret =  ST_FIFO_COMPRESSION_NC_T_1;
+      break;
     case TAG_GY_COMPRESSED_2X:
-    ret =  ST_FIFO_COMPRESSION_2X;
-    break;
+      ret =  ST_FIFO_COMPRESSION_2X;
+      break;
     case TAG_GY_COMPRESSED_3X:
-    ret =  ST_FIFO_COMPRESSION_3X;
-    break;
+      ret =  ST_FIFO_COMPRESSION_3X;
+      break;
     default:
-    ret =  ST_FIFO_COMPRESSION_NC;
-    break;
+      ret =  ST_FIFO_COMPRESSION_NC;
+      break;
   }
   return ret;
 }
@@ -836,7 +818,7 @@ static uint8_t has_even_parity(uint8_t x)
   uint8_t ret = 1;
 
   for (i = 0U; i < 8U; i++) {
-    if( ( x & (b << i) ) == 0x01U){
+    if( ( x & (b << i) ) != 0x00U){
       count++;
     }
   }
@@ -859,7 +841,7 @@ static void get_diff_2x(int16_t diff[6], uint8_t input[6])
 {
   uint8_t i;
   for (i = 0; i < 6U; i++){
-    if ( input[i] < 128U ){
+    if (input[i] < 128U ){
       diff[i] = (int16_t)input[i];
     }
     else {
