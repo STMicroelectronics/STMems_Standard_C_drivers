@@ -22,9 +22,9 @@
  *   GETTING STARTED:
  *
  *   If you have one of the following STMicroelectronics development tool
- * 
+ *
  *   This example use an STM32F4xx development board and CubeMX tool.
- *   
+ *
  *
  *   In this case the "*handle" variable is useful in order to select the
  *   correct interface but the usage of "*handle" is not mandatory.
@@ -107,17 +107,17 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 /*
  * @brief  This file shows the simplest way to get data from sensor.
  */
-void lis2ds12_8bit_module(void)
+void lis2ds12_read_8bit_module(void)
 {
- 
+
   /* PWM Define */
   #define PWM_3V3 915
-  #define PWM_1V8 498 
- 
- 
+  #define PWM_1V8 498
+
+
   TIM3->CCR1 = PWM_1V8;
   TIM3->CCR2 = PWM_1V8;
-  HAL_Delay(1000); 
+  HAL_Delay(1000);
   /*
    *  Initialize mems driver interface.
    */
@@ -142,10 +142,10 @@ void lis2ds12_8bit_module(void)
   /* Enable Block Data Update. */
   lis2ds12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /* Set full scale. */ 
+  /* Set full scale. */
   lis2ds12_xl_full_scale_set(&dev_ctx, LIS2DS12_4g);
 
-  /* Enable pedometer algorithm. */ 
+  /* Enable pedometer algorithm. */
   //lis2ds12_pedo_sens_set(&dev_ctx, PROPERTY_ENABLE);
   lis2ds12_motion_sens_set(&dev_ctx, PROPERTY_ENABLE);
   //lis2ds12_tilt_sens_set(&dev_ctx, PROPERTY_ENABLE);
@@ -160,7 +160,7 @@ void lis2ds12_8bit_module(void)
      */
     lis2ds12_reg_t reg;
     lis2ds12_status_reg_get(&dev_ctx, &reg.status);
-   
+
     //lis2ds12_read_reg(&dev_ctx, LIS2DS12_FUNC_SRC, &reg.byte, 1);
 
     if (reg.status.drdy)
@@ -170,13 +170,13 @@ void lis2ds12_8bit_module(void)
        * Read acceleration data.
        */
       lis2ds12_acceleration_module_raw_get(&dev_ctx, &magnitude_8bit);
-     
+
       memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
       lis2ds12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
       acceleration_mg[0] = lis2ds12_from_fs2g_to_mg( data_raw_acceleration.i16bit[0]);
       acceleration_mg[1] = lis2ds12_from_fs2g_to_mg( data_raw_acceleration.i16bit[1]);
       acceleration_mg[2] = lis2ds12_from_fs2g_to_mg( data_raw_acceleration.i16bit[2]);
-     
+
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\t%d\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2],magnitude_8bit);
       tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
@@ -202,7 +202,7 @@ static int32_t platform_write(void *handle, uint8_t Reg, uint8_t *Bufp,
     HAL_I2C_Mem_Write(handle, LIS2DS12_I2C_ADD_H, Reg,
                       I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
   }
-#ifdef STEVAL_MKI109V3 
+#ifdef STEVAL_MKI109V3
   else if (handle == &hspi2)
   {
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
@@ -232,7 +232,7 @@ static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
       HAL_I2C_Mem_Read(handle, LIS2DS12_I2C_ADD_H, Reg,
                        I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
   }
-#ifdef STEVAL_MKI109V3  
+#ifdef STEVAL_MKI109V3
   else if (handle == &hspi2)
   {
     Reg |= 0x80;
@@ -241,7 +241,7 @@ static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
     HAL_SPI_Receive(handle, Bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
-#endif 
+#endif
   return 0;
 }
 
@@ -256,10 +256,10 @@ static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
 */
 static void tx_com( uint8_t *tx_buffer, uint16_t len )
 {
-  #ifdef NUCLEO_STM32F411RE 
+  #ifdef NUCLEO_STM32F411RE
   HAL_UART_Transmit( &huart2, tx_buffer, len, 1000 );
   #endif
-  #ifdef STEVAL_MKI109V3 
+  #ifdef STEVAL_MKI109V3
   CDC_Transmit_FS( tx_buffer, len );
   #endif
 }

@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * @file    read_8bit_module.c
+ * @file    read_14bit_fifo_module.c
  * @author  Sensors Software Solution Team
  * @brief   This file show the simplest way to get data from sensor.
  *
@@ -22,9 +22,9 @@
  *   GETTING STARTED:
  *
  *   If you have one of the following STMicroelectronics development tool
- * 
+ *
  *   This example use an STM32F4xx development board and CubeMX tool.
- *   
+ *
  *
  *   In this case the "*handle" variable is useful in order to select the
  *   correct interface but the usage of "*handle" is not mandatory.
@@ -81,10 +81,10 @@ typedef union{
 
 /* Private variables ---------------------------------------------------------*/
 static axis3bit16_t data_raw_acceleration;
-static uint8_t magnitude_8bit;
-static float acceleration_mg[3];
-static uint8_t whoamI, rst;
+static float magnitude[30];
 static uint8_t tx_buffer[1000];
+
+static uint8_t whoamI, rst;
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -102,22 +102,22 @@ static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 
+uint16_t samples, fail;
 
 /* Main Example --------------------------------------------------------------*/
 /*
  * @brief  This file shows the simplest way to get data from sensor.
  */
-void lis2ds12_8bit_module(void)
+void lis2ds12_14bit_module(void)
 {
- 
   /* PWM Define */
-  #define PWM_3V3 915
-  #define PWM_1V8 498 
- 
- 
+#define PWM_3V3 915
+#define PWM_1V8 498
+
+
   TIM3->CCR1 = PWM_1V8;
   TIM3->CCR2 = PWM_1V8;
-  HAL_Delay(1000); 
+  HAL_Delay(1000);
   /*
    *  Initialize mems driver interface.
    */
@@ -127,13 +127,17 @@ void lis2ds12_8bit_module(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
 
-  /* Check device ID. */
+  /*
+   *  Check device ID.
+   */
   whoamI = 0;
   lis2ds12_device_id_get(&dev_ctx, &whoamI);
   if ( whoamI != LIS2DS12_ID )
     while(1); /*manage here device not found */
 
-  /* Restore default configuration. */
+  /*
+   *  Restore default configuration.
+   */
   lis2ds12_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lis2ds12_reset_get(&dev_ctx, &rst);
@@ -142,44 +146,90 @@ void lis2ds12_8bit_module(void)
   /* Enable Block Data Update. */
   lis2ds12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /* Set full scale. */ 
+  /* Set full scale. */
   lis2ds12_xl_full_scale_set(&dev_ctx, LIS2DS12_4g);
 
-  /* Enable pedometer algorithm. */ 
-  //lis2ds12_pedo_sens_set(&dev_ctx, PROPERTY_ENABLE);
-  lis2ds12_motion_sens_set(&dev_ctx, PROPERTY_ENABLE);
-  //lis2ds12_tilt_sens_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Configure filtering chain. */
+  /* Accelerometer - High Pass / Slope path */
+  //lis2ds12_xl_hp_path_set(&dev_ctx, LIS2DS12_HP_ON_OUTPUTS);
+  /* Module processing enable. */
+  lis2ds12_module_sens_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Module routine result is send to FIFO */
+  lis2ds12_fifo_xl_module_batch_set(&dev_ctx, PROPERTY_ENABLE);
+  /* FIFO mode selection: FIFO_MODE */
+  lis2ds12_fifo_mode_set(&dev_ctx, LIS2DS12_FIFO_MODE);
+  /* FIFO watermark level selection. */
+  lis2ds12_fifo_watermark_set(&dev_ctx, 10);
 
-  /* Set Output Data Rate. */
-  lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_1Hz_LP);
+  /* Select the signal that need to route on int1 pad. */
+  lis2ds12_pin_int1_route_t pin1;
+  pin1.int1_6d = 0;
+  pin1.int1_drdy = 0;
+  pin1.int1_ff = 0;
+  pin1.int1_fss7 = 0;
+  pin1.int1_fth = 0;
+  pin1.int1_master_drdy = 0;
+  pin1.int1_s_tap = 0;
+  pin1.int1_tap = 0;
+  pin1.int1_wu = 0;
+  lis2ds12_pin_int1_route_set(&dev_ctx, pin1);
 
+  /* Select the signal that need to route on int2 pad. */
+  lis2ds12_pin_int2_route_t pin2;
+  pin2.int2_boot = 0;
+  pin2.int2_drdy = 0;
+  pin2.int2_fth = 0;
+  pin2.int2_sig_mot = 0;
+  pin2.int2_step_det = 0;
+  pin2.int2_tilt = 0;
+  lis2ds12_pin_int2_route_set(&dev_ctx, pin2);
+
+  /* Set Output Data Rate. Maximum ODR supported is 800Hz */
+  lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_100Hz_HR);
+  fail = 0;
+  /* Read samples in polling mode (no int). */
   while(1)
   {
-    /*
-     * Read output only if new value is available.
-     */
-    lis2ds12_reg_t reg;
-    lis2ds12_status_reg_get(&dev_ctx, &reg.status);
-   
-    //lis2ds12_read_reg(&dev_ctx, LIS2DS12_FUNC_SRC, &reg.byte, 1);
+    uint8_t i, j;
+    uint8_t fifo_ths_flag;
+    uint8_t fifo_full_flag;
 
-    if (reg.status.drdy)
-    //if (reg.func_src.module_ready)
+    /* Read fifo when is full. */
+    lis2ds12_fifo_wtm_flag_get(&dev_ctx, &fifo_ths_flag);
+    lis2ds12_fifo_full_flag_get(&dev_ctx, &fifo_full_flag);
+
+
+    if (fifo_ths_flag)
     {
-      /*
-       * Read acceleration data.
-       */
-      lis2ds12_acceleration_module_raw_get(&dev_ctx, &magnitude_8bit);
-     
-      memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
-      lis2ds12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = lis2ds12_from_fs2g_to_mg( data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = lis2ds12_from_fs2g_to_mg( data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = lis2ds12_from_fs2g_to_mg( data_raw_acceleration.i16bit[2]);
-     
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\t%d\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2],magnitude_8bit);
-      tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
+      HAL_Delay(500);
+
+      /* Read acceleration data. */
+      //memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
+      lis2ds12_fifo_data_level_get(&dev_ctx, &samples);
+      //lis2ds12_read_reg(&dev_ctx,  LIS2DS12_OUT_X_L, (uint8_t*) acceleration_mg, 256 * 3);
+      j = 0;
+      for (i=0; i<10; i++){
+        lis2ds12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+
+        magnitude[j++] = lis2ds12_from_fs4g_to_mg(data_raw_acceleration.i16bit[0]);
+        sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\r\n",magnitude[j-1]);
+        tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
+
+        magnitude[j++] = lis2ds12_from_fs4g_to_mg(data_raw_acceleration.i16bit[1]);
+        sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\r\n",magnitude[j-1]);
+        tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
+
+        magnitude[j++] = lis2ds12_from_fs4g_to_mg(data_raw_acceleration.i16bit[2]);
+        sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\r\n",magnitude[j-1]);
+        tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
+
+      }
+
+      /* FIFO mode selection: FIFO_MODE */
+      lis2ds12_fifo_mode_set(&dev_ctx, LIS2DS12_BYPASS_MODE);
+      /* FIFO mode selection: FIFO_MODE */
+      lis2ds12_fifo_mode_set(&dev_ctx, LIS2DS12_FIFO_MODE);
+
     }
   }
 }
@@ -202,7 +252,7 @@ static int32_t platform_write(void *handle, uint8_t Reg, uint8_t *Bufp,
     HAL_I2C_Mem_Write(handle, LIS2DS12_I2C_ADD_H, Reg,
                       I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
   }
-#ifdef STEVAL_MKI109V3 
+#ifdef STEVAL_MKI109V3
   else if (handle == &hspi2)
   {
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
@@ -232,7 +282,7 @@ static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
       HAL_I2C_Mem_Read(handle, LIS2DS12_I2C_ADD_H, Reg,
                        I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
   }
-#ifdef STEVAL_MKI109V3  
+#ifdef STEVAL_MKI109V3
   else if (handle == &hspi2)
   {
     Reg |= 0x80;
@@ -241,7 +291,7 @@ static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
     HAL_SPI_Receive(handle, Bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
-#endif 
+#endif
   return 0;
 }
 
@@ -256,10 +306,10 @@ static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
 */
 static void tx_com( uint8_t *tx_buffer, uint16_t len )
 {
-  #ifdef NUCLEO_STM32F411RE 
+  #ifdef NUCLEO_STM32F411RE
   HAL_UART_Transmit( &huart2, tx_buffer, len, 1000 );
   #endif
-  #ifdef STEVAL_MKI109V3 
+  #ifdef STEVAL_MKI109V3
   CDC_Transmit_FS( tx_buffer, len );
   #endif
 }

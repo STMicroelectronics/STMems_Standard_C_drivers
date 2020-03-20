@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    wake_up.c
+ * @file    orientation_6d.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect wake_up from sensor.
+ * @brief   This file show the simplest way to detect 6D orientation from sensor.
  *
  ******************************************************************************
  * @attention
@@ -101,10 +101,10 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_wake_lis2ds12(void)
+void lis2ds12_orientation_6D(void)
 {
   /*
-   * Initialize mems driver interface
+   * Initialize mems driver interface.
    */
   stmdev_ctx_t dev_ctx;
 
@@ -128,58 +128,60 @@ void example_main_wake_lis2ds12(void)
     }
 
   /*
-   * Restore default configuration
+   * Restore default configuration.
    */
   lis2ds12_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
-	  lis2ds12_reset_get(&dev_ctx, &rst);
+    lis2ds12_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /*
-   * Set XL Output Data Rate
+   * Set XL Output Data Rate.
    */
   lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_400Hz_HR);
 
   /*
-   * Set 2g full XL scale
+   * Set 2g full XL scale.
    */
   lis2ds12_xl_full_scale_set(&dev_ctx, LIS2DS12_2g);
 
   /*
-   * Apply high-pass digital filter on Wake-Up function
-   * Duration time is set to zero so Wake-Up interrupt signal
-   * is generated for each X,Y,Z filtered data exceeding the
-   * configured threshold
+   * Set threshold to 60 degrees.
    */
-  lis2ds12_wkup_dur_set(&dev_ctx, 0);
+  lis2ds12_6d_threshold_set(&dev_ctx, LIS2DS12_DEG_60);
 
   /*
-   * Set Wake-Up threshold: 1 LSb corresponds to FS_XL/2^6
+   * Uncomment for enable 4D orientation feature.
    */
-  lis2ds12_wkup_threshold_set(&dev_ctx, 2);
+  //lis2ds12_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
-   * Wait Events
+   * Wait Events.
    */
   while(1)
   {
     lis2ds12_all_sources_t all_source;
 
     /*
-     * Check if Wake-Up events
+     * Check if 6D Orientation events.
      */
     lis2ds12_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.wake_up_src.wu_ia)
+    if (all_source._6d_src._6d_ia)
     {
-      sprintf((char*)tx_buffer, "Wake-Up event on ");
-      if (all_source.wake_up_src.x_wu)
-        strcat((char*)tx_buffer, "X");
-      if (all_source.wake_up_src.y_wu)
-        strcat((char*)tx_buffer, "Y");
-      if (all_source.wake_up_src.z_wu)
-        strcat((char*)tx_buffer, "Z");
-
-      strcat((char*)tx_buffer, " direction\r\n");
+      sprintf((char*)tx_buffer, "6D Or. switched to ");
+      if (all_source._6d_src.xh)
+        strcat((char*)tx_buffer, "XH");
+      if (all_source._6d_src.xl)
+        strcat((char*)tx_buffer, "XL");
+      if (all_source._6d_src.yh)
+        strcat((char*)tx_buffer, "YH");
+      if (all_source._6d_src.yl)
+        strcat((char*)tx_buffer, "YL");
+      if (all_source._6d_src.zh)
+        strcat((char*)tx_buffer, "ZH");
+      if (all_source._6d_src.zl)
+        strcat((char*)tx_buffer, "ZL");
+      strcat((char*)tx_buffer, "\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

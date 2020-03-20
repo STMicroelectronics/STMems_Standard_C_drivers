@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    tap_single.c
+ * @file    wake_up.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect single tap from sensor.
+ * @brief   This file show the simplest way to detect wake_up from sensor.
  *
  ******************************************************************************
  * @attention
@@ -101,7 +101,7 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_single_tap_lis2ds12(void)
+void lis2ds12_wake_up(void)
 {
   /*
    * Initialize mems driver interface
@@ -146,30 +146,17 @@ void example_main_single_tap_lis2ds12(void)
   lis2ds12_xl_full_scale_set(&dev_ctx, LIS2DS12_2g);
 
   /*
-   * Enable Tap detection on X, Y, Z
+   * Apply high-pass digital filter on Wake-Up function
+   * Duration time is set to zero so Wake-Up interrupt signal
+   * is generated for each X,Y,Z filtered data exceeding the
+   * configured threshold
    */
-  lis2ds12_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
-  lis2ds12_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
-  lis2ds12_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
-  lis2ds12_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2ds12_wkup_dur_set(&dev_ctx, 0);
 
   /*
-   * Set Tap threshold to 01001b, therefore the tap threshold is
-   * 562.5 mg (= 9 * FS_XL / 2 5 )
+   * Set Wake-Up threshold: 1 LSb corresponds to FS_XL/2^6
    */
-  lis2ds12_tap_threshold_set(&dev_ctx, 0x09);
-
-  /*
-   * Configure Single Tap parameter
-   */
-  //lis2ds12_tap_dur_set(&dev_ctx, 0x0);
-  lis2ds12_tap_quiet_set(&dev_ctx, 0x01);
-  lis2ds12_tap_shock_set(&dev_ctx, 0x02);
-
-  /*
-   * Enable Single Tap detection only
-   */
-  lis2ds12_tap_mode_set(&dev_ctx, LIS2DS12_ONLY_SINGLE);
+  lis2ds12_wkup_threshold_set(&dev_ctx, 2);
 
   /*
    * Wait Events
@@ -178,14 +165,21 @@ void example_main_single_tap_lis2ds12(void)
   {
     lis2ds12_all_sources_t all_source;
 
-    lis2ds12_all_sources_get(&dev_ctx, &all_source);
-
     /*
-     * Check if Single Tap events
+     * Check if Wake-Up events
      */
-    if (all_source.tap_src.single_tap)
+    lis2ds12_all_sources_get(&dev_ctx, &all_source);
+    if (all_source.wake_up_src.wu_ia)
     {
-      sprintf((char*)tx_buffer, "Tap Detected\r\n");
+      sprintf((char*)tx_buffer, "Wake-Up event on ");
+      if (all_source.wake_up_src.x_wu)
+        strcat((char*)tx_buffer, "X");
+      if (all_source.wake_up_src.y_wu)
+        strcat((char*)tx_buffer, "Y");
+      if (all_source.wake_up_src.z_wu)
+        strcat((char*)tx_buffer, "Z");
+
+      strcat((char*)tx_buffer, " direction\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

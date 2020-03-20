@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    tap_double.c
+ * @file    multi_read_fifo.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect double tap from sensor.
+ * @brief   This file show the simplest way to get data from sensor FIFO.
  *
  ******************************************************************************
  * @attention
@@ -77,9 +77,22 @@
 #include "usart.h"
 #endif
 
+typedef union{
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
+} axis3bit16_t;
+
 /* Private macro -------------------------------------------------------------*/
 
+/* Define number of byte for each sensor sample */
+#define OUT_XYZ_SIZE		6
+
+/* Define FIFO watermark to 10 samples */
+#define FIFO_WATERMARK		OUT_XYZ_SIZE * 10
+
 /* Private variables ---------------------------------------------------------*/
+static axis3bit16_t data_raw_acceleration;
+static float acceleration_mg[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -101,10 +114,10 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_tap_double_lis2ds12(void)
+void lis2ds12_read_fifo(void)
 {
   /*
-   * Initialize mems driver interface.
+   * Initialize mems driver interface
    */
   stmdev_ctx_t dev_ctx;
 
@@ -128,79 +141,72 @@ void example_main_tap_double_lis2ds12(void)
     }
 
   /*
-   * Restore default configuration
+   * Restore default configuration.
    */
   lis2ds12_reset_set(&dev_ctx, PROPERTY_ENABLE);
-  do {
-	  lis2ds12_reset_get(&dev_ctx, &rst);
+  do
+  {
+    lis2ds12_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /*
    * Set XL Output Data Rate
    */
-  lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_400Hz_HR);
+  lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_50Hz_HR);
 
   /*
-   * Set 2g full XL scale
+   * Set XL full scale
    */
   lis2ds12_xl_full_scale_set(&dev_ctx, LIS2DS12_2g);
 
   /*
-   * Enable Tap detection on X, Y, Z
+   * Set FIFO watermark to FIFO_WATERMARK
    */
-  lis2ds12_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
-  lis2ds12_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
-  lis2ds12_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
-  lis2ds12_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2ds12_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
 
   /*
-   * Set Tap threshold to 01100b, therefore the tap threshold
-   * is 750 mg (= 12 * FS_XL / 2 5 )
+   * Set FIFO mode to Stream mode (aka Continuous Mode)
    */
-  lis2ds12_tap_threshold_set(&dev_ctx, 0x0c);
-
-  /* Configure Double Tap parameter
-   *
-   * The SHOCK field of the INT_DUR2 register is set to 11b, therefore
-   * the Shock time is 57.7 ms (= 3 * 8 / ODR_XL).
-   *
-   * The QUIET field of the INT_DUR2 register is set to 11b, therefore
-   * the Quiet time is 28.8 ms (= 3 * 4 / ODR_XL).
-   *
-   * For the maximum time between two consecutive detected taps, the DUR
-   * field of the INT_DUR2 register is set to 0111b, therefore the Duration
-   * time is 538.5 ms (= 7 * 32 / ODR_XL).
-   */
-  lis2ds12_tap_dur_set(&dev_ctx, 0x07);
-  lis2ds12_tap_quiet_set(&dev_ctx, 0x03);
-  lis2ds12_tap_shock_set(&dev_ctx, 0x03);
-
-  /*
-   * Enable Double Tap detection
-   */
-  lis2ds12_tap_mode_set(&dev_ctx, LIS2DS12_ONLY_DOUBLE);
+  lis2ds12_fifo_mode_set(&dev_ctx, LIS2DS12_STREAM_MODE);
 
   /*
    * Wait Events
    */
   while(1)
   {
-    lis2ds12_all_sources_t all_source;
+    uint8_t num_pattern;
+    uint8_t flags;
+    uint16_t num = 0;
 
     /*
-     * Check if Double Tap events
+     * Check if FIFO level over threshold
      */
-    lis2ds12_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.tap_src.double_tap)
+    lis2ds12_fifo_wtm_flag_get(&dev_ctx, &flags);
+    if (flags)
     {
-      sprintf((char*)tx_buffer, "Double Tap Detected\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
+      /*
+       * Read number of sample in FIFO
+       */
+      lis2ds12_fifo_data_level_get(&dev_ctx, &num);
+      num_pattern = num / OUT_XYZ_SIZE;
 
-    if (all_source.tap_src.single_tap)
-    {
-      sprintf((char*)tx_buffer, "Single Tap Detected\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      while (num_pattern-- > 0)
+      {
+        /*
+         * Read XL samples
+        */
+        lis2ds12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+        acceleration_mg[0] =
+          lis2ds12_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
+        acceleration_mg[1] =
+          lis2ds12_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
+        acceleration_mg[2] =
+          lis2ds12_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
+
+        sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+                acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+        tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      }
     }
   }
 }

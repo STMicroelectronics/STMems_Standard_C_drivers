@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    orientation_6d.c
+ * @file    tap_double.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect 6D orientation from sensor.
+ * @brief   This file show the simplest way to detect double tap from sensor.
  *
  ******************************************************************************
  * @attention
@@ -101,7 +101,7 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_orientation_6D_lis2ds12(void)
+void lis2ds12_tap_double(void)
 {
   /*
    * Initialize mems driver interface.
@@ -128,60 +128,78 @@ void example_main_orientation_6D_lis2ds12(void)
     }
 
   /*
-   * Restore default configuration.
+   * Restore default configuration
    */
   lis2ds12_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
-    lis2ds12_reset_get(&dev_ctx, &rst);
+	  lis2ds12_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /*
-   * Set XL Output Data Rate.
+   * Set XL Output Data Rate
    */
   lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_400Hz_HR);
 
   /*
-   * Set 2g full XL scale.
+   * Set 2g full XL scale
    */
   lis2ds12_xl_full_scale_set(&dev_ctx, LIS2DS12_2g);
 
   /*
-   * Set threshold to 60 degrees.
+   * Enable Tap detection on X, Y, Z
    */
-  lis2ds12_6d_threshold_set(&dev_ctx, LIS2DS12_DEG_60);
+  lis2ds12_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2ds12_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2ds12_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2ds12_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
-   * Uncomment for enable 4D orientation feature.
+   * Set Tap threshold to 01100b, therefore the tap threshold
+   * is 750 mg (= 12 * FS_XL / 2 5 )
    */
-  //lis2ds12_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2ds12_tap_threshold_set(&dev_ctx, 0x0c);
+
+  /* Configure Double Tap parameter
+   *
+   * The SHOCK field of the INT_DUR2 register is set to 11b, therefore
+   * the Shock time is 57.7 ms (= 3 * 8 / ODR_XL).
+   *
+   * The QUIET field of the INT_DUR2 register is set to 11b, therefore
+   * the Quiet time is 28.8 ms (= 3 * 4 / ODR_XL).
+   *
+   * For the maximum time between two consecutive detected taps, the DUR
+   * field of the INT_DUR2 register is set to 0111b, therefore the Duration
+   * time is 538.5 ms (= 7 * 32 / ODR_XL).
+   */
+  lis2ds12_tap_dur_set(&dev_ctx, 0x07);
+  lis2ds12_tap_quiet_set(&dev_ctx, 0x03);
+  lis2ds12_tap_shock_set(&dev_ctx, 0x03);
 
   /*
-   * Wait Events.
+   * Enable Double Tap detection
+   */
+  lis2ds12_tap_mode_set(&dev_ctx, LIS2DS12_ONLY_DOUBLE);
+
+  /*
+   * Wait Events
    */
   while(1)
   {
     lis2ds12_all_sources_t all_source;
 
     /*
-     * Check if 6D Orientation events.
+     * Check if Double Tap events
      */
     lis2ds12_all_sources_get(&dev_ctx, &all_source);
-    if (all_source._6d_src._6d_ia)
+    if (all_source.tap_src.double_tap)
     {
-      sprintf((char*)tx_buffer, "6D Or. switched to ");
-      if (all_source._6d_src.xh)
-        strcat((char*)tx_buffer, "XH");
-      if (all_source._6d_src.xl)
-        strcat((char*)tx_buffer, "XL");
-      if (all_source._6d_src.yh)
-        strcat((char*)tx_buffer, "YH");
-      if (all_source._6d_src.yl)
-        strcat((char*)tx_buffer, "YL");
-      if (all_source._6d_src.zh)
-        strcat((char*)tx_buffer, "ZH");
-      if (all_source._6d_src.zl)
-        strcat((char*)tx_buffer, "ZL");
-      strcat((char*)tx_buffer, "\r\n");
+      sprintf((char*)tx_buffer, "Double Tap Detected\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
+
+    if (all_source.tap_src.single_tap)
+    {
+      sprintf((char*)tx_buffer, "Single Tap Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

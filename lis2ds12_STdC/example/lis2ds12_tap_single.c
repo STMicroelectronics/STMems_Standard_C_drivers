@@ -1,9 +1,8 @@
 /*
  ******************************************************************************
- * @file    activity.c
+ * @file    tap_single.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect activity/inactivity
- * 			from sensor.
+ * @brief   This file show the simplest way to detect single tap from sensor.
  *
  ******************************************************************************
  * @attention
@@ -102,7 +101,7 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_activity_lis2ds12(void)
+void lis2ds12_single_tap_(void)
 {
   /*
    * Initialize mems driver interface
@@ -137,40 +136,40 @@ void example_main_activity_lis2ds12(void)
   } while (rst);
 
   /*
-   * Set XL and Gyro Output Data Rate
+   * Set XL Output Data Rate
    */
-  lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_200Hz_HR);
+  lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_400Hz_HR);
 
   /*
-   * Set 2g full XL scale and 250 dps full Gyro
+   * Set 2g full XL scale
    */
   lis2ds12_xl_full_scale_set(&dev_ctx, LIS2DS12_2g);
 
   /*
-   * Set wake-up duration:
-   * this field is set to 0010b, corresponding to
-   *
-   * 10 ms (= 2 * 1 / ODR)
+   * Enable Tap detection on X, Y, Z
    */
-  lis2ds12_wkup_dur_set(&dev_ctx, 0x02);
+  lis2ds12_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2ds12_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2ds12_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
+  lis2ds12_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
-   * Set sleep duration:
-   * this field is set to 0010b, corresponding to
-   *
-   * 5.12 s (= 2 * 512 / ODR).
-   *
-   * After this period of time has elapsed, the accelerometer
-   * ODR is internally set to 12.5 Hz
+   * Set Tap threshold to 01001b, therefore the tap threshold is
+   * 562.5 mg (= 9 * FS_XL / 2 5 )
    */
-  lis2ds12_act_sleep_dur_set(&dev_ctx, 0x02);
+  lis2ds12_tap_threshold_set(&dev_ctx, 0x09);
 
   /*
-   * Set Activity wake-up threshold:
-   * set to 000010b, therefore the activity/inactivity
-   * threshold is 62.5 mg(= 2 * FS / 64)
+   * Configure Single Tap parameter
    */
-  lis2ds12_wkup_threshold_set(&dev_ctx, 0x02);
+  //lis2ds12_tap_dur_set(&dev_ctx, 0x0);
+  lis2ds12_tap_quiet_set(&dev_ctx, 0x01);
+  lis2ds12_tap_shock_set(&dev_ctx, 0x02);
+
+  /*
+   * Enable Single Tap detection only
+   */
+  lis2ds12_tap_mode_set(&dev_ctx, LIS2DS12_ONLY_SINGLE);
 
   /*
    * Wait Events
@@ -179,19 +178,14 @@ void example_main_activity_lis2ds12(void)
   {
     lis2ds12_all_sources_t all_source;
 
-    /*
-     * Check if Activity/Inactivity events
-     */
     lis2ds12_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.wake_up_src.sleep_state_ia)
-    {
-      sprintf((char*)tx_buffer, "Inactivity Detected\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
 
-    if (all_source.wake_up_src.wu_ia)
+    /*
+     * Check if Single Tap events
+     */
+    if (all_source.tap_src.single_tap)
     {
-      sprintf((char*)tx_buffer, "Activity Detected\r\n");
+      sprintf((char*)tx_buffer, "Tap Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
