@@ -1,14 +1,13 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    read_data_polling.c
  * @author  MEMS Software Solution Team
- * @date    19-December-2017
  * @brief   This file show the simplest way to get data from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -119,7 +118,7 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len )
 }
 
 /* Main Example --------------------------------------------------------------*/
-void example_main(void)
+void lsm303ah_read_data_polling(void)
 {
   /*
    *  Initialize mems driver interface
