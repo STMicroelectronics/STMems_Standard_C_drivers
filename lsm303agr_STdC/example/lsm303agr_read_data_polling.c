@@ -1,14 +1,14 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    read_data_polling.c
  * @author  MEMS Software Solution Team
- * @date    12-October-2017
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file shows how to extract data from the sensor in 
+ *          polling mode.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -19,13 +19,45 @@
  ******************************************************************************
  */
 
+/*
+ * This example was developed using the following STMicroelectronics
+ * evaluation boards:
+ *
+ * - STEVAL_MKI109V3 + STEVAL-MKI172V1
+ * - NUCLEO_F411RE + STEVAL-MKI172V1
+ *
+ * and STM32CubeMX tool with STM32CubeF4 MCU Package
+ *
+ * Used interfaces:
+ *
+ * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
+ *                    - Sensor side: SPI(Default) / I2C(supported)
+ *
+ * NUCLEO_F411RE      - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
+ *
+ * If you need to run this example on a different hardware platform a
+ * modification of the functions: `platform_write`, `platform_read`,
+ * `tx_com` and 'platform_init' is required.
+ *
+ */
+
+/* STMicroelectronics evaluation boards definition
+ *
+ * Please uncomment ONLY the evaluation boards in use.
+ * If a different hardware is used please comment all
+ * following target board and redefine yours.
+ */
+//#define STEVAL_MKI109V3
+#define NUCLEO_F411RE
+
 /* Includes ------------------------------------------------------------------*/
 #include "lsm303agr_reg.h"
 #include <string.h>
 #include <stdio.h>
 
 //#define MKI109V2
-#define NUCLEO_STM32F411RE
+#define NUCLEO_F411RE
 
 #ifdef MKI109V2
 #include "stm32f1xx_hal.h"
@@ -34,7 +66,7 @@
 #include "i2c.h"
 #endif
 
-#ifdef NUCLEO_STM32F411RE
+#ifdef NUCLEO_F411RE
 #include "stm32f4xx_hal.h"
 #include "i2c.h"
 #include "usart.h"
@@ -64,9 +96,8 @@ typedef union{
 #define CS_SPI1_Pin         CS_RF_Pin
 #endif
 
-#ifdef NUCLEO_STM32F411RE
-/* N/A on NUCLEO_STM32F411RE + IKS01A1 */
-/* N/A on NUCLEO_STM32F411RE + IKS01A2 */
+#ifdef NUCLEO_F411RE
+/* Add here the used pins */
 #define CS_SPI2_GPIO_Port   0
 #define CS_SPI2_Pin         0
 #define CS_SPI1_GPIO_Port   0
@@ -130,7 +161,7 @@ static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
  */
 void tx_com( uint8_t *tx_buffer, uint16_t len )
 {
-  #ifdef NUCLEO_STM32F411RE 
+  #ifdef NUCLEO_F411RE 
   HAL_UART_Transmit( &huart2, tx_buffer, len, 1000 );
   #endif
   #ifdef MKI109V2 
@@ -140,12 +171,9 @@ void tx_com( uint8_t *tx_buffer, uint16_t len )
 
 /* Main Example --------------------------------------------------------------*/
 
-void example_main(void)
+void lsm303agr_read_data_polling(void)
 {
-  /*
-   *  Initialize mems driver interface
-   */
- 
+  /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx_xl;
   dev_ctx_xl.write_reg = platform_write;
   dev_ctx_xl.read_reg = platform_read;
@@ -156,9 +184,7 @@ void example_main(void)
   dev_ctx_mg.read_reg = platform_read;
   dev_ctx_mg.handle = (void*)LSM303AGR_I2C_ADD_MG; 
  
-  /*
-   *  Check device ID
-   */
+  /* Check device ID */
   whoamI = 0;
   lsm303agr_xl_device_id_get(&dev_ctx_xl, &whoamI);
   if ( whoamI != LSM303AGR_ID_XL )
@@ -169,57 +195,35 @@ void example_main(void)
   if ( whoamI != LSM303AGR_ID_MG )
     while(1); /*manage here device not found */ 
    
-  /*
-   *  Restore default configuration for magnetometer
-   */
+  /* Restore default configuration for magnetometer */
   lsm303agr_mag_reset_set(&dev_ctx_mg, PROPERTY_ENABLE);
   do {
      lsm303agr_mag_reset_get(&dev_ctx_mg, &rst);
   } while (rst); 
    
-  /*
-   *  Enable Block Data Update
-   */
+  /* Enable Block Data Update */
   lsm303agr_xl_block_data_update_set(&dev_ctx_xl, PROPERTY_ENABLE);
   lsm303agr_mag_block_data_update_set(&dev_ctx_mg, PROPERTY_ENABLE);
-  /*
-   * Set Output Data Rate
-   */
+  /* Set Output Data Rate */
   lsm303agr_xl_data_rate_set(&dev_ctx_xl, LSM303AGR_XL_ODR_1Hz);
   lsm303agr_mag_data_rate_set(&dev_ctx_mg, LSM303AGR_MG_ODR_10Hz);
-  /*
-   * Set accelerometer full scale
-   */ 
+  /* Set accelerometer full scale */ 
   lsm303agr_xl_full_scale_set(&dev_ctx_xl, LSM303AGR_2g);
-  /*
-   * Set / Reset magnetic sensor mode
-   */ 
+  /* Set / Reset magnetic sensor mode */
   lsm303agr_mag_set_rst_mode_set(&dev_ctx_mg, LSM303AGR_SENS_OFF_CANC_EVERY_ODR); 
-  /*
-   * Enable temperature compensation on mag sensor
-   */ 
+  /* Enable temperature compensation on mag sensor */ 
   lsm303agr_mag_offset_temp_comp_set(&dev_ctx_mg, PROPERTY_ENABLE); 
-  /*
-   * Enable temperature sensor
-   */  
+  /* Enable temperature sensor */  
   lsm303agr_temperature_meas_set(&dev_ctx_xl, LSM303AGR_TEMP_ENABLE);
-  /*
-   * Set device in continuos mode
-   */  
+  /* Set device in continuos mode */
   lsm303agr_xl_operating_mode_set(&dev_ctx_xl, LSM303AGR_HR_12bit);
-  /*
-   * Set magnetometer in continuos mode
-   */  
+  /* Set magnetometer in continuos mode */  
   lsm303agr_mag_operating_mode_set(&dev_ctx_mg, LSM303AGR_CONTINUOUS_MODE);
  
-  /*
-   * Read samples in polling mode (no int)
-   */
+  /* Read samples in polling mode (no int) */
   while(1)
   {
-    /*
-     * Read output only if new value is available
-     */
+    /* Read output only if new value is available */
     lsm303agr_reg_t reg;
     lsm303agr_xl_status_get(&dev_ctx_xl, &reg.status_reg_a);
 
