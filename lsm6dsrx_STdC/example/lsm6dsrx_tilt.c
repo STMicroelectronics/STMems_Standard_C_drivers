@@ -1,10 +1,9 @@
 /*
  ******************************************************************************
- * @file    compressed_fifo.c
+ * @file    lsm6dsrx_tilt.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to configure compressed FIFO and
- *          to retrieve acc and gyro data. This sample use a fifo utility
- *          library tool for FIFO decompression.
+ * @brief   This file show the simplest way to detect tilt event
+ * 			from sensor.
  *
  ******************************************************************************
  * @attention
@@ -70,7 +69,6 @@
 #include <stdio.h>
 #include "stm32f4xx_hal.h"
 #include <lsm6dsrx_reg.h>
-#include <fifo_utility.h>
 #include "gpio.h"
 #include "i2c.h"
 #if defined(STEVAL_MKI109V3)
@@ -81,21 +79,10 @@
 #endif
 
 /* Private macro -------------------------------------------------------------*/
-/*
- * Select FIFO samples watermark, max value is 512
- * in FIFO are stored acc, gyro and timestamp samples
- */
-#define FIFO_WATERMARK    10
-#define FIFO_COMPRESSION  3
-#define SLOT_NUMBER      (FIFO_WATERMARK * FIFO_COMPRESSION)
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
-static st_fifo_raw_slot raw_slot[SLOT_NUMBER];
-static st_fifo_out_slot out_slot[SLOT_NUMBER];
-static st_fifo_out_slot acc_slot[SLOT_NUMBER];
-static st_fifo_out_slot gyr_slot[SLOT_NUMBER];
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -114,163 +101,103 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
-sensor_data_t sensor_data;
-
 /* Main Example --------------------------------------------------------------*/
-void example_compressed_fifo_simple_lsm6dsrx(void)
+void lsm6dsrx_tilt(void)
 {
   stmdev_ctx_t dev_ctx;
-  uint16_t out_slot_size;
 
-  /* Uncomment to configure INT 1 */
+  /*
+   * Uncomment to configure INT 1
+   */
   //lsm6dsrx_pin_int1_route_t int1_route;
 
-  /* Uncomment to configure INT 2 */
-  //lsm6dsrx_pin_int2_route_t int2_route;
+  /*
+   * Uncomment to configure INT 2
+   */
+  lsm6dsrx_pin_int2_route_t int2_route;
 
-  /* Initialize mems driver interface */
+  /*
+   *  Initialize mems driver interface
+   */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
 
-  /* Init test platform */
+  /*
+   * Init test platform
+   */
   platform_init();
 
-  /* Init utility for FIFO decompression */
-  st_fifo_init(0, 0, 0);
-
-  /* Check device ID */
+  /*
+   *  Check device ID
+   */
   lsm6dsrx_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSRX_ID)
     while(1);
 
-  /* Restore default configuration */
+  /*
+   *  Restore default configuration
+   */
   lsm6dsrx_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lsm6dsrx_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /* Disable I3C interface */
+  /*
+   * Disable I3C interface
+   */
   lsm6dsrx_i3c_disable_set(&dev_ctx, LSM6DSRX_I3C_DISABLE);
 
-  /* Enable Block Data Update */
-  lsm6dsrx_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /* Set full scale */
-  lsm6dsrx_xl_full_scale_set(&dev_ctx, LSM6DSRX_2g);
-  lsm6dsrx_gy_full_scale_set(&dev_ctx, LSM6DSRX_2000dps);
-
   /*
-   * Set FIFO watermark (number of unread sensor data TAG + 6 bytes
-   * stored in FIFO) to FIFO_WATERMARK samples
+   * Set XL Output Data Rate: The tilt function works at 26 Hz,
+   * so the accelerometer ODR must be set at 26 Hz or higher values
    */
-  lsm6dsrx_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
-
-  /* Set FIFO batch XL/Gyro ODR to 12.5Hz */
-  lsm6dsrx_fifo_xl_batch_set(&dev_ctx, LSM6DSRX_XL_BATCHED_AT_12Hz5);
-  lsm6dsrx_fifo_gy_batch_set(&dev_ctx, LSM6DSRX_GY_BATCHED_AT_12Hz5);
-
-  /* Set FIFO mode to Stream mode (aka Continuous Mode) */
-  lsm6dsrx_fifo_mode_set(&dev_ctx, LSM6DSRX_STREAM_MODE);
-
-  /* Enable FIFO compression on all samples */
-  lsm6dsrx_compression_algo_set(&dev_ctx, LSM6DSRX_CMP_DISABLE);
-
-  /* Enable drdy 75 μs pulse: uncomment if interrupt must be pulsed */
-  //lsm6dsrx_data_ready_mode_set(&dev_ctx, LSM6DSRX_DRDY_PULSED);
+  lsm6dsrx_xl_data_rate_set(&dev_ctx, LSM6DSRX_XL_ODR_26Hz);
 
   /*
-   * FIFO watermark interrupt routed on INT1 pin
-   * WARNING: INT1 pin is used by sensor to switch in I3C mode.
+   * Set 2g full XL scale.
+   */
+  lsm6dsrx_xl_full_scale_set(&dev_ctx, LSM6DSRX_2g);
+
+  /*
+   * Enable Tilt in embedded function.
+   */
+  lsm6dsrx_tilt_sens_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /*
+   * Uncomment if interrupt generation on Tilt INT1 pin
    */
   //lsm6dsrx_pin_int1_route_get(&dev_ctx, &int1_route);
-  //int1_route.reg.int1_ctrl.int1_fifo_th = PROPERTY_ENABLE;
+  //int1_route.emb_func_int1.int1_tilt = PROPERTY_ENABLE;
   //lsm6dsrx_pin_int1_route_set(&dev_ctx, &int1_route);
 
-  /* FIFO watermark interrupt routed on INT2 pin */
-  //lsm6dsrx_pin_int2_route_get(&dev_ctx, &int2_route);
-  //int2_route.reg.int2_ctrl.int2_fifo_th = PROPERTY_ENABLE;
-  //lsm6dsrx_pin_int2_route_set(&dev_ctx, &int2_route);
+  /*
+   * Uncomment if interrupt generation on Tilt INT2 pin
+   */
+  lsm6dsrx_pin_int2_route_get(&dev_ctx, &int2_route);
+  int2_route.emb_func_int2.int2_tilt = PROPERTY_ENABLE;
+  lsm6dsrx_pin_int2_route_set(&dev_ctx, &int2_route);
 
-  /* Set Output Data Rate */
-  lsm6dsrx_xl_data_rate_set(&dev_ctx, LSM6DSRX_XL_ODR_12Hz5);
-  lsm6dsrx_gy_data_rate_set(&dev_ctx, LSM6DSRX_GY_ODR_12Hz5);
-  lsm6dsrx_fifo_timestamp_decimation_set(&dev_ctx, LSM6DSRX_DEC_1);
-  lsm6dsrx_timestamp_set(&dev_ctx, PROPERTY_ENABLE);
+  /*
+   * Uncomment to have interrupt latched
+   */
+  //lsm6dsrx_int_notification_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /* Wait samples */
+  /*
+   * Wait Events.
+   */
   while(1)
   {
-    uint16_t num = 0;
-    uint8_t wmflag = 0;
-    uint16_t slots = 0;
-    uint16_t acc_samples;
-    uint16_t gyr_samples;
+    uint8_t is_tilt;
 
-  /* Read watermark flag */
-    lsm6dsrx_fifo_wtm_flag_get(&dev_ctx, &wmflag);
-    if (wmflag > 0)
+    /*
+     * Check if Tilt events
+     */
+    lsm6dsrx_tilt_flag_data_ready_get(&dev_ctx, &is_tilt);
+    if (is_tilt)
     {
-      /* Read number of samples in FIFO */
-      lsm6dsrx_fifo_data_level_get(&dev_ctx, &num);
-      while(num--)
-      {
-        /*
-         * Read FIFO sensor tag
-         *
-         * To reorder data samples in FIFO is needed the register
-         * LSM6DSRX_FIFO_DATA_OUT_TAG, including tag counter and parity.
-         */
-        lsm6dsrx_read_reg(&dev_ctx, LSM6DSRX_FIFO_DATA_OUT_TAG,
-                         (uint8_t *)&raw_slot[slots].fifo_data_out[0], 1);
-
-        /* Read FIFO sensor value */
-        lsm6dsrx_fifo_out_raw_get(&dev_ctx, &raw_slot[slots].fifo_data_out[1]);
-        slots++;
-      }
-
-      /* Uncompress FIFO samples and filter based on sensor type */
-      st_fifo_decompress(out_slot, raw_slot, &out_slot_size, slots);
-      st_fifo_sort(out_slot, out_slot_size);
-      acc_samples = st_fifo_get_sensor_occurrence(out_slot,
-                                                  out_slot_size,
-                                                  ST_FIFO_ACCELEROMETER);
-      gyr_samples = st_fifo_get_sensor_occurrence(out_slot,
-                                                  out_slot_size,
-                                                  ST_FIFO_GYROSCOPE);
-      /* Count how many acc and gyro samples */
-      st_fifo_extract_sensor(acc_slot, out_slot,out_slot_size,
-                             ST_FIFO_ACCELEROMETER);
-      st_fifo_extract_sensor(gyr_slot, out_slot, out_slot_size,
-                             ST_FIFO_GYROSCOPE);
-
-      for (int i = 0; i < acc_samples; i++)
-      {
-        memcpy( sensor_data.raw_data, acc_slot[i].raw_data, sizeof(sensor_data) );
-
-        sprintf((char*)tx_buffer, "ACC:\t%u\t%d\t%4.2f\t%4.2f\t%4.2f\r\n",
-                (unsigned int)acc_slot[i].timestamp,
-                 acc_slot[i].sensor_tag,
-                 lsm6dsrx_from_fs2g_to_mg(sensor_data.data[0]),
-                 lsm6dsrx_from_fs2g_to_mg(sensor_data.data[1]),
-                 lsm6dsrx_from_fs2g_to_mg(sensor_data.data[2]));
-        tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      }
-
-      for (int i = 0; i < gyr_samples; i++)
-      {
-        memcpy( sensor_data.raw_data, gyr_slot[i].raw_data, sizeof(sensor_data) );
-
-        sprintf((char*)tx_buffer, "GYR:\t%u\t%d\t%4.2f\t%4.2f\t%4.2f\r\n",
-                (unsigned int)gyr_slot[i].timestamp,
-                gyr_slot[i].sensor_tag,
-                lsm6dsrx_from_fs2000dps_to_mdps(sensor_data.data[0]),
-                lsm6dsrx_from_fs2000dps_to_mdps(sensor_data.data[1]),
-                lsm6dsrx_from_fs2000dps_to_mdps(sensor_data.data[2]));
-        tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      }
-
-      slots = 0;
+      sprintf((char*)tx_buffer, "TILT Detected\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
 }
@@ -290,7 +217,7 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 {
   if (handle == &hi2c1)
   {
-    HAL_I2C_Mem_Write(handle, LSM6DSRX_I2C_ADD_H, reg,
+    HAL_I2C_Mem_Write(handle, LSM6DSRX_I2C_ADD_L, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
 #ifdef STEVAL_MKI109V3
@@ -320,7 +247,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 {
   if (handle == &hi2c1)
   {
-    HAL_I2C_Mem_Read(handle, LSM6DSRX_I2C_ADD_H, reg,
+    HAL_I2C_Mem_Read(handle, LSM6DSRX_I2C_ADD_L, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
 #ifdef STEVAL_MKI109V3

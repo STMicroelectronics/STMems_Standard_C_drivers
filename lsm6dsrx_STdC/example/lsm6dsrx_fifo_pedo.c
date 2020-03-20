@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    multi_read_fifo_simple.c
+ * @file    lsm6dsrx_fifo_pedo.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor FIFO.
+ * @brief   This file show how to read step count from FIFO.
  *
  ******************************************************************************
  * @attention
@@ -77,18 +77,21 @@
 #include "usart.h"
 #endif
 
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static axis3bit16_t data_raw_angular_rate;
-static float acceleration_mg[3];
-static float angular_rate_mdps[3];
+typedef union {
+    struct {
+		uint16_t step_count;
+		uint32_t timestamp;
+#ifdef __GNUC__
+    } __attribute__((__packed__));
+#else /* __GNUC__ */
+	};
+#endif /* __GNUC__ */
+	uint8_t byte[6];
+} pedo_count_sample_t;
+
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -110,26 +113,22 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_multi_read_fifo_simple_lsm6dsrx(void)
+void lsm6dsrx_fifo_pedo_simple(void)
 {
-  stmdev_ctx_t dev_ctx;
+  stmdev_ctx_t ag_ctx;
 
   /*
    * Uncomment to configure INT 1
    */
   //lsm6dsrx_pin_int1_route_t int1_route;
-
   /*
    * Uncomment to configure INT 2
    */
   //lsm6dsrx_pin_int2_route_t int2_route;
 
-  /*
-   *  Initialize mems driver interface
-   */
-  dev_ctx.write_reg = platform_write;
-  dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  ag_ctx.write_reg = platform_write;
+  ag_ctx.read_reg = platform_read;
+  ag_ctx.handle = &hi2c1;
 
   /*
    * Init test platform
@@ -139,138 +138,117 @@ void example_multi_read_fifo_simple_lsm6dsrx(void)
   /*
    *  Check device ID
    */
-  lsm6dsrx_device_id_get(&dev_ctx, &whoamI);
+  lsm6dsrx_device_id_get(&ag_ctx, &whoamI);
   if (whoamI != LSM6DSRX_ID)
     while(1);
 
   /*
    *  Restore default configuration
    */
-  lsm6dsrx_reset_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsrx_reset_set(&ag_ctx, PROPERTY_ENABLE);
   do {
-    lsm6dsrx_reset_get(&dev_ctx, &rst);
+    lsm6dsrx_reset_get(&ag_ctx, &rst);
   } while (rst);
 
   /*
    * Disable I3C interface
    */
-  lsm6dsrx_i3c_disable_set(&dev_ctx, LSM6DSRX_I3C_DISABLE);
+  lsm6dsrx_i3c_disable_set(&ag_ctx, LSM6DSRX_I3C_DISABLE);
+
+  /*
+   * Set XL full scale
+   */
+  lsm6dsrx_xl_full_scale_set(&ag_ctx, LSM6DSRX_2g);
 
   /*
    *  Enable Block Data Update
    */
-  lsm6dsrx_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /*
-   * Set full scale
-   */
-  lsm6dsrx_xl_full_scale_set(&dev_ctx, LSM6DSRX_2g);
-  lsm6dsrx_gy_full_scale_set(&dev_ctx, LSM6DSRX_2000dps);
-
-  /*
-   * Set FIFO watermark (number of unread sensor data TAG + 6 bytes
-   * stored in FIFO) to 10 samples
-   */
-  lsm6dsrx_fifo_watermark_set(&dev_ctx, 10);
-
-  /*
-   * Set FIFO batch XL/Gyro ODR to 12.5Hz
-   */
-  lsm6dsrx_fifo_xl_batch_set(&dev_ctx, LSM6DSRX_XL_BATCHED_AT_12Hz5);
-  lsm6dsrx_fifo_gy_batch_set(&dev_ctx, LSM6DSRX_GY_BATCHED_AT_12Hz5);
+  lsm6dsrx_block_data_update_set(&ag_ctx, PROPERTY_ENABLE);
 
   /*
    * Set FIFO mode to Stream mode (aka Continuous Mode)
    */
-  lsm6dsrx_fifo_mode_set(&dev_ctx, LSM6DSRX_STREAM_MODE);
+  lsm6dsrx_fifo_mode_set(&ag_ctx, LSM6DSRX_STREAM_MODE);
 
   /*
-   * Enable drdy 75 μs pulse: uncomment if interrupt must be pulsed
+   * Enable latched interrupt notification.
    */
-  //lsm6dsrx_data_ready_mode_set(&dev_ctx, LSM6DSRX_DRDY_PULSED);
+  lsm6dsrx_int_notification_set(&ag_ctx, LSM6DSRX_ALL_INT_LATCHED);
+
+ /*
+   * Enable drdy 75 μs pulse: uncomment if interrupt must be pulsed.
+   */
+  //lsm6dsrx_data_ready_mode_set(&ag_ctx, LSM6DSRX_DRDY_PULSED);
 
   /*
-   * Uncomment if interrupt generation on Free Fall INT1 pin
+   * FIFO watermark interrupt routed on INT1 pin
+   *
+   * Remember that INT1 pin is used by sensor to switch in I3C mode
+   * Uncomment to configure INT 1
    */
-  //lsm6dsrx_pin_int1_route_get(&dev_ctx, &int1_route);
-  //int1_route.reg.int1_ctrl.int1_fifo_th = PROPERTY_ENABLE;
-  //lsm6dsrx_pin_int1_route_set(&dev_ctx, &int1_route);
+  //lsm6dsrx_pin_int1_route_get(&ag_ctx, &int1_route);
+  //int1_route.reg.emb_func_int1.int1_step_detector = PROPERTY_ENABLE;
+  //lsm6dsrx_pin_int1_route_set(&ag_ctx, &int1_route);
 
   /*
-   * Uncomment if interrupt generation on Free Fall INT2 pin
+   * FIFO watermark interrupt routed on INT2 pin
+   * Uncomment to configure INT 2
    */
-  //lsm6dsrx_pin_int2_route_get(&dev_ctx, &int2_route);
-  //int2_route.reg.int2_ctrl.int2_fifo_th = PROPERTY_ENABLE;
-  //lsm6dsrx_pin_int2_route_set(&dev_ctx, &int2_route);
+  //lsm6dsrx_pin_int2_route_get(&ag_ctx, &int2_route);
+  //int2_route.reg.emb_func_int2.int2_step_detector = PROPERTY_ENABLE;
+  //lsm6dsrx_pin_int2_route_set(&ag_ctx, &int2_route);
+
+  /*
+   * Enable HW Timestamp
+   */
+  lsm6dsrx_timestamp_set(&ag_ctx, PROPERTY_ENABLE);
+
+  /*
+   * Enable pedometer
+   */
+  lsm6dsrx_pedo_sens_set(&ag_ctx, PROPERTY_ENABLE);
+  lsm6dsrx_fifo_pedo_batch_set(&ag_ctx, PROPERTY_ENABLE);
+  lsm6dsrx_steps_reset(&ag_ctx);
+
+  /*
+   * Enable I2C Master
+   */
+  lsm6dsrx_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
 
   /*
    * Set Output Data Rate
    */
-  lsm6dsrx_xl_data_rate_set(&dev_ctx, LSM6DSRX_XL_ODR_12Hz5);
-  lsm6dsrx_gy_data_rate_set(&dev_ctx, LSM6DSRX_GY_ODR_12Hz5);
+  lsm6dsrx_xl_data_rate_set(&ag_ctx, LSM6DSRX_XL_ODR_26Hz);
 
-  /*
-   * Wait samples.
-   */
   while(1)
   {
     uint16_t num = 0;
-    uint8_t wmflag = 0;
     lsm6dsrx_fifo_tag_t reg_tag;
-    axis3bit16_t dummy;
+    pedo_count_sample_t pedo_sample;
 
     /*
-     * Read watermark flag
+     * Read FIFO samples number
      */
-    lsm6dsrx_fifo_wtm_flag_get(&dev_ctx, &wmflag);
-    if (wmflag > 0)
+    lsm6dsrx_fifo_data_level_get(&ag_ctx, &num);
+    if (num > 0)
     {
-      /*
-       * Read number of samples in FIFO
-       */
-      lsm6dsrx_fifo_data_level_get(&dev_ctx, &num);
       while(num--)
       {
         /*
          * Read FIFO tag
          */
-        lsm6dsrx_fifo_sensor_tag_get(&dev_ctx, &reg_tag);
+        lsm6dsrx_fifo_sensor_tag_get(&ag_ctx, &reg_tag);
         switch(reg_tag)
         {
-          case LSM6DSRX_XL_NC_TAG:
-            memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-            lsm6dsrx_fifo_out_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-            acceleration_mg[0] =
-              lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
-            acceleration_mg[1] =
-              lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
-            acceleration_mg[2] =
-              lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
+          case LSM6DSRX_STEP_CPUNTER_TAG:
+            lsm6dsrx_fifo_out_raw_get(&ag_ctx, pedo_sample.byte);
 
-            sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-                    acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-            tx_com(tx_buffer, strlen((char const*)tx_buffer));
-            break;
-          case LSM6DSRX_GYRO_NC_TAG:
-            memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
-            lsm6dsrx_fifo_out_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
-            angular_rate_mdps[0] =
-              lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[0]);
-            angular_rate_mdps[1] =
-              lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[1]);
-            angular_rate_mdps[2] =
-              lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
-
-            sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-                    angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
+            sprintf((char*)tx_buffer, "Step Count :%u T %u\r\n",
+                    (unsigned int)pedo_sample.step_count,
+                    (unsigned int)pedo_sample.timestamp);
             tx_com(tx_buffer, strlen((char const*)tx_buffer));
             break;
           default:
-            /*
-             * Flush unused samples
-             */
-            memset(dummy.u8bit, 0x00, 3 * sizeof(int16_t));
-            lsm6dsrx_fifo_out_raw_get(&dev_ctx, dummy.u8bit);
             break;
         }
       }

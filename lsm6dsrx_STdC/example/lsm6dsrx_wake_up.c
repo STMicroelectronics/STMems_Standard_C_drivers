@@ -1,9 +1,9 @@
 /*
  ******************************************************************************
- * @file    orientation_6d_4d.c
+ * @file    lsm6dsrx_wake_up.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect orientation 6D/4D event
- * 			from sensor.
+ * @brief   This file show the simplest way to detect wake-up events from
+ *          sensor.
  *
  ******************************************************************************
  * @attention
@@ -102,7 +102,7 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_orientation_lsm6dsrx(void)
+void lsm6dsrx_wake_up(void)
 {
   stmdev_ctx_t dev_ctx;
 
@@ -111,29 +111,32 @@ void example_main_orientation_lsm6dsrx(void)
    */
   //lsm6dsrx_pin_int1_route_t int1_route;
 
+  /*
+   * Uncomment to configure INT 2
+   */
   lsm6dsrx_pin_int2_route_t int2_route;
 
   /*
-   *  Initialize mems driver interface.
+   *  Initialize mems driver interface
    */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
 
   /*
-   * Init test platform.
+   * Init test platform
    */
   platform_init();
 
   /*
-   *  Check device ID.
+   *  Check device ID
    */
   lsm6dsrx_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSRX_ID)
     while(1);
 
   /*
-   *  Restore default configuration.
+   *  Restore default configuration
    */
   lsm6dsrx_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
@@ -141,77 +144,66 @@ void example_main_orientation_lsm6dsrx(void)
   } while (rst);
 
   /*
-   * Disable I3C interface.
+   * Disable I3C interface
    */
   lsm6dsrx_i3c_disable_set(&dev_ctx, LSM6DSRX_I3C_DISABLE);
 
   /*
-   * Set XL Output Data Rate to 417 Hz.
+   * Set XL Output Data Rate to 416 Hz
    */
   lsm6dsrx_xl_data_rate_set(&dev_ctx, LSM6DSRX_XL_ODR_417Hz);
 
   /*
-   * Set 2g full XL scale.
+   * Set 2g full XL scale
    */
   lsm6dsrx_xl_full_scale_set(&dev_ctx, LSM6DSRX_2g);
 
   /*
-   * Set threshold to 60 degrees.
+   * Apply high-pass digital filter on Wake-Up function
    */
-  lsm6dsrx_6d_threshold_set(&dev_ctx, LSM6DSRX_DEG_60);
+  lsm6dsrx_xl_hp_path_internal_set(&dev_ctx, LSM6DSRX_USE_SLOPE);
 
   /*
-   * LPF2 on 6D/4D function selection.
+   * Set Wake-Up threshold: 1 LSb corresponds to FS_XL/2^6
    */
-  lsm6dsrx_xl_lp2_on_6d_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsrx_wkup_threshold_set(&dev_ctx, 2);
 
   /*
-   * To enable 4D mode uncomment next line.
-   * 4D orientation detection disable Z-axis events.
-   */
-  lsm6dsrx_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /*
-   * Uncomment if interrupt generation on Free Fall INT1 pin
+   * Uncomment interrupt generation on Wake-Up INT1 pin
    */
   //lsm6dsrx_pin_int1_route_get(&dev_ctx, &int1_route);
-  //int1_route.reg.md1_cfg.int1_ff = PROPERTY_ENABLE;
+  //int1_route.md1_cfg.int1_wu = PROPERTY_ENABLE;
   //lsm6dsrx_pin_int1_route_set(&dev_ctx, &int1_route);
 
   /*
-   * Uncomment if interrupt generation on Free Fall INT2 pin
+   * Enable if interrupt generation on Wake-Up INT2 pin
    */
   lsm6dsrx_pin_int2_route_get(&dev_ctx, &int2_route);
-  int2_route.md2_cfg.int2_ff = PROPERTY_ENABLE;
+  int2_route.md2_cfg.int2_wu = PROPERTY_ENABLE;
   lsm6dsrx_pin_int2_route_set(&dev_ctx, &int2_route);
 
   /*
-   * Wait Events.
+   * Wait Events
    */
   while(1)
   {
     lsm6dsrx_all_sources_t all_source;
 
     /*
-     * Check if 6D/4D Orientation events.
+     * Check if Wake-Up events
      */
     lsm6dsrx_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.d6d_src.d6d_ia)
+    if (all_source.wake_up_src.wu_ia)
     {
-      sprintf((char*)tx_buffer, "6D Or. switched to ");
-      if (all_source.d6d_src.xh)
-          strcat((char*)tx_buffer, "XH");
-      if (all_source.d6d_src.xl)
-          strcat((char*)tx_buffer, "XL");
-      if (all_source.d6d_src.yh)
-          strcat((char*)tx_buffer, "YH");
-      if (all_source.d6d_src.yl)
-          strcat((char*)tx_buffer, "YL");
-      if (all_source.d6d_src.zh)
-          strcat((char*)tx_buffer, "ZH");
-      if (all_source.d6d_src.zl)
-          strcat((char*)tx_buffer, "ZL");
-      strcat((char*)tx_buffer, "\r\n");
+      sprintf((char*)tx_buffer, "Wake-Up event on ");
+      if (all_source.wake_up_src.x_wu)
+        strcat((char*)tx_buffer, "X");
+      if (all_source.wake_up_src.y_wu)
+        strcat((char*)tx_buffer, "Y");
+      if (all_source.wake_up_src.z_wu)
+        strcat((char*)tx_buffer, "Z");
+
+      strcat((char*)tx_buffer, " direction\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

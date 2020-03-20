@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    lsm6dsrx_multi_read_fifo_simple.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show the simplest way to get data from sensor FIFO.
  *
  ******************************************************************************
  * @attention
@@ -82,20 +82,13 @@ typedef union{
   uint8_t u8bit[6];
 } axis3bit16_t;
 
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
-
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
 static axis3bit16_t data_raw_acceleration;
 static axis3bit16_t data_raw_angular_rate;
-static axis1bit16_t data_raw_temperature;
 static float acceleration_mg[3];
 static float angular_rate_mdps[3];
-static float temperature_degC;
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -117,9 +110,19 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lsm6dsrx(void)
+void lsm6dsrx_read_fifo_simple(void)
 {
   stmdev_ctx_t dev_ctx;
+
+  /*
+   * Uncomment to configure INT 1
+   */
+  //lsm6dsrx_pin_int1_route_t int1_route;
+
+  /*
+   * Uncomment to configure INT 2
+   */
+  //lsm6dsrx_pin_int2_route_t int2_route;
 
   /*
    *  Initialize mems driver interface
@@ -159,88 +162,118 @@ void example_main_lsm6dsrx(void)
   lsm6dsrx_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
-   * Set Output Data Rate
-   */
-  lsm6dsrx_xl_data_rate_set(&dev_ctx, LSM6DSRX_XL_ODR_12Hz5);
-  lsm6dsrx_gy_data_rate_set(&dev_ctx, LSM6DSRX_GY_ODR_12Hz5);
-
-  /*
    * Set full scale
    */
   lsm6dsrx_xl_full_scale_set(&dev_ctx, LSM6DSRX_2g);
   lsm6dsrx_gy_full_scale_set(&dev_ctx, LSM6DSRX_2000dps);
 
   /*
-   * Configure filtering chain(No aux interface)
-   *
-   * Accelerometer - LPF1 + LPF2 path
+   * Set FIFO watermark (number of unread sensor data TAG + 6 bytes
+   * stored in FIFO) to 10 samples
    */
-  lsm6dsrx_xl_hp_path_on_out_set(&dev_ctx, LSM6DSRX_LP_ODR_DIV_100);
-  lsm6dsrx_xl_filter_lp2_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsrx_fifo_watermark_set(&dev_ctx, 10);
 
   /*
-   * Read samples in polling mode (no int)
+   * Set FIFO batch XL/Gyro ODR to 12.5Hz
+   */
+  lsm6dsrx_fifo_xl_batch_set(&dev_ctx, LSM6DSRX_XL_BATCHED_AT_12Hz5);
+  lsm6dsrx_fifo_gy_batch_set(&dev_ctx, LSM6DSRX_GY_BATCHED_AT_12Hz5);
+
+  /*
+   * Set FIFO mode to Stream mode (aka Continuous Mode)
+   */
+  lsm6dsrx_fifo_mode_set(&dev_ctx, LSM6DSRX_STREAM_MODE);
+
+  /*
+   * Enable drdy 75 μs pulse: uncomment if interrupt must be pulsed
+   */
+  //lsm6dsrx_data_ready_mode_set(&dev_ctx, LSM6DSRX_DRDY_PULSED);
+
+  /*
+   * Uncomment if interrupt generation on Free Fall INT1 pin
+   */
+  //lsm6dsrx_pin_int1_route_get(&dev_ctx, &int1_route);
+  //int1_route.reg.int1_ctrl.int1_fifo_th = PROPERTY_ENABLE;
+  //lsm6dsrx_pin_int1_route_set(&dev_ctx, &int1_route);
+
+  /*
+   * Uncomment if interrupt generation on Free Fall INT2 pin
+   */
+  //lsm6dsrx_pin_int2_route_get(&dev_ctx, &int2_route);
+  //int2_route.reg.int2_ctrl.int2_fifo_th = PROPERTY_ENABLE;
+  //lsm6dsrx_pin_int2_route_set(&dev_ctx, &int2_route);
+
+  /*
+   * Set Output Data Rate
+   */
+  lsm6dsrx_xl_data_rate_set(&dev_ctx, LSM6DSRX_XL_ODR_12Hz5);
+  lsm6dsrx_gy_data_rate_set(&dev_ctx, LSM6DSRX_GY_ODR_12Hz5);
+
+  /*
+   * Wait samples.
    */
   while(1)
   {
-    uint8_t reg;
+    uint16_t num = 0;
+    uint8_t wmflag = 0;
+    lsm6dsrx_fifo_tag_t reg_tag;
+    axis3bit16_t dummy;
 
     /*
-     * Read output only if new xl value is available
+     * Read watermark flag
      */
-    lsm6dsrx_xl_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
+    lsm6dsrx_fifo_wtm_flag_get(&dev_ctx, &wmflag);
+    if (wmflag > 0)
     {
       /*
-       * Read acceleration field data
+       * Read number of samples in FIFO
        */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dsrx_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] =
-        lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] =
-        lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] =
-        lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
+      lsm6dsrx_fifo_data_level_get(&dev_ctx, &num);
+      while(num--)
+      {
+        /*
+         * Read FIFO tag
+         */
+        lsm6dsrx_fifo_sensor_tag_get(&dev_ctx, &reg_tag);
+        switch(reg_tag)
+        {
+          case LSM6DSRX_XL_NC_TAG:
+            memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
+            lsm6dsrx_fifo_out_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+            acceleration_mg[0] =
+              lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
+            acceleration_mg[1] =
+              lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
+            acceleration_mg[2] =
+              lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
 
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
+            sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+                    acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+            tx_com(tx_buffer, strlen((char const*)tx_buffer));
+            break;
+          case LSM6DSRX_GYRO_NC_TAG:
+            memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
+            lsm6dsrx_fifo_out_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
+            angular_rate_mdps[0] =
+              lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[0]);
+            angular_rate_mdps[1] =
+              lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[1]);
+            angular_rate_mdps[2] =
+              lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
 
-    lsm6dsrx_gy_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
-      /*
-       * Read angular rate field data
-       */
-      memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dsrx_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
-      angular_rate_mdps[0] =
-        lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[0]);
-      angular_rate_mdps[1] =
-        lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[1]);
-      angular_rate_mdps[2] =
-        lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
-
-      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-              angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
-
-    lsm6dsrx_temp_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
-      /*
-       * Read temperature data
-       */
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      lsm6dsrx_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = lsm6dsrx_from_lsb_to_celsius(data_raw_temperature.i16bit);
-
-      sprintf((char*)tx_buffer,
-              "Temperature [degC]:%6.2f\r\n", temperature_degC);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+            sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+                    angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
+            tx_com(tx_buffer, strlen((char const*)tx_buffer));
+            break;
+          default:
+            /*
+             * Flush unused samples
+             */
+            memset(dummy.u8bit, 0x00, 3 * sizeof(int16_t));
+            lsm6dsrx_fifo_out_raw_get(&dev_ctx, dummy.u8bit);
+            break;
+        }
+      }
     }
   }
 }

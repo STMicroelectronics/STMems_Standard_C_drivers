@@ -1,9 +1,9 @@
 /*
  ******************************************************************************
- * @file    single_double_tap.c
+ * @file    lsm6dsrx_read_data_interrupt.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect single and double tap
- *          from sensor.
+ * @brief   This file show the simplest way to get data from sensor (interrupt
+ * 			mode).
  *
  ******************************************************************************
  * @attention
@@ -78,9 +78,18 @@
 #include "usart.h"
 #endif
 
+typedef union{
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
+} axis3bit16_t;
+
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
+static axis3bit16_t data_raw_acceleration;
+static axis3bit16_t data_raw_angular_rate;
+static float acceleration_mg[3];
+static float angular_rate_mdps[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -102,7 +111,7 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_double_tap_lsm6dsrx(void)
+void lsm6dsrx_main_interrupt(void)
 {
   stmdev_ctx_t dev_ctx;
 
@@ -114,29 +123,29 @@ void example_main_double_tap_lsm6dsrx(void)
   /*
    * Uncomment to configure INT 2
    */
-  lsm6dsrx_pin_int2_route_t int2_route;
+  //lsm6dsrx_pin_int2_route_t int2_route;
 
   /*
-   *  Initialize mems driver interface
+   *  Initialize mems driver interface.
    */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
 
   /*
-   * Init test platform
+   * Init test platform.
    */
   platform_init();
 
   /*
-   *  Check device ID
+   *  Check device ID.
    */
   lsm6dsrx_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSRX_ID)
     while(1);
 
   /*
-   *  Restore default configuration
+   *  Restore default configuration.
    */
   lsm6dsrx_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
@@ -144,128 +153,96 @@ void example_main_double_tap_lsm6dsrx(void)
   } while (rst);
 
   /*
-   * Disable I3C interface
+   * Disable I3C interface.
    */
   lsm6dsrx_i3c_disable_set(&dev_ctx, LSM6DSRX_I3C_DISABLE);
 
   /*
-   * Set XL Output Data Rate to 417 Hz
+   *  Enable Block Data Update.
    */
-  lsm6dsrx_xl_data_rate_set(&dev_ctx, LSM6DSRX_XL_ODR_417Hz);
+  lsm6dsrx_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
-   * Set 2g full XL scale
+   * Set Output Data Rate.
+   */
+  lsm6dsrx_xl_data_rate_set(&dev_ctx, LSM6DSRX_XL_ODR_12Hz5);
+  lsm6dsrx_gy_data_rate_set(&dev_ctx, LSM6DSRX_GY_ODR_12Hz5);
+
+  /*
+   * Set full scale.
    */
   lsm6dsrx_xl_full_scale_set(&dev_ctx, LSM6DSRX_2g);
+  lsm6dsrx_gy_full_scale_set(&dev_ctx, LSM6DSRX_2000dps);
 
   /*
-   * Enable Tap detection on X, Y, Z
+   * Enable drdy 75 μs pulse: uncomment if interrupt must be pulsed.
    */
-  lsm6dsrx_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6dsrx_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6dsrx_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
+  //lsm6dsrx_data_ready_mode_set(&dev_ctx, LSM6DSRX_DRDY_PULSED);
 
   /*
-   * Set Tap threshold to 01000b, therefore the tap threshold
-   * is 500 mg (= 12 * FS_XL / 32 )
-   */
-  lsm6dsrx_tap_threshold_x_set(&dev_ctx, 0x08);
-  lsm6dsrx_tap_threshold_y_set(&dev_ctx, 0x08);
-  lsm6dsrx_tap_threshold_z_set(&dev_ctx, 0x08);
-
-  /*
-   * Configure Single and Double Tap parameter
-   *
-   * For the maximum time between two consecutive detected taps, the DUR
-   * field of the INT_DUR2 register is set to 0111b, therefore the Duration
-   * time is 538.5 ms (= 7 * 32 * ODR_XL)
-   *
-   * The SHOCK field of the INT_DUR2 register is set to 11b, therefore
-   * the Shock time is 57.36 ms (= 3 * 8 * ODR_XL)
-   *
-   * The QUIET field of the INT_DUR2 register is set to 11b, therefore
-   * the Quiet time is 28.68 ms (= 3 * 4 * ODR_XL)
-   */
-  lsm6dsrx_tap_dur_set(&dev_ctx, 0x07);
-  lsm6dsrx_tap_quiet_set(&dev_ctx, 0x03);
-  lsm6dsrx_tap_shock_set(&dev_ctx, 0x03);
-
-  /*
-   * Enable Single and Double Tap detection.
-   */
-  lsm6dsrx_tap_mode_set(&dev_ctx, LSM6DSRX_BOTH_SINGLE_DOUBLE);
-
-  /*
-   * For single tap only uncomments next function
-   */
-  //lsm6dsrx_tap_mode_set(&dev_ctx, LSM6DSRX_ONLY_SINGLE);
-
-  /*
-   * Enable interrupt generation on Single and Double Tap INT1 pin
+   * Uncomment if interrupt generation on Free Fall INT1 pin
    */
   //lsm6dsrx_pin_int1_route_get(&dev_ctx, &int1_route);
-
-  /*
-   * For single tap only comment next function
-   */
-  //int1_route.md1_cfg.int1_double_tap = PROPERTY_ENABLE;
-  //int1_route.md1_cfg.int1_single_tap = PROPERTY_ENABLE;
+  //int1_route.reg.md1_cfg.int1_ff = PROPERTY_ENABLE;
   //lsm6dsrx_pin_int1_route_set(&dev_ctx, &int1_route);
 
   /*
-   * Uncomment if interrupt generation on Single and Double Tap INT2 pin
+   * Uncomment if interrupt generation on Free Fall INT2 pin
    */
-  lsm6dsrx_pin_int2_route_get(&dev_ctx, &int2_route);
+  //lsm6dsrx_pin_int2_route_get(&dev_ctx, &int2_route);
+  //int2_route.reg.md2_cfg.int2_ff = PROPERTY_ENABLE;
+  //lsm6dsrx_pin_int2_route_set(&dev_ctx, &int2_route);
 
   /*
-   * For single tap only comment next function
-   */
-  int2_route.md2_cfg.int2_double_tap = PROPERTY_ENABLE;
-  int2_route.md2_cfg.int2_single_tap = PROPERTY_ENABLE;
-  lsm6dsrx_pin_int2_route_set(&dev_ctx, &int2_route);
-
-  /*
-   * Wait Events
+   * Wait samples.
    */
   while(1)
   {
-    lsm6dsrx_all_sources_t all_source;
+    uint8_t reg;
 
     /*
-     * Check if Tap events
+     * Read output only if new xl value is available
      */
-    lsm6dsrx_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.tap_src.double_tap)
+    lsm6dsrx_xl_flag_data_ready_get(&dev_ctx, &reg);
+    if (reg)
     {
-      sprintf((char*)tx_buffer, "D-Tap: ");
-      if (all_source.tap_src.x_tap)
-        strcat((char*)tx_buffer, "x-axis");
-      else if (all_source.tap_src.y_tap)
-        strcat((char*)tx_buffer, "y-axis");
-      else
-        strcat((char*)tx_buffer, "z-axis");
-      if (all_source.tap_src.tap_sign)
-        strcat((char*)tx_buffer, " negative");
-      else
-        strcat((char*)tx_buffer, " positive");
-      strcat((char*)tx_buffer, " sign\r\n");
+      /*
+       * Read acceleration field data.
+       */
+      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
+      lsm6dsrx_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+      acceleration_mg[0] =
+        lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
+      acceleration_mg[1] =
+        lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
+      acceleration_mg[2] =
+        lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
+
+      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if (all_source.tap_src.single_tap)
+    /*
+     * Read output only if new gyro value is available
+     */
+    lsm6dsrx_gy_flag_data_ready_get(&dev_ctx, &reg);
+    if (reg)
     {
-      sprintf((char*)tx_buffer, "S-Tap: ");
-      if (all_source.tap_src.x_tap)
-        strcat((char*)tx_buffer, "x-axis");
-      else if (all_source.tap_src.y_tap)
-        strcat((char*)tx_buffer, "y-axis");
-      else
-        strcat((char*)tx_buffer, "z-axis");
-      if (all_source.tap_src.tap_sign)
-        strcat((char*)tx_buffer, " negative");
-      else
-        strcat((char*)tx_buffer, " positive");
-      strcat((char*)tx_buffer, " sign\r\n");
+      /*
+       * Read angular rate field data.
+       */
+      memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
+      lsm6dsrx_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
+      angular_rate_mdps[0] =
+        lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[0]);
+      angular_rate_mdps[1] =
+        lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[1]);
+      angular_rate_mdps[2] =
+        lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
+
+      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+              angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

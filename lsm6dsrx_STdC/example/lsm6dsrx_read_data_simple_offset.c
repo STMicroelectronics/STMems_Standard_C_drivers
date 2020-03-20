@@ -1,9 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple_timestamp.c
+ * @file    lsm6dsrx_read_data_simple_offset.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor (with
- *          timestamp)
+ * @brief   This file show the simplest way to get data from sensor.
  *
  ******************************************************************************
  * @attention
@@ -91,11 +90,6 @@ typedef union{
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-typedef union {
-	uint8_t byte[4];
-	uint32_t val;
-} timestamp_t;
-
 static axis3bit16_t data_raw_acceleration;
 static axis3bit16_t data_raw_angular_rate;
 static axis1bit16_t data_raw_temperature;
@@ -123,9 +117,14 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_read_simple_timestamp_lsm6dsrx(void)
+void lsm6dsrx_simple_offset(void)
 {
   stmdev_ctx_t dev_ctx;
+
+  /*
+   * Example of XL offset to apply to acc. output
+   */
+  uint8_t offset[3] = { 0x30, 0x40, 0x7E };
 
   /*
    *  Initialize mems driver interface
@@ -165,6 +164,20 @@ void example_main_read_simple_timestamp_lsm6dsrx(void)
   lsm6dsrx_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
+   * Weight of XL user offset to 2^(-10) g/LSB
+   */
+  lsm6dsrx_xl_offset_weight_set(&dev_ctx, LSM6DSRX_LSb_1mg);
+
+  /*
+   * Accelerometer X,Y,Z axis user offset correction expressed
+   * in two’s complement. Set X to 48mg, Y tp 64 mg, Z to -127 mg
+   */
+  lsm6dsrx_xl_usr_offset_x_set(&dev_ctx, &offset[0]);
+  lsm6dsrx_xl_usr_offset_y_set(&dev_ctx, &offset[1]);
+  lsm6dsrx_xl_usr_offset_z_set(&dev_ctx, &offset[2]);
+  lsm6dsrx_xl_usr_offset_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /*
    * Set Output Data Rate
    */
   lsm6dsrx_xl_data_rate_set(&dev_ctx, LSM6DSRX_XL_ODR_12Hz5);
@@ -177,35 +190,26 @@ void example_main_read_simple_timestamp_lsm6dsrx(void)
   lsm6dsrx_gy_full_scale_set(&dev_ctx, LSM6DSRX_2000dps);
 
   /*
-   * Enable timestamp
+   * Configure filtering chain(No aux interface).
    */
-  lsm6dsrx_timestamp_set(&dev_ctx, PROPERTY_ENABLE);
-
   /*
-   * Configure filtering chain(No aux interface)
-   *
    * Accelerometer - LPF1 + LPF2 path
    */
   lsm6dsrx_xl_hp_path_on_out_set(&dev_ctx, LSM6DSRX_LP_ODR_DIV_100);
   lsm6dsrx_xl_filter_lp2_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
-   * Read samples in polling mode (no int)
+   * Read samples in polling mode (no int).
    */
   while(1)
   {
-    lsm6dsrx_reg_t reg;
-    timestamp_t timestamp;
+    uint8_t reg;
 
     /*
-     * Read output only if new value is available
+     * Read output only if new xl value is available
      */
-    lsm6dsrx_status_reg_get(&dev_ctx, &reg.status_reg);
-
-    if (reg.status_reg.xlda || reg.status_reg.gda || reg.status_reg.tda)
-    	lsm6dsrx_timestamp_raw_get(&dev_ctx, timestamp.byte);
-
-    if (reg.status_reg.xlda)
+    lsm6dsrx_xl_flag_data_ready_get(&dev_ctx, &reg);
+    if (reg)
     {
       /*
        * Read acceleration field data
@@ -217,15 +221,15 @@ void example_main_read_simple_timestamp_lsm6dsrx(void)
       acceleration_mg[1] =
         lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
       acceleration_mg[2] =
-        lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
+         lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
 
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f %lu\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2],
-              timestamp.val);
+      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if (reg.status_reg.gda)
+    lsm6dsrx_gy_flag_data_ready_get(&dev_ctx, &reg);
+    if (reg)
     {
       /*
        * Read angular rate field data
@@ -239,23 +243,23 @@ void example_main_read_simple_timestamp_lsm6dsrx(void)
       angular_rate_mdps[2] =
         lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
 
-      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f %lu\r\n",
-              angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2],
-			  timestamp.val);
+      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+              angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if (reg.status_reg.tda)
+    lsm6dsrx_temp_flag_data_ready_get(&dev_ctx, &reg);
+    if (reg)
     {
       /*
-       * Read temperature data
+       * Read temperature data.
        */
       memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
       lsm6dsrx_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
       temperature_degC = lsm6dsrx_from_lsb_to_celsius(data_raw_temperature.i16bit);
 
       sprintf((char*)tx_buffer,
-              "Temperature [degC]:%6.2f %lu\r\n", temperature_degC, timestamp.val);
+             "Temperature [degC]:%6.2f\r\n", temperature_degC);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
@@ -336,7 +340,7 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
   #endif
   #ifdef STEVAL_MKI109V3
-  CDC_Transmit_FS( tx_buffer, len );
+  CDC_Transmit_FS(tx_buffer, len);
   #endif
 }
 

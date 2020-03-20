@@ -1,9 +1,9 @@
 /*
  ******************************************************************************
- * @file    wake_up.c
+ * @file    lsm6dsrx_activity.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect wake-up events from
- *          sensor.
+ * @brief   This file show the simplest way to detect activity/inactivity
+ * 			from sensor.
  *
  ******************************************************************************
  * @attention
@@ -102,19 +102,10 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_wake_up_lsm6dsrx(void)
+void lsm6dsrx_activity(void)
 {
   stmdev_ctx_t dev_ctx;
-
-  /*
-   * Uncomment to configure INT 1
-   */
-  //lsm6dsrx_pin_int1_route_t int1_route;
-
-  /*
-   * Uncomment to configure INT 2
-   */
-  lsm6dsrx_pin_int2_route_t int2_route;
+  lsm6dsrx_pin_int1_route_t int1_route;
 
   /*
    *  Initialize mems driver interface
@@ -128,7 +119,7 @@ void example_main_wake_up_lsm6dsrx(void)
    */
   platform_init();
 
-  /*
+ /*
    *  Check device ID
    */
   lsm6dsrx_device_id_get(&dev_ctx, &whoamI);
@@ -149,38 +140,43 @@ void example_main_wake_up_lsm6dsrx(void)
   lsm6dsrx_i3c_disable_set(&dev_ctx, LSM6DSRX_I3C_DISABLE);
 
   /*
-   * Set XL Output Data Rate to 416 Hz
+   * Set XL and Gyro Output Data Rate
    */
-  lsm6dsrx_xl_data_rate_set(&dev_ctx, LSM6DSRX_XL_ODR_417Hz);
+  lsm6dsrx_xl_data_rate_set(&dev_ctx, LSM6DSRX_XL_ODR_208Hz);
+  lsm6dsrx_gy_data_rate_set(&dev_ctx, LSM6DSRX_GY_ODR_104Hz);
 
   /*
-   * Set 2g full XL scale
+   * Set 2g full XL scale and 250 dps full Gyro
    */
   lsm6dsrx_xl_full_scale_set(&dev_ctx, LSM6DSRX_2g);
+  lsm6dsrx_gy_full_scale_set(&dev_ctx, LSM6DSRX_250dps);
 
   /*
-   * Apply high-pass digital filter on Wake-Up function
+   * Set duration for Activity detection to 9.62 ms (= 2 * 1 / ODR_XL)
    */
-  lsm6dsrx_xl_hp_path_internal_set(&dev_ctx, LSM6DSRX_USE_SLOPE);
+  lsm6dsrx_wkup_dur_set(&dev_ctx, 0x02);
 
   /*
-   * Set Wake-Up threshold: 1 LSb corresponds to FS_XL/2^6
+   * Set duration for Inactivity detection to 4.92 s (= 2 * 512 / ODR_XL)
    */
-  lsm6dsrx_wkup_threshold_set(&dev_ctx, 2);
+  lsm6dsrx_act_sleep_dur_set(&dev_ctx, 0x02);
 
   /*
-   * Uncomment interrupt generation on Wake-Up INT1 pin
+   * Set Activity/Inactivity threshold to 62.5 mg
    */
-  //lsm6dsrx_pin_int1_route_get(&dev_ctx, &int1_route);
-  //int1_route.md1_cfg.int1_wu = PROPERTY_ENABLE;
-  //lsm6dsrx_pin_int1_route_set(&dev_ctx, &int1_route);
+  lsm6dsrx_wkup_threshold_set(&dev_ctx, 0x02);
 
   /*
-   * Enable if interrupt generation on Wake-Up INT2 pin
+   * Inactivity configuration: XL to 12.5 in LP, gyro to Power-Down
    */
-  lsm6dsrx_pin_int2_route_get(&dev_ctx, &int2_route);
-  int2_route.md2_cfg.int2_wu = PROPERTY_ENABLE;
-  lsm6dsrx_pin_int2_route_set(&dev_ctx, &int2_route);
+  lsm6dsrx_act_mode_set(&dev_ctx, LSM6DSRX_XL_12Hz5_GY_PD);
+
+  /*
+   * Enable interrupt generation on Inactivity INT1 pin
+   */
+  lsm6dsrx_pin_int1_route_get(&dev_ctx, &int1_route);
+  int1_route.md1_cfg.int1_sleep_change = PROPERTY_ENABLE;
+  lsm6dsrx_pin_int1_route_set(&dev_ctx, &int1_route);
 
   /*
    * Wait Events
@@ -190,20 +186,18 @@ void example_main_wake_up_lsm6dsrx(void)
     lsm6dsrx_all_sources_t all_source;
 
     /*
-     * Check if Wake-Up events
+     * Check if Activity/Inactivity events
      */
     lsm6dsrx_all_sources_get(&dev_ctx, &all_source);
+    if (all_source.wake_up_src.sleep_state)
+    {
+      sprintf((char*)tx_buffer, "Inactivity Detected\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
+
     if (all_source.wake_up_src.wu_ia)
     {
-      sprintf((char*)tx_buffer, "Wake-Up event on ");
-      if (all_source.wake_up_src.x_wu)
-        strcat((char*)tx_buffer, "X");
-      if (all_source.wake_up_src.y_wu)
-        strcat((char*)tx_buffer, "Y");
-      if (all_source.wake_up_src.z_wu)
-        strcat((char*)tx_buffer, "Z");
-
-      strcat((char*)tx_buffer, " direction\r\n");
+      sprintf((char*)tx_buffer, "Activity Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

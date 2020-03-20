@@ -1,8 +1,9 @@
 /*
  ******************************************************************************
- * @file    fifo_pedo.c
+ * @file    lsm6dsrx_orientation_6d_4d.c
  * @author  Sensors Software Solution Team
- * @brief   This file show how to read step count from FIFO.
+ * @brief   This file show the simplest way to detect orientation 6D/4D event
+ * 			from sensor.
  *
  ******************************************************************************
  * @attention
@@ -80,18 +81,6 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-typedef union {
-    struct {
-		uint16_t step_count;
-		uint32_t timestamp;
-#ifdef __GNUC__
-    } __attribute__((__packed__));
-#else /* __GNUC__ */
-	};
-#endif /* __GNUC__ */
-	uint8_t byte[6];
-} pedo_count_sample_t;
-
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -113,145 +102,117 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void lsm6dsrx_fifo_pedo_simple(void)
+void lsm6dsrx_orientation(void)
 {
-  stmdev_ctx_t ag_ctx;
+  stmdev_ctx_t dev_ctx;
 
   /*
    * Uncomment to configure INT 1
    */
   //lsm6dsrx_pin_int1_route_t int1_route;
+
+  lsm6dsrx_pin_int2_route_t int2_route;
+
   /*
-   * Uncomment to configure INT 2
+   *  Initialize mems driver interface.
    */
-  //lsm6dsrx_pin_int2_route_t int2_route;
-
-  ag_ctx.write_reg = platform_write;
-  ag_ctx.read_reg = platform_read;
-  ag_ctx.handle = &hi2c1;
+  dev_ctx.write_reg = platform_write;
+  dev_ctx.read_reg = platform_read;
+  dev_ctx.handle = &hi2c1;
 
   /*
-   * Init test platform
+   * Init test platform.
    */
   platform_init();
 
   /*
-   *  Check device ID
+   *  Check device ID.
    */
-  lsm6dsrx_device_id_get(&ag_ctx, &whoamI);
+  lsm6dsrx_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSRX_ID)
     while(1);
 
   /*
-   *  Restore default configuration
+   *  Restore default configuration.
    */
-  lsm6dsrx_reset_set(&ag_ctx, PROPERTY_ENABLE);
+  lsm6dsrx_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
-    lsm6dsrx_reset_get(&ag_ctx, &rst);
+    lsm6dsrx_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /*
-   * Disable I3C interface
+   * Disable I3C interface.
    */
-  lsm6dsrx_i3c_disable_set(&ag_ctx, LSM6DSRX_I3C_DISABLE);
+  lsm6dsrx_i3c_disable_set(&dev_ctx, LSM6DSRX_I3C_DISABLE);
 
   /*
-   * Set XL full scale
+   * Set XL Output Data Rate to 417 Hz.
    */
-  lsm6dsrx_xl_full_scale_set(&ag_ctx, LSM6DSRX_2g);
+  lsm6dsrx_xl_data_rate_set(&dev_ctx, LSM6DSRX_XL_ODR_417Hz);
 
   /*
-   *  Enable Block Data Update
+   * Set 2g full XL scale.
    */
-  lsm6dsrx_block_data_update_set(&ag_ctx, PROPERTY_ENABLE);
+  lsm6dsrx_xl_full_scale_set(&dev_ctx, LSM6DSRX_2g);
 
   /*
-   * Set FIFO mode to Stream mode (aka Continuous Mode)
+   * Set threshold to 60 degrees.
    */
-  lsm6dsrx_fifo_mode_set(&ag_ctx, LSM6DSRX_STREAM_MODE);
+  lsm6dsrx_6d_threshold_set(&dev_ctx, LSM6DSRX_DEG_60);
 
   /*
-   * Enable latched interrupt notification.
+   * LPF2 on 6D/4D function selection.
    */
-  lsm6dsrx_int_notification_set(&ag_ctx, LSM6DSRX_ALL_INT_LATCHED);
-
- /*
-   * Enable drdy 75 μs pulse: uncomment if interrupt must be pulsed.
-   */
-  //lsm6dsrx_data_ready_mode_set(&ag_ctx, LSM6DSRX_DRDY_PULSED);
+  lsm6dsrx_xl_lp2_on_6d_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
-   * FIFO watermark interrupt routed on INT1 pin
-   *
-   * Remember that INT1 pin is used by sensor to switch in I3C mode
-   * Uncomment to configure INT 1
+   * To enable 4D mode uncomment next line.
+   * 4D orientation detection disable Z-axis events.
    */
-  //lsm6dsrx_pin_int1_route_get(&ag_ctx, &int1_route);
-  //int1_route.reg.emb_func_int1.int1_step_detector = PROPERTY_ENABLE;
-  //lsm6dsrx_pin_int1_route_set(&ag_ctx, &int1_route);
+  lsm6dsrx_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
-   * FIFO watermark interrupt routed on INT2 pin
-   * Uncomment to configure INT 2
+   * Uncomment if interrupt generation on Free Fall INT1 pin
    */
-  //lsm6dsrx_pin_int2_route_get(&ag_ctx, &int2_route);
-  //int2_route.reg.emb_func_int2.int2_step_detector = PROPERTY_ENABLE;
-  //lsm6dsrx_pin_int2_route_set(&ag_ctx, &int2_route);
+  //lsm6dsrx_pin_int1_route_get(&dev_ctx, &int1_route);
+  //int1_route.reg.md1_cfg.int1_ff = PROPERTY_ENABLE;
+  //lsm6dsrx_pin_int1_route_set(&dev_ctx, &int1_route);
 
   /*
-   * Enable HW Timestamp
+   * Uncomment if interrupt generation on Free Fall INT2 pin
    */
-  lsm6dsrx_timestamp_set(&ag_ctx, PROPERTY_ENABLE);
+  lsm6dsrx_pin_int2_route_get(&dev_ctx, &int2_route);
+  int2_route.md2_cfg.int2_ff = PROPERTY_ENABLE;
+  lsm6dsrx_pin_int2_route_set(&dev_ctx, &int2_route);
 
   /*
-   * Enable pedometer
+   * Wait Events.
    */
-  lsm6dsrx_pedo_sens_set(&ag_ctx, PROPERTY_ENABLE);
-  lsm6dsrx_fifo_pedo_batch_set(&ag_ctx, PROPERTY_ENABLE);
-  lsm6dsrx_steps_reset(&ag_ctx);
-
-  /*
-   * Enable I2C Master
-   */
-  lsm6dsrx_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
-
-  /*
-   * Set Output Data Rate
-   */
-  lsm6dsrx_xl_data_rate_set(&ag_ctx, LSM6DSRX_XL_ODR_26Hz);
-
   while(1)
   {
-    uint16_t num = 0;
-    lsm6dsrx_fifo_tag_t reg_tag;
-    pedo_count_sample_t pedo_sample;
+    lsm6dsrx_all_sources_t all_source;
 
     /*
-     * Read FIFO samples number
+     * Check if 6D/4D Orientation events.
      */
-    lsm6dsrx_fifo_data_level_get(&ag_ctx, &num);
-    if (num > 0)
+    lsm6dsrx_all_sources_get(&dev_ctx, &all_source);
+    if (all_source.d6d_src.d6d_ia)
     {
-      while(num--)
-      {
-        /*
-         * Read FIFO tag
-         */
-        lsm6dsrx_fifo_sensor_tag_get(&ag_ctx, &reg_tag);
-        switch(reg_tag)
-        {
-          case LSM6DSRX_STEP_CPUNTER_TAG:
-            lsm6dsrx_fifo_out_raw_get(&ag_ctx, pedo_sample.byte);
-
-            sprintf((char*)tx_buffer, "Step Count :%u T %u\r\n",
-                    (unsigned int)pedo_sample.step_count,
-                    (unsigned int)pedo_sample.timestamp);
-            tx_com(tx_buffer, strlen((char const*)tx_buffer));
-            break;
-          default:
-            break;
-        }
-      }
+      sprintf((char*)tx_buffer, "6D Or. switched to ");
+      if (all_source.d6d_src.xh)
+          strcat((char*)tx_buffer, "XH");
+      if (all_source.d6d_src.xl)
+          strcat((char*)tx_buffer, "XL");
+      if (all_source.d6d_src.yh)
+          strcat((char*)tx_buffer, "YH");
+      if (all_source.d6d_src.yl)
+          strcat((char*)tx_buffer, "YL");
+      if (all_source.d6d_src.zh)
+          strcat((char*)tx_buffer, "ZH");
+      if (all_source.d6d_src.zl)
+          strcat((char*)tx_buffer, "ZL");
+      strcat((char*)tx_buffer, "\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
 }

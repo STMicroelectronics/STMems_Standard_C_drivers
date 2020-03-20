@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    activity.c
+ * @file    lsm6dsrx_free_fall.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect activity/inactivity
+ * @brief   This file show the simplest way to detect free fall event
  * 			from sensor.
  *
  ******************************************************************************
@@ -102,10 +102,19 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_activity_lsm6dsrx(void)
+void lsm6dsrx_free_fall(void)
 {
   stmdev_ctx_t dev_ctx;
-  lsm6dsrx_pin_int1_route_t int1_route;
+
+  /*
+   * Uncomment to configure INT 1
+   */
+  //lsm6dsrx_pin_int1_route_t int1_route;
+
+  /*
+   * Uncomment to configure INT 2
+   */
+  //lsm6dsrx_pin_int2_route_t int2_route;
 
   /*
    *  Initialize mems driver interface
@@ -119,7 +128,7 @@ void example_main_activity_lsm6dsrx(void)
    */
   platform_init();
 
- /*
+  /*
    *  Check device ID
    */
   lsm6dsrx_device_id_get(&dev_ctx, &whoamI);
@@ -140,43 +149,39 @@ void example_main_activity_lsm6dsrx(void)
   lsm6dsrx_i3c_disable_set(&dev_ctx, LSM6DSRX_I3C_DISABLE);
 
   /*
-   * Set XL and Gyro Output Data Rate
+   * Set XL Output Data Rate
    */
-  lsm6dsrx_xl_data_rate_set(&dev_ctx, LSM6DSRX_XL_ODR_208Hz);
-  lsm6dsrx_gy_data_rate_set(&dev_ctx, LSM6DSRX_GY_ODR_104Hz);
+  lsm6dsrx_xl_data_rate_set(&dev_ctx, LSM6DSRX_XL_ODR_417Hz);
 
   /*
-   * Set 2g full XL scale and 250 dps full Gyro
+   * Set 2g full XL scale
    */
   lsm6dsrx_xl_full_scale_set(&dev_ctx, LSM6DSRX_2g);
-  lsm6dsrx_gy_full_scale_set(&dev_ctx, LSM6DSRX_250dps);
 
   /*
-   * Set duration for Activity detection to 9.62 ms (= 2 * 1 / ODR_XL)
+   * Enable LIR
    */
-  lsm6dsrx_wkup_dur_set(&dev_ctx, 0x02);
+  lsm6dsrx_int_notification_set(&dev_ctx, LSM6DSRX_ALL_INT_LATCHED);
 
   /*
-   * Set duration for Inactivity detection to 4.92 s (= 2 * 512 / ODR_XL)
+   * Set Free Fall duration to 3 and 6 samples event duration
    */
-  lsm6dsrx_act_sleep_dur_set(&dev_ctx, 0x02);
+  lsm6dsrx_ff_dur_set(&dev_ctx, 0x06);
+  lsm6dsrx_ff_threshold_set(&dev_ctx, LSM6DSRX_FF_TSH_312mg);
 
   /*
-   * Set Activity/Inactivity threshold to 62.5 mg
+   * Uncomment if interrupt generation on Free Fall INT1 pin
    */
-  lsm6dsrx_wkup_threshold_set(&dev_ctx, 0x02);
+  //lsm6dsrx_pin_int1_route_get(&dev_ctx, &int1_route);
+  //int1_route.reg.md1_cfg.int1_ff = PROPERTY_ENABLE;
+  //lsm6dsrx_pin_int1_route_set(&dev_ctx, &int1_route);
 
   /*
-   * Inactivity configuration: XL to 12.5 in LP, gyro to Power-Down
+   * Uncomment if interrupt generation on Free Fall INT2 pin
    */
-  lsm6dsrx_act_mode_set(&dev_ctx, LSM6DSRX_XL_12Hz5_GY_PD);
-
-  /*
-   * Enable interrupt generation on Inactivity INT1 pin
-   */
-  lsm6dsrx_pin_int1_route_get(&dev_ctx, &int1_route);
-  int1_route.md1_cfg.int1_sleep_change = PROPERTY_ENABLE;
-  lsm6dsrx_pin_int1_route_set(&dev_ctx, &int1_route);
+  //lsm6dsrx_pin_int2_route_get(&dev_ctx, &int2_route);
+  //int2_route.reg.md2_cfg.int2_ff = PROPERTY_ENABLE;
+  //lsm6dsrx_pin_int2_route_set(&dev_ctx, &int2_route);
 
   /*
    * Wait Events
@@ -186,18 +191,12 @@ void example_main_activity_lsm6dsrx(void)
     lsm6dsrx_all_sources_t all_source;
 
     /*
-     * Check if Activity/Inactivity events
+     * Check if Free Fall events
      */
     lsm6dsrx_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.wake_up_src.sleep_state)
+    if (all_source.wake_up_src.ff_ia)
     {
-      sprintf((char*)tx_buffer, "Inactivity Detected\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
-
-    if (all_source.wake_up_src.wu_ia)
-    {
-      sprintf((char*)tx_buffer, "Activity Detected\r\n");
+      sprintf((char*)tx_buffer, "Free Fall Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
