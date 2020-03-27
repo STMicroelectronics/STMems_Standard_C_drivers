@@ -1,14 +1,14 @@
 /*
  ******************************************************************************
- * @file    wake_up.c
+ * @file    orientation_6d_4d.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect wake-up events from
- *          sensor.
+ * @brief   This file shows the simplest way to detect orientation 6D/4D event
+ *       from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -23,8 +23,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI197V1
+ * - NUCLEO_F411RE + STEVAL-MKI197V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -33,8 +33,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -100,111 +100,97 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_wake_up_lsm6dsox(void)
+void example_main_orientation_lsm6dsox(void)
 {
   stmdev_ctx_t dev_ctx;
 
-  /*
-   * Uncomment to configure INT 1
-   */
+  /* Uncomment to configure INT 1 */
   //lsm6dsox_pin_int1_route_t int1_route;
 
-  /*
-   * Uncomment to configure INT 2
-   */
   lsm6dsox_pin_int2_route_t int2_route;
 
-  /*
-   *  Initialize mems driver interface
-   */
+  /* Initialize mems driver interface. */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
 
-  /*
-   * Init test platform
-   */
+  /* Init test platform. */
   platform_init();
 
-  /*
-   *  Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(10);
+
+  /* Check device ID. */
   lsm6dsox_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSOX_ID)
     while(1);
 
-  /*
-   *  Restore default configuration
-   */
+  /* Restore default configuration. */
   lsm6dsox_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lsm6dsox_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Disable I3C interface
-   */
+  /* Disable I3C interface. */
   lsm6dsox_i3c_disable_set(&dev_ctx, LSM6DSOX_I3C_DISABLE);
 
-  /*
-   * Set XL Output Data Rate to 416 Hz
-   */
+  /* Set XL Output Data Rate to 417 Hz. */
   lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_417Hz);
 
-  /*
-   * Set 2g full XL scale
-   */
+  /* Set 2g full XL scale.*/
   lsm6dsox_xl_full_scale_set(&dev_ctx, LSM6DSOX_2g);
 
-  /*
-   * Apply high-pass digital filter on Wake-Up function
-   */
-  lsm6dsox_xl_hp_path_internal_set(&dev_ctx, LSM6DSOX_USE_SLOPE);
+  /* Set threshold to 60 degrees. */
+  lsm6dsox_6d_threshold_set(&dev_ctx, LSM6DSOX_DEG_60);
+
+  /* LPF2 on 6D/4D function selection. */
+  lsm6dsox_xl_lp2_on_6d_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
-   * Set Wake-Up threshold: 1 LSb corresponds to FS_XL/2^6
+   * To enable 4D mode uncomment next line.
+   * 4D orientation detection disable Z-axis events.
    */
-  lsm6dsox_wkup_threshold_set(&dev_ctx, 2);
+  lsm6dsox_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
-   * Uncomment interrupt generation on Wake-Up INT1 pin
+   * Uncomment if interrupt generation on Free Fall INT1 pin
    */
   //lsm6dsox_pin_int1_route_get(&dev_ctx, &int1_route);
-  //int1_route.reg.md1_cfg.int1_wu = PROPERTY_ENABLE;
+  //int1_route.reg.md1_cfg.int1_ff = PROPERTY_ENABLE;
   //lsm6dsox_pin_int1_route_set(&dev_ctx, &int1_route);
 
-  /*
-   * Enable if interrupt generation on Wake-Up INT2 pin
-   */
-  lsm6dsox_pin_int2_route_get(&dev_ctx, &int2_route);
-  int2_route.md2_cfg.int2_wu = PROPERTY_ENABLE;
-  lsm6dsox_pin_int2_route_set(&dev_ctx, &int2_route);
+  /* Uncomment if interrupt generation on Free Fall INT2 pin */
+  lsm6dsox_pin_int2_route_get(&dev_ctx, NULL, &int2_route);
+  int2_route.free_fall = PROPERTY_ENABLE;
+  lsm6dsox_pin_int2_route_set(&dev_ctx, NULL, int2_route);
 
-  /*
-   * Wait Events
-   */
+  /* Wait Events. */
   while(1)
   {
     lsm6dsox_all_sources_t all_source;
 
-    /*
-     * Check if Wake-Up events
-     */
+    /* Check if 6D/4D Orientation events. */
     lsm6dsox_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.wake_up_src.wu_ia)
+    if (all_source.six_d)
     {
-      sprintf((char*)tx_buffer, "Wake-Up event on ");
-      if (all_source.wake_up_src.x_wu)
-        strcat((char*)tx_buffer, "X");
-      if (all_source.wake_up_src.y_wu)
-        strcat((char*)tx_buffer, "Y");
-      if (all_source.wake_up_src.z_wu)
-        strcat((char*)tx_buffer, "Z");
-
-      strcat((char*)tx_buffer, " direction\r\n");
+      sprintf((char*)tx_buffer, "6D Or. switched to ");
+      if (all_source.six_d_xh)
+          strcat((char*)tx_buffer, "XH");
+      if (all_source.six_d_xl)
+          strcat((char*)tx_buffer, "XL");
+      if (all_source.six_d_yh)
+          strcat((char*)tx_buffer, "YH");
+      if (all_source.six_d_yl)
+          strcat((char*)tx_buffer, "YL");
+      if (all_source.six_d_zh)
+          strcat((char*)tx_buffer, "ZH");
+      if (all_source.six_d_zl)
+          strcat((char*)tx_buffer, "ZL");
+      strcat((char*)tx_buffer, "\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
@@ -287,6 +273,17 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
   #ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
   #endif
+}
+
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
 }
 
 /*

@@ -2,13 +2,13 @@
  ******************************************************************************
  * @file    sensor_hub_fifo_lps22hh.c
  * @author  Sensor Solutions Software Team
- * @brief   This file show the simplest way to read LPS22HH mag
- *          connected to LSM6DSOX I2C master interface (with FIFO support).
+ * @brief   This file shows how to read LPS22HH mag connected to LSM6DSOX
+ *          I2C master interface (with FIFO support).
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -28,13 +28,13 @@
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
  * Used interfaces:
- * - STM32F411 -> PC:         UART(COM) to USB bridge(via ST-link)
- * - LSM6DSOX  -> STM32F411:  I2C
- * - LPS22HH   -> LSM6DSOX:   I2C
+ *
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
- * modification of the functions: `platform_write`, `platform_read` and
- * `tx_com` is required.
+ * modification of the functions: `platform_write`, `platform_read`,
+ * `tx_com` and 'platform_init' is required.
  *
  */
 
@@ -99,7 +99,7 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
-
+static void platform_delay(uint32_t ms);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 
 /* Main Example --------------------------------------------------------------*/
@@ -137,9 +137,9 @@ void lsm6dsox_hub_fifo_lps22hh(void)
   press_ctx.write_reg = lsm6dsox_write_lps22hh_cx;
   press_ctx.handle = &hi2c1;
 
-  /*
-   * Check Connected devices.
-   */
+  /* Wait sensor boot time */
+  platform_delay(10);
+
   /* Check lsm6dsox ID. */
   lsm6dsox_device_id_get(&ag_ctx, &whoamI);
   if (whoamI != LSM6DSOX_ID)
@@ -189,8 +189,8 @@ void lsm6dsox_hub_fifo_lps22hh(void)
    * Remember that INT1 pin is used by sensor to switch in I3C mode.
    */
   lsm6dsox_pin_int1_route_get(&ag_ctx, &int1_route);
-  int1_route.int1_ctrl.int1_fifo_th = PROPERTY_ENABLE;
-  lsm6dsox_pin_int1_route_set(&ag_ctx, &int1_route);
+  int1_route.fifo_th = PROPERTY_ENABLE;
+  lsm6dsox_pin_int1_route_set(&ag_ctx, int1_route);
 
   /*
    * Enable FIFO batching of Slave0.
@@ -309,7 +309,7 @@ static int32_t platform_write(void *handle, uint8_t Reg, uint8_t *Bufp,
 {
   if (handle == &hi2c1)
   {
-    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_H, Reg,
+    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_L, Reg,
                       I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
   }
   return 0;
@@ -330,10 +330,21 @@ static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
 {
   if (handle == &hi2c1)
   {
-      HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_H, Reg,
+      HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_L, Reg,
                        I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
   }
   return 0;
+}
+
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
 }
 
 /*

@@ -8,7 +8,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -23,19 +23,22 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A3
+ * - STEVAL_MKI109V3 + STEVAL-MKI197V1
+ * - NUCLEO_F411RE + STEVAL-MKI197V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
  * Used interfaces:
  *
+ * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
+ *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A3 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
- * `tx_com` and is required.
+ * `tx_com` and 'platform_init' is required.
  *
  */
 
@@ -237,7 +240,7 @@
  */
 
 /* Program: wakeup [ array created from ".ucf" file]*/
-const uint8_t lsm6so_prg_wakeup[] = {
+static const uint8_t lsm6so_prg_wakeup[] = {
       0x50, 0x40, 0x12, 0x00, 0x0C, 0x00, 0x00, 0x3C, 0x66, 0x2A, 0x02, 0x00,
       0x41, 0x75, 0x10, 0x10, 0x22, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
       0x00, 0x00, 0x06, 0x00, 0x06, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
@@ -270,7 +273,7 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
-
+static void platform_delay(uint32_t ms);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 
 /* Main Example --------------------------------------------------------------*/
@@ -287,6 +290,9 @@ void lsm6dsox_fsm_ucf(void)
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg  = platform_read;
   dev_ctx.handle    = &hi2c1;
+
+  /* Wait sensor boot time */
+  platform_delay(10);
 
   /* Check device ID */
   lsm6dsox_device_id_get(&dev_ctx, &whoamI);
@@ -311,16 +317,13 @@ void lsm6dsox_fsm_ucf(void)
 
   /* Route signals on interrupt pin 1 */
   lsm6dsox_pin_int1_route_get(&dev_ctx, &pin_int1_route);
-  pin_int1_route.md1_cfg.int1_emb_func              = PROPERTY_ENABLE;
-  pin_int1_route.fsm_int1_a.int1_fsm1               = PROPERTY_ENABLE;
-  lsm6dsox_pin_int1_route_set(&dev_ctx, &pin_int1_route);
+  pin_int1_route.fsm1               = PROPERTY_ENABLE;
+  lsm6dsox_pin_int1_route_set(&dev_ctx, pin_int1_route);
 
   /* Configure interrupt pin mode notification */
   lsm6dsox_int_notification_set(&dev_ctx, LSM6DSOX_BASE_PULSED_EMB_LATCHED);
 
-  /*
-   * Start Finite State Machine configuration
-   */
+  /* Start Finite State Machine configuration */
 
   /* Reset/Init Long Counter from FSM_LC_TIMEOUT_L / H */
   lsm6dsox_long_cnt_int_value_set(&dev_ctx, 0x0000U);
@@ -350,9 +353,7 @@ void lsm6dsox_fsm_ucf(void)
                       sizeof(lsm6so_prg_wakeup));
   fsm_addr += sizeof(lsm6so_prg_wakeup);
 
- /*
-  * End Finite State Machine configuration
-  */
+ /* End Finite State Machine configuration */
 
   /* Set Output Data Rate */
   lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_104Hz);
@@ -364,7 +365,7 @@ void lsm6dsox_fsm_ucf(void)
     /* Read interrupt source registers in polling mode (no int) */
     lsm6dsox_all_sources_get(&dev_ctx, &status);
 
-    if(status.fsm_status_a.is_fsm1){
+    if(status.fsm1){
         sprintf((char*)tx_buffer, "wakeup detected\r\n");
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
@@ -385,7 +386,7 @@ void lsm6dsox_fsm_ucf(void)
 static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
-    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_H, reg,
+    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_L, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   return 0;
 }
@@ -403,9 +404,20 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-    HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_H, reg,
+    HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_L, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   return 0;
+}
+
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
 }
 
 /*

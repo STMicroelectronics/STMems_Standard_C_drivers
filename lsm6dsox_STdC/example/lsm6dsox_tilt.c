@@ -1,13 +1,13 @@
 /*
  ******************************************************************************
- * @file    machine_learning_core.c
+ * @file    tilt.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file shows how to detect tilt event from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -19,44 +19,64 @@
  */
 
 /*
- * The purpose of this example is to show how use the device Machine Learning
- * Core (MLC) starting from an ".h" file generated through with the tool
- * "Machine Learning Core" of Unico GUI.
- *
- * Some MLC examples are available at:
- * https://github.com/STMicroelectronics/STMems_Machine_Learning_Core
- * the same repository is linked to this repository in folder "_resources"
- *
- * For more information about Machine Learning Core tool please refer
- * to AN5259 "LSM6DSOX: Machine Learning Core".
- *
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A3 + STEVAL-MKI197V1
+ * - STEVAL_MKI109V3 + STEVAL-MKI197V1
+ * - NUCLEO_F411RE + STEVAL-MKI197V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
  * Used interfaces:
  *
- * - Host side: UART(COM) to USB bridge @ 115200 Baud Rate
- * - Sensor Side: I2C(Default)
+ * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
+ *                    - Sensor side: SPI(Default) / I2C(supported)
+ *
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
- * `tx_com` is required.
+ * `tx_com` and 'platform_init' is required.
  *
  */
+
+/* STMicroelectronics evaluation boards definition
+ *
+ * Please uncomment ONLY the evaluation boards in use.
+ * If a different hardware is used please comment all
+ * following target board and redefine yours.
+ */
+//#define STEVAL_MKI109V3
+#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+
+#if defined(STEVAL_MKI109V3)
+/* MKI109V3: Define communication interface */
+#define SENSOR_BUS hspi2
+
+/* MKI109V3: Vdd and Vddio power supply values */
+#define PWM_3V3 915
+
+#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
+#define SENSOR_BUS hi2c1
+
+#endif
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
+
 #include "stm32f4xx_hal.h"
 #include <lsm6dsox_reg.h>
-#include <lsm6dsox_vibration_monitoring.h>
 #include "gpio.h"
 #include "i2c.h"
+#if defined(STEVAL_MKI109V3)
+#include "usbd_cdc_if.h"
+#include "spi.h"
+#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
 #include "usart.h"
+#endif
 
 /* Private macro -------------------------------------------------------------*/
 
@@ -78,23 +98,31 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
-
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
+static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void lsm6dsox_mlc(void)
+void example_main_tilt_lsm6dsox(void)
 {
-  /* Variable declaration */
-  stmdev_ctx_t              dev_ctx;
-  lsm6dsox_pin_int1_route_t   pin_int1_route;
-  lsm6dsox_all_sources_t      status;
-  uint8_t                     mlc_out[8];
-  uint32_t                    i;
+  stmdev_ctx_t dev_ctx;
+
+  /* Uncomment to configure INT 1 */
+  //lsm6dsox_pin_int1_route_t int1_route;
+
+  /* Uncomment to configure INT 2 */
+  lsm6dsox_pin_int2_route_t int2_route;
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
-  dev_ctx.read_reg  = platform_read;
-  dev_ctx.handle    = &hi2c1;
+  dev_ctx.read_reg = platform_read;
+  dev_ctx.handle = &hi2c1;
+
+  /* Init test platform */
+  platform_init();
+
+  /* Wait sensor boot time */
+  platform_delay(10);
 
   /* Check device ID */
   lsm6dsox_device_id_get(&dev_ctx, &whoamI);
@@ -107,63 +135,44 @@ void lsm6dsox_mlc(void)
     lsm6dsox_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(lsm6dsox_vibration_monitoring) /
-                    sizeof(ucf_line_t) ); i++ ){
-  
-    lsm6dsox_write_reg(&dev_ctx, lsm6dsox_vibration_monitoring[i].address,
-                       (uint8_t*)&lsm6dsox_vibration_monitoring[i].data, 1);
-     
-  } 
-  /* End Machine Learning Core configuration */
-
-  /* At this point the device is ready to run but if you need you can also
-   * interact with the device but taking in account the MLC configuration.
-   *
-   * For more information about Machine Learning Core tool please refer
-   * to AN5259 "LSM6DSOX: Machine Learning Core".
-   */
-
-  /* Turn off Sensors */
-  lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_OFF);
-  lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_OFF);
- 
   /* Disable I3C interface */
   lsm6dsox_i3c_disable_set(&dev_ctx, LSM6DSOX_I3C_DISABLE);
 
-  /* Enable Block Data Update */
-  lsm6dsox_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /* Set full scale */
-  lsm6dsox_xl_full_scale_set(&dev_ctx, LSM6DSOX_4g);
-  lsm6dsox_gy_full_scale_set(&dev_ctx, LSM6DSOX_2000dps);
-
-  /* Route signals on interrupt pin 1 */
-  lsm6dsox_pin_int1_route_get(&dev_ctx, &pin_int1_route);
-  pin_int1_route.mlc_int1.int1_mlc1 = PROPERTY_ENABLE;
-  lsm6dsox_pin_int1_route_set(&dev_ctx, &pin_int1_route);
-
-  /* Configure interrupt pin mode notification */
-  lsm6dsox_int_notification_set(&dev_ctx, LSM6DSOX_BASE_PULSED_EMB_LATCHED);
-
-  /* Set Output Data Rate.
-   * Selected data rate have to be equal or greater with respect
-   * with MLC data rate.
+  /*
+   * Set XL Output Data Rate: The tilt function works at 26 Hz,
+   * so the accelerometer ODR must be set at 26 Hz or higher values
    */
   lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_26Hz);
-  lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_OFF);
- 
-  /* Main loop */
+
+  /* Set 2g full XL scale. */
+  lsm6dsox_xl_full_scale_set(&dev_ctx, LSM6DSOX_2g);
+
+  /* Enable Tilt in embedded function. */
+  lsm6dsox_tilt_sens_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /* Uncomment if interrupt generation on Tilt INT1 pin */
+  //lsm6dsox_pin_int1_route_get(&dev_ctx, &int1_route);
+  //int1_route.reg.emb_func_int1.int1_tilt = PROPERTY_ENABLE;
+  //lsm6dsox_pin_int1_route_set(&dev_ctx, &int1_route);
+
+  /* Uncomment if interrupt generation on Tilt INT2 pin */
+  lsm6dsox_pin_int2_route_get(&dev_ctx, NULL, &int2_route);
+  int2_route.tilt = PROPERTY_ENABLE;
+  lsm6dsox_pin_int2_route_set(&dev_ctx, NULL, int2_route);
+
+  /* Uncomment to have interrupt latched */
+  //lsm6dsox_int_notification_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /* Wait Events. */
   while(1)
   {
-    /* Read interrupt source registers in polling mode (no int) */
-    lsm6dsox_all_sources_get(&dev_ctx, &status);
-    if (status.mlc_status.is_mlc1){
-     
-      lsm6dsox_mlc_out_get(&dev_ctx, mlc_out);
-      sprintf((char*)tx_buffer, "Detect MLC interrupt code: %02X\r\n",
-              mlc_out[0]);
-       
+    uint8_t is_tilt;
+
+    /* Check if Tilt events */
+    lsm6dsox_tilt_flag_data_ready_get(&dev_ctx, &is_tilt);
+    if (is_tilt)
+    {
+      sprintf((char*)tx_buffer, "TILT Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
@@ -182,8 +191,20 @@ void lsm6dsox_mlc(void)
 static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
+  if (handle == &hi2c1)
+  {
     HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_L, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  }
+#ifdef STEVAL_MKI109V3
+  else if (handle == &hspi2)
+  {
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+    HAL_SPI_Transmit(handle, &reg, 1, 1000);
+    HAL_SPI_Transmit(handle, bufp, len, 1000);
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  }
+#endif
   return 0;
 }
 
@@ -200,8 +221,22 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
+  if (handle == &hi2c1)
+  {
     HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_L, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  }
+#ifdef STEVAL_MKI109V3
+  else if (handle == &hspi2)
+  {
+    /* Read command */
+    reg |= 0x80;
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+    HAL_SPI_Transmit(handle, &reg, 1, 1000);
+    HAL_SPI_Receive(handle, bufp, len, 1000);
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  }
+#endif
   return 0;
 }
 
@@ -214,6 +249,33 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
+  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
+  #endif
+  #ifdef STEVAL_MKI109V3
+  CDC_Transmit_FS(tx_buffer, len);
+  #endif
 }
 
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
+ * @brief  platform specific initialization (platform dependent)
+ */
+static void platform_init(void)
+{
+#ifdef STEVAL_MKI109V3
+  TIM3->CCR1 = PWM_3V3;
+  TIM3->CCR2 = PWM_3V3;
+  HAL_Delay(1000);
+#endif
+}

@@ -1,13 +1,13 @@
 /*
  ******************************************************************************
- * @file    read_data_simple_offset.c
+ * @file    wake_up.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file shows how to detect wake-up events from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,8 +22,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI197V1
+ * - NUCLEO_F411RE + STEVAL-MKI197V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -32,8 +32,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -78,25 +78,9 @@
 #include "usart.h"
 #endif
 
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
-
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static axis3bit16_t data_raw_angular_rate;
-static axis1bit16_t data_raw_temperature;
-static float acceleration_mg[3];
-static float angular_rate_mdps[3];
-static float temperature_degC;
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -115,152 +99,85 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_simple_offset_lsm6dsox(void)
+void example_main_wake_up_lsm6dsox(void)
 {
   stmdev_ctx_t dev_ctx;
 
-  /*
-   * Example of XL offset to apply to acc. output
-   */
-  uint8_t offset[3] = { 0x30, 0x40, 0x7E };
+  /* Uncomment to configure INT 1 */
+  //lsm6dsox_pin_int1_route_t int1_route;
 
-  /*
-   *  Initialize mems driver interface
-   */
+  /* Uncomment to configure INT 2 */
+  lsm6dsox_pin_int2_route_t int2_route;
+
+  /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
 
-  /*
-   * Init test platform
-   */
+  /* Init test platform */
   platform_init();
 
-  /*
-   *  Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(10);
+
+  /* Check device ID */
   lsm6dsox_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSOX_ID)
     while(1);
 
-  /*
-   *  Restore default configuration
-   */
+  /* Restore default configuration */
   lsm6dsox_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lsm6dsox_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Disable I3C interface
-   */
+  /* Disable I3C interface */
   lsm6dsox_i3c_disable_set(&dev_ctx, LSM6DSOX_I3C_DISABLE);
 
-  /*
-   *  Enable Block Data Update
-   */
-  lsm6dsox_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Set XL Output Data Rate to 416 Hz */
+  lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_417Hz);
 
-  /*
-   * Weight of XL user offset to 2^(-10) g/LSB
-   */
-  lsm6dsox_xl_offset_weight_set(&dev_ctx, LSM6DSOX_LSb_1mg);
-
-  /*
-   * Accelerometer X,Y,Z axis user offset correction expressed
-   * in two’s complement. Set X to 48mg, Y tp 64 mg, Z to -127 mg
-   */
-  lsm6dsox_xl_usr_offset_x_set(&dev_ctx, &offset[0]);
-  lsm6dsox_xl_usr_offset_y_set(&dev_ctx, &offset[1]);
-  lsm6dsox_xl_usr_offset_z_set(&dev_ctx, &offset[2]);
-  lsm6dsox_xl_usr_offset_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /*
-   * Set Output Data Rate
-   */
-  lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_12Hz5);
-  lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_12Hz5);
-
-  /*
-   * Set full scale
-   */
+  /* Set 2g full XL scale */
   lsm6dsox_xl_full_scale_set(&dev_ctx, LSM6DSOX_2g);
-  lsm6dsox_gy_full_scale_set(&dev_ctx, LSM6DSOX_2000dps);
 
-  /*
-   * Configure filtering chain(No aux interface).
-   */
-  /*
-   * Accelerometer - LPF1 + LPF2 path
-   */
-  lsm6dsox_xl_hp_path_on_out_set(&dev_ctx, LSM6DSOX_LP_ODR_DIV_100);
-  lsm6dsox_xl_filter_lp2_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Apply high-pass digital filter on Wake-Up function */
+  lsm6dsox_xl_hp_path_internal_set(&dev_ctx, LSM6DSOX_USE_SLOPE);
 
-  /*
-   * Read samples in polling mode (no int).
-   */
+  /* Set Wake-Up threshold: 1 LSb corresponds to FS_XL/2^6 */
+  lsm6dsox_wkup_threshold_set(&dev_ctx, 2);
+
+  /* Uncomment interrupt generation on Wake-Up INT1 pin */
+  //lsm6dsox_pin_int1_route_get(&dev_ctx, &int1_route);
+  //int1_route.reg.md1_cfg.int1_wu = PROPERTY_ENABLE;
+  //lsm6dsox_pin_int1_route_set(&dev_ctx, &int1_route);
+
+  /* Enable if interrupt generation on Wake-Up INT2 pin */
+  lsm6dsox_pin_int2_route_get(&dev_ctx, NULL, &int2_route);
+  int2_route.wake_up = PROPERTY_ENABLE;
+  lsm6dsox_pin_int2_route_set(&dev_ctx, NULL, int2_route);
+
+  /* Wait Events */
   while(1)
   {
-    uint8_t reg;
+    lsm6dsox_all_sources_t all_source;
 
-    /*
-     * Read output only if new xl value is available
-     */
-    lsm6dsox_xl_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
+    /* Check if Wake-Up events */
+    lsm6dsox_all_sources_get(&dev_ctx, &all_source);
+    if (all_source.wake_up)
     {
-      /*
-       * Read acceleration field data
-       */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dsox_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] =
-    		  lsm6dsox_from_fs2_to_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] =
-    		  lsm6dsox_from_fs2_to_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] =
-    		  lsm6dsox_from_fs2_to_mg(data_raw_acceleration.i16bit[2]);
+      sprintf((char*)tx_buffer, "Wake-Up event on ");
+      if (all_source.wake_up_x)
+        strcat((char*)tx_buffer, "X");
+      if (all_source.wake_up_y)
+        strcat((char*)tx_buffer, "Y");
+      if (all_source.wake_up_z)
+        strcat((char*)tx_buffer, "Z");
 
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
-
-    lsm6dsox_gy_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
-      /*
-       * Read angular rate field data
-       */
-      memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dsox_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
-      angular_rate_mdps[0] =
-    		  lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[0]);
-      angular_rate_mdps[1] =
-    		  lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[1]);
-      angular_rate_mdps[2] =
-    		  lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[2]);
-
-      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-              angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
-
-    lsm6dsox_temp_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
-      /*
-       * Read temperature data.
-       */
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      lsm6dsox_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = lsm6dsox_from_lsb_to_celsius(data_raw_temperature.i16bit);
-
-      sprintf((char*)tx_buffer,
-              "Temperature [degC]:%6.2f\r\n", temperature_degC);
+      strcat((char*)tx_buffer, " direction\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
@@ -343,6 +260,17 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
   #ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
   #endif
+}
+
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
 }
 
 /*

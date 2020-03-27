@@ -1,13 +1,13 @@
 /*
  ******************************************************************************
- * @file    fifo_pedo.c
+ * @file    activity.c
  * @author  Sensors Software Solution Team
- * @brief   This file show how to read step count from FIFO.
+ * @brief   This file shows how to detect activity/inactivity from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,8 +22,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI197V1
+ * - NUCLEO_F411RE + STEVAL-MKI197V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -32,8 +32,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -74,6 +74,7 @@
 #if defined(STEVAL_MKI109V3)
 #include "usbd_cdc_if.h"
 #include "spi.h"
+#include "tim.h"
 #elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
 #include "usart.h"
 #endif
@@ -81,18 +82,6 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-typedef union {
-    struct {
-		uint16_t step_count;
-		uint32_t timestamp;
-#ifdef __GNUC__
-    } __attribute__((__packed__));
-#else /* __GNUC__ */
-	};
-#endif /* __GNUC__ */
-	uint8_t byte[6];
-} pedo_count_sample_t;
-
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -111,148 +100,83 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void lsm6dsox_fifo_pedo_simple(void)
+void lsm6dsox_activity(void)
 {
-  stmdev_ctx_t ag_ctx;
+  stmdev_ctx_t dev_ctx;
+  lsm6dsox_pin_int1_route_t int1_route;
 
-  /*
-   * Uncomment to configure INT 1
-   */
-  //lsm6dsox_pin_int1_route_t int1_route;
-  /*
-   * Uncomment to configure INT 2
-   */
-  //lsm6dsox_pin_int2_route_t int2_route;
+  /* Initialize mems driver interface */
+  dev_ctx.write_reg = platform_write;
+  dev_ctx.read_reg = platform_read;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  ag_ctx.write_reg = platform_write;
-  ag_ctx.read_reg = platform_read;
-  ag_ctx.handle = &hi2c1;
-
-  /*
-   * Init test platform
-   */
+  /* Init test platform */
   platform_init();
 
-  /*
-   *  Check device ID
-   */
-  lsm6dsox_device_id_get(&ag_ctx, &whoamI);
+  /* Wait Boot Time */
+  platform_delay(50);
+
+ /* Check device ID */
+  lsm6dsox_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSOX_ID)
     while(1);
 
-  /*
-   *  Restore default configuration
-   */
-  lsm6dsox_reset_set(&ag_ctx, PROPERTY_ENABLE);
+  /* Restore default configuration */
+  lsm6dsox_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
-    lsm6dsox_reset_get(&ag_ctx, &rst);
+    lsm6dsox_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Disable I3C interface
-   */
-  lsm6dsox_i3c_disable_set(&ag_ctx, LSM6DSOX_I3C_DISABLE);
+  /* Disable I3C interface */
+  lsm6dsox_i3c_disable_set(&dev_ctx, LSM6DSOX_I3C_DISABLE);
 
-  /*
-   * Set XL full scale
-   */
-  lsm6dsox_xl_full_scale_set(&ag_ctx, LSM6DSOX_2g);
+  /* Set XL and Gyro Output Data Rate */
+  lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_208Hz);
+  lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_104Hz);
 
-  /*
-   *  Enable Block Data Update
-   */
-  lsm6dsox_block_data_update_set(&ag_ctx, PROPERTY_ENABLE);
+  /* Set 2g full XL scale and 250 dps full Gyro */
+  lsm6dsox_xl_full_scale_set(&dev_ctx, LSM6DSOX_2g);
+  lsm6dsox_gy_full_scale_set(&dev_ctx, LSM6DSOX_250dps);
 
-  /*
-   * Set FIFO mode to Stream mode (aka Continuous Mode)
-   */
-  lsm6dsox_fifo_mode_set(&ag_ctx, LSM6DSOX_STREAM_MODE);
+  /* Set duration for Activity detection to 9.62 ms (= 2 * 1 / ODR_XL) */
+  lsm6dsox_wkup_dur_set(&dev_ctx, 0x02);
 
-  /*
-   * Enable latched interrupt notification.
-   */
-  lsm6dsox_int_notification_set(&ag_ctx, LSM6DSOX_ALL_INT_LATCHED);
+  /* Set duration for Inactivity detection to 4.92 s (= 2 * 512 / ODR_XL) */
+  lsm6dsox_act_sleep_dur_set(&dev_ctx, 0x02);
 
- /*
-   * Enable drdy 75 μs pulse: uncomment if interrupt must be pulsed.
-   */
-  //lsm6dsox_data_ready_mode_set(&ag_ctx, LSM6DSOX_DRDY_PULSED);
+  /* Set Activity/Inactivity threshold to 62.5 mg */
+  lsm6dsox_wkup_threshold_set(&dev_ctx, 0x02);
 
-  /*
-   * FIFO watermark interrupt routed on INT1 pin
-   *
-   * Remember that INT1 pin is used by sensor to switch in I3C mode
-   * Uncomment to configure INT 1
-   */
-  //lsm6dsox_pin_int1_route_get(&ag_ctx, &int1_route);
-  //int1_route.reg.emb_func_int1.int1_step_detector = PROPERTY_ENABLE;
-  //lsm6dsox_pin_int1_route_set(&ag_ctx, &int1_route);
+  /* Inactivity configuration: XL to 12.5 in LP, gyro to Power-Down */
+  lsm6dsox_act_mode_set(&dev_ctx, LSM6DSOX_XL_12Hz5_GY_PD);
 
-  /*
-   * FIFO watermark interrupt routed on INT2 pin
-   * Uncomment to configure INT 2
-   */
-  //lsm6dsox_pin_int2_route_get(&ag_ctx, &int2_route);
-  //int2_route.reg.emb_func_int2.int2_step_detector = PROPERTY_ENABLE;
-  //lsm6dsox_pin_int2_route_set(&ag_ctx, &int2_route);
+  /* Enable interrupt generation on Inactivity INT1 pin */
+  lsm6dsox_pin_int1_route_get(&dev_ctx, &int1_route);
+  int1_route.sleep_change = PROPERTY_ENABLE;
+  lsm6dsox_pin_int1_route_set(&dev_ctx, int1_route);
 
-  /*
-   * Enable HW Timestamp
-   */
-  lsm6dsox_timestamp_set(&ag_ctx, PROPERTY_ENABLE);
-
-  /*
-   * Enable pedometer
-   */
-  lsm6dsox_pedo_sens_set(&ag_ctx, LSM6DSOX_PEDO_BASE_MODE);
-  lsm6dsox_fifo_pedo_batch_set(&ag_ctx, PROPERTY_ENABLE);
-  lsm6dsox_steps_reset(&ag_ctx);
-
-  /*
-   * Enable I2C Master
-   */
-  lsm6dsox_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
-
-  /*
-   * Set Output Data Rate
-   */
-  lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_26Hz);
-
+  /* Wait Events */
   while(1)
   {
-	uint16_t num = 0;
-    lsm6dsox_fifo_tag_t reg_tag;
-    pedo_count_sample_t pedo_sample;
+    lsm6dsox_all_sources_t all_source;
 
-    /*
-     * Read FIFO samples number
-     */
-    lsm6dsox_fifo_data_level_get(&ag_ctx, &num);
-    if (num > 0)
+    /* Check if Activity/Inactivity events */
+    lsm6dsox_all_sources_get(&dev_ctx, &all_source);
+    if (all_source.sleep_state)
     {
-      while(num--)
-      {
-        /*
-         * Read FIFO tag
-         */
-        lsm6dsox_fifo_sensor_tag_get(&ag_ctx, &reg_tag);
-        switch(reg_tag)
-        {
-          case LSM6DSOX_STEP_CPUNTER_TAG:
-            lsm6dsox_fifo_out_raw_get(&ag_ctx, pedo_sample.byte);
+      sprintf((char*)tx_buffer, "Inactivity Detected\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
 
-            sprintf((char*)tx_buffer, "Step Count :%u T %u\r\n",
-                    (unsigned int)pedo_sample.step_count,
-                    (unsigned int)pedo_sample.timestamp);
-            tx_com(tx_buffer, strlen((char const*)tx_buffer));
-            break;
-          default:
-            break;
-        }
-      }
+    if (all_source.wake_up)
+    {
+      sprintf((char*)tx_buffer, "Activity Detected\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
 }
@@ -337,6 +261,17 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
@@ -344,6 +279,8 @@ static void platform_init(void)
 #ifdef STEVAL_MKI109V3
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }

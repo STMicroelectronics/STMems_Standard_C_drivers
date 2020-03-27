@@ -2,12 +2,12 @@
  ******************************************************************************
  * @file    finite_state_machine.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file shows how to use some fsm programs.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,18 +22,19 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A3
+ * - NUCLEO_F411RE + STEVAL-MKI197V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
  * Used interfaces:
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A3 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default)
+ *
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
- * `tx_com` is required.
+ * `tx_com` and 'platform_init' is required.
  *
  */
 
@@ -51,7 +52,7 @@
  * Programs can be extracted from ".ucf" configuration file generated
  * by Unico / Unicleo tool.
  *
- *This example contains 7 programs of the Finite State Machine:
+ * This example contains 7 programs of the Finite State Machine:
  *    - glance
  *    - motion
  *    - no_motion
@@ -63,7 +64,7 @@
  */
 
 /* Program: glance */
-const uint8_t lsm6so_prg_glance[] = {
+static const uint8_t lsm6so_prg_glance[] = {
       0xb2, 0x10, 0x24, 0x20, 0x17, 0x17, 0x66, 0x32,
       0x66, 0x3c, 0x20, 0x20, 0x02, 0x02, 0x08, 0x08,
       0x00, 0x04, 0x0c, 0x00, 0xc7, 0x66, 0x33, 0x73,
@@ -72,19 +73,19 @@ const uint8_t lsm6so_prg_glance[] = {
     };
 
 /* Program: motion */
-const uint8_t lsm6so_prg_motion[] = {
+static const uint8_t lsm6so_prg_motion[] = {
       0x51, 0x10, 0x16, 0x00, 0x00, 0x00, 0x66, 0x3c,
       0x02, 0x00, 0x00, 0x7d, 0x00, 0xc7, 0x05, 0x99,
       0x33, 0x53, 0x44, 0xf5, 0x22, 0x00,
     };
 
 /* Program: no_motion */
-const uint8_t lsm6so_prg_no_motion[] = {
+static const uint8_t lsm6so_prg_no_motion[] = {
       0x51, 0x00, 0x10, 0x00, 0x00, 0x00, 0x66, 0x3c,
       0x02, 0x00, 0x00, 0x7d, 0xff, 0x53, 0x99, 0x50,
     };
 /* Program: wakeup */
-const uint8_t lsm6so_prg_wakeup[] = {
+static const uint8_t lsm6so_prg_wakeup[] = {
       0xe2, 0x00, 0x1e, 0x20, 0x13, 0x15, 0x66, 0x3e,
       0x66, 0xbe, 0xcd, 0x3c, 0xc0, 0xc0, 0x02, 0x02,
       0x0b, 0x10, 0x05, 0x66, 0xcc, 0x35, 0x38, 0x35,
@@ -92,20 +93,20 @@ const uint8_t lsm6so_prg_wakeup[] = {
     };
 
 /* Program: pickup */
-const uint8_t lsm6so_prg_pickup[] = {
+static const uint8_t lsm6so_prg_pickup[] = {
       0x51, 0x00, 0x10, 0x00, 0x00, 0x00, 0x33, 0x3c,
       0x02, 0x00, 0x00, 0x05, 0x05, 0x99, 0x30, 0x00,
     };
 
 /* Program: orientation */
-const uint8_t lsm6so_prg_orientation[] = {
+static const uint8_t lsm6so_prg_orientation[] = {
       0x91, 0x10, 0x16, 0x00, 0x00, 0x00, 0x66, 0x3a,
       0x66, 0x32, 0xf0, 0x00, 0x00, 0x0d, 0x00, 0xc7,
       0x05, 0x73, 0x99, 0x08, 0xf5, 0x22,
     };
 
 /* Program: wrist_tilt */
-const uint8_t lsm6so_prg_wrist_tilt[] = {
+static const uint8_t lsm6so_prg_wrist_tilt[] = {
       0x52, 0x00, 0x14, 0x00, 0x00, 0x00, 0xae, 0xb7,
       0x80, 0x00, 0x00, 0x06, 0x0f, 0x05, 0x73, 0x33,
       0x07, 0x54, 0x44, 0x22,
@@ -135,7 +136,7 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
-
+static void platform_delay(uint32_t ms);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 
 /* Main Example --------------------------------------------------------------*/
@@ -153,6 +154,9 @@ void lsm6dsox_fsm(void)
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg  = platform_read;
   dev_ctx.handle    = &hi2c1;
+
+  /* Wait sensor boot time */
+  platform_delay(10);
 
   /* Check device ID */
   lsm6dsox_device_id_get(&dev_ctx, &whoamI);
@@ -176,43 +180,15 @@ void lsm6dsox_fsm(void)
   lsm6dsox_gy_full_scale_set(&dev_ctx, LSM6DSOX_2000dps);
 
   /* Route signals on interrupt pin 1 */
-  pin_int1_route.int1_ctrl.int1_drdy_xl             = PROPERTY_DISABLE;
-  pin_int1_route.int1_ctrl.int1_drdy_g              = PROPERTY_DISABLE;
-  pin_int1_route.int1_ctrl.int1_boot                = PROPERTY_DISABLE;
-  pin_int1_route.int1_ctrl.int1_fifo_th             = PROPERTY_DISABLE;
-  pin_int1_route.int1_ctrl.int1_fifo_ovr            = PROPERTY_DISABLE;
-  pin_int1_route.int1_ctrl.int1_fifo_full           = PROPERTY_DISABLE;
-  pin_int1_route.int1_ctrl.int1_cnt_bdr             = PROPERTY_DISABLE;
-  pin_int1_route.int1_ctrl.den_drdy_flag            = PROPERTY_DISABLE;
-  pin_int1_route.md1_cfg.int1_shub                  = PROPERTY_DISABLE;
-  pin_int1_route.md1_cfg.int1_emb_func              = PROPERTY_ENABLE;
-  pin_int1_route.md1_cfg.int1_6d                    = PROPERTY_DISABLE;
-  pin_int1_route.md1_cfg.int1_double_tap            = PROPERTY_DISABLE;
-  pin_int1_route.md1_cfg.int1_ff                    = PROPERTY_DISABLE;
-  pin_int1_route.md1_cfg.int1_wu                    = PROPERTY_DISABLE;
-  pin_int1_route.md1_cfg.int1_single_tap            = PROPERTY_DISABLE;
-  pin_int1_route.md1_cfg.int1_sleep_change          = PROPERTY_DISABLE;
-  pin_int1_route.emb_func_int1.int1_step_detector   = PROPERTY_DISABLE;
-  pin_int1_route.emb_func_int1.int1_tilt            = PROPERTY_DISABLE;
-  pin_int1_route.emb_func_int1.int1_sig_mot         = PROPERTY_DISABLE;
-  pin_int1_route.emb_func_int1.int1_fsm_lc          = PROPERTY_DISABLE;
-  pin_int1_route.fsm_int1_a.int1_fsm1               = PROPERTY_ENABLE;
-  pin_int1_route.fsm_int1_a.int1_fsm2               = PROPERTY_ENABLE;
-  pin_int1_route.fsm_int1_a.int1_fsm3               = PROPERTY_ENABLE;
-  pin_int1_route.fsm_int1_a.int1_fsm4               = PROPERTY_ENABLE;
-  pin_int1_route.fsm_int1_a.int1_fsm5               = PROPERTY_ENABLE;
-  pin_int1_route.fsm_int1_a.int1_fsm6               = PROPERTY_ENABLE;
-  pin_int1_route.fsm_int1_a.int1_fsm7               = PROPERTY_ENABLE;
-  pin_int1_route.fsm_int1_a.int1_fsm8               = PROPERTY_DISABLE;
-  pin_int1_route.fsm_int1_b.int1_fsm9               = PROPERTY_DISABLE;
-  pin_int1_route.fsm_int1_b.int1_fsm10              = PROPERTY_DISABLE;
-  pin_int1_route.fsm_int1_b.int1_fsm11              = PROPERTY_DISABLE;
-  pin_int1_route.fsm_int1_b.int1_fsm12              = PROPERTY_DISABLE;
-  pin_int1_route.fsm_int1_b.int1_fsm13              = PROPERTY_DISABLE;
-  pin_int1_route.fsm_int1_b.int1_fsm14              = PROPERTY_DISABLE;
-  pin_int1_route.fsm_int1_b.int1_fsm15              = PROPERTY_DISABLE;
-  pin_int1_route.fsm_int1_b.int1_fsm16              = PROPERTY_DISABLE;
-  lsm6dsox_pin_int1_route_set(&dev_ctx, &pin_int1_route);
+  lsm6dsox_pin_int1_route_get(&dev_ctx, &pin_int1_route);
+  pin_int1_route.fsm1               = PROPERTY_ENABLE;
+  pin_int1_route.fsm2               = PROPERTY_ENABLE;
+  pin_int1_route.fsm3               = PROPERTY_ENABLE;
+  pin_int1_route.fsm4               = PROPERTY_ENABLE;
+  pin_int1_route.fsm5               = PROPERTY_ENABLE;
+  pin_int1_route.fsm6               = PROPERTY_ENABLE;
+  pin_int1_route.fsm7               = PROPERTY_ENABLE;
+  lsm6dsox_pin_int1_route_set(&dev_ctx, pin_int1_route);
 
   /* Configure interrupt pin mode notification */
   lsm6dsox_int_notification_set(&dev_ctx, LSM6DSOX_BASE_PULSED_EMB_LATCHED);
@@ -303,32 +279,32 @@ void lsm6dsox_fsm(void)
     /* Read interrupt source registers in polling mode (no int) */
     lsm6dsox_all_sources_get(&dev_ctx, &status);
 
-    if (status.fsm_status_a.is_fsm1){
+    if (status.fsm1){
       sprintf((char*)tx_buffer, "glance detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if(status.fsm_status_a.is_fsm2){
+    if(status.fsm2){
         sprintf((char*)tx_buffer, "motion detected\r\n");
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if(status.fsm_status_a.is_fsm3){
+    if(status.fsm3){
         sprintf((char*)tx_buffer, "no motion detected\r\n");
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if(status.fsm_status_a.is_fsm4){
+    if(status.fsm4){
         sprintf((char*)tx_buffer, "wakeup detected\r\n");
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if(status.fsm_status_a.is_fsm5){
+    if(status.fsm5){
         sprintf((char*)tx_buffer, "pickup detected\r\n");
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if(status.fsm_status_a.is_fsm6) {
+    if(status.fsm6) {
       lsm6dsox_fsm_out_get(&dev_ctx, &fsm_out);
         sprintf((char*)tx_buffer,
                 "orientation detected (%d, %d, %d, %d, %d, %d, %d, %d)\r\n",
@@ -339,7 +315,7 @@ void lsm6dsox_fsm(void)
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if(status.fsm_status_a.is_fsm7) {
+    if(status.fsm7) {
         sprintf((char*)tx_buffer, "wrist tilt detected\r\n");
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
@@ -360,7 +336,7 @@ void lsm6dsox_fsm(void)
 static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
-    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_H, reg,
+    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_L, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   return 0;
 }
@@ -378,9 +354,20 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-    HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_H, reg,
+    HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_L, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   return 0;
+}
+
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
 }
 
 /*

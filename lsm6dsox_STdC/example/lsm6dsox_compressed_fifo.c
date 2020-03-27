@@ -1,13 +1,15 @@
 /*
  ******************************************************************************
- * @file    multi_read_fifo_simple.c
+ * @file    compressed_fifo.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor FIFO.
+ * @brief   This file shows how to configure compressed FIFO to retrieve
+ *          acc and gyro data. This sample use a fifo utility library tool
+ *          for FIFO decompression.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,8 +24,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI197V1
+ * - NUCLEO_F411RE + STEVAL-MKI197V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -32,8 +34,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -66,9 +68,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-
 #include "stm32f4xx_hal.h"
 #include <lsm6dsox_reg.h>
+#include <fifo_utility.h>
 #include "gpio.h"
 #include "i2c.h"
 #if defined(STEVAL_MKI109V3)
@@ -78,20 +80,22 @@
 #include "usart.h"
 #endif
 
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
 /* Private macro -------------------------------------------------------------*/
+/*
+ * Select FIFO samples watermark, max value is 512
+ * in FIFO are stored acc, gyro and timestamp samples
+ */
+#define FIFO_WATERMARK    10
+#define FIFO_COMPRESSION  3
+#define SLOT_NUMBER      (FIFO_WATERMARK * FIFO_COMPRESSION)
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static axis3bit16_t data_raw_angular_rate;
-static float acceleration_mg[3];
-static float angular_rate_mdps[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
+static st_fifo_raw_slot raw_slot[SLOT_NUMBER];
+static st_fifo_out_slot out_slot[SLOT_NUMBER];
+static st_fifo_out_slot acc_slot[SLOT_NUMBER];
+static st_fifo_out_slot gyr_slot[SLOT_NUMBER];
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -108,173 +112,169 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
+sensor_data_t sensor_data;
+
 /* Main Example --------------------------------------------------------------*/
-void example_multi_read_fifo_simple_lsm6dsox(void)
+void lsm6dsox_compressed_fifo(void)
 {
   stmdev_ctx_t dev_ctx;
+  uint16_t out_slot_size;
 
-  /*
-   * Uncomment to configure INT 1
-   */
+  /* Uncomment to configure INT 1 */
   //lsm6dsox_pin_int1_route_t int1_route;
 
-  /*
-   * Uncomment to configure INT 2
-   */
+  /* Uncomment to configure INT 2 */
   //lsm6dsox_pin_int2_route_t int2_route;
 
-  /*
-   *  Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
 
-  /*
-   * Init test platform
-   */
+  /* Init test platform */
   platform_init();
 
-  /*
-   *  Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(10);
+
+  /* Init utility for FIFO decompression */
+  st_fifo_init(0, 0, 0);
+
+  /* Check device ID */
   lsm6dsox_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSOX_ID)
     while(1);
 
-  /*
-   *  Restore default configuration
-   */
+  /* Restore default configuration */
   lsm6dsox_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lsm6dsox_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Disable I3C interface
-   */
+  /* Disable I3C interface */
   lsm6dsox_i3c_disable_set(&dev_ctx, LSM6DSOX_I3C_DISABLE);
 
-  /*
-   *  Enable Block Data Update
-   */
+  /* Enable Block Data Update */
   lsm6dsox_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Set full scale
-   */
+  /* Set full scale */
   lsm6dsox_xl_full_scale_set(&dev_ctx, LSM6DSOX_2g);
   lsm6dsox_gy_full_scale_set(&dev_ctx, LSM6DSOX_2000dps);
 
   /*
    * Set FIFO watermark (number of unread sensor data TAG + 6 bytes
-   * stored in FIFO) to 10 samples
+   * stored in FIFO) to FIFO_WATERMARK samples
    */
-  lsm6dsox_fifo_watermark_set(&dev_ctx, 10);
+  lsm6dsox_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
 
-  /*
-   * Set FIFO batch XL/Gyro ODR to 12.5Hz
-   */
+  /* Set FIFO batch XL/Gyro ODR to 12.5Hz */
   lsm6dsox_fifo_xl_batch_set(&dev_ctx, LSM6DSOX_XL_BATCHED_AT_12Hz5);
   lsm6dsox_fifo_gy_batch_set(&dev_ctx, LSM6DSOX_GY_BATCHED_AT_12Hz5);
 
-  /*
-   * Set FIFO mode to Stream mode (aka Continuous Mode)
-   */
+  /* Set FIFO mode to Stream mode (aka Continuous Mode) */
   lsm6dsox_fifo_mode_set(&dev_ctx, LSM6DSOX_STREAM_MODE);
 
-  /*
-   * Enable drdy 75 μs pulse: uncomment if interrupt must be pulsed
-   */
+  /* Enable FIFO compression on all samples */
+  lsm6dsox_compression_algo_set(&dev_ctx, LSM6DSOX_CMP_DISABLE);
+
+  /* Enable drdy 75 μs pulse: uncomment if interrupt must be pulsed */
   //lsm6dsox_data_ready_mode_set(&dev_ctx, LSM6DSOX_DRDY_PULSED);
 
   /*
-   * Uncomment if interrupt generation on Free Fall INT1 pin
+   * FIFO watermark interrupt routed on INT1 pin
+   * WARNING: INT1 pin is used by sensor to switch in I3C mode.
    */
   //lsm6dsox_pin_int1_route_get(&dev_ctx, &int1_route);
   //int1_route.reg.int1_ctrl.int1_fifo_th = PROPERTY_ENABLE;
   //lsm6dsox_pin_int1_route_set(&dev_ctx, &int1_route);
 
-  /*
-   * Uncomment if interrupt generation on Free Fall INT2 pin
-   */
+  /* FIFO watermark interrupt routed on INT2 pin */
   //lsm6dsox_pin_int2_route_get(&dev_ctx, &int2_route);
   //int2_route.reg.int2_ctrl.int2_fifo_th = PROPERTY_ENABLE;
   //lsm6dsox_pin_int2_route_set(&dev_ctx, &int2_route);
 
-  /*
-   * Set Output Data Rate
-   */
+  /* Set Output Data Rate */
   lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_12Hz5);
   lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_12Hz5);
+  lsm6dsox_fifo_timestamp_decimation_set(&dev_ctx, LSM6DSOX_DEC_1);
+  lsm6dsox_timestamp_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Wait samples.
-   */
+  /* Wait samples */
   while(1)
   {
     uint16_t num = 0;
     uint8_t wmflag = 0;
-    lsm6dsox_fifo_tag_t reg_tag;
-    axis3bit16_t dummy;
+    uint16_t slots = 0;
+    uint16_t acc_samples;
+    uint16_t gyr_samples;
 
-    /*
-     * Read watermark flag
-     */
+  /* Read watermark flag */
     lsm6dsox_fifo_wtm_flag_get(&dev_ctx, &wmflag);
     if (wmflag > 0)
     {
-      /*
-       * Read number of samples in FIFO
-       */
+      /* Read number of samples in FIFO */
       lsm6dsox_fifo_data_level_get(&dev_ctx, &num);
       while(num--)
       {
         /*
-         * Read FIFO tag
+         * Read FIFO sensor tag
+         *
+         * To reorder data samples in FIFO is needed the register
+         * LSM6DSOX_FIFO_DATA_OUT_TAG, including tag counter and parity.
          */
-        lsm6dsox_fifo_sensor_tag_get(&dev_ctx, &reg_tag);
-        switch(reg_tag)
-        {
-          case LSM6DSOX_XL_NC_TAG:
-            memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-            lsm6dsox_fifo_out_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-            acceleration_mg[0] =
-              lsm6dsox_from_fs2_to_mg(data_raw_acceleration.i16bit[0]);
-            acceleration_mg[1] =
-              lsm6dsox_from_fs2_to_mg(data_raw_acceleration.i16bit[1]);
-            acceleration_mg[2] =
-              lsm6dsox_from_fs2_to_mg(data_raw_acceleration.i16bit[2]);
+        lsm6dsox_read_reg(&dev_ctx, LSM6DSOX_FIFO_DATA_OUT_TAG,
+                         (uint8_t *)&raw_slot[slots].fifo_data_out[0], 1);
 
-            sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-                    acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-            tx_com(tx_buffer, strlen((char const*)tx_buffer));
-            break;
-          case LSM6DSOX_GYRO_NC_TAG:
-            memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
-            lsm6dsox_fifo_out_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
-            angular_rate_mdps[0] =
-              lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[0]);
-            angular_rate_mdps[1] =
-              lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[1]);
-            angular_rate_mdps[2] =
-              lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[2]);
-
-            sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-                    angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-            tx_com(tx_buffer, strlen((char const*)tx_buffer));
-            break;
-          default:
-            /*
-             * Flush unused samples
-             */
-            memset(dummy.u8bit, 0x00, 3 * sizeof(int16_t));
-            lsm6dsox_fifo_out_raw_get(&dev_ctx, dummy.u8bit);
-            break;
-        }
+        /* Read FIFO sensor value */
+        lsm6dsox_fifo_out_raw_get(&dev_ctx, &raw_slot[slots].fifo_data_out[1]);
+        slots++;
       }
+
+      /* Uncompress FIFO samples and filter based on sensor type */
+      st_fifo_decompress(out_slot, raw_slot, &out_slot_size, slots);
+      st_fifo_sort(out_slot, out_slot_size);
+      acc_samples = st_fifo_get_sensor_occurrence(out_slot,
+                                                  out_slot_size,
+                                                  ST_FIFO_ACCELEROMETER);
+      gyr_samples = st_fifo_get_sensor_occurrence(out_slot,
+                                                  out_slot_size,
+                                                  ST_FIFO_GYROSCOPE);
+      /* Count how many acc and gyro samples */
+      st_fifo_extract_sensor(acc_slot, out_slot,out_slot_size,
+                             ST_FIFO_ACCELEROMETER);
+      st_fifo_extract_sensor(gyr_slot, out_slot, out_slot_size,
+                             ST_FIFO_GYROSCOPE);
+
+      for (int i = 0; i < acc_samples; i++)
+      {
+        memcpy( sensor_data.raw_data, acc_slot[i].raw_data, sizeof(sensor_data) );
+
+        sprintf((char*)tx_buffer, "ACC:\t%u\t%d\t%4.2f\t%4.2f\t%4.2f\r\n",
+                (unsigned int)acc_slot[i].timestamp,
+                 acc_slot[i].sensor_tag,
+                 lsm6dsox_from_fs2_to_mg(sensor_data.data[0]),
+                 lsm6dsox_from_fs2_to_mg(sensor_data.data[1]),
+                 lsm6dsox_from_fs2_to_mg(sensor_data.data[2]));
+        tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      }
+
+      for (int i = 0; i < gyr_samples; i++)
+      {
+        memcpy( sensor_data.raw_data, gyr_slot[i].raw_data, sizeof(sensor_data) );
+
+        sprintf((char*)tx_buffer, "GYR:\t%u\t%d\t%4.2f\t%4.2f\t%4.2f\r\n",
+                (unsigned int)gyr_slot[i].timestamp,
+                gyr_slot[i].sensor_tag,
+                lsm6dsox_from_fs2000_to_mdps(sensor_data.data[0]),
+                lsm6dsox_from_fs2000_to_mdps(sensor_data.data[1]),
+                lsm6dsox_from_fs2000_to_mdps(sensor_data.data[2]));
+        tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      }
+
+      slots = 0;
     }
   }
 }
@@ -356,6 +356,17 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
   #ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
   #endif
+}
+
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
 }
 
 /*

@@ -1,14 +1,13 @@
 /*
  ******************************************************************************
- * @file    read_data_interrupt.c
+ * @file    free_fall.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor (interrupt
- * 			mode).
+ * @brief   This file shows how to detect free fall event from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -23,8 +22,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI197V1
+ * - NUCLEO_F411RE + STEVAL-MKI197V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -33,8 +32,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -79,18 +78,9 @@
 #include "usart.h"
 #endif
 
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static axis3bit16_t data_raw_angular_rate;
-static float acceleration_mg[3];
-static float angular_rate_mdps[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -109,141 +99,78 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_interrupt_lsm6dsox(void)
+void example_main_free_fall_lsm6dsox(void)
 {
   stmdev_ctx_t dev_ctx;
 
-  /*
-   * Uncomment to configure INT 1
-   */
+  /* Uncomment to configure INT 1 */
   //lsm6dsox_pin_int1_route_t int1_route;
 
-  /*
-   * Uncomment to configure INT 2
-   */
+  /* Uncomment to configure INT 2 */
   //lsm6dsox_pin_int2_route_t int2_route;
 
-  /*
-   *  Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
 
-  /*
-   * Init test platform
-   */
+  /* Init test platform */
   platform_init();
 
-  /*
-   *  Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(10);
+
+  /* Check device ID */
   lsm6dsox_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSOX_ID)
     while(1);
 
-  /*
-   *  Restore default configuration
-   */
+  /* Restore default configuration */
   lsm6dsox_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lsm6dsox_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Disable I3C interface
-   */
+  /* Disable I3C interface */
   lsm6dsox_i3c_disable_set(&dev_ctx, LSM6DSOX_I3C_DISABLE);
 
-  /*
-   *  Enable Block Data Update
-   */
-  lsm6dsox_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Set XL Output Data Rate */
+  lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_417Hz);
 
-  /*
-   * Set Output Data Rate
-   */
-  lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_12Hz5);
-  lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_12Hz5);
-
-  /*
-   * Set full scale
-   */
+  /* Set 2g full XL scale */
   lsm6dsox_xl_full_scale_set(&dev_ctx, LSM6DSOX_2g);
-  lsm6dsox_gy_full_scale_set(&dev_ctx, LSM6DSOX_2000dps);
 
-  /*
-   * Enable drdy 75 μs pulse: uncomment if interrupt must be pulsed
-   */
-  //lsm6dsox_data_ready_mode_set(&dev_ctx, LSM6DSOX_DRDY_PULSED);
+  /* Enable LIR */
+  lsm6dsox_int_notification_set(&dev_ctx, LSM6DSOX_ALL_INT_LATCHED);
 
-  /*
-   * Uncomment if interrupt generation on Free Fall INT1 pin
-   */
+  /* Set Free Fall duration to 3 and 6 samples event duration */
+  lsm6dsox_ff_dur_set(&dev_ctx, 0x06);
+  lsm6dsox_ff_threshold_set(&dev_ctx, LSM6DSOX_FF_TSH_312mg);
+
+  /* Uncomment if interrupt generation on Free Fall INT1 pin */
   //lsm6dsox_pin_int1_route_get(&dev_ctx, &int1_route);
   //int1_route.reg.md1_cfg.int1_ff = PROPERTY_ENABLE;
   //lsm6dsox_pin_int1_route_set(&dev_ctx, &int1_route);
 
-  /*
-   * Uncomment if interrupt generation on Free Fall INT2 pin
-   */
+  /* Uncomment if interrupt generation on Free Fall INT2 pin */
   //lsm6dsox_pin_int2_route_get(&dev_ctx, &int2_route);
   //int2_route.reg.md2_cfg.int2_ff = PROPERTY_ENABLE;
   //lsm6dsox_pin_int2_route_set(&dev_ctx, &int2_route);
 
-  /*
-   * Wait samples
-   */
+  /* Wait Events */
   while(1)
   {
-    uint8_t reg;
+    lsm6dsox_all_sources_t all_source;
 
-    /*
-     * Read output only if new xl value is available
-     */
-    lsm6dsox_xl_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
+    /* Check if Free Fall events */
+    lsm6dsox_all_sources_get(&dev_ctx, &all_source);
+    if (all_source.free_fall)
     {
-      /*
-       * Read acceleration field data
-       */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dsox_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] =
-        lsm6dsox_from_fs2_to_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] =
-        lsm6dsox_from_fs2_to_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] =
-        lsm6dsox_from_fs2_to_mg(data_raw_acceleration.i16bit[2]);
-
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
-
-    /*
-     * Read output only if new gyro value is available
-     */
-    lsm6dsox_gy_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
-      /*
-       * Read angular rate field data
-       */
-      memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dsox_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
-      angular_rate_mdps[0] =
-        lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[0]);
-      angular_rate_mdps[1] =
-        lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[1]);
-      angular_rate_mdps[2] =
-        lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[2]);
-
-      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-              angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
+      sprintf((char*)tx_buffer, "Free Fall Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
@@ -326,6 +253,17 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
   #ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
   #endif
+}
+
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
 }
 
 /*
