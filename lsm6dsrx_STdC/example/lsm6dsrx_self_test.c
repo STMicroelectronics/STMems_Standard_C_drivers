@@ -181,6 +181,7 @@ void lsm6dsrx_self_test(void)
   lsm6dsrx_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
 
   /* Read 5 sample and get the average vale for each axis */
+  memset(val_st_off, 0x00, 3*sizeof(float));
   for (i = 0; i < 5; i++){
     /* Check if new value available */
     do {
@@ -188,7 +189,6 @@ void lsm6dsrx_self_test(void)
     } while(!drdy);
     /* Read data and accumulate the mg value */
     lsm6dsrx_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
-    memset(val_st_off, 0x00, 3*sizeof(float));
     for (j=0; j<3; j++){
       val_st_off[j] += lsm6dsrx_from_fs4g_to_mg(data_raw.i16bit[j]);
     }
@@ -215,6 +215,7 @@ void lsm6dsrx_self_test(void)
 
 
   /* Read 5 sample and get the average vale for each axis */
+  memset(val_st_on, 0x00, 3*sizeof(float));
   for (i = 0; i < 5; i++){
     /* Check if new value available */
     do {
@@ -222,7 +223,6 @@ void lsm6dsrx_self_test(void)
     } while(!drdy);
     /* Read data and accumulate the mg value */
     lsm6dsrx_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
-    memset(val_st_on, 0x00, 3*sizeof(float));
     for (j=0; j<3; j++){
       val_st_on[j] += lsm6dsrx_from_fs4g_to_mg(data_raw.i16bit[j]);
     }
@@ -269,7 +269,7 @@ void lsm6dsrx_self_test(void)
   lsm6dsrx_angular_rate_raw_get(&dev_ctx, data_raw.u8bit);
 
   /* Read 5 sample and get the average vale for each axis */
-
+  memset(val_st_off, 0x00, 3*sizeof(float));
   for (i = 0; i < 5; i++){
     /* Check if new value available */
     do {
@@ -277,7 +277,6 @@ void lsm6dsrx_self_test(void)
     } while(!drdy);
     /* Read data and accumulate the mg value */
     lsm6dsrx_angular_rate_raw_get(&dev_ctx, data_raw.u8bit);
-    memset(val_st_off, 0x00, 3*sizeof(float));
     for (j=0; j<3; j++){
       val_st_off[j] += lsm6dsrx_from_fs2000dps_to_mdps(data_raw.i16bit[j]);
     }
@@ -295,6 +294,7 @@ void lsm6dsrx_self_test(void)
   platform_delay(100);
 
   /* Read 5 sample and get the average vale for each axis */
+  memset(val_st_on, 0x00, 3*sizeof(float));
   for (i = 0; i < 5; i++){
     /* Check if new value available */
     do {
@@ -302,7 +302,6 @@ void lsm6dsrx_self_test(void)
     } while(!drdy);
     /* Read data and accumulate the mg value */
     lsm6dsrx_angular_rate_raw_get(&dev_ctx, data_raw.u8bit);
-    memset(val_st_on, 0x00, 3*sizeof(float));
     for (j=0; j<3; j++){
       val_st_on[j] += lsm6dsrx_from_fs2000dps_to_mdps(data_raw.i16bit[j]);
     }
@@ -420,6 +419,9 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 
 /*
  * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
  */
 static void platform_delay(uint32_t ms)
 {
