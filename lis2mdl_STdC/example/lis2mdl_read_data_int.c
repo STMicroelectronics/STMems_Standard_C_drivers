@@ -1,14 +1,14 @@
 /*
  ******************************************************************************
- * @file    read_data_interrupt.c
+ * @file    read_data_int.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor
- *          (interrupt mode).
+ * @brief   This file shows the simplest way to get data from sensor in
+ *          enabling dataredy interrupt signal.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -17,13 +17,14 @@
  *                        opensource.org/licenses/BSD-3-Clause
  *
  ******************************************************************************
- */
+*/
+
 /*
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI197V1
+ * - NUCLEO_F411RE + STEVAL-MKI197V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -32,8 +33,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -48,7 +49,7 @@
  * following target board and redefine yours.
  */
 //#define STEVAL_MKI109V3
-#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#define NUCLEO_F411RE
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
@@ -57,8 +58,8 @@
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
 #endif
@@ -73,7 +74,7 @@
 #if defined(STEVAL_MKI109V3)
 #include "usbd_cdc_if.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+#elif defined(NUCLEO_F411RE)
 #include "usart.h"
 #endif
 
@@ -111,94 +112,70 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com(uint8_t *tx_buffer, uint16_t len);
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_drdy_lis2mdl(void)
+void lis2mdl_read_data_int(void)
 {
-  /*
-   *  Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Initialize platform specific hardware */
   platform_init();
 
-  /*
-   *  Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(10);
+
+  /* Check device ID */
   lis2mdl_device_id_get(&dev_ctx, &whoamI);
-  if (whoamI != LIS2MDL_ID)
-    while(1)
-    {
+  if (whoamI != LIS2MDL_ID) {
+    while(1) {
       /* manage here device not found */
     }
+  }
 
-  /*
-   *  Restore default configuration
-   */
+  /* Restore default configuration */
   lis2mdl_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lis2mdl_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   *  Enable Block Data Update
-   */
+  /* Enable Block Data Update */
   lis2mdl_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Set Output Data Rate
-   */
+  /* Set Output Data Rate */
   lis2mdl_data_rate_set(&dev_ctx, LIS2MDL_ODR_10Hz);
 
-  /*
-   * Set / Reset sensor mode
-   */
+  /* Set / Reset sensor mode */
   lis2mdl_set_rst_mode_set(&dev_ctx, LIS2MDL_SENS_OFF_CANC_EVERY_ODR);
 
-  /*
-   * Enable temperature compensation
-   */
+  /* Enable temperature compensation */
   lis2mdl_offset_temp_comp_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Set Low-pass bandwidth to ODR/4
-   */
+  /* Set Low-pass bandwidth to ODR/4 */
   //lis2mdl_low_pass_bandwidth_set(&dev_ctx, LIS2MDL_ODR_DIV_4);
 
-  /*
-   * Set device in continuous mode
-   */
+  /* Set device in continuous mode */
   lis2mdl_operating_mode_set(&dev_ctx, LIS2MDL_CONTINUOUS_MODE);
 
-  /*
-   * Enable interrupt generation on new data ready
-   */
+  /* Enable interrupt generation on new data ready */
   lis2mdl_drdy_on_pin_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Read samples in polling mode
-   */
+  /* Read samples in polling mode */
   while(1)
   {
     uint8_t reg;
 
-    /*
-     * Read output only if new value is available
-     */
+    /* Read output only if new value is available */
     lis2mdl_mag_data_ready_get(&dev_ctx, &reg);
     if (reg)
     {
-      /*
-       * Read magnetic field data
-       */
+      /* Read magnetic field data */
       memset(data_raw_magnetic.u8bit, 0x00, 3 * sizeof(int16_t));
       lis2mdl_magnetic_raw_get(&dev_ctx, data_raw_magnetic.u8bit);
       magnetic_mG[0] = lis2mdl_from_lsb_to_mgauss( data_raw_magnetic.i16bit[0]);
@@ -209,9 +186,7 @@ void example_main_drdy_lis2mdl(void)
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
 
-      /*
-       * Read temperature data
-       */
+      /* Read temperature data */
       memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
       lis2mdl_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
       temperature_degC =
@@ -301,12 +276,23 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+  #ifdef NUCLEO_F411RE
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
   #endif
   #ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
   #endif
+}
+
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
 }
 
 /*
