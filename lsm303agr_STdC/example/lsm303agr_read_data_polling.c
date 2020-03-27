@@ -159,7 +159,7 @@ static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
 /*
  *  Function to print messages
  */
-void tx_com( uint8_t *tx_buffer, uint16_t len )
+static void tx_com( uint8_t *tx_buffer, uint16_t len )
 {
   #ifdef NUCLEO_F411RE 
   HAL_UART_Transmit( &huart2, tx_buffer, len, 1000 );
