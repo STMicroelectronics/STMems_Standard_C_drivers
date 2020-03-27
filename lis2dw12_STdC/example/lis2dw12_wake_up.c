@@ -47,8 +47,8 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-#define STEVAL_MKI109V3
-//#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+//#define STEVAL_MKI109V3
+#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */

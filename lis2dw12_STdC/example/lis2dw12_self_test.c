@@ -178,11 +178,11 @@ static void test_self_test_lis2dw12(stmdev_ctx_t *dev_ctx)
        */
       memset(data_raw_acceleration[i].u8bit, 0x00, 3 * sizeof(int16_t));
       lis2dw12_acceleration_raw_get(dev_ctx, data_raw_acceleration[i].u8bit);
-      for (axis = 0; axis < 3; axis++)
+      for (axis = 0; axis < 3; axis++) {
         acceleration_mg[i][axis] =
           lis2dw12_from_fs4_to_mg(data_raw_acceleration[i].i16bit[axis]);
-
-        i++;
+      }
+      i++;
       }
   } while (i < SELF_TEST_SAMPLES);
 
