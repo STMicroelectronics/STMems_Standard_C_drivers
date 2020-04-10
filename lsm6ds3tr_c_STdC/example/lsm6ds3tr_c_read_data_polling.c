@@ -162,7 +162,7 @@ void tx_com( uint8_t *tx_buffer, uint16_t len )
 }
 
 /* Main Example --------------------------------------------------------------*/
-void example_main(void)
+void lsm6ds3tr_c_read_data_polling(void)
 {
   /*
    *  Initialize mems driver interface
