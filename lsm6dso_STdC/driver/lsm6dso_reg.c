@@ -78,6 +78,20 @@ int32_t lsm6dso_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
 */
 
 /**
+  * @defgroup  LSM6DSOX_Private_functions
+  * @brief     Section collect all the utility functions needed by APIs.
+  * @{
+  *
+  */
+
+static void bytecpy(uint8_t *target, uint8_t *source)
+{
+  if ( (target != NULL) && (source != NULL) ) {
+    *target = *source;
+  }
+}
+
+/**
   * @defgroup  LSM6DSO_Sensitivity
   * @brief     These functions convert raw-data into engineering units.
   * @{
@@ -795,60 +809,6 @@ int32_t lsm6dso_gy_power_mode_get(stmdev_ctx_t *ctx,
     default:
       *val = LSM6DSO_GY_HIGH_PERFORMANCE;
       break;
-  }
-  return ret;
-}
-
-/**
-  * @brief  Read all the interrupt flag of the device.[get]
-  *
-  * @param  ctx      read / write interface definitions
-  * @param  val      registers ALL_INT_SRC; WAKE_UP_SRC;
-  *                              TAP_SRC; D6D_SRC; STATUS_REG;
-  *                              EMB_FUNC_STATUS; FSM_STATUS_A/B
-  *
-  */
-int32_t lsm6dso_all_sources_get(stmdev_ctx_t *ctx,
-                                lsm6dso_all_sources_t *val)
-{
-  int32_t ret;
-
-  ret = lsm6dso_read_reg(ctx, LSM6DSO_ALL_INT_SRC,
-                         (uint8_t*)&val->all_int_src, 1);
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_WAKE_UP_SRC,
-                           (uint8_t*)&val->wake_up_src, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_TAP_SRC,
-                           (uint8_t*)&val->tap_src, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_D6D_SRC,
-                           (uint8_t*)&val->d6d_src, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_STATUS_REG,
-                           (uint8_t*)&val->status_reg, 1);
-  }
-  if (ret == 0) {
-
-    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_STATUS,
-                           (uint8_t*)&val->emb_func_status, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_FSM_STATUS_A,
-                           (uint8_t*)&val->fsm_status_a, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_FSM_STATUS_B,
-                           (uint8_t*)&val->fsm_status_b, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
   }
   return ret;
 }
@@ -3666,307 +3626,6 @@ int32_t lsm6dso_int1_mode_get(stmdev_ctx_t *ctx, lsm6dso_int1_pd_en_t *val)
     default:
       *val = LSM6DSO_PULL_DOWN_DISC;
       break;
-  }
-  return ret;
-}
-
-/**
-  * @brief  Select the signal that need to route on int1 pad.[set]
-  *
-  * @param  ctx      read / write interface definitions
-  * @param  val      struct of registers: INT1_CTRL,
-  *                  MD1_CFG, EMB_FUNC_INT1, FSM_INT1_A,
-  *                  FSM_INT1_B
-  *
-  */
-int32_t lsm6dso_pin_int1_route_set(stmdev_ctx_t *ctx,
-                                   lsm6dso_pin_int1_route_t *val)
-{
-  lsm6dso_pin_int2_route_t pin_int2_route;
-  lsm6dso_tap_cfg2_t tap_cfg2;
-  int32_t ret;
-
-  ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
-  if (ret == 0) {
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_INT1,
-                            (uint8_t*)&val->emb_func_int1, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_FSM_INT1_A,
-                            (uint8_t*)&val->fsm_int1_a, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_FSM_INT1_B,
-                            (uint8_t*)&val->fsm_int1_b, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
-  }
-
-  if (ret == 0) {
-    if ( ( val->emb_func_int1.int1_fsm_lc
-         | val->emb_func_int1.int1_sig_mot
-         | val->emb_func_int1.int1_step_detector
-         | val->emb_func_int1.int1_tilt
-         | val->fsm_int1_a.int1_fsm1
-         | val->fsm_int1_a.int1_fsm2
-         | val->fsm_int1_a.int1_fsm3
-         | val->fsm_int1_a.int1_fsm4
-         | val->fsm_int1_a.int1_fsm5
-         | val->fsm_int1_a.int1_fsm6
-         | val->fsm_int1_a.int1_fsm7
-         | val->fsm_int1_a.int1_fsm8
-         | val->fsm_int1_b.int1_fsm9
-         | val->fsm_int1_b.int1_fsm10
-         | val->fsm_int1_b.int1_fsm11
-         | val->fsm_int1_b.int1_fsm12
-         | val->fsm_int1_b.int1_fsm13
-         | val->fsm_int1_b.int1_fsm14
-         | val->fsm_int1_b.int1_fsm15
-         | val->fsm_int1_b.int1_fsm16) != PROPERTY_DISABLE){
-      val->md1_cfg.int1_emb_func = PROPERTY_ENABLE;
-    }
-    else{
-      val->md1_cfg.int1_emb_func = PROPERTY_DISABLE;
-    }
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_INT1_CTRL,
-                            (uint8_t*)&val->int1_ctrl, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_MD1_CFG, (uint8_t*)&val->md1_cfg, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_TAP_CFG2, (uint8_t*) &tap_cfg2, 1);
-  }
-
-  if (ret == 0) {
-    ret = lsm6dso_pin_int2_route_get(ctx, &pin_int2_route);
-  }
-  if (ret == 0) {
-    if ( ( pin_int2_route.int2_ctrl.int2_cnt_bdr
-         | pin_int2_route.int2_ctrl.int2_drdy_g
-         | pin_int2_route.int2_ctrl.int2_drdy_temp
-         | pin_int2_route.int2_ctrl.int2_drdy_xl
-         | pin_int2_route.int2_ctrl.int2_fifo_full
-         | pin_int2_route.int2_ctrl.int2_fifo_ovr
-         | pin_int2_route.int2_ctrl.int2_fifo_th
-         | pin_int2_route.md2_cfg.int2_6d
-         | pin_int2_route.md2_cfg.int2_double_tap
-         | pin_int2_route.md2_cfg.int2_ff
-         | pin_int2_route.md2_cfg.int2_wu
-         | pin_int2_route.md2_cfg.int2_single_tap
-         | pin_int2_route.md2_cfg.int2_sleep_change
-         | val->int1_ctrl.den_drdy_flag
-         | val->int1_ctrl.int1_boot
-         | val->int1_ctrl.int1_cnt_bdr
-         | val->int1_ctrl.int1_drdy_g
-         | val->int1_ctrl.int1_drdy_xl
-         | val->int1_ctrl.int1_fifo_full
-         | val->int1_ctrl.int1_fifo_ovr
-         | val->int1_ctrl.int1_fifo_th
-         | val->md1_cfg.int1_6d
-         | val->md1_cfg.int1_double_tap
-         | val->md1_cfg.int1_ff
-         | val->md1_cfg.int1_wu
-         | val->md1_cfg.int1_single_tap
-         | val->md1_cfg.int1_sleep_change) != PROPERTY_DISABLE) {
-      tap_cfg2.interrupts_enable = PROPERTY_ENABLE;
-    }
-    else{
-      tap_cfg2.interrupts_enable = PROPERTY_DISABLE;
-    }
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_TAP_CFG2, (uint8_t*) &tap_cfg2, 1);
-  }
-  return ret;
-}
-
-/**
-  * @brief  Select the signal that need to route on int1 pad.[get]
-  *
-  * @param  ctx      read / write interface definitions
-  * @param  val      struct of registers: INT1_CTRL, MD1_CFG,
-  *                  EMB_FUNC_INT1, FSM_INT1_A, FSM_INT1_B
-  *
-  */
-int32_t lsm6dso_pin_int1_route_get(stmdev_ctx_t *ctx,
-                                   lsm6dso_pin_int1_route_t *val)
-{
-  int32_t ret;
-
-  ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_INT1,
-                           (uint8_t*)&val->emb_func_int1, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_FSM_INT1_A,
-                           (uint8_t*)&val->fsm_int1_a, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_FSM_INT1_B,
-                           (uint8_t*)&val->fsm_int1_b, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
-  }
-  if (ret == 0) {
-
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_INT1_CTRL,
-                           (uint8_t*)&val->int1_ctrl, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_MD1_CFG, (uint8_t*)&val->md1_cfg, 1);
-  }
-
-  return ret;
-}
-
-/**
-  * @brief  Select the signal that need to route on int2 pad.[set]
-  *
-  * @param  ctx      read / write interface definitions
-  * @param  val      union of registers INT2_CTRL,  MD2_CFG,
-  *                  EMB_FUNC_INT2, FSM_INT2_A, FSM_INT2_B
-  *
-  */
-int32_t lsm6dso_pin_int2_route_set(stmdev_ctx_t *ctx,
-                                   lsm6dso_pin_int2_route_t *val)
-{
-  lsm6dso_pin_int1_route_t pin_int1_route;
-  lsm6dso_tap_cfg2_t tap_cfg2;
-  int32_t ret;
-
-  ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
-  if (ret == 0) {
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_INT2,
-                            (uint8_t*)&val->emb_func_int2, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_FSM_INT2_A,
-                            (uint8_t*)&val->fsm_int2_a, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_FSM_INT2_B,
-                            (uint8_t*)&val->fsm_int2_b, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
-  }
-
-  if (ret == 0) {
-    if (( val->emb_func_int2.int2_fsm_lc
-        | val->emb_func_int2.int2_sig_mot
-        | val->emb_func_int2.int2_step_detector
-        | val->emb_func_int2.int2_tilt
-        | val->fsm_int2_a.int2_fsm1
-        | val->fsm_int2_a.int2_fsm2
-        | val->fsm_int2_a.int2_fsm3
-        | val->fsm_int2_a.int2_fsm4
-        | val->fsm_int2_a.int2_fsm5
-        | val->fsm_int2_a.int2_fsm6
-        | val->fsm_int2_a.int2_fsm7
-        | val->fsm_int2_a.int2_fsm8
-        | val->fsm_int2_b.int2_fsm9
-        | val->fsm_int2_b.int2_fsm10
-        | val->fsm_int2_b.int2_fsm11
-        | val->fsm_int2_b.int2_fsm12
-        | val->fsm_int2_b.int2_fsm13
-        | val->fsm_int2_b.int2_fsm14
-        | val->fsm_int2_b.int2_fsm15
-        | val->fsm_int2_b.int2_fsm16 )!= PROPERTY_DISABLE ){
-      val->md2_cfg.int2_emb_func = PROPERTY_ENABLE;
-    }
-    else{
-      val->md2_cfg.int2_emb_func = PROPERTY_DISABLE;
-    }
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_INT2_CTRL,
-                            (uint8_t*)&val->int2_ctrl, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_MD2_CFG, (uint8_t*)&val->md2_cfg, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_TAP_CFG2, (uint8_t*) &tap_cfg2, 1);
-  }
-
-  if (ret == 0) {
-    ret = lsm6dso_pin_int1_route_get(ctx, &pin_int1_route);
-  }
-
-  if (ret == 0) {
-    if ( ( val->int2_ctrl.int2_cnt_bdr
-         | val->int2_ctrl.int2_drdy_g
-         | val->int2_ctrl.int2_drdy_temp
-         | val->int2_ctrl.int2_drdy_xl
-         | val->int2_ctrl.int2_fifo_full
-         | val->int2_ctrl.int2_fifo_ovr
-         | val->int2_ctrl.int2_fifo_th
-         | val->md2_cfg.int2_6d
-         | val->md2_cfg.int2_double_tap
-         | val->md2_cfg.int2_ff
-         | val->md2_cfg.int2_wu
-         | val->md2_cfg.int2_single_tap
-         | val->md2_cfg.int2_sleep_change
-         | pin_int1_route.int1_ctrl.den_drdy_flag
-         | pin_int1_route.int1_ctrl.int1_boot
-         | pin_int1_route.int1_ctrl.int1_cnt_bdr
-         | pin_int1_route.int1_ctrl.int1_drdy_g
-         | pin_int1_route.int1_ctrl.int1_drdy_xl
-         | pin_int1_route.int1_ctrl.int1_fifo_full
-         | pin_int1_route.int1_ctrl.int1_fifo_ovr
-         | pin_int1_route.int1_ctrl.int1_fifo_th
-         | pin_int1_route.md1_cfg.int1_6d
-         | pin_int1_route.md1_cfg.int1_double_tap
-         | pin_int1_route.md1_cfg.int1_ff
-         | pin_int1_route.md1_cfg.int1_wu
-         | pin_int1_route.md1_cfg.int1_single_tap
-         | pin_int1_route.md1_cfg.int1_sleep_change ) != PROPERTY_DISABLE) {
-      tap_cfg2.interrupts_enable = PROPERTY_ENABLE;
-    }
-    else{
-      tap_cfg2.interrupts_enable = PROPERTY_DISABLE;
-    }
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_TAP_CFG2, (uint8_t*) &tap_cfg2, 1);
-  }
-  return ret;
-}
-
-/**
-  * @brief  Select the signal that need to route on int2 pad.[get]
-  *
-  * @param  ctx      read / write interface definitions
-  * @param  val      union of registers INT2_CTRL,  MD2_CFG,
-  *                  EMB_FUNC_INT2, FSM_INT2_A, FSM_INT2_B
-  *
-  */
-int32_t lsm6dso_pin_int2_route_get(stmdev_ctx_t *ctx,
-                                   lsm6dso_pin_int2_route_t *val)
-{
-  int32_t ret;
-
-  ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_INT2,
-                           (uint8_t*)&val->emb_func_int2, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_FSM_INT2_A,
-                           (uint8_t*)&val->fsm_int2_a, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_FSM_INT2_B,
-                           (uint8_t*)&val->fsm_int2_b, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
-  }
-  if (ret == 0) {
-
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_INT2_CTRL,
-                           (uint8_t*)&val->int2_ctrl, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_MD2_CFG, (uint8_t*)&val->md2_cfg, 1);
   }
   return ret;
 }
@@ -9082,6 +8741,2192 @@ int32_t lsm6dso_sh_status_get(stmdev_ctx_t *ctx,
   }
   if (ret == 0) {
     ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
+  }
+
+  return ret;
+}
+
+/**
+  * @}
+  *
+  */
+
+/**
+  * @defgroup  Basic configuration
+  * @brief     This section groups all the functions concerning
+  *            device basic configuration.
+  * @{
+  *
+  */
+
+/**
+  * @brief  Device "Who am I".[get]
+  *
+  * @param  ctx          communication interface handler. Use NULL to ingnore
+  *                      this interface.(ptr)
+  * @param  aux_ctx      auxiliary communication interface handler. Use NULL
+  *                      to ingnore this interface.(ptr)
+  * @param  val          ID values read from the two interfaces. ID values
+  *                      will be the same.(ptr)
+  *
+  */
+int32_t lsm6dso_id_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
+                        lsm6dso_id_t *val)
+{
+  int32_t ret = 0;
+
+  if (ctx != NULL){
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_WHO_AM_I,
+                              (uint8_t*)&(val->ui), 1);
+  }
+  if (aux_ctx != NULL){
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(aux_ctx, LSM6DSO_WHO_AM_I,
+                              (uint8_t*)&(val->aux), 1);
+    }
+  }
+  return ret;
+}
+
+/**
+  * @brief  Re-initialize the device.[set]
+  *
+  * @param  ctx          communication interface handler.(ptr)
+  * @param  val          re-initialization mode. Refer to datasheet
+  *                      and application note for more information
+  *                      about differencies beetween boot and sw_reset
+  *                      procedure.
+  *
+  */
+int32_t lsm6dso_init_set(stmdev_ctx_t *ctx, lsm6dso_init_t val)
+{
+  lsm6dso_emb_func_init_a_t emb_func_init_a;
+  lsm6dso_emb_func_init_b_t emb_func_init_b;
+  lsm6dso_ctrl3_c_t ctrl3_c;
+  int32_t ret;
+
+  ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_INIT_B,
+                            (uint8_t*)&emb_func_init_b, 1);
+  }
+  if (ret == 0) {
+    emb_func_init_b.fifo_compr_init = (uint8_t)val
+                                      & ( (uint8_t)LSM6DSO_FIFO_COMP >> 2 );
+    emb_func_init_b.fsm_init = (uint8_t)val
+                               & ( (uint8_t)LSM6DSO_FSM >> 3 );
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_INIT_B,
+                             (uint8_t*)&emb_func_init_b, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_INIT_A,
+                            (uint8_t*)&emb_func_init_a, 1);
+  }
+  if (ret == 0) {
+    emb_func_init_a.step_det_init = ( (uint8_t)val
+                                       & (uint8_t)LSM6DSO_PEDO ) >> 5;
+    emb_func_init_a.tilt_init = ( (uint8_t)val
+                                  & (uint8_t)LSM6DSO_TILT ) >> 6;
+    emb_func_init_a.sig_mot_init = ( (uint8_t)val
+                                     & (uint8_t)LSM6DSO_SMOTION ) >> 7;
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_INIT_A,
+                             (uint8_t*)&emb_func_init_a, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
+  }
+
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL3_C, (uint8_t*)&ctrl3_c, 1);
+  }
+  if ( ( (val == LSM6DSO_BOOT) || (val == LSM6DSO_RESET) ) && (ret == 0) ) {
+    ctrl3_c.boot = (uint8_t)val & (uint8_t)LSM6DSO_BOOT;
+    ctrl3_c.sw_reset = ( (uint8_t)val & (uint8_t)LSM6DSO_RESET) >> 1;
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_CTRL3_C, (uint8_t*)&ctrl3_c, 1);
+  }
+  if ( ( val == LSM6DSO_DRV_RDY )
+       && ( (ctrl3_c.bdu == PROPERTY_DISABLE)
+            || (ctrl3_c.if_inc == PROPERTY_DISABLE) ) && (ret == 0) ) {
+    ctrl3_c.bdu = PROPERTY_ENABLE;
+    ctrl3_c.if_inc = PROPERTY_ENABLE;
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_CTRL3_C, (uint8_t*)&ctrl3_c, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Configures the bus operating mode.[set]
+  *
+  * @param  ctx          communication interface handler. Use NULL to ingnore
+  *                      this interface.(ptr)
+  * @param  aux_ctx      auxiliary communication interface handler. Use NULL
+  *                      to ingnore this interface.(ptr)
+  * @param  val          configures the bus operating mode for both the
+  *                      main and the auxiliary interface.
+  *
+  */
+int32_t lsm6dso_bus_mode_set(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
+                              lsm6dso_bus_mode_t val)
+{
+  lsm6dso_ctrl1_ois_t ctrl1_ois;
+  lsm6dso_i3c_bus_avb_t i3c_bus_avb;
+  lsm6dso_ctrl9_xl_t ctrl9_xl;
+  lsm6dso_ctrl3_c_t ctrl3_c;
+  lsm6dso_ctrl4_c_t ctrl4_c;
+  uint8_t bit_val;
+  int32_t ret;
+
+  ret = 0;
+
+  if (aux_ctx != NULL) {
+    ret = lsm6dso_read_reg(aux_ctx, LSM6DSO_CTRL1_OIS,
+                            (uint8_t*)&ctrl1_ois, 1);
+
+    bit_val = ( (uint8_t)val.aux_bus_md & 0x04U ) >> 2;
+    if ( ( ret == 0 ) && ( ctrl1_ois.sim_ois != bit_val ) ) {
+      ctrl1_ois.sim_ois = bit_val;
+      ret = lsm6dso_write_reg(aux_ctx, LSM6DSO_CTRL1_OIS,
+                               (uint8_t*)&ctrl1_ois, 1);
+    }
+  }
+
+  if (ctx != NULL) {
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL9_XL,
+                              (uint8_t*)&ctrl9_xl, 1);
+    }
+
+    bit_val = ((uint8_t)val.ui_bus_md & 0x04U) >> 2;
+    if ( ( ret == 0 ) && ( ctrl9_xl.i3c_disable != bit_val ) ) {
+      ctrl9_xl.i3c_disable = bit_val;
+      ret = lsm6dso_write_reg(ctx, LSM6DSO_CTRL9_XL,
+                               (uint8_t*)&ctrl9_xl, 1);
+    }
+
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_I3C_BUS_AVB,
+                              (uint8_t*)&i3c_bus_avb, 1);
+    }
+
+    bit_val = ((uint8_t)val.ui_bus_md & 0x30U) >> 4;
+    if ( ( ret == 0 ) && ( i3c_bus_avb.i3c_bus_avb_sel != bit_val ) ) {
+      i3c_bus_avb.i3c_bus_avb_sel = bit_val;
+      ret = lsm6dso_write_reg(ctx, LSM6DSO_I3C_BUS_AVB,
+                               (uint8_t*)&i3c_bus_avb, 1);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL4_C,
+                              (uint8_t*)&ctrl4_c, 1);
+    }
+    bit_val = ( (uint8_t)val.ui_bus_md & 0x02U ) >> 1;
+    if ( ( ret == 0 ) && ( ctrl4_c.i2c_disable != bit_val ) ) {
+      ctrl4_c.i2c_disable = bit_val;
+      ret = lsm6dso_write_reg(ctx, LSM6DSO_CTRL4_C,
+                               (uint8_t*)&ctrl4_c, 1);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL3_C,
+                              (uint8_t*)&ctrl3_c, 1);
+    }
+    bit_val = (uint8_t)val.ui_bus_md & 0x01U;
+    if ( ( ret == 0 ) && ( ctrl3_c.sim != bit_val ) ) {
+      ctrl3_c.sim = bit_val;
+      ret = lsm6dso_write_reg(ctx, LSM6DSO_CTRL3_C,
+                               (uint8_t*)&ctrl3_c, 1);
+    }
+  }
+
+  return ret;
+
+}
+
+/**
+  * @brief  Get the bus operating mode.[get]
+  *
+  * @param  ctx          communication interface handler. Use NULL to ingnore
+  *                      this interface.(ptr)
+  * @param  aux_ctx      auxiliary communication interface handler. Use NULL
+  *                      to ingnore this interface.(ptr)
+  * @param  val          retrieves the bus operating mode for both the main
+  *                      and the auxiliary interface.(ptr)
+  *
+  */
+int32_t lsm6dso_bus_mode_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
+                              lsm6dso_bus_mode_t *val)
+{
+  lsm6dso_ctrl1_ois_t ctrl1_ois;
+  lsm6dso_i3c_bus_avb_t i3c_bus_avb;
+  lsm6dso_ctrl9_xl_t ctrl9_xl;
+  lsm6dso_ctrl3_c_t ctrl3_c;
+  lsm6dso_ctrl4_c_t ctrl4_c;
+
+  int32_t ret = 0;
+
+  if (aux_ctx != NULL) {
+    ret = lsm6dso_read_reg(aux_ctx, LSM6DSO_CTRL1_OIS,
+                            (uint8_t*)&ctrl1_ois, 1);
+    switch ( ctrl1_ois.sim_ois ) {
+      case LSM6DSO_SPI_4W_AUX:
+        val->aux_bus_md = LSM6DSO_SPI_4W_AUX;
+        break;
+      case LSM6DSO_SPI_3W_AUX:
+        val->aux_bus_md = LSM6DSO_SPI_3W_AUX;
+        break;
+      default:
+        val->aux_bus_md = LSM6DSO_SPI_4W_AUX;
+        break;
+    }
+  }
+
+  if (ctx != NULL) {
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL9_XL,
+                              (uint8_t*)&ctrl9_xl, 1);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_I3C_BUS_AVB,
+                              (uint8_t*)&i3c_bus_avb, 1);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL4_C,
+                              (uint8_t*)&ctrl4_c, 1);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL3_C,
+                              (uint8_t*)&ctrl3_c, 1);
+
+      switch ( ( i3c_bus_avb.i3c_bus_avb_sel << 4 ) &
+               ( ctrl9_xl.i3c_disable << 2 ) &
+               ( ctrl4_c.i2c_disable << 1) & ctrl3_c.sim ) {
+        case LSM6DSO_SEL_BY_HW:
+          val->ui_bus_md = LSM6DSO_SEL_BY_HW;
+          break;
+        case LSM6DSO_SPI_4W:
+          val->ui_bus_md = LSM6DSO_SPI_4W;
+          break;
+        case LSM6DSO_SPI_3W:
+          val->ui_bus_md = LSM6DSO_SPI_3W;
+          break;
+        case LSM6DSO_I2C:
+          val->ui_bus_md = LSM6DSO_I2C;
+          break;
+        case LSM6DSO_I3C_T_50us:
+          val->ui_bus_md = LSM6DSO_I3C_T_50us;
+          break;
+        case LSM6DSO_I3C_T_2us:
+          val->ui_bus_md = LSM6DSO_I3C_T_2us;
+          break;
+        case LSM6DSO_I3C_T_1ms:
+          val->ui_bus_md = LSM6DSO_I3C_T_1ms;
+          break;
+        case LSM6DSO_I3C_T_25ms:
+          val->ui_bus_md = LSM6DSO_I3C_T_25ms;
+          break;
+        default:
+          val->ui_bus_md = LSM6DSO_SEL_BY_HW;
+          break;
+      }
+    }
+  }
+  return ret;
+}
+
+/**
+  * @brief  Get the status of the device.[get]
+  *
+  * @param  ctx          communication interface handler. Use NULL to ingnore
+  *                      this interface.(ptr)
+  * @param  aux_ctx      auxiliary communication interface handler. Use NULL
+  *                      to ingnore this interface.(ptr)
+  * @param  val          the status of the device.(ptr)
+  *
+  */
+int32_t lsm6dso_status_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
+                            lsm6dso_status_t *val)
+{
+  lsm6dso_status_spiaux_t       status_spiaux;
+  lsm6dso_status_reg_t          status_reg;
+  lsm6dso_ctrl3_c_t             ctrl3_c;
+  int32_t                       ret;
+
+  ret = 0;
+
+  if (aux_ctx != NULL){
+    ret = lsm6dso_read_reg(aux_ctx, LSM6DSO_STATUS_SPIAUX,
+                            (uint8_t*)&status_spiaux, 1);
+    val->ois_drdy_xl        = status_spiaux.xlda;
+    val->ois_drdy_g         = status_spiaux.gda;
+    val->ois_gyro_settling  = status_spiaux.gyro_settling;
+  }
+
+  if (ctx != NULL){
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL3_C, (uint8_t*)&ctrl3_c, 1);
+    val->sw_reset = ctrl3_c.sw_reset;
+    val->boot = ctrl3_c.boot;
+
+    if ( (ret == 0) && ( ctrl3_c.sw_reset == PROPERTY_DISABLE ) &&
+         ( ctrl3_c.boot == PROPERTY_DISABLE ) ) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_STATUS_REG,
+                              (uint8_t*)&status_reg, 1);
+      val->drdy_xl   = status_reg.xlda;
+      val->drdy_g    = status_reg.gda;
+      val->drdy_temp = status_reg.tda;
+    }
+  }
+  return ret;
+}
+
+/**
+  * @brief  Electrical pin configuration.[set]
+  *
+  * @param  ctx          communication interface handler.(ptr)
+  * @param  val          the electrical settings for the configurable
+  *                      pins.
+  *
+  */
+int32_t lsm6dso_pin_conf_set(stmdev_ctx_t *ctx, lsm6dso_pin_conf_t val)
+{
+  lsm6dso_i3c_bus_avb_t i3c_bus_avb;
+  lsm6dso_pin_ctrl_t pin_ctrl;
+  lsm6dso_ctrl3_c_t ctrl3_c;
+  int32_t ret;
+
+  ret = lsm6dso_read_reg(ctx, LSM6DSO_PIN_CTRL, (uint8_t*)&pin_ctrl, 1);
+  if (ret == 0) {
+    pin_ctrl.ois_pu_dis = ~val.aux_sdo_ocs_pull_up;
+    pin_ctrl.sdo_pu_en  = val.sdo_sa0_pull_up;
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_PIN_CTRL, (uint8_t*)&pin_ctrl, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL3_C, (uint8_t*)&ctrl3_c, 1);
+  }
+  if (ret == 0) {
+    ctrl3_c.pp_od = ~val.int1_int2_push_pull;
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_CTRL3_C, (uint8_t*)&ctrl3_c, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_I3C_BUS_AVB,
+                            (uint8_t*)&i3c_bus_avb, 1);
+  }
+  if (ret == 0) {
+    i3c_bus_avb.pd_dis_int1 = ~val.int1_pull_down;
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_I3C_BUS_AVB,
+                             (uint8_t*)&i3c_bus_avb, 1);
+  }
+  return ret;
+}
+
+/**
+  * @brief  Electrical pin configuration.[get]
+  *
+  * @param  ctx          communication interface handler.(ptr)
+  * @param  val          the electrical settings for the configurable
+  *                      pins.(ptr)
+  *
+  */
+int32_t lsm6dso_pin_conf_get(stmdev_ctx_t *ctx, lsm6dso_pin_conf_t *val)
+{
+  lsm6dso_i3c_bus_avb_t i3c_bus_avb;
+  lsm6dso_pin_ctrl_t pin_ctrl;
+  lsm6dso_ctrl3_c_t ctrl3_c;
+  int32_t ret;
+
+  ret = lsm6dso_read_reg(ctx, LSM6DSO_PIN_CTRL, (uint8_t*)&pin_ctrl, 1);
+  if (ret == 0) {
+    val->aux_sdo_ocs_pull_up = ~pin_ctrl.ois_pu_dis;
+    val->aux_sdo_ocs_pull_up =  pin_ctrl.sdo_pu_en;
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL3_C, (uint8_t*)&ctrl3_c, 1);
+  }
+  if (ret == 0) {
+    val->int1_int2_push_pull = ~ctrl3_c.pp_od;
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_I3C_BUS_AVB,
+                            (uint8_t*)&i3c_bus_avb, 1);
+  }
+  if (ret == 0) {
+    val->int1_pull_down = ~i3c_bus_avb.pd_dis_int1;
+  }
+  return ret;
+}
+
+/**
+  * @brief  Interrupt pins hardware signal configuration.[set]
+  *
+  * @param  ctx          communication interface handler.(ptr)
+  * @param  val          the pins hardware signal settings.
+  *
+  */
+int32_t lsm6dso_interrupt_mode_set(stmdev_ctx_t *ctx,
+                                    lsm6dso_int_mode_t val)
+{
+  lsm6dso_tap_cfg0_t tap_cfg0;
+  lsm6dso_page_rw_t page_rw;
+  lsm6dso_ctrl3_c_t ctrl3_c;
+  int32_t ret;
+
+  ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL3_C, (uint8_t*)&ctrl3_c, 1);
+  if (ret == 0) {
+    ctrl3_c.h_lactive = val.active_low;
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_CTRL3_C, (uint8_t*)&ctrl3_c, 1);
+  }
+  if (ret == 0) {
+  ret = lsm6dso_read_reg(ctx, LSM6DSO_TAP_CFG0, (uint8_t*) &tap_cfg0, 1);
+  }
+  if (ret == 0) {
+    tap_cfg0.lir = val.base_latched;
+    tap_cfg0.int_clr_on_read = val.base_latched | val.emb_latched;
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_TAP_CFG0, (uint8_t*) &tap_cfg0, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_PAGE_RW, (uint8_t*) &page_rw, 1);
+  }
+  if (ret == 0) {
+    page_rw.emb_func_lir = val.emb_latched;
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_PAGE_RW, (uint8_t*) &page_rw, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
+  }
+  return ret;
+}
+
+/**
+  * @brief  Interrupt pins hardware signal configuration.[get]
+  *
+  * @param  ctx          communication interface handler.(ptr)
+  * @param  val          the pins hardware signal settings.(ptr)
+  *
+  */
+int32_t lsm6dso_interrupt_mode_get(stmdev_ctx_t *ctx,
+                                    lsm6dso_int_mode_t *val)
+{
+  lsm6dso_tap_cfg0_t tap_cfg0;
+  lsm6dso_page_rw_t page_rw;
+  lsm6dso_ctrl3_c_t ctrl3_c;
+  int32_t ret;
+
+  ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL3_C, (uint8_t*)&ctrl3_c, 1);
+  if (ret == 0) {
+    ctrl3_c.h_lactive = val->active_low;
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_TAP_CFG0, (uint8_t*) &tap_cfg0, 1);
+  }
+  if (ret == 0) {
+    tap_cfg0.lir = val->base_latched;
+    tap_cfg0.int_clr_on_read = val->base_latched | val->emb_latched;
+    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_PAGE_RW, (uint8_t*) &page_rw, 1);
+  }
+  if (ret == 0) {
+    page_rw.emb_func_lir = val->emb_latched;
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_PAGE_RW, (uint8_t*) &page_rw, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
+  }
+  return ret;
+}
+
+/**
+  * @brief  Route interrupt signals on int1 pin.[set]
+  *
+  * @param  ctx          communication interface handler.(ptr)
+  * @param  val          the signals to route on int1 pin.
+  *
+  */
+int32_t lsm6dso_pin_int1_route_set(stmdev_ctx_t *ctx,
+                                    lsm6dso_pin_int1_route_t val)
+{
+  lsm6dso_pin_int2_route_t  pin_int2_route;
+  lsm6dso_emb_func_int1_t   emb_func_int1;
+  lsm6dso_fsm_int1_a_t      fsm_int1_a;
+  lsm6dso_fsm_int1_b_t      fsm_int1_b;
+  lsm6dso_int1_ctrl_t       int1_ctrl;
+  lsm6dso_int2_ctrl_t       int2_ctrl;
+  lsm6dso_tap_cfg2_t        tap_cfg2;
+  lsm6dso_md2_cfg_t         md2_cfg;
+  lsm6dso_md1_cfg_t         md1_cfg;
+  lsm6dso_ctrl4_c_t         ctrl4_c;
+  int32_t                    ret;
+
+  int1_ctrl.int1_drdy_xl   = val.drdy_xl;
+  int1_ctrl.int1_drdy_g    = val.drdy_g;
+  int1_ctrl.int1_boot      = val.boot;
+  int1_ctrl.int1_fifo_th   = val.fifo_th;
+  int1_ctrl.int1_fifo_ovr  = val.fifo_ovr;
+  int1_ctrl.int1_fifo_full = val.fifo_full;
+  int1_ctrl.int1_cnt_bdr   = val.fifo_bdr;
+  int1_ctrl.den_drdy_flag  = val.den_flag;
+
+  md1_cfg.int1_shub         = val.sh_endop;
+  md1_cfg.int1_6d           = val.six_d;
+  md1_cfg.int1_double_tap   = val.double_tap;
+  md1_cfg.int1_ff           = val.free_fall;
+  md1_cfg.int1_wu           = val.wake_up;
+  md1_cfg.int1_single_tap   = val.single_tap;
+  md1_cfg.int1_sleep_change = val.sleep_change;
+
+  emb_func_int1.int1_step_detector = val.step_detector;
+  emb_func_int1.int1_tilt          = val.tilt;
+  emb_func_int1.int1_sig_mot       = val.sig_mot;
+  emb_func_int1.int1_fsm_lc        = val.fsm_lc;
+
+  fsm_int1_a.int1_fsm1 = val.fsm1;
+  fsm_int1_a.int1_fsm2 = val.fsm2;
+  fsm_int1_a.int1_fsm3 = val.fsm3;
+  fsm_int1_a.int1_fsm4 = val.fsm4;
+  fsm_int1_a.int1_fsm5 = val.fsm5;
+  fsm_int1_a.int1_fsm6 = val.fsm6;
+  fsm_int1_a.int1_fsm7 = val.fsm7;
+  fsm_int1_a.int1_fsm8 = val.fsm8;
+
+  fsm_int1_b.int1_fsm9  = val.fsm9 ;
+  fsm_int1_b.int1_fsm10 = val.fsm10;
+  fsm_int1_b.int1_fsm11 = val.fsm11;
+  fsm_int1_b.int1_fsm12 = val.fsm12;
+  fsm_int1_b.int1_fsm13 = val.fsm13;
+  fsm_int1_b.int1_fsm14 = val.fsm14;
+  fsm_int1_b.int1_fsm15 = val.fsm15;
+  fsm_int1_b.int1_fsm16 = val.fsm16;
+
+  ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL4_C, (uint8_t*)&ctrl4_c, 1);
+  if (ret == 0) {
+    if( ( val.drdy_temp | val.timestamp ) != PROPERTY_DISABLE) {
+      ctrl4_c.int2_on_int1 = PROPERTY_ENABLE;
+    }
+    else{
+      ctrl4_c.int2_on_int1 = PROPERTY_DISABLE;
+    }
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_CTRL4_C, (uint8_t*)&ctrl4_c, 1);
+  }
+
+  if (ret == 0) {
+    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_INT1,
+                            (uint8_t*)&emb_func_int1, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_FSM_INT1_A,
+                            (uint8_t*)&fsm_int1_a, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_FSM_INT1_B,
+                            (uint8_t*)&fsm_int1_b, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
+  }
+
+  if (ret == 0) {
+    if ( ( emb_func_int1.int1_fsm_lc
+         | emb_func_int1.int1_sig_mot
+         | emb_func_int1.int1_step_detector
+         | emb_func_int1.int1_tilt
+         | fsm_int1_a.int1_fsm1
+         | fsm_int1_a.int1_fsm2
+         | fsm_int1_a.int1_fsm3
+         | fsm_int1_a.int1_fsm4
+         | fsm_int1_a.int1_fsm5
+         | fsm_int1_a.int1_fsm6
+         | fsm_int1_a.int1_fsm7
+         | fsm_int1_a.int1_fsm8
+         | fsm_int1_b.int1_fsm9
+         | fsm_int1_b.int1_fsm10
+         | fsm_int1_b.int1_fsm11
+         | fsm_int1_b.int1_fsm12
+         | fsm_int1_b.int1_fsm13
+         | fsm_int1_b.int1_fsm14
+         | fsm_int1_b.int1_fsm15
+         | fsm_int1_b.int1_fsm16) != PROPERTY_DISABLE){
+      md1_cfg.int1_emb_func = PROPERTY_ENABLE;
+    }
+    else{
+      md1_cfg.int1_emb_func = PROPERTY_DISABLE;
+    }
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_INT1_CTRL,
+                            (uint8_t*)&int1_ctrl, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_MD1_CFG, (uint8_t*)&md1_cfg, 1);
+  }
+
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  }
+  if (ret == 0) {
+    int2_ctrl.int2_drdy_temp = val.drdy_temp;
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_MD2_CFG, (uint8_t*)&md2_cfg, 1);
+  }
+  if (ret == 0) {
+    md2_cfg.int2_timestamp = val.timestamp;
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_MD2_CFG, (uint8_t*)&md2_cfg, 1);
+  }
+
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_TAP_CFG2, (uint8_t*) &tap_cfg2, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_pin_int2_route_get(ctx, NULL, &pin_int2_route);
+  }
+  if (ret == 0) {
+    if ( ( pin_int2_route.fifo_bdr
+         | pin_int2_route.drdy_g
+         | pin_int2_route.drdy_temp
+         | pin_int2_route.drdy_xl
+         | pin_int2_route.fifo_full
+         | pin_int2_route.fifo_ovr
+         | pin_int2_route.fifo_th
+         | pin_int2_route.six_d
+         | pin_int2_route.double_tap
+         | pin_int2_route.free_fall
+         | pin_int2_route.wake_up
+         | pin_int2_route.single_tap
+         | pin_int2_route.sleep_change
+         | int1_ctrl.den_drdy_flag
+         | int1_ctrl.int1_boot
+         | int1_ctrl.int1_cnt_bdr
+         | int1_ctrl.int1_drdy_g
+         | int1_ctrl.int1_drdy_xl
+         | int1_ctrl.int1_fifo_full
+         | int1_ctrl.int1_fifo_ovr
+         | int1_ctrl.int1_fifo_th
+         | md1_cfg.int1_shub
+         | md1_cfg.int1_6d
+         | md1_cfg.int1_double_tap
+         | md1_cfg.int1_ff
+         | md1_cfg.int1_wu
+         | md1_cfg.int1_single_tap
+         | md1_cfg.int1_sleep_change) != PROPERTY_DISABLE) {
+      tap_cfg2.interrupts_enable = PROPERTY_ENABLE;
+    }
+    else{
+      tap_cfg2.interrupts_enable = PROPERTY_DISABLE;
+    }
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_TAP_CFG2, (uint8_t*) &tap_cfg2, 1);
+  }
+  return ret;
+}
+
+/**
+  * @brief  Route interrupt signals on int1 pin.[get]
+  *
+  * @param  ctx          communication interface handler.(ptr)
+  * @param  val          the signals that are routed on int1 pin.(ptr)
+  *
+  */
+int32_t lsm6dso_pin_int1_route_get(stmdev_ctx_t *ctx,
+                                    lsm6dso_pin_int1_route_t *val)
+{
+  lsm6dso_emb_func_int1_t   emb_func_int1;
+  lsm6dso_fsm_int1_a_t      fsm_int1_a;
+  lsm6dso_fsm_int1_b_t      fsm_int1_b;
+  lsm6dso_int1_ctrl_t       int1_ctrl;
+  lsm6dso_int2_ctrl_t       int2_ctrl;
+  lsm6dso_md2_cfg_t         md2_cfg;
+  lsm6dso_md1_cfg_t         md1_cfg;
+  lsm6dso_ctrl4_c_t         ctrl4_c;
+  int32_t                    ret;
+
+  ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_INT1,
+                           (uint8_t*)&emb_func_int1, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_FSM_INT1_A,
+                           (uint8_t*)&fsm_int1_a, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_FSM_INT1_B,
+                           (uint8_t*)&fsm_int1_b, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_INT1_CTRL,
+                           (uint8_t*)&int1_ctrl, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_MD1_CFG, (uint8_t*)&md1_cfg, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL4_C, (uint8_t*)&ctrl4_c, 1);
+  }
+  if (ctrl4_c.int2_on_int1 == PROPERTY_ENABLE){
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+      val->drdy_temp = int2_ctrl.int2_drdy_temp;
+    }
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_MD2_CFG, (uint8_t*)&md2_cfg, 1);
+      val->timestamp = md2_cfg.int2_timestamp;
+    }
+  }
+  else {
+    val->drdy_temp = PROPERTY_DISABLE;
+    val->timestamp = PROPERTY_DISABLE;
+  }
+
+  val->drdy_xl   = int1_ctrl.int1_drdy_xl;
+  val->drdy_g    = int1_ctrl.int1_drdy_g;
+  val->boot      = int1_ctrl.int1_boot;
+  val->fifo_th   = int1_ctrl.int1_fifo_th;
+  val->fifo_ovr  = int1_ctrl.int1_fifo_ovr;
+  val->fifo_full = int1_ctrl.int1_fifo_full;
+  val->fifo_bdr  = int1_ctrl.int1_cnt_bdr;
+  val->den_flag  = int1_ctrl.den_drdy_flag;
+
+  val->sh_endop     = md1_cfg.int1_shub;
+  val->six_d        = md1_cfg.int1_6d;
+  val->double_tap   = md1_cfg.int1_double_tap;
+  val->free_fall    = md1_cfg.int1_ff;
+  val->wake_up      = md1_cfg.int1_wu;
+  val->single_tap   = md1_cfg.int1_single_tap;
+  val->sleep_change = md1_cfg.int1_sleep_change;
+
+  val->step_detector = emb_func_int1.int1_step_detector;
+  val->tilt          = emb_func_int1.int1_tilt;
+  val->sig_mot       = emb_func_int1.int1_sig_mot;
+  val->fsm_lc        = emb_func_int1.int1_fsm_lc;
+
+  val->fsm1 = fsm_int1_a.int1_fsm1;
+  val->fsm2 = fsm_int1_a.int1_fsm2;
+  val->fsm3 = fsm_int1_a.int1_fsm3;
+  val->fsm4 = fsm_int1_a.int1_fsm4;
+  val->fsm5 = fsm_int1_a.int1_fsm5;
+  val->fsm6 = fsm_int1_a.int1_fsm6;
+  val->fsm7 = fsm_int1_a.int1_fsm7;
+  val->fsm8 = fsm_int1_a.int1_fsm8;
+
+  val->fsm9  = fsm_int1_b.int1_fsm9;
+  val->fsm10 = fsm_int1_b.int1_fsm10;
+  val->fsm11 = fsm_int1_b.int1_fsm11;
+  val->fsm12 = fsm_int1_b.int1_fsm12;
+  val->fsm13 = fsm_int1_b.int1_fsm13;
+  val->fsm14 = fsm_int1_b.int1_fsm14;
+  val->fsm15 = fsm_int1_b.int1_fsm15;
+  val->fsm16 = fsm_int1_b.int1_fsm16;
+
+  return ret;
+}
+
+/**
+  * @brief  Route interrupt signals on int2 pin.[set]
+  *
+  * @param  ctx          communication interface handler. Use NULL to ingnore
+  *                      this interface.(ptr)
+  * @param  aux_ctx      auxiliary communication interface handler. Use NULL
+  *                      to ingnore this interface.(ptr)
+  * @param  val          the signals to route on int2 pin.
+  *
+  */
+int32_t lsm6dso_pin_int2_route_set(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
+                                    lsm6dso_pin_int2_route_t val)
+{
+  lsm6dso_pin_int1_route_t pin_int1_route;
+  lsm6dso_emb_func_int2_t  emb_func_int2;
+  lsm6dso_fsm_int2_a_t     fsm_int2_a;
+  lsm6dso_fsm_int2_b_t     fsm_int2_b;
+  lsm6dso_int2_ctrl_t      int2_ctrl;
+  lsm6dso_tap_cfg2_t       tap_cfg2;
+  lsm6dso_md2_cfg_t        md2_cfg;
+  lsm6dso_ctrl4_c_t        ctrl4_c;
+  lsm6dso_int_ois_t        int_ois;
+  int32_t                  ret;
+
+  ret = 0;
+
+  if( aux_ctx != NULL ) {
+    ret = lsm6dso_read_reg(aux_ctx, LSM6DSO_INT_OIS,
+                            (uint8_t*)&int_ois, 1);
+    if (ret == 0) {
+      int_ois.int2_drdy_ois = val.drdy_ois;
+      ret = lsm6dso_write_reg(aux_ctx, LSM6DSO_INT_OIS,
+                               (uint8_t*)&int_ois, 1);
+    }
+  }
+
+  if( ctx != NULL ) {
+    int2_ctrl.int2_drdy_xl   = val.drdy_xl;
+    int2_ctrl.int2_drdy_g    = val.drdy_g;
+    int2_ctrl.int2_drdy_temp = val.drdy_temp;
+    int2_ctrl.int2_fifo_th   = val.fifo_th;
+    int2_ctrl.int2_fifo_ovr  = val.fifo_ovr;
+    int2_ctrl.int2_fifo_full = val.fifo_full;
+    int2_ctrl.int2_cnt_bdr   = val.fifo_bdr;
+
+    md2_cfg.int2_timestamp    = val.timestamp;
+    md2_cfg.int2_6d           = val.six_d;
+    md2_cfg.int2_double_tap   = val.double_tap;
+    md2_cfg.int2_ff           = val.free_fall;
+    md2_cfg.int2_wu           = val.wake_up;
+    md2_cfg.int2_single_tap   = val.single_tap;
+    md2_cfg.int2_sleep_change = val.sleep_change;
+
+    emb_func_int2. int2_step_detector = val.step_detector;
+    emb_func_int2.int2_tilt           = val.tilt;
+    emb_func_int2.int2_fsm_lc         = val.fsm_lc;
+
+    fsm_int2_a.int2_fsm1 = val.fsm1;
+    fsm_int2_a.int2_fsm2 = val.fsm2;
+    fsm_int2_a.int2_fsm3 = val.fsm3;
+    fsm_int2_a.int2_fsm4 = val.fsm4;
+    fsm_int2_a.int2_fsm5 = val.fsm5;
+    fsm_int2_a.int2_fsm6 = val.fsm6;
+    fsm_int2_a.int2_fsm7 = val.fsm7;
+    fsm_int2_a.int2_fsm8 = val.fsm8;
+
+    fsm_int2_b.int2_fsm9  = val.fsm9 ;
+    fsm_int2_b.int2_fsm10 = val.fsm10;
+    fsm_int2_b.int2_fsm11 = val.fsm11;
+    fsm_int2_b.int2_fsm12 = val.fsm12;
+    fsm_int2_b.int2_fsm13 = val.fsm13;
+    fsm_int2_b.int2_fsm14 = val.fsm14;
+    fsm_int2_b.int2_fsm15 = val.fsm15;
+    fsm_int2_b.int2_fsm16 = val.fsm16;
+
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL4_C, (uint8_t*)&ctrl4_c, 1);
+      if (ret == 0) {
+        if ( ( val.drdy_temp | val.timestamp ) != PROPERTY_DISABLE ) {
+          ctrl4_c.int2_on_int1 = PROPERTY_DISABLE;
+        }
+        else{
+          ctrl4_c.int2_on_int1 = PROPERTY_ENABLE;
+        }
+        ret = lsm6dso_write_reg(ctx, LSM6DSO_CTRL4_C, (uint8_t*)&ctrl4_c, 1);
+      }
+    }
+
+    if (ret == 0) {
+      ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_INT2,
+                              (uint8_t*)&emb_func_int2, 1);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_write_reg(ctx, LSM6DSO_FSM_INT2_A,
+                              (uint8_t*)&fsm_int2_a, 1);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_write_reg(ctx, LSM6DSO_FSM_INT2_B,
+                              (uint8_t*)&fsm_int2_b, 1);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
+    }
+
+    if (ret == 0) {
+      if (( emb_func_int2.int2_fsm_lc
+          | emb_func_int2.int2_sig_mot
+          | emb_func_int2.int2_step_detector
+          | emb_func_int2.int2_tilt
+          | fsm_int2_a.int2_fsm1
+          | fsm_int2_a.int2_fsm2
+          | fsm_int2_a.int2_fsm3
+          | fsm_int2_a.int2_fsm4
+          | fsm_int2_a.int2_fsm5
+          | fsm_int2_a.int2_fsm6
+          | fsm_int2_a.int2_fsm7
+          | fsm_int2_a.int2_fsm8
+          | fsm_int2_b.int2_fsm9
+          | fsm_int2_b.int2_fsm10
+          | fsm_int2_b.int2_fsm11
+          | fsm_int2_b.int2_fsm12
+          | fsm_int2_b.int2_fsm13
+          | fsm_int2_b.int2_fsm14
+          | fsm_int2_b.int2_fsm15
+          | fsm_int2_b.int2_fsm16)!= PROPERTY_DISABLE ){
+        md2_cfg.int2_emb_func = PROPERTY_ENABLE;
+      }
+      else{
+        md2_cfg.int2_emb_func = PROPERTY_DISABLE;
+      }
+      ret = lsm6dso_write_reg(ctx, LSM6DSO_INT2_CTRL,
+                              (uint8_t*)&int2_ctrl, 1);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_write_reg(ctx, LSM6DSO_MD2_CFG, (uint8_t*)&md2_cfg, 1);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_TAP_CFG2, (uint8_t*) &tap_cfg2, 1);
+    }
+
+    if (ret == 0) {
+      ret = lsm6dso_pin_int1_route_get(ctx, &pin_int1_route);
+    }
+
+    if (ret == 0) {
+      if ( ( val.fifo_bdr
+           | val.drdy_g
+           | val.drdy_temp
+           | val.drdy_xl
+           | val.fifo_full
+           | val.fifo_ovr
+           | val.fifo_th
+           | val.six_d
+           | val.double_tap
+           | val.free_fall
+           | val.wake_up
+           | val.single_tap
+           | val.sleep_change
+           | pin_int1_route.den_flag
+           | pin_int1_route.boot
+           | pin_int1_route.fifo_bdr
+           | pin_int1_route.drdy_g
+           | pin_int1_route.drdy_xl
+           | pin_int1_route.fifo_full
+           | pin_int1_route.fifo_ovr
+           | pin_int1_route.fifo_th
+           | pin_int1_route.six_d
+           | pin_int1_route.double_tap
+           | pin_int1_route.free_fall
+           | pin_int1_route.wake_up
+           | pin_int1_route.single_tap
+           | pin_int1_route.sleep_change ) != PROPERTY_DISABLE) {
+        tap_cfg2.interrupts_enable = PROPERTY_ENABLE;
+      }
+      else{
+        tap_cfg2.interrupts_enable = PROPERTY_DISABLE;
+      }
+      ret = lsm6dso_write_reg(ctx, LSM6DSO_TAP_CFG2, (uint8_t*) &tap_cfg2, 1);
+    }
+  }
+  return ret;
+}
+
+/**
+  * @brief  Route interrupt signals on int2 pin.[get]
+  *
+  * @param  ctx          communication interface handler. Use NULL to ingnore
+  *                      this interface.(ptr)
+  * @param  aux_ctx      auxiliary communication interface handler. Use NULL
+  *                      to ingnore this interface.(ptr)
+  * @param  val          the signals that are routed on int2 pin.(ptr)
+  *
+  */
+int32_t lsm6dso_pin_int2_route_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
+                                    lsm6dso_pin_int2_route_t *val)
+{
+  lsm6dso_emb_func_int2_t  emb_func_int2;
+  lsm6dso_fsm_int2_a_t     fsm_int2_a;
+  lsm6dso_fsm_int2_b_t     fsm_int2_b;
+  lsm6dso_int2_ctrl_t      int2_ctrl;
+  lsm6dso_md2_cfg_t        md2_cfg;
+  lsm6dso_ctrl4_c_t        ctrl4_c;
+  lsm6dso_int_ois_t        int_ois;
+  int32_t                   ret;
+
+  ret = 0;
+
+  if( aux_ctx != NULL ) {
+    ret = lsm6dso_read_reg(aux_ctx, LSM6DSO_INT_OIS,
+                            (uint8_t*)&int_ois, 1);
+    val->drdy_ois = int_ois.int2_drdy_ois;
+  }
+
+  if( ctx != NULL ) {
+    if (ret == 0) {
+     ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_INT2,
+                             (uint8_t*)&emb_func_int2, 1);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_FSM_INT2_A,
+                             (uint8_t*)&fsm_int2_a, 1);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_FSM_INT2_B,
+                             (uint8_t*)&fsm_int2_b, 1);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
+    }
+    if (ret == 0) {
+
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_INT2_CTRL,
+                             (uint8_t*)&int2_ctrl, 1);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_MD2_CFG,
+                              (uint8_t*)&md2_cfg, 1);
+    }
+
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL4_C, (uint8_t*)&ctrl4_c, 1);
+    }
+    if (ctrl4_c.int2_on_int1 == PROPERTY_DISABLE){
+      if (ret == 0) {
+        ret = lsm6dso_read_reg(ctx, LSM6DSO_INT2_CTRL,
+                                (uint8_t*)&int2_ctrl, 1);
+        val->drdy_temp = int2_ctrl.int2_drdy_temp;
+      }
+      if (ret == 0) {
+        ret = lsm6dso_read_reg(ctx, LSM6DSO_MD2_CFG, (uint8_t*)&md2_cfg, 1);
+        val->timestamp = md2_cfg.int2_timestamp;
+      }
+    }
+    else {
+      val->drdy_temp = PROPERTY_DISABLE;
+      val->timestamp = PROPERTY_DISABLE;
+    }
+
+    val->drdy_xl   = int2_ctrl.int2_drdy_xl;
+    val->drdy_g    = int2_ctrl.int2_drdy_g;
+    val->drdy_temp = int2_ctrl.int2_drdy_temp;
+    val->fifo_th   = int2_ctrl.int2_fifo_th;
+    val->fifo_ovr  = int2_ctrl.int2_fifo_ovr;
+    val->fifo_full = int2_ctrl.int2_fifo_full;
+    val->fifo_bdr   = int2_ctrl.int2_cnt_bdr;
+
+    val->timestamp    = md2_cfg.int2_timestamp;
+    val->six_d        = md2_cfg.int2_6d;
+    val->double_tap   = md2_cfg.int2_double_tap;
+    val->free_fall    = md2_cfg.int2_ff;
+    val->wake_up      = md2_cfg.int2_wu;
+    val->single_tap   = md2_cfg.int2_single_tap;
+    val->sleep_change = md2_cfg.int2_sleep_change;
+
+    val->step_detector = emb_func_int2. int2_step_detector;
+    val->tilt          = emb_func_int2.int2_tilt;
+    val->fsm_lc        = emb_func_int2.int2_fsm_lc;
+
+    val->fsm1 = fsm_int2_a.int2_fsm1;
+    val->fsm2 = fsm_int2_a.int2_fsm2;
+    val->fsm3 = fsm_int2_a.int2_fsm3;
+    val->fsm4 = fsm_int2_a.int2_fsm4;
+    val->fsm5 = fsm_int2_a.int2_fsm5;
+    val->fsm6 = fsm_int2_a.int2_fsm6;
+    val->fsm7 = fsm_int2_a.int2_fsm7;
+    val->fsm8 = fsm_int2_a.int2_fsm8;
+
+    val->fsm9  = fsm_int2_b.int2_fsm9;
+    val->fsm10 = fsm_int2_b.int2_fsm10;
+    val->fsm11 = fsm_int2_b.int2_fsm11;
+    val->fsm12 = fsm_int2_b.int2_fsm12;
+    val->fsm13 = fsm_int2_b.int2_fsm13;
+    val->fsm14 = fsm_int2_b.int2_fsm14;
+    val->fsm15 = fsm_int2_b.int2_fsm15;
+    val->fsm16 = fsm_int2_b.int2_fsm16;
+
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Get the status of all the interrupt sources.[get]
+  *
+  * @param  ctx          communication interface handler.(ptr)
+  * @param  val          the status of all the interrupt sources.(ptr)
+  *
+  */
+int32_t lsm6dso_all_sources_get(stmdev_ctx_t *ctx,
+                                 lsm6dso_all_sources_t *val)
+{
+  lsm6dso_emb_func_status_mainpage_t emb_func_status_mainpage;
+  lsm6dso_status_master_mainpage_t   status_master_mainpage;
+  lsm6dso_fsm_status_a_mainpage_t    fsm_status_a_mainpage;
+  lsm6dso_fsm_status_b_mainpage_t    fsm_status_b_mainpage;
+  lsm6dso_fifo_status1_t             fifo_status1;
+  lsm6dso_fifo_status2_t             fifo_status2;
+  lsm6dso_all_int_src_t              all_int_src;
+  lsm6dso_wake_up_src_t              wake_up_src;
+  lsm6dso_status_reg_t               status_reg;
+  lsm6dso_tap_src_t                  tap_src;
+  lsm6dso_d6d_src_t                  d6d_src;
+  lsm6dso_ctrl5_c_t                  ctrl5_c;
+  uint8_t                            reg[12];
+  int32_t                            ret;
+
+  ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL5_C, (uint8_t*)&ctrl5_c, 1);
+  if (ret == 0) {
+    ctrl5_c.not_used_01 = PROPERTY_ENABLE;
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_CTRL5_C, (uint8_t*)&ctrl5_c, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_ALL_INT_SRC, reg, 12);
+  }
+
+  if (ret == 0) {
+    bytecpy(( uint8_t*)&all_int_src, &reg[0]);
+    bytecpy(( uint8_t*)&wake_up_src, &reg[1]);
+    bytecpy(( uint8_t*)&tap_src, &reg[2]);
+    bytecpy(( uint8_t*)&d6d_src, &reg[3]);
+    bytecpy(( uint8_t*)&status_reg, &reg[4]);
+    bytecpy(( uint8_t*)&emb_func_status_mainpage, &reg[5]);
+    bytecpy(( uint8_t*)&fsm_status_a_mainpage, &reg[6]);
+    bytecpy(( uint8_t*)&fsm_status_b_mainpage, &reg[7]);
+    bytecpy(( uint8_t*)&status_master_mainpage, &reg[9]);
+    bytecpy(( uint8_t*)&fifo_status1, &reg[10]);
+    bytecpy(( uint8_t*)&fifo_status2, &reg[11]);
+
+    val->timestamp = all_int_src.timestamp_endcount;
+
+    val->wake_up_z    = wake_up_src.z_wu;
+    val->wake_up_y    = wake_up_src.y_wu;
+    val->wake_up_x    = wake_up_src.x_wu;
+    val->wake_up      = wake_up_src.wu_ia;
+    val->sleep_state  = wake_up_src.sleep_state;
+    val->free_fall    = wake_up_src.ff_ia;
+    val->sleep_change = wake_up_src.sleep_change_ia;
+
+    val->tap_x      = tap_src.z_tap;
+    val->tap_y      = tap_src.y_tap;
+    val->tap_z      = tap_src.x_tap;
+    val->tap_sign   = tap_src.tap_sign;
+    val->double_tap = tap_src.double_tap;
+    val->single_tap = tap_src.single_tap;
+
+    val->six_d_xl = d6d_src.xl;
+    val->six_d_xh = d6d_src.xh;
+    val->six_d_yl = d6d_src.yl;
+    val->six_d_yh = d6d_src.yh;
+    val->six_d_zl = d6d_src.zl;
+    val->six_d_zh = d6d_src.zh;
+    val->six_d    = d6d_src.d6d_ia;
+    val->den_flag = d6d_src.den_drdy;
+
+    val->drdy_xl   = status_reg.xlda;
+    val->drdy_g    = status_reg.gda;
+    val->drdy_temp = status_reg.tda;
+
+    val->step_detector = emb_func_status_mainpage.is_step_det;
+    val->tilt          = emb_func_status_mainpage.is_tilt;
+    val->sig_mot       = emb_func_status_mainpage.is_sigmot;
+    val->fsm_lc        = emb_func_status_mainpage.is_fsm_lc;
+
+    val->fsm1 = fsm_status_a_mainpage.is_fsm1;
+    val->fsm2 = fsm_status_a_mainpage.is_fsm2;
+    val->fsm3 = fsm_status_a_mainpage.is_fsm3;
+    val->fsm4 = fsm_status_a_mainpage.is_fsm4;
+    val->fsm5 = fsm_status_a_mainpage.is_fsm5;
+    val->fsm6 = fsm_status_a_mainpage.is_fsm6;
+    val->fsm7 = fsm_status_a_mainpage.is_fsm7;
+    val->fsm8 = fsm_status_a_mainpage.is_fsm8;
+
+    val->fsm9  = fsm_status_b_mainpage.is_fsm9;
+    val->fsm10 = fsm_status_b_mainpage.is_fsm10;
+    val->fsm11 = fsm_status_b_mainpage.is_fsm11;
+    val->fsm12 = fsm_status_b_mainpage.is_fsm12;
+    val->fsm13 = fsm_status_b_mainpage.is_fsm13;
+    val->fsm14 = fsm_status_b_mainpage.is_fsm14;
+    val->fsm15 = fsm_status_b_mainpage.is_fsm15;
+    val->fsm16 = fsm_status_b_mainpage.is_fsm16;
+
+    val->sh_endop       = status_master_mainpage.sens_hub_endop;
+    val->sh_slave0_nack = status_master_mainpage.slave0_nack;
+    val->sh_slave1_nack = status_master_mainpage.slave1_nack;
+    val->sh_slave2_nack = status_master_mainpage.slave2_nack;
+    val->sh_slave3_nack = status_master_mainpage.slave3_nack;
+    val->sh_wr_once     = status_master_mainpage.wr_once_done;
+
+    val->fifo_diff = (256U * fifo_status2.diff_fifo) + fifo_status1.diff_fifo;
+
+    val->fifo_ovr_latched = fifo_status2.over_run_latched;
+    val->fifo_bdr         = fifo_status2.counter_bdr_ia;
+    val->fifo_full        = fifo_status2.fifo_full_ia;
+    val->fifo_ovr         = fifo_status2.fifo_ovr_ia;
+    val->fifo_th          = fifo_status2.fifo_wtm_ia;
+
+    ctrl5_c.not_used_01 = PROPERTY_DISABLE;
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_CTRL5_C, (uint8_t*)&ctrl5_c, 1);
+
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Sensor conversion parameters selection.[set]
+  *
+  * @param  ctx          communication interface handler. Use NULL to ingnore
+  *                      this interface.(ptr)
+  * @param  aux_ctx      auxiliary communication interface handler. Use NULL
+  *                      to ingnore this interface.(ptr)
+  * @param  val          set the sensor conversion parameters by checking
+  *                      the constraints of the device.(ptr)
+  *
+  */
+int32_t lsm6dso_mode_set(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
+                          lsm6dso_md_t *val)
+{
+  lsm6dso_func_cfg_access_t func_cfg_access;
+  lsm6dso_ctrl1_ois_t ctrl1_ois;
+  lsm6dso_ctrl2_ois_t ctrl2_ois;
+  lsm6dso_ctrl3_ois_t ctrl3_ois;
+  lsm6dso_ctrl1_xl_t ctrl1_xl;
+  lsm6dso_ctrl8_xl_t ctrl8_xl;
+  lsm6dso_ctrl2_g_t ctrl2_g;
+  lsm6dso_ctrl3_c_t ctrl3_c;
+  lsm6dso_ctrl4_c_t ctrl4_c;
+  lsm6dso_ctrl5_c_t ctrl5_c;
+  lsm6dso_ctrl6_c_t ctrl6_c;
+  lsm6dso_ctrl7_g_t ctrl7_g;
+  uint8_t xl_hm_mode;
+  uint8_t g_hm_mode;
+  uint8_t xl_ulp_en;
+  uint8_t odr_gy;
+  uint8_t odr_xl;
+  uint8_t reg[8];
+  int32_t ret;
+
+  ret = 0;
+
+  /* reading input configuration */
+  xl_hm_mode = ( (uint8_t)val->ui.xl.odr & 0x10U ) >> 4;
+  xl_ulp_en = ( (uint8_t)val->ui.xl.odr & 0x20U ) >> 5;
+  odr_xl = (uint8_t)val->ui.xl.odr & 0x0FU;
+
+  /* if enable xl ultra low power mode disable gy and OIS chain */
+  if (xl_ulp_en == PROPERTY_ENABLE) {
+    val->ois.xl.odr = LSM6DSO_XL_OIS_OFF;
+    val->ois.gy.odr = LSM6DSO_GY_OIS_OFF;
+    val->ui.gy.odr  = LSM6DSO_GY_UI_OFF;
+  }
+  /* if OIS xl is enabled also gyro OIS is enabled */
+  if (val->ois.xl.odr == LSM6DSO_XL_OIS_6667Hz_HP){
+    val->ois.gy.odr = LSM6DSO_GY_OIS_6667Hz_HP;
+  }
+  g_hm_mode = ( (uint8_t)val->ui.gy.odr & 0x10U ) >> 4;
+  odr_gy = (uint8_t)val->ui.gy.odr & 0x0FU;
+
+  /* reading registers to be configured */
+  if( ctx != NULL ) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL1_XL, reg, 8);
+    bytecpy(( uint8_t*)&ctrl1_xl, &reg[0]);
+    bytecpy(( uint8_t*)&ctrl2_g,  &reg[1]);
+    bytecpy(( uint8_t*)&ctrl3_c,  &reg[2]);
+    bytecpy(( uint8_t*)&ctrl4_c,  &reg[3]);
+    bytecpy(( uint8_t*)&ctrl5_c,  &reg[4]);
+    bytecpy(( uint8_t*)&ctrl6_c,  &reg[5]);
+    bytecpy(( uint8_t*)&ctrl7_g,  &reg[6]);
+    bytecpy(( uint8_t*)&ctrl8_xl, &reg[7]);
+    if ( ret == 0 ) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_FUNC_CFG_ACCESS,
+                              (uint8_t*)&func_cfg_access, 1);
+    }
+    /* if toggle xl ultra low power mode, turn off xl before reconfigure */
+    if (ctrl5_c.xl_ulp_en != xl_ulp_en) {
+        ctrl1_xl.odr_xl = (uint8_t) 0x00U;
+        ret = lsm6dso_write_reg(ctx, LSM6DSO_CTRL1_XL,
+                                 (uint8_t*)&ctrl1_xl, 1);
+    }
+  }
+
+  /* reading OIS registers to be configured */
+  if( aux_ctx != NULL ) {
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(aux_ctx, LSM6DSO_CTRL1_OIS, reg, 3);
+    }
+    bytecpy(( uint8_t*)&ctrl1_ois, &reg[0]);
+    bytecpy(( uint8_t*)&ctrl2_ois, &reg[1]);
+    bytecpy(( uint8_t*)&ctrl3_ois, &reg[2]);
+  }
+  else {
+    if( ctx != NULL ) {
+      if (ret == 0) {
+        ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL1_OIS, reg, 3);
+      }
+      bytecpy(( uint8_t*)&ctrl1_ois, &reg[0]);
+      bytecpy(( uint8_t*)&ctrl2_ois, &reg[1]);
+      bytecpy(( uint8_t*)&ctrl3_ois, &reg[2]);
+    }
+  }
+
+  /* Check the Finite State Machine data rate constraints */
+  if (val->fsm.sens != LSM6DSO_FSM_DISABLE) {
+    switch (val->fsm.odr) {
+      case LSM6DSO_FSM_12Hz5:
+        if ( (val->fsm.sens != LSM6DSO_FSM_GY) && (odr_xl == 0x00U) ) {
+          odr_xl = 0x01U;
+        }
+        if ( (val->fsm.sens != LSM6DSO_FSM_XL) && (odr_gy == 0x00U) ) {
+          xl_ulp_en = PROPERTY_DISABLE;
+          odr_gy = 0x01U;
+        }
+        break;
+      case LSM6DSO_FSM_26Hz:
+        if ( (val->fsm.sens != LSM6DSO_FSM_GY) && (odr_xl < 0x02U) ) {
+          odr_xl = 0x02U;
+        }
+        if ( (val->fsm.sens != LSM6DSO_FSM_XL) && (odr_gy < 0x02U) ) {
+          xl_ulp_en = PROPERTY_DISABLE;
+          odr_gy = 0x02U;
+        }
+        break;
+      case LSM6DSO_FSM_52Hz:
+        if ( (val->fsm.sens != LSM6DSO_FSM_GY) && (odr_xl < 0x03U) ) {
+          odr_xl = 0x03U;
+        }
+        if ( (val->fsm.sens != LSM6DSO_FSM_XL) && (odr_gy < 0x03U) ) {
+          xl_ulp_en = PROPERTY_DISABLE;
+          odr_gy = 0x03U;
+        }
+        break;
+      case LSM6DSO_FSM_104Hz:
+        if ( (val->fsm.sens != LSM6DSO_FSM_GY) && (odr_xl < 0x04U) ) {
+          odr_xl = 0x04U;
+        }
+        if ( (val->fsm.sens != LSM6DSO_FSM_XL) && (odr_gy < 0x04U) ) {
+          xl_ulp_en = PROPERTY_DISABLE;
+          odr_gy = 0x04U;
+        }
+        break;
+      default:
+        odr_xl = 0x00U;
+        odr_gy = 0x00U;
+        break;
+    }
+  }
+
+  /* Check the Machine Learning Core data rate constraints */
+  if (val->mlc.sens != LSM6DSO_MLC_DISABLE) {
+    switch (val->mlc.odr) {
+      case LSM6DSO_MLC_12Hz5:
+        if (odr_xl == 0x00U) {
+          odr_xl = 0x01U;
+        }
+        if ( (val->mlc.sens != LSM6DSO_MLC_XL) && (odr_gy == 0x00U) ) {
+          xl_ulp_en = PROPERTY_DISABLE;
+          odr_gy = 0x01U;
+        }
+        break;
+      case LSM6DSO_MLC_26Hz:
+        if (odr_xl < 0x02U) {
+          odr_xl = 0x02U;
+        }
+        if ( (val->mlc.sens != LSM6DSO_MLC_XL) && (odr_gy < 0x02U) ) {
+          xl_ulp_en = PROPERTY_DISABLE;
+          odr_gy = 0x02U;
+        }
+        break;
+      case LSM6DSO_MLC_52Hz:
+        if (odr_xl < 0x03U) {
+          odr_xl = 0x03U;
+        }
+        if ( (val->mlc.sens != LSM6DSO_MLC_XL) && (odr_gy < 0x03U) ) {
+          xl_ulp_en = PROPERTY_DISABLE;
+          odr_gy = 0x03U;
+        }
+        break;
+      case LSM6DSO_MLC_104Hz:
+        if (odr_xl < 0x04U) {
+          odr_xl = 0x04U;
+        }
+        if ( (val->mlc.sens != LSM6DSO_MLC_XL) && (odr_gy < 0x04U) ) {
+          xl_ulp_en = PROPERTY_DISABLE;
+          odr_gy = 0x04U;
+        }
+        break;
+      default:
+        odr_xl = 0x00U;
+        odr_gy = 0x00U;
+        break;
+    }
+  }
+
+  /* Updating the accelerometer data rate configuration */
+  switch ( ( ctrl5_c.xl_ulp_en << 5 ) | ( ctrl6_c.xl_hm_mode << 4 ) |
+           ctrl1_xl.odr_xl ) {
+    case LSM6DSO_XL_UI_OFF:
+      val->ui.xl.odr = LSM6DSO_XL_UI_OFF;
+      break;
+    case LSM6DSO_XL_UI_12Hz5_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_12Hz5_HP;
+      break;
+    case LSM6DSO_XL_UI_26Hz_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_26Hz_HP;
+      break;
+    case LSM6DSO_XL_UI_52Hz_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_52Hz_HP;
+      break;
+    case LSM6DSO_XL_UI_104Hz_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_104Hz_HP;
+      break;
+    case LSM6DSO_XL_UI_208Hz_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_208Hz_HP;
+      break;
+    case LSM6DSO_XL_UI_416Hz_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_416Hz_HP;
+      break;
+    case LSM6DSO_XL_UI_833Hz_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_833Hz_HP;
+      break;
+    case LSM6DSO_XL_UI_1667Hz_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_1667Hz_HP;
+      break;
+    case LSM6DSO_XL_UI_3333Hz_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_3333Hz_HP;
+      break;
+    case LSM6DSO_XL_UI_6667Hz_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_6667Hz_HP;
+      break;
+    case LSM6DSO_XL_UI_1Hz6_LP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_1Hz6_LP;
+      break;
+    case LSM6DSO_XL_UI_12Hz5_LP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_12Hz5_LP;
+      break;
+    case LSM6DSO_XL_UI_26Hz_LP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_26Hz_LP;
+      break;
+    case LSM6DSO_XL_UI_52Hz_LP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_52Hz_LP;
+      break;
+    case LSM6DSO_XL_UI_104Hz_NM:
+      val->ui.xl.odr = LSM6DSO_XL_UI_104Hz_NM;
+      break;
+    case LSM6DSO_XL_UI_208Hz_NM:
+      val->ui.xl.odr = LSM6DSO_XL_UI_208Hz_NM;
+      break;
+    case LSM6DSO_XL_UI_1Hz6_ULP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_1Hz6_ULP;
+      break;
+    case LSM6DSO_XL_UI_12Hz5_ULP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_12Hz5_ULP;
+      break;
+    case LSM6DSO_XL_UI_26Hz_ULP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_26Hz_ULP;
+      break;
+    case LSM6DSO_XL_UI_52Hz_ULP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_52Hz_ULP;
+      break;
+    case LSM6DSO_XL_UI_104Hz_ULP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_104Hz_ULP;
+      break;
+    case LSM6DSO_XL_UI_208Hz_ULP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_208Hz_ULP;
+      break;
+    default:
+      val->ui.xl.odr = LSM6DSO_XL_UI_OFF;
+      break;
+  }
+
+  /* Updating the accelerometer data rate configuration */
+  switch ( (ctrl7_g.g_hm_mode << 4) | ctrl2_g.odr_g) {
+    case LSM6DSO_GY_UI_OFF:
+      val->ui.gy.odr = LSM6DSO_GY_UI_OFF;
+      break;
+    case LSM6DSO_GY_UI_12Hz5_LP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_12Hz5_LP;
+      break;
+    case LSM6DSO_GY_UI_12Hz5_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_12Hz5_HP;
+      break;
+    case LSM6DSO_GY_UI_26Hz_LP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_26Hz_LP;
+      break;
+    case LSM6DSO_GY_UI_26Hz_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_26Hz_HP;
+      break;
+    case LSM6DSO_GY_UI_52Hz_LP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_52Hz_LP;
+      break;
+    case LSM6DSO_GY_UI_52Hz_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_52Hz_HP;
+      break;
+    case LSM6DSO_GY_UI_104Hz_NM:
+      val->ui.gy.odr = LSM6DSO_GY_UI_104Hz_NM;
+      break;
+    case LSM6DSO_GY_UI_104Hz_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_104Hz_HP;
+      break;
+    case LSM6DSO_GY_UI_208Hz_NM:
+      val->ui.gy.odr = LSM6DSO_GY_UI_208Hz_NM;
+      break;
+    case LSM6DSO_GY_UI_208Hz_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_208Hz_HP;
+      break;
+    case LSM6DSO_GY_UI_416Hz_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_416Hz_HP;
+      break;
+    case LSM6DSO_GY_UI_833Hz_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_833Hz_HP;
+      break;
+    case LSM6DSO_GY_UI_1667Hz_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_1667Hz_HP;
+      break;
+    case LSM6DSO_GY_UI_3333Hz_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_3333Hz_HP;
+      break;
+    case LSM6DSO_GY_UI_6667Hz_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_6667Hz_HP;
+      break;
+    default:
+      val->ui.gy.odr = LSM6DSO_GY_UI_OFF;
+      break;
+  }
+
+  /* Check accelerometer full scale constraints */
+  /* Full scale of 16g must be the same for UI and OIS */
+  if ( (val->ui.xl.fs == LSM6DSO_XL_UI_16g) ||
+       (val->ois.xl.fs == LSM6DSO_XL_OIS_16g) ){
+    val->ui.xl.fs = LSM6DSO_XL_UI_16g;
+    val->ois.xl.fs = LSM6DSO_XL_OIS_16g;
+  }
+
+  /* prapare new configuration */
+
+  /* Full scale of 16g must be the same for UI and OIS */
+  if (val->ui.xl.fs == LSM6DSO_XL_UI_16g) {
+    ctrl8_xl.xl_fs_mode = PROPERTY_DISABLE;
+  }
+  else {
+    ctrl8_xl.xl_fs_mode = PROPERTY_ENABLE;
+  }
+
+  /* OIS new configuration */
+  ctrl7_g.ois_on_en = val->ois.ctrl_md & 0x01U;
+
+  switch (val->ois.ctrl_md) {
+    case LSM6DSO_OIS_ONLY_AUX:
+      ctrl1_ois.fs_g_ois = (uint8_t)val->ois.gy.fs;
+      ctrl1_ois.ois_en_spi2 = (uint8_t)val->ois.gy.odr | (uint8_t)val->ois.xl.odr;
+      ctrl1_ois.mode4_en = (uint8_t) val->ois.xl.odr;
+      ctrl3_ois.fs_xl_ois = (uint8_t)val->ois.xl.fs;
+      break;
+    case LSM6DSO_OIS_MIXED:
+      ctrl1_ois.fs_g_ois = (uint8_t)val->ois.gy.fs;
+      ctrl7_g.ois_on = (uint8_t)val->ois.gy.odr | (uint8_t)val->ois.xl.odr;
+      ctrl1_ois.mode4_en = (uint8_t) val->ois.xl.odr;
+      ctrl3_ois.fs_xl_ois = (uint8_t)val->ois.xl.fs;
+      break;
+    default:
+      ctrl1_ois.fs_g_ois = (uint8_t)val->ois.gy.fs;
+      ctrl1_ois.ois_en_spi2 = (uint8_t)val->ois.gy.odr | (uint8_t)val->ois.xl.odr;
+      ctrl1_ois.mode4_en = (uint8_t) val->ois.xl.odr;
+      ctrl3_ois.fs_xl_ois = (uint8_t)val->ois.xl.fs;
+      break;
+  }
+
+  /* UI new configuration */
+  ctrl1_xl.odr_xl = odr_xl;
+  ctrl1_xl.fs_xl = (uint8_t)val->ui.xl.fs;
+  ctrl5_c.xl_ulp_en = xl_ulp_en;
+  ctrl6_c.xl_hm_mode = xl_hm_mode;
+  ctrl7_g.g_hm_mode = g_hm_mode;
+  ctrl2_g.odr_g = odr_gy;
+  ctrl2_g.fs_g = (uint8_t) val->ui.gy.fs;
+
+  /* writing checked configuration */
+  if( ctx != NULL ) {
+    bytecpy(&reg[0], ( uint8_t*)&ctrl1_xl);
+    bytecpy(&reg[1], ( uint8_t*)&ctrl2_g);
+    bytecpy(&reg[2], ( uint8_t*)&ctrl3_c);
+    bytecpy(&reg[3], ( uint8_t*)&ctrl4_c);
+    bytecpy(&reg[4], ( uint8_t*)&ctrl5_c);
+    bytecpy(&reg[5], ( uint8_t*)&ctrl6_c);
+    bytecpy(&reg[6], ( uint8_t*)&ctrl7_g);
+    bytecpy(&reg[7], ( uint8_t*)&ctrl8_xl);
+    if ( ret == 0 ) {
+      ret = lsm6dso_write_reg(ctx, LSM6DSO_CTRL1_XL, (uint8_t*)&reg, 8);
+    }
+    if ( ret == 0 ) {
+      ret = lsm6dso_write_reg(ctx, LSM6DSO_FUNC_CFG_ACCESS,
+                               (uint8_t*)&func_cfg_access, 1);
+    }
+  }
+
+  /* writing OIS checked configuration */
+  if( aux_ctx != NULL ) {
+    bytecpy(&reg[0], ( uint8_t*)&ctrl1_ois);
+    bytecpy(&reg[1], ( uint8_t*)&ctrl2_ois);
+    bytecpy(&reg[2], ( uint8_t*)&ctrl3_ois);
+    if (ret == 0) {
+      ret = lsm6dso_write_reg(aux_ctx, LSM6DSO_CTRL1_OIS, reg, 3);
+    }
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Sensor conversion parameters selection.[get]
+  *
+  * @param  ctx          communication interface handler. Use NULL to ingnore
+  *                      this interface.(ptr)
+  * @param  aux_ctx      auxiliary communication interface handler. Use NULL
+  *                      to ingnore this interface.(ptr)
+  * @param  val          get the sensor conversion parameters.(ptr)
+  *
+  */
+int32_t lsm6dso_mode_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
+                          lsm6dso_md_t *val)
+{
+
+  lsm6dso_emb_func_odr_cfg_b_t emb_func_odr_cfg_b;
+  lsm6dso_func_cfg_access_t func_cfg_access;
+  lsm6dso_emb_func_en_b_t emb_func_en_b;
+  lsm6dso_fsm_enable_a_t fsm_enable_a;
+  lsm6dso_fsm_enable_b_t fsm_enable_b;
+  lsm6dso_ctrl1_ois_t ctrl1_ois;
+  lsm6dso_ctrl2_ois_t ctrl2_ois;
+  lsm6dso_ctrl3_ois_t ctrl3_ois;
+  lsm6dso_ctrl1_xl_t ctrl1_xl;
+  lsm6dso_ctrl2_g_t ctrl2_g;
+  lsm6dso_ctrl3_c_t ctrl3_c;
+  lsm6dso_ctrl4_c_t ctrl4_c;
+  lsm6dso_ctrl5_c_t ctrl5_c;
+  lsm6dso_ctrl6_c_t ctrl6_c;
+  lsm6dso_ctrl7_g_t ctrl7_g;
+
+  uint8_t reg[8];
+  int32_t ret;
+
+  ret = 0;
+
+  /* reading the registers of the device */
+  if( ctx != NULL ) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL1_XL, reg, 7);
+    bytecpy(( uint8_t*)&ctrl1_xl, &reg[0]);
+    bytecpy(( uint8_t*)&ctrl2_g,  &reg[1]);
+    bytecpy(( uint8_t*)&ctrl3_c,  &reg[2]);
+    bytecpy(( uint8_t*)&ctrl4_c,  &reg[3]);
+    bytecpy(( uint8_t*)&ctrl5_c,  &reg[4]);
+    bytecpy(( uint8_t*)&ctrl6_c,  &reg[5]);
+    bytecpy(( uint8_t*)&ctrl7_g,  &reg[6]);
+    if ( ret == 0 ) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_FUNC_CFG_ACCESS,
+                              (uint8_t*)&func_cfg_access, 1);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_ODR_CFG_B, reg, 1);
+      bytecpy(( uint8_t*)&emb_func_odr_cfg_b, &reg[0]);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_B,
+                              (uint8_t*)&emb_func_en_b, 1);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(ctx, LSM6DSO_FSM_ENABLE_A, reg, 2);
+      bytecpy(( uint8_t*)&fsm_enable_a, &reg[0]);
+      bytecpy(( uint8_t*)&fsm_enable_b, &reg[1]);
+    }
+    if (ret == 0) {
+      ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
+    }
+  }
+
+  if( aux_ctx != NULL ) {
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(aux_ctx, LSM6DSO_CTRL1_OIS, reg, 3);
+    }
+    bytecpy(( uint8_t*)&ctrl1_ois, &reg[0]);
+    bytecpy(( uint8_t*)&ctrl2_ois, &reg[1]);
+    bytecpy(( uint8_t*)&ctrl3_ois, &reg[2]);
+  }
+  else {
+    if( ctx != NULL ) {
+      if (ret == 0) {
+        ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL1_OIS, reg, 3);
+      }
+      bytecpy(( uint8_t*)&ctrl1_ois, &reg[0]);
+      bytecpy(( uint8_t*)&ctrl2_ois, &reg[1]);
+      bytecpy(( uint8_t*)&ctrl3_ois, &reg[2]);
+    }
+  }
+  
+  /* fill the input structure */
+
+  /* get accelerometer configuration */
+  switch ( (ctrl5_c.xl_ulp_en << 5) | (ctrl6_c.xl_hm_mode << 4) |
+           ctrl1_xl.odr_xl ) {
+    case LSM6DSO_XL_UI_OFF:
+      val->ui.xl.odr = LSM6DSO_XL_UI_OFF;
+      break;
+    case LSM6DSO_XL_UI_12Hz5_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_12Hz5_HP;
+      break;
+    case LSM6DSO_XL_UI_26Hz_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_26Hz_HP;
+      break;
+    case LSM6DSO_XL_UI_52Hz_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_52Hz_HP;
+      break;
+    case LSM6DSO_XL_UI_104Hz_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_104Hz_HP;
+      break;
+    case LSM6DSO_XL_UI_208Hz_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_208Hz_HP;
+      break;
+    case LSM6DSO_XL_UI_416Hz_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_416Hz_HP;
+      break;
+    case LSM6DSO_XL_UI_833Hz_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_833Hz_HP;
+      break;
+    case LSM6DSO_XL_UI_1667Hz_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_1667Hz_HP;
+      break;
+    case LSM6DSO_XL_UI_3333Hz_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_3333Hz_HP;
+      break;
+    case LSM6DSO_XL_UI_6667Hz_HP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_6667Hz_HP;
+      break;
+    case LSM6DSO_XL_UI_1Hz6_LP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_1Hz6_LP;
+      break;
+    case LSM6DSO_XL_UI_12Hz5_LP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_12Hz5_LP;
+      break;
+    case LSM6DSO_XL_UI_26Hz_LP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_26Hz_LP;
+      break;
+    case LSM6DSO_XL_UI_52Hz_LP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_52Hz_LP;
+      break;
+    case LSM6DSO_XL_UI_104Hz_NM:
+      val->ui.xl.odr = LSM6DSO_XL_UI_104Hz_NM;
+      break;
+    case LSM6DSO_XL_UI_208Hz_NM:
+      val->ui.xl.odr = LSM6DSO_XL_UI_208Hz_NM;
+      break;
+    case LSM6DSO_XL_UI_1Hz6_ULP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_1Hz6_ULP;
+      break;
+    case LSM6DSO_XL_UI_12Hz5_ULP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_12Hz5_ULP;
+      break;
+    case LSM6DSO_XL_UI_26Hz_ULP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_26Hz_ULP;
+      break;
+    case LSM6DSO_XL_UI_52Hz_ULP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_52Hz_ULP;
+      break;
+    case LSM6DSO_XL_UI_104Hz_ULP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_104Hz_ULP;
+      break;
+    case LSM6DSO_XL_UI_208Hz_ULP:
+      val->ui.xl.odr = LSM6DSO_XL_UI_208Hz_ULP;
+      break;
+    default:
+      val->ui.xl.odr = LSM6DSO_XL_UI_OFF;
+      break;
+  }
+
+  switch ( ctrl1_xl.fs_xl ) {
+    case LSM6DSO_XL_UI_2g:
+      val->ui.xl.fs = LSM6DSO_XL_UI_2g;
+      break;
+    case LSM6DSO_XL_UI_4g:
+      val->ui.xl.fs = LSM6DSO_XL_UI_4g;
+      break;
+    case LSM6DSO_XL_UI_8g:
+      val->ui.xl.fs = LSM6DSO_XL_UI_8g;
+      break;
+    case LSM6DSO_XL_UI_16g:
+      val->ui.xl.fs = LSM6DSO_XL_UI_16g;
+      break;
+    default:
+      val->ui.xl.fs = LSM6DSO_XL_UI_2g;
+      break;
+  }
+
+  /* get gyroscope configuration */
+  switch ( (ctrl7_g.g_hm_mode << 4) | ctrl2_g.odr_g) {
+    case LSM6DSO_GY_UI_OFF:
+      val->ui.gy.odr = LSM6DSO_GY_UI_OFF;
+      break;
+    case LSM6DSO_GY_UI_12Hz5_LP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_12Hz5_LP;
+      break;
+    case LSM6DSO_GY_UI_12Hz5_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_12Hz5_HP;
+      break;
+    case LSM6DSO_GY_UI_26Hz_LP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_26Hz_LP;
+      break;
+    case LSM6DSO_GY_UI_26Hz_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_26Hz_HP;
+      break;
+    case LSM6DSO_GY_UI_52Hz_LP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_52Hz_LP;
+      break;
+    case LSM6DSO_GY_UI_52Hz_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_52Hz_HP;
+      break;
+    case LSM6DSO_GY_UI_104Hz_NM:
+      val->ui.gy.odr = LSM6DSO_GY_UI_104Hz_NM;
+      break;
+    case LSM6DSO_GY_UI_104Hz_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_104Hz_HP;
+      break;
+    case LSM6DSO_GY_UI_208Hz_NM:
+      val->ui.gy.odr = LSM6DSO_GY_UI_208Hz_NM;
+      break;
+    case LSM6DSO_GY_UI_208Hz_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_208Hz_HP;
+      break;
+    case LSM6DSO_GY_UI_416Hz_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_416Hz_HP;
+      break;
+    case LSM6DSO_GY_UI_833Hz_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_833Hz_HP;
+      break;
+    case LSM6DSO_GY_UI_1667Hz_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_1667Hz_HP;
+      break;
+    case LSM6DSO_GY_UI_3333Hz_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_3333Hz_HP;
+      break;
+    case LSM6DSO_GY_UI_6667Hz_HP:
+      val->ui.gy.odr = LSM6DSO_GY_UI_6667Hz_HP;
+      break;
+    default:
+      val->ui.gy.odr = LSM6DSO_GY_UI_OFF;
+      break;
+  }
+
+  switch (ctrl2_g.fs_g) {
+    case LSM6DSO_GY_UI_125dps:
+      val->ui.gy.fs = LSM6DSO_GY_UI_125dps;
+      break;
+    case LSM6DSO_GY_UI_250dps:
+      val->ui.gy.fs = LSM6DSO_GY_UI_250dps;
+      break;
+    case LSM6DSO_GY_UI_500dps:
+      val->ui.gy.fs = LSM6DSO_GY_UI_500dps;
+      break;
+    case LSM6DSO_GY_UI_1000dps:
+      val->ui.gy.fs = LSM6DSO_GY_UI_1000dps;
+      break;
+    case LSM6DSO_GY_UI_2000dps:
+      val->ui.gy.fs = LSM6DSO_GY_UI_2000dps;
+      break;
+    default:
+      val->ui.gy.fs = LSM6DSO_GY_UI_125dps;
+      break;
+  }
+
+  /* get finite state machine configuration */
+  if ( (fsm_enable_a.fsm1_en | fsm_enable_a.fsm2_en | fsm_enable_a.fsm3_en |
+        fsm_enable_a.fsm4_en | fsm_enable_a.fsm5_en | fsm_enable_a.fsm6_en |
+        fsm_enable_a.fsm7_en | fsm_enable_a.fsm8_en | fsm_enable_b.fsm9_en |
+        fsm_enable_b.fsm10_en | fsm_enable_b.fsm11_en |
+        fsm_enable_b.fsm12_en | fsm_enable_b.fsm13_en |
+        fsm_enable_b.fsm14_en | fsm_enable_b.fsm15_en |
+        fsm_enable_b.fsm16_en) == PROPERTY_ENABLE ){
+    switch (emb_func_odr_cfg_b.fsm_odr) {
+      case LSM6DSO_FSM_12Hz5:
+        val->fsm.odr = LSM6DSO_FSM_12Hz5;
+        break;
+      case LSM6DSO_FSM_26Hz:
+        val->fsm.odr = LSM6DSO_FSM_26Hz;
+        break;
+      case LSM6DSO_FSM_52Hz:
+        val->fsm.odr = LSM6DSO_FSM_52Hz;
+        break;
+      case LSM6DSO_FSM_104Hz:
+        val->fsm.odr = LSM6DSO_FSM_104Hz;
+        break;
+      default:
+        val->fsm.odr = LSM6DSO_FSM_12Hz5;
+        break;
+    }
+    
+    val->fsm.sens = LSM6DSO_FSM_XL_GY;
+    if (val->ui.gy.odr == LSM6DSO_GY_UI_OFF) {
+      val->fsm.sens = LSM6DSO_FSM_XL;
+    }
+    if (val->ui.xl.odr == LSM6DSO_XL_UI_OFF) {
+      val->fsm.sens = LSM6DSO_FSM_GY;
+    }
+  }
+  else {
+    val->fsm.sens = LSM6DSO_FSM_DISABLE;
+  }
+
+  /* get ois configuration */
+
+  /* OIS configuration mode */
+  switch ( ctrl7_g.ois_on_en ) {
+    case LSM6DSO_OIS_ONLY_AUX:
+      switch ( ctrl3_ois.fs_xl_ois ) {
+        case LSM6DSO_XL_OIS_2g:
+          val->ois.xl.fs = LSM6DSO_XL_OIS_2g;
+          break;
+        case LSM6DSO_XL_OIS_4g:
+          val->ois.xl.fs = LSM6DSO_XL_OIS_4g;
+          break;
+        case LSM6DSO_XL_OIS_8g:
+          val->ois.xl.fs = LSM6DSO_XL_OIS_8g;
+          break;
+        case LSM6DSO_XL_OIS_16g:
+          val->ois.xl.fs = LSM6DSO_XL_OIS_16g;
+          break;
+        default:
+          val->ois.xl.fs = LSM6DSO_XL_OIS_2g;
+          break;
+      }
+      switch ( ctrl1_ois.mode4_en ) {
+        case LSM6DSO_XL_OIS_OFF:
+          val->ois.xl.odr = LSM6DSO_XL_OIS_OFF;
+          break;
+        case LSM6DSO_XL_OIS_6667Hz_HP:
+          val->ois.xl.odr = LSM6DSO_XL_OIS_6667Hz_HP;
+          break;
+        default:
+          val->ois.xl.odr = LSM6DSO_XL_OIS_OFF;
+          break;
+      }
+      switch ( ctrl1_ois.fs_g_ois ) {
+        case LSM6DSO_GY_OIS_250dps:
+          val->ois.gy.fs = LSM6DSO_GY_OIS_250dps;
+          break;
+        case LSM6DSO_GY_OIS_500dps:
+          val->ois.gy.fs = LSM6DSO_GY_OIS_500dps;
+          break;
+        case LSM6DSO_GY_OIS_1000dps:
+          val->ois.gy.fs = LSM6DSO_GY_OIS_1000dps;
+          break;
+        case LSM6DSO_GY_OIS_2000dps:
+          val->ois.gy.fs = LSM6DSO_GY_OIS_2000dps;
+          break;
+        default:
+          val->ois.gy.fs = LSM6DSO_GY_OIS_250dps;
+          break;
+      }
+      switch ( ctrl1_ois.ois_en_spi2 ) {
+        case LSM6DSO_GY_OIS_OFF:
+          val->ois.gy.odr = LSM6DSO_GY_OIS_OFF;
+          break;
+        case LSM6DSO_GY_OIS_6667Hz_HP:
+          val->ois.gy.odr = LSM6DSO_GY_OIS_6667Hz_HP;
+          break;
+        default:
+          val->ois.gy.odr = LSM6DSO_GY_OIS_OFF;
+          break;
+      }
+      val->ois.ctrl_md = LSM6DSO_OIS_ONLY_AUX;
+      break;
+    case LSM6DSO_OIS_MIXED:
+      switch ( ctrl3_ois.fs_xl_ois ) {
+        case LSM6DSO_XL_OIS_2g:
+          val->ois.xl.fs = LSM6DSO_XL_OIS_2g;
+          break;
+        case LSM6DSO_XL_OIS_4g:
+          val->ois.xl.fs = LSM6DSO_XL_OIS_4g;
+          break;
+        case LSM6DSO_XL_OIS_8g:
+          val->ois.xl.fs = LSM6DSO_XL_OIS_8g;
+          break;
+        case LSM6DSO_XL_OIS_16g:
+          val->ois.xl.fs = LSM6DSO_XL_OIS_16g;
+          break;
+        default:
+          val->ois.xl.fs = LSM6DSO_XL_OIS_2g;
+          break;
+      }
+      switch ( ctrl1_ois.mode4_en ) {
+        case LSM6DSO_XL_OIS_OFF:
+          val->ois.xl.odr = LSM6DSO_XL_OIS_OFF;
+          break;
+        case LSM6DSO_XL_OIS_6667Hz_HP:
+          val->ois.xl.odr = LSM6DSO_XL_OIS_6667Hz_HP;
+          break;
+        default:
+          val->ois.xl.odr = LSM6DSO_XL_OIS_OFF;
+          break;
+      }
+      switch ( ctrl1_ois.fs_g_ois ) {
+        case LSM6DSO_GY_OIS_250dps:
+          val->ois.gy.fs = LSM6DSO_GY_OIS_250dps;
+          break;
+        case LSM6DSO_GY_OIS_500dps:
+          val->ois.gy.fs = LSM6DSO_GY_OIS_500dps;
+          break;
+        case LSM6DSO_GY_OIS_1000dps:
+          val->ois.gy.fs = LSM6DSO_GY_OIS_1000dps;
+          break;
+        case LSM6DSO_GY_OIS_2000dps:
+          val->ois.gy.fs = LSM6DSO_GY_OIS_2000dps;
+          break;
+        default:
+          val->ois.gy.fs = LSM6DSO_GY_OIS_250dps;
+          break;
+      }
+      switch ( ctrl1_ois.ois_en_spi2 ) {
+        case LSM6DSO_GY_OIS_OFF:
+          val->ois.gy.odr = LSM6DSO_GY_OIS_OFF;
+          break;
+        case LSM6DSO_GY_OIS_6667Hz_HP:
+          val->ois.gy.odr = LSM6DSO_GY_OIS_6667Hz_HP;
+          break;
+        default:
+          val->ois.gy.odr = LSM6DSO_GY_OIS_OFF;
+          break;
+      }
+      val->ois.ctrl_md = LSM6DSO_OIS_MIXED;
+      break;
+    default:
+      ctrl1_ois.fs_g_ois = (uint8_t)val->ois.gy.fs;
+      ctrl1_ois.ois_en_spi2 = (uint8_t)val->ois.gy.odr | (uint8_t)val->ois.xl.odr;
+      ctrl1_ois.mode4_en = (uint8_t) val->ois.xl.odr;
+      ctrl3_ois.fs_xl_ois = (uint8_t)val->ois.xl.fs;
+      val->ois.ctrl_md = LSM6DSO_OIS_ONLY_AUX;
+      break;
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Read data in engineering unit.[get]
+  *
+  * @param  ctx     communication interface handler.(ptr)
+  * @param  md      the sensor conversion parameters.(ptr)
+  *
+  */
+int32_t lsm6dso_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
+                          lsm6dso_md_t *md, lsm6dso_data_t *data)
+{
+  uint8_t buff[14];
+  int32_t ret;
+  uint8_t i;
+  uint8_t j;
+  
+  ret = 0;
+  
+  /* read data */
+  if( ctx != NULL ) {
+    ret = lsm6dso_read_reg(aux_ctx, LSM6DSO_OUT_TEMP_L, buff, 14);
+  }
+  j = 0;
+
+  /* temperature conversion */
+  data->ui.heat.raw = (int16_t)buff[j+1U];
+  data->ui.heat.raw = ( ((int16_t)data->ui.heat.raw * (int16_t)256) + (int16_t)buff[j] );
+  j+=2U;
+  data->ui.heat.deg_c = lsm6dso_from_lsb_to_celsius((int16_t)data->ui.heat.raw);
+
+
+  /* acceleration conversion */
+  for (i = 0U; i < 3U; i++) {
+    data->ui.xl.raw[i] = (int16_t)buff[j+1U];
+    data->ui.xl.raw[i] = (data->ui.xl.raw[i] * 256) + (int16_t) buff[j];
+    j+=2U;
+    switch ( md->ui.xl.fs ) {
+      case LSM6DSO_XL_UI_2g:
+        data->ui.xl.mg[i] =lsm6dso_from_fs2_to_mg(data->ui.xl.raw[i]);
+        break;
+      case LSM6DSO_XL_UI_4g:
+        data->ui.xl.mg[i] =lsm6dso_from_fs4_to_mg(data->ui.xl.raw[i]);
+        break;
+      case LSM6DSO_XL_UI_8g:
+        data->ui.xl.mg[i] =lsm6dso_from_fs8_to_mg(data->ui.xl.raw[i]);
+        break;
+      case LSM6DSO_XL_UI_16g:
+        data->ui.xl.mg[i] =lsm6dso_from_fs16_to_mg(data->ui.xl.raw[i]);
+        break;
+      default:
+        data->ui.xl.mg[i] = 0.0f;
+        break;
+    }
+    
+  }
+
+  /* angular rate conversion */
+  for (i = 0U; i < 3U; i++) {
+    data->ui.gy.raw[i] = (int16_t)buff[j+1U];
+    data->ui.gy.raw[i] = (data->ui.gy.raw[i] * 256) + (int16_t) buff[j];
+    j+=2U;
+    switch ( md->ui.gy.fs ) {
+      case LSM6DSO_GY_UI_250dps:
+        data->ui.gy.mdps[i] = lsm6dso_from_fs250_to_mdps(data->ui.gy.raw[i]);
+        break;
+      case LSM6DSO_GY_UI_125dps:
+        data->ui.gy.mdps[i] = lsm6dso_from_fs125_to_mdps(data->ui.gy.raw[i]);
+        break;
+      case LSM6DSO_GY_UI_500dps:
+        data->ui.gy.mdps[i] = lsm6dso_from_fs500_to_mdps(data->ui.gy.raw[i]);
+        break;
+      case LSM6DSO_GY_UI_1000dps:
+        data->ui.gy.mdps[i] = lsm6dso_from_fs1000_to_mdps(data->ui.gy.raw[i]);
+        break;
+      case LSM6DSO_GY_UI_2000dps:
+        data->ui.gy.mdps[i] = lsm6dso_from_fs2000_to_mdps(data->ui.gy.raw[i]);
+        break;
+      default:
+        data->ui.gy.mdps[i] = 0.0f;
+        break;
+    }
+  }
+
+  /* read data from ois chain */
+  if (aux_ctx != NULL) {
+    if (ret == 0) {
+      ret = lsm6dso_read_reg(aux_ctx, LSM6DSO_OUTX_L_A, buff, 12);
+    }
+  }
+  j = 0;
+
+  /* ois acceleration conversion */
+  for (i = 0U; i < 3U; i++) {
+    data->ois.xl.raw[i] = (int16_t) buff[j+1U];
+    data->ois.xl.raw[i] = (data->ois.xl.raw[i] * 256) + (int16_t) buff[j];
+    j+=2U;
+    switch ( md->ois.xl.fs ) {
+      case LSM6DSO_XL_UI_2g:
+        data->ois.xl.mg[i] =lsm6dso_from_fs2_to_mg(data->ois.xl.raw[i]);
+        break;
+      case LSM6DSO_XL_UI_4g:
+        data->ois.xl.mg[i] =lsm6dso_from_fs4_to_mg(data->ois.xl.raw[i]);
+        break;
+      case LSM6DSO_XL_UI_8g:
+        data->ois.xl.mg[i] =lsm6dso_from_fs8_to_mg(data->ois.xl.raw[i]);
+        break;
+      case LSM6DSO_XL_UI_16g:
+        data->ois.xl.mg[i] =lsm6dso_from_fs16_to_mg(data->ois.xl.raw[i]);
+        break;
+      default:
+        data->ois.xl.mg[i] = 0.0f;
+        break;
+    }
+  }
+
+  /* ois angular rate conversion */
+  for (i = 0U; i < 3U; i++) {
+    data->ois.gy.raw[i] = (int16_t) buff[j+1U];
+    data->ois.gy.raw[i] = (data->ois.gy.raw[i] * 256) + (int16_t) buff[j];
+    j+=2U;
+    switch ( md->ois.gy.fs ) {
+      case LSM6DSO_GY_UI_250dps:
+        data->ois.gy.mdps[i] = lsm6dso_from_fs250_to_mdps(data->ois.gy.raw[i]);
+        break;
+      case LSM6DSO_GY_UI_125dps:
+        data->ois.gy.mdps[i] = lsm6dso_from_fs125_to_mdps(data->ois.gy.raw[i]);
+        break;
+      case LSM6DSO_GY_UI_500dps:
+        data->ois.gy.mdps[i] = lsm6dso_from_fs500_to_mdps(data->ois.gy.raw[i]);
+        break;
+      case LSM6DSO_GY_UI_1000dps:
+        data->ois.gy.mdps[i] = lsm6dso_from_fs1000_to_mdps(data->ois.gy.raw[i]);
+        break;
+      case LSM6DSO_GY_UI_2000dps:
+        data->ois.gy.mdps[i] = lsm6dso_from_fs2000_to_mdps(data->ois.gy.raw[i]);
+        break;
+      default:
+        data->ois.gy.mdps[i] = 0.0f;
+        break;
+    }
   }
 
   return ret;
