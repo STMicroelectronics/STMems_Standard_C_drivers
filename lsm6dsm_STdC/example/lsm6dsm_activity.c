@@ -3,12 +3,12 @@
  * @file    activity.c
  * @author  Sensors Software Solution Team
  * @brief   This file show the simplest way to detect activity/inactivity
- * 			from sensor.
+ *          from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -23,8 +23,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI189V1
+ * - NUCLEO_F411RE + STEVAL-MKI189V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -33,8 +33,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -99,34 +99,30 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_activity_lsm6dsm(void)
+void lsm6dsm_activity(void)
 {
-  /*
-   * Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
   lsm6dsm_int1_route_t int_1_reg;
 
-  /*
-   * Uncomment if interrupt generation on Activity/Inactivity INT2 pin
-   */
+  /* Uncomment if interrupt generation on Activity/Inactivity INT2 pin */
   //lsm6dsm_int2_route_t int_2_reg;
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Init test platform */
   platform_init();
 
-  /*
-   * Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(15);
+
+  /* Check device ID */
   lsm6dsm_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSM_ID)
     while(1)
@@ -134,70 +130,48 @@ void example_main_activity_lsm6dsm(void)
       /* manage here device not found */
     }
 
-  /*
-   * Restore default configuration
-   */
+  /* Restore default configuration */
   lsm6dsm_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
-	  lsm6dsm_reset_get(&dev_ctx, &rst);
+    lsm6dsm_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Set XL and Gyro Output Data Rate
-   */
+  /* Set XL and Gyro Output Data Rate */
   lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_208Hz);
   lsm6dsm_gy_data_rate_set(&dev_ctx, LSM6DSM_GY_ODR_104Hz);
 
-  /*
-   * Set 2g full XL scale and 250 dps full Gyro
-   */
+  /* Set 2g full XL scale and 250 dps full Gyro */
   lsm6dsm_xl_full_scale_set(&dev_ctx, LSM6DSM_2g);
   lsm6dsm_gy_full_scale_set(&dev_ctx, LSM6DSM_250dps);
 
-  /*
-   * Set duration for Activity detection to 9.62 ms (= 2 * 1 / ODR_XL)
-   */
+  /* Set duration for Activity detection to 9.62 ms (= 2 * 1 / ODR_XL) */
   lsm6dsm_wkup_dur_set(&dev_ctx, 0x02);
 
-  /*
-   * Set duration for Inactivity detection to 4.92 s (= 2 * 512 / ODR_XL)
-   */
+  /* Set duration for Inactivity detection to 4.92 s (= 2 * 512 / ODR_XL) */
   lsm6dsm_act_sleep_dur_set(&dev_ctx, 0x02);
 
-  /*
-   * Set Activity/Inactivity threshold to 62.5 mg
-   */
+  /* Set Activity/Inactivity threshold to 62.5 mg */
   lsm6dsm_wkup_threshold_set(&dev_ctx, 0x02);
 
-  /*
-   * Inactivity configuration: acc to 12.5 LP, gyro to Power-Down
-   */
+  /* Inactivity configuration: acc to 12.5 LP, gyro to Power-Down */
   lsm6dsm_act_mode_set(&dev_ctx, LSM6DSM_XL_12Hz5_GY_PD);
 
-  /*
-   * Enable interrupt generation on Inactivity INT1 pin
-   */
+  /* Enable interrupt generation on Inactivity INT1 pin */
   lsm6dsm_pin_int1_route_get(&dev_ctx, &int_1_reg);
   int_1_reg.int1_inact_state = PROPERTY_ENABLE;
   lsm6dsm_pin_int1_route_set(&dev_ctx, int_1_reg);
 
-  /*
-   * Uncomment if interrupt generation on Inactivity INT2 pin
-   */
+  /* Uncomment if interrupt generation on Inactivity INT2 pin */
   //lsm6dsm_pin_int2_route_get(&dev_ctx, &int_2_reg);
   //int_2_reg.int2_inact_state = PROPERTY_ENABLE;
   //lsm6dsm_pin_int2_route_set(&dev_ctx, int_2_reg);
 
-  /*
-   * Wait Events
-   */
+  /* Wait Events */
   while(1)
   {
     lsm6dsm_all_sources_t all_source;
 
-    /*
-     * Check if Activity/Inactivity events
-     */
+    /* Check if Activity/Inactivity events */
     lsm6dsm_all_sources_get(&dev_ctx, &all_source);
     if (all_source.wake_up_src.sleep_state_ia)
     {
@@ -293,13 +267,26 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }

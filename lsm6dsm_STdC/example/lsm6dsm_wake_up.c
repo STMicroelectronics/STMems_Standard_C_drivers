@@ -1,13 +1,13 @@
 /*
  ******************************************************************************
- * @file    tap_double.c
+ * @file    wake_up.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect double tap from sensor.
+ * @brief   This file show the simplest way to detect wake_up from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,8 +22,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI189V1
+ * - NUCLEO_F411RE + STEVAL-MKI189V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -32,8 +32,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -98,126 +98,94 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_tap_double_lsm6dsm(void)
+void lsm6dsm_wake_up(void)
 {
-  /*
-   * Initialize mems driver interface
-   */
+  /* Initialize mems driver interface. */
   stmdev_ctx_t dev_ctx;
-
-  /*
-   * Uncomment if need interrupt on Double Tap (select int1 or 2)
-   */
   lsm6dsm_int1_route_t int_1_reg;
+
+  /* Uncomment if interrupt generation on Wake-Up INT2 pin. */
   //lsm6dsm_int2_route_t int_2_reg;
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Init test platform */
   platform_init();
 
-  /*
-   * Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(15);
+
+  /* Check device ID */
   lsm6dsm_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSM_ID)
+  {
     while(1)
     {
       /* manage here device not found */
     }
+  }
 
-  /*
-   * Restore default configuration
-   */
+  /* Restore default configuration */
   lsm6dsm_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lsm6dsm_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Set XL Output Data Rate to 416 Hz
-   */
+  /* Set XL Output Data Rate */
   lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_416Hz);
 
   /* Set 2g full XL scale */
   lsm6dsm_xl_full_scale_set(&dev_ctx, LSM6DSM_2g);
 
-  /*
-   * Enable Tap detection on X, Y, Z
-   */
-  lsm6dsm_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6dsm_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6dsm_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6dsm_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Apply high-pass digital filter on Wake-Up function */
+  lsm6dsm_xl_hp_path_internal_set(&dev_ctx, LSM6DSM_USE_HPF);
 
-  /*
-   * Set Tap threshold to 01100b, therefore the tap threshold
-   * is 750 mg (= 12 * FS_XL / 2 5 )
+  /* Apply high-pass digital filter on Wake-Up function
+   * Duration time is set to zero so Wake-Up interrupt signal
+   * is generated for each X,Y,Z filtered data exceeding the
+   * configured threshold
    */
-  lsm6dsm_tap_threshold_x_set(&dev_ctx, 0x0c);
+  lsm6dsm_wkup_dur_set(&dev_ctx, 0);
 
-  /* Configure Double Tap parameter
-   *
-   * The SHOCK field of the INT_DUR2 register is set to 11b, therefore
-   * the Shock time is 57.7 ms (= 3 * 8 / ODR_XL)
-   *
-   * The QUIET field of the INT_DUR2 register is set to 11b, therefore
-   * the Quiet time is 28.8 ms (= 3 * 4 / ODR_XL)
-   *
-   * For the maximum time between two consecutive detected taps, the DUR
-   * field of the INT_DUR2 register is set to 0111b, therefore the Duration
-   * time is 538.5 ms (= 7 * 32 / ODR_XL)
-   */
-  lsm6dsm_tap_dur_set(&dev_ctx, 0x07);
-  lsm6dsm_tap_quiet_set(&dev_ctx, 0x03);
-  lsm6dsm_tap_shock_set(&dev_ctx, 0x03);
+  /* Set Wake-Up threshold: 1 LSb corresponds to FS_XL/2^6 */
+  lsm6dsm_wkup_threshold_set(&dev_ctx, 2);
 
-  /*
-   * Enable Double Tap detection
-   */
-  lsm6dsm_tap_mode_set(&dev_ctx, LSM6DSM_BOTH_SINGLE_DOUBLE);
-
-  /*
-   * Enable interrupt generation on Double Tap INT1 pin
-   */
+  /* Enable interrupt generation on Wake-Up INT1 pin */
   lsm6dsm_pin_int1_route_get(&dev_ctx, &int_1_reg);
-  int_1_reg.int1_double_tap = PROPERTY_ENABLE;
+  int_1_reg.int1_wu = PROPERTY_ENABLE;
   lsm6dsm_pin_int1_route_set(&dev_ctx, int_1_reg);
 
-  /*
-   * Uncomment if interrupt generation on Double Tap INT2 pin
-   */
+  /* Uncomment if interrupt generation on Wake-Up INT2 pin */
   //lsm6dsm_pin_int2_route_get(&dev_ctx, &int_2_reg);
-  //int_2_reg.int2_double_tap = PROPERTY_ENABLE;
+  //int_2_reg.int2_wu = PROPERTY_ENABLE;
   //lsm6dsm_pin_int2_route_set(&dev_ctx, int_2_reg);
 
-  /*
-   * Wait Events
-   */
+  /* Wait Events */
   while(1)
   {
     lsm6dsm_all_sources_t all_source;
 
     /*
-     * Check if Double Tap events
+     * Check if Wake-Up events
      */
     lsm6dsm_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.tap_src.double_tap)
+    if (all_source.wake_up_src.wu_ia)
     {
-      sprintf((char*)tx_buffer, "Double Tap Detected\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
+      sprintf((char*)tx_buffer, "Wake-Up event on ");
+      if (all_source.wake_up_src.x_wu)
+        strcat((char*)tx_buffer, "X");
+      if (all_source.wake_up_src.y_wu)
+        strcat((char*)tx_buffer, "Y");
+      if (all_source.wake_up_src.z_wu)
+        strcat((char*)tx_buffer, "Z");
 
-    if (all_source.tap_src.single_tap)
-    {
-      sprintf((char*)tx_buffer, "Single Tap Detected\r\n");
+      strcat((char*)tx_buffer, " direction\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
@@ -303,13 +271,26 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }

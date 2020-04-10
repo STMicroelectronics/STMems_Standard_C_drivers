@@ -1,13 +1,13 @@
 /*
  ******************************************************************************
- * @file    fifo_stream_to_fifo.c
+ * @file    tap_single.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to use Stream to FIFO mode.
+ * @brief   This file show the simplest way to detect single tap from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,8 +22,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI189V1
+ * - NUCLEO_F411RE + STEVAL-MKI189V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -32,8 +32,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -76,19 +76,10 @@
 #elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
 #include "usart.h"
 #endif
-  
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
 
-/* Private types ---------------------------------------------------------*/
-
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static float acceleration_mg[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -107,29 +98,29 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_fifo_stream_lsm6dsm(void)
+void lsm6dsm_single_tap(void)
 {
-  /*
-   * Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
-  uint16_t pattern_len, pattern_numbers;
+  lsm6dsm_int1_route_t int_1_reg;
+
+  /* Uncomment if interrupt generation on Single Tap INT2 pin */
+  //lsm6dsm_int2_route_t int_2_reg;
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Init test platform */
   platform_init();
 
-  /*
-   * Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(15);
+  /* Check device ID */
   lsm6dsm_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSM_ID)
     while(1)
@@ -137,96 +128,70 @@ void example_main_fifo_stream_lsm6dsm(void)
       /* manage here device not found */
     }
 
-  /*
-   * Restore default configuration
-   */
+  /* Restore default configuration */
   lsm6dsm_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
-	  lsm6dsm_reset_get(&dev_ctx, &rst);
+    lsm6dsm_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Set XL full scale
-   */
+  /* Set XL Output Data Rate */
+  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_416Hz);
+
+  /* Set 2g full XL scale */
   lsm6dsm_xl_full_scale_set(&dev_ctx, LSM6DSM_2g);
 
-  /*
-   * Enable Block Data Update (BDU) when FIFO support selected
-   */
-  lsm6dsm_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Enable Tap detection on X, Y, Z */
+  lsm6dsm_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsm_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsm_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsm_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Set FIFO watermark to a multiple of a pattern
-   * in this example we set watermark to 32 pattern
-   * which means 32 sequence of:
-   * (XL) = 6 bytes (3 word)
+  /* Set Tap threshold to 01001b, therefore the tap threshold is
+   * 562.5 mg (= 9 * FS_XL / 2 5 )
    */
-  pattern_len = 3;
-  pattern_numbers = 32;
-  lsm6dsm_fifo_watermark_set(&dev_ctx, pattern_numbers * pattern_len);
-  lsm6dsm_fifo_stop_on_wtm_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsm_tap_threshold_x_set(&dev_ctx, 0x09);
 
-  /*
-   * Set FIFO mode to Stream to FIFO
+  /* Configure Single Tap parameter
+   *
+   * The SHOCK field of the INT_DUR2 register is set to 10b: an
+   * interrupt is generated when the slope data exceeds the programmed
+   * threshold, and returns below it within 38.5 ms (= 2 * 8 / ODR_XL)
+   * corresponding to the Shock time window.
+   *
+   * The QUIET field of the INT_DUR2 register is set to 01b: since the
+   * latch mode is disabled, the interrupt is kept high for the duration
+   * of the Quiet window, therefore 9.6 ms (= 1 * 4 / ODR_XL.)
+   *
+   * DUR already set to 0 after reset
    */
-  lsm6dsm_fifo_mode_set(&dev_ctx, LSM6DSM_STREAM_TO_FIFO_MODE);
+  //lsm6dsm_tap_dur_set(&dev_ctx, 0x0);
+  lsm6dsm_tap_quiet_set(&dev_ctx, 0x01);
+  lsm6dsm_tap_shock_set(&dev_ctx, 0x02);
 
-  /*
-   * Set FIFO sensor decimator
-   */
-  lsm6dsm_fifo_xl_batch_set(&dev_ctx, LSM6DSM_FIFO_XL_NO_DEC);
+  /* Enable Single Tap detection only */
+  lsm6dsm_tap_mode_set(&dev_ctx, LSM6DSM_ONLY_SINGLE);
 
-  /*
-   * Set ODR FIFO
-   */
-  lsm6dsm_fifo_data_rate_set(&dev_ctx, LSM6DSM_FIFO_52Hz);
- 
-  /*
-   * Set XL Output Data Rate:
-   * in this example we set 52 Hz
-   */
-  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_52Hz);
+  /* Enable interrupt generation on Single Tap INT1 pin */
+  lsm6dsm_pin_int1_route_get(&dev_ctx, &int_1_reg);
+  int_1_reg.int1_single_tap = PROPERTY_ENABLE;
+  lsm6dsm_pin_int1_route_set(&dev_ctx, int_1_reg);
 
+  /* Uncomment if interrupt generation on Single Tap INT2 pin */
+  //lsm6dsm_pin_int2_route_get(&dev_ctx, &int_2_reg);
+  //int_2_reg.int2_single_tap = PROPERTY_ENABLE;
+  //lsm6dsm_pin_int2_route_set(&dev_ctx, int_2_reg);
+
+  /* Wait Events */
   while(1)
   {
-    uint16_t num = 0;
-    uint16_t num_pattern = 0;
-    uint8_t waterm = 0;
+    lsm6dsm_all_sources_t all_source;
 
-    /*
-     * Read LSM6DSM watermark flag
-     */
-    lsm6dsm_fifo_wtm_flag_get(&dev_ctx, &waterm);
-    if (waterm)
+    /* Check if Single Tap events */
+    lsm6dsm_all_sources_get(&dev_ctx, &all_source);
+    if (all_source.tap_src.single_tap)
     {
-      /*
-       * Read number of word in FIFO
-       */
-      lsm6dsm_fifo_data_level_get(&dev_ctx, &num);
-      num_pattern = num / pattern_len;
-
-      while (num_pattern-- > 0)
-      {
-        lsm6dsm_fifo_raw_data_get(&dev_ctx, data_raw_acceleration.u8bit,
-                                  3 * sizeof(int16_t));
-        acceleration_mg[0] =
-          lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
-        acceleration_mg[1] =
-          lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
-        acceleration_mg[2] =
-         lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
-
-        sprintf((char*)tx_buffer, "[%03d] Acc [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-                num_pattern, acceleration_mg[0],
-                acceleration_mg[1], acceleration_mg[2]);
-        tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      }
-       
-      /*
-       * Reset FIFO
-       */       
-      lsm6dsm_fifo_mode_set(&dev_ctx, LSM6DSM_BYPASS_MODE);
-      lsm6dsm_fifo_mode_set(&dev_ctx, LSM6DSM_STREAM_TO_FIFO_MODE);
+      sprintf((char*)tx_buffer, "Tap Detected\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
 }
@@ -311,13 +276,26 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }

@@ -9,7 +9,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -24,8 +24,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI189V1
+ * - NUCLEO_F411RE + STEVAL-MKI189V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -34,8 +34,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -97,16 +97,16 @@ typedef union{
 } axis1bit32_t;
 
 /* Private macro -------------------------------------------------------------*/
-#define OUT_XYZ_SIZE		6
-#define PRESS_OUT_XYZ_SIZE	3
-#define TEMP_OUT_XYZ_SIZE	2
+#define OUT_XYZ_SIZE    6
+#define PRESS_OUT_XYZ_SIZE  3
+#define TEMP_OUT_XYZ_SIZE  2
 
-#define MIN_ODR(x, y) 			(x < y ? x : y)
-#define MAX_ODR(x, y) 			(x > y ? x : y)
-#define MAX_PATTERN_NUM			FIFO_THRESHOLD / 6
-#define LSM6DSM_ODR_LSB_TO_HZ(_odr)	(_odr ? (13 << (_odr - 1)) : 0)
-#define LIS2MDL_ODR_LSB_TO_HZ(_odr)	(_odr == 0 ? 10 : _odr == 1 ? 20 : _odr == 2 ? 50 : 100)
-#define LPS22HB_ODR_LSB_TO_HZ(_odr)	(_odr == 1 ? 1 : _odr == 2 ? 10 : 25 << (_odr - 3))
+#define MIN_ODR(x, y)       (x < y ? x : y)
+#define MAX_ODR(x, y)       (x > y ? x : y)
+#define MAX_PATTERN_NUM      FIFO_THRESHOLD / 6
+#define LSM6DSM_ODR_LSB_TO_HZ(_odr)  (_odr ? (13 << (_odr - 1)) : 0)
+#define LIS2MDL_ODR_LSB_TO_HZ(_odr)  (_odr == 0 ? 10 : _odr == 1 ? 20 : _odr == 2 ? 50 : 100)
+#define LPS22HB_ODR_LSB_TO_HZ(_odr)  (_odr == 1 ? 1 : _odr == 2 ? 10 : 25 << (_odr - 3))
 
 /* Private types ---------------------------------------------------------*/
 typedef struct {
@@ -202,6 +202,7 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /*
@@ -215,16 +216,13 @@ static void LSM6DSL_SH_Read_FIFO_Pattern(void)
   uint8_t mg_num = test_6dsl_mag.samples_num_in_pattern;
   uint8_t dummy[OUT_XYZ_SIZE];
 
-  /*
-   * FIFO pattern is composed by gy_num gyroscope triplets and
+  /* FIFO pattern is composed by gy_num gyroscope triplets and
    * xl_num accelerometer triplets. The sequence has always following order:
    * gyro first, accelerometer second etc etc
    */
   while(gy_num > 0 || xl_num > 0 || press_num > 0 || mg_num > 0)
   {
-    /*
-     * Read gyro samples
-     */
+    /* Read gyro samples */
     if (test_6dsl_gyro.enable && gy_num > 0)
     {
       lsm6dsm_fifo_raw_data_get(&dev_ctx, data_raw_angular_rate.u8bit, OUT_XYZ_SIZE);
@@ -238,9 +236,7 @@ static void LSM6DSL_SH_Read_FIFO_Pattern(void)
       gy_num--;
     }
 
-    /*
-     * Read XL samples
-     */
+    /* Read XL samples */
     if (test_6dsl_xl.enable && xl_num > 0)
     {
       lsm6dsm_fifo_raw_data_get(&dev_ctx,
@@ -259,9 +255,7 @@ static void LSM6DSL_SH_Read_FIFO_Pattern(void)
       xl_num--;
     }
 
-    /*
-     * Read Mag samples
-     */
+    /* Read Mag samples */
     if (test_6dsl_mag.enable && mg_num > 0)
     {
       lsm6dsm_fifo_raw_data_get(&dev_ctx,
@@ -277,9 +271,7 @@ static void LSM6DSL_SH_Read_FIFO_Pattern(void)
       mg_num--;
     }
 
-    /*
-     * Read press. and temperature samples
-     */
+    /* Read press. and temperature samples */
     if (test_6dsl_press.enable && press_num > 0)
     {
       lsm6dsm_fifo_raw_data_get(&dev_ctx, dummy, OUT_XYZ_SIZE);
@@ -306,13 +298,10 @@ static void LSM6DSL_SH_ACC_GYRO_MAG_PRESS_sample_Callback_fifo(void)
   uint16_t num_pattern = 0;
   lsm6dsm_reg_t reg;
 
-  /*
-   * Get FIFO status
-   */
+  /* Get FIFO status */
   lsm6dsm_read_reg(&dev_ctx, LSM6DSM_FIFO_STATUS2, &reg.byte, 1);
 
-  /*
-   * In case of overrun remove at least minimal pattern from FIFO
+  /* In case of overrun remove at least minimal pattern from FIFO
    * in order to recovery status
    */
   if (reg.fifo_status2.over_run)
@@ -321,9 +310,7 @@ static void LSM6DSL_SH_ACC_GYRO_MAG_PRESS_sample_Callback_fifo(void)
   }
   else
   {
-    /*
-     * Read number of word in FIFO
-     */
+    /* Read number of word in FIFO */
     lsm6dsm_fifo_data_level_get(&dev_ctx, &num);
     num_pattern = num / pattern_len;
   }
@@ -355,9 +342,7 @@ static uint16_t LSM6DSL_SH_Calculate_FIFO_Pattern(uint16_t *min_odr, uint16_t *m
 {
   uint16_t fifo_samples_tot_num = 0;
 
-  /*
-   * Calculate min_odr and max_odr for current configuration
-   */
+  /* Calculate min_odr and max_odr for current configuration */
   if (test_6dsl_gyro.enable)
   {
     test_6dsl_gyro.odr_hz_val = LSM6DSM_ODR_LSB_TO_HZ(test_6dsl_gyro.odr);
@@ -374,9 +359,7 @@ static uint16_t LSM6DSL_SH_Calculate_FIFO_Pattern(uint16_t *min_odr, uint16_t *m
 
   if (test_6dsl_mag.enable)
   {
-    /*
-     * LIS2MDL odr are 10, 20, 50 and 100 must be remapped to LSM6DSM ODR
-     */
+    /* LIS2MDL odr are 10, 20, 50 and 100 must be remapped to LSM6DSM ODR */
     test_6dsl_mag.odr_hz_val = LIS2MDL_ODR_LSB_TO_HZ(test_6dsl_mag.odr);
     test_6dsl_mag.odr_hz_val = lsm6dsm_normalize_odr(test_6dsl_mag.odr_hz_val);
 
@@ -386,9 +369,7 @@ static uint16_t LSM6DSL_SH_Calculate_FIFO_Pattern(uint16_t *min_odr, uint16_t *m
 
   if (test_6dsl_press.enable)
   {
-    /*
-     * LPS22HB odr are 10, 25, 50 and 75 must be remapped to LSM6DSM ODR
-     */
+    /* LPS22HB odr are 10, 25, 50 and 75 must be remapped to LSM6DSM ODR */
     test_6dsl_press.odr_hz_val = LPS22HB_ODR_LSB_TO_HZ(test_6dsl_press.odr);
     test_6dsl_press.odr_hz_val = lsm6dsm_normalize_odr(test_6dsl_press.odr_hz_val);
 
@@ -396,9 +377,7 @@ static uint16_t LSM6DSL_SH_Calculate_FIFO_Pattern(uint16_t *min_odr, uint16_t *m
     *min_odr = MIN_ODR(*min_odr, test_6dsl_press.odr_hz_val);
   }
 
-  /*
-   * Calculate how many samples for each sensor are in current FIFO pattern
-   */
+  /* Calculate how many samples for each sensor are in current FIFO pattern */
   if (test_6dsl_gyro.enable)
   {
     test_6dsl_gyro.samples_num_in_pattern = test_6dsl_gyro.odr_hz_val / *min_odr;
@@ -449,26 +428,18 @@ static int32_t lsm6dsm_read_lps22hb_cx(void* ctx, uint8_t reg, uint8_t* data,
 
   (void)ctx;
 
-  /*
-   * Configure Sensor Hub to read LIS2MDL
-   */
+  /* Configure Sensor Hub to read LIS2MDL */
   mm_error = lsm6dsm_sh_slv0_cfg_read(&dev_ctx, &val);
   lsm6dsm_sh_num_of_dev_connected_set(&dev_ctx, LSM6DSM_SLV_0_1);
 
-  /*
-   * Enable I2C Master and I2C master Pull Up
-   */
+  /* Enable I2C Master and I2C master Pull Up */
   lsm6dsm_func_en_set(&dev_ctx, PROPERTY_ENABLE);
   lsm6dsm_sh_master_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Enable accelerometer to trigger Sensor Hub operation
-   */
+  /* Enable accelerometer to trigger Sensor Hub operation */
   lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_104Hz);
 
-  /*
-   * Wait Sensor Hub operation flag set
-   */
+  /* Wait Sensor Hub operation flag set */
   lsm6dsm_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
   do
   {
@@ -508,30 +479,20 @@ static int32_t lsm6dsm_write_lps22hb_cx(void* ctx, uint8_t reg, uint8_t* data,
   (void)ctx;
   (void)len;
 
-  /*
-   * Disable accelerometer
-   */
+  /* Disable accelerometer */
   lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_OFF);
 
-  /*
-   * Configure Sensor Hub to write
-   */
+  /* Configure Sensor Hub to write */
   mm_error = lsm6dsm_sh_cfg_write(&dev_ctx, &val);
 
-  /*
-   * Enable I2C Master and I2C master Pull Up
-   */
+  /* Enable I2C Master and I2C master Pull Up */
   lsm6dsm_func_en_set(&dev_ctx, PROPERTY_ENABLE);
   lsm6dsm_sh_master_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Enable accelerometer to trigger Sensor Hub operation
-   */
+  /* Enable accelerometer to trigger Sensor Hub operation */
   lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_104Hz);
 
-  /*
-   * Wait Sensor Hub operation flag set
-   */
+  /* Wait Sensor Hub operation flag set */
   lsm6dsm_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
   do
   {
@@ -569,26 +530,18 @@ static int32_t lsm6dsm_read_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
 
   (void)ctx;
 
-  /*
-   * Configure Sensor Hub to read LIS2MDL
-   */
+  /* Configure Sensor Hub to read LIS2MDL */
   mm_error = lsm6dsm_sh_slv0_cfg_read(&dev_ctx, &val);
   lsm6dsm_sh_num_of_dev_connected_set(&dev_ctx, LSM6DSM_SLV_0_1);
 
-  /*
-   * Enable I2C Master and I2C master Pull Up
-   */
+  /* Enable I2C Master and I2C master Pull Up */
   lsm6dsm_func_en_set(&dev_ctx, PROPERTY_ENABLE);
   lsm6dsm_sh_master_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Enable accelerometer to trigger Sensor Hub operation
-   */
+  /* Enable accelerometer to trigger Sensor Hub operation */
   lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_104Hz);
 
-  /*
-   * Wait Sensor Hub operation flag set
-   */
+  /* Wait Sensor Hub operation flag set */
   lsm6dsm_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
   do
   {
@@ -628,30 +581,20 @@ static int32_t lsm6dsm_write_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
   (void)ctx;
   (void)len;
 
-  /*
-   * Disable accelerometer
-   */
+  /* Disable accelerometer */
   lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_OFF);
 
-  /*
-   * Configure Sensor Hub to write
-   */
+  /* Configure Sensor Hub to write */
   mm_error = lsm6dsm_sh_cfg_write(&dev_ctx, &val);
 
-  /*
-   * Enable I2C Master and I2C master Pull Up
-   */
+  /* Enable I2C Master and I2C master Pull Up */
   lsm6dsm_func_en_set(&dev_ctx, PROPERTY_ENABLE);
   lsm6dsm_sh_master_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Enable accelerometer to trigger Sensor Hub operation
-   */
+  /* Enable accelerometer to trigger Sensor Hub operation */
   lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_104Hz);
 
-  /*
-   * Wait Sensor Hub operation flag set
-   */
+  /* Wait Sensor Hub operation flag set */
   lsm6dsm_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
   do
   {
@@ -694,9 +637,7 @@ static void configure_lis2mdl(stmdev_ctx_t* ctx)
   lis2mdl_block_data_update_set(ctx, PROPERTY_ENABLE);
   lis2mdl_data_rate_set(ctx, LIS2MDL_ODR_50Hz);
 
-  /*
-   * Prepare sensor hub to read data from external Slave0
-   */
+  /* Prepare sensor hub to read data from external Slave0 */
   lsm6dsm_sh_slv0_cfg_read(&dev_ctx, &val);
 }
 
@@ -719,9 +660,7 @@ static void configure_lps22hb(stmdev_ctx_t* ctx)
   lps22hb_data_rate_set(ctx, LPS22HB_ODR_50_Hz);
   lps22hb_block_data_update_set(ctx, PROPERTY_ENABLE);
 
-  /*
-   * Prepare sensor hub to read data from external Slave1
-   */
+  /* Prepare sensor hub to read data from external Slave1 */
   lsm6dsm_sh_slv1_cfg_read(&dev_ctx, &val);
 }
 
@@ -734,11 +673,15 @@ void example_fifo_sensorhub_lps22hb_lis2mdl(void)
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Configure low level function to access to external device
-   */
+  /* Init test platform */
+  platform_init();
+
+  /* Wait sensor boot time */
+  platform_delay(15);
+
+  /* Configure low level function to access to external device */
   press_ctx.read_reg = lsm6dsm_read_lps22hb_cx;
   press_ctx.write_reg = lsm6dsm_write_lps22hb_cx;
   press_ctx.handle = &hi2c1;
@@ -746,14 +689,10 @@ void example_fifo_sensorhub_lps22hb_lis2mdl(void)
   mag_ctx.write_reg = lsm6dsm_write_lis2mdl_cx;
   mag_ctx.handle = &hi2c1;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Initialize platform specific hardware */
   platform_init();
 
-  /*
-   * Check device ID
-   */
+  /* Check device ID */
   lsm6dsm_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSM_ID)
     while(1)
@@ -761,22 +700,16 @@ void example_fifo_sensorhub_lps22hb_lis2mdl(void)
       /* manage here device not found */
     }
 
-  /*
-   * Restore default configuration
-   */
+  /* Restore default configuration */
   lsm6dsm_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lsm6dsm_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Some hardware require to enable pull up on master I2C interface
-   */
+  /* Some hardware require to enable pull up on master I2C interface */
   //lsm6dsm_sh_pin_mode_set(&dev_ctx, LSM6DSM_INTERNAL_PULL_UP);
 
-  /*
-   * Check if LPS22HB connected to Sensor Hub
-   */
+  /* Check if LPS22HB connected to Sensor Hub */
   lps22hb_device_id_get(&press_ctx, &whoamI);
   if (whoamI != LPS22HB_ID)
   {
@@ -786,9 +719,7 @@ void example_fifo_sensorhub_lps22hb_lis2mdl(void)
     }
   }
 
-  /*
-   * Check if LIS2MDL connected to Sensor Hub
-   */
+  /* Check if LIS2MDL connected to Sensor Hub */
   lis2mdl_device_id_get(&mag_ctx, &whoamI);
   if (whoamI != LIS2MDL_ID)
   {
@@ -798,83 +729,60 @@ void example_fifo_sensorhub_lps22hb_lis2mdl(void)
     }
   }
 
-  /*
-   * Configure LPS22HB on the I2C master line
-   */
+  /* Configure LPS22HB on the I2C master line */
   configure_lps22hb(&press_ctx);
 
-  /*
-   * Configure LIS2MDL on the I2C master line
-   */
+  /* Configure LIS2MDL on the I2C master line */
   configure_lis2mdl(&mag_ctx);
 
-  /*
-   * Configure Sensor Hub to read two slaves
-   */
+  /* Configure Sensor Hub to read two slaves */
   lsm6dsm_sh_num_of_dev_connected_set(&dev_ctx, LSM6DSM_SLV_0_1);
 
-  /*
-   * Set XL full scale and Gyro full scale
-   */
+  /* Set XL full scale and Gyro full scale */
   lsm6dsm_xl_full_scale_set(&dev_ctx, test_6dsl_xl.fs);
   lsm6dsm_gy_full_scale_set(&dev_ctx, test_6dsl_gyro.fs);
 
-  /*
-   * Calculate number of sensors samples in each FIFO pattern
-   */
+  /* Calculate number of sensors samples in each FIFO pattern */
   pattern_len = LSM6DSL_SH_Calculate_FIFO_Pattern(&min_odr, &max_odr);
 
-  /*
-   * Set FIFO watermark to a multiple of a pattern
+  /* Set FIFO watermark to a multiple of a pattern
    * in this example we set watermark to 10 pattern
    * which means ten sequence of:
    * (GYRO + XL + MAG + BARO_TEMP + XL + MAG + BARO_TEMP) = 42 bytes
    */
   lsm6dsm_fifo_watermark_set(&dev_ctx, 10 * pattern_len);
 
-  /*
-   * Set FIFO mode to Stream mode (aka Continuous Mode)
-   */
+  /* Set FIFO mode to Stream mode (aka Continuous Mode) */
   lsm6dsm_fifo_mode_set(&dev_ctx, LSM6DSM_STREAM_MODE);
 
-  /*
-   * Uncomment to enable FIFO watermark interrupt generation
+  /* Uncomment to enable FIFO watermark interrupt generation
    * on INT1 pin
    */
   //lsm6dsm_pin_int1_route_get(&dev_ctx, &int_1_reg);
   //int_1_reg.int1_fth = PROPERTY_ENABLE;
   //lsm6dsm_pin_int1_route_set(&dev_ctx, int_1_reg);
 
-  /*
-   * Uncomment to enable FIFO watermark interrupt generation
+  /* Uncomment to enable FIFO watermark interrupt generation
    * on INT2 pin
    */
   //lsm6dsm_pin_int2_route_get(&dev_ctx, &int_2_reg);
   //int_2_reg.int2_fth = PROPERTY_ENABLE;
   //lsm6dsm_pin_int2_route_set(&dev_ctx, int_2_reg);
 
-  /*
-   * Set FIFO sensor decimator
-   */
+  /* Set FIFO sensor decimator */
   lsm6dsm_fifo_xl_batch_set(&dev_ctx, test_6dsl_xl.decimation);
   lsm6dsm_fifo_gy_batch_set(&dev_ctx, test_6dsl_gyro.decimation);
   lsm6dsm_fifo_dataset_3_batch_set(&dev_ctx, test_6dsl_mag.decimation);
   lsm6dsm_fifo_dataset_4_batch_set(&dev_ctx, test_6dsl_press.decimation);
 
-  /*
-   * Enable master and XL trigger
-   */
+  /* Enable master and XL trigger */
   lsm6dsm_func_en_set(&dev_ctx, PROPERTY_ENABLE);
   lsm6dsm_sh_master_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Set ODR FIFO
-   */
+  /* Set ODR FIFO */
   lsm6dsm_fifo_data_rate_set(&dev_ctx, LSM6DSM_FIFO_416Hz);
 
-  /*
-   * Set XL and Gyro Output Data Rate
-   */
+  /* Set XL and Gyro Output Data Rate */
   lsm6dsm_xl_data_rate_set(&dev_ctx, test_6dsl_xl.odr);
   lsm6dsm_gy_data_rate_set(&dev_ctx, test_6dsl_gyro.odr);
 
@@ -882,9 +790,7 @@ void example_fifo_sensorhub_lps22hb_lis2mdl(void)
   {
     uint8_t wt;
 
-    /*
-     * Read FIFO watermark flag in polling mode
-     */
+    /* Read FIFO watermark flag in polling mode */
     lsm6dsm_fifo_wtm_flag_get(&dev_ctx, &wt);
     if (wt)
     {
@@ -973,13 +879,26 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }

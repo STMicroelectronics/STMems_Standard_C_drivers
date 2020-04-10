@@ -8,7 +8,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -23,8 +23,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI189V1
+ * - NUCLEO_F411RE + STEVAL-MKI189V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -33,8 +33,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -84,10 +84,10 @@ typedef union{
 } axis3bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
-#define MIN_ODR(x, y) 				(x < y ? x : y)
-#define MAX_ODR(x, y) 				(x > y ? x : y)
-#define MAX_PATTERN_NUM				FIFO_THRESHOLD / 6
-#define LSM6DSM_ODR_LSB_TO_HZ(_odr)	(_odr ? (13 << (_odr - 1)) : 0)
+#define MIN_ODR(x, y)         (x < y ? x : y)
+#define MAX_ODR(x, y)         (x > y ? x : y)
+#define MAX_PATTERN_NUM        FIFO_THRESHOLD / 6
+#define LSM6DSM_ODR_LSB_TO_HZ(_odr)  (_odr ? (13 << (_odr - 1)) : 0)
 
 /* Private types ---------------------------------------------------------*/
 typedef struct {
@@ -158,6 +158,7 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /*
@@ -168,16 +169,13 @@ static void LSM6DSL_Read_FIFO_Pattern(void)
   uint8_t gy_num = test_6dsl_gyro.samples_num_in_pattern;
   uint8_t xl_num = test_6dsl_xl.samples_num_in_pattern;
 
-  /*
-   * FIFO pattern is composed by gy_num gyroscope triplets and
+  /* FIFO pattern is composed by gy_num gyroscope triplets and
    * xl_num accelerometer triplets. The sequence has always following order:
    * gyro first, accelerometer second
    */
   while(gy_num > 0 || xl_num > 0)
   {
-    /*
-     * Read gyro samples
-     */
+    /* Read gyro samples */
     if (test_6dsl_gyro.enable && gy_num > 0)
     {
       lsm6dsm_fifo_raw_data_get(&dev_ctx, data_raw_angular_rate.u8bit,
@@ -195,9 +193,7 @@ static void LSM6DSL_Read_FIFO_Pattern(void)
       gy_num--;
     }
 
-    /*
-     * Read XL samples
-     */
+    /* Read XL samples */
     if (test_6dsl_xl.enable && xl_num > 0)
     {
       lsm6dsm_fifo_raw_data_get(&dev_ctx, data_raw_acceleration.u8bit,
@@ -227,9 +223,7 @@ static void LSM6DSL_ACC_GYRO_sample_Callback_fifo(void)
   uint16_t num = 0;
   uint16_t num_pattern = 0;
 
-  /*
-   * Read number of word in FIFO
-   */
+  /* Read number of word in FIFO */
   lsm6dsm_fifo_data_level_get(&dev_ctx, &num);
   num_pattern = num / pattern_len;
 
@@ -245,9 +239,7 @@ static uint16_t LSM6DSL_Calculate_FIFO_Pattern(uint16_t *min_odr, uint16_t *max_
 {
   uint16_t fifo_samples_tot_num = 0;
 
-  /*
-   * Calculate min_odr and max_odr for current configuration
-   */
+  /* Calculate min_odr and max_odr for current configuration */
   if (test_6dsl_gyro.enable)
   {
     test_6dsl_gyro.odr_hz_val = LSM6DSM_ODR_LSB_TO_HZ(test_6dsl_gyro.odr);
@@ -262,9 +254,7 @@ static uint16_t LSM6DSL_Calculate_FIFO_Pattern(uint16_t *min_odr, uint16_t *max_
     *min_odr = MIN_ODR(*min_odr, test_6dsl_xl.odr_hz_val);
   }
 
-  /*
-   * Calculate how many samples for each sensor are in current FIFO pattern
-   */
+  /* Calculate how many samples for each sensor are in current FIFO pattern */
   if (test_6dsl_gyro.enable)
   {
     test_6dsl_gyro.samples_num_in_pattern = test_6dsl_gyro.odr_hz_val / *min_odr;
@@ -279,9 +269,7 @@ static uint16_t LSM6DSL_Calculate_FIFO_Pattern(uint16_t *min_odr, uint16_t *max_
     fifo_samples_tot_num += test_6dsl_xl.samples_num_in_pattern;
   }
 
-  /*
-   * Return the total number of 16-bit samples in the pattern
-   */
+  /* Return the total number of 16-bit samples in the pattern */
   return(6 * fifo_samples_tot_num);
 }
 
@@ -290,24 +278,21 @@ void example_main_fifo_lsm6dsm(void)
 {
   uint16_t max_odr = 0, min_odr = 0xffff;
 
-  /*
-   * Interrupt generation on FIFO watermark INT1/INT2 pin
-   */
+  /* Interrupt generation on FIFO watermark INT1/INT2 pin */
   //lsm6dsm_int2_route_t int_2_reg;
   //lsm6dsm_int1_route_t int_1_reg;
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Init test platform */
   platform_init();
 
-  /*
-   * Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(15);
+
+  /* Check device ID */
   lsm6dsm_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSM_ID)
     while(1)
@@ -315,63 +300,43 @@ void example_main_fifo_lsm6dsm(void)
       /* manage here device not found */
     }
 
-  /*
-   * Restore default configuration
-   */
+  /* Restore default configuration */
   lsm6dsm_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
-	  lsm6dsm_reset_get(&dev_ctx, &rst);
+    lsm6dsm_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Set XL and Gyro Output Data Rate
-   */
+  /* Set XL and Gyro Output Data Rate */
   lsm6dsm_xl_data_rate_set(&dev_ctx, test_6dsl_xl.odr);
   lsm6dsm_gy_data_rate_set(&dev_ctx, test_6dsl_gyro.odr);
 
-  /*
-   * Set XL full scale and Gyro full scale
-   */
+  /* Set XL full scale and Gyro full scale */
   lsm6dsm_xl_full_scale_set(&dev_ctx, test_6dsl_xl.fs);
   lsm6dsm_gy_full_scale_set(&dev_ctx, test_6dsl_gyro.fs);
 
-  /*
-   * Calculate number of sensors samples in each FIFO pattern
-   */
+  /* Calculate number of sensors samples in each FIFO pattern */
   pattern_len = LSM6DSL_Calculate_FIFO_Pattern(&min_odr, &max_odr);
 
-  /*
-   * Set FIFO watermark to a multiple of a pattern
-   */
+  /* Set FIFO watermark to a multiple of a pattern */
   lsm6dsm_fifo_watermark_set(&dev_ctx, pattern_len);
 
-  /*
-   * Set FIFO mode to Stream mode
-   */
+  /* Set FIFO mode to Stream mode */
   lsm6dsm_fifo_mode_set(&dev_ctx, LSM6DSM_STREAM_MODE);
 
-  /*
-   * Enable FIFO watermark interrupt generation on INT1 pin
-   */
+  /* Enable FIFO watermark interrupt generation on INT1 pin */
   //lsm6dsm_pin_int1_route_get(&dev_ctx, &int_1_reg);
   //int_1_reg.int1_fth = PROPERTY_ENABLE;
   //lsm6dsm_pin_int1_route_set(&dev_ctx, int_1_reg);
 
-  /*
-   * FIFO watermark interrupt on INT2 pin
-   */
+  /* FIFO watermark interrupt on INT2 pin */
   //lsm6dsm_pin_int2_route_get(&dev_ctx, &int_2_reg);
   //int_2_reg.int2_fth = PROPERTY_ENABLE;
   //lsm6dsm_pin_int2_route_set(&dev_ctx, int_2_reg);
 
-  /*
-   * Set ODR FIFO
-   */
+  /* Set ODR FIFO */
   lsm6dsm_fifo_data_rate_set(&dev_ctx, LSM6DSM_FIFO_416Hz);
 
-  /*
-   * Set FIFO sensor decimator
-   */
+  /* Set FIFO sensor decimator */
   lsm6dsm_fifo_xl_batch_set(&dev_ctx, test_6dsl_xl.decimation);
   lsm6dsm_fifo_gy_batch_set(&dev_ctx, test_6dsl_gyro.decimation);
 
@@ -379,12 +344,10 @@ void example_main_fifo_lsm6dsm(void)
   {
     uint8_t wt;
 
-    /*
-     * Read FIFO watermark flag in polling mode
-     */
+    /* Read FIFO watermark flag in polling mode */
     lsm6dsm_fifo_wtm_flag_get(&dev_ctx, &wt);
     if (wt)
-    	LSM6DSL_ACC_GYRO_sample_Callback_fifo();
+      LSM6DSL_ACC_GYRO_sample_Callback_fifo();
   }
 }
 
@@ -468,13 +431,26 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }

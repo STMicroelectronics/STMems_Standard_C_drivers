@@ -1,13 +1,14 @@
 /*
  ******************************************************************************
- * @file    orientation_6d.c
+ * @file    read_data_interrupt.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect 6D orientation from sensor.
+ * @brief   This file show the simplest way to get data from sensor
+ *          (interrupt enabled).
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,8 +23,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI189V1
+ * - NUCLEO_F411RE + STEVAL-MKI189V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -32,8 +33,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -76,10 +77,30 @@
 #elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
 #include "usart.h"
 #endif
+  
+typedef union{
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
+} axis3bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
+#if defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+#define LSM6DSM_INT2_PIN GPIO_PIN_4
+#define LSM6DSM_INT2_GPIO_PORT GPIOB
+#define LSM6DSM_INT1_PIN GPIO_PIN_5
+#define LSM6DSM_INT1_GPIO_PORT GPIOB
+#else /* NUCLEO_F411RE_X_NUCLEO_IKS01A2 */
+#define LSM6DSM_INT2_PIN GPIO_PIN_5
+#define LSM6DSM_INT2_GPIO_PORT GPIOB
+#define LSM6DSM_INT1_PIN GPIO_PIN_8
+#define LSM6DSM_INT1_GPIO_PORT GPIOB
+#endif /* NUCLEO_F411RE_X_NUCLEO_IKS01A2 */
 
 /* Private variables ---------------------------------------------------------*/
+static axis3bit16_t data_raw_acceleration;
+static axis3bit16_t data_raw_angular_rate;
+static float acceleration_mg[3];
+static float angular_rate_mdps[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -98,34 +119,31 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
+static int32_t platform_read_int_pin(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_orientation_6D_lsm6dsm(void)
+void lsm6dsm_read_data_int(void)
 {
-  /*
-   * Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
   lsm6dsm_int1_route_t int_1_reg;
 
-  /*
-   * Uncomment if interrupt generation on 6D INT2 pin
-   */
+  /* Uncomment if interrupt generation on DRDY INT2 pin. */
   //lsm6dsm_int2_route_t int_2_reg;
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Init test platform */
   platform_init();
 
-  /*
-   * Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(15);
+
+  /* Check device ID */
   lsm6dsm_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSM_ID)
     while(1)
@@ -133,81 +151,81 @@ void example_main_orientation_6D_lsm6dsm(void)
       /* manage here device not found */
     }
 
-  /*
-   * Restore default configuration
-   */
+  /* Restore default configuration */
   lsm6dsm_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
-	  lsm6dsm_reset_get(&dev_ctx, &rst);
+    lsm6dsm_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Set XL Output Data Rate
-   */
-  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_416Hz);
+  /* Enable Block Data Update */
+  lsm6dsm_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Set 2g full XL scale
-   */
+  /* Set full scale */
   lsm6dsm_xl_full_scale_set(&dev_ctx, LSM6DSM_2g);
+  lsm6dsm_gy_full_scale_set(&dev_ctx, LSM6DSM_2000dps);
 
-  /*
-   * Set threshold to 60 degrees
-   */
-  lsm6dsm_6d_threshold_set(&dev_ctx, LSM6DSM_DEG_60);
+  /* Set Output Data Rate */
+  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_12Hz5);
+  lsm6dsm_gy_data_rate_set(&dev_ctx, LSM6DSM_GY_ODR_12Hz5);
 
-  /*
-   * Use HP filter
-   */
-  lsm6dsm_xl_hp_path_internal_set(&dev_ctx, LSM6DSM_USE_HPF);
+  /* Enable drdy 75 μs pulse: uncomment if interrupt must be pulsed */
+  //lsm6dsm_data_ready_mode_set(&dev_ctx, LSM6DSM_DRDY_PULSED);
 
-  /*
-   * LPF2 on 6D function selection
-   */
-  lsm6dsm_6d_feed_data_set(&dev_ctx, LSM6DSM_LPF2_FEED);
-
-  /*
-   * Enable interrupt generation on 6D INT1 pin
-   */
+  /* Enable interrupt generation on DRDY INT1 pin */
   lsm6dsm_pin_int1_route_get(&dev_ctx, &int_1_reg);
-  int_1_reg.int1_6d = PROPERTY_ENABLE;
+  int_1_reg.int1_drdy_g = PROPERTY_ENABLE;
+  int_1_reg.int1_drdy_xl = PROPERTY_ENABLE;
   lsm6dsm_pin_int1_route_set(&dev_ctx, int_1_reg);
 
-  /*
-   * Uncomment if interrupt generation on 6D INT2 pin
-   */
+  /* Uncomment if interrupt generation routed on DRDY INT2 pin */
   //lsm6dsm_pin_int2_route_get(&dev_ctx, &int_2_reg);
-  //int_2_reg.int2_6d = PROPERTY_ENABLE;
+  //int_2_reg.int2_drdy_g = PROPERTY_ENABLE;
+  //int_2_reg.int2_drdy_xl = PROPERTY_ENABLE;
   //lsm6dsm_pin_int2_route_set(&dev_ctx, int_2_reg);
 
-  /*
-   * Wait Events
-   */
+  /* Wait samples */
   while(1)
   {
-    lsm6dsm_all_sources_t all_source;
+    uint8_t reg;
 
-    /*
-     * Check if 6D Orientation events
-     */
-    lsm6dsm_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.d6d_src.d6d_ia)
+    /* Read LSM6DSM INT pin */
+    if (platform_read_int_pin())
     {
-      sprintf((char*)tx_buffer, "6D Or. switched to ");
-      if (all_source.d6d_src.xh)
-        strcat((char*)tx_buffer, "XH");
-      if (all_source.d6d_src.xl)
-        strcat((char*)tx_buffer, "XL");
-      if (all_source.d6d_src.yh)
-        strcat((char*)tx_buffer, "YH");
-      if (all_source.d6d_src.yl)
-        strcat((char*)tx_buffer, "YL");
-      if (all_source.d6d_src.zh)
-        strcat((char*)tx_buffer, "ZH");
-      if (all_source.d6d_src.zl)
-        strcat((char*)tx_buffer, "ZL");
-      strcat((char*)tx_buffer, "\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      /* Read status register */
+      lsm6dsm_xl_flag_data_ready_get(&dev_ctx, &reg);
+      if (reg)
+      {
+        /* Read accelerometer field data */
+        memset(data_raw_acceleration.u8bit, 0, 3 * sizeof(int16_t));
+        lsm6dsm_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+        acceleration_mg[0] =
+          lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
+        acceleration_mg[1] =
+          lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
+        acceleration_mg[2] =
+          lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
+        sprintf((char*)tx_buffer, "Acc [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+                acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+        tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      }
+
+      lsm6dsm_gy_flag_data_ready_get(&dev_ctx, &reg);
+      if (reg)
+      {
+        /* Read gyroscope field data */
+        memset(data_raw_angular_rate.u8bit, 0, 3 * sizeof(int16_t));
+        lsm6dsm_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
+        angular_rate_mdps[0] =
+          lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[0]);
+        angular_rate_mdps[1] =
+          lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[1]);
+        angular_rate_mdps[2] =
+          lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
+
+        sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+                angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
+        tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      }
     }
   }
 }
@@ -292,13 +310,37 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }
+
+/*
+ * @brief  read interrupt pin (platform dependent)
+ */
+static int32_t platform_read_int_pin(void)
+{
+  return HAL_GPIO_ReadPin(LSM6DSM_INT1_GPIO_PORT, LSM6DSM_INT1_PIN);
+  /* Please uncomment next line if interrupt configured on INT2 pin */
+  //return HAL_GPIO_ReadPin(LSM6DSM_INT2_GPIO_PORT, LSM6DSM_INT2_PIN);
+}
+

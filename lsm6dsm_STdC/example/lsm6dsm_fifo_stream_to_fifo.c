@@ -1,13 +1,13 @@
 /*
  ******************************************************************************
- * @file    wrist_tilt.c
+ * @file    fifo_stream_to_fifo.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect tilt from sensor.
+ * @brief   This file show the simplest way to use Stream to FIFO mode.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,8 +22,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI189V1
+ * - NUCLEO_F411RE + STEVAL-MKI189V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -32,8 +32,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -76,10 +76,19 @@
 #elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
 #include "usart.h"
 #endif
+  
+typedef union{
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
+} axis3bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
 
+/* Private types ---------------------------------------------------------*/
+
 /* Private variables ---------------------------------------------------------*/
+static axis3bit16_t data_raw_acceleration;
+static float acceleration_mg[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -98,92 +107,105 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_wtilt_lsm6dsm(void)
+void lsm6dsm_fifo_stream(void)
 {
-  /*
-   * Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
-  lsm6dsm_int2_route_t int_2_reg;
+  uint16_t pattern_len, pattern_numbers;
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Init test platform */
   platform_init();
 
-  /*
-   * Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(15);
+
+  /* Check device ID */
   lsm6dsm_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSM_ID)
-  {
     while(1)
     {
       /* manage here device not found */
     }
-  }
 
-  /*
-   * Restore default configuration
-   */
+  /* Restore default configuration */
   lsm6dsm_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
-      lsm6dsm_reset_get(&dev_ctx, &rst);
+    lsm6dsm_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Enable Wrist Tilt function
-   */
-  lsm6dsm_wrist_tilt_sens_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /*
-   * Enable interrupt generation on Tilt INT1 pin
-   */
-  lsm6dsm_int_notification_set(&dev_ctx, LSM6DSM_INT_LATCHED);
-  lsm6dsm_pin_int2_route_get(&dev_ctx, &int_2_reg);
-  int_2_reg.int2_wrist_tilt = PROPERTY_ENABLE;
-  lsm6dsm_pin_int2_route_set(&dev_ctx, int_2_reg);
-  lsm6dsm_all_on_int1_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /*
-   * Set XL Output Data Rate:The tilt function works at 26 Hz,
-   * so the accelerometer ODR must be set at 26 Hz or higher values
-   */
-  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_26Hz);
-
-  /*
-   * Set 2g full XL scale
-   */
+  /* Set XL full scale */
   lsm6dsm_xl_full_scale_set(&dev_ctx, LSM6DSM_2g);
 
-  /*
-   * Wait Events
+  /* Enable Block Data Update (BDU) when FIFO support selected */
+  lsm6dsm_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /* Set FIFO watermark to a multiple of a pattern
+   * in this example we set watermark to 32 pattern
+   * which means 32 sequence of:
+   * (XL) = 6 bytes (3 word)
    */
+  pattern_len = 3;
+  pattern_numbers = 32;
+  lsm6dsm_fifo_watermark_set(&dev_ctx, pattern_numbers * pattern_len);
+  lsm6dsm_fifo_stop_on_wtm_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /* Set FIFO mode to Stream to FIFO */
+  lsm6dsm_fifo_mode_set(&dev_ctx, LSM6DSM_STREAM_TO_FIFO_MODE);
+
+  /* Set FIFO sensor decimator */
+  lsm6dsm_fifo_xl_batch_set(&dev_ctx, LSM6DSM_FIFO_XL_NO_DEC);
+
+  /* Set ODR FIFO */
+  lsm6dsm_fifo_data_rate_set(&dev_ctx, LSM6DSM_FIFO_52Hz);
+ 
+  /* Set XL Output Data Rate:
+   * in this example we set 52 Hz
+   */
+  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_52Hz);
+
   while(1)
   {
-    lsm6dsm_all_sources_t all_source;
+    uint16_t num = 0;
+    uint16_t num_pattern = 0;
+    uint8_t waterm = 0;
 
-    /*
-     * Check if Tilt events
-     */
-    lsm6dsm_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.func_src2.wrist_tilt_ia)
+    /* Read LSM6DSM watermark flag */
+    lsm6dsm_fifo_wtm_flag_get(&dev_ctx, &waterm);
+    if (waterm)
     {
-      sprintf((char*)tx_buffer, "Wrist TILT Detected\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
+      /* Read number of word in FIFO */
+      lsm6dsm_fifo_data_level_get(&dev_ctx, &num);
+      num_pattern = num / pattern_len;
 
-    /*
-     * Slow polling on device
-     */
-    HAL_Delay(100);
+      while (num_pattern-- > 0)
+      {
+        lsm6dsm_fifo_raw_data_get(&dev_ctx, data_raw_acceleration.u8bit,
+                                  3 * sizeof(int16_t));
+        acceleration_mg[0] =
+          lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
+        acceleration_mg[1] =
+          lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
+        acceleration_mg[2] =
+         lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
+
+        sprintf((char*)tx_buffer, "[%03d] Acc [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+                num_pattern, acceleration_mg[0],
+                acceleration_mg[1], acceleration_mg[2]);
+        tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      }
+       
+      /* Reset FIFO */
+      lsm6dsm_fifo_mode_set(&dev_ctx, LSM6DSM_BYPASS_MODE);
+      lsm6dsm_fifo_mode_set(&dev_ctx, LSM6DSM_STREAM_TO_FIFO_MODE);
+    }
   }
 }
 
@@ -267,13 +289,26 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }
