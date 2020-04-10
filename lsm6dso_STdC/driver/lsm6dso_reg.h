@@ -2638,7 +2638,6 @@ typedef enum {
   LSM6DSO_RESET     = 0x02, /* Reset configuration registers */
   LSM6DSO_FIFO_COMP = 0x04, /* FIFO compression initialization request. */
   LSM6DSO_FSM       = 0x08, /* Finite State Machine initialization request */
-  LSM6DSO_MLC       = 0x10, /* Machine Learning Core initialization request */
   LSM6DSO_PEDO      = 0x20, /* Pedometer algo initialization request. */
   LSM6DSO_TILT      = 0x40, /* Tilt algo initialization request */
   LSM6DSO_SMOTION   = 0x80, /* Significant Motion initialization request */
@@ -2964,19 +2963,6 @@ typedef struct {
       LSM6DSO_FSM_104Hz = 0x03,
     } odr;
   } fsm;
-  struct {
-    enum {
-      LSM6DSO_MLC_DISABLE = 0x00,
-      LSM6DSO_MLC_XL      = 0x01,
-      LSM6DSO_MLC_XL_GY   = 0x03,
-    } sens;
-    enum {
-      LSM6DSO_MLC_12Hz5 = 0x00,
-      LSM6DSO_MLC_26Hz  = 0x01,
-      LSM6DSO_MLC_52Hz  = 0x02,
-      LSM6DSO_MLC_104Hz = 0x03,
-    } odr;
-  } mlc;
 } lsm6dso_md_t;
 int32_t lsm6dso_mode_set(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
                           lsm6dso_md_t *val);

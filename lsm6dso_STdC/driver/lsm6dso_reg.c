@@ -10093,52 +10093,6 @@ int32_t lsm6dso_mode_set(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
     }
   }
 
-  /* Check the Machine Learning Core data rate constraints */
-  if (val->mlc.sens != LSM6DSO_MLC_DISABLE) {
-    switch (val->mlc.odr) {
-      case LSM6DSO_MLC_12Hz5:
-        if (odr_xl == 0x00U) {
-          odr_xl = 0x01U;
-        }
-        if ( (val->mlc.sens != LSM6DSO_MLC_XL) && (odr_gy == 0x00U) ) {
-          xl_ulp_en = PROPERTY_DISABLE;
-          odr_gy = 0x01U;
-        }
-        break;
-      case LSM6DSO_MLC_26Hz:
-        if (odr_xl < 0x02U) {
-          odr_xl = 0x02U;
-        }
-        if ( (val->mlc.sens != LSM6DSO_MLC_XL) && (odr_gy < 0x02U) ) {
-          xl_ulp_en = PROPERTY_DISABLE;
-          odr_gy = 0x02U;
-        }
-        break;
-      case LSM6DSO_MLC_52Hz:
-        if (odr_xl < 0x03U) {
-          odr_xl = 0x03U;
-        }
-        if ( (val->mlc.sens != LSM6DSO_MLC_XL) && (odr_gy < 0x03U) ) {
-          xl_ulp_en = PROPERTY_DISABLE;
-          odr_gy = 0x03U;
-        }
-        break;
-      case LSM6DSO_MLC_104Hz:
-        if (odr_xl < 0x04U) {
-          odr_xl = 0x04U;
-        }
-        if ( (val->mlc.sens != LSM6DSO_MLC_XL) && (odr_gy < 0x04U) ) {
-          xl_ulp_en = PROPERTY_DISABLE;
-          odr_gy = 0x04U;
-        }
-        break;
-      default:
-        odr_xl = 0x00U;
-        odr_gy = 0x00U;
-        break;
-    }
-  }
-
   /* Updating the accelerometer data rate configuration */
   switch ( ( ctrl5_c.xl_ulp_en << 5 ) | ( ctrl6_c.xl_hm_mode << 4 ) |
            ctrl1_xl.odr_xl ) {
