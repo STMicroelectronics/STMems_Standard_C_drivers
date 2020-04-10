@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,20 +22,46 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
+ * - STEVAL_MKI109V3 + STEVAL-MKI196V1
  * - NUCLEO_F411RE + X_NUCLEO_IKS01A3
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
  * Used interfaces:
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A3 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default)
+ * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
+ *                    - Sensor side: SPI(Default) / I2C(supported)
+ *
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
- * `tx_com` is required.
+ * `tx_com` and 'platform_init' is required.
  *
  */
+
+/* STMicroelectronics evaluation boards definition
+ *
+ * Please uncomment ONLY the evaluation boards in use.
+ * If a different hardware is used please comment all
+ * following target board and redefine yours.
+ */
+//#define STEVAL_MKI109V3
+#define NUCLEO_F411RE
+
+#if defined(STEVAL_MKI109V3)
+/* MKI109V3: Define communication interface */
+#define SENSOR_BUS hspi2
+
+/* MKI109V3: Vdd and Vddio power supply values */
+#define PWM_3V3 915
+
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
+#define SENSOR_BUS hi2c1
+
+#endif
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
@@ -135,14 +161,15 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
-
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
+static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
 void lsm6dso_fsm(void)
 {
   /* Variable declaration */
-  stmdev_ctx_t              dev_ctx;
+  stmdev_ctx_t               dev_ctx;
   lsm6dso_pin_int1_route_t   pin_int1_route;
   lsm6dso_emb_fsm_enable_t   fsm_enable;
   lsm6dso_fsm_out_t          fsm_out;
@@ -152,7 +179,12 @@ void lsm6dso_fsm(void)
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg  = platform_read;
-  dev_ctx.handle    = &hi2c1;
+  dev_ctx.handle    = &SENSOR_BUS;
+
+  /* Init test platform */
+  platform_init();
+  /* Wait sensor boot time */
+  platform_delay(10);
 
   /* Check device ID */
   lsm6dso_device_id_get(&dev_ctx, &whoamI);
@@ -176,51 +208,20 @@ void lsm6dso_fsm(void)
   lsm6dso_gy_full_scale_set(&dev_ctx, LSM6DSO_2000dps);
 
   /* Route signals on interrupt pin 1 */
-  pin_int1_route.int1_ctrl.int1_drdy_xl             = PROPERTY_DISABLE;
-  pin_int1_route.int1_ctrl.int1_drdy_g              = PROPERTY_DISABLE;
-  pin_int1_route.int1_ctrl.int1_boot                = PROPERTY_DISABLE;
-  pin_int1_route.int1_ctrl.int1_fifo_th             = PROPERTY_DISABLE;
-  pin_int1_route.int1_ctrl.int1_fifo_ovr            = PROPERTY_DISABLE;
-  pin_int1_route.int1_ctrl.int1_fifo_full           = PROPERTY_DISABLE;
-  pin_int1_route.int1_ctrl.int1_cnt_bdr             = PROPERTY_DISABLE;
-  pin_int1_route.int1_ctrl.den_drdy_flag            = PROPERTY_DISABLE;
-  pin_int1_route.md1_cfg.int1_shub                  = PROPERTY_DISABLE;
-  pin_int1_route.md1_cfg.int1_emb_func              = PROPERTY_ENABLE;
-  pin_int1_route.md1_cfg.int1_6d                    = PROPERTY_DISABLE;
-  pin_int1_route.md1_cfg.int1_double_tap            = PROPERTY_DISABLE;
-  pin_int1_route.md1_cfg.int1_ff                    = PROPERTY_DISABLE;
-  pin_int1_route.md1_cfg.int1_wu                    = PROPERTY_DISABLE;
-  pin_int1_route.md1_cfg.int1_single_tap            = PROPERTY_DISABLE;
-  pin_int1_route.md1_cfg.int1_sleep_change          = PROPERTY_DISABLE;
-  pin_int1_route.emb_func_int1.int1_step_detector   = PROPERTY_DISABLE;
-  pin_int1_route.emb_func_int1.int1_tilt            = PROPERTY_DISABLE;
-  pin_int1_route.emb_func_int1.int1_sig_mot         = PROPERTY_DISABLE;
-  pin_int1_route.emb_func_int1.int1_fsm_lc          = PROPERTY_DISABLE;
-  pin_int1_route.fsm_int1_a.int1_fsm1               = PROPERTY_ENABLE;
-  pin_int1_route.fsm_int1_a.int1_fsm2               = PROPERTY_ENABLE;
-  pin_int1_route.fsm_int1_a.int1_fsm3               = PROPERTY_ENABLE;
-  pin_int1_route.fsm_int1_a.int1_fsm4               = PROPERTY_ENABLE;
-  pin_int1_route.fsm_int1_a.int1_fsm5               = PROPERTY_ENABLE;
-  pin_int1_route.fsm_int1_a.int1_fsm6               = PROPERTY_ENABLE;
-  pin_int1_route.fsm_int1_a.int1_fsm7               = PROPERTY_ENABLE;
-  pin_int1_route.fsm_int1_a.int1_fsm8               = PROPERTY_DISABLE;
-  pin_int1_route.fsm_int1_b.int1_fsm9               = PROPERTY_DISABLE;
-  pin_int1_route.fsm_int1_b.int1_fsm10              = PROPERTY_DISABLE;
-  pin_int1_route.fsm_int1_b.int1_fsm11              = PROPERTY_DISABLE;
-  pin_int1_route.fsm_int1_b.int1_fsm12              = PROPERTY_DISABLE;
-  pin_int1_route.fsm_int1_b.int1_fsm13              = PROPERTY_DISABLE;
-  pin_int1_route.fsm_int1_b.int1_fsm14              = PROPERTY_DISABLE;
-  pin_int1_route.fsm_int1_b.int1_fsm15              = PROPERTY_DISABLE;
-  pin_int1_route.fsm_int1_b.int1_fsm16              = PROPERTY_DISABLE;
-  lsm6dso_pin_int1_route_set(&dev_ctx, &pin_int1_route);
+  lsm6dso_pin_int1_route_get(&dev_ctx, &pin_int1_route);
+  pin_int1_route.fsm1               = PROPERTY_ENABLE;
+  pin_int1_route.fsm2               = PROPERTY_ENABLE;
+  pin_int1_route.fsm3               = PROPERTY_ENABLE;
+  pin_int1_route.fsm4               = PROPERTY_ENABLE;
+  pin_int1_route.fsm5               = PROPERTY_ENABLE;
+  pin_int1_route.fsm6               = PROPERTY_ENABLE;
+  pin_int1_route.fsm7               = PROPERTY_ENABLE;
+  lsm6dso_pin_int1_route_set(&dev_ctx, pin_int1_route);
 
   /* Configure interrupt pin mode notification */
   lsm6dso_int_notification_set(&dev_ctx, LSM6DSO_BASE_PULSED_EMB_LATCHED);
 
-  /*
-   * Start Finite State Machine configuration
-   */
-
+  /* Start Finite State Machine configuration */
   /* Reset Long Counter */
   lsm6dso_long_cnt_int_value_set(&dev_ctx, 0x0000U);
 
@@ -288,10 +289,7 @@ void lsm6dso_fsm(void)
   /* wrist_tilt */
   lsm6dso_ln_pg_write(&dev_ctx, fsm_addr, (uint8_t*)lsm6so_prg_wrist_tilt,
                       sizeof(lsm6so_prg_wrist_tilt));
-
- /*
-  * End Finite State Machine configuration
-  */
+ /* End Finite State Machine configuration */
 
   /* Set Output Data Rate */
   lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_104Hz);
@@ -303,32 +301,32 @@ void lsm6dso_fsm(void)
     /* Read interrupt source registers in polling mode (no int) */
     lsm6dso_all_sources_get(&dev_ctx, &status);
 
-    if (status.fsm_status_a.is_fsm1){
+    if (status.fsm1){
       sprintf((char*)tx_buffer, "glance detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if(status.fsm_status_a.is_fsm2){
+    if(status.fsm2){
         sprintf((char*)tx_buffer, "motion detected\r\n");
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if(status.fsm_status_a.is_fsm3){
+    if(status.fsm3){
         sprintf((char*)tx_buffer, "no motion detected\r\n");
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if(status.fsm_status_a.is_fsm4){
+    if(status.fsm4){
         sprintf((char*)tx_buffer, "wakeup detected\r\n");
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if(status.fsm_status_a.is_fsm5){
+    if(status.fsm5){
         sprintf((char*)tx_buffer, "pickup detected\r\n");
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if(status.fsm_status_a.is_fsm6) {
+    if(status.fsm6) {
       lsm6dso_fsm_out_get(&dev_ctx, &fsm_out);
         sprintf((char*)tx_buffer,
                 "orientation detected (%d, %d, %d, %d, %d, %d, %d, %d)\r\n",
@@ -339,7 +337,7 @@ void lsm6dso_fsm(void)
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    if(status.fsm_status_a.is_fsm7) {
+    if(status.fsm7) {
         sprintf((char*)tx_buffer, "wrist tilt detected\r\n");
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
@@ -360,8 +358,20 @@ void lsm6dso_fsm(void)
 static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
-    HAL_I2C_Mem_Write(handle, LSM6DSO_I2C_ADD_H, reg,
+  if (handle == &hi2c1)
+  {
+    HAL_I2C_Mem_Write(handle, LSM6DSO_I2C_ADD_L, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  }
+#ifdef STEVAL_MKI109V3
+  else if (handle == &hspi2)
+  {
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+    HAL_SPI_Transmit(handle, &reg, 1, 1000);
+    HAL_SPI_Transmit(handle, bufp, len, 1000);
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  }
+#endif
   return 0;
 }
 
@@ -378,8 +388,22 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-    HAL_I2C_Mem_Read(handle, LSM6DSO_I2C_ADD_H, reg,
+  if (handle == &hi2c1)
+  {
+    HAL_I2C_Mem_Read(handle, LSM6DSO_I2C_ADD_L, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  }
+#ifdef STEVAL_MKI109V3
+  else if (handle == &hspi2)
+  {
+    /* Read command */
+    reg |= 0x80;
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+    HAL_SPI_Transmit(handle, &reg, 1, 1000);
+    HAL_SPI_Receive(handle, bufp, len, 1000);
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  }
+#endif
   return 0;
 }
 
@@ -392,6 +416,35 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
+  #ifdef NUCLEO_F411RE
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
+  #endif
+  #ifdef STEVAL_MKI109V3
+  CDC_Transmit_FS(tx_buffer, len);
+  #endif
 }
 
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
+ * @brief  platform specific initialization (platform dependent)
+ */
+static void platform_init(void)
+{
+#if defined(STEVAL_MKI109V3)
+  TIM3->CCR1 = PWM_3V3;
+  TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  HAL_Delay(1000);
+#endif
+}

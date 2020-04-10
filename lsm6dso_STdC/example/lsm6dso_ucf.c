@@ -8,7 +8,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -23,21 +23,46 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
+ * - STEVAL_MKI109V3 + STEVAL-MKI196V1
  * - NUCLEO_F411RE + X_NUCLEO_IKS01A3
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
  * Used interfaces:
  *
+ * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
+ *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A3 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
- * `tx_com` and is required.
+ * `tx_com` and 'platform_init' is required.
  *
  */
+
+/* STMicroelectronics evaluation boards definition
+ *
+ * Please uncomment ONLY the evaluation boards in use.
+ * If a different hardware is used please comment all
+ * following target board and redefine yours.
+ */
+//#define STEVAL_MKI109V3
+#define NUCLEO_F411RE
+
+#if defined(STEVAL_MKI109V3)
+/* MKI109V3: Define communication interface */
+#define SENSOR_BUS hspi2
+
+/* MKI109V3: Vdd and Vddio power supply values */
+#define PWM_3V3 915
+
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
+#define SENSOR_BUS hi2c1
+
+#endif
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
@@ -237,7 +262,7 @@
  */
 
 /* Program: wakeup [ array created from ".ucf" file]*/
-const uint8_t lsm6so_prg_wakeup[] = {
+static const uint8_t lsm6so_prg_wakeup[] = {
       0x50, 0x40, 0x12, 0x00, 0x0C, 0x00, 0x00, 0x3C, 0x66, 0x2A, 0x02, 0x00,
       0x41, 0x75, 0x10, 0x10, 0x22, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
       0x00, 0x00, 0x06, 0x00, 0x06, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
@@ -270,23 +295,29 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
-
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
+static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
 void lsm6dso_fsm_ucf(void)
 {
   /* Variable declaration */
-  stmdev_ctx_t              dev_ctx;
-  lsm6dso_pin_int1_route_t   pin_int1_route;
-  lsm6dso_emb_fsm_enable_t   fsm_enable;
-  lsm6dso_all_sources_t      status;
-  uint16_t                   fsm_addr;
+  lsm6dso_pin_int1_route_t pin_int1_route;
+  lsm6dso_emb_fsm_enable_t fsm_enable;
+  lsm6dso_all_sources_t status;
+  stmdev_ctx_t dev_ctx;
+  uint16_t fsm_addr;
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg  = platform_read;
-  dev_ctx.handle    = &hi2c1;
+  dev_ctx.handle    = &SENSOR_BUS;
+
+  /* Init test platform */
+  platform_init();
+  /* Wait sensor boot time */
+  platform_delay(10);
 
   /* Check device ID */
   lsm6dso_device_id_get(&dev_ctx, &whoamI);
@@ -311,9 +342,8 @@ void lsm6dso_fsm_ucf(void)
 
   /* Route signals on interrupt pin 1 */
   lsm6dso_pin_int1_route_get(&dev_ctx, &pin_int1_route);
-  pin_int1_route.md1_cfg.int1_emb_func              = PROPERTY_ENABLE;
-  pin_int1_route.fsm_int1_a.int1_fsm1               = PROPERTY_ENABLE;
-  lsm6dso_pin_int1_route_set(&dev_ctx, &pin_int1_route);
+  pin_int1_route.fsm1               = PROPERTY_ENABLE;
+  lsm6dso_pin_int1_route_set(&dev_ctx, pin_int1_route);
 
   /* Configure interrupt pin mode notification */
   lsm6dso_int_notification_set(&dev_ctx, LSM6DSO_BASE_PULSED_EMB_LATCHED);
@@ -364,7 +394,7 @@ void lsm6dso_fsm_ucf(void)
     /* Read interrupt source registers in polling mode (no int) */
     lsm6dso_all_sources_get(&dev_ctx, &status);
 
-    if(status.fsm_status_a.is_fsm1){
+    if(status.fsm1){
         sprintf((char*)tx_buffer, "wakeup detected\r\n");
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
@@ -420,4 +450,28 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
 }
 
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
+ * @brief  platform specific initialization (platform dependent)
+ */
+static void platform_init(void)
+{
+#if defined(STEVAL_MKI109V3)
+  TIM3->CCR1 = PWM_3V3;
+  TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  HAL_Delay(1000);
+#endif
+}
 

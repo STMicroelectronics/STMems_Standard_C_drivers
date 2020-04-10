@@ -1,13 +1,14 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    orientation_6d_4d.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show the simplest way to detect orientation 6D/4D event
+ * 			from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,8 +23,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI196V1
+ * - NUCLEO_F411RE + X_NUCLEO_IKS01A3
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -32,8 +33,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -48,7 +49,7 @@
  * following target board and redefine yours.
  */
 //#define STEVAL_MKI109V3
-#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#define NUCLEO_F411RE
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
@@ -57,8 +58,8 @@
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
 #endif
@@ -74,29 +75,13 @@
 #if defined(STEVAL_MKI109V3)
 #include "usbd_cdc_if.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+#elif defined(NUCLEO_F411RE)
 #include "usart.h"
 #endif
-
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static axis3bit16_t data_raw_angular_rate;
-static axis1bit16_t data_raw_temperature;
-static float acceleration_mg[3];
-static float angular_rate_mdps[3];
-static float temperature_degC;
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -115,132 +100,93 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lsm6dso(void)
+void example_main_orientation_lsm6dso(void)
 {
   stmdev_ctx_t dev_ctx;
 
-  /*
-   *  Initialize mems driver interface
-   */
+  /* Uncomment to configure INT 1 */
+  //lsm6dso_pin_int1_route_t int1_route;
+
+  lsm6dso_pin_int2_route_t int2_route;
+
+  /* Initialize mems driver interface. */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Init test platform
-   */
+  /* Init test platform. */
   platform_init();
+  /* Wait sensor boot time */
+  platform_delay(10);
 
-  /*
-   *  Check device ID
-   */
+  /* Check device ID. */
   lsm6dso_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSO_ID)
     while(1);
 
-  /*
-   *  Restore default configuration
-   */
+  /* Restore default configuration. */
   lsm6dso_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lsm6dso_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Disable I3C interface
-   */
+  /* Disable I3C interface. */
   lsm6dso_i3c_disable_set(&dev_ctx, LSM6DSO_I3C_DISABLE);
 
-  /*
-   *  Enable Block Data Update
-   */
-  lsm6dso_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Set XL Output Data Rate to 417 Hz. */
+  lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_417Hz);
 
-  /*
-   * Set Output Data Rate
-   */
-  lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_12Hz5);
-  lsm6dso_gy_data_rate_set(&dev_ctx, LSM6DSO_GY_ODR_12Hz5);
-
-  /*
-   * Set full scale
-   */
+  /* Set 2g full XL scale. */
   lsm6dso_xl_full_scale_set(&dev_ctx, LSM6DSO_2g);
-  lsm6dso_gy_full_scale_set(&dev_ctx, LSM6DSO_2000dps);
 
-  /*
-   * Configure filtering chain(No aux interface)
-   *
-   * Accelerometer - LPF1 + LPF2 path
-   */
-  lsm6dso_xl_hp_path_on_out_set(&dev_ctx, LSM6DSO_LP_ODR_DIV_100);
-  lsm6dso_xl_filter_lp2_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Set threshold to 60 degrees. */
+  lsm6dso_6d_threshold_set(&dev_ctx, LSM6DSO_DEG_60);
 
-  /*
-   * Read samples in polling mode (no int)
+  /* LPF2 on 6D/4D function selection. */
+  lsm6dso_xl_lp2_on_6d_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /* To enable 4D mode uncomment next line.
+   * 4D orientation detection disable Z-axis events.
    */
+  lsm6dso_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /* Uncomment if interrupt generation on Free Fall INT1 pin */
+  //lsm6dso_pin_int1_route_get(&dev_ctx, &int1_route);
+  //int1_route.reg.md1_cfg.int1_ff = PROPERTY_ENABLE;
+  //lsm6dso_pin_int1_route_set(&dev_ctx, &int1_route);
+
+  /* Uncomment if interrupt generation on Free Fall INT2 pin */
+  lsm6dso_pin_int2_route_get(&dev_ctx, NULL, &int2_route);
+  int2_route.free_fall = PROPERTY_ENABLE;
+  lsm6dso_pin_int2_route_set(&dev_ctx, NULL, int2_route);
+
+  /* Wait Events. */
   while(1)
   {
-    uint8_t reg;
+    lsm6dso_all_sources_t all_source;
 
-    /*
-     * Read output only if new xl value is available
-     */
-    lsm6dso_xl_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
+    /* Check if 6D/4D Orientation events. */
+    lsm6dso_all_sources_get(&dev_ctx, &all_source);
+    if (all_source.six_d)
     {
-      /*
-       * Read acceleration field data
-       */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dso_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] =
-    		  lsm6dso_from_fs2_to_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] =
-    		  lsm6dso_from_fs2_to_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] =
-    		  lsm6dso_from_fs2_to_mg(data_raw_acceleration.i16bit[2]);
-
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
-
-    lsm6dso_gy_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
-      /*
-       * Read angular rate field data
-       */
-      memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dso_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
-      angular_rate_mdps[0] =
-    		  lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[0]);
-      angular_rate_mdps[1] =
-    		  lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[1]);
-      angular_rate_mdps[2] =
-    		  lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[2]);
-
-      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-              angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
-
-    lsm6dso_temp_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
-      /*
-       * Read temperature data
-       */
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      lsm6dso_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = lsm6dso_from_lsb_to_celsius(data_raw_temperature.i16bit);
-
-      sprintf((char*)tx_buffer,
-    		  "Temperature [degC]:%6.2f\r\n", temperature_degC);
+      sprintf((char*)tx_buffer, "6D Or. switched to ");
+      if (all_source.six_d_xh)
+          strcat((char*)tx_buffer, "XH");
+      if (all_source.six_d_xl)
+          strcat((char*)tx_buffer, "XL");
+      if (all_source.six_d_yh)
+          strcat((char*)tx_buffer, "YH");
+      if (all_source.six_d_yl)
+          strcat((char*)tx_buffer, "YL");
+      if (all_source.six_d_zh)
+          strcat((char*)tx_buffer, "ZH");
+      if (all_source.six_d_zl)
+          strcat((char*)tx_buffer, "ZL");
+      strcat((char*)tx_buffer, "\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
@@ -317,7 +263,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+  #ifdef NUCLEO_F411RE
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
   #endif
   #ifdef STEVAL_MKI109V3
@@ -326,13 +272,26 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }

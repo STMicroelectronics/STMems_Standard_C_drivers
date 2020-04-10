@@ -1,13 +1,14 @@
 /*
  ******************************************************************************
- * @file    read_data_simple_offset.c
+ * @file    activity.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show the simplest way to detect activity/inactivity
+ *          from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,8 +23,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI196V1
+ * - NUCLEO_F411RE + X_NUCLEO_IKS01A3
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -32,8 +33,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -48,7 +49,7 @@
  * following target board and redefine yours.
  */
 //#define STEVAL_MKI109V3
-#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#define NUCLEO_F411RE
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
@@ -57,46 +58,29 @@
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+#include <lsm6dso_reg.h>
 #include <string.h>
 #include <stdio.h>
-
 #include "stm32f4xx_hal.h"
-#include <lsm6dso_reg.h>
 #include "gpio.h"
 #include "i2c.h"
 #if defined(STEVAL_MKI109V3)
 #include "usbd_cdc_if.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+#elif defined(NUCLEO_F411RE)
 #include "usart.h"
 #endif
-
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static axis3bit16_t data_raw_angular_rate;
-static axis1bit16_t data_raw_temperature;
-static float acceleration_mg[3];
-static float angular_rate_mdps[3];
-static float temperature_degC;
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -115,152 +99,80 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_simple_offset_lsm6dso(void)
+void example_main_activity_lsm6dso(void)
 {
   stmdev_ctx_t dev_ctx;
+  lsm6dso_pin_int1_route_t int1_route;
 
-  /*
-   * Example of XL offset to apply to acc. output
-   */
-  uint8_t offset[3] = { 0x30, 0x40, 0x7E };
-
-  /*
-   *  Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Init test platform
-   */
+  /* Init platform */
   platform_init();
+  /* Wait sensor boot time */
+  platform_delay(10);
 
-  /*
-   *  Check device ID
-   */
+ /* Check device ID */
   lsm6dso_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSO_ID)
     while(1);
 
-  /*
-   *  Restore default configuration
-   */
+  /* Restore default configuration */
   lsm6dso_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lsm6dso_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Disable I3C interface
-   */
+  /* Disable I3C interface */
   lsm6dso_i3c_disable_set(&dev_ctx, LSM6DSO_I3C_DISABLE);
 
-  /*
-   *  Enable Block Data Update
-   */
-  lsm6dso_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Set XL and Gyro Output Data Rate */
+  lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_208Hz);
+  lsm6dso_gy_data_rate_set(&dev_ctx, LSM6DSO_GY_ODR_104Hz);
 
-  /*
-   * Weight of XL user offset to 2^(-10) g/LSB
-   */
-  lsm6dso_xl_offset_weight_set(&dev_ctx, LSM6DSO_LSb_1mg);
-
-  /*
-   * Accelerometer X,Y,Z axis user offset correction expressed
-   * in two’s complement. Set X to 48mg, Y tp 64 mg, Z to -127 mg
-   */
-  lsm6dso_xl_usr_offset_x_set(&dev_ctx, &offset[0]);
-  lsm6dso_xl_usr_offset_y_set(&dev_ctx, &offset[1]);
-  lsm6dso_xl_usr_offset_z_set(&dev_ctx, &offset[2]);
-  lsm6dso_xl_usr_offset_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /*
-   * Set Output Data Rate
-   */
-  lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_12Hz5);
-  lsm6dso_gy_data_rate_set(&dev_ctx, LSM6DSO_GY_ODR_12Hz5);
-
-  /*
-   * Set full scale
-   */
+  /* Set 2g full XL scale and 250 dps full Gyro */
   lsm6dso_xl_full_scale_set(&dev_ctx, LSM6DSO_2g);
-  lsm6dso_gy_full_scale_set(&dev_ctx, LSM6DSO_2000dps);
+  lsm6dso_gy_full_scale_set(&dev_ctx, LSM6DSO_250dps);
 
-  /*
-   * Configure filtering chain(No aux interface).
-   */
-  /*
-   * Accelerometer - LPF1 + LPF2 path
-   */
-  lsm6dso_xl_hp_path_on_out_set(&dev_ctx, LSM6DSO_LP_ODR_DIV_100);
-  lsm6dso_xl_filter_lp2_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Set duration for Activity detection to 9.62 ms (= 2 * 1 / ODR_XL) */
+  lsm6dso_wkup_dur_set(&dev_ctx, 0x02);
 
-  /*
-   * Read samples in polling mode (no int).
-   */
+  /* Set duration for Inactivity detection to 4.92 s (= 2 * 512 / ODR_XL) */
+  lsm6dso_act_sleep_dur_set(&dev_ctx, 0x02);
+
+  /* Set Activity/Inactivity threshold to 62.5 mg */
+  lsm6dso_wkup_threshold_set(&dev_ctx, 0x02);
+
+  /* Inactivity configuration: XL to 12.5 in LP, gyro to Power-Down */
+  lsm6dso_act_mode_set(&dev_ctx, LSM6DSO_XL_12Hz5_GY_PD);
+
+  /* Enable interrupt generation on Inactivity INT1 pin */
+  lsm6dso_pin_int1_route_get(&dev_ctx, &int1_route);
+  int1_route.sleep_change = PROPERTY_ENABLE;
+  lsm6dso_pin_int1_route_set(&dev_ctx, int1_route);
+
+  /* Wait Events */
   while(1)
   {
-    uint8_t reg;
+    lsm6dso_all_sources_t all_source;
 
-    /*
-     * Read output only if new xl value is available
-     */
-    lsm6dso_xl_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
+    /* Check if Activity/Inactivity events */
+    lsm6dso_all_sources_get(&dev_ctx, &all_source);
+    if (all_source.sleep_state)
     {
-      /*
-       * Read acceleration field data
-       */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dso_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] =
-    		  lsm6dso_from_fs2_to_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] =
-    		  lsm6dso_from_fs2_to_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] =
-    		  lsm6dso_from_fs2_to_mg(data_raw_acceleration.i16bit[2]);
-
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+      sprintf((char*)tx_buffer, "Inactivity Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    lsm6dso_gy_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
+    if (all_source.wake_up)
     {
-      /*
-       * Read angular rate field data
-       */
-      memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dso_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
-      angular_rate_mdps[0] =
-    		  lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[0]);
-      angular_rate_mdps[1] =
-    		  lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[1]);
-      angular_rate_mdps[2] =
-    		  lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[2]);
-
-      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-              angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
-
-    lsm6dso_temp_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
-      /*
-       * Read temperature data.
-       */
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      lsm6dso_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = lsm6dso_from_lsb_to_celsius(data_raw_temperature.i16bit);
-
-      sprintf((char*)tx_buffer,
-              "Temperature [degC]:%6.2f\r\n", temperature_degC);
+      sprintf((char*)tx_buffer, "Activity Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
@@ -337,7 +249,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+  #ifdef NUCLEO_F411RE
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
   #endif
   #ifdef STEVAL_MKI109V3
@@ -346,13 +258,26 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }

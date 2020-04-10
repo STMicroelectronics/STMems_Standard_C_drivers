@@ -1,14 +1,14 @@
 /*
  ******************************************************************************
- * @file    wake_up.c
+ * @file    free_fall.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect wake-up events from
- *          sensor.
+ * @brief   This file show the simplest way to detect free fall event
+ * 			from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -23,8 +23,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI196V1
+ * - NUCLEO_F411RE + X_NUCLEO_IKS01A3
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -33,8 +33,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -49,7 +49,7 @@
  * following target board and redefine yours.
  */
 //#define STEVAL_MKI109V3
-#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#define NUCLEO_F411RE
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
@@ -58,8 +58,8 @@
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
 #endif
@@ -75,7 +75,7 @@
 #if defined(STEVAL_MKI109V3)
 #include "usbd_cdc_if.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+#elif defined(NUCLEO_F411RE)
 #include "usart.h"
 #endif
 
@@ -100,111 +100,77 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_wake_up_lsm6dso(void)
+void example_main_free_fall_lsm6dso(void)
 {
   stmdev_ctx_t dev_ctx;
 
-  /*
-   * Uncomment to configure INT 1
-   */
+  /* Uncomment to configure INT 1 */
   //lsm6dso_pin_int1_route_t int1_route;
 
-  /*
-   * Uncomment to configure INT 2
-   */
-  lsm6dso_pin_int2_route_t int2_route;
+  /* Uncomment to configure INT 2 */
+  //lsm6dso_pin_int2_route_t int2_route;
 
-  /*
-   *  Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Init test platform
-   */
+  /* Init test platform */
   platform_init();
+  /* Wait sensor boot time */
+  platform_delay(10);
 
-  /*
-   *  Check device ID
-   */
+  /* Check device ID */
   lsm6dso_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DSO_ID)
     while(1);
 
-  /*
-   *  Restore default configuration
-   */
+  /* Restore default configuration */
   lsm6dso_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lsm6dso_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Disable I3C interface
-   */
+  /* Disable I3C interface */
   lsm6dso_i3c_disable_set(&dev_ctx, LSM6DSO_I3C_DISABLE);
 
-  /*
-   * Set XL Output Data Rate to 416 Hz
-   */
+  /* Set XL Output Data Rate */
   lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_417Hz);
 
-  /*
-   * Set 2g full XL scale
-   */
+  /* Set 2g full XL scale */
   lsm6dso_xl_full_scale_set(&dev_ctx, LSM6DSO_2g);
 
-  /*
-   * Apply high-pass digital filter on Wake-Up function
-   */
-  lsm6dso_xl_hp_path_internal_set(&dev_ctx, LSM6DSO_USE_SLOPE);
+  /* Enable LIR */
+  lsm6dso_int_notification_set(&dev_ctx, LSM6DSO_ALL_INT_LATCHED);
 
-  /*
-   * Set Wake-Up threshold: 1 LSb corresponds to FS_XL/2^6
-   */
-  lsm6dso_wkup_threshold_set(&dev_ctx, 2);
+  /* Set Free Fall duration to 3 and 6 samples event duration */
+  lsm6dso_ff_dur_set(&dev_ctx, 0x06);
+  lsm6dso_ff_threshold_set(&dev_ctx, LSM6DSO_FF_TSH_312mg);
 
-  /*
-   * Uncomment interrupt generation on Wake-Up INT1 pin
-   */
+  /* Uncomment if interrupt generation on Free Fall INT1 pin */
   //lsm6dso_pin_int1_route_get(&dev_ctx, &int1_route);
-  //int1_route.reg.md1_cfg.int1_wu = PROPERTY_ENABLE;
+  //int1_route.reg.md1_cfg.int1_ff = PROPERTY_ENABLE;
   //lsm6dso_pin_int1_route_set(&dev_ctx, &int1_route);
 
-  /*
-   * Enable if interrupt generation on Wake-Up INT2 pin
-   */
-  lsm6dso_pin_int2_route_get(&dev_ctx, &int2_route);
-  int2_route.md2_cfg.int2_wu = PROPERTY_ENABLE;
-  lsm6dso_pin_int2_route_set(&dev_ctx, &int2_route);
+  /* Uncomment if interrupt generation on Free Fall INT2 pin */
+  //lsm6dso_pin_int2_route_get(&dev_ctx, &int2_route);
+  //int2_route.reg.md2_cfg.int2_ff = PROPERTY_ENABLE;
+  //lsm6dso_pin_int2_route_set(&dev_ctx, &int2_route);
 
-  /*
-   * Wait Events
-   */
+  /* Wait Events */
   while(1)
   {
     lsm6dso_all_sources_t all_source;
 
-    /*
-     * Check if Wake-Up events
-     */
+    /* Check if Free Fall events */
     lsm6dso_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.wake_up_src.wu_ia)
+    if (all_source.free_fall)
     {
-      sprintf((char*)tx_buffer, "Wake-Up event on ");
-      if (all_source.wake_up_src.x_wu)
-        strcat((char*)tx_buffer, "X");
-      if (all_source.wake_up_src.y_wu)
-        strcat((char*)tx_buffer, "Y");
-      if (all_source.wake_up_src.z_wu)
-        strcat((char*)tx_buffer, "Z");
-
-      strcat((char*)tx_buffer, " direction\r\n");
+      sprintf((char*)tx_buffer, "Free Fall Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
@@ -281,7 +247,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+  #ifdef NUCLEO_F411RE
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
   #endif
   #ifdef STEVAL_MKI109V3
@@ -290,13 +256,26 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }
