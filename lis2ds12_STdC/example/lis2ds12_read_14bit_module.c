@@ -54,6 +54,27 @@
  * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 -> SPI N/A
  *
  */
+/* STMicroelectronics evaluation boards definition
+ *
+ * Please uncomment ONLY the evaluation boards in use.
+ * If a different hardware is used please comment all
+ * following target board and redefine yours.
+ */
+//#define STEVAL_MKI109V3
+#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+
+#if defined(STEVAL_MKI109V3)
+/* MKI109V3: Define communication interface */
+#define SENSOR_BUS hspi2
+
+/* MKI109V3: Vdd and Vddio power supply values */
+#define PWM_3V3 915
+
+#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
+#define SENSOR_BUS hi2c1
+
+#endif
 
 #include <string.h>
 #include <stdio.h>
@@ -101,6 +122,7 @@ static int32_t platform_write(void *handle, uint8_t Reg, uint8_t *Bufp,
 static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_init(void);
 
 uint16_t samples, fail;
 
@@ -110,22 +132,16 @@ uint16_t samples, fail;
  */
 void lis2ds12_14bit_module(void)
 {
-  /* PWM Define */
-#define PWM_3V3 915
-#define PWM_1V8 498
 
+  /* Initialize platform specific hardware */
+  platform_init();
 
-  TIM3->CCR1 = PWM_1V8;
-  TIM3->CCR2 = PWM_1V8;
-  HAL_Delay(1000);
-  /*
-   *  Initialize mems driver interface.
-   */
+  /* Initialize mems driver interface. */
   stmdev_ctx_t dev_ctx;
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
   /*
    *  Check device ID.
@@ -312,4 +328,18 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len )
   #ifdef STEVAL_MKI109V3
   CDC_Transmit_FS( tx_buffer, len );
   #endif
+}
+
+/*
+ * @brief  platform specific initialization (platform dependent)
+ */
+static void platform_init(void)
+{
+#if defined(STEVAL_MKI109V3)
+  TIM3->CCR1 = PWM_3V3;
+  TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  HAL_Delay(1000);
+#endif
 }
