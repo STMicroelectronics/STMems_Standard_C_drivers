@@ -129,6 +129,9 @@ void lps22hh_read_data_polling(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
 
+  /* Initialize platform specific hardware */
+  platform_init();
+
   /* Wait sensor boot time */
   platform_delay(5);
 
@@ -277,8 +280,8 @@ static void platform_init(void)
 #if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
-  /* Sensor boot time: 5ms */
-  HAL_Delay(5);
 }
