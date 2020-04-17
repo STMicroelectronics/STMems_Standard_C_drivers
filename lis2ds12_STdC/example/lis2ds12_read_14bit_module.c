@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -19,23 +19,25 @@
  */
 
 /*
- *   GETTING STARTED:
+ * This example was developed using the following STMicroelectronics
+ * evaluation boards:
  *
- *   If you have one of the following STMicroelectronics development tool
+ * - STEVAL_MKI109V3 + STEVAL-MKI174V1
+ * - NUCLEO_F411RE + STEVAL-MKI174V1
  *
- *   This example use an STM32F4xx development board and CubeMX tool.
+ * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
+ * Used interfaces:
  *
- *   In this case the "*handle" variable is useful in order to select the
- *   correct interface but the usage of "*handle" is not mandatory.
+ * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
+ *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * -> STEVAL_MKI109V3
- * -> NUCLEO_F411RE + X_NUCLEO_IKS01A1
- * -> NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
- *   If you need to run this example on a different hardware platform a
- *   modification of the functions: "platform_write", "platform_read" and
- *   "tx_com" is required.
+ * If you need to run this example on a different hardware platform a
+ * modification of the functions: `platform_write`, `platform_read`,
+ * `tx_com` and 'platform_init' is required.
  *
  */
 
@@ -99,6 +101,7 @@ typedef union{
 } axis3bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
+#define    BOOT_TIME         20 //ms
 
 /* Private variables ---------------------------------------------------------*/
 static axis3bit16_t data_raw_acceleration;
@@ -122,6 +125,7 @@ static int32_t platform_write(void *handle, uint8_t Reg, uint8_t *Bufp,
 static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 uint16_t samples, fail;
@@ -135,6 +139,10 @@ void lis2ds12_14bit_module(void)
 
   /* Initialize platform specific hardware */
   platform_init();
+
+  /* Wait sensor boot time */
+  platform_delay(BOOT_TIME);
+
 
   /* Initialize mems driver interface. */
   stmdev_ctx_t dev_ctx;
@@ -328,6 +336,17 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len )
   #ifdef STEVAL_MKI109V3
   CDC_Transmit_FS( tx_buffer, len );
   #endif
+}
+
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
 }
 
 /*

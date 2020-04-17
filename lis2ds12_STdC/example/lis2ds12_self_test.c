@@ -22,8 +22,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3 + STEVAL-MKI151V1
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A3 + STEVAL-MKI151V1
+ * - STEVAL_MKI109V3 + STEVAL-MKI174V1
+ * - NUCLEO_F411RE + STEVAL-MKI174V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -83,6 +83,12 @@ typedef union{
 } axis3bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
+
+#define    BOOT_TIME         20 //ms
+#define    WAIT_TIME        200 //ms
+
+#define    SAMPLES            5 //number of samples
+
 /* Self test limits. */
 #define    MIN_ST_LIMIT_mg     70.0f
 #define    MAX_ST_LIMIT_mg   1500.0f
@@ -135,7 +141,7 @@ void lis2ds12_self_test(void)
   platform_init();
 
   /* Wait sensor boot time */
-  platform_delay(20);
+  platform_delay(BOOT_TIME);
 
   /* Check device ID */
   lis2ds12_device_id_get(&dev_ctx_xl, &reg.byte);
@@ -155,17 +161,17 @@ void lis2ds12_self_test(void)
   lis2ds12_xl_data_rate_set(&dev_ctx_xl, LIS2DS12_XL_ODR_50Hz_HR);
 
   /* Wait stable output */
-  platform_delay(200);
+  platform_delay(WAIT_TIME);
 
   /* Check if new value available */
   do {
-	  lis2ds12_status_reg_get(&dev_ctx_xl, &reg.status);
+    lis2ds12_status_reg_get(&dev_ctx_xl, &reg.status);
   } while(!reg.status.drdy);
   /* Read dummy data and discard it */
   lis2ds12_acceleration_raw_get(&dev_ctx_xl, data_raw.u8bit);
 
-  /* Read 5 sample and get the average vale for each axis */
-  for (i = 0; i < 5; i++){
+  /* Read samples and get the average vale for each axis */
+  for (i = 0; i < SAMPLES; i++){
     /* Check if new value available */
       do {
         lis2ds12_status_reg_get(&dev_ctx_xl, &reg.status);
@@ -178,7 +184,7 @@ void lis2ds12_self_test(void)
   }
   /* Calculate the mg average values */
   for (i=0; i<3; i++){
-	  maes_st_off[i] /= 5.0f;
+    maes_st_off[i] /= SAMPLES;
   }
 
   /* Enable Self Test positive (or negative) */
@@ -186,17 +192,17 @@ void lis2ds12_self_test(void)
   //lis2ds12_xl_self_test_set(&dev_ctx_xl, LIS2DS12_ST_NEGATIVE);
 
   /* Wait stable output */
-  platform_delay(200);
+  platform_delay(WAIT_TIME);
 
   /* Check if new value available */
   do {
-	  lis2ds12_status_reg_get(&dev_ctx_xl, &reg.status);
+    lis2ds12_status_reg_get(&dev_ctx_xl, &reg.status);
   } while(!reg.status.drdy);
   /* Read dummy data and discard it */
   lis2ds12_acceleration_raw_get(&dev_ctx_xl, data_raw.u8bit);
 
-  /* Read 5 sample and get the average vale for each axis */
-  for (i = 0; i < 5; i++){
+  /* Read samples and get the average vale for each axis */
+  for (i = 0; i < SAMPLES; i++){
     /* Check if new value available */
       do {
         lis2ds12_status_reg_get(&dev_ctx_xl, &reg.status);
@@ -209,7 +215,7 @@ void lis2ds12_self_test(void)
   }
   /* Calculate the mg average values */
   for (i=0; i<3; i++){
-    maes_st_on[i] /= 5.0f;
+    maes_st_on[i] /= SAMPLES;
   }
 
   /* Calculate the mg values for self test */
@@ -326,6 +332,9 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 
 /*
  * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
  */
 static void platform_delay(uint32_t ms)
 {
