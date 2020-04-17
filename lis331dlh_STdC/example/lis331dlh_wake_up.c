@@ -1,14 +1,13 @@
 /*
  ******************************************************************************
- * @file    free_fall.c
+ * @file    wake_up.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect free fall events
- *          from sensor.
+ * @brief   This file show the simplest way to detect wake_up from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -23,8 +22,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI089V1
+ * - NUCLEO_F411RE + STEVAL-MKI089V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -33,8 +32,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -49,7 +48,7 @@
  * following target board and redefine yours.
  */
 //#define STEVAL_MKI109V3
-#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#define NUCLEO_F411RE
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
@@ -58,8 +57,8 @@
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
 #endif
@@ -74,12 +73,12 @@
 #if defined(STEVAL_MKI109V3)
 #include "usbd_cdc_if.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+#elif defined(NUCLEO_F411RE)
 #include "usart.h"
 #endif
 
 /* Private macro -------------------------------------------------------------*/
-
+#define    BOOT_TIME          5 //ms
 /* Private variables ---------------------------------------------------------*/
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
@@ -98,94 +97,100 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_free_fall_lis331dlh(void)
+void lis331dlh_wake_up(void)
 {
   /*
-   * Initialize mems driver interface
-   */
+   * Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
   int1_on_th_conf_t int_route;
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Initialize platform specific hardware */
   platform_init();
-
-  /*
-   * Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(BOOT_TIME);
+  /* Check device ID */
   lis331dlh_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LIS331DLH_ID)
-  {
     while(1)
     {
       /* manage here device not found */
     }
-  }
 
-  /*
-   * Set full scale
-   */
+  /* Set full scale */
   lis331dlh_full_scale_set(&dev_ctx, LIS331DLH_2g);
 
-  /*
-   * Disable HP filter
-   */
-  lis331dlh_hp_path_set(&dev_ctx, LIS331DLH_HP_DISABLE);
-
-  /*
-   * Set minimum event duration for free fall
-   */
-  lis331dlh_int1_dur_set(&dev_ctx, 3);
-
-  /*
-   * Apply free-fall axis threshold
+  /* Apply high-pass digital filter on Wake-Up function
    *
-   * Set threshold to 350mg
+   * Comment out this configuration in case of HP filter
+   * bypassed: in this case you have on Z axis 1 g to take
+   * in account in threshold
    */
-  lis331dlh_int1_treshold_set(&dev_ctx, 22);
+  lis331dlh_hp_path_set(&dev_ctx, LIS331DLH_HP_ON_INT1_OUT);
+  lis331dlh_hp_bandwidth_set(&dev_ctx, LIS331DLH_CUT_OFF_16Hz);
+  lis331dlh_reference_mode_set(&dev_ctx, LIS331DLH_NORMAL_MODE);
 
-  /*
-   * Enable interrupt generation on free fall INT1 pin
+  /* Apply high-pass digital filter on Wake-Up function
+   * Duration time is set to zero so Wake-Up interrupt signal
+   * is generated for each X,Y,Z filtered data exceeding the
+   * configured threshold
    */
-  lis331dlh_int1_on_threshold_mode_set(&dev_ctx, LIS331DLH_INT1_ON_THRESHOLD_AND);
+  lis331dlh_int1_dur_set(&dev_ctx, 0);
+
+  /* Set wake-up threshold to 250 mg */
+  lis331dlh_int1_treshold_set(&dev_ctx, 16);
+
+  /* Dummy read to force the HP filter to
+   * actual acceleration value
+   * (i.e. set reference acceleration/tilt value
+   */
+  lis331dlh_hp_reset_get(&dev_ctx);
+
+  /* Enable interrupt generation on Wake-Up INT1 pin */
   lis331dlh_int1_on_threshold_conf_get(&dev_ctx, &int_route);
-  int_route.int1_xlie = PROPERTY_ENABLE;
-  int_route.int1_ylie = PROPERTY_ENABLE;
-  int_route.int1_zlie = PROPERTY_ENABLE;
+  int_route.int1_xhie = PROPERTY_ENABLE;
+  int_route.int1_yhie = PROPERTY_ENABLE;
+
+  /* If HP filter is off take in account of 1g related to gravity */
+  int_route.int1_zhie = PROPERTY_ENABLE;
   lis331dlh_int1_on_threshold_conf_set(&dev_ctx, int_route);
 
-  /*
-   * Set Output Data Rate
-   */
+  /* Set Output Data Rate */
   lis331dlh_data_rate_set(&dev_ctx, LIS331DLH_ODR_100Hz);
 
-  /*
-   * Wait Events
-   */
+  /* Wait Events */
   while(1)
   {
     lis331dlh_int1_src_t all_source;
 
-    /*
-     * Check free fall events
-     *
-     * You can test the event of zl && yl &&xl or check
-     * the interrupt int1 pin
-     */
+    /* Check Wake-Up events */
     lis331dlh_int1_src_get(&dev_ctx, &all_source);
-    if (all_source.xl && all_source.yl && all_source.zl)
+    if (all_source.xh)
     {
-      sprintf((char*)tx_buffer, "Free fall\r\n");
+      sprintf((char*)tx_buffer, "Wake-Up event on X\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
+
+    if (all_source.yh)
+    {
+      sprintf((char*)tx_buffer, "Wake-Up event on Y\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
+
+    if (all_source.zh)
+    {
+      sprintf((char*)tx_buffer, "Wake-Up event on Z\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
+
+    lis331dlh_hp_reset_get(&dev_ctx);
   }
 }
 
@@ -266,7 +271,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+  #ifdef NUCLEO_F411RE
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
   #endif
   #ifdef STEVAL_MKI109V3
@@ -275,13 +280,26 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }
