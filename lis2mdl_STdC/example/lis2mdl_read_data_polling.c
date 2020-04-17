@@ -22,8 +22,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3 + STEVAL-MKI197V1
- * - NUCLEO_F411RE + STEVAL-MKI197V1
+ * - STEVAL_MKI109V3 + STEVAL-MKI181V1
+ * - NUCLEO_F411RE + X_NUCLEO_IKS01A3
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -98,6 +98,7 @@ static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
 /* Extern variables ----------------------------------------------------------*/
+#define    BOOT_TIME        20 //ms
 
 /* Private functions ---------------------------------------------------------*/
 /*
@@ -122,13 +123,13 @@ void lis2mdl_read_data_simple(void)
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
   /* Initialize platform specific hardware */
   platform_init();
 
   /* Wait sensor boot time */
-  platform_delay(10);
+  platform_delay(BOOT_TIME);
 
   /* Check device ID */
   lis2mdl_device_id_get(&dev_ctx, &whoamI);

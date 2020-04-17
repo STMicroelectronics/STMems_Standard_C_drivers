@@ -22,8 +22,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3 + STEVAL-MKI197V1
- * - NUCLEO_F411RE + STEVAL-MKI197V1
+ * - STEVAL_MKI109V3 + STEVAL-MKI181V1
+ * - NUCLEO_F411RE + X_NUCLEO_IKS01A3
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -83,23 +83,27 @@ typedef union{
 } axis3bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
-#define SELF_TEST_SAMPLES  50
 
-/*
- * Self-test max value range
- */
-#define ST_MIN_POS    15.0f
-#define ST_MAX_POS    500.0f
+#define    BOOT_TIME        20 //ms
+#define    WAIT_TIME_01     20 //ms
+#define    WAIT_TIME_02     60 //ms
+
+#define    SAMPLES          50 //number of samples
+
+/* Self test limits. */
+#define    MIN_ST_LIMIT_mG         15.0f
+#define    MAX_ST_LIMIT_mG        500.0f
+
+/* Self test results. */
+#define    ST_PASS     1U
+#define    ST_FAIL     0U
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_magnetic[SELF_TEST_SAMPLES];
-static float magnetic_mG[SELF_TEST_SAMPLES][3];
-static uint8_t whoamI, rst;
-static uint8_t tx_buffer[1000];
 
 /* Extern variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
+
 /*
  *   WARNING:
  *   Functions declare in this section are defined at the end of this file
@@ -110,179 +114,139 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
-static void tx_com(uint8_t *tx_buffer, uint16_t len);
+static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void);
-
-static inline float ABSF(float _x)
-{
-  return (_x < 0.0f) ? -(_x) : _x;
-}
-
-static int lis2mdl_flush_samples(stmdev_ctx_t *dev_ctx)
-{
-  uint8_t reg;
-  axis3bit16_t dummy;
-  int samples = 0;
-
-  /*
-   * Discard old samples
-   */
-  lis2mdl_mag_data_ready_get(dev_ctx, &reg);
-  if (reg)
-  {
-    lis2mdl_magnetic_raw_get(dev_ctx, dummy.u8bit);
-    samples++;
-  }
-
-  return samples;
-}
-
-/*
- * @brief  execute self test procedure
- *
- * @param  dev_ctx   customizable argument. In this examples is used in
- *                   order to select the correct sensor bus handler.
- *
- * @return 0: TEST PASSED
- *        -1: TEST FAILED
- */
-static int test_self_test_lis2mdl(stmdev_ctx_t *dev_ctx)
-{
-  uint8_t reg;
-  float media[3] = { 0.0f, 0.0f, 0.0f };
-  float mediast[3] = { 0.0f, 0.0f, 0.0f };
-  uint8_t match[3] = { 0, 0, 0 };
-  uint8_t j = 0;
-  uint16_t i = 0;
-  uint8_t k = 0;
-  uint8_t axis;
-  int result = 0;
-
-  /* Restore default configuration */
-  lis2mdl_reset_set(dev_ctx, PROPERTY_ENABLE);
-  do {
-    lis2mdl_reset_get(dev_ctx, &rst);
-  } while (rst);
-
-  lis2mdl_block_data_update_set(dev_ctx, PROPERTY_ENABLE);
-  /* Set / Reset sensor mode */
-  lis2mdl_set_rst_mode_set(dev_ctx, LIS2MDL_SENS_OFF_CANC_EVERY_ODR);
-
-  /* Enable temperature compensation */
-  lis2mdl_offset_temp_comp_set(dev_ctx, PROPERTY_ENABLE);
-
-  /* Set device in continuous mode */
-  lis2mdl_operating_mode_set(dev_ctx, LIS2MDL_CONTINUOUS_MODE);
-
-  /* Set Output Data Rate to 100 Hz */
-  lis2mdl_data_rate_set(dev_ctx, LIS2MDL_ODR_100Hz);
-
-  /* Power up and wait for 20 ms for stable output */
-  HAL_Delay(20);
-
-  /* Flush old samples */
-  lis2mdl_flush_samples(dev_ctx);
-
-  do {
-    lis2mdl_mag_data_ready_get(dev_ctx, &reg);
-    if (reg) {
-      /* Read magnetic field data */
-      memset(data_raw_magnetic[i].u8bit, 0x00, 3 * sizeof(int16_t));
-      lis2mdl_magnetic_raw_get(dev_ctx, data_raw_magnetic[i].u8bit);
-      for (axis = 0; axis < 3; axis++) {
-        magnetic_mG[i][axis] =
-          lis2mdl_from_lsb_to_mgauss(data_raw_magnetic[i].i16bit[axis]);
-      }
-      i++;
-    }
-  } while (i < SELF_TEST_SAMPLES);
-
-  for (k = 0; k < 3; k++) {
-    for (j = 0; j < SELF_TEST_SAMPLES; j++) {
-      media[k] += magnetic_mG[j][k];
-    }
-    media[k] = (media[k] / j);
-  }
-
-  /* Enable self test mode */
-  lis2mdl_self_test_set(dev_ctx, PROPERTY_ENABLE);
-  HAL_Delay(60);
-  i = 0;
-
-  /* Flush old samples */
-  lis2mdl_flush_samples(dev_ctx);
-
-  do {
-    lis2mdl_mag_data_ready_get(dev_ctx, &reg);
-    if (reg) {
-      /* Read accelerometer data */
-      memset(data_raw_magnetic[i].u8bit, 0x00, 3 * sizeof(int16_t));
-      lis2mdl_magnetic_raw_get(dev_ctx, data_raw_magnetic[i].u8bit);
-      for (axis = 0; axis < 3; axis++){
-        magnetic_mG[i][axis] =
-          lis2mdl_from_lsb_to_mgauss(data_raw_magnetic[i].i16bit[axis]);
-      }
-      i++;
-    }
-  } while (i < SELF_TEST_SAMPLES);
-
-  for (k = 0; k < 3; k++) {
-    for (j = 0; j < SELF_TEST_SAMPLES; j++) {
-      mediast[k] += magnetic_mG[j][k];
-    }
-
-    mediast[k] = (mediast[k] / j);
-  }
-
-  /* Check for all axis self test value range */
-  for (k = 0; k < 3; k++) {
-    if ((ABSF(mediast[k] - media[k]) >= ST_MIN_POS) &&
-        (ABSF(mediast[k] - media[k]) <= ST_MAX_POS)) {
-      match[k] = 1;
-      result += 1;
-    }
-
-    sprintf((char*)tx_buffer, "%d: |%f| <= |%f| <= |%f| %s\r\n", k,
-            ST_MIN_POS, ABSF(mediast[k] - media[k]), ST_MAX_POS,
-            match[k] == 1 ? "PASSED" : "FAILED");
-    tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
-  }
-
-  /* Disable self test mode */
-  lis2mdl_operating_mode_set(dev_ctx, LIS2MDL_POWER_DOWN);
-  lis2mdl_self_test_set(dev_ctx, PROPERTY_DISABLE);
-
-  return result == 3 ? 0 : -1;
-}
 
 /* Main Example --------------------------------------------------------------*/
 void lis2mdl_self_test(void)
 {
-  /* Initialize mems driver interface */
+  uint8_t tx_buffer[1000];
+  axis3bit16_t data_raw;
   stmdev_ctx_t dev_ctx;
+  float val_st_off[3];
+  float val_st_on[3];
+  float test_val[3];
+  uint8_t st_result;
+  uint8_t whoamI;
+  uint8_t drdy;
+  uint8_t rst;
+  uint8_t i;
+  uint8_t j;
 
+  /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /* Initialize platform specific hardware */
+  /* Init test platform */
   platform_init();
 
   /* Wait sensor boot time */
-  platform_delay(10);
+  platform_delay(BOOT_TIME);
 
   /* Check device ID */
   lis2mdl_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LIS2MDL_ID)
-    while(1)
-    {
-      /* manage here device not found */
-    }
+    while(1);
 
-  while(1) {
-    test_self_test_lis2mdl(&dev_ctx);
+  /* Restore default configuration */
+  lis2mdl_reset_set(&dev_ctx, PROPERTY_ENABLE);
+  do {
+    lis2mdl_reset_get(&dev_ctx, &rst);
+  } while (rst);
+
+  /* Enable Block Data Update */
+  lis2mdl_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Temperature compensation enable */
+  lis2mdl_offset_temp_comp_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Set restore magnetic condition policy */
+  lis2mdl_set_rst_mode_set(&dev_ctx, LIS2MDL_SET_SENS_ODR_DIV_63);
+  /* Set power mode */
+  lis2mdl_power_mode_set(&dev_ctx, LIS2MDL_HIGH_RESOLUTION);
+  /* Set Output Data Rate */
+  lis2mdl_data_rate_set(&dev_ctx, LIS2MDL_ODR_100Hz);
+  /* Set Operating mode */
+  lis2mdl_operating_mode_set(&dev_ctx, LIS2MDL_CONTINUOUS_MODE);
+
+  /* Wait stable output */
+  platform_delay(WAIT_TIME_01);
+
+  /* Check if new value available */
+  do {
+    lis2mdl_mag_data_ready_get(&dev_ctx, &drdy);
+  } while(!drdy);
+  /* Read dummy data and discard it */
+  lis2mdl_magnetic_raw_get(&dev_ctx, data_raw.u8bit);
+
+  /* Read samples and get the average vale for each axis */
+  memset(val_st_off, 0x00, 3*sizeof(float));
+  for (i = 0; i < SAMPLES; i++){
+    /* Check if new value available */
+    do {
+      lis2mdl_mag_data_ready_get(&dev_ctx, &drdy);
+    } while(!drdy);
+    /* Read data and accumulate the mg value */
+    lis2mdl_magnetic_raw_get(&dev_ctx, data_raw.u8bit);
+    for (j = 0; j < 3; j++){
+      val_st_off[j] += lis2mdl_from_lsb_to_mgauss(data_raw.i16bit[j]);
+    }
   }
+  /* Calculate the mg average values */
+  for (i = 0; i < 3; i++){
+    val_st_off[i] /= SAMPLES;
+  }
+
+  /* Enable Self Test */
+  lis2mdl_self_test_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /* Wait stable output */
+  platform_delay(WAIT_TIME_02);
+
+  /* Read samples and get the average vale for each axis */
+  memset(val_st_on, 0x00, 3*sizeof(float));
+  for (i = 0; i < SAMPLES; i++){
+    /* Check if new value available */
+    do {
+      lis2mdl_mag_data_ready_get(&dev_ctx, &drdy);
+    } while(!drdy);
+    /* Read data and accumulate the mg value */
+    lis2mdl_magnetic_raw_get(&dev_ctx, data_raw.u8bit);
+    for (j = 0; j < 3; j++){
+      val_st_on[j] += lis2mdl_from_lsb_to_mgauss(data_raw.i16bit[j]);
+    }
+  }
+
+  /* Calculate the mg average values */
+  for (i = 0; i < 3; i++){
+    val_st_on[i] /= SAMPLES;
+  }
+
+  st_result = ST_PASS;
+  /* Calculate the mg values for self test */
+  for (i = 0; i < 3; i++){
+    test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
+  }
+  /* Check self test limit */
+  for (i = 0; i < 3; i++){
+    if (( MIN_ST_LIMIT_mG > test_val[i] ) ||
+        ( test_val[i] > MAX_ST_LIMIT_mG)){
+      st_result = ST_FAIL;
+    }
+  }
+
+  /* Disable Self Test */
+  lis2mdl_self_test_set(&dev_ctx, PROPERTY_DISABLE);
+  /* Disable sensor. */
+  lis2mdl_operating_mode_set(&dev_ctx, LIS2MDL_POWER_DOWN);
+
+  if (st_result == ST_PASS) {
+    sprintf((char*)tx_buffer, "Self Test - PASS\r\n" );
+  }
+  else {
+    sprintf((char*)tx_buffer, "Self Test - FAIL\r\n" );
+  }
+  tx_com(tx_buffer, strlen((char const*)tx_buffer));
 }
 
 /*
@@ -300,16 +264,12 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 {
   if (handle == &hi2c1)
   {
-    /* Write multiple command */
-    reg |= 0x80;
     HAL_I2C_Mem_Write(handle, LIS2MDL_I2C_ADD, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
 #ifdef STEVAL_MKI109V3
   else if (handle == &hspi2)
   {
-    /* Write multiple command */
-    reg |= 0x40;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Transmit(handle, bufp, len, 1000);
@@ -334,16 +294,14 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 {
   if (handle == &hi2c1)
   {
-    /* Read multiple command */
-    reg |= 0x80;
     HAL_I2C_Mem_Read(handle, LIS2MDL_I2C_ADD, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
 #ifdef STEVAL_MKI109V3
   else if (handle == &hspi2)
   {
-    /* Read multiple command */
-    reg |= 0xC0;
+    /* Read command */
+    reg |= 0x80;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Receive(handle, bufp, len, 1000);
@@ -354,7 +312,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 }
 
 /*
- * @brief  Send buffer to console (platform dependent)
+ * @brief  Write generic device register (platform dependent)
  *
  * @param  tx_buffer     buffer to trasmit
  * @param  len           number of byte to send
@@ -386,7 +344,7 @@ static void platform_delay(uint32_t ms)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
