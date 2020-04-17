@@ -63,6 +63,8 @@ typedef union{
 } axis3bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
+#define    BOOT_TIME               5 //ms
+
 /* Self test limits. */
 #define    MIN_ST_XL_LIMIT_mg     68.0f
 #define    MAX_ST_XL_LIMIT_mg   1440.0f
@@ -116,13 +118,13 @@ void lsm303agr_self_test(void)
   dev_ctx_mg.handle = (void*)LSM303AGR_I2C_ADD_MG;
 
   /* Initialize self test results */
-	st_result = ST_PASS;
+  st_result = ST_PASS;
 
   /* Wait boot time and initialize platform specific hardware */
   platform_init();
 
   /* Wait sensor boot time */
-  platform_delay(5);
+  platform_delay(BOOT_TIME);
 
   /* Check device ID */
   reg.byte = 0;
@@ -372,7 +374,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   if (i2c_add == LSM303AGR_I2C_ADD_XL)
   {
     /* enable auto incremented in multiple read/write commands */
-	reg |= 0x80;
+    reg |= 0x80;
   }
   HAL_I2C_Mem_Read(&hi2c1, (uint8_t) i2c_add, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
@@ -396,6 +398,9 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 
 /*
  * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
  */
 static void platform_delay(uint32_t ms)
 {
@@ -407,7 +412,6 @@ static void platform_delay(uint32_t ms)
  */
 static void platform_init(void)
 {
-  /* Sensor boot time: 5ms */
-  HAL_Delay(5);
+
 }
 
