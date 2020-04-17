@@ -1,14 +1,13 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
- * @author  MEMS Software Solution Team
- * @date    20-December-2017
- * @brief   This file show the simplest way to get data from sensor.
+ * @file    read_data_polling.c
+ * @author  Sensors Software Solution Team
+ * @brief   This file show how to get data from sensor in polling mode.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -23,18 +22,14 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI186V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
  * Used interfaces:
  *
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
- *                    - Sensor side: SPI(Default) / I2C(supported)
- *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ *                    - Sensor side: SPI
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -49,7 +44,6 @@
  * following target board and redefine yours.
  */
 //#define STEVAL_MKI109V3
-#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
@@ -57,11 +51,6 @@
 
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
-
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
-#define SENSOR_BUS hi2c1
-
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -75,8 +64,6 @@
 #if defined(STEVAL_MKI109V3)
 #include "usbd_cdc_if.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-#include "usart.h"
 #endif
 
 typedef union{
@@ -97,7 +84,9 @@ typedef union{
 #define CS_SPI1_Pin         CS_RF_Pin
 #endif
 
-#define TX_BUF_DIM          1000
+#define    BOOT_TIME         20 //ms
+
+#define TX_BUF_DIM         1000
 
 /* Private variables ---------------------------------------------------------*/
 static axis3bit16_t data_raw_acceleration;
@@ -121,60 +110,50 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
 
-void example_main(void)
+void iis3dhhc_read_data_polling(void)
 {
-  /*
-   *  Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hspi2; 
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Initialize platform specific hardware
-   */ 
+  /* Initialize platform specific hardware */
   platform_init();
- 
-  /*
-   *  Check device ID
-   */
+
+  /* Wait sensor boot time */
+  platform_delay(BOOT_TIME);
+
+  /* Check device ID */
   whoamI = 0;
   iis3dhhc_device_id_get(&dev_ctx, &whoamI);
   if ( whoamI != IIS3DHHC_ID )
     while(1); /*manage here device not found */
-  /*
-   *  Restore default configuration
-   */
+
+  /* Restore default configuration */
   iis3dhhc_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     iis3dhhc_reset_get(&dev_ctx, &rst);
   } while (rst);
-  /*
-   *  Enable Block Data Update
-   */
+
+  /* Enable Block Data Update */
   iis3dhhc_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-  /*
-   * Set Output Data Rate
-   */
+
+  /* Set Output Data Rate */
   iis3dhhc_data_rate_set(&dev_ctx, IIS3DHHC_1kHz1);
-  /*
-   * Enable temperature compensation
-   */ 
+
+  /* Enable temperature compensation */ 
   iis3dhhc_offset_temp_comp_set(&dev_ctx, PROPERTY_ENABLE);
  
-  /*
-   * Read samples in polling mode (no int)
-   */
+  /* Read samples in polling mode (no int) */
   while(1)
   {
-    /*
-     * Read output only if new value is available
-     */
+    /*  Read output only if new value is available */
     iis3dhhc_reg_t reg;
     iis3dhhc_status_get(&dev_ctx, &reg.status);
 
@@ -263,12 +242,20 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
-  HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
   #ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
   #endif
+}
+
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
 }
 
 /*
@@ -276,9 +263,11 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }
