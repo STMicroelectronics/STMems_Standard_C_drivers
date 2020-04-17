@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,18 +22,22 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
+ * - STEVAL_MKI109V3 + STEVAL-MKI110V1
+ * - NUCLEO_F411RE + STEVAL-MKI110V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
  * Used interfaces:
  *
- * STEVAL_MKI109V3    - Sensor side: SPI(Default) / I2C(supported)
+ * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
+ *                    - Sensor side: SPI(Default) / I2C(supported)
  *
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
- * `device_on` and 'device_off' is required.
+ * `tx_com` and 'platform_init' is required.
  *
  */
 
@@ -96,7 +100,7 @@
 #endif
 
 /* Private macro -------------------------------------------------------------*/
-
+#define    BOOT_TIME          5 //ms
 /* Private variables ---------------------------------------------------------*/
 static uint8_t whoamI;
 
@@ -113,10 +117,11 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_wake_up_ais328dq(void)
+void ais328dq_wake_up(void)
 {
   /* Variables */
   stmdev_ctx_t dev_ctx;
@@ -133,8 +138,8 @@ void example_main_wake_up_ais328dq(void)
   {
     /* turn device on  */
     platform_init();
-    /* wait mems boot time */
-    HAL_Delay(50); 
+    /* Wait sensor boot time */
+    platform_delay(BOOT_TIME);
    
     /* Check device ID */
     ais328dq_device_id_get(&dev_ctx, &whoamI);
@@ -265,13 +270,26 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }
