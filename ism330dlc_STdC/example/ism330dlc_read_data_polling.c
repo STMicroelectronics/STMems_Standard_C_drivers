@@ -1,12 +1,12 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    read_data_polling.c
  * @author  Sensors Software Solution Team
  * @brief   ISM330DLC driver file
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -17,26 +17,63 @@
  ******************************************************************************
  */
 
-/* Includes ------------------------------------------------------------------*/
-#include <ism330dlc_reg.h>
-#include <string.h>
-#include <stdio.h>
+/*
+ * This example was developed using the following STMicroelectronics
+ * evaluation boards:
+ *
+ * - STEVAL_MKI109V3 + STEVAL-MKI182V1
+ * - NUCLEO_F411RE + STEVAL-MKI182V1
+ *
+ * and STM32CubeMX tool with STM32CubeF4 MCU Package
+ *
+ * Used interfaces:
+ *
+ * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
+ *                    - Sensor side: SPI(Default) / I2C(supported)
+ *
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
+ *
+ * If you need to run this example on a different hardware platform a
+ * modification of the functions: `platform_write`, `platform_read`,
+ * `tx_com` and 'platform_init' is required.
+ *
+ */
 
-//#define MKI109V2
-#define NUCLEO_STM32F411RE
+/* STMicroelectronics evaluation boards definition
+ *
+ * Please uncomment ONLY the evaluation boards in use.
+ * If a different hardware is used please comment all
+ * following target board and redefine yours.
+ */
+//#define STEVAL_MKI109V3
+#define NUCLEO_F411RE
 
-#ifdef MKI109V2
-#include "stm32f1xx_hal.h"
-#include "usbd_cdc_if.h"
-#include "spi.h"
-#include "i2c.h"
+#if defined(STEVAL_MKI109V3)
+/* MKI109V3: Define communication interface */
+#define SENSOR_BUS hspi2
+
+/* MKI109V3: Vdd and Vddio power supply values */
+#define PWM_3V3 915
+
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
+#define SENSOR_BUS hi2c1
+
 #endif
 
-#ifdef NUCLEO_STM32F411RE
+/* Includes ------------------------------------------------------------------*/
+#include <string.h>
+#include <stdio.h>
 #include "stm32f4xx_hal.h"
-#include "i2c.h"
-#include "usart.h"
+#include <ism330dlc_reg.h>
 #include "gpio.h"
+#include "i2c.h"
+#if defined(STEVAL_MKI109V3)
+#include "usbd_cdc_if.h"
+#include "spi.h"
+#elif defined(NUCLEO_F411RE)
+#include "usart.h"
 #endif
 
 typedef union{
@@ -50,22 +87,7 @@ typedef union{
 } axis1bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
-#ifdef MKI109V2
-#define CS_SPI2_GPIO_Port   CS_DEV_GPIO_Port
-#define CS_SPI2_Pin         CS_DEV_Pin
-#define CS_SPI1_GPIO_Port   CS_RF_GPIO_Port
-#define CS_SPI1_Pin         CS_RF_Pin
-#endif
-
-#ifdef NUCLEO_STM32F411RE
-/* N/A on NUCLEO_STM32F411RE + IKS01A1 */
-/* N/A on NUCLEO_STM32F411RE + IKS01A2 */
-#define CS_SPI2_GPIO_Port   0
-#define CS_SPI2_Pin         0
-#define CS_SPI1_GPIO_Port   0
-#define CS_SPI1_Pin         0
-#endif
-
+#define BOOT_TIME             15 //ms
 #define TX_BUF_DIM          1000
 
 /* Private variables ---------------------------------------------------------*/
@@ -82,132 +104,65 @@ static uint8_t tx_buffer[TX_BUF_DIM];
 
 /* Private functions ---------------------------------------------------------*/
 
-/*
- *   Replace the functions "platform_write" and "platform_read" with your
- *   platform specific read and write function.
- *   This example use an STM32 evaluation board and CubeMX tool.
- *   In this case the "*handle" variable is useful in order to select the
- *   correct interface but the usage of "*handle" is not mandatory.
+/* WARNING:
+ *   Functions declare in this section are defined at the end of this file
+ *   and are strictly related to the hardware platform used.
+ *
  */
-
-static int32_t platform_write(void *handle, uint8_t Reg, uint8_t *Bufp,
-                              uint16_t len)
-{
-  if (handle == &hi2c1)
-  {
-    HAL_I2C_Mem_Write(handle, ISM330DLC_I2C_ADD_H, Reg,
-                      I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
-  }
-#ifdef MKI109V2 
-  else if (handle == &hspi2)
-  {
-    HAL_GPIO_WritePin(CS_SPI2_GPIO_Port, CS_SPI2_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &Reg, 1, 1000);
-    HAL_SPI_Transmit(handle, Bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_SPI2_GPIO_Port, CS_SPI2_Pin, GPIO_PIN_SET);
-  }
-  else if (handle == &hspi1)
-  {
-    HAL_GPIO_WritePin(CS_SPI1_GPIO_Port, CS_SPI1_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &Reg, 1, 1000);
-    HAL_SPI_Transmit(handle, Bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_SPI1_GPIO_Port, CS_SPI1_Pin, GPIO_PIN_SET);
-  }
-#endif
-  return 0;
-}
-
-static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
-                             uint16_t len)
-{
-  if (handle == &hi2c1)
-  {
-      HAL_I2C_Mem_Read(handle, ISM330DLC_I2C_ADD_H, Reg,
-                       I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
-  }
-#ifdef MKI109V2  
-  else if (handle == &hspi2)
-  {
-    Reg |= 0x80;
-    HAL_GPIO_WritePin(CS_DEV_GPIO_Port, CS_DEV_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &Reg, 1, 1000);
-    HAL_SPI_Receive(handle, Bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_DEV_GPIO_Port, CS_DEV_Pin, GPIO_PIN_SET);
-  }
-  else
-  {
-    Reg |= 0x80;
-    HAL_GPIO_WritePin(CS_RF_GPIO_Port, CS_RF_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &Reg, 1, 1000);
-    HAL_SPI_Receive(handle, Bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_RF_GPIO_Port, CS_RF_Pin, GPIO_PIN_SET);
-  }
-#endif 
-  return 0;
-}
-
-/*
- *  Function to print messages
- */
-static void tx_com( uint8_t *tx_buffer, uint16_t len )
-{
-  #ifdef NUCLEO_STM32F411RE 
-  HAL_UART_Transmit( &huart2, tx_buffer, len, 1000 );
-  #endif
-  #ifdef MKI109V2 
-  CDC_Transmit_FS( tx_buffer, len );
-  #endif
-}
+static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+                              uint16_t len);
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
+                             uint16_t len);
+static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
+static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main(void)
+void ism330dlc_read_data_polling(void)
 {
-  /*
-   *  Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1; 
-  /*
-   *  Check device ID
-   */
+  dev_ctx.handle = &SENSOR_BUS;
+
+  /* Init test platform */
+  platform_init();
+
+  /* Wait sensor boot time */
+  platform_delay(BOOT_TIME);
+
+  /* Check device ID */
   whoamI = 0;
   ism330dlc_device_id_get(&dev_ctx, &whoamI);
   if ( whoamI != ISM330DLC_ID )
     while(1); /*manage here device not found */
-  /*
-   *  Restore default configuration
-   */
+
+  /* Restore default configuration */
   ism330dlc_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     ism330dlc_reset_get(&dev_ctx, &rst);
   } while (rst);
-  /*
-   *  Enable Block Data Update
-   */
+
+  /* Enable Block Data Update */
   ism330dlc_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-  /*
-   * Set Output Data Rate
-   */
+
+  /* Set Output Data Rate */
   ism330dlc_xl_data_rate_set(&dev_ctx, ISM330DLC_XL_ODR_12Hz5);
   ism330dlc_gy_data_rate_set(&dev_ctx, ISM330DLC_GY_ODR_12Hz5);
-  /*
-   * Set full scale
-   */ 
+
+  /* Set full scale */
   ism330dlc_xl_full_scale_set(&dev_ctx, ISM330DLC_2g);
   ism330dlc_gy_full_scale_set(&dev_ctx, ISM330DLC_2000dps);
- 
-  /*
-   * Configure filtering chain(No aux interface)
-   */ 
+
+  /* Configure filtering chain(No aux interface) */
   /* Accelerometer - analog filter */
   ism330dlc_xl_filter_analog_set(&dev_ctx, ISM330DLC_XL_ANA_BW_400Hz);
  
   /* Accelerometer - LPF1 path ( LPF2 not used )*/
   //ism330dlc_xl_lp1_bandwidth_set(&dev_ctx, ISM330DLC_XL_LP1_ODR_DIV_4);
  
-  /* Accelerometer - LPF1 + LPF2 path */  
+  /* Accelerometer - LPF1 + LPF2 path */
   ism330dlc_xl_lp2_bandwidth_set(&dev_ctx, ISM330DLC_XL_LOW_NOISE_LP_ODR_DIV_100);
  
   /* Accelerometer - High Pass / Slope path */
@@ -217,14 +172,10 @@ void example_main(void)
   /* Gyroscope - filtering chain */
   ism330dlc_gy_band_pass_set(&dev_ctx, ISM330DLC_HP_260mHz_LP1_STRONG);
  
-  /*
-   * Read samples in polling mode (no int)
-   */
+  /* Read samples in polling mode (no int) */
   while(1)
   {
-    /*
-     * Read output only if new value is available
-     */
+    /* Read output only if new value is available */
     ism330dlc_reg_t reg;
     ism330dlc_status_reg_get(&dev_ctx, &reg.status_reg);
 
@@ -267,3 +218,106 @@ void example_main(void)
   }
 }
 
+/*
+ * @brief  Write generic device register (platform dependent)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to write
+ * @param  bufp      pointer to data to write in register reg
+ * @param  len       number of consecutive register to write
+ *
+ */
+static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+                              uint16_t len)
+{
+  if (handle == &hi2c1)
+  {
+    HAL_I2C_Mem_Write(handle, ISM330DLC_I2C_ADD_L, reg,
+                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  }
+#ifdef STEVAL_MKI109V3
+  else if (handle == &hspi2)
+  {
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+    HAL_SPI_Transmit(handle, &reg, 1, 1000);
+    HAL_SPI_Transmit(handle, bufp, len, 1000);
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  }
+#endif
+  return 0;
+}
+
+/*
+ * @brief  Read generic device register (platform dependent)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to read
+ * @param  bufp      pointer to buffer that store the data read
+ * @param  len       number of consecutive register to read
+ *
+ */
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
+                             uint16_t len)
+{
+  if (handle == &hi2c1)
+  {
+    HAL_I2C_Mem_Read(handle, ISM330DLC_I2C_ADD_L, reg,
+                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  }
+#ifdef STEVAL_MKI109V3
+  else if (handle == &hspi2)
+  {
+    /* Read command */
+    reg |= 0x80;
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+    HAL_SPI_Transmit(handle, &reg, 1, 1000);
+    HAL_SPI_Receive(handle, bufp, len, 1000);
+    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  }
+#endif
+  return 0;
+}
+
+/*
+ * @brief  Write generic device register (platform dependent)
+ *
+ * @param  tx_buffer     buffer to trasmit
+ * @param  len           number of byte to send
+ *
+ */
+static void tx_com(uint8_t *tx_buffer, uint16_t len)
+{
+  #ifdef NUCLEO_F411RE
+  HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
+  #endif
+  #ifdef STEVAL_MKI109V3
+  CDC_Transmit_FS(tx_buffer, len);
+  #endif
+}
+
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
+ * @brief  platform specific initialization (platform dependent)
+ */
+static void platform_init(void)
+{
+#if defined(STEVAL_MKI109V3)
+  TIM3->CCR1 = PWM_3V3;
+  TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  HAL_Delay(1000);
+#endif
+}
