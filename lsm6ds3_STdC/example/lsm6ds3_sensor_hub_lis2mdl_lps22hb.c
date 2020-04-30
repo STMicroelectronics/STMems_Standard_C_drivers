@@ -1,5 +1,4 @@
-/*
- ******************************************************************************
+/******************************************************************************
  * @file    sensor_hub_lis2mdl_lps22hb_no_fifo_simple.c
  * @author  Sensors Software Solution Team
  * @brief   This file show the simplest way enable a LIS2MDL mag and
@@ -8,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -19,12 +18,11 @@
  ******************************************************************************
  */
 
-/*
- * This example was developed using the following STMicroelectronics
+/* This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI160V1
+ * - NUCLEO_F411RE + STEVAL-MKI160V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -33,8 +31,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -94,11 +92,12 @@ typedef union{
   int16_t i16bit;
   uint8_t u8bit[2];
 } axis1bit16_t;
-  
+
 /* Private macro -------------------------------------------------------------*/
-#define OUT_XYZ_SIZE		6
-#define PRESS_OUT_XYZ_SIZE	3
-#define TEMP_OUT_XYZ_SIZE	2
+#define    BOOT_TIME   20 //ms
+#define OUT_XYZ_SIZE    6
+#define PRESS_OUT_XYZ_SIZE  3
+#define TEMP_OUT_XYZ_SIZE  2
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t whoamI, rst;
@@ -121,8 +120,7 @@ static uint8_t tx_buffer[1000];
 
 /* Private functions ---------------------------------------------------------*/
 
-/*
- *   WARNING:
+/*   WARNING:
  *   Functions declare in this section are defined at the end of this file
  *   and are strictly related to the hardware platform used.
  *
@@ -132,10 +130,10 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
-/*
- * Read data byte from internal register of a slave device connected
+/* Read data byte from internal register of a slave device connected
  * to master I2C interface
  */
 static int32_t lsm6ds3_read_lps22hb_cx(void* ctx, uint8_t reg, uint8_t* data,
@@ -154,25 +152,17 @@ static int32_t lsm6ds3_read_lps22hb_cx(void* ctx, uint8_t reg, uint8_t* data,
 
   (void)ctx;
 
-  /*
-   * Configure Sensor Hub to read LPS22HB
-   */
+  /* Configure Sensor Hub to read LPS22HB */
   mm_error = lsm6ds3_sh_slv0_cfg_read(&dev_ctx, &val);
   lsm6ds3_sh_num_of_dev_connected_set(&dev_ctx, LSM6DS3_SLV_0_1);
 
-  /*
-   * Enable I2C Master and I2C Master Pull Up
-   */
+  /* Enable I2C Master and I2C Master Pull Up */
   lsm6ds3_sh_master_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Enable accelerometer to trigger Sensor Hub operation
-   */
+  /* Enable accelerometer to trigger Sensor Hub operation */
   lsm6ds3_xl_data_rate_set(&dev_ctx, LSM6DS3_XL_ODR_104Hz);
 
-  /*
-   * Wait Sensor Hub operation flag set
-   */
+  /* Wait Sensor Hub operation flag set */
   lsm6ds3_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
   do
   {
@@ -192,8 +182,7 @@ static int32_t lsm6ds3_read_lps22hb_cx(void* ctx, uint8_t reg, uint8_t* data,
   return mm_error;
 }
 
-/*
- * Write data byte to internal register of a slave device connected
+/* Write data byte to internal register of a slave device connected
  * to master I2C interface
  */
 static int32_t lsm6ds3_write_lps22hb_cx(void* ctx, uint8_t reg, uint8_t* data,
@@ -212,29 +201,19 @@ static int32_t lsm6ds3_write_lps22hb_cx(void* ctx, uint8_t reg, uint8_t* data,
   (void)ctx;
   (void)len;
 
-  /*
-   * Disable accelerometer
-   */
+  /* Disable accelerometer */
   lsm6ds3_xl_data_rate_set(&dev_ctx, LSM6DS3_XL_ODR_OFF);
 
-  /*
-   * Configure Sensor Hub to write
-   */
+  /* Configure Sensor Hub to write */
   mm_error = lsm6ds3_sh_cfg_write(&dev_ctx, &val);
 
-  /*
-   * Enable I2C Master and I2C master Pull Up
-   */
+  /* Enable I2C Master and I2C master Pull Up */
   lsm6ds3_sh_master_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Enable accelerometer to trigger Sensor Hub operation
-   */
+  /* Enable accelerometer to trigger Sensor Hub operation */
   lsm6ds3_xl_data_rate_set(&dev_ctx, LSM6DS3_XL_ODR_104Hz);
 
-  /*
-   * Wait Sensor Hub operation flag set
-   */
+  /* Wait Sensor Hub operation flag set */
   lsm6ds3_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
   do
   {
@@ -253,8 +232,7 @@ static int32_t lsm6ds3_write_lps22hb_cx(void* ctx, uint8_t reg, uint8_t* data,
   return mm_error;
 }
 
-/*
- * Read data byte from internal register of a slave device connected
+/* Read data byte from internal register of a slave device connected
  * to master I2C interface
  */
 static int32_t lsm6ds3_read_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
@@ -272,25 +250,17 @@ static int32_t lsm6ds3_read_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
 
   (void)ctx;
 
-  /*
-   * Configure Sensor Hub to read LIS2MDL
-   */
+  /* Configure Sensor Hub to read LIS2MDL */
   mm_error = lsm6ds3_sh_slv0_cfg_read(&dev_ctx, &val);
   lsm6ds3_sh_num_of_dev_connected_set(&dev_ctx, LSM6DS3_SLV_0_1);
 
-  /*
-   * Enable I2C Master and I2C master Pull Up
-   */
+  /* Enable I2C Master and I2C master Pull Up */
   lsm6ds3_sh_master_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Enable accelerometer to trigger Sensor Hub operation
-   */
+  /* Enable accelerometer to trigger Sensor Hub operation */
   lsm6ds3_xl_data_rate_set(&dev_ctx, LSM6DS3_XL_ODR_104Hz);
 
-  /*
-   * Wait Sensor Hub operation flag set
-   */
+  /* Wait Sensor Hub operation flag set */
   lsm6ds3_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
   do {
     lsm6ds3_xl_flag_data_ready_get(&dev_ctx, &drdy);
@@ -309,8 +279,7 @@ static int32_t lsm6ds3_read_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
   return mm_error;
 }
 
-/*
- * Write data byte to internal register of a slave device connected
+/* Write data byte to internal register of a slave device connected
  * to master I2C interface
  */
 static int32_t lsm6ds3_write_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
@@ -329,29 +298,19 @@ static int32_t lsm6ds3_write_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
   (void)ctx;
   (void)len;
 
-  /*
-   * Disable accelerometer
-   */
+  /* Disable accelerometer */
   lsm6ds3_xl_data_rate_set(&dev_ctx, LSM6DS3_XL_ODR_OFF);
 
-  /*
-   * Configure Sensor Hub to write
-   */
+  /* Configure Sensor Hub to write */
   mm_error = lsm6ds3_sh_cfg_write(&dev_ctx, &val);
 
-  /*
-   * Enable I2C Master and I2C master Pull Up
-   */
+  /* Enable I2C Master and I2C master Pull Up */
   lsm6ds3_sh_master_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Enable accelerometer to trigger Sensor Hub operation
-   */
+  /* Enable accelerometer to trigger Sensor Hub operation */
   lsm6ds3_xl_data_rate_set(&dev_ctx, LSM6DS3_XL_ODR_104Hz);
 
-  /*
-   * Wait Sensor Hub operation flag set
-   */
+  /* Wait Sensor Hub operation flag set */
   lsm6ds3_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
   do {
     lsm6ds3_xl_flag_data_ready_get(&dev_ctx, &drdy);
@@ -388,8 +347,7 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6ds3(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
 
-  /*
-   * Configure low level function to access to external device
+  /* Configure low level function to access to external device
     */
   press_ctx.read_reg = lsm6ds3_read_lps22hb_cx;
   press_ctx.write_reg = lsm6ds3_write_lps22hb_cx;
@@ -398,14 +356,13 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6ds3(void)
   mag_ctx.write_reg = lsm6ds3_write_lis2mdl_cx;
   mag_ctx.handle = &hi2c1;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Init test platform */
   platform_init();
 
-  /*
-   * Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(BOOT_TIME);
+
+  /* Check device ID */
   lsm6ds3_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DS3_ID)
   {
@@ -415,22 +372,16 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6ds3(void)
     }
   }
 
-  /*
-   * Restore default configuration
-   */
+  /* Restore default configuration */
   lsm6ds3_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lsm6ds3_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Some hardware require to enable pull up on master I2C interface
-   */
+  /* Some hardware require to enable pull up on master I2C interface */
   //lsm6ds3_sh_pin_mode_set(&dev_ctx, LSM6DS3_INTERNAL_PULL_UP);
 
-  /*
-   * Check if LPS22HB connected to Sensor Hub
-   */
+  /* Check if LPS22HB connected to Sensor Hub */
   lps22hb_device_id_get(&press_ctx, &whoamI);
   if (whoamI != LPS22HB_ID)
   {
@@ -440,9 +391,7 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6ds3(void)
     }
   }
 
-  /*
-   * Check if LIS2MDL connected to Sensor Hub
-   */
+  /* Check if LIS2MDL connected to Sensor Hub */
   lis2mdl_device_id_get(&mag_ctx, &whoamI);
   if (whoamI != LIS2MDL_ID)
   {
@@ -452,49 +401,33 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6ds3(void)
     }
   }
 
-  /*
-   * Set XL full scale and Gyro full scale
-   */
+  /* Set XL full scale and Gyro full scale */
   lsm6ds3_xl_full_scale_set(&dev_ctx, LSM6DS3_2g);
   lsm6ds3_gy_full_scale_set(&dev_ctx, LSM6DS3_2000dps);
 
-  /*
-   * Configure LPS22HB on the I2C master line
-   */
+  /* Configure LPS22HB on the I2C master line */
   lps22hb_data_rate_set(&press_ctx, LPS22HB_ODR_50_Hz);
   lps22hb_block_data_update_set(&press_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Prepare sensor hub to read data from external Slave1
-   */
+  /* Prepare sensor hub to read data from external Slave1 */
   lsm6ds3_sh_slv1_cfg_read(&dev_ctx, &lps22hb_conf);
 
-  /*
-   * Configure LIS2MDL on the I2C master line
-   */
+  /* Configure LIS2MDL on the I2C master line */
   lis2mdl_operating_mode_set(&mag_ctx, LIS2MDL_CONTINUOUS_MODE);
   lis2mdl_offset_temp_comp_set(&mag_ctx, PROPERTY_ENABLE);
   lis2mdl_block_data_update_set(&mag_ctx, PROPERTY_ENABLE);
   lis2mdl_data_rate_set(&mag_ctx, LIS2MDL_ODR_50Hz);
 
-  /*
-   * Prepare sensor hub to read data from external Slave0
-   */
+  /* Prepare sensor hub to read data from external Slave0 */
   lsm6ds3_sh_slv0_cfg_read(&dev_ctx, &lis2mdl_conf);
 
-  /*
-   * Configure Sensor Hub to read two slaves
-   */
+  /* Configure Sensor Hub to read two slaves */
   lsm6ds3_sh_num_of_dev_connected_set(&dev_ctx, LSM6DS3_SLV_0_1);
 
-  /*
-   * Enable master and XL trigger
-   */
+  /* Enable master and XL trigger */
   lsm6ds3_sh_master_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Set XL and Gyro Output Data Rate
-   */
+  /* Set XL and Gyro Output Data Rate */
   lsm6ds3_xl_data_rate_set(&dev_ctx, LSM6DS3_XL_ODR_52Hz);
   lsm6ds3_gy_data_rate_set(&dev_ctx, LSM6DS3_GY_ODR_26Hz);
 
@@ -503,15 +436,11 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6ds3(void)
     uint8_t drdy;
     lsm6ds3_sh_read_t sh_reg;
 
-    /*
-     * Read output only if new value is available
-     */
+    /* Read output only if new value is available */
     lsm6ds3_xl_flag_data_ready_get(&dev_ctx, &drdy);
     if (drdy)
     {
-      /*
-       * Read acceleration field data
-       */
+      /* Read acceleration field data */
       memset(data_raw_acceleration.u8bit, 0x0, 3 * sizeof(int16_t));
       lsm6ds3_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
       acceleration_mg[0] =
@@ -525,8 +454,7 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6ds3(void)
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
 
-      /*
-       * Read magnetic data from sensor hub register: XL trigger a new read to
+      /* Read magnetic data from sensor hub register: XL trigger a new read to
        * mag sensor
        */
       lsm6ds3_sh_read_data_raw_get(&dev_ctx, &sh_reg);
@@ -541,8 +469,7 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6ds3(void)
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
 
-      /*
-       * Read pressure data from sensor hub register: XL trigger a new read to
+      /* Read pressure data from sensor hub register: XL trigger a new read to
        * barom. sensor. Barometer and Temperature sensor share the same slave
        * because is a combo sensor
        */
@@ -564,9 +491,7 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6ds3(void)
     lsm6ds3_gy_flag_data_ready_get(&dev_ctx, &drdy);
     if (drdy)
     {
-      /*
-       * Read angular rate field data
-       */
+      /* Read angular rate field data */
       memset(data_raw_angular_rate.u8bit, 0x0, 3 * sizeof(int16_t));
       lsm6ds3_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
       angular_rate_mdps[0] =
@@ -586,8 +511,7 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6ds3(void)
   }
 }
 
-/*
- * @brief  Write generic device register (platform dependent)
+/* @brief  Write generic device register (platform dependent)
  *
  * @param  handle    customizable argument. In this examples is used in
  *                   order to select the correct sensor bus handler.
@@ -616,8 +540,7 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
   return 0;
 }
 
-/*
- * @brief  Read generic device register (platform dependent)
+/* @brief  Read generic device register (platform dependent)
  *
  * @param  handle    customizable argument. In this examples is used in
  *                   order to select the correct sensor bus handler.
@@ -648,8 +571,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   return 0;
 }
 
-/*
- * @brief  Write generic device register (platform dependent)
+/* @brief  Write generic device register (platform dependent)
  *
  * @param  tx_buffer     buffer to trasmit
  * @param  len           number of byte to send
@@ -666,13 +588,26 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }

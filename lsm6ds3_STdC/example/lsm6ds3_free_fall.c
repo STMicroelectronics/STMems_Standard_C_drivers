@@ -1,13 +1,12 @@
-/*
- ******************************************************************************
- * @file    tap_double.c
+/******************************************************************************
+ * @file    free_fall.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect double tap from sensor.
+ * @brief   This file show the simplest way to detect free fall from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -18,12 +17,11 @@
  ******************************************************************************
  */
 
-/*
- * This example was developed using the following STMicroelectronics
+/* This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI160V1
+ * - NUCLEO_F411RE + STEVAL-MKI160V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -32,8 +30,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -78,6 +76,7 @@
 #endif
 
 /* Private macro -------------------------------------------------------------*/
+#define    BOOT_TIME   20 //ms
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t whoamI, rst;
@@ -87,8 +86,7 @@ static uint8_t tx_buffer[1000];
 
 /* Private functions ---------------------------------------------------------*/
 
-/*
- *   WARNING:
+/*   WARNING:
  *   Functions declare in this section are defined at the end of this file
  *   and are strictly related to the hardware platform used.
  *
@@ -98,34 +96,30 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_tap_double_lsm6ds3(void)
+void example_main_free_fall_lsm6ds3(void)
 {
-  /*
-   * Initialize mems driver interface
-   */
+  /* Initialize mems driver interface. */
   stmdev_ctx_t dev_ctx;
-
-  /*
-   * Uncomment if need interrupt on Double Tap (select int1 or 2)
-   */
   lsm6ds3_int1_route_t int_1_reg;
+
+  /* Uncomment if interrupt generation on Free Fall INT2 pin. */
   //lsm6ds3_int2_route_t int_2_reg;
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Init test platform */
   platform_init();
 
-  /*
-   * Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(BOOT_TIME);
+
+  /* Check device ID */
   lsm6ds3_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DS3_ID)
     while(1)
@@ -133,98 +127,51 @@ void example_main_tap_double_lsm6ds3(void)
       /* manage here device not found */
     }
 
-  /*
-   * Restore default configuration
-   */
+  /* Restore default configuration */
   lsm6ds3_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lsm6ds3_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Set XL Output Data Rate to 416 Hz
-   */
+  /* Set XL Output Data Rate. */
   lsm6ds3_xl_data_rate_set(&dev_ctx, LSM6DS3_XL_ODR_416Hz);
 
-  /* Set 2g full XL scale */
+  /* Set 2g full XL scale. */
   lsm6ds3_xl_full_scale_set(&dev_ctx, LSM6DS3_2g);
 
-  /*
-   * Enable Tap detection on X, Y, Z
-   */
-  lsm6ds3_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6ds3_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6ds3_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6ds3_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Enable LIR. */
+  lsm6ds3_int_notification_set(&dev_ctx, LSM6DS3_INT_LATCHED);
 
-  /*
-   * Set Tap threshold to 01100b, therefore the tap threshold
-   * is 750 mg (= 12 * FS_XL / 2 5 )
-   */
-  lsm6ds3_tap_threshold_set(&dev_ctx, 0x0c);
+  /* Set Free Fall duration to 3 and 6 samples event duration. */
+  lsm6ds3_ff_dur_set(&dev_ctx, 0x06);
+  lsm6ds3_ff_threshold_set(&dev_ctx, LSM6DS3_312_mg);
 
-  /* Configure Double Tap parameter
-   *
-   * The SHOCK field of the INT_DUR2 register is set to 11b, therefore
-   * the Shock time is 57.7 ms (= 3 * 8 / ODR_XL)
-   *
-   * The QUIET field of the INT_DUR2 register is set to 11b, therefore
-   * the Quiet time is 28.8 ms (= 3 * 4 / ODR_XL)
-   *
-   * For the maximum time between two consecutive detected taps, the DUR
-   * field of the INT_DUR2 register is set to 0111b, therefore the Duration
-   * time is 538.5 ms (= 7 * 32 / ODR_XL)
-   */
-  lsm6ds3_tap_dur_set(&dev_ctx, 0x07);
-  lsm6ds3_tap_quiet_set(&dev_ctx, 0x03);
-  lsm6ds3_tap_shock_set(&dev_ctx, 0x03);
-
-  /*
-   * Enable Double Tap detection
-   */
-  lsm6ds3_tap_mode_set(&dev_ctx, LSM6DS3_ONLY_DOUBLE);
-
-  /*
-   * Enable interrupt generation on Double Tap INT1 pin
-   */
+  /* Enable interrupt generation on Free Fall INT1 pin. */
   lsm6ds3_pin_int1_route_get(&dev_ctx, &int_1_reg);
-  int_1_reg.int1_double_tap = PROPERTY_ENABLE;
+  int_1_reg.int1_ff = PROPERTY_ENABLE;
   lsm6ds3_pin_int1_route_set(&dev_ctx, &int_1_reg);
 
-  /*
-   * Uncomment if interrupt generation on Double Tap INT2 pin
-   */
+  /* Uncomment if interrupt generation on Free Fall INT2 pin. */
   //lsm6ds3_pin_int2_route_get(&dev_ctx, &int_2_reg);
-  //int_2_reg.int2_double_tap = PROPERTY_ENABLE;
+  //int_2_reg.int2_ff = PROPERTY_ENABLE;
   //lsm6ds3_pin_int2_route_set(&dev_ctx, &int_2_reg);
 
-  /*
-   * Wait Events
-   */
+  /* Wait Events. */
   while(1)
   {
     lsm6ds3_all_src_t all_source;
 
-    /*
-     * Check if Double Tap events
-     */
+    /* Check if Free Fall events. */
     lsm6ds3_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.tap_src.double_tap)
+    if (all_source.wake_up_src.ff_ia)
     {
-      sprintf((char*)tx_buffer, "Double Tap Detected\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
-
-    if (all_source.tap_src.single_tap)
-    {
-      sprintf((char*)tx_buffer, "Single Tap Detected\r\n");
+      sprintf((char*)tx_buffer, "Free Fall Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
 }
 
-/*
- * @brief  Write generic device register (platform dependent)
+/* @brief  Write generic device register (platform dependent)
  *
  * @param  handle    customizable argument. In this examples is used in
  *                   order to select the correct sensor bus handler.
@@ -253,8 +200,7 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
   return 0;
 }
 
-/*
- * @brief  Read generic device register (platform dependent)
+/* @brief  Read generic device register (platform dependent)
  *
  * @param  handle    customizable argument. In this examples is used in
  *                   order to select the correct sensor bus handler.
@@ -285,8 +231,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   return 0;
 }
 
-/*
- * @brief  Write generic device register (platform dependent)
+/* @brief  Write generic device register (platform dependent)
  *
  * @param  tx_buffer     buffer to trasmit
  * @param  len           number of byte to send
@@ -303,13 +248,26 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }

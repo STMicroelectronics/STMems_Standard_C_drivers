@@ -1,13 +1,13 @@
-/*
- ******************************************************************************
- * @file    tilt.c
+/******************************************************************************
+ * @file    enable_timestamp_hw.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect tilt from sensor.
+ * @brief   This file show the simplest way to get data from sensor
+ *          (interrupt enabled) with timestamp.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,8 +22,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI160V1
+ * - NUCLEO_F411RE + STEVAL-MKI160V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -32,8 +32,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -77,9 +77,25 @@
 #include "usart.h"
 #endif
 
+typedef union{
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
+} axis3bit16_t;
+
 /* Private macro -------------------------------------------------------------*/
+#define    BOOT_TIME   20 //ms
+
+/* Private types ---------------------------------------------------------*/
+typedef union {
+  uint8_t byte[4];
+  uint32_t val;
+} timestamp_t;
 
 /* Private variables ---------------------------------------------------------*/
+static axis3bit16_t data_raw_acceleration;
+static axis3bit16_t data_raw_angular_rate;
+static float acceleration_mg[3];
+static float angular_rate_mdps[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -87,8 +103,7 @@ static uint8_t tx_buffer[1000];
 
 /* Private functions ---------------------------------------------------------*/
 
-/*
- *   WARNING:
+/*   WARNING:
  *   Functions declare in this section are defined at the end of this file
  *   and are strictly related to the hardware platform used.
  *
@@ -98,34 +113,31 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_tilt_lsm6ds3(void)
+void example_main_timestamp_lsm6ds3(void)
 {
-  /*
-   * Initialize mems driver interface.
-   */
+  /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
   lsm6ds3_int1_route_t int_1_reg;
+  timestamp_t timestamp;
 
-  /*
-   * Uncomment if interrupt generation on Tilt INT2 pin
-   */
-  //lsm6ds3_int2_route_t int_2_reg;
+  /* Interrupt generation on DRDY INT2 pin */
+  lsm6ds3_int2_route_t int_2_reg;
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Init test platform */
   platform_init();
 
-  /*
-   * Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(BOOT_TIME);
+
+  /* Check device ID */
   lsm6ds3_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LSM6DS3_ID)
     while(1)
@@ -133,74 +145,105 @@ void example_main_tilt_lsm6ds3(void)
       /* manage here device not found */
     }
 
-  /*
-   * Restore default configuration
-   */
+  /* Restore default configuration */
   lsm6ds3_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lsm6ds3_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Set XL Output Data Rate:The tilt function works at 26 Hz,
-   * so the accelerometer ODR must be set at 26 Hz or higher values
-   */
-  lsm6ds3_xl_data_rate_set(&dev_ctx, LSM6DS3_XL_ODR_26Hz);
+  /* Enable Block Data Update */
+  lsm6ds3_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Set 2g full XL scale
-   */
+  /* Set full scale */
   lsm6ds3_xl_full_scale_set(&dev_ctx, LSM6DS3_2g);
+  lsm6ds3_gy_full_scale_set(&dev_ctx, LSM6DS3_2000dps);
 
-  /*
-   * Enable Tilt function
-   */
-  lsm6ds3_tilt_sens_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Set High Resolution Timestamp (25 us tick) */
+  lsm6ds3_timestamp_res_set(&dev_ctx, LSM6DS3_LSB_25us);
 
-  /*
-   * Enable interrupt generation on Tilt INT1 pin
-   */
-  lsm6ds3_int_notification_set(&dev_ctx, LSM6DS3_INT_LATCHED);
-  lsm6ds3_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6ds3_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6ds3_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Enable timestamp in HW */
+  lsm6ds3_timestamp_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /* Set Output Data Rate for acc/gyro to 12.5 Hz */
+  lsm6ds3_xl_data_rate_set(&dev_ctx, LSM6DS3_XL_ODR_12Hz5);
+  lsm6ds3_gy_data_rate_set(&dev_ctx, LSM6DS3_GY_ODR_12Hz5);
+
+  /* Enable drdy 75 μs pulse: uncomment if interrupt must be pulsed */
+  lsm6ds3_int_notification_set(&dev_ctx, LSM6DS3_INT_PULSED);
+
+  /* Enable interrupt generation on DRDY INT1 pin */
   lsm6ds3_pin_int1_route_get(&dev_ctx, &int_1_reg);
-  int_1_reg.int1_tilt = PROPERTY_ENABLE;
+  int_1_reg.int1_drdy_g = PROPERTY_ENABLE;
+  int_1_reg.int1_drdy_xl = PROPERTY_ENABLE;
   lsm6ds3_pin_int1_route_set(&dev_ctx, &int_1_reg);
+  /* Interrupt generation routed on DRDY INT2 pin */
+  lsm6ds3_pin_int2_route_get(&dev_ctx, &int_2_reg);
+  int_2_reg.int2_drdy_g = PROPERTY_ENABLE;
+  int_2_reg.int2_drdy_xl = PROPERTY_ENABLE;
+  lsm6ds3_pin_int2_route_set(&dev_ctx, &int_2_reg);
 
-  /*
-   * Uncomment if interrupt generation on Tilt INT2 pin
-   */
-  //lsm6ds3_pin_int2_route_get(&dev_ctx, &int_2_reg);
-  //int_2_reg.int2_tilt = PROPERTY_ENABLE;
-  //lsm6ds3_pin_int2_route_set(&dev_ctx, &int_2_reg);
-
-  /*
-   * Wait Events
-   */
+  /* Wait samples */
   while(1)
   {
-    lsm6ds3_all_src_t all_source;
+    lsm6ds3_reg_t reg;
 
-    /*
-     * Check Tilt events
+    /* Read status register
      */
-    lsm6ds3_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.func_src.tilt_ia)
+    lsm6ds3_status_reg_get(&dev_ctx, &reg.status_reg);
+    if (reg.status_reg.xlda)
     {
-      sprintf((char*)tx_buffer, "TILT Detected\r\n");
+      /* Read timestamp */
+      lsm6ds3_read_reg(&dev_ctx,
+                       LSM6DS3_TIMESTAMP0_REG,
+                       (uint8_t*)timestamp.byte, 3);
+
+      /* Read accelerometer field data and append timestamp information
+       * in us (LSB in timestamp counter is 25 us)
+       */
+      memset(data_raw_acceleration.u8bit, 0, 3 * sizeof(int16_t));
+      lsm6ds3_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+      acceleration_mg[0] =
+        lsm6ds3_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
+      acceleration_mg[1] =
+        lsm6ds3_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
+      acceleration_mg[2] =
+        lsm6ds3_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
+      sprintf((char*)tx_buffer,
+              "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\t%ld us\r\n",
+              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2],
+              timestamp.val * 25);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
-    /*
-     * Slow polling on device
-     */
-    HAL_Delay(100);
+    if (reg.status_reg.gda)
+    {
+      /* Read timestamp */
+      lsm6ds3_read_reg(&dev_ctx,
+                       LSM6DS3_TIMESTAMP0_REG,
+                       (uint8_t*)timestamp.byte, 3);
+
+      /* Read gyroscope field data and append timestamp information
+       * in us(LSB in timestamp counter is 25 us)
+       */
+      memset(data_raw_angular_rate.u8bit, 0, 3 * sizeof(int16_t));
+      lsm6ds3_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
+      angular_rate_mdps[0] =
+        lsm6ds3_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[0]);
+      angular_rate_mdps[1] =
+        lsm6ds3_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[1]);
+      angular_rate_mdps[2] =
+        lsm6ds3_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
+
+      sprintf((char*)tx_buffer,
+              "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\t%ld us\r\n",
+              angular_rate_mdps[0], angular_rate_mdps[1],
+              angular_rate_mdps[2], timestamp.val * 25);
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
   }
 }
 
-/*
- * @brief  Write generic device register (platform dependent)
+/* @brief  Write generic device register (platform dependent)
  *
  * @param  handle    customizable argument. In this examples is used in
  *                   order to select the correct sensor bus handler.
@@ -229,8 +272,7 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
   return 0;
 }
 
-/*
- * @brief  Read generic device register (platform dependent)
+/* @brief  Read generic device register (platform dependent)
  *
  * @param  handle    customizable argument. In this examples is used in
  *                   order to select the correct sensor bus handler.
@@ -261,8 +303,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   return 0;
 }
 
-/*
- * @brief  Write generic device register (platform dependent)
+/* @brief  Write generic device register (platform dependent)
  *
  * @param  tx_buffer     buffer to trasmit
  * @param  len           number of byte to send
@@ -279,13 +320,26 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }
