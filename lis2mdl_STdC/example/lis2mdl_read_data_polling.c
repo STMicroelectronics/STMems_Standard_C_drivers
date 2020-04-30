@@ -131,6 +131,11 @@ void lis2mdl_read_data_simple(void)
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
 
+#if defined(STEVAL_MKI109V3)
+  /* Default SPI mode is 3 wire, so enable 4 wire mode */
+  lis2mdl_spi_mode_set(&dev_ctx, LIS2MDL_SPI_4_WIRE);
+#endif
+
   /* Check device ID */
   lis2mdl_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LIS2MDL_ID)
