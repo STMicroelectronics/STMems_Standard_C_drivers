@@ -19,8 +19,8 @@
  */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef LSM6DSO_REGS_H
-#define LSM6DSO_REGS_H
+#ifndef LSM6DSO32_REGS_H
+#define LSM6DSO32_REGS_H
 
 #ifdef __cplusplus
   extern "C" {
@@ -30,7 +30,7 @@
 #include <stdint.h>
 #include <math.h>
 
-/** @addtogroup LSM6DSO
+/** @addtogroup LSM6DSO32
   * @{
   *
   */
