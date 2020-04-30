@@ -198,6 +198,13 @@ void lis3mdl_self_test(void)
   /* Wait stable output */
   platform_delay(WAIT_TIME_02);
 
+  /* Check if new value available */
+  do {
+    lis3mdl_mag_data_ready_get(&dev_ctx, &drdy);
+  } while(!drdy);
+  /* Read dummy data and discard it */
+  lis3mdl_magnetic_raw_get(&dev_ctx, data_raw.u8bit);
+
   /* Read samples and get the average vale for each axis */
   memset(val_st_on, 0x00, 3*sizeof(float));
   for (i = 0; i < SAMPLES; i++){
