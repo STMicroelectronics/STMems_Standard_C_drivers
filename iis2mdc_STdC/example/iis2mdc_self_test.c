@@ -77,6 +77,8 @@
 #endif
 
 /* Private macro -------------------------------------------------------------*/
+#define    BOOT_TIME       20 //ms
+
 #define SELF_TEST_SAMPLES  50
 
 /* Self-test max value rang */
@@ -109,6 +111,7 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com(uint8_t *tx_buffer, uint16_t len);
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 static inline float ABSF(float _x)
@@ -192,7 +195,7 @@ static int test_self_test_iis2mdc(stmdev_ctx_t *dev_ctx)
         magnetic_mG[i][axis] =
           iis2mdc_from_lsb_to_mgauss(data_raw_magnetic[i].i16bit[axis]);
 
-        i++;
+      i++;
     }
   } while (i < SELF_TEST_SAMPLES);
 
@@ -275,6 +278,14 @@ void iis2mdc_self_test(void)
 
   /* Initialize platform specific hardware */
   platform_init();
+
+  /* Wait sensor boot time */
+  platform_delay(BOOT_TIME);
+
+#if defined(STEVAL_MKI109V3)
+  /* Default SPI mode is 3 wire, so enable 4 wire mode */
+  iis2mdc_spi_mode_set(&dev_ctx, LIS2MDL_SPI_4_WIRE);
+#endif
 
   /* Check device ID */
   iis2mdc_device_id_get(&dev_ctx, &whoamI);
@@ -372,6 +383,15 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
   #ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
   #endif
+}
+
+/* @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ */
+static void platform_delay(uint32_t ms)
+{
+ HAL_Delay(ms);
 }
 
 /*
