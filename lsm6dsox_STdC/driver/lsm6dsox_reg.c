@@ -10689,9 +10689,9 @@ int32_t lsm6dsox_all_sources_get(stmdev_ctx_t *ctx,
     val->free_fall    = wake_up_src.ff_ia;
     val->sleep_change = wake_up_src.sleep_change_ia;
 
-    val->tap_x      = tap_src.z_tap;
+    val->tap_x      = tap_src.x_tap;
     val->tap_y      = tap_src.y_tap;
-    val->tap_z      = tap_src.x_tap;
+    val->tap_z      = tap_src.z_tap;
     val->tap_sign   = tap_src.tap_sign;
     val->double_tap = tap_src.double_tap;
     val->single_tap = tap_src.single_tap;
