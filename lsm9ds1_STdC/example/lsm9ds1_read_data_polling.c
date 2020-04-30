@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,18 +22,18 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI159V1
+ * - NUCLEO_F411RE + STEVAL-MKI159V11
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
  * Used interfaces:
  *
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
- *                    - Sensor side: I2C(Default) / SPI(supported)
+ *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -48,11 +48,19 @@
  * following target board and redefine yours.
  */
 //#define STEVAL_MKI109V3
-#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#define NUCLEO_F411RE
 
 #if defined(STEVAL_MKI109V3)
+/* MKI109V3: Define communication interface */
+#define SENSOR_BUS hspi2
+
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
+
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
+#define SENSOR_BUS hi2c1
+
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -65,7 +73,7 @@
 #if defined(STEVAL_MKI109V3)
 #include "usbd_cdc_if.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+#elif defined(NUCLEO_F411RE)
 #include "usart.h"
 #endif
 
@@ -74,9 +82,37 @@ typedef union{
   uint8_t u8bit[6];
 } axis3bit16_t;
 
+typedef struct {
+  void*   hbus;
+  uint8_t i2c_address;
+  uint8_t cs_port;
+  uint8_t cs_pin;
+} sensbus_t;
+
 /* Private macro -------------------------------------------------------------*/
+#define    BOOT_TIME            20 //ms
 
 /* Private variables ---------------------------------------------------------*/
+#if defined(STEVAL_MKI109V3)
+static sensbus_t imu_bus = {&SENSOR_BUS,
+                            0,
+                            CS_DEV_GPIO_Port, 
+                            CS_DEV_Pin};
+static sensbus_t mag_bus = {&SENSOR_BUS,
+                            0,
+                            CS_RF_GPIO_Port,
+                            CS_RF_Pin};
+#elif defined(NUCLEO_F411RE)
+static sensbus_t imu_bus = {&SENSOR_BUS,
+                            LSM9DS1_MAG_I2C_ADD_L,
+                            0,
+                            0};
+static sensbus_t mag_bus = {&SENSOR_BUS,
+                            LSM9DS1_IMU_I2C_ADD_H,
+                            0,
+                            0};
+#endif
+
 static axis3bit16_t data_raw_acceleration;
 static axis3bit16_t data_raw_angular_rate;
 static axis3bit16_t data_raw_magnetic_field;
@@ -102,27 +138,30 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
 void example_main_lsm9ds1(void)
 {
+    stmdev_ctx_t dev_ctx_imu;
+    stmdev_ctx_t dev_ctx_mag;
+
+  /* Initialize inertial sensors (IMU) driver interface */
+  dev_ctx_imu.write_reg = platform_write;
+  dev_ctx_imu.read_reg = platform_read;
+  dev_ctx_imu.handle = (void*)&imu_bus;
+
+  /* Initialize magnetic sensors driver interface */
+  dev_ctx_mag.write_reg = platform_write;
+  dev_ctx_mag.read_reg = platform_read;
+  dev_ctx_mag.handle = (void*)&mag_bus;
+
   /* Initialize platform specific hardware */
   platform_init();
 
-  /* Initialize inertial sensors (IMU) driver interface */
-  uint8_t i2c_add_mag = LSM9DS1_MAG_I2C_ADD_L;
-  stmdev_ctx_t dev_ctx_mag;
-  dev_ctx_mag.write_reg = platform_write;
-  dev_ctx_mag.read_reg = platform_read;
-  dev_ctx_mag.handle = (void*)&i2c_add_mag;
-
-  /* Initialize magnetic sensors driver interface */
-  uint8_t i2c_add_imu = LSM9DS1_IMU_I2C_ADD_H;
-  stmdev_ctx_t dev_ctx_imu;
-  dev_ctx_imu.write_reg = platform_write;
-  dev_ctx_imu.read_reg = platform_read;
-  dev_ctx_imu.handle = (void*)&i2c_add_imu;
+  /* Wait sensor boot time */
+  platform_delay(BOOT_TIME);
 
   /* Check device ID */
   lsm9ds1_dev_id_get(&dev_ctx_mag, &dev_ctx_imu, &whoamI);
@@ -211,7 +250,7 @@ void example_main_lsm9ds1(void)
  * @brief  Write generic device register (platform dependent)
  *
  * @param  handle    customizable argument. In this examples is used in
- *                   order to select the correct sensor I2C address.
+ *                   order to select the correct sensor bus handler.
  * @param  reg       register to write
  * @param  bufp      pointer to data to write in register reg
  * @param  len       number of consecutive register to write
@@ -220,9 +259,20 @@ void example_main_lsm9ds1(void)
 static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
-  uint8_t *i2c_address = handle;
-  HAL_I2C_Mem_Write(&hi2c1, *i2c_address, reg,
-                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+sensbus_t *sensbus = (sensbus_t*)handle;
+
+  if (sensbus->hbus == &hi2c1) {
+    HAL_I2C_Mem_Write(sensbus->hbus, sensbus->i2c_address, reg,
+                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  }
+#if defined(STEVAL_MKI109V3)
+  else if (sensbus->hbus == &hspi2) {
+    HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_RESET);
+    HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
+    HAL_SPI_Transmit(sensbus->hbus, bufp, len, 1000);
+    HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
+  }
+#endif
   return 0;
 }
 
@@ -230,7 +280,7 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
  * @brief  Read generic device register (platform dependent)
  *
  * @param  handle    customizable argument. In this examples is used in
- *                   order to select the correct sensor I2C address.
+ *                   order to select the correct sensor bus handler.
  * @param  reg       register to read
  * @param  bufp      pointer to buffer that store the data read
  * @param  len       number of consecutive register to read
@@ -239,9 +289,22 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  uint8_t *i2c_address = handle;
-  HAL_I2C_Mem_Read(&hi2c1, *i2c_address, reg,
-                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+sensbus_t *sensbus = (sensbus_t*)handle;
+
+  if (sensbus->hbus == &hi2c1) {
+    HAL_I2C_Mem_Read(sensbus->hbus, sensbus->i2c_address, reg,
+                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  }
+#if defined(STEVAL_MKI109V3)
+  else if (sensbus->hbus == &hspi2) {
+    /* Read command */
+    reg |= 0x80;
+    HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_RESET);
+    HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
+    HAL_SPI_Receive(sensbus->hbus, bufp, len, 1000);
+    HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
+  }
+#endif
   return 0;
 }
 
@@ -254,7 +317,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+  #ifdef NUCLEO_F411RE
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
   #endif
   #ifdef STEVAL_MKI109V3
@@ -263,13 +326,26 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }
