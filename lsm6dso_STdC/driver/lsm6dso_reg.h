@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -89,9 +89,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using 
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -743,7 +743,7 @@ typedef struct {
   uint8_t emb_func_lir             : 1;
 } lsm6dso_page_rw_t;
 
-#define LSM6DSO_EMB_FUNC_FIFO_CFG			       0x44U
+#define LSM6DSO_EMB_FUNC_FIFO_CFG             0x44U
 typedef struct {
   uint8_t not_used_00              : 6;
   uint8_t pedo_fifo_en             : 1;
@@ -1453,7 +1453,7 @@ typedef union{
   lsm6dso_fsm_status_a_t                  fsm_status_a;
   lsm6dso_fsm_status_b_t                  fsm_status_b;
   lsm6dso_page_rw_t                       page_rw;
-  lsm6dso_emb_func_fifo_cfg_t	            emb_func_fifo_cfg;
+  lsm6dso_emb_func_fifo_cfg_t              emb_func_fifo_cfg;
   lsm6dso_fsm_enable_a_t                  fsm_enable_a;
   lsm6dso_fsm_enable_b_t                  fsm_enable_b;
   lsm6dso_fsm_long_counter_clear_t        fsm_long_counter_clear;
@@ -2196,7 +2196,7 @@ int32_t lsm6dso_fifo_stop_on_wtm_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dso_fifo_stop_on_wtm_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
-  LSM6DSO_XL_NOT_BATCHED     	=  0,
+  LSM6DSO_XL_NOT_BATCHED       =  0,
   LSM6DSO_XL_BATCHED_AT_12Hz5   =  1,
   LSM6DSO_XL_BATCHED_AT_26Hz    =  2,
   LSM6DSO_XL_BATCHED_AT_52Hz    =  3,
@@ -2268,7 +2268,7 @@ typedef enum {
 } lsm6dso_trig_counter_bdr_t;
 
 typedef enum {
-  LSM6DSO_GYRO_NC_TAG		= 1,
+  LSM6DSO_GYRO_NC_TAG    = 1,
   LSM6DSO_XL_NC_TAG,
   LSM6DSO_TEMPERATURE_TAG,
   LSM6DSO_TIMESTAMP_TAG,
@@ -2289,7 +2289,7 @@ typedef enum {
   LSM6DSO_GAME_ROTATION_TAG,
   LSM6DSO_GEOMAG_ROTATION_TAG,
   LSM6DSO_ROTATION_TAG,
-  LSM6DSO_SENSORHUB_NACK_TAG	= 0x19,
+  LSM6DSO_SENSORHUB_NACK_TAG  = 0x19,
 } lsm6dso_fifo_tag_t;
 int32_t lsm6dso_fifo_cnt_event_batch_set(stmdev_ctx_t *ctx,
                                           lsm6dso_trig_counter_bdr_t val);
@@ -2316,7 +2316,7 @@ int32_t lsm6dso_fifo_ovr_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t lsm6dso_fifo_wtm_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm6dso_fifo_sensor_tag_get(stmdev_ctx_t *ctx,
-				    lsm6dso_fifo_tag_t *val);
+            lsm6dso_fifo_tag_t *val);
 
 int32_t lsm6dso_fifo_pedo_batch_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dso_fifo_pedo_batch_get(stmdev_ctx_t *ctx, uint8_t *val);
