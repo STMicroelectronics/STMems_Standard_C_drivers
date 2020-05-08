@@ -189,9 +189,6 @@ void lsm6dsox_fifo_pedo_simple(void)
   lsm6dsox_fifo_pedo_batch_set(&ag_ctx, PROPERTY_ENABLE);
   lsm6dsox_steps_reset(&ag_ctx);
 
-  /* Enable I2C Master */
-  lsm6dsox_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
-
   /* Set Output Data Rate */
   lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_26Hz);
 
