@@ -1,14 +1,13 @@
 /*
  ******************************************************************************
- * @file    wake_up.c
+ * @file    iis3dwb_self_test.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect wake-up events from
- *          sensor.
+ * @brief   This file implements the self test procedure.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -24,7 +23,6 @@
  * evaluation boards:
  *
  * - STEVAL_MKI109V3 + STEVAL-MKI208V1K
- * - NUCLEO_F411RE + STEVAL-MKI208V1K
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -33,8 +31,6 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
- *                    - I2C(Default) / SPI(N/A)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -48,8 +44,7 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-//#define STEVAL_MKI109V3
-#define NUCLEO_F411RE
+#define STEVAL_MKI109V3
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
@@ -58,10 +53,8 @@
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#elif defined(NUCLEO_F411RE)
-/* NUCLEO_F411RE: Define communication interface */
-#define SENSOR_BUS hi2c1
-
+#else
+#error "Please leave STEVAL_MKI109V3 defined: this sensor support SPI only interface"
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -74,15 +67,31 @@
 #if defined(STEVAL_MKI109V3)
 #include "usbd_cdc_if.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE)
-#include "usart.h"
 #endif
 
+typedef union{
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
+} axis3bit16_t;
+
+typedef union{
+  int16_t i16bit;
+  uint8_t u8bit[2];
+} axis1bit16_t;
+
 /* Private macro -------------------------------------------------------------*/
+#define    BOOT_TIME        10 //ms
+#define    WAIT_TIME       100 //ms
+
+/* Self test limits. */
+#define    MIN_ST_LIMIT_mg        800.0f
+#define    MAX_ST_LIMIT_mg       3200.0f
+
+/* Self test results. */
+#define    ST_PASS     1U
+#define    ST_FAIL     0U
 
 /* Private variables ---------------------------------------------------------*/
-static uint8_t whoamI, rst;
-static uint8_t tx_buffer[1000];
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -99,110 +108,148 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_wake_up_iis3dwb(void)
+void iis3dwb_self_test(void)
 {
+  uint8_t tx_buffer[1000];
+  axis3bit16_t data_raw;
   stmdev_ctx_t dev_ctx;
+  float val_st_off[3];
+  float val_st_on[3];
+  float test_val[3];
+  uint8_t st_result;
+  uint8_t whoamI;
+  uint8_t drdy;
+  uint8_t rst;
+  uint8_t i;
+  uint8_t j;
 
-  /*
-   * Uncomment to configure INT 1
-   */
-  //iis3dwb_pin_int1_route_t int1_route;
-
-  /*
-   * Uncomment to configure INT 2
-   */
-  iis3dwb_pin_int2_route_t int2_route;
-
-  /*
-   *  Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Init test platform
-   */
+  /* Init test platform */
   platform_init();
 
-  /*
-   *  Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(BOOT_TIME);
+
+  /* Check device ID */
   iis3dwb_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != IIS3DWB_ID)
     while(1);
 
-  /*
-   *  Restore default configuration
-   */
+  /* Restore default configuration */
   iis3dwb_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     iis3dwb_reset_get(&dev_ctx, &rst);
   } while (rst);
 
+  /* Enable Block Data Update */
+  iis3dwb_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+
   /*
-   * Set XL Output Data Rate to 416 Hz
+   * Accelerometer Self Test
    */
+  /* Set Output Data Rate */
   iis3dwb_xl_data_rate_set(&dev_ctx, IIS3DWB_XL_ODR_26k7Hz);
 
-  /*
-   * Set 2g full XL scale
-   */
-  iis3dwb_xl_full_scale_set(&dev_ctx, IIS3DWB_2g);
+  /* Set full scale */
+  iis3dwb_xl_full_scale_set(&dev_ctx, IIS3DWB_4g);
 
-  /*
-   * Apply high-pass digital filter on Wake-Up function
-   */
-  iis3dwb_xl_hp_path_internal_set(&dev_ctx, IIS3DWB_USE_SLOPE);
+  /* Wait stable output */
+  platform_delay(WAIT_TIME);
 
-  /*
-   * Set Wake-Up threshold: 1 LSb corresponds to FS_XL/2^6
-   * WARNING: this function is mandatory for activate the wake up logic
-   */
-  iis3dwb_wkup_threshold_set(&dev_ctx, 2);
+  /* Check if new value available */
+  do {
+    lis3dhh_xl_data_ready_get(&dev_ctx, &drdy);
+  } while(!drdy);
+  /* Read dummy data and discard it */
+  iis3dwb_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
 
-  /*
-   * Uncomment interrupt generation on Wake-Up INT1 pin
-   */
-  //iis3dwb_pin_int1_route_get(&dev_ctx, &int1_route);
-  //int1_route.md1_cfg.int1_wu = PROPERTY_ENABLE;
-  //iis3dwb_pin_int1_route_set(&dev_ctx, &int1_route);
-
-  /*
-   * Enable if interrupt generation on Wake-Up INT2 pin
-   */
-  iis3dwb_pin_int2_route_get(&dev_ctx, &int2_route);
-  int2_route.md2_cfg.int2_wu = PROPERTY_ENABLE;
-  iis3dwb_pin_int2_route_set(&dev_ctx, &int2_route);
-
-  /*
-   * Wait Events
-   */
-  while(1)
-  {
-    iis3dwb_all_sources_t all_source;
-
-    /*
-     * Check if Wake-Up events
-     */
-    iis3dwb_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.wake_up_src.wu_ia)
-    {
-      sprintf((char*)tx_buffer, "Wake-Up event on ");
-      if (all_source.wake_up_src.x_wu)
-        strcat((char*)tx_buffer, "X");
-      if (all_source.wake_up_src.y_wu)
-        strcat((char*)tx_buffer, "Y");
-      if (all_source.wake_up_src.z_wu)
-        strcat((char*)tx_buffer, "Z");
-
-      strcat((char*)tx_buffer, " direction\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+  /* Read 5 sample and get the average vale for each axis */
+  memset(val_st_off, 0x00, 3*sizeof(float));
+  for (i = 0; i < 5; i++){
+    /* Check if new value available */
+    do {
+      lis3dhh_xl_data_ready_get(&dev_ctx, &drdy);
+    } while(!drdy);
+    /* Read data and accumulate the mg value */
+    iis3dwb_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
+    for (j = 0; j < 3; j++){
+      val_st_off[j] += iis3dwb_from_fs4g_to_mg(data_raw.i16bit[j]);
     }
   }
+
+  /* Calculate the mg average values */
+  for (i = 0; i < 3; i++){
+    val_st_off[i] /= 5.0f;
+  }
+
+  /* Enable Self Test positive (or negative) */
+  lis3dhh_self_test_set(&dev_ctx, LIS3DHH_ST_NEGATIVE);
+  //lis3dhh_self_test_set(&dev_ctx, LIS3DHH_ST_POSITIVE);
+
+  /* Wait stable output */
+  platform_delay(WAIT_TIME);
+
+  /* Check if new value available */
+  do {
+    lis3dhh_xl_data_ready_get(&dev_ctx, &drdy);
+  } while(!drdy);
+  /* Read dummy data and discard it */
+  iis3dwb_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
+
+
+  /* Read 5 sample and get the average vale for each axis */
+  memset(val_st_on, 0x00, 3*sizeof(float));
+  for (i = 0; i < 5; i++){
+    /* Check if new value available */
+    do {
+      lis3dhh_xl_data_ready_get(&dev_ctx, &drdy);
+    } while(!drdy);
+    /* Read data and accumulate the mg value */
+    iis3dwb_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
+    for (j = 0; j < 3; j++){
+      val_st_on[j] += iis3dwb_from_fs4g_to_mg(data_raw.i16bit[j]);
+    }
+  }
+
+  /* Calculate the mg average values */
+  for (i = 0; i < 3; i++){
+    val_st_on[i] /= 5.0f;
+  }
+
+  /* Calculate the mg values for self test */
+  for (i = 0; i < 3; i++){
+    test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
+  }
+
+  /* Check self test limit */
+  st_result = ST_PASS;
+  for (i = 0; i < 3; i++){
+    if (( MIN_ST_LIMIT_mg > test_val[i] ) ||
+        ( test_val[i] > MAX_ST_LIMIT_mg)){
+      st_result = ST_FAIL;
+    }
+  }
+
+  /* Disable Self Test */
+  lis3dhh_self_test_set(&dev_ctx, LIS3DHH_ST_DISABLE);
+  /* Disable sensor. */
+  iis3dwb_xl_data_rate_set(&dev_ctx, IIS3DWB_XL_ODR_OFF);
+
+  if (st_result == ST_PASS) {
+    sprintf((char*)tx_buffer, "Self Test - PASS\r\n" );
+  }
+  else {
+    sprintf((char*)tx_buffer, "Self Test - FAIL\r\n" );
+  }
+  tx_com(tx_buffer, strlen((char const*)tx_buffer));
 }
 
 /*
@@ -218,13 +265,8 @@ void example_main_wake_up_iis3dwb(void)
 static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
-    HAL_I2C_Mem_Write(handle, IIS3DWB_I2C_ADD_L, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
+  if (handle == &hspi2)
   {
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
@@ -248,13 +290,8 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
-    HAL_I2C_Mem_Read(handle, IIS3DWB_I2C_ADD_L, reg,
-                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
+  if (handle == &hspi2)
   {
     /* Read command */
     reg |= 0x80;
@@ -268,7 +305,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 }
 
 /*
- * @brief  Write generic device register (platform dependent)
+ * @brief  Send buffer to console (platform dependent)
  *
  * @param  tx_buffer     buffer to trasmit
  * @param  len           number of byte to send
@@ -276,12 +313,20 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE
-  HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
   #ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
   #endif
+}
+
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
 }
 
 /*
@@ -289,9 +334,11 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }
