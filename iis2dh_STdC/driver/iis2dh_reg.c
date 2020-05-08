@@ -86,22 +86,22 @@ int32_t iis2dh_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
 
 float iis2dh_from_fs2_hr_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 16.0f ) * 1.0f;
+  return ( (float)lsb / 16.0f ) * 0.98f;
 }
 
 float iis2dh_from_fs4_hr_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 16.0f ) *  2.0f;
+  return ( (float)lsb / 16.0f ) *  1.95f;
 }
 
 float iis2dh_from_fs8_hr_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 16.0f ) * 4.0f;
+  return ( (float)lsb / 16.0f ) * 3.91f;
 }
 
 float iis2dh_from_fs16_hr_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 16.0f ) * 12.0f;
+  return ( (float)lsb / 16.0f ) * 11.72f;
 }
 
 float iis2dh_from_lsb_hr_to_celsius(int16_t lsb)
@@ -111,22 +111,22 @@ float iis2dh_from_lsb_hr_to_celsius(int16_t lsb)
 
 float iis2dh_from_fs2_nm_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 64.0f ) *  4.0f;
+  return ( (float)lsb / 64.0f ) *  3.91f;
 }
 
 float iis2dh_from_fs4_nm_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 64.0f ) *  8.0f;
+  return ( (float)lsb / 64.0f ) *  7.81f;
 }
 
 float iis2dh_from_fs8_nm_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 64.0f ) * 16.0f;
+  return ( (float)lsb / 64.0f ) * 15.63f;
 }
 
 float iis2dh_from_fs16_nm_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 64.0f ) * 48.0f;
+  return ( (float)lsb / 64.0f ) * 46.95f;
 }
 
 float iis2dh_from_lsb_nm_to_celsius(int16_t lsb)
@@ -136,22 +136,22 @@ float iis2dh_from_lsb_nm_to_celsius(int16_t lsb)
 
 float iis2dh_from_fs2_lp_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 256.0f ) * 16.0f;
+  return ( (float)lsb / 256.0f ) * 15.63f;
 }
 
 float iis2dh_from_fs4_lp_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 256.0f ) * 32.0f;
+  return ( (float)lsb / 256.0f ) * 31.25f;
 }
 
 float iis2dh_from_fs8_lp_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 256.0f ) * 64.0f;
+  return ( (float)lsb / 256.0f ) * 62.5f;
 }
 
 float iis2dh_from_fs16_lp_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 256.0f ) * 192.0f;
+  return ( (float)lsb / 256.0f ) * 188.68f;
 }
 
 float iis2dh_from_lsb_lp_to_celsius(int16_t lsb)
