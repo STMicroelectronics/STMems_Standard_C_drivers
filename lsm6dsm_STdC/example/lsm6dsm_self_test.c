@@ -335,7 +335,7 @@ void lsm6dsm_self_test(void)
   /* Disable Self Test */
   lsm6dsm_gy_self_test_set(&dev_ctx, LSM6DSM_GY_ST_DISABLE);
   /* Disable sensor. */
-  lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_GY_ODR_OFF);
+  lsm6dsm_gy_data_rate_set(&dev_ctx, LSM6DSM_GY_ODR_OFF);
 
   if (st_result == ST_PASS) {
     sprintf((char*)tx_buffer, "Self Test - PASS\r\n" );
