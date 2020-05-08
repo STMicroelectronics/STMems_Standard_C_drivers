@@ -1,13 +1,13 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    read_data_polling.c
  * @author  Sensors Software Solution Team
  * @brief   This file show the simplest way to get data from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,14 +22,14 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
+ * - STEVAL_MKI109V3 + STEVAL-MKI180V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
  * Used interfaces:
  *
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
- *                    - Sensor side: SPI(Default) / I2C(supported)
+ *                    - Sensor side: SPI
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -73,11 +73,19 @@ typedef union{
   uint8_t u8bit[6];
 } axis3bit16_t;
 
+typedef union{
+  int16_t i16bit;
+  uint8_t u8bit[2];
+} axis1bit16_t;
+
 /* Private macro -------------------------------------------------------------*/
+#define    BOOT_TIME   10 //ms
 
 /* Private variables ---------------------------------------------------------*/
 static axis3bit16_t data_raw_acceleration;
+static axis1bit16_t data_raw_temperature;
 static float acceleration_mg[3];
+static float temperature_degC;
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -95,20 +103,23 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com(uint8_t *tx_buffer, uint16_t len);
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_multi_read_fifo_lis3dhh(void)
+void lis3dhh_read_data_polling(void)
 {
   /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hspi2;
+  dev_ctx.handle = &SENSOR_BUS;
 
   /* Initialize platform specific hardware */
   platform_init();
+
+  /* Wait sensor boot time */
+  platform_delay(BOOT_TIME);
 
   /* Check device ID */
   lis3dhh_device_id_get(&dev_ctx, &whoamI);
@@ -127,46 +138,33 @@ void example_multi_read_fifo_lis3dhh(void)
   /* Set Output Data Rate */
   lis3dhh_data_rate_set(&dev_ctx, LIS3DHH_1kHz1);
 
-  /* Enable temperature compensation */
-  lis3dhh_offset_temp_comp_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /* Set FIFO watermark to 16 samples (half FIFO) */
-  lis3dhh_fifo_watermark_set(&dev_ctx, 16);
-
-  /* Set FIFO to Stream mode */
-  lis3dhh_fifo_mode_set(&dev_ctx, LIS3DHH_DYNAMIC_STREAM_MODE);
-
-  /* Enable FIFO */
-  lis3dhh_fifo_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /* Uncomment to use Int1 as interrupt on FIFO watermark */
-  //lis3dhh_fifo_threshold_on_int1_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Read samples in polling mode (no int) */
   while(1)
   {
-    uint8_t wtm;
-    uint8_t num = 0;
+    uint8_t reg;
 
     /* Read output only if new value is available */
-    lis3dhh_fifo_fth_flag_get(&dev_ctx, &wtm);
-    if (wtm)
+    lis3dhh_xl_data_ready_get(&dev_ctx, &reg);
+    if (reg)
     {
-      /* Read number of sample in FIFO */
-      lis3dhh_fifo_full_flag_get(&dev_ctx, &num);
-      while (num-- > 0)
-      {
-        /* Read XL samples */
-        memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-        lis3dhh_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-        acceleration_mg[0] = lis3dhh_from_lsb_to_mg(data_raw_acceleration.i16bit[0]);
-        acceleration_mg[1] = lis3dhh_from_lsb_to_mg(data_raw_acceleration.i16bit[1]);
-        acceleration_mg[2] = lis3dhh_from_lsb_to_mg(data_raw_acceleration.i16bit[2]);
+      /* Read acceleration data */
+      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
+      lis3dhh_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+      acceleration_mg[0] = lis3dhh_from_lsb_to_mg(data_raw_acceleration.i16bit[0]);
+      acceleration_mg[1] = lis3dhh_from_lsb_to_mg(data_raw_acceleration.i16bit[1]);
+      acceleration_mg[2] = lis3dhh_from_lsb_to_mg(data_raw_acceleration.i16bit[2]);
 
-        sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-                acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-        tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      }
+      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+      /* Read temperature data */
+      memset(data_raw_temperature.u8bit, 0, sizeof(int16_t));
+      lis3dhh_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
+      temperature_degC = lis3dhh_from_lsb_to_celsius(data_raw_temperature.i16bit);
+
+      sprintf((char*)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC);
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
 }
@@ -238,13 +236,26 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }
