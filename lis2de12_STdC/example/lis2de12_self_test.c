@@ -170,7 +170,7 @@ void lis2de12_self_test(void)
     /* Read data and accumulate the mg value */
     lis2de12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
     for (j=0; j<3; j++){
-      acceleration_mg[j] += lis2de12_from_fs2_nm_to_mg(data_raw_acceleration.i16bit[j]);
+      acceleration_mg[j] += lis2de12_from_fs2_to_mg(data_raw_acceleration.i16bit[j]);
     }
   }
   /* Calculate the mg average values */
@@ -202,7 +202,7 @@ void lis2de12_self_test(void)
     /* Read data and accumulate the mg value */
     lis2de12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
     for (j=0; j<3; j++){
-      acceleration_st_mg[j] += lis2de12_from_fs2_nm_to_mg(data_raw_acceleration.i16bit[j]);
+      acceleration_st_mg[j] += lis2de12_from_fs2_to_mg(data_raw_acceleration.i16bit[j]);
     }
   }
   /* Calculate the mg average values */
@@ -214,8 +214,8 @@ void lis2de12_self_test(void)
   for (i=0; i<3; i++){
     test_val_mg[i] = fabs((acceleration_st_mg[i] - acceleration_mg[i]));
   }
-  min_st_limit_mg = lis2de12_from_fs2_nm_to_mg(MIN_ST_LIMIT_LSb);
-  max_st_limit_mg = lis2de12_from_fs2_nm_to_mg(MAX_ST_LIMIT_LSb);
+  min_st_limit_mg = lis2de12_from_fs2_to_mg(MIN_ST_LIMIT_LSb);
+  max_st_limit_mg = lis2de12_from_fs2_to_mg(MAX_ST_LIMIT_LSb);
 
   /* Check self test limit */
   for (i=0; i<3; i++){
