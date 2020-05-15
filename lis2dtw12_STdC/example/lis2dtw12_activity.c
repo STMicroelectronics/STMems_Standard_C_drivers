@@ -3,12 +3,12 @@
  * @file    activity.c
  * @author  Sensors Software Solution Team
  * @brief   This file show the simplest way to detect activity/inactivity
- * 			from sensor.
+ *          from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -19,12 +19,11 @@
  ******************************************************************************
  */
 
-/*
- * This example was developed using the following STMicroelectronics
+/* This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI190V1
+ * - NUCLEO_F411RE + STEVAL-MKI190V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -33,8 +32,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -49,7 +48,7 @@
  * following target board and redefine yours.
  */
 //#define STEVAL_MKI109V3
-#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#define NUCLEO_F411RE
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
@@ -58,8 +57,8 @@
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
 #endif
@@ -74,11 +73,12 @@
 #if defined(STEVAL_MKI109V3)
 #include "usbd_cdc_if.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+#elif defined(NUCLEO_F411RE)
 #include "usart.h"
 #endif
 
 /* Private macro -------------------------------------------------------------*/
+#define    BOOT_TIME            20 //ms
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t whoamI, rst;
@@ -88,8 +88,7 @@ static uint8_t tx_buffer[1000];
 
 /* Private functions ---------------------------------------------------------*/
 
-/*
- *   WARNING:
+/*   WARNING:
  *   Functions declare in this section are defined at the end of this file
  *   and are strictly related to the hardware platform used.
  *
@@ -99,120 +98,90 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_activity_lis2dtw12(void)
+void lis2dtw12_activity(void)
 {
-  /*
-   * Initialize mems driver interface
-   */
-  stmdev_ctx_t dev_ctx;
+  /* Initialize mems driver interface */
   lis2dtw12_reg_t int_route;
+  stmdev_ctx_t dev_ctx;
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Initialize platform specific hardware */
   platform_init();
 
-  /*
-   * Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(BOOT_TIME);
+
+  /* Check device ID */
   lis2dtw12_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LIS2DTW12_ID)
     while(1)
-	{
-	  /* manage here device not found */
-	}
+  {
+    /* manage here device not found */
+  }
 
-  /*
-   * Restore default configuration
-   */
+  /* Restore default configuration */
   lis2dtw12_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
-	  lis2dtw12_reset_get(&dev_ctx, &rst);
+    lis2dtw12_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Set full scale
-   */
+  /* Set full scale */
   lis2dtw12_full_scale_set(&dev_ctx, LIS2DTW12_2g);
 
-  /*
-   * Configure filtering chain
-   * Accelerometer - filter path / bandwidth
-   */
+  /* Configure filtering chain
+   * Accelerometer - filter path / bandwidth */
   lis2dtw12_filter_path_set(&dev_ctx, LIS2DTW12_LPF_ON_OUT);
   lis2dtw12_filter_bandwidth_set(&dev_ctx, LIS2DTW12_ODR_DIV_4);
 
-  /*
-   * Configure power mode
-   */
+  /* Configure power mode */
   lis2dtw12_power_mode_set(&dev_ctx, LIS2DTW12_CONT_LOW_PWR_LOW_NOISE_12bit);
 
-  /*
-   * Set wake-up duration
-   *
+  /* Set wake-up duration
    * Wake up duration event 1LSb = 1 / ODR
    */
   lis2dtw12_wkup_dur_set(&dev_ctx, 2);
 
-  /*
-   * Set sleep duration
-   *
+  /* Set sleep duration
    * Duration to go in sleep mode (1 LSb = 512 / ODR)
    */
   lis2dtw12_act_sleep_dur_set(&dev_ctx, 2);
 
-  /*
-   * Set Activity wake-up threshold
-   *
+  /* Set Activity wake-up threshold
    * Threshold for wake-up 1 LSB = FS_XL / 64
    */
   lis2dtw12_wkup_threshold_set(&dev_ctx, 2);
 
-  /*
-   * Data sent to wake-up interrupt function
-   */
+  /* Data sent to wake-up interrupt function */
   lis2dtw12_wkup_feed_data_set(&dev_ctx, LIS2DTW12_HP_FEED);
 
-  /*
-   * Config activity / inactivity or stationary / motion detection
-   */
+  /* Config activity / inactivity or stationary / motion detection */
   lis2dtw12_act_mode_set(&dev_ctx, LIS2DTW12_DETECT_ACT_INACT);
 
-  /*
-   * Enable activity detection interrupt
-   */
+  /* Enable activity detection interrupt */
   lis2dtw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
   int_route.ctrl4_int1_pad_ctrl.int1_wu = PROPERTY_ENABLE;
   lis2dtw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
 
-  /*
-   * Set Output Data Rate
-   */
+  /* Set Output Data Rate */
   lis2dtw12_data_rate_set(&dev_ctx, LIS2DTW12_XL_ODR_200Hz);
 
-  /*
-   * Wait Events
-   */
+  /* Wait Events */
   while(1)
   {
     lis2dtw12_all_sources_t all_source;
 
-    /*
-     * Read status register
-     */
+    /* Read status register */
     lis2dtw12_all_sources_get(&dev_ctx, &all_source);
 
-    /*
-     * Check if Activity/Inactivity events
-     */
+    /* Check if Activity/Inactivity events */
     if (all_source.wake_up_src.sleep_state_ia)
     {
       sprintf((char*)tx_buffer, "Inactivity Detected\r\n");
@@ -297,7 +266,7 @@ void example_main_activity_lis2dtw12(void)
   */
  static void tx_com(uint8_t *tx_buffer, uint16_t len)
  {
-   #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+   #ifdef NUCLEO_F411RE
    HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
    #endif
    #ifdef STEVAL_MKI109V3
@@ -305,14 +274,27 @@ void example_main_activity_lis2dtw12(void)
    #endif
  }
 
- /*
-  * @brief  platform specific initialization (platform dependent)
-  */
- static void platform_init(void)
- {
- #ifdef STEVAL_MKI109V3
-   TIM3->CCR1 = PWM_3V3;
-   TIM3->CCR2 = PWM_3V3;
-   HAL_Delay(1000);
- #endif
- }
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
+ * @brief  platform specific initialization (platform dependent)
+ */
+static void platform_init(void)
+{
+#if defined(STEVAL_MKI109V3)
+  TIM3->CCR1 = PWM_3V3;
+  TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  HAL_Delay(1000);
+#endif
+}
