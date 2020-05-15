@@ -79,6 +79,7 @@
 #endif
 
 /* Private macro -------------------------------------------------------------*/
+#define    BOOT_TIME            20 //ms
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t whoamI, rst;

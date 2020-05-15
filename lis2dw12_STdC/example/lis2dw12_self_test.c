@@ -83,6 +83,8 @@ typedef union{
 } axis3bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
+#define    BOOT_TIME            20 //ms
+
 /* Self-test recommended samples */
 #define SELF_TEST_SAMPLES  5
 
@@ -240,7 +242,7 @@ static void test_self_test_lis2dw12(stmdev_ctx_t *dev_ctx)
     tx_com(tx_buffer, strlen((char const*)tx_buffer));
   }
 
-  /* Disable self test mode /
+  /* Disable self test mode */
   lis2dw12_data_rate_set(dev_ctx, LIS2DW12_XL_ODR_OFF);
   lis2dw12_self_test_set(dev_ctx, LIS2DW12_XL_ST_DISABLE);
 }
