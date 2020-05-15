@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,8 +22,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI179V1
+ * - NUCLEO_F411RE + X_NUCLEO_IKS01A3
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -32,8 +32,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -48,7 +48,7 @@
  * following target board and redefine yours.
  */
 //#define STEVAL_MKI109V3
-#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#define NUCLEO_F411RE
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
@@ -57,8 +57,8 @@
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
 #endif
@@ -73,7 +73,7 @@
 #if defined(STEVAL_MKI109V3)
 #include "usbd_cdc_if.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+#elif defined(NUCLEO_F411RE)
 #include "usart.h"
 #endif
 
@@ -97,29 +97,27 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
 void lis2dw12_single_tap(void)
 {
-  /*
-   * Initialize mems driver interface.
-   */
+  /* Initialize mems driver interface. */
   stmdev_ctx_t dev_ctx;
   lis2dw12_reg_t int_route;
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Initialize platform specific hardware */
   platform_init();
 
-  /*
-   * Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(BOOT_TIME);
+
+  /* Check device ID */
   lis2dw12_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != LIS2DW12_ID)
     while(1)
@@ -127,71 +125,49 @@ void lis2dw12_single_tap(void)
       /* manage here device not found */
     }
 
-  /*
-   * Restore default configuration
-   */
+  /* Restore default configuration */
   lis2dw12_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     lis2dw12_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Set full scale
-   */
+  /* Set full scale */
   lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_2g);
 
-  /*
-   * Configure power mode
-   */
+  /* Configure power mode */
   lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
 
-  /*
-   * Set Output Data Rate
-   */
+  /* Set Output Data Rate */
   lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_400Hz);
 
-  /*
-   * Enable Tap detection on X, Y, Z
-   */
+  /* Enable Tap detection on X, Y, Z */
   lis2dw12_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
   lis2dw12_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
   lis2dw12_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Set Tap threshold on all axis
-   */
+  /* Set Tap threshold on all axis */
   lis2dw12_tap_threshold_x_set(&dev_ctx, 9);
   lis2dw12_tap_threshold_y_set(&dev_ctx, 9);
   lis2dw12_tap_threshold_z_set(&dev_ctx, 9);
 
-  /*
-   * Configure Single Tap parameter
-   */
+  /* Configure Single Tap parameter */
   lis2dw12_tap_quiet_set(&dev_ctx, 1);
   lis2dw12_tap_shock_set(&dev_ctx, 2);
 
-  /*
-   * Enable Single Tap detection only
-   */
+  /* Enable Single Tap detection only */
   lis2dw12_tap_mode_set(&dev_ctx, LIS2DW12_ONLY_SINGLE);
 
-  /*
-   * Enable single tap detection interrupt
-   */
+  /* Enable single tap detection interrupt */
   lis2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
   int_route.ctrl4_int1_pad_ctrl.int1_single_tap = PROPERTY_ENABLE;
   lis2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
 
-  /*
-   * Wait Events
-   */
+  /* Wait Events */
   while(1)
   {
     lis2dw12_all_sources_t all_source;
 
-    /*
-     * Check Single Tap events
-     */
+    /* Check Single Tap events */
     lis2dw12_all_sources_get(&dev_ctx, &all_source);
     if (all_source.tap_src.single_tap)
     {
@@ -259,8 +235,8 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 #ifdef STEVAL_MKI109V3
   else if (handle == &hspi2)
   {
-	/* Read command */
-	reg |= 0x80;
+  /* Read command */
+  reg |= 0x80;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Receive(handle, bufp, len, 1000);
@@ -279,7 +255,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+  #ifdef NUCLEO_F411RE
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
   #endif
   #ifdef STEVAL_MKI109V3
@@ -288,11 +264,22 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
