@@ -593,6 +593,14 @@ typedef struct {
 int32_t lis3dsh_data_get(stmdev_ctx_t *ctx, lis3dsh_md_t *md,
                          lis3dsh_data_t *data);
 
+typedef enum {
+  LIS3DSH_ST_DISABLE   = 0,
+  LIS3DSH_ST_POSITIVE  = 1,
+  LIS3DSH_ST_NEGATIVE  = 2,
+} lis3dsh_st_t;
+int32_t lis3dsh_self_test_set(stmdev_ctx_t *ctx, lis3dsh_st_t val);
+int32_t lis3dsh_self_test_get(stmdev_ctx_t *ctx, lis3dsh_st_t *val);
+
 /**
   * @}
   *

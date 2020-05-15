@@ -277,10 +277,10 @@ int32_t lis3dsh_status_get(stmdev_ctx_t *ctx, lis3dsh_status_var_t *val)
 
   ret = lis3dsh_read_reg(ctx, LIS3DSH_STAT, (uint8_t*)&stat, 1);
   if (ret == 0) {
-    ret = lis3dsh_write_reg(ctx, LIS3DSH_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+    ret = lis3dsh_read_reg(ctx, LIS3DSH_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
   }
   if (ret == 0) {
-    ret = lis3dsh_write_reg(ctx, LIS3DSH_CTRL_REG6, (uint8_t*)&ctrl_reg6, 1);
+    ret = lis3dsh_read_reg(ctx, LIS3DSH_CTRL_REG6, (uint8_t*)&ctrl_reg6, 1);
   }
 
   val->sw_reset = ctrl_reg3.strt;
@@ -715,6 +715,59 @@ int32_t lis3dsh_data_get(stmdev_ctx_t *ctx, lis3dsh_md_t *md,
   * @}
   *
   */
+
+/**
+  * @brief  Configures the self test.[set]
+  *
+  * @param  ctx          communication interface handler.(ptr)
+  * @param  val          Self test mode mode.(ptr)
+  *
+  */
+int32_t lis3dsh_self_test_set(stmdev_ctx_t *ctx, lis3dsh_st_t val)
+{
+  lis3dsh_ctrl_reg5_t ctrl_reg5;
+  int32_t ret;
+
+  ret = lis3dsh_read_reg(ctx, LIS3DSH_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+  if (ret == 0) {
+    ctrl_reg5.st = (uint8_t) val;
+    ret = lis3dsh_read_reg(ctx, LIS3DSH_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+  }
+  return ret;
+}
+
+/**
+  * @brief  Get self test configuration.[set]
+  *
+  * @param  ctx          communication interface handler.(ptr)
+  * @param  val          Self test mode mode.(ptr)
+  *
+  */
+int32_t lis3dsh_self_test_get(stmdev_ctx_t *ctx, lis3dsh_st_t *val)
+{
+  lis3dsh_ctrl_reg5_t ctrl_reg5;
+  int32_t ret;
+
+  ret = lis3dsh_read_reg(ctx, LIS3DSH_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+
+  switch (ctrl_reg5.st)
+  {
+    case LIS3DSH_ST_DISABLE:
+      *val = LIS3DSH_ST_DISABLE;
+      break;
+    case LIS3DSH_ST_POSITIVE:
+      *val = LIS3DSH_ST_POSITIVE;
+      break;
+    case LIS3DSH_ST_NEGATIVE:
+      *val = LIS3DSH_ST_NEGATIVE;
+      break;
+    default:
+      *val = LIS3DSH_ST_DISABLE;
+      break;
+  }
+
+  return ret;
+}
 
 /**
   * @}
