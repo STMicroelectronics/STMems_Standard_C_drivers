@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    read_data_polling.c
  * @author  Sensors Software Solution Team
  * @brief   This file show the simplest way to get data from sensor.
  *
@@ -142,7 +142,7 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lsm9ds1(void)
+void lsm9ds1_read_data_polling(void)
 {
     stmdev_ctx_t dev_ctx_imu;
     stmdev_ctx_t dev_ctx_mag;
