@@ -121,11 +121,11 @@ typedef struct {
   */
 
 /** I2C Device Address 8 bit format  if SA0=0 -> D5 if SA0=1 -> D7 **/
-#define LSM6DSOX_I2C_ADD_L                    0xD5
-#define LSM6DSOX_I2C_ADD_H                    0xD7
+#define LSM6DSOX_I2C_ADD_L                    0xD5U
+#define LSM6DSOX_I2C_ADD_H                    0xD7U
 
 /** Device Identification (Who am I) **/
-#define LSM6DSOX_ID                           0x6C
+#define LSM6DSOX_ID                           0x6CU
 
 /**
   * @}
