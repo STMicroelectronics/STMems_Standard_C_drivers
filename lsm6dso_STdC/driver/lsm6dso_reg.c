@@ -10761,7 +10761,7 @@ int32_t lsm6dso_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
   
   /* read data */
   if( ctx != NULL ) {
-    ret = lsm6dso_read_reg(aux_ctx, LSM6DSO_OUT_TEMP_L, buff, 14);
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_OUT_TEMP_L, buff, 14);
   }
   j = 0;
 
@@ -10770,32 +10770,6 @@ int32_t lsm6dso_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
   data->ui.heat.raw = ( ((int16_t)data->ui.heat.raw * (int16_t)256) + (int16_t)buff[j] );
   j+=2U;
   data->ui.heat.deg_c = lsm6dso_from_lsb_to_celsius((int16_t)data->ui.heat.raw);
-
-
-  /* acceleration conversion */
-  for (i = 0U; i < 3U; i++) {
-    data->ui.xl.raw[i] = (int16_t)buff[j+1U];
-    data->ui.xl.raw[i] = (data->ui.xl.raw[i] * 256) + (int16_t) buff[j];
-    j+=2U;
-    switch ( md->ui.xl.fs ) {
-      case LSM6DSO_XL_UI_2g:
-        data->ui.xl.mg[i] =lsm6dso_from_fs2_to_mg(data->ui.xl.raw[i]);
-        break;
-      case LSM6DSO_XL_UI_4g:
-        data->ui.xl.mg[i] =lsm6dso_from_fs4_to_mg(data->ui.xl.raw[i]);
-        break;
-      case LSM6DSO_XL_UI_8g:
-        data->ui.xl.mg[i] =lsm6dso_from_fs8_to_mg(data->ui.xl.raw[i]);
-        break;
-      case LSM6DSO_XL_UI_16g:
-        data->ui.xl.mg[i] =lsm6dso_from_fs16_to_mg(data->ui.xl.raw[i]);
-        break;
-      default:
-        data->ui.xl.mg[i] = 0.0f;
-        break;
-    }
-    
-  }
 
   /* angular rate conversion */
   for (i = 0U; i < 3U; i++) {
@@ -10824,37 +10798,38 @@ int32_t lsm6dso_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
     }
   }
 
+  /* acceleration conversion */
+  for (i = 0U; i < 3U; i++) {
+    data->ui.xl.raw[i] = (int16_t)buff[j+1U];
+    data->ui.xl.raw[i] = (data->ui.xl.raw[i] * 256) + (int16_t) buff[j];
+    j+=2U;
+    switch ( md->ui.xl.fs ) {
+      case LSM6DSO_XL_UI_2g:
+        data->ui.xl.mg[i] =lsm6dso_from_fs2_to_mg(data->ui.xl.raw[i]);
+        break;
+      case LSM6DSO_XL_UI_4g:
+        data->ui.xl.mg[i] =lsm6dso_from_fs4_to_mg(data->ui.xl.raw[i]);
+        break;
+      case LSM6DSO_XL_UI_8g:
+        data->ui.xl.mg[i] =lsm6dso_from_fs8_to_mg(data->ui.xl.raw[i]);
+        break;
+      case LSM6DSO_XL_UI_16g:
+        data->ui.xl.mg[i] =lsm6dso_from_fs16_to_mg(data->ui.xl.raw[i]);
+        break;
+      default:
+        data->ui.xl.mg[i] = 0.0f;
+        break;
+    }
+    
+  }
+
   /* read data from ois chain */
   if (aux_ctx != NULL) {
     if (ret == 0) {
-      ret = lsm6dso_read_reg(aux_ctx, LSM6DSO_OUTX_L_A, buff, 12);
+      ret = lsm6dso_read_reg(aux_ctx, LSM6DSO_OUTX_L_G, buff, 12);
     }
   }
   j = 0;
-
-  /* ois acceleration conversion */
-  for (i = 0U; i < 3U; i++) {
-    data->ois.xl.raw[i] = (int16_t) buff[j+1U];
-    data->ois.xl.raw[i] = (data->ois.xl.raw[i] * 256) + (int16_t) buff[j];
-    j+=2U;
-    switch ( md->ois.xl.fs ) {
-      case LSM6DSO_XL_UI_2g:
-        data->ois.xl.mg[i] =lsm6dso_from_fs2_to_mg(data->ois.xl.raw[i]);
-        break;
-      case LSM6DSO_XL_UI_4g:
-        data->ois.xl.mg[i] =lsm6dso_from_fs4_to_mg(data->ois.xl.raw[i]);
-        break;
-      case LSM6DSO_XL_UI_8g:
-        data->ois.xl.mg[i] =lsm6dso_from_fs8_to_mg(data->ois.xl.raw[i]);
-        break;
-      case LSM6DSO_XL_UI_16g:
-        data->ois.xl.mg[i] =lsm6dso_from_fs16_to_mg(data->ois.xl.raw[i]);
-        break;
-      default:
-        data->ois.xl.mg[i] = 0.0f;
-        break;
-    }
-  }
 
   /* ois angular rate conversion */
   for (i = 0U; i < 3U; i++) {
@@ -10879,6 +10854,30 @@ int32_t lsm6dso_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
         break;
       default:
         data->ois.gy.mdps[i] = 0.0f;
+        break;
+    }
+  }
+
+  /* ois acceleration conversion */
+  for (i = 0U; i < 3U; i++) {
+    data->ois.xl.raw[i] = (int16_t) buff[j+1U];
+    data->ois.xl.raw[i] = (data->ois.xl.raw[i] * 256) + (int16_t) buff[j];
+    j+=2U;
+    switch ( md->ois.xl.fs ) {
+      case LSM6DSO_XL_UI_2g:
+        data->ois.xl.mg[i] =lsm6dso_from_fs2_to_mg(data->ois.xl.raw[i]);
+        break;
+      case LSM6DSO_XL_UI_4g:
+        data->ois.xl.mg[i] =lsm6dso_from_fs4_to_mg(data->ois.xl.raw[i]);
+        break;
+      case LSM6DSO_XL_UI_8g:
+        data->ois.xl.mg[i] =lsm6dso_from_fs8_to_mg(data->ois.xl.raw[i]);
+        break;
+      case LSM6DSO_XL_UI_16g:
+        data->ois.xl.mg[i] =lsm6dso_from_fs16_to_mg(data->ois.xl.raw[i]);
+        break;
+      default:
+        data->ois.xl.mg[i] = 0.0f;
         break;
     }
   }
