@@ -11281,7 +11281,7 @@ int32_t lsm6dsox_mode_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
       bytecpy(( uint8_t*)&ui_ctrl3_ois, &reg[2]);
     }
   }
-  
+
   /* fill the input structure */
 
   /* get accelerometer configuration */
@@ -11480,7 +11480,7 @@ int32_t lsm6dsox_mode_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
         val->fsm.odr = LSM6DSOX_FSM_12Hz5;
         break;
     }
-    
+
     val->fsm.sens = LSM6DSOX_FSM_XL_GY;
     if (val->ui.gy.odr == LSM6DSOX_GY_UI_OFF) {
       val->fsm.sens = LSM6DSOX_FSM_XL;
@@ -11735,46 +11735,21 @@ int32_t lsm6dsox_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
   int32_t ret;
   uint8_t i;
   uint8_t j;
-  
+
   ret = 0;
-  
+
   /* read data */
   if( ctx != NULL ) {
-    ret = lsm6dsox_read_reg(aux_ctx, LSM6DSOX_OUT_TEMP_L, buff, 14);
+    ret = lsm6dsox_read_reg(ctx, LSM6DSOX_OUT_TEMP_L, buff, 14);
   }
   j = 0;
 
   /* temperature conversion */
   data->ui.heat.raw = (int16_t)buff[j+1U];
-  data->ui.heat.raw = ( ((int16_t)data->ui.heat.raw * (int16_t)256) + (int16_t)buff[j] );
+  data->ui.heat.raw = ( ((int16_t)data->ui.heat.raw * (int16_t)256) +
+                                                      (int16_t)buff[j] );
   j+=2U;
   data->ui.heat.deg_c = lsm6dsox_from_lsb_to_celsius((int16_t)data->ui.heat.raw);
-
-
-  /* acceleration conversion */
-  for (i = 0U; i < 3U; i++) {
-    data->ui.xl.raw[i] = (int16_t)buff[j+1U];
-    data->ui.xl.raw[i] = (data->ui.xl.raw[i] * 256) + (int16_t) buff[j];
-    j+=2U;
-    switch ( md->ui.xl.fs ) {
-      case LSM6DSOX_XL_UI_2g:
-        data->ui.xl.mg[i] =lsm6dsox_from_fs2_to_mg(data->ui.xl.raw[i]);
-        break;
-      case LSM6DSOX_XL_UI_4g:
-        data->ui.xl.mg[i] =lsm6dsox_from_fs4_to_mg(data->ui.xl.raw[i]);
-        break;
-      case LSM6DSOX_XL_UI_8g:
-        data->ui.xl.mg[i] =lsm6dsox_from_fs8_to_mg(data->ui.xl.raw[i]);
-        break;
-      case LSM6DSOX_XL_UI_16g:
-        data->ui.xl.mg[i] =lsm6dsox_from_fs16_to_mg(data->ui.xl.raw[i]);
-        break;
-      default:
-        data->ui.xl.mg[i] = 0.0f;
-        break;
-    }
-    
-  }
 
   /* angular rate conversion */
   for (i = 0U; i < 3U; i++) {
@@ -11803,42 +11778,43 @@ int32_t lsm6dsox_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
     }
   }
 
+  /* acceleration conversion */
+  for (i = 0U; i < 3U; i++) {
+    data->ui.xl.raw[i] = (int16_t)buff[j+1U];
+    data->ui.xl.raw[i] = (data->ui.xl.raw[i] * 256) + (int16_t) buff[j];
+    j+=2U;
+    switch ( md->ui.xl.fs ) {
+      case LSM6DSOX_XL_UI_2g:
+        data->ui.xl.mg[i] =lsm6dsox_from_fs2_to_mg(data->ui.xl.raw[i]);
+        break;
+      case LSM6DSOX_XL_UI_4g:
+        data->ui.xl.mg[i] =lsm6dsox_from_fs4_to_mg(data->ui.xl.raw[i]);
+        break;
+      case LSM6DSOX_XL_UI_8g:
+        data->ui.xl.mg[i] =lsm6dsox_from_fs8_to_mg(data->ui.xl.raw[i]);
+        break;
+      case LSM6DSOX_XL_UI_16g:
+        data->ui.xl.mg[i] =lsm6dsox_from_fs16_to_mg(data->ui.xl.raw[i]);
+        break;
+      default:
+        data->ui.xl.mg[i] = 0.0f;
+        break;
+    }
+
+  }
+
   /* read data from ois chain */
   if (aux_ctx != NULL) {
     if (ret == 0) {
-      ret = lsm6dsox_read_reg(aux_ctx, LSM6DSOX_SPI2_OUTX_L_A_OIS, buff, 12);
+      ret = lsm6dsox_read_reg(aux_ctx, LSM6DSOX_SPI2_OUTX_L_G_OIS, buff, 12);
     }
   }
   else {
     if ((ctx != NULL) && (md->ois.ctrl_md == LSM6DSOX_OIS_ONLY_UI)) {
-      ret = lsm6dsox_read_reg(ctx, LSM6DSOX_UI_OUTX_L_A_OIS, buff, 12);
+      ret = lsm6dsox_read_reg(ctx, LSM6DSOX_UI_OUTX_L_G_OIS, buff, 12);
     }
   }
   j = 0;
-
-  /* ois acceleration conversion */
-  for (i = 0U; i < 3U; i++) {
-    data->ois.xl.raw[i] = (int16_t) buff[j+1U];
-    data->ois.xl.raw[i] = (data->ois.xl.raw[i] * 256) + (int16_t) buff[j];
-    j+=2U;
-    switch ( md->ois.xl.fs ) {
-      case LSM6DSOX_XL_UI_2g:
-        data->ois.xl.mg[i] =lsm6dsox_from_fs2_to_mg(data->ois.xl.raw[i]);
-        break;
-      case LSM6DSOX_XL_UI_4g:
-        data->ois.xl.mg[i] =lsm6dsox_from_fs4_to_mg(data->ois.xl.raw[i]);
-        break;
-      case LSM6DSOX_XL_UI_8g:
-        data->ois.xl.mg[i] =lsm6dsox_from_fs8_to_mg(data->ois.xl.raw[i]);
-        break;
-      case LSM6DSOX_XL_UI_16g:
-        data->ois.xl.mg[i] =lsm6dsox_from_fs16_to_mg(data->ois.xl.raw[i]);
-        break;
-      default:
-        data->ois.xl.mg[i] = 0.0f;
-        break;
-    }
-  }
 
   /* ois angular rate conversion */
   for (i = 0U; i < 3U; i++) {
@@ -11863,6 +11839,30 @@ int32_t lsm6dsox_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
         break;
       default:
         data->ois.gy.mdps[i] = 0.0f;
+        break;
+    }
+  }
+
+  /* ois acceleration conversion */
+  for (i = 0U; i < 3U; i++) {
+    data->ois.xl.raw[i] = (int16_t) buff[j+1U];
+    data->ois.xl.raw[i] = (data->ois.xl.raw[i] * 256) + (int16_t) buff[j];
+    j+=2U;
+    switch ( md->ois.xl.fs ) {
+      case LSM6DSOX_XL_UI_2g:
+        data->ois.xl.mg[i] =lsm6dsox_from_fs2_to_mg(data->ois.xl.raw[i]);
+        break;
+      case LSM6DSOX_XL_UI_4g:
+        data->ois.xl.mg[i] =lsm6dsox_from_fs4_to_mg(data->ois.xl.raw[i]);
+        break;
+      case LSM6DSOX_XL_UI_8g:
+        data->ois.xl.mg[i] =lsm6dsox_from_fs8_to_mg(data->ois.xl.raw[i]);
+        break;
+      case LSM6DSOX_XL_UI_16g:
+        data->ois.xl.mg[i] =lsm6dsox_from_fs16_to_mg(data->ois.xl.raw[i]);
+        break;
+      default:
+        data->ois.xl.mg[i] = 0.0f;
         break;
     }
   }
