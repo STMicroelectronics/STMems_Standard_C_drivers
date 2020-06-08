@@ -120,9 +120,8 @@ typedef struct {
   *
   */
 
-  /** I2C Device Address 8 bit format: if SA0=0 -> 0xB9 if SA0=1 -> 0xBB **/
-#define LPS33K_I2C_ADD_H   0xBBU
-#define LPS33K_I2C_ADD_L   0xB9U
+  /** I2C Device Address 8 bit format. **/
+#define LPS33K_I2C_ADD       0xBBU
 
 /** Device Identification (Who am I) **/
 #define LPS33K_ID            0xB1U
@@ -214,18 +213,6 @@ int32_t lps33k_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
 extern float_t lps33k_from_lsb_to_hpa(int32_t lsb);
 extern float_t lps33k_from_lsb_to_degc(int16_t lsb);
 
-int32_t lps33k_autozero_rst_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps33k_autozero_rst_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t lps33k_autozero_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps33k_autozero_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t lps33k_pressure_snap_rst_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps33k_pressure_snap_rst_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t lps33k_pressure_snap_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps33k_pressure_snap_get(stmdev_ctx_t *ctx, uint8_t *val);
-
 int32_t lps33k_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps33k_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
 
@@ -252,9 +239,6 @@ int32_t lps33k_data_rate_get(stmdev_ctx_t *ctx, lps33k_odr_t *val);
 
 int32_t lps33k_one_shoot_trigger_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps33k_one_shoot_trigger_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t lps33k_pressure_ref_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lps33k_pressure_ref_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
 int32_t lps33k_pressure_offset_set(stmdev_ctx_t *ctx, uint8_t *buff);
 int32_t lps33k_pressure_offset_get(stmdev_ctx_t *ctx, uint8_t *buff);
@@ -283,121 +267,6 @@ int32_t lps33k_boot_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lps33k_low_power_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps33k_low_power_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t lps33k_boot_status_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-typedef struct{
-  lps33k_status_t       status;
-} lps33k_dev_stat_t;
-int32_t lps33k_dev_status_get(stmdev_ctx_t *ctx, lps33k_dev_stat_t *val);
-
-typedef enum {
-  LPS33K_NO_THRESHOLD = 0,
-  LPS33K_POSITIVE     = 1,
-  LPS33K_NEGATIVE     = 2,
-  LPS33K_BOTH         = 3,
-} lps33k_pe_t;
-int32_t lps33k_sign_of_int_threshold_set(stmdev_ctx_t *ctx,
-                                          lps33k_pe_t val);
-int32_t lps33k_sign_of_int_threshold_get(stmdev_ctx_t *ctx,
-                                          lps33k_pe_t *val);
-
-typedef enum {
-  LPS33K_INT_PULSED  = 0,
-  LPS33K_INT_LATCHED = 1,
-} lps33k_lir_t;
-int32_t lps33k_int_notification_mode_set(stmdev_ctx_t *ctx,
-                                          lps33k_lir_t val);
-int32_t lps33k_int_notification_mode_get(stmdev_ctx_t *ctx,
-                                          lps33k_lir_t *val);
-
-int32_t lps33k_int_generation_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps33k_int_generation_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t lps33k_int_threshold_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lps33k_int_threshold_get(stmdev_ctx_t *ctx, uint8_t *buff);
-
-typedef enum {
-  LPS33K_DRDY_OR_FIFO_FLAGS = 0,
-  LPS33K_HIGH_PRES_INT      = 1,
-  LPS33K_LOW_PRES_INT       = 2,
-  LPS33K_EVERY_PRES_INT     = 3,
-} lps33k_int_s_t;
-int32_t lps33k_int_pin_mode_set(stmdev_ctx_t *ctx, lps33k_int_s_t val);
-int32_t lps33k_int_pin_mode_get(stmdev_ctx_t *ctx, lps33k_int_s_t *val);
-
-int32_t lps33k_drdy_on_int_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps33k_drdy_on_int_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t lps33k_fifo_ovr_on_int_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps33k_fifo_ovr_on_int_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t lps33k_fifo_threshold_on_int_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps33k_fifo_threshold_on_int_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t lps33k_fifo_full_on_int_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps33k_fifo_full_on_int_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-typedef enum {
-  LPS33K_PUSH_PULL  = 0,
-  LPS33K_OPEN_DRAIN = 1,
-} lps33k_pp_od_t;
-int32_t lps33k_pin_mode_set(stmdev_ctx_t *ctx, lps33k_pp_od_t val);
-int32_t lps33k_pin_mode_get(stmdev_ctx_t *ctx, lps33k_pp_od_t *val);
-
-typedef enum {
-  LPS33K_ACTIVE_HIGH = 0,
-  LPS33K_ACTIVE_LOW = 1,
-} lps33k_int_h_l_t;
-int32_t lps33k_int_polarity_set(stmdev_ctx_t *ctx, lps33k_int_h_l_t val);
-int32_t lps33k_int_polarity_get(stmdev_ctx_t *ctx, lps33k_int_h_l_t *val);
-
-int32_t lps33k_int_on_press_high_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t lps33k_int_on_press_low_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t lps33k_interrupt_event_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t lps33k_stop_on_fifo_threshold_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps33k_stop_on_fifo_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t lps33k_fifo_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps33k_fifo_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t lps33k_fifo_watermark_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps33k_fifo_watermark_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-typedef enum {
-  LPS33K_BYPASS_MODE           = 0,
-  LPS33K_FIFO_MODE             = 1,
-  LPS33K_STREAM_MODE           = 2,
-  LPS33K_STREAM_TO_FIFO_MODE   = 3,
-  LPS33K_BYPASS_TO_STREAM_MODE = 4,
-  LPS33K_DYNAMIC_STREAM_MODE   = 6,
-  LPS33K_BYPASS_TO_FIFO_MODE   = 7,
-} lps33k_f_mode_t;
-int32_t lps33k_fifo_mode_set(stmdev_ctx_t *ctx, lps33k_f_mode_t val);
-int32_t lps33k_fifo_mode_get(stmdev_ctx_t *ctx, lps33k_f_mode_t *val);
-
-int32_t lps33k_fifo_data_level_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t lps33k_fifo_ovr_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-int32_t lps33k_fifo_fth_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
-
-typedef enum {
-  LPS33K_SPI_4_WIRE = 0,
-  LPS33K_SPI_3_WIRE = 1,
-} lps33k_sim_t;
-int32_t lps33k_spi_mode_set(stmdev_ctx_t *ctx, lps33k_sim_t val);
-int32_t lps33k_spi_mode_get(stmdev_ctx_t *ctx, lps33k_sim_t *val);
-
-typedef enum {
-  LPS33K_I2C_ENABLE = 0,
-  LPS33K_I2C_DISABLE = 1,
-} lps33k_i2c_dis_t;
-int32_t lps33k_i2c_interface_set(stmdev_ctx_t *ctx, lps33k_i2c_dis_t val);
-int32_t lps33k_i2c_interface_get(stmdev_ctx_t *ctx, lps33k_i2c_dis_t *val);
 
 int32_t lps33k_auto_add_inc_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps33k_auto_add_inc_get(stmdev_ctx_t *ctx, uint8_t *val);
