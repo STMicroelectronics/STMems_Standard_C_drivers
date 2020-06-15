@@ -180,7 +180,7 @@ int32_t lis3dsh_bus_mode_set(stmdev_ctx_t *ctx, lis3dsh_bus_mode_t *val)
   ret = lis3dsh_read_reg(ctx, LIS3DSH_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
   if (ret == 0) {
     ctrl_reg5.sim = (uint8_t)*val;
-    ret = lis3dsh_read_reg(ctx, LIS3DSH_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+    ret = lis3dsh_write_reg(ctx, LIS3DSH_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
   }
 
   return ret;
