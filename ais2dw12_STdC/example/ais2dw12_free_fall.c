@@ -1,13 +1,14 @@
 /*
  ******************************************************************************
- * @file    orientation_6d.c
+ * @file    free_fall.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect 6D orientation from sensor.
+ * @brief   This file show the simplest way to detect free fall events
+ *          from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,8 +23,8 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - STEVAL_MKI109V3 + STEVAL-MKI206V1
+ * - NUCLEO_F411RE + STEVAL-MKI206V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -32,8 +33,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -48,7 +49,7 @@
  * following target board and redefine yours.
  */
 //#define STEVAL_MKI109V3
-#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#define NUCLEO_F411RE
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
@@ -57,8 +58,8 @@
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
 #endif
@@ -73,11 +74,12 @@
 #if defined(STEVAL_MKI109V3)
 #include "usbd_cdc_if.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+#elif defined(NUCLEO_F411RE)
 #include "usart.h"
 #endif
 
 /* Private macro -------------------------------------------------------------*/
+#define    BOOT_TIME            20 //ms
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t whoamI, rst;
@@ -97,29 +99,27 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_orientation_6D_ais2dw12(void)
+void ais2dw12_free_fall(void)
 {
-  /*
-   * Initialize mems driver interface
-   */
+  /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
   ais2dw12_reg_t int_route;
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Initialize platform specific hardware */
   platform_init();
 
-  /*
-   * Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(BOOT_TIME);
+
+  /* Check device  */
   ais2dw12_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != AIS2DW12_ID)
     while(1)
@@ -127,76 +127,45 @@ void example_main_orientation_6D_ais2dw12(void)
       /* manage here device not found */
     }
 
-  /*
-   * Restore default configuration
-   */
+  /* Restore default configuration */
   ais2dw12_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
     ais2dw12_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*
-   * Set full scale
-   */
-  ais2dw12_full_scale_set(&dev_ctx, AIS2DW12_2g);
+  /* Configure power mode */
+  ais2dw12_power_mode_set(&dev_ctx, AIS2DW12_PWR_MD_4);
 
-  /*
-   * Configure power mode
-   */
-  ais2dw12_power_mode_set(&dev_ctx, AIS2DW12_PWR_MD_12bit);
-
-  /*
-   * Set threshold to 60 degrees
-   */
-  ais2dw12_6d_threshold_set(&dev_ctx, 0x02);
-
-  /*
-   * LPF2 on 6D function selection.
-   */
-  ais2dw12_6d_feed_data_set(&dev_ctx, AIS2DW12_ODR_DIV_2_FEED);
-
-  /*
-   * Enable interrupt generation on 6D INT1 pin.
-   */
-  ais2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1);
-  int_route.ctrl4_int1.int1_6d = PROPERTY_ENABLE;
-  ais2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1);
-
-  /*
-   * Set Output Data Rate
-   */
+  /* Set Output Data Rate */
   ais2dw12_data_rate_set(&dev_ctx, AIS2DW12_XL_ODR_100Hz);
 
-  /*
-   * Wait Events.
-   */
+  /* Set full scale to 2 g */
+  ais2dw12_full_scale_set(&dev_ctx, AIS2DW12_2g);
+
+  /* Configure Free Fall duration and samples count */
+  ais2dw12_ff_dur_set(&dev_ctx, 0x06);
+  ais2dw12_ff_threshold_set(&dev_ctx, AIS2DW12_FF_TSH_10LSb_FS2g);
+
+  /* Enable free fall interrupt */
+  ais2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1);
+  int_route.ctrl4_int1.int1_ff = PROPERTY_ENABLE;
+  ais2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1);
+
+  /* Set latched interrupt */
+  ais2dw12_int_notification_set(&dev_ctx, AIS2DW12_INT_LATCHED);
+
+  /* Wait Events */
   while(1)
   {
-  ais2dw12_all_sources_t all_source;
+    /* Check Free Fall events */
+    ais2dw12_all_sources_t src;
 
-  ais2dw12_all_sources_get(&dev_ctx, &all_source);
-
-  /*
-   * Check 6D Orientation events
-   */
-  if (all_source.sixd_src._6d_ia)
-  {
-      sprintf((char*)tx_buffer, "6D Or. switched to ");
-      if (all_source.sixd_src.xh)
-        strcat((char*)tx_buffer, "XH");
-      if (all_source.sixd_src.xl)
-        strcat((char*)tx_buffer, "XL");
-      if (all_source.sixd_src.yh)
-        strcat((char*)tx_buffer, "YH");
-      if (all_source.sixd_src.yl)
-        strcat((char*)tx_buffer, "YL");
-      if (all_source.sixd_src.zh)
-        strcat((char*)tx_buffer, "ZH");
-      if (all_source.sixd_src.zl)
-        strcat((char*)tx_buffer, "ZL");
-      strcat((char*)tx_buffer, "\r\n");
+    ais2dw12_all_sources_get(&dev_ctx, &src);
+    if (src.wake_up_src.ff_ia)
+    {
+      sprintf((char*)tx_buffer, "free fall detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
-  }
+    }
   }
 }
 
@@ -271,7 +240,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+  #ifdef NUCLEO_F411RE
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
   #endif
   #ifdef STEVAL_MKI109V3
@@ -280,13 +249,26 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 }
 
 /*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+  HAL_Delay(ms);
+}
+
+/*
  * @brief  platform specific initialization (platform dependent)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }
