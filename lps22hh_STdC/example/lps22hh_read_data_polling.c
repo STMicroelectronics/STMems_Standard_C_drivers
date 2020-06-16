@@ -23,7 +23,7 @@
  * evaluation boards:
  *
  * - STEVAL_MKI109V3 + STEVAL-MKI192V1
- * - NUCLEO_F411RE + STEVAL-MKI192V1
+ * - NUCLEO_F411RE + X_NUCLEO_IKS01A3
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -77,22 +77,12 @@
 #include "usart.h"
 #endif
 
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
-
-typedef union{
-  int32_t i32bit;
-  uint8_t u8bit[4];
-} axis1bit32_t;
-
 /* Private macro -------------------------------------------------------------*/
 #define TX_BUF_DIM          1000
 
 /* Private variables ---------------------------------------------------------*/
-static axis1bit32_t data_raw_pressure;
-static axis1bit16_t data_raw_temperature;
+static uint32_t data_raw_pressure;
+static int16_t data_raw_temperature;
 static float pressure_hPa;
 static float temperature_degC;
 static uint8_t whoamI, rst;
@@ -123,8 +113,10 @@ static void platform_init(void);
 
 void lps22hh_read_data_polling(void)
 {
-  /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
+  lps22hh_reg_t reg;
+
+  /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
@@ -157,14 +149,13 @@ void lps22hh_read_data_polling(void)
   while(1)
   {
     /* Read output only if new value is available */
-    lps22hh_reg_t reg;
     lps22hh_read_reg(&dev_ctx, LPS22HH_STATUS, (uint8_t *)&reg, 1);
 
     if (reg.status.p_da)
     {
-      memset(data_raw_pressure.u8bit, 0x00, sizeof(int32_t));
-      lps22hh_pressure_raw_get(&dev_ctx, data_raw_pressure.u8bit);
-      pressure_hPa = lps22hh_from_lsb_to_hpa( data_raw_pressure.i32bit);
+      memset(&data_raw_pressure, 0x00, sizeof(uint32_t));
+      lps22hh_pressure_raw_get(&dev_ctx, &data_raw_pressure);
+      pressure_hPa = lps22hh_from_lsb_to_hpa( data_raw_pressure);
      
       sprintf((char*)tx_buffer, "pressure [hPa]:%6.2f\r\n", pressure_hPa);
       tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
@@ -172,9 +163,9 @@ void lps22hh_read_data_polling(void)
 
     if (reg.status.t_da)
     {
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      lps22hh_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = lps22hh_from_lsb_to_celsius( data_raw_temperature.i16bit );
+      memset(&data_raw_temperature, 0x00, sizeof(int16_t));
+      lps22hh_temperature_raw_get(&dev_ctx, &data_raw_temperature);
+      temperature_degC = lps22hh_from_lsb_to_celsius( data_raw_temperature );
      
       sprintf((char*)tx_buffer, "temperature [degC]:%6.2f\r\n", temperature_degC );
       tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
