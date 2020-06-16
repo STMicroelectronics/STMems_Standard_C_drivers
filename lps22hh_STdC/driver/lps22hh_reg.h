@@ -289,7 +289,7 @@ int32_t lps22hh_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lps22hh_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
-extern float_t lps22hh_from_lsb_to_hpa(int32_t lsb);
+extern float_t lps22hh_from_lsb_to_hpa(uint32_t lsb);
 extern float_t lps22hh_from_lsb_to_celsius(int16_t lsb);
 
 int32_t lps22hh_autozero_rst_set(stmdev_ctx_t *ctx, uint8_t val);
@@ -346,9 +346,9 @@ int32_t lps22hh_press_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lps22hh_temp_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lps22hh_pressure_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lps22hh_pressure_raw_get(stmdev_ctx_t *ctx, uint32_t *buff);
 
-int32_t lps22hh_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lps22hh_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff);
 
 int32_t lps22hh_fifo_pressure_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 

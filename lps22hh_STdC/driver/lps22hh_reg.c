@@ -83,9 +83,9 @@ int32_t lps22hh_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @{
   *
   */
-float_t lps22hh_from_lsb_to_hpa(int32_t lsb)
+float_t lps22hh_from_lsb_to_hpa(uint32_t lsb)
 {
-  return ( (float_t) lsb / 4096.0f );
+  return ( (float_t) lsb / 1048576.0f );
 }
 
 float_t lps22hh_from_lsb_to_celsius(int16_t lsb)
@@ -576,10 +576,15 @@ int32_t lps22hh_temp_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps22hh_pressure_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps22hh_pressure_raw_get(stmdev_ctx_t *ctx, uint32_t *buff)
 {
   int32_t ret;
-  ret =  lps22hh_read_reg(ctx, LPS22HH_PRESS_OUT_XL, buff, 3);
+  uint8_t reg[3];
+  ret =  lps22hh_read_reg(ctx, LPS22HH_PRESS_OUT_XL, reg, 3);
+  *buff = reg[2];
+  *buff = (*buff * 256) + reg[1];
+  *buff = (*buff * 256) + reg[0];
+  *buff *= 256;
   return ret;
 }
 
@@ -591,10 +596,13 @@ int32_t lps22hh_pressure_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps22hh_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps22hh_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff)
 {
   int32_t ret;
-  ret =  lps22hh_read_reg(ctx, LPS22HH_TEMP_OUT_L, buff, 2);
+  uint8_t reg[2];
+  ret =  lps22hh_read_reg(ctx, LPS22HH_TEMP_OUT_L, reg, 2);
+  *buff = reg[1];
+  *buff = (*buff * 256) + reg[0];
   return ret;
 }
 
