@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -35,6 +35,34 @@
   *
   */
 
+/** @defgroup  Endianness definitions
+  *
+  */
+
+#ifndef __BYTE_ORDER__
+
+#define DRV_LITTLE_ENDIAN 1234
+#define DRV_BIG_ENDIAN    4321
+
+/** if DRV_BYTE_ORDER is not defined, choose the endianness of your architecture
+  * by uncommenting the define which fits your platform endianness
+  */
+//#define DRV_BYTE_ORDER         DRV_BIG_ENDIAN
+#define DRV_BYTE_ORDER         DRV_LITTLE_ENDIAN
+
+#else /* defined __BYTE_ORDER__ */
+
+#define DRV_LITTLE_ENDIAN __ORDER_LITTLE_ENDIAN__
+#define DRV_BIG_ENDIAN    __ORDER_BIG_ENDIAN__
+#define DRV_BYTE_ORDER          __BYTE_ORDER__
+
+#endif /* DRV_BYTE_ORDER */
+
+/**
+  * @}
+  *
+  */
+
 /** @defgroup STMicroelectronics sensors common types
   * @{
   *
@@ -44,6 +72,7 @@
 #define MEMS_SHARED_TYPES
 
 typedef struct{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -52,6 +81,16 @@ typedef struct{
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit0       : 1;
+#endif /* DRV_BYTE_ORDER */
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
@@ -89,9 +128,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using 
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using 
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -135,20 +174,33 @@ typedef struct {
 #define A3G4250D_WHO_AM_I                0x0FU
 #define A3G4250D_CTRL_REG1               0x20U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t pd                        : 4; /* xen yen zen pd */
   uint8_t bw                        : 2;
   uint8_t dr                        : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t dr                        : 2;
+  uint8_t bw                        : 2;
+  uint8_t pd                        : 4; /* xen yen zen pd */
+#endif /* DRV_BYTE_ORDER */
 } a3g4250d_ctrl_reg1_t;
 
 #define A3G4250D_CTRL_REG2               0x21U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t hpcf                      : 4;
   uint8_t hpm                       : 2;
   uint8_t not_used_01               : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01               : 2;
+  uint8_t hpm                       : 2;
+  uint8_t hpcf                      : 4;
+#endif /* DRV_BYTE_ORDER */
 } a3g4250d_ctrl_reg2_t;
 
 #define A3G4250D_CTRL_REG3               0x22U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t i2_empty                  : 1;
   uint8_t i2_orun                   : 1;
   uint8_t i2_wtm                    : 1;
@@ -157,25 +209,52 @@ typedef struct {
   uint8_t h_lactive                 : 1;
   uint8_t i1_boot                   : 1;
   uint8_t i1_int1                   : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t i1_int1                   : 1;
+  uint8_t i1_boot                   : 1;
+  uint8_t h_lactive                 : 1;
+  uint8_t pp_od                     : 1;
+  uint8_t i2_drdy                   : 1;
+  uint8_t i2_wtm                    : 1;
+  uint8_t i2_orun                   : 1;
+  uint8_t i2_empty                  : 1;
+#endif /* DRV_BYTE_ORDER */
 } a3g4250d_ctrl_reg3_t;
 
 #define A3G4250D_CTRL_REG4               0x23U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t sim                       : 1;
   uint8_t st                        : 2;
   uint8_t not_used_01               : 3;
   uint8_t ble                       : 1;
   uint8_t not_used_02               : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_02               : 1;
+  uint8_t ble                       : 1;
+  uint8_t not_used_01               : 3;
+  uint8_t st                        : 2;
+  uint8_t sim                       : 1;
+#endif /* DRV_BYTE_ORDER */
 } a3g4250d_ctrl_reg4_t;
 
 #define A3G4250D_CTRL_REG5               0x24U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t out_sel                   : 2;
   uint8_t int1_sel                  : 2;
   uint8_t hpen                      : 1;
   uint8_t not_used_01               : 1;
   uint8_t fifo_en                   : 1;
   uint8_t boot                      : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t boot                      : 1;
+  uint8_t fifo_en                   : 1;
+  uint8_t not_used_01               : 1;
+  uint8_t hpen                      : 1;
+  uint8_t int1_sel                  : 2;
+  uint8_t out_sel                   : 2;
+#endif /* DRV_BYTE_ORDER */
 } a3g4250d_ctrl_reg5_t;
 
 #define A3G4250D_REFERENCE               0x25U
@@ -186,6 +265,7 @@ typedef struct {
 #define A3G4250D_OUT_TEMP                0x26U
 #define A3G4250D_STATUS_REG              0x27U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xda                       : 1;
   uint8_t yda                       : 1;
   uint8_t zda                       : 1;
@@ -194,6 +274,16 @@ typedef struct {
   uint8_t yor                       : 1;
   uint8_t zor                       : 1;
   uint8_t zyxor                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t zyxor                     : 1;
+  uint8_t zor                       : 1;
+  uint8_t yor                       : 1;
+  uint8_t _xor                      : 1;
+  uint8_t zyxda                     : 1;
+  uint8_t zda                       : 1;
+  uint8_t yda                       : 1;
+  uint8_t xda                       : 1;
+#endif /* DRV_BYTE_ORDER */
 } a3g4250d_status_reg_t;
 
 #define A3G4250D_OUT_X_L                 0x28U
@@ -204,20 +294,33 @@ typedef struct {
 #define A3G4250D_OUT_Z_H                 0x2DU
 #define A3G4250D_FIFO_CTRL_REG           0x2EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t wtm                       : 5;
   uint8_t fm                        : 3;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t fm                        : 3;
+  uint8_t wtm                       : 5;
+#endif /* DRV_BYTE_ORDER */
 } a3g4250d_fifo_ctrl_reg_t;
 
 #define A3G4250D_FIFO_SRC_REG            0x2FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t fss                       : 5;
   uint8_t empty                     : 1;
   uint8_t ovrn                      : 1;
   uint8_t wtm                       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t wtm                       : 1;
+  uint8_t ovrn                      : 1;
+  uint8_t empty                     : 1;
+  uint8_t fss                       : 5;
+#endif /* DRV_BYTE_ORDER */
 } a3g4250d_fifo_src_reg_t;
 
 #define A3G4250D_INT1_CFG                0x30U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xlie                      : 1;
   uint8_t xhie                      : 1;
   uint8_t ylie                      : 1;
@@ -226,10 +329,21 @@ typedef struct {
   uint8_t zhie                      : 1;
   uint8_t lir                       : 1;
   uint8_t and_or                    : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t and_or                    : 1;
+  uint8_t lir                       : 1;
+  uint8_t zhie                      : 1;
+  uint8_t zlie                      : 1;
+  uint8_t yhie                      : 1;
+  uint8_t ylie                      : 1;
+  uint8_t xhie                      : 1;
+  uint8_t xlie                      : 1;
+#endif /* DRV_BYTE_ORDER */
 } a3g4250d_int1_cfg_t;
 
 #define A3G4250D_INT1_SRC                0x31U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xl                        : 1;
   uint8_t xh                        : 1;
   uint8_t yl                        : 1;
@@ -238,12 +352,27 @@ typedef struct {
   uint8_t zh                        : 1;
   uint8_t ia                        : 1;
   uint8_t not_used_01               : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01               : 1;
+  uint8_t ia                        : 1;
+  uint8_t zh                        : 1;
+  uint8_t zl                        : 1;
+  uint8_t yh                        : 1;
+  uint8_t yl                        : 1;
+  uint8_t xh                        : 1;
+  uint8_t xl                        : 1;
+#endif /* DRV_BYTE_ORDER */
 } a3g4250d_int1_src_t;
 
 #define A3G4250D_INT1_TSH_XH             0x32U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t thsx                      : 7;
   uint8_t not_used_01               : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01               : 1;
+  uint8_t thsx                      : 7;
+#endif /* DRV_BYTE_ORDER */
 } a3g4250d_int1_tsh_xh_t;
 
 #define A3G4250D_INT1_TSH_XL             0x33U
@@ -253,8 +382,13 @@ typedef struct {
 
 #define A3G4250D_INT1_TSH_YH             0x34U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t thsy                      : 7;
   uint8_t not_used_01               : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01               : 1;
+  uint8_t thsy                      : 7;
+#endif /* DRV_BYTE_ORDER */
 } a3g4250d_int1_tsh_yh_t;
 
 #define A3G4250D_INT1_TSH_YL             0x35U
@@ -264,8 +398,13 @@ typedef struct {
 
 #define A3G4250D_INT1_TSH_ZH             0x36U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t thsz                      : 7;
   uint8_t not_used_01               : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01               : 1;
+  uint8_t thsz                      : 7;
+#endif /* DRV_BYTE_ORDER */
 } a3g4250d_int1_tsh_zh_t;
 
 #define A3G4250D_INT1_TSH_ZL             0x37U
@@ -275,8 +414,13 @@ typedef struct {
 
 #define A3G4250D_INT1_DURATION           0x38U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t d                         : 7;
   uint8_t wait                      : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t wait                      : 1;
+  uint8_t d                         : 7;
+#endif /* DRV_BYTE_ORDER */
 } a3g4250d_int1_duration_t;
 
 /**
@@ -325,8 +469,8 @@ int32_t a3g4250d_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t a3g4250d_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                            uint16_t len);
 
-extern float_t a3g4250d_from_fs245dps_to_mdps(int16_t lsb);
-extern float_t a3g4250d_from_lsb_to_celsius(int16_t lsb);
+float_t a3g4250d_from_fs245dps_to_mdps(int16_t lsb);
+float_t a3g4250d_from_lsb_to_celsius(int16_t lsb);
 
 int32_t a3g4250d_axis_x_data_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t a3g4250d_axis_x_data_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -355,7 +499,7 @@ int32_t a3g4250d_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t a3g4250d_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t a3g4250d_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t a3g4250d_angular_rate_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
 int32_t a3g4250d_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 

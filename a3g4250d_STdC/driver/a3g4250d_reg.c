@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -242,10 +242,19 @@ int32_t a3g4250d_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t a3g4250d_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t a3g4250d_angular_rate_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
+
   ret =  a3g4250d_read_reg(ctx, A3G4250D_OUT_X_L, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
+
   return ret;
 }
 
@@ -1247,7 +1256,7 @@ int32_t a3g4250d_int_x_treshold_set(stmdev_ctx_t *ctx, uint16_t val)
   ret = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_XH,
                                (uint8_t*)&int1_tsh_xh, 1);
   if(ret == 0){
-    int1_tsh_xh.thsx = (uint8_t)((uint16_t)val & 0x7F00U)>>8;
+    int1_tsh_xh.thsx = (uint8_t)(val / 256U) & 0x7FU;
     ret = a3g4250d_write_reg(ctx, A3G4250D_INT1_TSH_XH,
                              (uint8_t*)&int1_tsh_xh, 1);
   }
@@ -1256,7 +1265,7 @@ int32_t a3g4250d_int_x_treshold_set(stmdev_ctx_t *ctx, uint16_t val)
                             (uint8_t*)&int1_tsh_xl, 1);
   }
   if(ret == 0){
-    int1_tsh_xl.thsx = (uint8_t)((uint16_t)val & 0x00FFU);
+    int1_tsh_xl.thsx = (uint8_t)(val - (int1_tsh_xh.thsx * 256U));
     ret = a3g4250d_write_reg(ctx, A3G4250D_INT1_TSH_XL,
                              (uint8_t*)&int1_tsh_xl, 1);
   }
@@ -1284,8 +1293,9 @@ int32_t a3g4250d_int_x_treshold_get(stmdev_ctx_t *ctx, uint16_t *val)
                                (uint8_t*)&int1_tsh_xl, 1);
 
     *val = int1_tsh_xh.thsx;
-    *val = *val << 8;
+    *val = *val * 256U;
     *val +=  int1_tsh_xl.thsx;
+
   }
   return ret;
 }
@@ -1306,7 +1316,7 @@ int32_t a3g4250d_int_y_treshold_set(stmdev_ctx_t *ctx, uint16_t val)
 
   ret = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_YH,
                                (uint8_t*)&int1_tsh_yh, 1);
-  int1_tsh_yh.thsy = (uint8_t)((uint16_t)val & 0x7F00U)>>8;
+  int1_tsh_yh.thsy = (uint8_t)(val / 256U) & 0x7FU;
   if(ret == 0){
     ret = a3g4250d_write_reg(ctx, A3G4250D_INT1_TSH_YH,
                                 (uint8_t*)&int1_tsh_yh, 1);
@@ -1314,7 +1324,7 @@ int32_t a3g4250d_int_y_treshold_set(stmdev_ctx_t *ctx, uint16_t val)
   if(ret == 0){
     ret = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_YL,
                                (uint8_t*)&int1_tsh_yl, 1);
-    int1_tsh_yl.thsy = (uint8_t)((uint16_t)val & 0x00FFU);
+    int1_tsh_yl.thsy = (uint8_t)(val - (int1_tsh_yh.thsy * 256U));
   }
   if(ret == 0){
     ret = a3g4250d_write_reg(ctx, A3G4250D_INT1_TSH_YL,
@@ -1344,7 +1354,7 @@ int32_t a3g4250d_int_y_treshold_get(stmdev_ctx_t *ctx, uint16_t *val)
                                (uint8_t*)&int1_tsh_yl, 1);
 
     *val = int1_tsh_yh.thsy;
-    *val = *val << 8;
+    *val = *val * 256U;
     *val += int1_tsh_yl.thsy;
   }
   return ret;
@@ -1366,7 +1376,7 @@ int32_t a3g4250d_int_z_treshold_set(stmdev_ctx_t *ctx, uint16_t val)
 
   ret = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_ZH,
                                (uint8_t*)&int1_tsh_zh, 1);
-  int1_tsh_zh.thsz = (uint8_t)((uint16_t)val & 0x7F00U)>>8;
+  int1_tsh_zh.thsz = (uint8_t)(val / 256U) & 0x7FU;;
   if(ret == 0){
     ret = a3g4250d_write_reg(ctx, A3G4250D_INT1_TSH_ZH,
                                 (uint8_t*)&int1_tsh_zh, 1);
@@ -1374,7 +1384,7 @@ int32_t a3g4250d_int_z_treshold_set(stmdev_ctx_t *ctx, uint16_t val)
   if(ret == 0){
     ret = a3g4250d_read_reg(ctx, A3G4250D_INT1_TSH_ZL,
                                (uint8_t*)&int1_tsh_zl, 1);
-    int1_tsh_zl.thsz = (uint8_t)((uint8_t)val & 0x00FFU);
+    int1_tsh_zl.thsz = (uint8_t)(val - (int1_tsh_zh.thsz * 256U));
   }
   if(ret == 0){
     ret = a3g4250d_write_reg(ctx, A3G4250D_INT1_TSH_ZL,
@@ -1404,7 +1414,7 @@ int32_t a3g4250d_int_z_treshold_get(stmdev_ctx_t *ctx, uint16_t *val)
                                (uint8_t*)&int1_tsh_zl, 1);
 
     *val = int1_tsh_zh.thsz;
-    *val = *val << 8;
+    *val = *val * 256U;
     *val += int1_tsh_zl.thsz;
   }
   return ret;
