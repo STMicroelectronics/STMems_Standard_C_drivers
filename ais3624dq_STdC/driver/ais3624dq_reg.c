@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -84,17 +84,17 @@ int32_t ais3624dq_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-float ais3624dq_from_fs6_to_mg(int16_t lsb)
+float_t ais3624dq_from_fs6_to_mg(int16_t lsb)
 {
   return ((float)lsb * 2.9f / 16.0f);
 }
 
-float ais3624dq_from_fs12_to_mg(int16_t lsb)
+float_t ais3624dq_from_fs12_to_mg(int16_t lsb)
 {
   return ((float)lsb * 5.9f / 16.0f);
 }
 
-float ais3624dq_from_fs24_to_mg(int16_t lsb)
+float_t ais3624dq_from_fs24_to_mg(int16_t lsb)
 {
   return ((float)lsb * 11.7f / 16.0f);
 }
@@ -507,10 +507,19 @@ int32_t ais3624dq_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @param  buff        buffer that stores data read
   *
   */
-int32_t ais3624dq_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t ais3624dq_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
+
   ret = ais3624dq_read_reg(ctx, AIS3624DQ_OUT_X_L, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) +  (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) +  (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) +  (int16_t)buff[4];
+
   return ret;
 }
 
