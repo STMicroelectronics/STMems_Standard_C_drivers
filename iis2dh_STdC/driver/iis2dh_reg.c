@@ -84,79 +84,79 @@ int32_t iis2dh_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-float iis2dh_from_fs2_hr_to_mg(int16_t lsb)
+float_t iis2dh_from_fs2_hr_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 16.0f ) * 0.98f;
+  return ( (float_t)lsb / 16.0f ) * 0.98f;
 }
 
-float iis2dh_from_fs4_hr_to_mg(int16_t lsb)
+float_t iis2dh_from_fs4_hr_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 16.0f ) *  1.95f;
+  return ( (float_t)lsb / 16.0f ) *  1.95f;
 }
 
-float iis2dh_from_fs8_hr_to_mg(int16_t lsb)
+float_t iis2dh_from_fs8_hr_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 16.0f ) * 3.91f;
+  return ( (float_t)lsb / 16.0f ) * 3.91f;
 }
 
-float iis2dh_from_fs16_hr_to_mg(int16_t lsb)
+float_t iis2dh_from_fs16_hr_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 16.0f ) * 11.72f;
+  return ( (float_t)lsb / 16.0f ) * 11.72f;
 }
 
-float iis2dh_from_lsb_hr_to_celsius(int16_t lsb)
+float_t iis2dh_from_lsb_hr_to_celsius(int16_t lsb)
 {
-  return ( ( (float)lsb / 64.0f ) / 4.0f ) + 25.0f;
+  return ( ( (float_t)lsb / 64.0f ) / 4.0f ) + 25.0f;
 }
 
-float iis2dh_from_fs2_nm_to_mg(int16_t lsb)
+float_t iis2dh_from_fs2_nm_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 64.0f ) *  3.91f;
+  return ( (float_t)lsb / 64.0f ) *  3.91f;
 }
 
-float iis2dh_from_fs4_nm_to_mg(int16_t lsb)
+float_t iis2dh_from_fs4_nm_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 64.0f ) *  7.81f;
+  return ( (float_t)lsb / 64.0f ) *  7.81f;
 }
 
-float iis2dh_from_fs8_nm_to_mg(int16_t lsb)
+float_t iis2dh_from_fs8_nm_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 64.0f ) * 15.63f;
+  return ( (float_t)lsb / 64.0f ) * 15.63f;
 }
 
-float iis2dh_from_fs16_nm_to_mg(int16_t lsb)
+float_t iis2dh_from_fs16_nm_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 64.0f ) * 46.95f;
+  return ( (float_t)lsb / 64.0f ) * 46.95f;
 }
 
-float iis2dh_from_lsb_nm_to_celsius(int16_t lsb)
+float_t iis2dh_from_lsb_nm_to_celsius(int16_t lsb)
 {
-  return ( ( (float)lsb / 64.0f ) / 4.0f ) + 25.0f;
+  return ( ( (float_t)lsb / 64.0f ) / 4.0f ) + 25.0f;
 }
 
-float iis2dh_from_fs2_lp_to_mg(int16_t lsb)
+float_t iis2dh_from_fs2_lp_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 256.0f ) * 15.63f;
+  return ( (float_t)lsb / 256.0f ) * 15.63f;
 }
 
-float iis2dh_from_fs4_lp_to_mg(int16_t lsb)
+float_t iis2dh_from_fs4_lp_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 256.0f ) * 31.25f;
+  return ( (float_t)lsb / 256.0f ) * 31.25f;
 }
 
-float iis2dh_from_fs8_lp_to_mg(int16_t lsb)
+float_t iis2dh_from_fs8_lp_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 256.0f ) * 62.5f;
+  return ( (float_t)lsb / 256.0f ) * 62.5f;
 }
 
-float iis2dh_from_fs16_lp_to_mg(int16_t lsb)
+float_t iis2dh_from_fs16_lp_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 256.0f ) * 188.68f;
+  return ( (float_t)lsb / 256.0f ) * 188.68f;
 }
 
-float iis2dh_from_lsb_lp_to_celsius(int16_t lsb)
+float_t iis2dh_from_lsb_lp_to_celsius(int16_t lsb)
 {
-  return ( ( (float)lsb / 256.0f ) * 1.0f ) + 25.0f;
+  return ( ( (float_t)lsb / 256.0f ) * 1.0f ) + 25.0f;
 }
 
 /**
@@ -231,10 +231,15 @@ int32_t iis2dh_temp_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t iis2dh_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t iis2dh_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
+
   ret = iis2dh_read_reg(ctx, IIS2DH_OUT_TEMP_L, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) +  (int16_t)buff[0];
+
   return ret;
 }
 /**
@@ -762,10 +767,18 @@ int32_t iis2dh_xl_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t iis2dh_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t iis2dh_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
+
   ret = iis2dh_read_reg(ctx, IIS2DH_OUT_X_L, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) +  (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) +  (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) +  (int16_t)buff[4];
   return ret;
 }
 /**
