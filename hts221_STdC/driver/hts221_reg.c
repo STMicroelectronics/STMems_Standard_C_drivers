@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -414,10 +414,15 @@ int32_t hts221_hum_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_humidity_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_humidity_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
+
   ret = hts221_read_reg(ctx, HTS221_HUMIDITY_OUT_L, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) +  (int16_t)buff[0];
+
   return ret;
 }
 
@@ -429,10 +434,15 @@ int32_t hts221_humidity_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t hts221_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
+
   ret = hts221_read_reg(ctx, HTS221_TEMP_OUT_L, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) +  (int16_t)buff[0];
+
   return ret;
 }
 

@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -35,6 +35,37 @@
   *
   */
 
+/** @defgroup  Endianness definitions
+  * @{
+  *
+  */
+
+#ifndef DRV_BYTE_ORDER
+#ifndef __BYTE_ORDER__
+
+#define DRV_LITTLE_ENDIAN 1234
+#define DRV_BIG_ENDIAN    4321
+
+/** if _BYTE_ORDER is not defined, choose the endianness of your architecture
+  * by uncommenting the define which fits your platform endianness
+  */
+//#define DRV_BYTE_ORDER    DRV_BIG_ENDIAN
+#define DRV_BYTE_ORDER    DRV_LITTLE_ENDIAN
+
+#else /* defined __BYTE_ORDER__ */
+
+#define DRV_LITTLE_ENDIAN  __ORDER_LITTLE_ENDIAN__
+#define DRV_BIG_ENDIAN     __ORDER_BIG_ENDIAN__
+#define DRV_BYTE_ORDER     __BYTE_ORDER__
+
+#endif /* __BYTE_ORDER__*/
+#endif /* DRV_BYTE_ORDER */
+
+/**
+  * @}
+  *
+  */
+
 /** @defgroup STMicroelectronics sensors common types
   * @{
   *
@@ -44,6 +75,7 @@
 #define MEMS_SHARED_TYPES
 
 typedef struct{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -52,6 +84,16 @@ typedef struct{
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit0       : 1;
+#endif /* DRV_BYTE_ORDER */
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
@@ -89,9 +131,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using 
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using 
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -133,41 +175,75 @@ typedef struct {
 #define HTS221_WHO_AM_I            0x0FU
 #define HTS221_AV_CONF             0x10U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t avgh                 : 3;
   uint8_t avgt                 : 3;
   uint8_t not_used_01          : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01          : 2;
+  uint8_t avgt                 : 3;
+  uint8_t avgh                 : 3;
+#endif /* DRV_BYTE_ORDER */
 } hts221_av_conf_t;
 
 #define HTS221_CTRL_REG1           0x20U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t odr                  : 2;
   uint8_t bdu                  : 1;
   uint8_t not_used_01          : 4;
   uint8_t pd                   : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t pd                   : 1;
+  uint8_t not_used_01          : 4;
+  uint8_t bdu                  : 1;
+  uint8_t odr                  : 2;
+#endif /* DRV_BYTE_ORDER */
 } hts221_ctrl_reg1_t;
 
 #define HTS221_CTRL_REG2           0x21U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t one_shot             : 1;
   uint8_t heater               : 1;
   uint8_t not_used_01          : 5;
   uint8_t boot                 : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t boot                 : 1;
+  uint8_t not_used_01          : 5;
+  uint8_t heater               : 1;
+  uint8_t one_shot             : 1;
+#endif /* DRV_BYTE_ORDER */
 } hts221_ctrl_reg2_t;
 
 #define HTS221_CTRL_REG3           0x22U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01          : 2;
   uint8_t drdy                 : 1;
   uint8_t not_used_02          : 3;
   uint8_t pp_od                : 1;
   uint8_t drdy_h_l             : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t drdy_h_l             : 1;
+  uint8_t pp_od                : 1;
+  uint8_t not_used_02          : 3;
+  uint8_t drdy                 : 1;
+  uint8_t not_used_01          : 2;
+#endif /* DRV_BYTE_ORDER */
 } hts221_ctrl_reg3_t;
 
 #define HTS221_STATUS_REG          0x27U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t t_da                 : 1;
   uint8_t h_da                 : 1;
   uint8_t not_used_01          : 6;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01          : 6;
+  uint8_t h_da                 : 1;
+  uint8_t t_da                 : 1;
+#endif /* DRV_BYTE_ORDER */
 } hts221_status_reg_t;
 
 #define HTS221_HUMIDITY_OUT_L      0x28U
@@ -180,9 +256,15 @@ typedef struct {
 #define HTS221_T1_DEGC_X8          0x33U
 #define HTS221_T1_T0_MSB           0x35U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t t0_msb               : 2;
   uint8_t t1_msb               : 2;
   uint8_t not_used_01          : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01          : 4;
+  uint8_t t1_msb               : 2;
+  uint8_t t0_msb               : 2;
+#endif /* DRV_BYTE_ORDER */
 } hts221_t1_t0_msb_t;
 
 #define HTS221_H0_T0_OUT_L         0x36U
@@ -275,9 +357,9 @@ int32_t hts221_temp_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t hts221_hum_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t hts221_humidity_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t hts221_humidity_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
-int32_t hts221_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t hts221_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
 int32_t hts221_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
