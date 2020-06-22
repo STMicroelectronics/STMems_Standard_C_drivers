@@ -309,7 +309,7 @@ static int32_t platform_write(void *handle, uint8_t Reg, uint8_t *Bufp,
 {
   if (handle == &hi2c1)
   {
-    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_L, Reg,
+    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_H, Reg,
                       I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
   }
   return 0;
@@ -330,7 +330,7 @@ static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
 {
   if (handle == &hi2c1)
   {
-      HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_L, Reg,
+      HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_H, Reg,
                        I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
   }
   return 0;
@@ -466,7 +466,7 @@ static int32_t lsm6dsox_read_lps22hh_cx(void* ctx, uint8_t reg, uint8_t* data,
   lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_OFF);
 
   /* Read SensorHub registers. */
-  lsm6dsox_sh_read_data_raw_get(&ag_ctx,(lsm6dsox_emb_sh_read_t*)data);
+  lsm6dsox_sh_read_data_raw_get(&ag_ctx,(lsm6dsox_emb_sh_read_t*)data, len);
 
   return ret;
 }

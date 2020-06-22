@@ -320,7 +320,7 @@ static int32_t lsm6dsox_read_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
   lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_OFF);
 
   /* Read SensorHub registers. */
-  lsm6dsox_sh_read_data_raw_get(&ag_ctx, (lsm6dsox_emb_sh_read_t*)&data);
+  lsm6dsox_sh_read_data_raw_get(&ag_ctx, (lsm6dsox_emb_sh_read_t*)&data, len);
 
   return mm_error;
 }
