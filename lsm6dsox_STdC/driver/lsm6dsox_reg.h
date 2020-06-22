@@ -2766,7 +2766,8 @@ typedef struct {
     lsm6dsox_sensor_hub_18_t  sh_byte_18;
 } lsm6dsox_emb_sh_read_t;
 int32_t lsm6dsox_sh_read_data_raw_get(stmdev_ctx_t *ctx,
-                                     lsm6dsox_emb_sh_read_t *val);
+                                     lsm6dsox_emb_sh_read_t *val,
+									 uint8_t len);
 
 typedef enum {
   LSM6DSOX_SLV_0       = 0,

@@ -8492,13 +8492,14 @@ int32_t lsm6dsox_mlc_data_rate_get(stmdev_ctx_t *ctx,
 *
   */
 int32_t lsm6dsox_sh_read_data_raw_get(stmdev_ctx_t *ctx,
-                                     lsm6dsox_emb_sh_read_t *val)
+                                     lsm6dsox_emb_sh_read_t *val,
+                                     uint8_t len)
 {
   int32_t ret;
 
   ret = lsm6dsox_mem_bank_set(ctx, LSM6DSOX_SENSOR_HUB_BANK);
   if (ret == 0) {
-    ret = lsm6dsox_read_reg(ctx, LSM6DSOX_SENSOR_HUB_1, (uint8_t*) val, 18U);
+    ret = lsm6dsox_read_reg(ctx, LSM6DSOX_SENSOR_HUB_1, (uint8_t*) val, len);
   }
   if (ret == 0) {
     ret = lsm6dsox_mem_bank_set(ctx, LSM6DSOX_USER_BANK);
