@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -28,10 +28,42 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <stddef.h>
 #include <math.h>
 
 /** @addtogroup IIS3DHHC
   * @{
+  *
+  */
+
+/** @defgroup  Endianness definitions
+  * @{
+  *
+  */
+
+#ifndef DRV_BYTE_ORDER
+#ifndef __BYTE_ORDER__
+
+#define DRV_LITTLE_ENDIAN 1234
+#define DRV_BIG_ENDIAN    4321
+
+/** if _BYTE_ORDER is not defined, choose the endianness of your architecture
+  * by uncommenting the define which fits your platform endianness
+  */
+//#define DRV_BYTE_ORDER    DRV_BIG_ENDIAN
+#define DRV_BYTE_ORDER    DRV_LITTLE_ENDIAN
+
+#else /* defined __BYTE_ORDER__ */
+
+#define DRV_LITTLE_ENDIAN  __ORDER_LITTLE_ENDIAN__
+#define DRV_BIG_ENDIAN     __ORDER_BIG_ENDIAN__
+#define DRV_BYTE_ORDER     __BYTE_ORDER__
+
+#endif /* __BYTE_ORDER__*/
+#endif /* DRV_BYTE_ORDER */
+
+/**
+  * @}
   *
   */
 
@@ -44,6 +76,7 @@
 #define MEMS_SHARED_TYPES
 
 typedef struct{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -52,6 +85,16 @@ typedef struct{
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit0       : 1;
+#endif /* DRV_BYTE_ORDER */
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
@@ -89,9 +132,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using 
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using 
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -129,12 +172,18 @@ typedef struct {
 
 #define IIS3DHHC_WHO_AM_I      0x0FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01      : 7;
   uint8_t asic_id          : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t asic_id          : 1;
+  uint8_t not_used_01      : 7;
+#endif /* DRV_BYTE_ORDER */
 } iis3dhhc_id_reg_t;
 
 #define IIS3DHHC_CTRL_REG1     0x20U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bdu              : 1;
   uint8_t drdy_pulse       : 1;
   uint8_t sw_reset         : 1;
@@ -142,10 +191,20 @@ typedef struct {
   uint8_t not_used_01      : 2;
   uint8_t if_add_inc       : 1;
   uint8_t norm_mod_en      : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t norm_mod_en      : 1;
+  uint8_t if_add_inc       : 1;
+  uint8_t not_used_01      : 2;
+  uint8_t boot             : 1;
+  uint8_t sw_reset         : 1;
+  uint8_t drdy_pulse       : 1;
+  uint8_t bdu              : 1;
+#endif /* DRV_BYTE_ORDER */
 } iis3dhhc_ctrl_reg1_t;
 
 #define IIS3DHHC_INT1_CTRL     0x21U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01      : 2;
   uint8_t int1_ext         : 1;
   uint8_t int1_fth         : 1;
@@ -153,37 +212,69 @@ typedef struct {
   uint8_t int1_ovr         : 1;
   uint8_t int1_boot        : 1;
   uint8_t int1_drdy        : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t int1_drdy        : 1;
+  uint8_t int1_boot        : 1;
+  uint8_t int1_ovr         : 1;
+  uint8_t int1_fss5        : 1;
+  uint8_t int1_fth         : 1;
+  uint8_t int1_ext         : 1;
+  uint8_t not_used_01      : 2;
+#endif /* DRV_BYTE_ORDER */
 } iis3dhhc_int1_ctrl_t;
 
 #define IIS3DHHC_INT2_CTRL     0x22U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01      : 3;
   uint8_t int2_fth         : 1;
   uint8_t int2_fss5        : 1;
   uint8_t int2_ovr         : 1;
   uint8_t int2_boot        : 1;
   uint8_t int2_drdy        : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t int2_drdy        : 1;
+  uint8_t int2_boot        : 1;
+  uint8_t int2_ovr         : 1;
+  uint8_t int2_fss5        : 1;
+  uint8_t int2_fth         : 1;
+  uint8_t not_used_01      : 3;
+#endif /* DRV_BYTE_ORDER */
 } iis3dhhc_int2_ctrl_t;
 
 #define IIS3DHHC_CTRL_REG4     0x23U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t off_tcomp_en     : 1;
   uint8_t fifo_en          : 1;
   uint8_t pp_od            : 2;
   uint8_t st               : 2;
   uint8_t dsp              : 2;  /* dsp_lp_type + dsp_bw_sel */
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t dsp              : 2;  /* dsp_lp_type + dsp_bw_sel */
+  uint8_t st               : 2;
+  uint8_t pp_od            : 2;
+  uint8_t fifo_en          : 1;
+  uint8_t off_tcomp_en     : 1;
+#endif /* DRV_BYTE_ORDER */
 } iis3dhhc_ctrl_reg4_t;
 
 #define IIS3DHHC_CTRL_REG5     0x24U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t fifo_spi_hs_on   : 1;
   uint8_t not_used_01      : 7;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01      : 7;
+  uint8_t fifo_spi_hs_on   : 1;
+#endif /* DRV_BYTE_ORDER */
 } iis3dhhc_ctrl_reg5_t;
 
 #define IIS3DHHC_OUT_TEMP_L    0x25U
 #define IIS3DHHC_OUT_TEMP_H    0x26U
 #define IIS3DHHC_STATUS        0x27U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xda              : 1;
   uint8_t yda              : 1;
   uint8_t zda              : 1;
@@ -192,6 +283,16 @@ typedef struct {
   uint8_t yor              : 1;
   uint8_t zor              : 1;
   uint8_t zyxor            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t zyxor            : 1;
+  uint8_t zor              : 1;
+  uint8_t yor              : 1;
+  uint8_t _xor             : 1;
+  uint8_t zyxda            : 1;
+  uint8_t zda              : 1;
+  uint8_t yda              : 1;
+  uint8_t xda              : 1;
+#endif /* DRV_BYTE_ORDER */
 } iis3dhhc_status_t;
 
 #define IIS3DHHC_OUT_X_L_XL    0x28U
@@ -202,15 +303,26 @@ typedef struct {
 #define IIS3DHHC_OUT_Z_H_XL    0x2DU
 #define IIS3DHHC_FIFO_CTRL     0x2EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t fth              : 5;
   uint8_t fmode            : 3;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t fmode            : 3;
+  uint8_t fth              : 5;
+#endif /* DRV_BYTE_ORDER */
 } iis3dhhc_fifo_ctrl_t;
 
 #define IIS3DHHC_FIFO_SRC      0x2FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t fss             : 6;
   uint8_t ovrn            : 1;
   uint8_t fth             : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t fth             : 1;
+  uint8_t ovrn            : 1;
+  uint8_t fss             : 6;
+#endif /* DRV_BYTE_ORDER */
 } iis3dhhc_fifo_src_t;
 
 /**
@@ -249,8 +361,8 @@ int32_t iis3dhhc_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t iis3dhhc_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                            uint16_t len);
 
-extern float_t iis3dhhc_from_lsb_to_mg(int16_t lsb);
-extern float_t iis3dhhc_from_lsb_to_celsius(int16_t lsb);
+float_t iis3dhhc_from_lsb_to_mg(int16_t lsb);
+float_t iis3dhhc_from_lsb_to_celsius(int16_t lsb);
 
 int32_t iis3dhhc_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t iis3dhhc_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -267,9 +379,9 @@ int32_t iis3dhhc_data_rate_get(stmdev_ctx_t *ctx,
 int32_t iis3dhhc_offset_temp_comp_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t iis3dhhc_offset_temp_comp_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t iis3dhhc_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t iis3dhhc_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
-int32_t iis3dhhc_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t iis3dhhc_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
 int32_t iis3dhhc_xl_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
