@@ -84,19 +84,19 @@ int32_t iis328dq_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-float iis328dq_from_fs2_to_mg(int16_t lsb)
+float_t iis328dq_from_fs2_to_mg(int16_t lsb)
 {
-  return ((float)lsb * 0.98f / 16.0f);
+  return ((float_t)lsb * 0.98f / 16.0f);
 }
 
-float iis328dq_from_fs4_to_mg(int16_t lsb)
+float_t iis328dq_from_fs4_to_mg(int16_t lsb)
 {
-  return ((float)lsb * 1.95f / 16.0f);
+  return ((float_t)lsb * 1.95f / 16.0f);
 }
 
-float iis328dq_from_fs8_to_mg(int16_t lsb)
+float_t iis328dq_from_fs8_to_mg(int16_t lsb)
 {
-  return ((float)lsb * 3.91f / 16.0f);
+  return ((float_t)lsb * 3.91f / 16.0f);
 }
 
 /**
@@ -507,10 +507,18 @@ int32_t iis328dq_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @param  buff        buffer that stores data read
   *
   */
-int32_t iis328dq_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t iis328dq_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
+
   ret = iis328dq_read_reg(ctx, IIS328DQ_OUT_X_L, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) +  (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) +  (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) +  (int16_t)buff[4];
   return ret;
 }
 
