@@ -435,23 +435,23 @@ int32_t lis2dh12_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lis2dh12_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                            uint16_t len);
 
-extern float lis2dh12_from_fs2_hr_to_mg(int16_t lsb);
-extern float lis2dh12_from_fs4_hr_to_mg(int16_t lsb);
-extern float lis2dh12_from_fs8_hr_to_mg(int16_t lsb);
-extern float lis2dh12_from_fs16_hr_to_mg(int16_t lsb);
-extern float lis2dh12_from_lsb_hr_to_celsius(int16_t lsb);
+float lis2dh12_from_fs2_hr_to_mg(int16_t lsb);
+float lis2dh12_from_fs4_hr_to_mg(int16_t lsb);
+float lis2dh12_from_fs8_hr_to_mg(int16_t lsb);
+float lis2dh12_from_fs16_hr_to_mg(int16_t lsb);
+float lis2dh12_from_lsb_hr_to_celsius(int16_t lsb);
 
-extern float lis2dh12_from_fs2_nm_to_mg(int16_t lsb);
-extern float lis2dh12_from_fs4_nm_to_mg(int16_t lsb);
-extern float lis2dh12_from_fs8_nm_to_mg(int16_t lsb);
-extern float lis2dh12_from_fs16_nm_to_mg(int16_t lsb);
-extern float lis2dh12_from_lsb_nm_to_celsius(int16_t lsb);
+float lis2dh12_from_fs2_nm_to_mg(int16_t lsb);
+float lis2dh12_from_fs4_nm_to_mg(int16_t lsb);
+float lis2dh12_from_fs8_nm_to_mg(int16_t lsb);
+float lis2dh12_from_fs16_nm_to_mg(int16_t lsb);
+float lis2dh12_from_lsb_nm_to_celsius(int16_t lsb);
 
-extern float lis2dh12_from_fs2_lp_to_mg(int16_t lsb);
-extern float lis2dh12_from_fs4_lp_to_mg(int16_t lsb);
-extern float lis2dh12_from_fs8_lp_to_mg(int16_t lsb);
-extern float lis2dh12_from_fs16_lp_to_mg(int16_t lsb);
-extern float lis2dh12_from_lsb_lp_to_celsius(int16_t lsb);
+float lis2dh12_from_fs2_lp_to_mg(int16_t lsb);
+float lis2dh12_from_fs4_lp_to_mg(int16_t lsb);
+float lis2dh12_from_fs8_lp_to_mg(int16_t lsb);
+float lis2dh12_from_fs16_lp_to_mg(int16_t lsb);
+float lis2dh12_from_lsb_lp_to_celsius(int16_t lsb);
 
 int32_t lis2dh12_temp_status_reg_get(stmdev_ctx_t *ctx, uint8_t *buff);
 int32_t lis2dh12_temp_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
