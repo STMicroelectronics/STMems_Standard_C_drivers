@@ -1239,7 +1239,7 @@ int32_t lsm9ds1_dev_reset_get(stmdev_ctx_t *ctx_mag, stmdev_ctx_t *ctx_imu,
   if(ret == 0){
     ret = lsm9ds1_read_reg(ctx_mag, LSM9DS1_CTRL_REG2_M,
                            (uint8_t*)&ctrl_reg2_m, 1);
-    *val = (uint8_t)(ctrl_reg2_m.soft_rst & ctrl_reg8.sw_reset);
+    *val = (uint8_t)(ctrl_reg2_m.soft_rst | ctrl_reg8.sw_reset);
   }
   return ret;
 }
