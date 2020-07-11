@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -35,6 +35,37 @@
   *
   */
 
+/** @defgroup  Endianness definitions
+  * @{
+  *
+  */
+
+#ifndef DRV_BYTE_ORDER
+#ifndef __BYTE_ORDER__
+
+#define DRV_LITTLE_ENDIAN 1234
+#define DRV_BIG_ENDIAN    4321
+
+/** if _BYTE_ORDER is not defined, choose the endianness of your architecture
+  * by uncommenting the define which fits your platform endianness
+  */
+//#define DRV_BYTE_ORDER    DRV_BIG_ENDIAN
+#define DRV_BYTE_ORDER    DRV_LITTLE_ENDIAN
+
+#else /* defined __BYTE_ORDER__ */
+
+#define DRV_LITTLE_ENDIAN  __ORDER_LITTLE_ENDIAN__
+#define DRV_BIG_ENDIAN     __ORDER_BIG_ENDIAN__
+#define DRV_BYTE_ORDER     __BYTE_ORDER__
+
+#endif /* __BYTE_ORDER__*/
+#endif /* DRV_BYTE_ORDER */
+
+/**
+  * @}
+  *
+  */
+
 /** @defgroup STMicroelectronics sensors common types
   * @{
   *
@@ -44,6 +75,7 @@
 #define MEMS_SHARED_TYPES
 
 typedef struct{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -52,6 +84,16 @@ typedef struct{
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit0       : 1;
+#endif /* DRV_BYTE_ORDER */
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
@@ -89,9 +131,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using 
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using 
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -133,6 +175,7 @@ typedef struct {
 
 #define LIS2DS12_SENSORHUB1_REG        0x06U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                : 1;
   uint8_t bit1                : 1;
   uint8_t bit2                : 1;
@@ -141,10 +184,21 @@ typedef struct {
   uint8_t bit5                : 1;
   uint8_t bit6                : 1;
   uint8_t bit7                : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                : 1;
+  uint8_t bit6                : 1;
+  uint8_t bit5                : 1;
+  uint8_t bit4                : 1;
+  uint8_t bit3                : 1;
+  uint8_t bit2                : 1;
+  uint8_t bit1                : 1;
+  uint8_t bit0                : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_sensorhub1_reg_t;
 
 #define LIS2DS12_SENSORHUB2_REG        0x07U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                : 1;
   uint8_t bit1                : 1;
   uint8_t bit2                : 1;
@@ -153,10 +207,21 @@ typedef struct {
   uint8_t bit5                : 1;
   uint8_t bit6                : 1;
   uint8_t bit7                : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                : 1;
+  uint8_t bit6                : 1;
+  uint8_t bit5                : 1;
+  uint8_t bit4                : 1;
+  uint8_t bit3                : 1;
+  uint8_t bit2                : 1;
+  uint8_t bit1                : 1;
+  uint8_t bit0                : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_sensorhub2_reg_t;
 
 #define LIS2DS12_SENSORHUB3_REG        0x08U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                : 1;
   uint8_t bit1                : 1;
   uint8_t bit2                : 1;
@@ -165,10 +230,21 @@ typedef struct {
   uint8_t bit5                : 1;
   uint8_t bit6                : 1;
   uint8_t bit7                : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                : 1;
+  uint8_t bit6                : 1;
+  uint8_t bit5                : 1;
+  uint8_t bit4                : 1;
+  uint8_t bit3                : 1;
+  uint8_t bit2                : 1;
+  uint8_t bit1                : 1;
+  uint8_t bit0                : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_sensorhub3_reg_t;
 
 #define LIS2DS12_SENSORHUB4_REG        0x09U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                : 1;
   uint8_t bit1                : 1;
   uint8_t bit2                : 1;
@@ -177,10 +253,21 @@ typedef struct {
   uint8_t bit5                : 1;
   uint8_t bit6                : 1;
   uint8_t bit7                : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                : 1;
+  uint8_t bit6                : 1;
+  uint8_t bit5                : 1;
+  uint8_t bit4                : 1;
+  uint8_t bit3                : 1;
+  uint8_t bit2                : 1;
+  uint8_t bit1                : 1;
+  uint8_t bit0                : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_sensorhub4_reg_t;
 
 #define LIS2DS12_SENSORHUB5_REG        0x0AU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                : 1;
   uint8_t bit1                : 1;
   uint8_t bit2                : 1;
@@ -189,10 +276,21 @@ typedef struct {
   uint8_t bit5                : 1;
   uint8_t bit6                : 1;
   uint8_t bit7                : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                : 1;
+  uint8_t bit6                : 1;
+  uint8_t bit5                : 1;
+  uint8_t bit4                : 1;
+  uint8_t bit3                : 1;
+  uint8_t bit2                : 1;
+  uint8_t bit1                : 1;
+  uint8_t bit0                : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_sensorhub5_reg_t;
 
 #define LIS2DS12_SENSORHUB6_REG        0x0BU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                : 1;
   uint8_t bit1                : 1;
   uint8_t bit2                : 1;
@@ -201,20 +299,39 @@ typedef struct {
   uint8_t bit5                : 1;
   uint8_t bit6                : 1;
   uint8_t bit7                : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                : 1;
+  uint8_t bit6                : 1;
+  uint8_t bit5                : 1;
+  uint8_t bit4                : 1;
+  uint8_t bit3                : 1;
+  uint8_t bit2                : 1;
+  uint8_t bit1                : 1;
+  uint8_t bit0                : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_sensorhub6_reg_t;
 
 #define LIS2DS12_MODULE_8BIT           0x0CU
 #define LIS2DS12_WHO_AM_I              0x0FU
 #define LIS2DS12_CTRL1                 0x20U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bdu                 : 1;
   uint8_t hf_odr              : 1;
   uint8_t fs                  : 2;
   uint8_t odr                 : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t odr                 : 4;
+  uint8_t fs                  : 2;
+  uint8_t hf_odr              : 1;
+  uint8_t bdu                 : 1;
+#endif /* DRV_BYTE_ORDER */
+
 } lis2ds12_ctrl1_t;
 
 #define LIS2DS12_CTRL2                 0x21U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t sim                 : 1;
   uint8_t i2c_disable         : 1;
   uint8_t if_add_inc          : 1;
@@ -223,10 +340,22 @@ typedef struct {
   uint8_t not_used_01         : 1;
   uint8_t soft_reset          : 1;
   uint8_t boot                : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t boot                : 1;
+  uint8_t soft_reset          : 1;
+  uint8_t not_used_01         : 1;
+  uint8_t func_cfg_en         : 1;
+  uint8_t fds_slope           : 1;
+  uint8_t if_add_inc          : 1;
+  uint8_t i2c_disable         : 1;
+  uint8_t sim                 : 1;
+#endif /* DRV_BYTE_ORDER */
+
 } lis2ds12_ctrl2_t;
 
 #define LIS2DS12_CTRL3                 0x22U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t pp_od               : 1;
   uint8_t h_lactive           : 1;
   uint8_t lir                 : 1;
@@ -234,10 +363,21 @@ typedef struct {
   uint8_t tap_y_en            : 1;
   uint8_t tap_x_en            : 1;
   uint8_t st                  : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t st                  : 2;
+  uint8_t tap_x_en            : 1;
+  uint8_t tap_y_en            : 1;
+  uint8_t tap_z_en            : 1;
+  uint8_t lir                 : 1;
+  uint8_t h_lactive           : 1;
+  uint8_t pp_od               : 1;
+#endif /* DRV_BYTE_ORDER */
+
 } lis2ds12_ctrl3_t;
 
 #define LIS2DS12_CTRL4                 0x23U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t int1_drdy           : 1;
   uint8_t int1_fth            : 1;
   uint8_t int1_6d             : 1;
@@ -246,10 +386,21 @@ typedef struct {
   uint8_t int1_wu             : 1;
   uint8_t int1_s_tap          : 1;
   uint8_t int1_master_drdy    : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t int1_master_drdy    : 1;
+  uint8_t int1_s_tap          : 1;
+  uint8_t int1_wu             : 1;
+  uint8_t int1_ff             : 1;
+  uint8_t int1_tap            : 1;
+  uint8_t int1_6d             : 1;
+  uint8_t int1_fth            : 1;
+  uint8_t int1_drdy           : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_ctrl4_t;
 
 #define LIS2DS12_CTRL5                 0x24U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t int2_drdy           : 1;
   uint8_t int2_fth            : 1;
   uint8_t int2_step_det       : 1;
@@ -258,20 +409,39 @@ typedef struct {
   uint8_t int2_on_int1        : 1;
   uint8_t int2_boot           : 1;
   uint8_t drdy_pulsed         : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t drdy_pulsed         : 1;
+  uint8_t int2_boot           : 1;
+  uint8_t int2_on_int1        : 1;
+  uint8_t int2_tilt           : 1;
+  uint8_t int2_sig_mot        : 1;
+  uint8_t int2_step_det       : 1;
+  uint8_t int2_fth            : 1;
+  uint8_t int2_drdy           : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_ctrl5_t;
 
 #define LIS2DS12_FIFO_CTRL             0x25U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t if_cs_pu_dis        : 1;
   uint8_t not_used_01         : 2;
   uint8_t module_to_fifo      : 1;
   uint8_t int2_step_count_ov  : 1;
   uint8_t fmode               : 3;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t fmode               : 3;
+  uint8_t int2_step_count_ov  : 1;
+  uint8_t module_to_fifo      : 1;
+  uint8_t not_used_01         : 2;
+  uint8_t if_cs_pu_dis        : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_fifo_ctrl_t;
 
 #define LIS2DS12_OUT_T                 0x26U
 #define LIS2DS12_STATUS                0x27U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t drdy                : 1;
   uint8_t ff_ia               : 1;
   uint8_t _6d_ia              : 1;
@@ -280,6 +450,16 @@ typedef struct {
   uint8_t sleep_state         : 1;
   uint8_t wu_ia               : 1;
   uint8_t fifo_ths            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t fifo_ths            : 1;
+  uint8_t wu_ia               : 1;
+  uint8_t sleep_state         : 1;
+  uint8_t double_tap          : 1;
+  uint8_t single_tap          : 1;
+  uint8_t _6d_ia              : 1;
+  uint8_t ff_ia               : 1;
+  uint8_t drdy                : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_status_t;
 
 #define LIS2DS12_OUT_X_L               0x28U
@@ -295,50 +475,88 @@ typedef struct {
 
 #define LIS2DS12_FIFO_SRC              0x2FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01         : 5;
   uint8_t diff                : 1;
   uint8_t fifo_ovr            : 1;
   uint8_t fth                 : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t fth                 : 1;
+  uint8_t fifo_ovr            : 1;
+  uint8_t diff                : 1;
+  uint8_t not_used_01         : 5;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_fifo_src_t;
 
 #define LIS2DS12_FIFO_SAMPLES          0x30U
 #define LIS2DS12_TAP_6D_THS            0x31U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t tap_ths             : 5;
   uint8_t _6d_ths             : 2;
   uint8_t _4d_en              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t _4d_en              : 1;
+  uint8_t _6d_ths             : 2;
+  uint8_t tap_ths             : 5;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_tap_6d_ths_t;
 
 #define LIS2DS12_INT_DUR               0x32U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t shock               : 2;
   uint8_t quiet               : 2;
   uint8_t lat                 : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t lat                 : 4;
+  uint8_t quiet               : 2;
+  uint8_t shock               : 2;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_int_dur_t;
 
 #define LIS2DS12_WAKE_UP_THS           0x33U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t wu_ths              : 6;
   uint8_t sleep_on            : 1;
   uint8_t single_double_tap   : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t single_double_tap   : 1;
+  uint8_t sleep_on            : 1;
+  uint8_t wu_ths              : 6;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_wake_up_ths_t;
 
 #define LIS2DS12_WAKE_UP_DUR           0x34U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t sleep_dur           : 4;
   uint8_t int1_fss7           : 1;
   uint8_t wu_dur              : 2;
   uint8_t ff_dur              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t ff_dur              : 1;
+  uint8_t wu_dur              : 2;
+  uint8_t int1_fss7           : 1;
+  uint8_t sleep_dur           : 4;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_wake_up_dur_t;
 
 #define LIS2DS12_FREE_FALL             0x35U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ff_ths              : 3;
   uint8_t ff_dur              : 5;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t ff_dur              : 5;
+  uint8_t ff_ths              : 3;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_free_fall_t;
 
 #define LIS2DS12_STATUS_DUP            0x36U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t drdy                : 1;
   uint8_t ff_ia               : 1;
   uint8_t _6d_ia              : 1;
@@ -347,10 +565,21 @@ typedef struct {
   uint8_t sleep_state         : 1;
   uint8_t wu_ia               : 1;
   uint8_t ovr                 : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t ovr                 : 1;
+  uint8_t ovr                 : 1;
+  uint8_t sleep_state         : 1;
+  uint8_t double_tap          : 1;
+  uint8_t single_tap          : 1;
+  uint8_t _6d_ia              : 1;
+  uint8_t ff_ia               : 1;
+  uint8_t drdy                : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_status_dup_t;
 
 #define LIS2DS12_WAKE_UP_SRC           0x37U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t z_wu                : 1;
   uint8_t y_wu                : 1;
   uint8_t x_wu                : 1;
@@ -358,10 +587,20 @@ typedef struct {
   uint8_t sleep_state_ia      : 1;
   uint8_t ff_ia               : 1;
   uint8_t not_used_01         : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01         : 2;
+  uint8_t ff_ia               : 1;
+  uint8_t sleep_state_ia      : 1;
+  uint8_t wu_ia               : 1;
+  uint8_t x_wu                : 1;
+  uint8_t y_wu                : 1;
+  uint8_t z_wu                : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_wake_up_src_t;
 
 #define LIS2DS12_TAP_SRC               0x38U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t z_tap               : 1;
   uint8_t y_tap               : 1;
   uint8_t x_tap               : 1;
@@ -370,10 +609,21 @@ typedef struct {
   uint8_t single_tap          : 1;
   uint8_t tap_ia              : 1;
   uint8_t not_used_01         : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01         : 1;
+  uint8_t tap_ia              : 1;
+  uint8_t single_tap          : 1;
+  uint8_t double_tap          : 1;
+  uint8_t tap_sign            : 1;
+  uint8_t x_tap               : 1;
+  uint8_t y_tap               : 1;
+  uint8_t z_tap               : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_tap_src_t;
 
 #define LIS2DS12_6D_SRC                0x39U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xl                  : 1;
   uint8_t xh                  : 1;
   uint8_t yl                  : 1;
@@ -382,19 +632,36 @@ typedef struct {
   uint8_t zh                  : 1;
   uint8_t _6d_ia              : 1;
   uint8_t not_used_01         : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01         : 1;
+  uint8_t _6d_ia              : 1;
+  uint8_t zh                  : 1;
+  uint8_t zl                  : 1;
+  uint8_t yh                  : 1;
+  uint8_t yl                  : 1;
+  uint8_t xh                  : 1;
+  uint8_t xl                  : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_6d_src_t;
 
 #define LIS2DS12_STEP_COUNTER_MINTHS   0x3AU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t sc_mths             : 6;
   uint8_t pedo4g              : 1;
   uint8_t rst_nstep           : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t rst_nstep           : 1;
+  uint8_t pedo4g              : 1;
+  uint8_t sc_mths             : 6;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_step_counter_minths_t;
 
 #define LIS2DS12_STEP_COUNTER_L        0x3BU
 #define LIS2DS12_STEP_COUNTER_H        0x3CU
 #define LIS2DS12_FUNC_CK_GATE          0x3DU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ck_gate_func        : 1;
   uint8_t step_detect         : 1;
   uint8_t rst_pedo            : 1;
@@ -402,18 +669,35 @@ typedef struct {
   uint8_t sig_mot_detect      : 1;
   uint8_t fs_src              : 2;
   uint8_t tilt_int            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t tilt_int            : 1;
+  uint8_t fs_src              : 2;
+  uint8_t sig_mot_detect      : 1;
+  uint8_t rst_sign_mot        : 1;
+  uint8_t rst_pedo            : 1;
+  uint8_t step_detect         : 1;
+  uint8_t ck_gate_func        : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_func_ck_gate_t;
 
 #define LIS2DS12_FUNC_SRC              0x3EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t sensorhub_end_op    : 1;
   uint8_t module_ready        : 1;
   uint8_t rst_tilt            : 1;
   uint8_t not_used_01         : 5;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01         : 5;
+  uint8_t rst_tilt            : 1;
+  uint8_t module_ready        : 1;
+  uint8_t sensorhub_end_op    : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_func_src_t;
 
 #define LIS2DS12_FUNC_CTRL             0x3FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t step_cnt_on         : 1;
   uint8_t sign_mot_on         : 1;
   uint8_t master_on           : 1;
@@ -421,18 +705,37 @@ typedef struct {
   uint8_t tilt_on             : 1;
   uint8_t module_on           : 1;
   uint8_t not_used_01         : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01         : 2;
+  uint8_t module_on           : 1;
+  uint8_t tilt_on             : 1;
+  uint8_t tud_en              : 1;
+  uint8_t master_on           : 1;
+  uint8_t sign_mot_on         : 1;
+  uint8_t step_cnt_on         : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_func_ctrl_t;
 
 #define LIS2DS12_PEDO_DEB_REG          0x2BU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t deb_step            : 3;
   uint8_t deb_time            : 5;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t deb_time            : 5;
+  uint8_t deb_step            : 3;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_pedo_deb_reg_t;
 
 #define LIS2DS12_SLV0_ADD              0x30U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t rw_0                : 1;
   uint8_t slave0_add          : 7;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t slave0_add          : 7;
+  uint8_t rw_0                : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_slv0_add_t;
 
 #define LIS2DS12_SLV0_SUBADD           0x31U
@@ -442,8 +745,13 @@ typedef struct {
 
 #define LIS2DS12_SLV0_CONFIG           0x32U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t slave0_numop        : 3;
   uint8_t not_used_01         : 5;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01         : 5;
+  uint8_t slave0_numop        : 3;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_slv0_config_t;
 
 #define LIS2DS12_DATAWRITE_SLV0        0x33U
@@ -463,6 +771,7 @@ typedef struct {
 
 #define LIS2DS12_CTRL2_ADV             0x3FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t sim                 : 1;
   uint8_t i2c_disable         : 1;
   uint8_t if_add_inc          : 1;
@@ -471,6 +780,16 @@ typedef struct {
   uint8_t not_used_01         : 1;
   uint8_t soft_reset          : 1;
   uint8_t boot                : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t boot                : 1;
+  uint8_t soft_reset          : 1;
+  uint8_t not_used_01         : 1;
+  uint8_t func_cfg_en         : 1;
+  uint8_t fds_slope           : 1;
+  uint8_t if_add_inc          : 1;
+  uint8_t i2c_disable         : 1;
+  uint8_t sim                 : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis2ds12_ctrl2_adv_t;
 
 /**
@@ -535,12 +854,12 @@ int32_t lis2ds12_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lis2ds12_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                            uint16_t len);
 
-extern float_t lis2ds12_from_fs2g_to_mg(int16_t lsb);
-extern float_t lis2ds12_from_fs4g_to_mg(int16_t lsb);
-extern float_t lis2ds12_from_fs8g_to_mg(int16_t lsb);
-extern float_t lis2ds12_from_fs16g_to_mg(int16_t lsb);
+float_t lis2ds12_from_fs2g_to_mg(int16_t lsb);
+float_t lis2ds12_from_fs4g_to_mg(int16_t lsb);
+float_t lis2ds12_from_fs8g_to_mg(int16_t lsb);
+float_t lis2ds12_from_fs16g_to_mg(int16_t lsb);
 
-extern float_t lis2ds12_from_lsb_to_celsius(int16_t lsb);
+float_t lis2ds12_from_lsb_to_celsius(int16_t lsb);
 
 typedef struct {
   lis2ds12_fifo_src_t       fifo_src;
@@ -599,9 +918,9 @@ int32_t lis2ds12_acceleration_module_raw_get(stmdev_ctx_t *ctx,
 
 int32_t lis2ds12_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t lis2ds12_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lis2ds12_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
-int32_t lis2ds12_number_of_steps_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lis2ds12_number_of_steps_get(stmdev_ctx_t *ctx, int16_t *val);
 
 int32_t lis2ds12_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
