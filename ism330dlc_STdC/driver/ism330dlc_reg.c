@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -1054,10 +1054,15 @@ int32_t ism330dlc_rounding_mode_get(stmdev_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dlc_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
+
   ret = ism330dlc_read_reg(ctx, ISM330DLC_OUT_TEMP_L, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) +  (int16_t)buff[0];
+
   return ret;
 }
 
@@ -1070,10 +1075,19 @@ int32_t ism330dlc_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dlc_angular_rate_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
+
   ret = ism330dlc_read_reg(ctx, ISM330DLC_OUTX_L_G, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) +  (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) +  (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) +  (int16_t)buff[4];
+
   return ret;
 }
 
@@ -1086,10 +1100,19 @@ int32_t ism330dlc_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dlc_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
+
   ret = ism330dlc_read_reg(ctx, ISM330DLC_OUTX_L_XL, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) +  (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) +  (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) +  (int16_t)buff[4];
+
   return ret;
 }
 
@@ -1101,10 +1124,19 @@ int32_t ism330dlc_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_mag_calibrated_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dlc_mag_calibrated_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
+
   ret = ism330dlc_read_reg(ctx, ISM330DLC_OUT_MAG_RAW_X_L, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) +  (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) +  (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) +  (int16_t)buff[4];
+
   return ret;
 }
 
@@ -1118,7 +1150,7 @@ int32_t ism330dlc_mag_calibrated_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   *
   */
 int32_t ism330dlc_fifo_raw_data_get(stmdev_ctx_t *ctx, uint8_t *buffer,
-                                  uint8_t len)
+                                    uint8_t len)
 {
   int32_t ret;
   ret = ism330dlc_read_reg(ctx, ISM330DLC_FIFO_DATA_OUT_L, buffer, len);
@@ -4708,8 +4740,8 @@ int32_t ism330dlc_fifo_watermark_set(stmdev_ctx_t *ctx, uint16_t val)
   ret = ism330dlc_read_reg(ctx, ISM330DLC_FIFO_CTRL2,
                            (uint8_t*)&fifo_ctrl2, 1);
   if(ret == 0){
-    fifo_ctrl1.fth = (uint8_t) (0x00FFU & val);
-    fifo_ctrl2.fth = (uint8_t) (( 0x0700U & val ) >> 8);
+    fifo_ctrl2.fth = (uint8_t) (uint8_t) (val / 256U);
+    fifo_ctrl1.fth = (uint8_t) (uint8_t) (val - (fifo_ctrl2.fth * 256U));
     ret = ism330dlc_write_reg(ctx, ISM330DLC_FIFO_CTRL1,
                               (uint8_t*)&fifo_ctrl1, 1);
     if(ret == 0){
@@ -4740,7 +4772,8 @@ int32_t ism330dlc_fifo_watermark_get(stmdev_ctx_t *ctx, uint16_t *val)
     ret = ism330dlc_read_reg(ctx, ISM330DLC_FIFO_CTRL2,
                              (uint8_t*)&fifo_ctrl2, 1);
   }
-  *val = ((uint16_t)fifo_ctrl2.fth << 8) + (uint16_t)fifo_ctrl1.fth;
+  *val = fifo_ctrl2.fth;
+  *val = (*val * 256U) +  fifo_ctrl1.fth;
 
   return ret;
 }
@@ -4766,8 +4799,8 @@ int32_t ism330dlc_fifo_data_level_get(stmdev_ctx_t *ctx, uint16_t *val)
   if(ret == 0){
     ret = ism330dlc_read_reg(ctx, ISM330DLC_FIFO_STATUS2,
                              (uint8_t*)&fifo_status2, 1);
-    *val = ( (uint16_t) fifo_status2.diff_fifo << 8) +
-             (uint16_t) fifo_status1.diff_fifo;
+     *val = fifo_status2.diff_fifo;
+     *val = (*val * 256U) +  fifo_status1.diff_fifo;
   }
 
   return ret;
@@ -4813,8 +4846,8 @@ int32_t ism330dlc_fifo_pattern_get(stmdev_ctx_t *ctx, uint16_t *val)
   if(ret == 0){
     ret = ism330dlc_read_reg(ctx, ISM330DLC_FIFO_STATUS4,
                              (uint8_t*)&fifo_status4, 1);
-    *val = ( (uint16_t)fifo_status4.fifo_pattern << 8) +
-             fifo_status3.fifo_pattern;
+    *val = fifo_status4.fifo_pattern;
+    *val = (*val * 256U) +  fifo_status3.fifo_pattern;
   }
   return ret;
 }
@@ -5901,12 +5934,19 @@ int32_t ism330dlc_mag_soft_iron_mat_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dlc_mag_offset_set(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
 
   ret = ism330dlc_mem_bank_set(ctx, ISM330DLC_BANK_A);
   if(ret == 0){
+    buff[1] = (uint8_t) ((uint16_t)val[0] / 256U);
+    buff[0] = (uint8_t) ((uint16_t)val[0] - (buff[1] * 256U));
+    buff[3] = (uint8_t) ((uint16_t)val[1] / 256U);
+    buff[2] = (uint8_t) ((uint16_t)val[1] - (buff[3] * 256U));
+    buff[5] = (uint8_t) ((uint16_t)val[2] / 256U);
+    buff[4] = (uint8_t) ((uint16_t)val[2] - (buff[5] * 256U));
     ret = ism330dlc_write_reg(ctx, ISM330DLC_MAG_OFFX_L, buff, 6);
     if(ret == 0){
       ret = ism330dlc_mem_bank_set(ctx, ISM330DLC_USER_BANK);
@@ -5924,13 +5964,20 @@ int32_t ism330dlc_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t ism330dlc_mag_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t ism330dlc_mag_offset_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
 
   ret = ism330dlc_mem_bank_set(ctx, ISM330DLC_BANK_A);
   if(ret == 0){
     ret = ism330dlc_read_reg(ctx, ISM330DLC_MAG_OFFX_L, buff, 6);
+    val[0] = (int16_t)buff[1];
+    val[0] = (val[0] * 256) + (int16_t)buff[0];
+    val[1] = (int16_t)buff[3];
+    val[1] = (val[1] * 256) + (int16_t)buff[2];
+    val[2] = (int16_t)buff[5];
+    val[2] = (val[2] * 256) + (int16_t)buff[4];
     if(ret == 0){
       ret = ism330dlc_mem_bank_set(ctx, ISM330DLC_USER_BANK);
     }

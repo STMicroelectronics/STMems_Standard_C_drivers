@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -35,6 +35,37 @@
   *
   */
 
+/** @defgroup  Endianness definitions
+  * @{
+  *
+  */
+
+#ifndef DRV_BYTE_ORDER
+#ifndef __BYTE_ORDER__
+
+#define DRV_LITTLE_ENDIAN 1234
+#define DRV_BIG_ENDIAN    4321
+
+/** if _BYTE_ORDER is not defined, choose the endianness of your architecture
+  * by uncommenting the define which fits your platform endianness
+  */
+//#define DRV_BYTE_ORDER    DRV_BIG_ENDIAN
+#define DRV_BYTE_ORDER    DRV_LITTLE_ENDIAN
+
+#else /* defined __BYTE_ORDER__ */
+
+#define DRV_LITTLE_ENDIAN  __ORDER_LITTLE_ENDIAN__
+#define DRV_BIG_ENDIAN     __ORDER_BIG_ENDIAN__
+#define DRV_BYTE_ORDER     __BYTE_ORDER__
+
+#endif /* __BYTE_ORDER__*/
+#endif /* DRV_BYTE_ORDER */
+
+/**
+  * @}
+  *
+  */
+
 /** @defgroup STMicroelectronics sensors common types
   * @{
   *
@@ -44,6 +75,7 @@
 #define MEMS_SHARED_TYPES
 
 typedef struct{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -52,6 +84,16 @@ typedef struct{
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit0       : 1;
+#endif /* DRV_BYTE_ORDER */
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
@@ -89,9 +131,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using 
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using 
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -133,20 +175,35 @@ typedef struct {
 
 #define ISM330DLC_FUNC_CFG_ACCESS              0x01U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01              : 7;
   uint8_t func_cfg_en              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t func_cfg_en              : 1;
+  uint8_t not_used_01              : 7;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_func_cfg_access_t;
 
 #define ISM330DLC_SENSOR_SYNC_TIME_FRAME       0x04U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t tph                      : 4;
   uint8_t not_used_01              : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 4;
+  uint8_t tph                      : 4;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensor_sync_time_frame_t;
 
 #define ISM330DLC_SENSOR_SYNC_RES_RATIO        0x05U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t rr                       : 2;
   uint8_t not_used_01              : 6;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 6;
+  uint8_t rr                       : 2;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensor_sync_res_ratio_t;
 
 #define ISM330DLC_FIFO_CTRL1                   0x06U
@@ -156,53 +213,95 @@ typedef struct {
 
 #define ISM330DLC_FIFO_CTRL2                   0x07U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t fth                      : 3;  /* + FIFO_CTRL1(fth) */
   uint8_t fifo_temp_en             : 1;
   uint8_t not_used_01              : 4;
   uint8_t fifo_timer_en            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t fifo_timer_en            : 1;
+  uint8_t not_used_01              : 4;
+  uint8_t fifo_temp_en             : 1;
+  uint8_t fth                      : 3;  /* + FIFO_CTRL1(fth) */
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_fifo_ctrl2_t;
 
 #define ISM330DLC_FIFO_CTRL3                   0x08U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t dec_fifo_xl              : 3;
   uint8_t dec_fifo_gyro            : 3;
   uint8_t not_used_01              : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 2;
+  uint8_t dec_fifo_gyro            : 3;
+  uint8_t dec_fifo_xl              : 3;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_fifo_ctrl3_t;
 
 #define ISM330DLC_FIFO_CTRL4                   0x09U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t dec_ds3_fifo             : 3;
   uint8_t dec_ds4_fifo             : 3;
   uint8_t only_high_data           : 1;
   uint8_t stop_on_fth              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t stop_on_fth              : 1;
+  uint8_t only_high_data           : 1;
+  uint8_t dec_ds4_fifo             : 3;
+  uint8_t dec_ds3_fifo             : 3;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_fifo_ctrl4_t;
 
 #define ISM330DLC_FIFO_CTRL5                   0x0AU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t fifo_mode                : 3;
   uint8_t odr_fifo                 : 4;
   uint8_t not_used_01              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 1;
+  uint8_t odr_fifo                 : 4;
+  uint8_t fifo_mode                : 3;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_fifo_ctrl5_t;
 
 #define ISM330DLC_DRDY_PULSE_CFG               0x0BU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01              : 7;
   uint8_t drdy_pulsed              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t drdy_pulsed              : 1;
+  uint8_t not_used_01              : 7;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_drdy_pulse_cfg_t;
 
 #define ISM330DLC_INT1_CTRL                    0x0DU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t int1_drdy_xl             : 1;
   uint8_t int1_drdy_g              : 1;
   uint8_t int1_boot                : 1;
   uint8_t int1_fth                 : 1;
   uint8_t int1_fifo_ovr            : 1;
   uint8_t int1_full_flag           : 1;
-  uint8_t not_used_01              : 2;  
+  uint8_t not_used_01              : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 2;
+  uint8_t int1_full_flag           : 1;
+  uint8_t int1_fifo_ovr            : 1;
+  uint8_t int1_fth                 : 1;
+  uint8_t int1_boot                : 1;
+  uint8_t int1_drdy_g              : 1;
+  uint8_t int1_drdy_xl             : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_int1_ctrl_t;
 
 #define ISM330DLC_INT2_CTRL                    0x0EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t int2_drdy_xl             : 1;
   uint8_t int2_drdy_g              : 1;
   uint8_t int2_drdy_temp           : 1;
@@ -210,26 +309,49 @@ typedef struct {
   uint8_t int2_fifo_ovr            : 1;
   uint8_t int2_full_flag           : 1;
   uint8_t not_used_01              : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 2;
+  uint8_t int2_full_flag           : 1;
+  uint8_t int2_fifo_ovr            : 1;
+  uint8_t int2_fth                 : 1;
+  uint8_t int2_drdy_temp           : 1;
+  uint8_t int2_drdy_g              : 1;
+  uint8_t int2_drdy_xl             : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_int2_ctrl_t;
 
 #define ISM330DLC_WHO_AM_I                     0x0FU
 #define ISM330DLC_CTRL1_XL                     0x10U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bw0_xl                   : 1;
   uint8_t lpf1_bw_sel              : 1;
   uint8_t fs_xl                    : 2;
   uint8_t odr_xl                   : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t odr_xl                   : 4;
+  uint8_t fs_xl                    : 2;
+  uint8_t lpf1_bw_sel              : 1;
+  uint8_t bw0_xl                   : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_ctrl1_xl_t;
 
 #define ISM330DLC_CTRL2_G                      0x11U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01              : 1;
   uint8_t fs_g                     : 3;  /* fs_g + fs_125 */
   uint8_t odr_g                    : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t odr_g                    : 4;
+  uint8_t fs_g                     : 3;  /* fs_g + fs_125 */
+  uint8_t not_used_01              : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_ctrl2_g_t;
 
 #define ISM330DLC_CTRL3_C                      0x12U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t sw_reset                 : 1;
   uint8_t ble                      : 1;
   uint8_t if_inc                   : 1;
@@ -238,10 +360,21 @@ typedef struct {
   uint8_t h_lactive                : 1;
   uint8_t bdu                      : 1;
   uint8_t boot                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t boot                     : 1;
+  uint8_t bdu                      : 1;
+  uint8_t h_lactive                : 1;
+  uint8_t pp_od                    : 1;
+  uint8_t sim                      : 1;
+  uint8_t if_inc                   : 1;
+  uint8_t ble                      : 1;
+  uint8_t sw_reset                 : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_ctrl3_c_t;
 
 #define ISM330DLC_CTRL4_C                      0x13U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01              : 1;
   uint8_t lpf1_sel_g               : 1;
   uint8_t i2c_disable              : 1;
@@ -250,37 +383,72 @@ typedef struct {
   uint8_t int2_on_int1             : 1;
   uint8_t sleep                    : 1;
   uint8_t den_xl_en                : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t den_xl_en                : 1;
+  uint8_t sleep                    : 1;
+  uint8_t int2_on_int1             : 1;
+  uint8_t den_drdy_int1            : 1;
+  uint8_t drdy_mask                : 1;
+  uint8_t i2c_disable              : 1;
+  uint8_t lpf1_sel_g               : 1;
+  uint8_t not_used_01              : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_ctrl4_c_t;
 
 #define ISM330DLC_CTRL5_C                      0x14U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t st_xl                    : 2;
   uint8_t st_g                     : 2;
   uint8_t den_lh                   : 1;
   uint8_t rounding                 : 3;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t rounding                 : 3;
+  uint8_t den_lh                   : 1;
+  uint8_t st_g                     : 2;
+  uint8_t st_xl                    : 2;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_ctrl5_c_t;
 
 #define ISM330DLC_CTRL6_C                      0x15U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ftype                    : 2;
   uint8_t not_used_01              : 1;
   uint8_t usr_off_w                : 1;
   uint8_t xl_hm_mode               : 1;
   uint8_t den_mode                 : 3;  /* trig_en + lvl_en + lvl2_en */
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t den_mode                 : 3;  /* trig_en + lvl_en + lvl2_en */
+  uint8_t xl_hm_mode               : 1;
+  uint8_t usr_off_w                : 1;
+  uint8_t not_used_01              : 1;
+  uint8_t ftype                    : 2;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_ctrl6_c_t;
 
 #define ISM330DLC_CTRL7_G                      0x16U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01              : 2;
   uint8_t rounding_status          : 1;
   uint8_t not_used_02              : 1;
   uint8_t hpm_g                    : 2;
   uint8_t hp_en_g                  : 1;
   uint8_t g_hm_mode                : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t g_hm_mode                : 1;
+  uint8_t hp_en_g                  : 1;
+  uint8_t hpm_g                    : 2;
+  uint8_t not_used_02              : 1;
+  uint8_t rounding_status          : 1;
+  uint8_t not_used_01              : 2;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_ctrl7_g_t;
 
 #define ISM330DLC_CTRL8_XL                     0x17U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t low_pass_on_6d           : 1;
   uint8_t not_used_01              : 1;
   uint8_t hp_slope_xl_en           : 1;
@@ -288,10 +456,20 @@ typedef struct {
   uint8_t hp_ref_mode              : 1;
   uint8_t hpcf_xl                  : 2;
   uint8_t lpf2_xl_en               : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t lpf2_xl_en               : 1;
+  uint8_t hpcf_xl                  : 2;
+  uint8_t hp_ref_mode              : 1;
+  uint8_t input_composite          : 1;
+  uint8_t hp_slope_xl_en           : 1;
+  uint8_t not_used_01              : 1;
+  uint8_t low_pass_on_6d           : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_ctrl8_xl_t;
 
 #define ISM330DLC_CTRL9_XL                     0x18U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01              : 2;
   uint8_t soft_en                  : 1;
   uint8_t not_used_02              : 1;
@@ -299,20 +477,39 @@ typedef struct {
   uint8_t den_z                    : 1;
   uint8_t den_y                    : 1;
   uint8_t den_x                    : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t den_x                    : 1;
+  uint8_t den_y                    : 1;
+  uint8_t den_z                    : 1;
+  uint8_t den_xl_g                 : 1;
+  uint8_t not_used_02              : 1;
+  uint8_t soft_en                  : 1;
+  uint8_t not_used_01              : 2;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_ctrl9_xl_t;
 
 #define ISM330DLC_CTRL10_C                     0x19U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01              : 2;
   uint8_t func_en                  : 1;
   uint8_t tilt_en                  : 1;
   uint8_t not_used_02              : 1;
   uint8_t timer_en                 : 1;
   uint8_t not_used_03              : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_03              : 2;
+  uint8_t timer_en                 : 1;
+  uint8_t not_used_02              : 1;
+  uint8_t tilt_en                  : 1;
+  uint8_t func_en                  : 1;
+  uint8_t not_used_01              : 2;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_ctrl10_c_t;
 
 #define ISM330DLC_MASTER_CONFIG                0x1AU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t master_on                : 1;
   uint8_t iron_en                  : 1;
   uint8_t pass_through_mode        : 1;
@@ -321,10 +518,21 @@ typedef struct {
   uint8_t not_used_01              : 1;
   uint8_t  data_valid_sel_fifo     : 1;
   uint8_t drdy_on_int1             : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t drdy_on_int1             : 1;
+  uint8_t  data_valid_sel_fifo     : 1;
+  uint8_t not_used_01              : 1;
+  uint8_t start_config             : 1;
+  uint8_t pull_up_en               : 1;
+  uint8_t pass_through_mode        : 1;
+  uint8_t iron_en                  : 1;
+  uint8_t master_on                : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_master_config_t;
 
 #define ISM330DLC_WAKE_UP_SRC                  0x1BU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t z_wu                     : 1;
   uint8_t y_wu                     : 1;
   uint8_t x_wu                     : 1;
@@ -332,10 +540,20 @@ typedef struct {
   uint8_t sleep_state_ia           : 1;
   uint8_t ff_ia                    : 1;
   uint8_t not_used_01              : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 2;
+  uint8_t ff_ia                    : 1;
+  uint8_t sleep_state_ia           : 1;
+  uint8_t wu_ia                    : 1;
+  uint8_t x_wu                     : 1;
+  uint8_t y_wu                     : 1;
+  uint8_t z_wu                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_wake_up_src_t;
 
 #define ISM330DLC_TAP_SRC                      0x1CU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t z_tap                    : 1;
   uint8_t y_tap                    : 1;
   uint8_t x_tap                    : 1;
@@ -344,10 +562,21 @@ typedef struct {
   uint8_t single_tap               : 1;
   uint8_t tap_ia                   : 1;
   uint8_t not_used_01              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 1;
+  uint8_t tap_ia                   : 1;
+  uint8_t single_tap               : 1;
+  uint8_t double_tap               : 1;
+  uint8_t tap_sign                 : 1;
+  uint8_t x_tap                    : 1;
+  uint8_t y_tap                    : 1;
+  uint8_t z_tap                    : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_tap_src_t;
 
 #define ISM330DLC_D6D_SRC                      0x1DU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xl                       : 1;
   uint8_t xh                       : 1;
   uint8_t yl                       : 1;
@@ -356,22 +585,46 @@ typedef struct {
   uint8_t zh                       : 1;
   uint8_t d6d_ia                   : 1;
   uint8_t den_drdy                 : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t den_drdy                 : 1;
+  uint8_t d6d_ia                   : 1;
+  uint8_t zh                       : 1;
+  uint8_t zl                       : 1;
+  uint8_t yh                       : 1;
+  uint8_t yl                       : 1;
+  uint8_t xh                       : 1;
+  uint8_t xl                       : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_d6d_src_t;
 
 #define ISM330DLC_STATUS_REG                   0x1EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xlda                     : 1;
   uint8_t gda                      : 1;
   uint8_t tda                      : 1;
   uint8_t not_used_01              : 5;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 5;
+  uint8_t tda                      : 1;
+  uint8_t gda                      : 1;
+  uint8_t xlda                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_status_reg_t;
 
 #define ISM330DLC_STATUS_SPIAUX                0x1EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xlda                     : 1;
   uint8_t gda                      : 1;
   uint8_t gyro_settling            : 1;
   uint8_t not_used_01              : 5;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 5;
+  uint8_t gyro_settling            : 1;
+  uint8_t gda                      : 1;
+  uint8_t xlda                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_status_spiaux_t;
 
 #define ISM330DLC_OUT_TEMP_L                   0x20U
@@ -390,6 +643,7 @@ typedef struct {
 #define ISM330DLC_OUTZ_H_XL                    0x2DU
 #define ISM330DLC_SENSORHUB1_REG               0x2EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -398,10 +652,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensorhub1_reg_t;
 
 #define ISM330DLC_SENSORHUB2_REG               0x2FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -410,10 +675,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensorhub2_reg_t;
 
 #define ISM330DLC_SENSORHUB3_REG               0x30U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -422,10 +698,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensorhub3_reg_t;
 
 #define ISM330DLC_SENSORHUB4_REG               0x31U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -434,10 +721,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensorhub4_reg_t;
 
 #define ISM330DLC_SENSORHUB5_REG               0x32U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -446,10 +744,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensorhub5_reg_t;
 
 #define ISM330DLC_SENSORHUB6_REG               0x33U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -458,10 +767,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensorhub6_reg_t;
 
 #define ISM330DLC_SENSORHUB7_REG               0x34U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -470,10 +790,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensorhub7_reg_t;
 
 #define ISM330DLC_SENSORHUB8_REG               0x35U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -482,10 +813,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensorhub8_reg_t;
 
 #define ISM330DLC_SENSORHUB9_REG               0x36U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -494,10 +836,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensorhub9_reg_t;
 
 #define ISM330DLC_SENSORHUB10_REG              0x37U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -506,10 +859,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensorhub10_reg_t;
 
 #define ISM330DLC_SENSORHUB11_REG              0x38U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -518,10 +882,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensorhub11_reg_t;
 
 #define ISM330DLC_SENSORHUB12_REG              0x39U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -530,6 +905,16 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensorhub12_reg_t;
 
 #define ISM330DLC_FIFO_STATUS1                 0x3AU
@@ -539,12 +924,21 @@ typedef struct {
 
 #define ISM330DLC_FIFO_STATUS2                 0x3BU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t diff_fifo                : 3;  /* + FIFO_STATUS1(diff_fifo) */
   uint8_t not_used_01              : 1;
   uint8_t fifo_empty               : 1;
   uint8_t fifo_full_smart          : 1;
   uint8_t over_run                 : 1;
   uint8_t waterm                   : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t waterm                   : 1;
+  uint8_t over_run                 : 1;
+  uint8_t fifo_full_smart          : 1;
+  uint8_t fifo_empty               : 1;
+  uint8_t not_used_01              : 1;
+  uint8_t diff_fifo                : 3;  /* + FIFO_STATUS1(diff_fifo) */
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_fifo_status2_t;
 
 #define ISM330DLC_FIFO_STATUS3                 0x3CU
@@ -554,8 +948,13 @@ typedef struct {
 
 #define ISM330DLC_FIFO_STATUS4                 0x3DU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t fifo_pattern             : 2;  /* + FIFO_STATUS3(fifo_pattern) */
   uint8_t not_used_01              : 6;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 6;
+  uint8_t fifo_pattern             : 2;  /* + FIFO_STATUS3(fifo_pattern) */
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_fifo_status4_t;
 
 #define ISM330DLC_FIFO_DATA_OUT_L              0x3E
@@ -566,6 +965,7 @@ typedef struct {
 
 #define ISM330DLC_SENSORHUB13_REG              0x4DU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -574,10 +974,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensorhub13_reg_t;
 
 #define ISM330DLC_SENSORHUB14_REG              0x4EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -586,10 +997,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensorhub14_reg_t;
 
 #define ISM330DLC_SENSORHUB15_REG              0x4FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -598,10 +1020,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensorhub15_reg_t;
 
 #define ISM330DLC_SENSORHUB16_REG              0x50U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -610,10 +1043,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensorhub16_reg_t;
 
 #define ISM330DLC_SENSORHUB17_REG              0x51U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -622,10 +1066,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensorhub17_reg_t;
 
 #define ISM330DLC_SENSORHUB18_REG              0x52U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -634,30 +1089,59 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_sensorhub18_reg_t;
 
 #define ISM330DLC_FUNC_SRC1                    0x53U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t sensorhub_end_op         : 1;
   uint8_t si_end_op                : 1;
   uint8_t hi_fail                  : 1;
   uint8_t not_used_01              : 2;
   uint8_t tilt_ia                  : 1;
   uint8_t not_used_02              : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_02              : 2;
+  uint8_t tilt_ia                  : 1;
+  uint8_t not_used_01              : 2;
+  uint8_t hi_fail                  : 1;
+  uint8_t si_end_op                : 1;
+  uint8_t sensorhub_end_op         : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_func_src1_t;
 
 #define ISM330DLC_FUNC_SRC2                    0x54U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01              : 3;
   uint8_t slave0_nack              : 1;
   uint8_t slave1_nack              : 1;
   uint8_t slave2_nack              : 1;
   uint8_t slave3_nack              : 1;
   uint8_t not_used_02              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_02              : 1;
+  uint8_t slave3_nack              : 1;
+  uint8_t slave2_nack              : 1;
+  uint8_t slave1_nack              : 1;
+  uint8_t slave0_nack              : 1;
+  uint8_t not_used_01              : 3;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_func_src2_t;
 
 #define ISM330DLC_TAP_CFG                      0x58U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t lir                      : 1;
   uint8_t tap_z_en                 : 1;
   uint8_t tap_y_en                 : 1;
@@ -665,45 +1149,85 @@ typedef struct {
   uint8_t slope_fds                : 1;
   uint8_t inact_en                 : 2;
   uint8_t interrupts_enable        : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t interrupts_enable        : 1;
+  uint8_t inact_en                 : 2;
+  uint8_t slope_fds                : 1;
+  uint8_t tap_x_en                 : 1;
+  uint8_t tap_y_en                 : 1;
+  uint8_t tap_z_en                 : 1;
+  uint8_t lir                      : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_tap_cfg_t;
 
 #define ISM330DLC_TAP_THS_6D                   0x59U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t tap_ths                  : 5;
   uint8_t sixd_ths                 : 2;
   uint8_t d4d_en                   : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t d4d_en                   : 1;
+  uint8_t sixd_ths                 : 2;
+  uint8_t tap_ths                  : 5;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_tap_ths_6d_t;
 
 #define ISM330DLC_INT_DUR2                     0x5AU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t shock                    : 2;
   uint8_t quiet                    : 2;
   uint8_t dur                      : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t dur                      : 4;
+  uint8_t quiet                    : 2;
+  uint8_t shock                    : 2;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_int_dur2_t;
 
 #define ISM330DLC_WAKE_UP_THS                  0x5BU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t wk_ths                   : 6;
   uint8_t not_used_01              : 1;
   uint8_t single_double_tap        : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t single_double_tap        : 1;
+  uint8_t not_used_01              : 1;
+  uint8_t wk_ths                   : 6;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_wake_up_ths_t;
 
 #define ISM330DLC_WAKE_UP_DUR                  0x5CU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t sleep_dur                : 4;
   uint8_t timer_hr                 : 1;
   uint8_t wake_dur                 : 2;
   uint8_t ff_dur                   : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t ff_dur                   : 1;
+  uint8_t wake_dur                 : 2;
+  uint8_t timer_hr                 : 1;
+  uint8_t sleep_dur                : 4;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_wake_up_dur_t;
 
 #define ISM330DLC_FREE_FALL                    0x5DU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ff_ths                   : 3;
   uint8_t ff_dur                   : 5;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t ff_dur                   : 5;
+  uint8_t ff_ths                   : 3;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_free_fall_t;
 
 #define ISM330DLC_MD1_CFG                      0x5EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t int1_timer               : 1;
   uint8_t int1_tilt                : 1;
   uint8_t int1_6d                  : 1;
@@ -712,10 +1236,21 @@ typedef struct {
   uint8_t int1_wu                  : 1;
   uint8_t int1_single_tap          : 1;
   uint8_t int1_inact_state         : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t int1_inact_state         : 1;
+  uint8_t int1_single_tap          : 1;
+  uint8_t int1_wu                  : 1;
+  uint8_t int1_ff                  : 1;
+  uint8_t int1_double_tap          : 1;
+  uint8_t int1_6d                  : 1;
+  uint8_t int1_tilt                : 1;
+  uint8_t int1_timer               : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_md1_cfg_t;
 
 #define ISM330DLC_MD2_CFG                      0x5FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t int2_iron                : 1;
   uint8_t int2_tilt                : 1;
   uint8_t int2_6d                  : 1;
@@ -724,6 +1259,16 @@ typedef struct {
   uint8_t int2_wu                  : 1;
   uint8_t int2_single_tap          : 1;
   uint8_t int2_inact_state         : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t int2_inact_state         : 1;
+  uint8_t int2_single_tap          : 1;
+  uint8_t int2_wu                  : 1;
+  uint8_t int2_ff                  : 1;
+  uint8_t int2_double_tap          : 1;
+  uint8_t int2_6d                  : 1;
+  uint8_t int2_tilt                : 1;
+  uint8_t int2_iron                : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_md2_cfg_t;
 
 #define ISM330DLC_MASTER_CMD_CODE              0x60U
@@ -744,37 +1289,68 @@ typedef struct {
 #define ISM330DLC_OUT_MAG_RAW_Z_H              0x6BU
 #define ISM330DLC_INT_OIS                      0x6FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01              : 6;
   uint8_t lvl2_ois                 : 1;
   uint8_t int2_drdy_ois            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t int2_drdy_ois            : 1;
+  uint8_t lvl2_ois                 : 1;
+  uint8_t not_used_01              : 6;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_int_ois_t;
 
 #define ISM330DLC_CTRL1_OIS                    0x70U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ois_en_spi2              : 1;
   uint8_t fs_g_ois                 : 3;  /* fs_g_ois + fs_125_ois */
   uint8_t mode4_en                 : 1;
   uint8_t sim_ois                  : 1;
   uint8_t lvl1_ois                 : 1;
   uint8_t ble_ois                  : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t ble_ois                  : 1;
+  uint8_t lvl1_ois                 : 1;
+  uint8_t sim_ois                  : 1;
+  uint8_t mode4_en                 : 1;
+  uint8_t fs_g_ois                 : 3;  /* fs_g_ois + fs_125_ois */
+  uint8_t ois_en_spi2              : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_ctrl1_ois_t;
 
 #define ISM330DLC_CTRL2_OIS                    0x71U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t hp_en_ois                : 1;
   uint8_t ftype_ois                : 2;
   uint8_t not_used_01              : 1;
   uint8_t hpm_ois                  : 2;
   uint8_t not_used_02              : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_02              : 2;
+  uint8_t hpm_ois                  : 2;
+  uint8_t not_used_01              : 1;
+  uint8_t ftype_ois                : 2;
+  uint8_t hp_en_ois                : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_ctrl2_ois_t;
 
 #define ISM330DLC_CTRL3_OIS                    0x72U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t st_ois_clampdis          : 1;
   uint8_t st_ois                   : 2;
   uint8_t filter_xl_conf_ois       : 2;
   uint8_t fs_xl_ois                : 2;
   uint8_t den_lh_ois               : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t den_lh_ois               : 1;
+  uint8_t fs_xl_ois                : 2;
+  uint8_t filter_xl_conf_ois       : 2;
+  uint8_t st_ois                   : 2;
+  uint8_t st_ois_clampdis          : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_ctrl3_ois_t;
 
 #define ISM330DLC_X_OFS_USR                    0x73U
@@ -782,8 +1358,13 @@ typedef struct {
 #define ISM330DLC_Z_OFS_USR                    0x75U
 #define ISM330DLC_SLV0_ADD                     0x02U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t rw_0                     : 1;
   uint8_t slave0_add               : 7;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t slave0_add               : 7;
+  uint8_t rw_0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_slv0_add_t;
 
 #define ISM330DLC_SLV0_SUBADD                  0x03U
@@ -793,16 +1374,28 @@ typedef struct {
 
 #define ISM330DLC_SLAVE0_CONFIG                0x04U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t slave0_numop             : 3;
   uint8_t src_mode                 : 1;
   uint8_t aux_sens_on              : 2;
   uint8_t slave0_rate              : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t slave0_rate              : 2;
+  uint8_t aux_sens_on              : 2;
+  uint8_t src_mode                 : 1;
+  uint8_t slave0_numop             : 3;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_slave0_config_t;
 
 #define ISM330DLC_SLV1_ADD                     0x05U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t r_1                      : 1;
   uint8_t slave1_add               : 7;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t slave1_add               : 7;
+  uint8_t r_1                      : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_slv1_add_t;
 
 #define ISM330DLC_SLV1_SUBADD                  0x06U
@@ -812,16 +1405,28 @@ typedef struct {
 
 #define ISM330DLC_SLAVE1_CONFIG                0x07U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t slave1_numop             : 3;
   uint8_t not_used_01              : 2;
   uint8_t write_once               : 1;
   uint8_t slave1_rate              : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t slave1_rate              : 2;
+  uint8_t write_once               : 1;
+  uint8_t not_used_01              : 2;
+  uint8_t slave1_numop             : 3;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_slave1_config_t;
 
 #define ISM330DLC_SLV2_ADD                     0x08U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t r_2                      : 1;
   uint8_t slave2_add               : 7;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t slave2_add               : 7;
+  uint8_t r_2                      : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_slv2_add_t;
 
 #define ISM330DLC_SLV2_SUBADD                  0x09U
@@ -831,15 +1436,26 @@ typedef struct {
 
 #define ISM330DLC_SLAVE2_CONFIG                0x0AU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t slave2_numop             : 3;
   uint8_t not_used_01              : 3;
   uint8_t slave2_rate              : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t slave2_rate              : 2;
+  uint8_t not_used_01              : 3;
+  uint8_t slave2_numop             : 3;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_slave2_config_t;
 
 #define ISM330DLC_SLV3_ADD                     0x0BU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t r_3                      : 1;
   uint8_t slave3_add               : 7;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t slave3_add               : 7;
+  uint8_t r_3                      : 1;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_slv3_add_t;
 
 #define ISM330DLC_SLV3_SUBADD                  0x0CU
@@ -849,9 +1465,15 @@ typedef struct {
 
 #define ISM330DLC_SLAVE3_CONFIG                0x0DU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t slave3_numop             : 3;
   uint8_t not_used_01              : 3;
   uint8_t slave3_rate              : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t slave3_rate              : 2;
+  uint8_t not_used_01              : 3;
+  uint8_t slave3_numop             : 3;
+#endif /* DRV_BYTE_ORDER */
 } ism330dlc_slave3_config_t;
 
 #define ISM330DLC_DATAWRITE_SRC_MODE_SUB_SLV0  0x0EU
@@ -980,18 +1602,18 @@ int32_t ism330dlc_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t ism330dlc_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
-extern float_t ism330dlc_from_fs2g_to_mg(int16_t lsb);
-extern float_t ism330dlc_from_fs4g_to_mg(int16_t lsb);
-extern float_t ism330dlc_from_fs8g_to_mg(int16_t lsb);
-extern float_t ism330dlc_from_fs16g_to_mg(int16_t lsb);
+float_t ism330dlc_from_fs2g_to_mg(int16_t lsb);
+float_t ism330dlc_from_fs4g_to_mg(int16_t lsb);
+float_t ism330dlc_from_fs8g_to_mg(int16_t lsb);
+float_t ism330dlc_from_fs16g_to_mg(int16_t lsb);
 
-extern float_t ism330dlc_from_fs125dps_to_mdps(int16_t lsb);
-extern float_t ism330dlc_from_fs250dps_to_mdps(int16_t lsb);
-extern float_t ism330dlc_from_fs500dps_to_mdps(int16_t lsb);
-extern float_t ism330dlc_from_fs1000dps_to_mdps(int16_t lsb);
-extern float_t ism330dlc_from_fs2000dps_to_mdps(int16_t lsb);
+float_t ism330dlc_from_fs125dps_to_mdps(int16_t lsb);
+float_t ism330dlc_from_fs250dps_to_mdps(int16_t lsb);
+float_t ism330dlc_from_fs500dps_to_mdps(int16_t lsb);
+float_t ism330dlc_from_fs1000dps_to_mdps(int16_t lsb);
+float_t ism330dlc_from_fs2000dps_to_mdps(int16_t lsb);
 
-extern float_t ism330dlc_from_lsb_to_celsius(int16_t lsb);
+float_t ism330dlc_from_lsb_to_celsius(int16_t lsb);
 
 typedef enum {
   ISM330DLC_2g       = 0,
@@ -1129,16 +1751,16 @@ typedef enum {
 int32_t ism330dlc_rounding_mode_set(stmdev_ctx_t *ctx, ism330dlc_rounding_t val);
 int32_t ism330dlc_rounding_mode_get(stmdev_ctx_t *ctx, ism330dlc_rounding_t *val);
 
-int32_t ism330dlc_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t ism330dlc_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
-int32_t ism330dlc_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t ism330dlc_angular_rate_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
-int32_t ism330dlc_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t ism330dlc_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
-int32_t ism330dlc_mag_calibrated_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t ism330dlc_mag_calibrated_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
 int32_t ism330dlc_fifo_raw_data_get(stmdev_ctx_t *ctx, uint8_t *buffer,
-                                  uint8_t len);
+                                    uint8_t len);
 
 typedef enum {
   ISM330DLC_USER_BANK   = 0,
@@ -1752,8 +2374,8 @@ int32_t ism330dlc_mag_hard_iron_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t ism330dlc_mag_soft_iron_mat_set(stmdev_ctx_t *ctx, uint8_t *buff);
 int32_t ism330dlc_mag_soft_iron_mat_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t ism330dlc_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t ism330dlc_mag_offset_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t ism330dlc_mag_offset_set(stmdev_ctx_t *ctx, int16_t *val);
+int32_t ism330dlc_mag_offset_get(stmdev_ctx_t *ctx, int16_t *val);
 
 int32_t ism330dlc_sh_sync_sens_frame_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dlc_sh_sync_sens_frame_get(stmdev_ctx_t *ctx, uint8_t *val);
