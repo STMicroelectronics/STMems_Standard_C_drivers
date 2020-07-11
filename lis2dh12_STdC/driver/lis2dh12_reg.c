@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -84,79 +84,79 @@ int32_t lis2dh12_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-float lis2dh12_from_fs2_hr_to_mg(int16_t lsb)
+float_t lis2dh12_from_fs2_hr_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 16.0f ) * 1.0f;
+  return ( (float_t)lsb / 16.0f ) * 1.0f;
 }
 
-float lis2dh12_from_fs4_hr_to_mg(int16_t lsb)
+float_t lis2dh12_from_fs4_hr_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 16.0f ) *  2.0f;
+  return ( (float_t)lsb / 16.0f ) *  2.0f;
 }
 
-float lis2dh12_from_fs8_hr_to_mg(int16_t lsb)
+float_t lis2dh12_from_fs8_hr_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 16.0f ) * 4.0f;
+  return ( (float_t)lsb / 16.0f ) * 4.0f;
 }
 
-float lis2dh12_from_fs16_hr_to_mg(int16_t lsb)
+float_t lis2dh12_from_fs16_hr_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 16.0f ) * 12.0f;
+  return ( (float_t)lsb / 16.0f ) * 12.0f;
 }
 
-float lis2dh12_from_lsb_hr_to_celsius(int16_t lsb)
+float_t lis2dh12_from_lsb_hr_to_celsius(int16_t lsb)
 {
-  return ( ( (float)lsb / 64.0f ) / 4.0f ) + 25.0f;
+  return ( ( (float_t)lsb / 64.0f ) / 4.0f ) + 25.0f;
 }
 
-float lis2dh12_from_fs2_nm_to_mg(int16_t lsb)
+float_t lis2dh12_from_fs2_nm_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 64.0f ) *  4.0f;
+  return ( (float_t)lsb / 64.0f ) *  4.0f;
 }
 
-float lis2dh12_from_fs4_nm_to_mg(int16_t lsb)
+float_t lis2dh12_from_fs4_nm_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 64.0f ) *  8.0f;
+  return ( (float_t)lsb / 64.0f ) *  8.0f;
 }
 
-float lis2dh12_from_fs8_nm_to_mg(int16_t lsb)
+float_t lis2dh12_from_fs8_nm_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 64.0f ) * 16.0f;
+  return ( (float_t)lsb / 64.0f ) * 16.0f;
 }
 
-float lis2dh12_from_fs16_nm_to_mg(int16_t lsb)
+float_t lis2dh12_from_fs16_nm_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 64.0f ) * 48.0f;
+  return ( (float_t)lsb / 64.0f ) * 48.0f;
 }
 
-float lis2dh12_from_lsb_nm_to_celsius(int16_t lsb)
+float_t lis2dh12_from_lsb_nm_to_celsius(int16_t lsb)
 {
-  return ( ( (float)lsb / 64.0f ) / 4.0f ) + 25.0f;
+  return ( ( (float_t)lsb / 64.0f ) / 4.0f ) + 25.0f;
 }
 
-float lis2dh12_from_fs2_lp_to_mg(int16_t lsb)
+float_t lis2dh12_from_fs2_lp_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 256.0f ) * 16.0f;
+  return ( (float_t)lsb / 256.0f ) * 16.0f;
 }
 
-float lis2dh12_from_fs4_lp_to_mg(int16_t lsb)
+float_t lis2dh12_from_fs4_lp_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 256.0f ) * 32.0f;
+  return ( (float_t)lsb / 256.0f ) * 32.0f;
 }
 
-float lis2dh12_from_fs8_lp_to_mg(int16_t lsb)
+float_t lis2dh12_from_fs8_lp_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 256.0f ) * 64.0f;
+  return ( (float_t)lsb / 256.0f ) * 64.0f;
 }
 
-float lis2dh12_from_fs16_lp_to_mg(int16_t lsb)
+float_t lis2dh12_from_fs16_lp_to_mg(int16_t lsb)
 {
-  return ( (float)lsb / 256.0f ) * 192.0f;
+  return ( (float_t)lsb / 256.0f ) * 192.0f;
 }
 
-float lis2dh12_from_lsb_lp_to_celsius(int16_t lsb)
+float_t lis2dh12_from_lsb_lp_to_celsius(int16_t lsb)
 {
-  return ( ( (float)lsb / 256.0f ) * 1.0f ) + 25.0f;
+  return ( ( (float_t)lsb / 256.0f ) * 1.0f ) + 25.0f;
 }
 
 /**
@@ -231,10 +231,15 @@ int32_t lis2dh12_temp_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lis2dh12_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
+
   ret = lis2dh12_read_reg(ctx, LIS2DH12_OUT_TEMP_L, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) +  (int16_t)buff[0];
+
   return ret;
 }
 /**
@@ -767,10 +772,19 @@ int32_t lis2dh12_xl_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lis2dh12_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
+
   ret = lis2dh12_read_reg(ctx, LIS2DH12_OUT_X_L, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) +  (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) +  (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) +  (int16_t)buff[4];
+
   return ret;
 }
 /**
