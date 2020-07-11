@@ -28,7 +28,7 @@
 
 /**
   * @defgroup    L3GD20H_Interfaces_Functions
-  * @brief      This section provide a set of functions used to read and
+  * @brief       This section provide a set of functions used to read and
   *              write a generic register of the device.
   *              MANDATORY: return 0 -> no Error.
   * @{
@@ -383,10 +383,19 @@ int32_t l3gd20h_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l3gd20h_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t l3gd20h_angular_rate_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
+
   ret = l3gd20h_read_reg(ctx, L3GD20H_OUT_X_L, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) +  (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) +  (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) +  (int16_t)buff[4];
+
   return ret;
 }
 
@@ -896,8 +905,7 @@ int32_t l3gd20h_gy_filter_reference_set(stmdev_ctx_t *ctx, uint8_t *buff)
 int32_t l3gd20h_gy_filter_reference_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
-  ret = l3gd20h_read_reg(ctx, L3GD20H_REFERENCE,
-                             buff, 1);
+  ret = l3gd20h_read_reg(ctx, L3GD20H_REFERENCE, buff, 1);
   return ret;
 }
 
@@ -1428,18 +1436,19 @@ int32_t l3gd20h_gy_trshld_x_set(stmdev_ctx_t *ctx, uint16_t val)
   l3gd20h_ig_ths_xh_t ig_ths_xh;
   int32_t ret;
 
-  ret = l3gd20h_read_reg(ctx, L3GD20H_IG_THS_XL, (uint8_t*)&ig_ths_xl, 1);
+  ret = l3gd20h_read_reg(ctx, L3GD20H_IG_THS_XH, (uint8_t*)&ig_ths_xh, 1);
   if(ret == 0){
-    ig_ths_xl.thsx = (uint8_t)( val & 0xFFU );
-    ret = l3gd20h_write_reg(ctx, L3GD20H_IG_THS_XL, (uint8_t*)&ig_ths_xl, 1);
-  }
-  if(ret == 0){
-    ret = l3gd20h_read_reg(ctx, L3GD20H_IG_THS_XH, (uint8_t*)&ig_ths_xh, 1);
-  }
-  if(ret == 0){
-    ig_ths_xh.thsx = (uint8_t)( (val & 0x7F00U ) >> 8 );
+    ig_ths_xh.thsx = (uint8_t)( val / 256U ) & 0x7FU;
     ret = l3gd20h_write_reg(ctx, L3GD20H_IG_THS_XH, (uint8_t*)&ig_ths_xh, 1);
   }
+  if(ret == 0){
+    ret = l3gd20h_read_reg(ctx, L3GD20H_IG_THS_XL, (uint8_t*)&ig_ths_xl, 1);
+  }
+  if(ret == 0){
+    ig_ths_xl.thsx = (uint8_t) (val - (ig_ths_xh.thsx * 256U));
+    ret = l3gd20h_write_reg(ctx, L3GD20H_IG_THS_XL, (uint8_t*)&ig_ths_xl, 1);
+  }
+
   return ret;
 }
 
@@ -1461,7 +1470,7 @@ int32_t l3gd20h_gy_trshld_x_get(stmdev_ctx_t *ctx, uint16_t *val)
   if(ret == 0){
       ret = l3gd20h_read_reg(ctx, L3GD20H_IG_THS_XH, (uint8_t*)&ig_ths_xh, 1);
       *val = ig_ths_xh.thsx;
-      *val = *val << 8;
+      *val = *val / 256U;
       *val += ig_ths_xl.thsx;
   }
 
@@ -1531,18 +1540,19 @@ int32_t l3gd20h_gy_trshld_y_set(stmdev_ctx_t *ctx, uint16_t val)
   l3gd20h_ig_ths_yl_t ig_ths_yl;
   int32_t ret;
 
-  ret = l3gd20h_read_reg(ctx, L3GD20H_IG_THS_YL, (uint8_t*)&ig_ths_yl, 1);
+  ret = l3gd20h_read_reg(ctx, L3GD20H_IG_THS_YH, (uint8_t*)&ig_ths_yh, 1);
   if(ret == 0){
-    ig_ths_yl.thsy = (uint8_t)(val & 0xFFU);
-    ret = l3gd20h_write_reg(ctx, L3GD20H_IG_THS_YL, (uint8_t*)&ig_ths_yl, 1);
-  }
-  if(ret == 0){
-    ret = l3gd20h_read_reg(ctx, L3GD20H_IG_THS_YH, (uint8_t*)&ig_ths_yh, 1);
-  }
-  if(ret == 0){
-    ig_ths_yh.thsy = (uint8_t)( (val & 0x7F00U) >> 8);
+    ig_ths_yh.thsy = (uint8_t)( val / 256U ) & 0x7FU;
     ret = l3gd20h_write_reg(ctx, L3GD20H_IG_THS_YH, (uint8_t*)&ig_ths_yh, 1);
   }
+  if(ret == 0){
+    ret = l3gd20h_read_reg(ctx, L3GD20H_IG_THS_YL, (uint8_t*)&ig_ths_yl, 1);
+  }
+  if(ret == 0){
+    ig_ths_yl.thsy = (uint8_t) (val - (ig_ths_yh.thsy * 256U));
+    ret = l3gd20h_write_reg(ctx, L3GD20H_IG_THS_YL, (uint8_t*)&ig_ths_yl, 1);
+  }
+
   return ret;
 }
 
@@ -1564,7 +1574,7 @@ int32_t l3gd20h_gy_trshld_y_get(stmdev_ctx_t *ctx, uint16_t *val)
   if(ret == 0){
     ret = l3gd20h_read_reg(ctx, L3GD20H_IG_THS_YH, (uint8_t*)&ig_ths_yh, 1);
     *val = ig_ths_yh.thsy;
-    *val = *val << 8;
+    *val = *val / 256U;
     *val += ig_ths_yl.thsy;
   }
   return ret;
@@ -1584,18 +1594,19 @@ int32_t l3gd20h_gy_trshld_z_set(stmdev_ctx_t *ctx, uint16_t val)
   l3gd20h_ig_ths_zl_t ig_ths_zl;
   int32_t ret;
 
-  ret = l3gd20h_read_reg(ctx, L3GD20H_IG_THS_ZL, (uint8_t*)&ig_ths_zl, 1);
+  ret = l3gd20h_read_reg(ctx, L3GD20H_IG_THS_ZH, (uint8_t*)&ig_ths_zh, 1);
   if(ret == 0){
-    ig_ths_zl.thsz = (uint8_t)(val & 0xFFU);
-    ret = l3gd20h_write_reg(ctx, L3GD20H_IG_THS_ZL, (uint8_t*)&ig_ths_zl, 1);
-  }
-  if(ret == 0){
-    ret = l3gd20h_read_reg(ctx, L3GD20H_IG_THS_ZH, (uint8_t*)&ig_ths_zh, 1);
-  }
-  if(ret == 0){
-    ig_ths_zh.thsz = (uint8_t)( (val & 0x7F00U) >> 8);
+    ig_ths_zh.thsz = (uint8_t)( val / 256U ) & 0x7FU;
     ret = l3gd20h_write_reg(ctx, L3GD20H_IG_THS_ZH, (uint8_t*)&ig_ths_zh, 1);
   }
+  if(ret == 0){
+    ret = l3gd20h_read_reg(ctx, L3GD20H_IG_THS_ZL, (uint8_t*)&ig_ths_zl, 1);
+  }
+  if(ret == 0){
+    ig_ths_zl.thsz = (uint8_t) (val - (ig_ths_zh.thsz * 256U));
+    ret = l3gd20h_write_reg(ctx, L3GD20H_IG_THS_ZL, (uint8_t*)&ig_ths_zl, 1);
+  }
+
   return ret;
 }
 
@@ -1617,7 +1628,7 @@ int32_t l3gd20h_gy_trshld_z_get(stmdev_ctx_t *ctx, uint16_t *val)
   if(ret == 0){
     ret = l3gd20h_read_reg(ctx, L3GD20H_IG_THS_ZH, (uint8_t*)&ig_ths_zh, 1);
     *val = ig_ths_zh.thsz;
-    *val = *val << 8;
+    *val = *val / 256U;
     *val += ig_ths_zh.thsz;
   }
   return ret;

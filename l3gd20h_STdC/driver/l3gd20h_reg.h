@@ -28,10 +28,42 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <stddef.h>
 #include <math.h>
 
 /** @addtogroup L3GD20H
   * @{
+  *
+  */
+
+/** @defgroup  Endianness definitions
+  * @{
+  *
+  */
+
+#ifndef DRV_BYTE_ORDER
+#ifndef __BYTE_ORDER__
+
+#define DRV_LITTLE_ENDIAN 1234
+#define DRV_BIG_ENDIAN    4321
+
+/** if _BYTE_ORDER is not defined, choose the endianness of your architecture
+  * by uncommenting the define which fits your platform endianness
+  */
+//#define DRV_BYTE_ORDER    DRV_BIG_ENDIAN
+#define DRV_BYTE_ORDER    DRV_LITTLE_ENDIAN
+
+#else /* defined __BYTE_ORDER__ */
+
+#define DRV_LITTLE_ENDIAN  __ORDER_LITTLE_ENDIAN__
+#define DRV_BIG_ENDIAN     __ORDER_BIG_ENDIAN__
+#define DRV_BYTE_ORDER     __BYTE_ORDER__
+
+#endif /* __BYTE_ORDER__*/
+#endif /* DRV_BYTE_ORDER */
+
+/**
+  * @}
   *
   */
 
@@ -44,6 +76,7 @@
 #define MEMS_SHARED_TYPES
 
 typedef struct{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -52,6 +85,16 @@ typedef struct{
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit0       : 1;
+#endif /* DRV_BYTE_ORDER */
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
@@ -89,9 +132,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using 
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using 
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -134,24 +177,41 @@ typedef struct {
 #define L3GD20H_WHO_AM_I                0x0FU
 #define L3GD20H_CTRL1                   0x20U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xen                 : 1;
   uint8_t yen                 : 1;
   uint8_t zen                 : 1;
   uint8_t pd                  : 1;
   uint8_t bw                  : 2;
   uint8_t dr                  : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t dr                  : 2;
+  uint8_t bw                  : 2;
+  uint8_t pd                  : 1;
+  uint8_t zen                 : 1;
+  uint8_t yen                 : 1;
+  uint8_t xen                 : 1;
+#endif /* DRV_BYTE_ORDER */
 } l3gd20h_ctrl1_t;
 
 #define L3GD20H_CTRL2                   0x21U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t hpcf                : 4;
   uint8_t hpm                 : 2;
   uint8_t lvlen               : 1;
   uint8_t extren              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t extren              : 1;
+  uint8_t lvlen               : 1;
+  uint8_t hpm                 : 2;
+  uint8_t hpcf                : 4;
+#endif /* DRV_BYTE_ORDER */
 } l3gd20h_ctrl2_t;
 
 #define L3GD20H_CTRL3                   0x22U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t int2_empty          : 1;
   uint8_t int2_orun           : 1;
   uint8_t int2_fth            : 1;
@@ -160,32 +220,61 @@ typedef struct {
   uint8_t h_lactive           : 1;
   uint8_t int1_boot           : 1;
   uint8_t int1_ig             : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t int1_ig             : 1;
+  uint8_t int1_boot           : 1;
+  uint8_t h_lactive           : 1;
+  uint8_t pp_od               : 1;
+  uint8_t int2_drdy           : 1;
+  uint8_t int2_fth            : 1;
+  uint8_t int2_orun           : 1;
+  uint8_t int2_empty          : 1;
+#endif /* DRV_BYTE_ORDER */
 } l3gd20h_ctrl3_t;
 
 #define L3GD20H_CTRL4                   0x23U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t sim                 : 1;
   uint8_t st                  : 2;
   uint8_t impen               : 1;
   uint8_t fs                  : 2;
   uint8_t ble                 : 1;
   uint8_t bdu                 : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bdu                 : 1;
+  uint8_t ble                 : 1;
+  uint8_t fs                  : 2;
+  uint8_t impen               : 1;
+  uint8_t st                  : 2;
+  uint8_t sim                 : 1;
+#endif /* DRV_BYTE_ORDER */
 } l3gd20h_ctrl4_t;
 
 #define L3GD20H_CTRL5                   0x24U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t out_sel             : 2;
   uint8_t ig_sel              : 2;
   uint8_t hpen                : 1;
   uint8_t stoponfth           : 1;
   uint8_t fifo_en             : 1;
   uint8_t boot                : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t boot                : 1;
+  uint8_t fifo_en             : 1;
+  uint8_t stoponfth           : 1;
+  uint8_t hpen                : 1;
+  uint8_t ig_sel              : 2;
+  uint8_t out_sel             : 2;
+#endif /* DRV_BYTE_ORDER */
 } l3gd20h_ctrl5_t;
 
 #define L3GD20H_REFERENCE               0x25U
 #define L3GD20H_OUT_TEMP                0x26U
 #define L3GD20H_STATUS                  0x27U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xda                 : 1;
   uint8_t yda                 : 1;
   uint8_t zda                 : 1;
@@ -194,6 +283,16 @@ typedef struct {
   uint8_t yor                 : 1;
   uint8_t zor                 : 1;
   uint8_t zyxor               : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t zyxor               : 1;
+  uint8_t zor                 : 1;
+  uint8_t yor                 : 1;
+  uint8_t _xor                : 1;
+  uint8_t zyxda               : 1;
+  uint8_t zda                 : 1;
+  uint8_t yda                 : 1;
+  uint8_t xda                 : 1;
+#endif /* DRV_BYTE_ORDER */
 } l3gd20h_status_t;
 
 #define L3GD20H_OUT_X_L                 0x28U
@@ -204,20 +303,33 @@ typedef struct {
 #define L3GD20H_OUT_Z_H                 0x2DU
 #define L3GD20H_FIFO_CTRL               0x2EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t fth                 : 5;
   uint8_t fm                  : 3;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t fm                  : 3;
+  uint8_t fth                 : 5;
+#endif /* DRV_BYTE_ORDER */
 } l3gd20h_fifo_ctrl_t;
 
 #define L3GD20H_FIFO_SRC                0x2FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t fss                 : 5;
   uint8_t empty               : 1;
   uint8_t ovrn                : 1;
   uint8_t fth                 : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t fth                 : 1;
+  uint8_t ovrn                : 1;
+  uint8_t empty               : 1;
+  uint8_t fss                 : 5;
+#endif /* DRV_BYTE_ORDER */
 } l3gd20h_fifo_src_t;
 
 #define L3GD20H_IG_CFG                  0x30U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xlie                : 1;
   uint8_t xhie                : 1;
   uint8_t ylie                : 1;
@@ -226,10 +338,21 @@ typedef struct {
   uint8_t zhie                : 1;
   uint8_t lir                 : 1;
   uint8_t and_or              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t and_or              : 1;
+  uint8_t lir                 : 1;
+  uint8_t zhie                : 1;
+  uint8_t zlie                : 1;
+  uint8_t yhie                : 1;
+  uint8_t ylie                : 1;
+  uint8_t xhie                : 1;
+  uint8_t xlie                : 1;
+#endif /* DRV_BYTE_ORDER */
 } l3gd20h_ig_cfg_t;
 
 #define L3GD20H_IG_SRC                  0x31U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xl                  : 1;
   uint8_t xh                  : 1;
   uint8_t yl                  : 1;
@@ -238,12 +361,27 @@ typedef struct {
   uint8_t zh                  : 1;
   uint8_t ia                  : 1;
   uint8_t not_used_01         : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01         : 1;
+  uint8_t ia                  : 1;
+  uint8_t zh                  : 1;
+  uint8_t zl                  : 1;
+  uint8_t yh                  : 1;
+  uint8_t yl                  : 1;
+  uint8_t xh                  : 1;
+  uint8_t xl                  : 1;
+#endif /* DRV_BYTE_ORDER */
 } l3gd20h_ig_src_t;
 
 #define L3GD20H_IG_THS_XH               0x32U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t thsx                : 7;
   uint8_t dcrm                : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t dcrm                : 1;
+  uint8_t thsx                : 7;
+#endif /* DRV_BYTE_ORDER */
 } l3gd20h_ig_ths_xh_t;
 
 #define L3GD20H_IG_THS_XL               0x33U
@@ -253,8 +391,13 @@ typedef struct {
 
 #define L3GD20H_IG_THS_YH               0x34U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t thsy                : 7;
   uint8_t not_used_01         : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01         : 1;
+  uint8_t thsy                : 7;
+#endif /* DRV_BYTE_ORDER */
 } l3gd20h_ig_ths_yh_t;
 
 #define L3GD20H_IG_THS_YL               0x35U
@@ -264,8 +407,13 @@ typedef struct {
 
 #define L3GD20H_IG_THS_ZH               0x36U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t thsz                : 7;
   uint8_t not_used_01         : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01         : 1;
+  uint8_t thsz                : 7;
+#endif /* DRV_BYTE_ORDER */
 } l3gd20h_ig_ths_zh_t;
 
 #define L3GD20H_IG_THS_ZL               0x37U
@@ -275,12 +423,18 @@ typedef struct {
 
 #define L3GD20H_IG_DURATION             0x38U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t d                   : 7;
   uint8_t wait                : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t wait                : 1;
+  uint8_t d                   : 7;
+#endif /* DRV_BYTE_ORDER */
 } l3gd20h_ig_duration_t;
 
 #define L3GD20H_LOW_ODR                 0x39U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t low_odr             : 1;
   uint8_t not_used_01         : 1;
   uint8_t sw_res              : 1;
@@ -288,6 +442,15 @@ typedef struct {
   uint8_t not_used_02         : 1;
   uint8_t drdy_hl             : 1;
   uint8_t not_used_03         : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_03         : 2;
+  uint8_t drdy_hl             : 1;
+  uint8_t not_used_02         : 1;
+  uint8_t i2c_dis             : 1;
+  uint8_t sw_res              : 1;
+  uint8_t not_used_01         : 1;
+  uint8_t low_odr             : 1;
+#endif /* DRV_BYTE_ORDER */
 } l3gd20h_low_odr_t;
 
 /**
@@ -335,11 +498,11 @@ int32_t l3gd20h_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t l3gd20h_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
-extern float_t l3gd20h_from_fs245_to_mdps(int16_t lsb);
-extern float_t l3gd20h_from_fs500_to_mdps(int16_t lsb);
-extern float_t l3gd20h_from_fs2000_to_mdps(int16_t lsb);
+float_t l3gd20h_from_fs245_to_mdps(int16_t lsb);
+float_t l3gd20h_from_fs500_to_mdps(int16_t lsb);
+float_t l3gd20h_from_fs2000_to_mdps(int16_t lsb);
 
-extern float_t l3gd20h_from_lsb_to_celsius(int16_t lsb);
+float_t l3gd20h_from_lsb_to_celsius(int16_t lsb);
 
 typedef struct {
   uint8_t xen             : 1;
@@ -380,7 +543,7 @@ int32_t l3gd20h_gy_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t l3gd20h_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t l3gd20h_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t l3gd20h_angular_rate_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
 int32_t l3gd20h_dev_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
