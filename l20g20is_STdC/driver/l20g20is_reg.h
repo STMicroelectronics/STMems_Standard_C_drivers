@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -35,6 +35,37 @@
   *
   */
 
+/** @defgroup  Endianness definitions
+  * @{
+  *
+  */
+
+#ifndef DRV_BYTE_ORDER
+#ifndef __BYTE_ORDER__
+
+#define DRV_LITTLE_ENDIAN 1234
+#define DRV_BIG_ENDIAN    4321
+
+/** if _BYTE_ORDER is not defined, choose the endianness of your architecture
+  * by uncommenting the define which fits your platform endianness
+  */
+//#define DRV_BYTE_ORDER    DRV_BIG_ENDIAN
+#define DRV_BYTE_ORDER    DRV_LITTLE_ENDIAN
+
+#else /* defined __BYTE_ORDER__ */
+
+#define DRV_LITTLE_ENDIAN  __ORDER_LITTLE_ENDIAN__
+#define DRV_BIG_ENDIAN     __ORDER_BIG_ENDIAN__
+#define DRV_BYTE_ORDER     __BYTE_ORDER__
+
+#endif /* __BYTE_ORDER__*/
+#endif /* DRV_BYTE_ORDER */
+
+/**
+  * @}
+  *
+  */
+
 /** @defgroup STMicroelectronics sensors common types
   * @{
   *
@@ -44,6 +75,7 @@
 #define MEMS_SHARED_TYPES
 
 typedef struct{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -52,6 +84,16 @@ typedef struct{
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit0       : 1;
+#endif /* DRV_BYTE_ORDER */
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
@@ -89,9 +131,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using 
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using 
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -136,6 +178,7 @@ typedef struct {
 #define L20G20IS_OUT_Y_H                0x06U
 #define L20G20IS_DATA_STATUS_OIS        0x0AU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01         : 1;
   uint8_t yda_ois             : 1;
   uint8_t xda_ois             : 1;
@@ -144,10 +187,21 @@ typedef struct {
   uint8_t yor_ois             : 1;
   uint8_t xor_ois             : 1;
   uint8_t xyor_ois            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t xyor_ois            : 1;
+  uint8_t xor_ois             : 1;
+  uint8_t yor_ois             : 1;
+  uint8_t not_used_02         : 1;
+  uint8_t xyda_ois            : 1;
+  uint8_t xda_ois             : 1;
+  uint8_t yda_ois             : 1;
+  uint8_t not_used_01         : 1;
+#endif /* DRV_BYTE_ORDER */
 } l20g20is_data_status_ois_t;
 
 #define L20G20IS_CTRL1_OIS              0x0BU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t pw                  : 2;
   uint8_t orient              : 1;
   uint8_t odu                 : 1;
@@ -155,10 +209,20 @@ typedef struct {
   uint8_t ble                 : 1;
   uint8_t dr_pulsed           : 1;
   uint8_t boot                : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t boot                : 1;
+  uint8_t dr_pulsed           : 1;
+  uint8_t ble                 : 1;
+  uint8_t sim                 : 1;
+  uint8_t odu                 : 1;
+  uint8_t orient              : 1;
+  uint8_t pw                  : 2;
+#endif /* DRV_BYTE_ORDER */
 } l20g20is_ctrl1_ois_t;
 
 #define L20G20IS_CTRL2_OIS              0x0CU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t hpf                 : 1;
   uint8_t sw_rst              : 1;
   uint8_t hp_rst              : 1;
@@ -166,46 +230,90 @@ typedef struct {
   uint8_t lpf_bw              : 2;
   uint8_t signy               : 1;
   uint8_t signx               : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t signx               : 1;
+  uint8_t signy               : 1;
+  uint8_t lpf_bw              : 2;
+  uint8_t not_used_01         : 1;
+  uint8_t hp_rst              : 1;
+  uint8_t sw_rst              : 1;
+  uint8_t hpf                 : 1;
+#endif /* DRV_BYTE_ORDER */
 } l20g20is_ctrl2_ois_t;
 
 #define L20G20IS_CTRL3_OIS              0x0DU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t lpf_bw              : 1;
   uint8_t h_l_active          : 1;
   uint8_t not_used_01         : 1;
   uint8_t st_en               : 1;
   uint8_t st_sign             : 1;
   uint8_t not_used_02         : 3;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_02         : 3;
+  uint8_t st_sign             : 1;
+  uint8_t st_en               : 1;
+  uint8_t not_used_01         : 1;
+  uint8_t h_l_active          : 1;
+  uint8_t lpf_bw              : 1;
+#endif /* DRV_BYTE_ORDER */
 } l20g20is_ctrl3_ois_t;
 
 #define L20G20IS_CTRL4_OIS              0x0EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01         : 1;
   uint8_t drdy_od             : 1;
   uint8_t temp_data_on_drdy   : 1;
   uint8_t not_used_02         : 1;
   uint8_t drdy_en             : 1;
   uint8_t not_used_03         : 3;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_03         : 3;
+  uint8_t drdy_en             : 1;
+  uint8_t not_used_02         : 1;
+  uint8_t temp_data_on_drdy   : 1;
+  uint8_t drdy_od             : 1;
+  uint8_t not_used_01         : 1;
+#endif /* DRV_BYTE_ORDER */
 } l20g20is_ctrl4_ois_t;
 
 #define L20G20IS_OFF_X                  0x0FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t offx                : 7;
   uint8_t not_used_01         : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01         : 1;
+  uint8_t offx                : 7;
+#endif /* DRV_BYTE_ORDER */
 } l20g20is_off_x_t;
 
 #define L20G20IS_OFF_Y                  0x10U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t offy                : 7;
   uint8_t not_used_01         : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01         : 1;
+  uint8_t offy                : 7;
+#endif /* DRV_BYTE_ORDER */
 } l20g20is_off_y_t;
 
 #define L20G20IS_OIS_CFG_REG            0x1FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t hpf_bw              : 2;
   uint8_t not_used_01         : 1;
   uint8_t fs_sel              : 1;
   uint8_t not_used_02         : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_02         : 4;
+  uint8_t fs_sel              : 1;
+  uint8_t not_used_01         : 1;
+  uint8_t hpf_bw              : 2;
+#endif /* DRV_BYTE_ORDER */
 } l20g20is_ois_cfg_reg_t;
 
 /**
@@ -244,10 +352,10 @@ int32_t l20g20is_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t l20g20is_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                            uint16_t len);
 
-extern float_t l20g20is_from_fs100dps_to_mdps(int16_t lsb);
-extern float_t l20g20is_from_fs200dps_to_mdps(int16_t lsb);
+float_t l20g20is_from_fs100dps_to_mdps(int16_t lsb);
+float_t l20g20is_from_fs200dps_to_mdps(int16_t lsb);
 
-extern float_t l20g20is_from_lsb_to_celsius(int16_t lsb);
+float_t l20g20is_from_lsb_to_celsius(int16_t lsb);
 
 int32_t l20g20is_gy_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
@@ -292,9 +400,9 @@ int32_t l20g20is_gy_full_scale_set(stmdev_ctx_t *ctx,
 int32_t l20g20is_gy_full_scale_get(stmdev_ctx_t *ctx,
                                    l20g20is_gy_fs_t *val);
 
-int32_t l20g20is_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t l20g20is_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
-int32_t l20g20is_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t l20g20is_angular_rate_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
 int32_t l20g20is_dev_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
