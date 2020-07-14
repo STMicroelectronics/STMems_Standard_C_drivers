@@ -667,14 +667,19 @@ int32_t lis2dw12_offset_weight_get(stmdev_ctx_t *ctx,
   *         together express a 16-bit word in two’s complement.[get]
   *
   * @param  ctx      read / write interface definitions
-  * @param  buff     buffer that stores data read
+  * @param  val      buffer that stores data read
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dw12_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lis2dw12_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
+
   ret = lis2dw12_read_reg(ctx, LIS2DW12_OUT_T_L, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) +  (int16_t)buff[0];
+
   return ret;
 }
 
@@ -683,14 +688,23 @@ int32_t lis2dw12_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   *         a 16-bit word in two’s complement.[get]
   *
   * @param  ctx      read / write interface definitions
-  * @param  buff     buffer that stores data read
+  * @param  val      buffer that stores data read
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dw12_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lis2dw12_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
+
   ret = lis2dw12_read_reg(ctx, LIS2DW12_OUT_X_L, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) +  (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) +  (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) +  (int16_t)buff[4];
+
   return ret;
 }
 
