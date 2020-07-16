@@ -126,11 +126,11 @@ static sensbus_t mag_bus = {&SENSOR_BUS,
                             CS_RF_GPIO_Port,
                             CS_RF_Pin};
 #elif defined(NUCLEO_F411RE)
-static sensbus_t imu_bus = {&SENSOR_BUS,
-                            LSM9DS1_MAG_I2C_ADD_L,
+static sensbus_t mag_bus = {&SENSOR_BUS,
+                            LSM9DS1_MAG_I2C_ADD_H,
                             0,
                             0};
-static sensbus_t mag_bus = {&SENSOR_BUS,
+static sensbus_t imu_bus = {&SENSOR_BUS,
                             LSM9DS1_IMU_I2C_ADD_H,
                             0,
                             0};
