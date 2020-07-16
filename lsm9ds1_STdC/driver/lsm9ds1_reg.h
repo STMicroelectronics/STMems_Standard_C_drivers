@@ -123,9 +123,9 @@ typedef struct {
 #define LSM9DS1_IMU_I2C_ADD_L      0xD5U
 #define LSM9DS1_IMU_I2C_ADD_H      0xD7U
 
-/** I2C Device Address 8 bit format  if SA0=0 -> 0x3D if SA0=1 -> 0x39 **/
-#define LSM9DS1_MAG_I2C_ADD_L      0x3DU
-#define LSM9DS1_MAG_I2C_ADD_H      0x39U
+/** I2C Device Address 8 bit format  if SA0=0 -> 0x39 if SA0=1 -> 0x3D **/
+#define LSM9DS1_MAG_I2C_ADD_L      0x39U
+#define LSM9DS1_MAG_I2C_ADD_H      0x3DU
 
 /** Device Identification (Who am I) **/
 #define LSM9DS1_IMU_ID             0x68U
