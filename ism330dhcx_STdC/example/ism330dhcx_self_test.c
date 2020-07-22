@@ -270,7 +270,7 @@ void ism330dhcx_self_test(void)
   for (i = 0; i < 5; i++){
     /* Check if new value available */
     do {
-      ism330dhcx_xl_flag_data_ready_get(&dev_ctx, &drdy);
+      ism330dhcx_gy_flag_data_ready_get(&dev_ctx, &drdy);
     } while(!drdy);
     /* Read data and accumulate the mg value */
     ism330dhcx_angular_rate_raw_get(&dev_ctx, data_raw.u8bit);
@@ -295,7 +295,7 @@ void ism330dhcx_self_test(void)
   for (i = 0; i < 5; i++){
     /* Check if new value available */
     do {
-      ism330dhcx_xl_flag_data_ready_get(&dev_ctx, &drdy);
+      ism330dhcx_gy_flag_data_ready_get(&dev_ctx, &drdy);
     } while(!drdy);
     /* Read data and accumulate the mg value */
     ism330dhcx_angular_rate_raw_get(&dev_ctx, data_raw.u8bit);
@@ -324,7 +324,7 @@ void ism330dhcx_self_test(void)
   /* Disable Self Test */
   ism330dhcx_gy_self_test_set(&dev_ctx, ISM330DHCX_GY_ST_DISABLE);
   /* Disable sensor. */
-  ism330dhcx_xl_data_rate_set(&dev_ctx, ISM330DHCX_GY_ODR_OFF);
+  ism330dhcx_gy_data_rate_set(&dev_ctx, ISM330DHCX_GY_ODR_OFF);
 
   if (st_result == ST_PASS) {
     sprintf((char*)tx_buffer, "Self Test - PASS\r\n" );
