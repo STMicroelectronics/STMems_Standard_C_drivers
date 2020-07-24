@@ -173,9 +173,15 @@ void lis2dw12_read_data_single(void)
       acceleration_mg[0] = lis2dw12_from_fs2_lp1_to_mg(data_raw_acceleration.i16bit[0]);
       acceleration_mg[1] = lis2dw12_from_fs2_lp1_to_mg(data_raw_acceleration.i16bit[1]);
       acceleration_mg[2] = lis2dw12_from_fs2_lp1_to_mg(data_raw_acceleration.i16bit[2]);
+#ifdef STEVAL_MKI109V3
+      /* After data ready signal rise, is not possible to set a
+       * new trigger before 175us.
+       * I2C read data operation fit this constraint while SPI need
+       * a wait loop in order to guarantee it.
+       */
       for (int i=0; i<0x3FF; i++);
+#endif
       lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_SET_SW_TRIG);
-     
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
