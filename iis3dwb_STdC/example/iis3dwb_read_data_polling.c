@@ -23,6 +23,7 @@
  * evaluation boards:
  *
  * - STEVAL_MKI109V3 + STEVAL-MKI208V1K
+ * - DISCOVERY_SPC584B + STEVAL-MKI208V1K
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -30,6 +31,9 @@
  *
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
+ *
+ * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  *
  * If you need to run this example on a different hardware platform a
@@ -44,47 +48,53 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-#define STEVAL_MKI109V3
+
+#define STEVAL_MKI109V3  /* little endian */
+//#define SPC584B_DIS      /* big endian */
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
-
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#else
-#error "Please leave STEVAL_MKI109V3 defined: this sensor support SPI only interface"
+#elif defined(SPC584B_DIS)
+/* DISCOVERY_SPC584B: Define communication interface */
+#define SENSOR_BUS NULL
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
+#include "iis3dwb_reg.h"
+
+#if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
-#include <lsm6dsm_reg.h>
+#include "usart.h"
 #include "gpio.h"
 #include "i2c.h"
-#if defined(STEVAL_MKI109V3)
+
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
 #include "usbd_cdc_if.h"
+#include "gpio.h"
 #include "spi.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
 #endif
-
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
 #define    BOOT_TIME        10 //ms
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static axis1bit16_t data_raw_temperature;
+static int16_t data_raw_acceleration[3];
+static int16_t data_raw_temperature;
 static float acceleration_mg[3];
 static float temperature_degC;
 static uint8_t whoamI, rst;
@@ -116,7 +126,7 @@ void iis3dwb_read_data_polling(void)
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &SENSOR_BUS;
+  //dev_ctx.handle = &SENSOR_BUS;
 
   /* Init test platform */
   platform_init();
@@ -160,14 +170,14 @@ void iis3dwb_read_data_polling(void)
     if (reg)
     {
       /* Read acceleration field data */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      iis3dwb_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
+      iis3dwb_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
       acceleration_mg[0] =
-        iis3dwb_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
+        iis3dwb_from_fs2g_to_mg(data_raw_acceleration[0]);
       acceleration_mg[1] =
-        iis3dwb_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
+        iis3dwb_from_fs2g_to_mg(data_raw_acceleration[1]);
       acceleration_mg[2] =
-        iis3dwb_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
+        iis3dwb_from_fs2g_to_mg(data_raw_acceleration[2]);
 
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
@@ -178,9 +188,9 @@ void iis3dwb_read_data_polling(void)
     if (reg)
     {
       /* Read temperature data */
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      iis3dwb_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = iis3dwb_from_lsb_to_celsius(data_raw_temperature.i16bit);
+      memset(&data_raw_temperature, 0x00, sizeof(int16_t));
+      iis3dwb_temperature_raw_get(&dev_ctx, &data_raw_temperature);
+      temperature_degC = iis3dwb_from_lsb_to_celsius(data_raw_temperature);
 
       sprintf((char*)tx_buffer,
               "Temperature [degC]:%6.2f\r\n", temperature_degC);
@@ -210,6 +220,8 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
     HAL_SPI_Transmit(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+#elif defined(SPC584B_DIS)
+  /* Add here the SPC5 write SPI interface */
 #endif
   return 0;
 }
@@ -237,6 +249,8 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
     HAL_SPI_Receive(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+#elif defined(SPC584B_DIS)
+  /* Add here the SPC5 read SPI interface */
 #endif
   return 0;
 }
@@ -250,9 +264,11 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef STEVAL_MKI109V3
+#ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#elif defined(SPC584B_DIS)
+  sd_lld_write(&SD2, tx_buffer, len);
+#endif
 }
 
 /*
@@ -263,7 +279,11 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
+#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
   HAL_Delay(ms);
+#elif defined(SPC584B_DIS)
+  osalThreadDelayMilliseconds(ms);
+#endif
 }
 
 /*

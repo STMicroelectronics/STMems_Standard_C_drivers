@@ -24,6 +24,7 @@
  * evaluation boards:
  *
  * - STEVAL_MKI109V3 + STEVAL-MKI208V1K
+ * - DISCOVERY_SPC584B + STEVAL-MKI208V1K
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -32,6 +33,8 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
+ * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -45,29 +48,45 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-#define STEVAL_MKI109V3
+
+#define STEVAL_MKI109V3  /* little endian */
+//#define SPC584B_DIS      /* big endian */
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
-
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#else
-#error "Please leave STEVAL_MKI109V3 defined: this sensor support SPI only interface"
+#elif defined(SPC584B_DIS)
+/* DISCOVERY_SPC584B: Define communication interface */
+#define SENSOR_BUS  NULL
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
+#include "iis3dwb_reg.h"
+
+#if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
-#include <lsm6dsm_reg.h>
+#include "usart.h"
 #include "gpio.h"
 #include "i2c.h"
-#if defined(STEVAL_MKI109V3)
+
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
 #include "usbd_cdc_if.h"
+#include "gpio.h"
 #include "spi.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
 #endif
 
 /* Private macro -------------------------------------------------------------*/
@@ -109,7 +128,7 @@ void iis3dwb_wake_up(void)
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &SENSOR_BUS;
+  //dev_ctx.handle = &SENSOR_BUS;
 
   /* Init test platform */
   platform_init();
@@ -146,11 +165,6 @@ void iis3dwb_wake_up(void)
   //iis3dwb_pin_int1_route_get(&dev_ctx, &int1_route);
   //int1_route.md1_cfg.int1_wu = PROPERTY_ENABLE;
   //iis3dwb_pin_int1_route_set(&dev_ctx, &int1_route);
-
-  /* Enable if interrupt generation on Wake-Up INT2 pin */
-  iis3dwb_pin_int2_route_get(&dev_ctx, &int2_route);
-  int2_route.md2_cfg.int2_wu = PROPERTY_ENABLE;
-  iis3dwb_pin_int2_route_set(&dev_ctx, &int2_route);
 
   /* Wait Events */
   while(1)
@@ -196,6 +210,8 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
     HAL_SPI_Transmit(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+#elif defined(SPC584B_DIS)
+  /* Add here the SPC5 write SPI interface */
 #endif
   return 0;
 }
@@ -223,6 +239,8 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
     HAL_SPI_Receive(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+#elif defined(SPC584B_DIS)
+  /* Add here the SPC5 read SPI interface */
 #endif
   return 0;
 }
@@ -236,9 +254,11 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef STEVAL_MKI109V3
+#ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#elif defined(SPC584B_DIS)
+  sd_lld_write(&SD2, tx_buffer, len);
+#endif
 }
 
 /*
@@ -249,7 +269,11 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
+#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
   HAL_Delay(ms);
+#elif defined(SPC584B_DIS)
+  osalThreadDelayMilliseconds(ms);
+#endif
 }
 
 /*

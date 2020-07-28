@@ -23,6 +23,7 @@
  * evaluation boards:
  *
  * - STEVAL_MKI109V3 + STEVAL-MKI208V1K
+ * - DISCOVERY_SPC584B + STEVAL-MKI208V1K
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -30,6 +31,9 @@
  *
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
+ *
+ * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  *
  * If you need to run this example on a different hardware platform a
@@ -44,40 +48,46 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-#define STEVAL_MKI109V3
+
+#define STEVAL_MKI109V3  /* little endian */
+//#define SPC584B_DIS      /* big endian */
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
-
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#else
-#error "Please leave STEVAL_MKI109V3 defined: this sensor support SPI only interface"
+#elif defined(SPC584B_DIS)
+/* DISCOVERY_SPC584B: Define communication interface */
+#define SENSOR_BUS NULL
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
+#include "iis3dwb_reg.h"
+
+#if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
-#include <iis3dwb_reg.h>
+#include "usart.h"
 #include "gpio.h"
 #include "i2c.h"
-#if defined(STEVAL_MKI109V3)
+
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
 #include "usbd_cdc_if.h"
+#include "gpio.h"
 #include "spi.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
 #endif
-
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
 #define    BOOT_TIME        10 //ms
@@ -115,8 +125,8 @@ static void platform_init(void);
 void iis3dwb_self_test(void)
 {
   uint8_t tx_buffer[1000];
-  axis3bit16_t data_raw;
   stmdev_ctx_t dev_ctx;
+  int16_t data_raw[3];
   float val_st_off[3];
   float val_st_on[3];
   float test_val[3];
@@ -130,7 +140,7 @@ void iis3dwb_self_test(void)
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &SENSOR_BUS;
+  //dev_ctx.handle = &SENSOR_BUS;
 
   /* Init test platform */
   platform_init();
@@ -166,22 +176,22 @@ void iis3dwb_self_test(void)
 
   /* Check if new value available */
   do {
-    lis3dhh_xl_data_ready_get(&dev_ctx, &drdy);
+    iis3dwb_xl_flag_data_ready_get(&dev_ctx, &drdy);
   } while(!drdy);
   /* Read dummy data and discard it */
-  iis3dwb_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
+  iis3dwb_acceleration_raw_get(&dev_ctx, data_raw);
 
   /* Read 5 sample and get the average vale for each axis */
   memset(val_st_off, 0x00, 3*sizeof(float));
   for (i = 0; i < 5; i++){
     /* Check if new value available */
     do {
-      lis3dhh_xl_data_ready_get(&dev_ctx, &drdy);
+      iis3dwb_xl_flag_data_ready_get(&dev_ctx, &drdy);
     } while(!drdy);
     /* Read data and accumulate the mg value */
-    iis3dwb_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
+    iis3dwb_acceleration_raw_get(&dev_ctx, data_raw);
     for (j = 0; j < 3; j++){
-      val_st_off[j] += iis3dwb_from_fs4g_to_mg(data_raw.i16bit[j]);
+      val_st_off[j] += iis3dwb_from_fs4g_to_mg(data_raw[j]);
     }
   }
 
@@ -191,18 +201,18 @@ void iis3dwb_self_test(void)
   }
 
   /* Enable Self Test positive (or negative) */
-  lis3dhh_self_test_set(&dev_ctx, LIS3DHH_ST_NEGATIVE);
-  //lis3dhh_self_test_set(&dev_ctx, LIS3DHH_ST_POSITIVE);
+  iis3dwb_xl_self_test_set(&dev_ctx, IIS3DWB_XL_ST_POSITIVE);
+  //iis3dwb_xl_self_test_set(&dev_ctx, IIS3DWB_XL_ST_NEGATIVE);
 
   /* Wait stable output */
   platform_delay(WAIT_TIME);
 
   /* Check if new value available */
   do {
-    lis3dhh_xl_data_ready_get(&dev_ctx, &drdy);
+    iis3dwb_xl_flag_data_ready_get(&dev_ctx, &drdy);
   } while(!drdy);
   /* Read dummy data and discard it */
-  iis3dwb_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
+  iis3dwb_acceleration_raw_get(&dev_ctx, data_raw);
 
 
   /* Read 5 sample and get the average vale for each axis */
@@ -210,12 +220,12 @@ void iis3dwb_self_test(void)
   for (i = 0; i < 5; i++){
     /* Check if new value available */
     do {
-      lis3dhh_xl_data_ready_get(&dev_ctx, &drdy);
+      iis3dwb_xl_flag_data_ready_get(&dev_ctx, &drdy);
     } while(!drdy);
     /* Read data and accumulate the mg value */
-    iis3dwb_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
+    iis3dwb_acceleration_raw_get(&dev_ctx, data_raw);
     for (j = 0; j < 3; j++){
-      val_st_on[j] += iis3dwb_from_fs4g_to_mg(data_raw.i16bit[j]);
+      val_st_on[j] += iis3dwb_from_fs4g_to_mg(data_raw[j]);
     }
   }
 
@@ -239,7 +249,7 @@ void iis3dwb_self_test(void)
   }
 
   /* Disable Self Test */
-  lis3dhh_self_test_set(&dev_ctx, LIS3DHH_ST_DISABLE);
+  iis3dwb_xl_self_test_set(&dev_ctx, IIS3DWB_XL_ST_DISABLE);
   /* Disable sensor. */
   iis3dwb_xl_data_rate_set(&dev_ctx, IIS3DWB_XL_ODR_OFF);
 
@@ -273,6 +283,8 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
     HAL_SPI_Transmit(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+#elif defined(SPC584B_DIS)
+  /* Add here the SPC5 write SPI interface */
 #endif
   return 0;
 }
@@ -300,6 +312,8 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
     HAL_SPI_Receive(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+#elif defined(SPC584B_DIS)
+  /* Add here the SPC5 read SPI interface */
 #endif
   return 0;
 }
@@ -313,9 +327,11 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef STEVAL_MKI109V3
+#ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#elif defined(SPC584B_DIS)
+  sd_lld_write(&SD2, tx_buffer, len);
+#endif
 }
 
 /*
@@ -326,7 +342,11 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
+#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
   HAL_Delay(ms);
+#elif defined(SPC584B_DIS)
+  osalThreadDelayMilliseconds(ms);
+#endif
 }
 
 /*
