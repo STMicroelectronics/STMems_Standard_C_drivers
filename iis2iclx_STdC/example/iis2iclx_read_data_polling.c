@@ -24,6 +24,7 @@
  *
  * - STEVAL_MKI109V3 + STEVAL-MKI209V1K
  * - NUCLEO_F411RE + STEVAL-MKI209V1K
+ * - DISCOVERY_SPC584B + STEVAL-MKI209V1K
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -33,7 +34,10 @@
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
  * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
- *                    - I2C(Default) / SPI(supported)
+ *                    - Sensor side: I2C(Default) / SPI(supported)
+ *
+ * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -47,13 +51,19 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-//#define STEVAL_MKI109V3
-#define NUCLEO_F411RE
+
+//#define STEVAL_MKI109V3  /* little endian */
+#define NUCLEO_F411RE    /* little endian */
+//#define SPC584B_DIS      /* big endian */
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
-
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
@@ -61,38 +71,39 @@
 /* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
+#elif defined(SPC584B_DIS)
+/* DISCOVERY_SPC584B: Define communication interface */
+#define SENSOR_BUS I2CD1
+
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
+#include "iis2iclx_reg.h"
+
+#if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
-#include <iis2iclx_reg.h>
+#include "usart.h"
 #include "gpio.h"
 #include "i2c.h"
-#if defined(STEVAL_MKI109V3)
+
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
 #include "usbd_cdc_if.h"
+#include "gpio.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE)
-#include "usart.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
 #endif
-
-typedef union{
-  int16_t i16bit[2];
-  uint8_t u8bit[4];
-} axis2bit16_t;
-
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
 #define    BOOT_TIME            20 //ms
 
 /* Private variables ---------------------------------------------------------*/
-static axis2bit16_t data_raw_acceleration;
-static axis1bit16_t data_raw_temperature;
+static int16_t data_raw_acceleration[2];
+static int16_t data_raw_temperature;
 static float acceleration_mg[2];
 static float temperature_degC;
 static uint8_t whoamI, rst;
@@ -171,12 +182,12 @@ void example_main_iis2iclx(void)
     if (reg)
     {
       /* Read acceleration field data */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      iis2iclx_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+      memset(data_raw_acceleration, 0x00, 2 * sizeof(int16_t));
+      iis2iclx_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
       acceleration_mg[0] =
-        iis2iclx_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
+        iis2iclx_from_fs2g_to_mg(data_raw_acceleration[0]);
       acceleration_mg[1] =
-        iis2iclx_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
+        iis2iclx_from_fs2g_to_mg(data_raw_acceleration[1]);
 
 
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\r\n",
@@ -188,9 +199,9 @@ void example_main_iis2iclx(void)
     if (reg)
     {
       /* Read temperature data */
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      iis2iclx_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = iis2iclx_from_lsb_to_celsius(data_raw_temperature.i16bit);
+      memset(&data_raw_temperature, 0x00, sizeof(int16_t));
+      iis2iclx_temperature_raw_get(&dev_ctx, &data_raw_temperature);
+      temperature_degC = iis2iclx_from_lsb_to_celsius(data_raw_temperature);
 
       sprintf((char*)tx_buffer,
               "Temperature [degC]:%6.2f\r\n", temperature_degC);
@@ -212,19 +223,16 @@ void example_main_iis2iclx(void)
 static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+#if defined(NUCLEO_F411RE)
     HAL_I2C_Mem_Write(handle, IIS2ICLX_I2C_ADD_L, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-#ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
+#elif defined(STEVAL_MKI109V3)
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Transmit(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
+#elif defined(SPC584B_DIS)
+  i2c_lld_write(handle,  IIS2ICLX_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
@@ -242,21 +250,17 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
-    HAL_I2C_Mem_Read(handle, IIS2ICLX_I2C_ADD_L, reg,
-                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-#ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
-    /* Read command */
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Read(handle, IIS2ICLX_I2C_ADD_L, reg,
+                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
     reg |= 0x80;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Receive(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
+#elif defined(SPC584B_DIS)
+  i2c_lld_read(handle, IIS2ICLX_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
@@ -270,12 +274,13 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE
+#if defined(NUCLEO_F411RE)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
-  #ifdef STEVAL_MKI109V3
+#elif defined(STEVAL_MKI109V3)
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#elif defined(SPC584B_DIS)
+  sd_lld_write(&SD2, tx_buffer, len);
+#endif
 }
 
 /*
@@ -286,7 +291,11 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
+#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
   HAL_Delay(ms);
+#elif defined(SPC584B_DIS)
+  osalThreadDelayMilliseconds(ms);
+#endif
 }
 
 /*
