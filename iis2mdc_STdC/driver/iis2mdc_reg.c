@@ -83,14 +83,14 @@ int32_t iis2mdc_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-float iis2mdc_from_lsb_to_mgauss(int16_t lsb)
+float_t iis2mdc_from_lsb_to_mgauss(int16_t lsb)
 {
-  return ((float)lsb) * 1.5f;
+  return ((float_t)lsb) * 1.5f;
 }
 
-float iis2mdc_from_lsb_to_celsius(int16_t lsb)
+float_t iis2mdc_from_lsb_to_celsius(int16_t lsb)
 {
-  return (((float)lsb / 8.0f) + 25.0f);
+  return (((float_t)lsb / 8.0f) + 25.0f);
 }
 
 /**
@@ -119,10 +119,20 @@ float iis2mdc_from_lsb_to_celsius(int16_t lsb)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t iis2mdc_mag_user_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t iis2mdc_mag_user_offset_set(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
+
+  buff[1] = (uint8_t) ((uint16_t)val[0] / 256U);
+  buff[0] = (uint8_t) ((uint16_t)val[0] - (buff[1] * 256U));
+  buff[3] = (uint8_t) ((uint16_t)val[1] / 256U);
+  buff[2] = (uint8_t) ((uint16_t)val[1] - (buff[3] * 256U));
+  buff[5] = (uint8_t) ((uint16_t)val[2] / 256U);
+  buff[4] = (uint8_t) ((uint16_t)val[2] - (buff[5] * 256U));
   ret =  iis2mdc_write_reg(ctx, IIS2MDC_OFFSET_X_REG_L, buff, 6);
+
+
   return ret;
 }
 
@@ -139,10 +149,19 @@ int32_t iis2mdc_mag_user_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t iis2mdc_mag_user_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t iis2mdc_mag_user_offset_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
+
   ret =  iis2mdc_read_reg(ctx, IIS2MDC_OFFSET_X_REG_L, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
+
   return ret;
 }
 
@@ -581,10 +600,19 @@ int32_t iis2mdc_mag_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t iis2mdc_magnetic_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t iis2mdc_magnetic_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
+
   ret =  iis2mdc_read_reg(ctx, IIS2MDC_OUTX_L_REG, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) +  (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) +  (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) +  (int16_t)buff[4];
+
   return ret;
 }
 
@@ -596,10 +624,15 @@ int32_t iis2mdc_magnetic_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t iis2mdc_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t iis2mdc_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
+
   ret =  iis2mdc_read_reg(ctx, IIS2MDC_TEMP_OUT_L_REG, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) + (int16_t)buff[0];
+
   return ret;
 }
 
@@ -1021,10 +1054,15 @@ int32_t iis2mdc_int_gen_source_get(stmdev_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t iis2mdc_int_gen_treshold_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t iis2mdc_int_gen_treshold_set(stmdev_ctx_t *ctx, int16_t val)
 {
+  uint8_t buff[2];
   int32_t ret;
+
+  buff[1] = (uint8_t) ((uint16_t)val / 256U);
+  buff[0] = (uint8_t) ((uint16_t)val - (buff[1] * 256U));
   ret =  iis2mdc_write_reg(ctx, IIS2MDC_INT_THS_L_REG, buff, 2);
+
   return ret;
 }
 
@@ -1038,10 +1076,15 @@ int32_t iis2mdc_int_gen_treshold_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t iis2mdc_int_gen_treshold_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t iis2mdc_int_gen_treshold_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
+
   ret =  iis2mdc_read_reg(ctx, IIS2MDC_INT_THS_L_REG, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) +  (int16_t)buff[0];
+
   return ret;
 }
 
