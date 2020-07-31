@@ -6162,6 +6162,9 @@ int32_t lsm6dsox_fifo_sensor_tag_get(stmdev_ctx_t *ctx,
     case LSM6DSOX_TEMPERATURE_TAG:
       *val = LSM6DSOX_TEMPERATURE_TAG;
       break;
+    case LSM6DSOX_TIMESTAMP_TAG:
+      *val = LSM6DSOX_TIMESTAMP_TAG;
+      break;
     case LSM6DSOX_CFG_CHANGE_TAG:
       *val = LSM6DSOX_CFG_CHANGE_TAG;
       break;
