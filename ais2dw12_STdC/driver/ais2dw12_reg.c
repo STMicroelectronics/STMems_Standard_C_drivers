@@ -78,6 +78,25 @@ int32_t ais2dw12_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   */
 
 /**
+  * @defgroup  Private_functions
+  * @brief     Section collect all the utility functions needed by APIs.
+  * @{
+  *
+  */
+
+static void bytecpy(uint8_t *target, uint8_t *source)
+{
+  if ( (target != NULL) && (source != NULL) ) {
+    *target = *source;
+  }
+}
+
+/**
+  * @}
+  *
+  */
+
+/**
   * @defgroup    AIS2DW12_Sensitivity
   * @brief       These functions convert raw-data into engineering units.
   * @{
@@ -404,8 +423,15 @@ int32_t ais2dw12_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 int32_t ais2dw12_all_sources_get(stmdev_ctx_t *ctx,
                                  ais2dw12_all_sources_t *val)
 {
+  uint8_t reg[5];
   int32_t ret;
-  ret = ais2dw12_read_reg(ctx, AIS2DW12_STATUS_DUP, (uint8_t*) val, 5);
+
+  ret = ais2dw12_read_reg(ctx, AIS2DW12_STATUS_DUP, reg, 5);
+  bytecpy(( uint8_t*)&val->status_dup, &reg[0]);
+  bytecpy(( uint8_t*)&val->wake_up_src, &reg[1]);
+  bytecpy(( uint8_t*)&val->sixd_src, &reg[3]);
+  bytecpy(( uint8_t*)&val->all_int_src, &reg[4]);
+
   return ret;
 }
 
