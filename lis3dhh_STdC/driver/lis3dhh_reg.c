@@ -208,10 +208,15 @@ int32_t lis3dhh_data_rate_get(stmdev_ctx_t *ctx, lis3dhh_norm_mod_en_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lis3dhh_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lis3dhh_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
+
   ret = lis3dhh_read_reg(ctx, LIS3DHH_OUT_TEMP_L, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) +  (int16_t)buff[0];
+
   return ret;
 }
 
@@ -223,10 +228,19 @@ int32_t lis3dhh_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lis3dhh_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lis3dhh_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
+
   ret = lis3dhh_read_reg(ctx, LIS3DHH_OUT_X_L_XL, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) +  (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) +  (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) +  (int16_t)buff[4];
+
   return ret;
 }
 
