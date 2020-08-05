@@ -35,6 +35,34 @@
   *
   */
 
+/** @defgroup  Endianness definitions
+  *
+  */
+
+#ifndef __BYTE_ORDER__
+
+#define ORDER_LITTLE_ENDIAN 1234
+#define ORDER_BIG_ENDIAN    4321
+
+/** if BYTE_ORDER is not defined, choose the endianness of your architecture
+  * by uncommenting the define which fits your platform endianness
+  */
+//#define BYTE_ORDER         ORDER_BIG_ENDIAN
+#define BYTE_ORDER         ORDER_LITTLE_ENDIAN
+
+#else /* defined __BYTE_ORDER__ */
+
+#define ORDER_LITTLE_ENDIAN __ORDER_LITTLE_ENDIAN__
+#define ORDER_BIG_ENDIAN    __ORDER_BIG_ENDIAN__
+#define BYTE_ORDER          __BYTE_ORDER__
+
+#endif /* BYTE_ORDER */
+
+/**
+  * @}
+  *
+  */
+
 /** @defgroup STMicroelectronics sensors common types
   * @{
   *
@@ -44,6 +72,7 @@
 #define MEMS_SHARED_TYPES
 
 typedef struct{
+#if BYTE_ORDER == ORDER_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -52,6 +81,16 @@ typedef struct{
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
+#elif BYTE_ORDER == ORDER_BIG_ENDIAN
+  uint8_t bit7       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit0       : 1;
+#endif /* BYTE_ORDER */
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
@@ -163,48 +202,84 @@ typedef struct {
 #define LIS3MDL_WHO_AM_I       0x0FU
 #define LIS3MDL_CTRL_REG1      0x20U
 typedef struct{
+#if BYTE_ORDER == ORDER_LITTLE_ENDIAN
   uint8_t st              : 1;
   uint8_t om              : 6; /* om + do + fast_odr -> om */
   uint8_t temp_en         : 1;
+#elif BYTE_ORDER == ORDER_BIG_ENDIAN
+  uint8_t temp_en         : 1;
+  uint8_t om              : 6; /* om + do + fast_odr -> om */
+  uint8_t st              : 1;
+#endif /* BYTE_ORDER */
 } lis3mdl_ctrl_reg1_t;
 
 #define LIS3MDL_CTRL_REG2      0x21U
-typedef struct
-{
+typedef struct{
+#if BYTE_ORDER == ORDER_LITTLE_ENDIAN
   uint8_t not_used_01     : 2;
   uint8_t soft_rst        : 1;
   uint8_t reboot          : 1;
   uint8_t not_used_02     : 1;
   uint8_t fs              : 2;
   uint8_t not_used_03     : 1;
+#elif BYTE_ORDER == ORDER_BIG_ENDIAN
+  uint8_t not_used_03     : 1;
+  uint8_t fs              : 2;
+  uint8_t not_used_02     : 1;
+  uint8_t reboot          : 1;
+  uint8_t soft_rst        : 1;
+  uint8_t not_used_01     : 2;
+#endif /* BYTE_ORDER */
 } lis3mdl_ctrl_reg2_t;
 
 #define LIS3MDL_CTRL_REG3      0x22U
 typedef struct{
+#if BYTE_ORDER == ORDER_LITTLE_ENDIAN
   uint8_t md              : 2;
   uint8_t sim             : 1;
   uint8_t not_used_01     : 2;
   uint8_t lp              : 1;
   uint8_t not_used_02     : 2;
+#elif BYTE_ORDER == ORDER_BIG_ENDIAN
+  uint8_t not_used_02     : 2;
+  uint8_t lp              : 1;
+  uint8_t not_used_01     : 2;
+  uint8_t sim             : 1;
+  uint8_t md              : 2;
+#endif /* BYTE_ORDER */
 } lis3mdl_ctrl_reg3_t;
 
 #define LIS3MDL_CTRL_REG4      0x23U
 typedef struct{
+#if BYTE_ORDER == ORDER_LITTLE_ENDIAN
   uint8_t not_used_01     : 1;
   uint8_t ble             : 1;
   uint8_t omz             : 2;
   uint8_t not_used_02     : 4;
+#elif BYTE_ORDER == ORDER_BIG_ENDIAN
+  uint8_t not_used_02     : 4;
+  uint8_t omz             : 2;
+  uint8_t ble             : 1;
+  uint8_t not_used_01     : 1;
+#endif /* BYTE_ORDER */
 } lis3mdl_ctrl_reg4_t;
 
 #define LIS3MDL_CTRL_REG5      0x24U
 typedef struct{
+#if BYTE_ORDER == ORDER_LITTLE_ENDIAN
   uint8_t not_used_01     : 6;
   uint8_t bdu             : 1;
   uint8_t fast_read       : 1;
+#elif BYTE_ORDER == ORDER_BIG_ENDIAN
+  uint8_t fast_read       : 1;
+  uint8_t bdu             : 1;
+  uint8_t not_used_01     : 6;
+#endif /* BYTE_ORDER */
 } lis3mdl_ctrl_reg5_t;
 
 #define LIS3MDL_STATUS_REG     0x27U
 typedef struct{
+#if BYTE_ORDER == ORDER_LITTLE_ENDIAN
   uint8_t xda             : 1;
   uint8_t yda             : 1;
   uint8_t zda             : 1;
@@ -213,6 +288,16 @@ typedef struct{
   uint8_t yor             : 1;
   uint8_t zor             : 1;
   uint8_t zyxor           : 1;
+#elif BYTE_ORDER == ORDER_BIG_ENDIAN
+  uint8_t zyxor           : 1;
+  uint8_t zor             : 1;
+  uint8_t yor             : 1;
+  uint8_t _xor            : 1;
+  uint8_t zyxda           : 1;
+  uint8_t zda             : 1;
+  uint8_t yda             : 1;
+  uint8_t xda             : 1;
+#endif /* BYTE_ORDER */
 } lis3mdl_status_reg_t;
 
 #define LIS3MDL_OUT_X_L        0x28U
@@ -225,6 +310,7 @@ typedef struct{
 #define LIS3MDL_TEMP_OUT_H     0x2FU
 #define LIS3MDL_INT_CFG        0x30U
 typedef struct{
+#if BYTE_ORDER == ORDER_LITTLE_ENDIAN
   uint8_t ien             : 1;
   uint8_t lir             : 1;
   uint8_t iea             : 1;
@@ -232,10 +318,20 @@ typedef struct{
   uint8_t zien            : 1;
   uint8_t yien            : 1;
   uint8_t xien            : 1;
+#elif BYTE_ORDER == ORDER_BIG_ENDIAN
+  uint8_t xien            : 1;
+  uint8_t yien            : 1;
+  uint8_t zien            : 1;
+  uint8_t not_used_01     : 2;
+  uint8_t iea             : 1;
+  uint8_t lir             : 1;
+  uint8_t ien             : 1;
+#endif /* BYTE_ORDER */
 } lis3mdl_int_cfg_t;
 
 #define LIS3MDL_INT_SRC        0x31U
 typedef struct{
+#if BYTE_ORDER == ORDER_LITTLE_ENDIAN
   uint8_t int_            : 1;
   uint8_t mroi            : 1;
   uint8_t nth_z           : 1;
@@ -244,6 +340,16 @@ typedef struct{
   uint8_t pth_z           : 1;
   uint8_t pth_y           : 1;
   uint8_t pth_x           : 1;
+#elif BYTE_ORDER == ORDER_BIG_ENDIAN
+  uint8_t pth_x           : 1;
+  uint8_t pth_y           : 1;
+  uint8_t pth_z           : 1;
+  uint8_t nth_x           : 1;
+  uint8_t nth_y           : 1;
+  uint8_t nth_z           : 1;
+  uint8_t mroi            : 1;
+  uint8_t int_            : 1;
+#endif /* BYTE_ORDER */
 } lis3mdl_int_src_t;
 
 #define LIS3MDL_INT_THS_L      0x32U
