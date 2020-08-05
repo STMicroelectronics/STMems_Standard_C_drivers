@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -36,6 +36,37 @@
   *
   */
 
+/** @defgroup  Endianness definitions
+  * @{
+  *
+  */
+
+#ifndef DRV_BYTE_ORDER
+#ifndef __BYTE_ORDER__
+
+#define DRV_LITTLE_ENDIAN 1234
+#define DRV_BIG_ENDIAN    4321
+
+/** if _BYTE_ORDER is not defined, choose the endianness of your architecture
+  * by uncommenting the define which fits your platform endianness
+  */
+//#define DRV_BYTE_ORDER    DRV_BIG_ENDIAN
+#define DRV_BYTE_ORDER    DRV_LITTLE_ENDIAN
+
+#else /* defined __BYTE_ORDER__ */
+
+#define DRV_LITTLE_ENDIAN  __ORDER_LITTLE_ENDIAN__
+#define DRV_BIG_ENDIAN     __ORDER_BIG_ENDIAN__
+#define DRV_BYTE_ORDER     __BYTE_ORDER__
+
+#endif /* __BYTE_ORDER__*/
+#endif /* DRV_BYTE_ORDER */
+
+/**
+  * @}
+  *
+  */
+
 /** @defgroup STMicroelectronics sensors common types
   * @{
   *
@@ -45,6 +76,7 @@
 #define MEMS_SHARED_TYPES
 
 typedef struct{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -53,6 +85,16 @@ typedef struct{
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit0       : 1;
+#endif /* DRV_BYTE_ORDER */
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
@@ -134,17 +176,28 @@ typedef struct {
 
 #define LIS25BA_TEST_REG                   0x0BU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01    : 3;
   uint8_t st             : 1;
   uint8_t not_used_02    : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_02    : 4;
+  uint8_t st             : 1;
+  uint8_t not_used_01    : 3;
+#endif /* DRV_BYTE_ORDER */
 } lis25ba_test_reg_t;
 
 #define LIS25BA_WHO_AM_I                   0x0FU
 
 #define LIS25BA_TDM_CMAX_H                 0x24U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t tdm_cmax                      : 4;
   uint8_t not_used_01                   : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01                   : 4;
+  uint8_t tdm_cmax                      : 4;
+#endif /* DRV_BYTE_ORDER */
 } lis25ba_tdm_cmax_h_t;
 
 #define LIS25BA_TDM_CMAX_L                 0x25U
@@ -154,13 +207,20 @@ typedef struct {
 
 #define LIS25BA_CTRL_REG                   0x26U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01    : 5;
   uint8_t pd             : 1;
   uint8_t not_used_02    : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_02    : 2;
+  uint8_t pd             : 1;
+  uint8_t not_used_01    : 5;
+#endif /* DRV_BYTE_ORDER */
 } lis25ba_ctrl_reg_t;
 
 #define LIS25BA_TDM_CTRL_REG               0x2EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01    : 1;
   uint8_t wclk_fq        : 2;
   uint8_t not_used_02    : 1;
@@ -168,15 +228,32 @@ typedef struct {
   uint8_t data_valid     : 1;
   uint8_t delayed        : 1;
   uint8_t tdm_pd         : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t tdm_pd         : 1;
+  uint8_t delayed        : 1;
+  uint8_t data_valid     : 1;
+  uint8_t mapping        : 1;
+  uint8_t not_used_02    : 1;
+  uint8_t wclk_fq        : 2;
+  uint8_t not_used_01    : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis25ba_tdm_ctrl_reg_t;
 
 #define LIS25BA_AXES_CTRL_REG              0x2FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t odr_auto_en    : 1;
   uint8_t not_used_01    : 4;
   uint8_t axisx_en       : 1;
   uint8_t axisy_en       : 1;
   uint8_t axisz_en       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t axisz_en       : 1;
+  uint8_t axisy_en       : 1;
+  uint8_t axisx_en       : 1;
+  uint8_t not_used_01    : 4;
+  uint8_t odr_auto_en    : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis25ba_axes_ctrl_reg_t;
 
 /**
