@@ -102,9 +102,15 @@
 /* Private macro -------------------------------------------------------------*/
 #define    BOOT_TIME            10 //ms
 
+typedef union{
+  int16_t i16bit[3];
+  uint8_t u8bit[6];
+} axis3bit16_t;
+
 /* Private variables ---------------------------------------------------------*/
-static int16_t data_raw_acceleration[3];
-static int16_t data_raw_angular_rate[3];
+static axis3bit16_t data_raw_acceleration;
+static axis3bit16_t data_raw_angular_rate;
+static axis3bit16_t dummy;
 static float acceleration_mg[3];
 static float angular_rate_mdps[3];
 static uint8_t whoamI, rst;
@@ -142,7 +148,7 @@ void lsm6dsrx_read_fifo_simple(void)
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
   /* Init test platform */
   platform_init();
@@ -207,7 +213,6 @@ void lsm6dsrx_read_fifo_simple(void)
     lsm6dsrx_fifo_tag_t reg_tag;
     uint8_t wmflag = 0;
     uint16_t num = 0;
-    int16_t dummy[3];
 
     /* Read watermark flag */
     lsm6dsrx_fifo_wtm_flag_get(&dev_ctx, &wmflag);
@@ -222,28 +227,28 @@ void lsm6dsrx_read_fifo_simple(void)
         switch(reg_tag)
         {
           case LSM6DSRX_XL_NC_TAG:
-            memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
-            lsm6dsrx_fifo_out_raw_get(&dev_ctx, data_raw_acceleration);
+            memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
+            lsm6dsrx_fifo_out_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
             acceleration_mg[0] =
-              lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration[0]);
+              lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
             acceleration_mg[1] =
-              lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration[1]);
+              lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
             acceleration_mg[2] =
-              lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration[2]);
+              lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
 
             sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                     acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
             tx_com(tx_buffer, strlen((char const*)tx_buffer));
             break;
           case LSM6DSRX_GYRO_NC_TAG:
-            memset(data_raw_angular_rate, 0x00, 3 * sizeof(int16_t));
-            lsm6dsrx_fifo_out_raw_get(&dev_ctx, data_raw_angular_rate);
+            memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
+            lsm6dsrx_fifo_out_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
             angular_rate_mdps[0] =
-              lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate[0]);
+              lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[0]);
             angular_rate_mdps[1] =
-              lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate[1]);
+              lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[1]);
             angular_rate_mdps[2] =
-              lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate[2]);
+              lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
 
             sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
                     angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
@@ -251,8 +256,8 @@ void lsm6dsrx_read_fifo_simple(void)
             break;
           default:
             /* Flush unused samples */
-            memset(dummy, 0x00, 3 * sizeof(int16_t));
-            lsm6dsrx_fifo_out_raw_get(&dev_ctx, dummy);
+            memset(dummy.u8bit, 0x00, 3 * sizeof(int16_t));
+            lsm6dsrx_fifo_out_raw_get(&dev_ctx, dummy.u8bit);
             break;
         }
       }
