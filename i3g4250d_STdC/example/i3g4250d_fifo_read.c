@@ -1,13 +1,13 @@
 /*
  ******************************************************************************
- * @file    wake_up.c
+ * @file    fifo_read.c
  * @author  Sensors Software Solution Team
- * @brief   This file show how to configure sensor to detect a wake-up event.
+ * @brief   This file show how to configure sensor FIFO in stream mode.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,18 +22,20 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
- *
- * and STM32CubeMX tool with STM32CubeF4 MCU Package
+ * - STEVAL_MKI109V3 + STEVAL-MKI169V1
+ * - NUCLEO_F411RE + STEVAL-MKI169V1
+ * - DISCOVERY_SPC584B + STEVAL-MKI169V1
  *
  * Used interfaces:
  *
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
+ *
+ * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -47,48 +49,60 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-//#define STEVAL_MKI109V3
-#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+
+//#define STEVAL_MKI109V3  /* little endian */
+#define NUCLEO_F411RE    /* little endian */
+//#define SPC584B_DIS      /* big endian */
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
+
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
+
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
+
+#elif defined(SPC584B_DIS)
+/* DISCOVERY_SPC584B: Define communication interface */
+#define SENSOR_BUS I2CD1
 
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "stm32f4xx_hal.h"
 #include "i3g4250d_reg.h"
+
+#if defined(NUCLEO_F411RE)
+#include "stm32f4xx_hal.h"
+#include "usart.h"
 #include "gpio.h"
 #include "i2c.h"
-#if defined(STEVAL_MKI109V3)
+
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
 #include "usbd_cdc_if.h"
+#include "gpio.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-#include "usart.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
 #endif
 
 /* Private macro -------------------------------------------------------------*/
-#if defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-#define I3G4250D_INT2_PIN GPIO_PIN_1
-#define I3G4250D_INT2_GPIO_PORT GPIOC
-#define I3G4250D_INT1_PIN GPIO_PIN_0
-#define I3G4250D_INT1_GPIO_PORT GPIOC
-#else /* NUCLEO_F411RE_X_NUCLEO_IKS01A2 */
-#define I3G4250D_INT2_PIN GPIO_PIN_5
-#define I3G4250D_INT2_GPIO_PORT GPIOB
-#define I3G4250D_INT1_PIN GPIO_PIN_8
-#define I3G4250D_INT1_GPIO_PORT GPIOB
-#endif /* NUCLEO_F411RE_X_NUCLEO_IKS01A2 */
+#define    BOOT_TIME            10 //ms
 
 /* Private variables ---------------------------------------------------------*/
+static int16_t data_raw_angular_rate[3];
+static float angular_rate_mdps[3];
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 
@@ -105,107 +119,74 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
-static void tx_com(uint8_t *tx_buffer, uint16_t len);
+static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
-static int32_t platform_read_int_pin(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_wake_up_i3g4250d(void)
+void i3g4250d_fifo_read(void)
 {
   stmdev_ctx_t dev_ctx;
-  i3g4250d_int1_route_t int1_reg;
-  i3g4250d_int1_cfg_t int1_cfg;
 
-  /*
-   *  Initialize mems driver interface
-   */
+  /* Uncomment to use interrupts on drdy */
+  //i3g4250d_int2_route_t int2_reg;
+
+  /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /*
-   * Initialize platform specific hardware
-   */
+  /* Initialize platform specific hardware */
   platform_init();
 
-  /*
-   *  Check device ID
-   */
+  /* Wait sensor boot time */
+  platform_delay(BOOT_TIME);
+
+  /* Check device ID */
   i3g4250d_device_id_get(&dev_ctx, &whoamI);
   if (whoamI != I3G4250D_ID)
     while(1); /*manage here device not found */
 
-  /*
-   * The value of 1 LSB of the threshold corresponds to ~7.5 mdps
-   * Set Threshold ~100 dps on X, Y and Z axis
-   */
-  i3g4250d_int_x_treshold_set(&dev_ctx, 0x3415);
-  i3g4250d_int_y_treshold_set(&dev_ctx, 0x3415);
-  i3g4250d_int_z_treshold_set(&dev_ctx, 0x3415);
+  /* Set FIFO watermark to 10 samples */
+  i3g4250d_fifo_watermark_set(&dev_ctx, 10);
 
-  /*
-   * Set event duration to 0 ms
-   */
-  i3g4250d_int_on_threshold_dur_set(&dev_ctx, 0);
+  /* Set FIFO mode to FIFO MODE */
+  i3g4250d_fifo_mode_set(&dev_ctx, I3G4250D_FIFO_STREAM_MODE);
 
-  /*
-   * Simple interrupt configuration for detect wake-up
-   *
-   * The angular rate applied along either the
-   * X, Y or Z-axis exceeds threshold
-   */
-  i3g4250d_int_on_threshold_conf_get(&dev_ctx, &int1_cfg);
-  int1_cfg.xlie = PROPERTY_DISABLE;
-  int1_cfg.ylie = PROPERTY_DISABLE;
-  int1_cfg.zlie = PROPERTY_DISABLE;
-  int1_cfg.lir = PROPERTY_ENABLE;
-  int1_cfg.zhie = PROPERTY_ENABLE;
-  int1_cfg.xhie = PROPERTY_ENABLE;
-  int1_cfg.yhie = PROPERTY_ENABLE;
-  i3g4250d_int_on_threshold_conf_set(&dev_ctx, &int1_cfg);
-  i3g4250d_int_on_threshold_mode_set(&dev_ctx, I3G4250D_INT1_ON_TH_OR);
+  /* Enable FIFO */
+  i3g4250d_fifo_enable_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /*
-   * Configure interrupt on INT1
-   */
-  i3g4250d_pin_int1_route_get(&dev_ctx, &int1_reg);
-  int1_reg.i1_int1 = PROPERTY_ENABLE;
-  i3g4250d_pin_int1_route_set(&dev_ctx, int1_reg);
+  /* Uncomment to configure watermark interrupt on INT2 */
+  //i3g4250d_pin_int2_route_get(&dev_ctx, &int2_route);
+  //int2_route.i2_wtm = PROPERTY_ENABLE;
+  //i3g4250d_pin_int2_route_set(&dev_ctx, int2_route);
 
-  /*
-   * Set full scale
-   */
-  i3g4250d_full_scale_set(&dev_ctx, I3G4250D_245dps);
-
-  /*
-   * Set Output Data Rate
-   */
+  /* Set Output Data Rate */
   i3g4250d_data_rate_set(&dev_ctx, I3G4250D_ODR_100Hz);
 
-  /*
-   * Wait Events Loop
-   */
+  /* Wait Events Loop */
   while(1)
   {
-    i3g4250d_int1_src_t int1_src;
+    uint8_t flags;
+    uint8_t num = 0;
 
-    if (platform_read_int_pin())
+    /* Read watermark interrupt flag */
+    i3g4250d_fifo_wtm_flag_get(&dev_ctx, &flags);
+    if (flags)
     {
-      /*
-       * Read interrupt status
-       */
-      i3g4250d_int_on_threshold_src_get(&dev_ctx, &int1_src);
-      if (int1_src.ia)
+      /* Read how many samples in fifo */
+      i3g4250d_fifo_data_level_get(&dev_ctx, &num);
+      while (num-- > 0)
       {
-        sprintf((char*)tx_buffer, "wake-up event on ");
-        if (int1_src.zh)
-          sprintf((char*)tx_buffer, "%sz", tx_buffer);
-        if (int1_src.yh)
-          sprintf((char*)tx_buffer, "%sy", tx_buffer);
-        if (int1_src.xh)
-          sprintf((char*)tx_buffer, "%sx", tx_buffer);
+        /* Read angular rate data */
+        memset(data_raw_angular_rate, 0x00, 3 * sizeof(int16_t));
+        i3g4250d_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate);
+        angular_rate_mdps[0] = i3g4250d_from_fs245dps_to_mdps(data_raw_angular_rate[0]);
+        angular_rate_mdps[1] = i3g4250d_from_fs245dps_to_mdps(data_raw_angular_rate[1]);
+        angular_rate_mdps[2] = i3g4250d_from_fs245dps_to_mdps(data_raw_angular_rate[2]);
 
-        sprintf((char*)tx_buffer, "%s\r\n", tx_buffer);
+        sprintf((char*)tx_buffer, "Angular Rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+                angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
       }
     }
@@ -225,23 +206,16 @@ void example_wake_up_i3g4250d(void)
 static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
-    /* Write multiple command */
-    reg |= 0x80;
+#if defined(NUCLEO_F411RE)
     HAL_I2C_Mem_Write(handle, I3G4250D_I2C_ADD_L, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-#ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
-    /* Write multiple command */
-    reg |= 0x40;
+#elif defined(STEVAL_MKI109V3)
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Transmit(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
+#elif defined(SPC584B_DIS)
+  i2c_lld_write(handle,  I3G4250D_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
@@ -259,42 +233,52 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
-    /* Read multiple command */
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Read(handle, I3G4250D_I2C_ADD_L, reg,
+                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
     reg |= 0x80;
-    HAL_I2C_Mem_Read(handle, I3G4250D_I2C_ADD_L, reg,
-                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-#ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
-    /* Read multiple command */
-    reg |= 0xC0;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Receive(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
+#elif defined(SPC584B_DIS)
+  i2c_lld_read(handle, I3G4250D_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
 
 /*
- * @brief  Send buffer to console (platform dependent)
+ * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#if defined(NUCLEO_F411RE)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
-  #ifdef STEVAL_MKI109V3
+#elif defined(STEVAL_MKI109V3)
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#elif defined(SPC584B_DIS)
+  sd_lld_write(&SD2, tx_buffer, len);
+#endif
+}
+
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
+  HAL_Delay(ms);
+#elif defined(SPC584B_DIS)
+  osalThreadDelayMilliseconds(ms);
+#endif
 }
 
 /*
@@ -302,17 +286,11 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
-}
-
-/*
- * @brief  read interrupt pin (platform dependent)
- */
-static int32_t platform_read_int_pin(void)
-{
-  return HAL_GPIO_ReadPin(I3G4250D_INT1_GPIO_PORT, I3G4250D_INT1_PIN);
 }
