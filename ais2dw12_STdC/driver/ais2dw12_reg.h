@@ -557,12 +557,12 @@ int32_t ais2dw12_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t ais2dw12_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                            uint16_t len);
 
-extern float_t ais2dw12_from_fs2_to_mg(int16_t lsb);
-extern float_t ais2dw12_from_fs4_to_mg(int16_t lsb);
-extern float_t ais2dw12_from_fs2_12bit_to_mg(int16_t lsb);
-extern float_t ais2dw12_from_fs4_12bit_to_mg(int16_t lsb);
+float_t ais2dw12_from_fs2_to_mg(int16_t lsb);
+float_t ais2dw12_from_fs4_to_mg(int16_t lsb);
+float_t ais2dw12_from_fs2_12bit_to_mg(int16_t lsb);
+float_t ais2dw12_from_fs4_12bit_to_mg(int16_t lsb);
 
-extern float_t ais2dw12_from_lsb_to_celsius(int16_t lsb);
+float_t ais2dw12_from_lsb_to_celsius(int16_t lsb);
 
 typedef enum {
   AIS2DW12_PWR_MD_4                           = 0x03,
