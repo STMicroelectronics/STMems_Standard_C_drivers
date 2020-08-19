@@ -191,12 +191,12 @@ static void test_self_test_iis2dlpc(stmdev_ctx_t *dev_ctx)
       /* Read accelerometer data */
       memset(data_raw_acceleration[i].i16bit, 0x00, 3 * sizeof(int16_t));
       iis2dlpc_acceleration_raw_get(dev_ctx, data_raw_acceleration[i].i16bit);
-      for (axis = 0; axis < 3; axis++)
+      for (axis = 0; axis < 3; axis++) {
         acceleration_mg[i][axis] =
           iis2dlpc_from_fs4_to_mg(data_raw_acceleration[i].i16bit[axis]);
-
-        i++;
       }
+      i++;
+    }
   } while (i < SELF_TEST_SAMPLES);
 
   for (k = 0; k < 3; k++) {
