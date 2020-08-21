@@ -2713,9 +2713,8 @@ int32_t iis2iclx_fifo_mode_get(stmdev_ctx_t *ctx, iis2iclx_fifo_mode_t *val);
 
 typedef enum {
   IIS2ICLX_TEMP_NOT_BATCHED        = 0,
-  IIS2ICLX_TEMP_BATCHED_AT_52Hz    = 1,
   IIS2ICLX_TEMP_BATCHED_AT_12Hz5   = 2,
-  IIS2ICLX_TEMP_BATCHED_AT_1Hz6    = 3,
+  IIS2ICLX_TEMP_BATCHED_AT_52Hz    = 3,
 } iis2iclx_odr_t_batch_t;
 int32_t iis2iclx_fifo_temp_batch_set(stmdev_ctx_t *ctx,
                                     iis2iclx_odr_t_batch_t val);

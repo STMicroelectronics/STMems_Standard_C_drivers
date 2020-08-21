@@ -3624,9 +3624,6 @@ int32_t iis2iclx_fifo_temp_batch_get(stmdev_ctx_t *ctx,
     case IIS2ICLX_TEMP_BATCHED_AT_12Hz5:
       *val = IIS2ICLX_TEMP_BATCHED_AT_12Hz5;
       break;
-    case IIS2ICLX_TEMP_BATCHED_AT_1Hz6:
-      *val = IIS2ICLX_TEMP_BATCHED_AT_1Hz6;
-      break;
     default:
       *val = IIS2ICLX_TEMP_NOT_BATCHED;
       break;
