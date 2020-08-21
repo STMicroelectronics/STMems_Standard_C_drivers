@@ -119,7 +119,7 @@ static const float max_st_gy_limit[] = {800.0f, 800.0f, 800.0f};
 #if defined(STEVAL_MKI109V3)
 static sensbus_t imu_bus = {&SENSOR_BUS,
                             0,
-                            CS_DEV_GPIO_Port, 
+                            CS_DEV_GPIO_Port,
                             CS_DEV_Pin};
 static sensbus_t mag_bus = {&SENSOR_BUS,
                             0,
@@ -145,10 +145,14 @@ static sensbus_t imu_bus = {&SENSOR_BUS,
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
-                              uint16_t len);
-static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
-                             uint16_t len);
+static int32_t platform_write_imu(void *handle, uint8_t reg, uint8_t *bufp,
+                                  uint16_t len);
+static int32_t platform_read_imu(void *handle, uint8_t reg, uint8_t *bufp,
+                                 uint16_t len);
+static int32_t platform_write_mag(void *handle, uint8_t reg, uint8_t *bufp,
+                                  uint16_t len);
+static int32_t platform_read_mag(void *handle, uint8_t reg, uint8_t *bufp,
+                                 uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void);
@@ -169,15 +173,16 @@ void lis9ds1_self_test(void)
   uint8_t rst;
   uint8_t i;
   uint8_t j;
-  
 
-  /* Initialize mems driver interface */
-  dev_ctx_imu.write_reg = platform_write;
-  dev_ctx_imu.read_reg = platform_read;
+
+  /* Initialize inertial sensors (IMU) driver interface */
+  dev_ctx_imu.write_reg = platform_write_imu;
+  dev_ctx_imu.read_reg = platform_read_imu;
   dev_ctx_imu.handle = (void*)&imu_bus;
 
-  dev_ctx_mag.write_reg = platform_write;
-  dev_ctx_mag.read_reg = platform_read;
+  /* Initialize magnetic sensors driver interface */
+  dev_ctx_mag.write_reg = platform_write_mag;
+  dev_ctx_mag.read_reg = platform_read_mag;
   dev_ctx_mag.handle = (void*)&mag_bus;
 
   /* Init test platform */
@@ -486,7 +491,7 @@ void lis9ds1_self_test(void)
 }
 
 /*
- * @brief  Write generic device register (platform dependent)
+ * @brief  Write generic imu register (platform dependent)
  *
  * @param  handle    customizable argument. In this examples is used in
  *                   order to select the correct sensor bus handler.
@@ -495,28 +500,56 @@ void lis9ds1_self_test(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
-                              uint16_t len)
+static int32_t platform_write_imu(void *handle, uint8_t reg, uint8_t *bufp,
+                                  uint16_t len)
 {
-sensbus_t *sensbus = (sensbus_t*)handle;
+  sensbus_t *sensbus = (sensbus_t*)handle;
 
-  if (sensbus->hbus == &hi2c1) {
-    HAL_I2C_Mem_Write(sensbus->hbus, sensbus->i2c_address, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-#if defined(STEVAL_MKI109V3)
-  else if (sensbus->hbus == &hspi2) {
-    HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
-    HAL_SPI_Transmit(sensbus->hbus, bufp, len, 1000);
-    HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
-  }
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Write(sensbus->hbus, sensbus->i2c_address, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
+  HAL_SPI_Transmit(sensbus->hbus, bufp, len, 1000);
+  HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
 #endif
   return 0;
 }
 
 /*
- * @brief  Read generic device register (platform dependent)
+ * @brief  Write generic magnetometer register (platform dependent)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to write
+ * @param  bufp      pointer to data to write in register reg
+ * @param  len       number of consecutive register to write
+ *
+ */
+static int32_t platform_write_mag(void *handle, uint8_t reg, uint8_t *bufp,
+                                  uint16_t len)
+{
+  sensbus_t *sensbus = (sensbus_t*)handle;
+
+#if defined(NUCLEO_F411RE)
+  /* Write multiple command */
+  reg |= 0x80;
+  HAL_I2C_Mem_Write(sensbus->hbus, sensbus->i2c_address, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  /* Write multiple command */
+  reg |= 0x40;
+  HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
+  HAL_SPI_Transmit(sensbus->hbus, bufp, len, 1000);
+  HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
+#endif
+  return 0;
+}
+
+/*
+ * @brief  Read generic imu register (platform dependent)
  *
  * @param  handle    customizable argument. In this examples is used in
  *                   order to select the correct sensor bus handler.
@@ -525,24 +558,52 @@ sensbus_t *sensbus = (sensbus_t*)handle;
  * @param  len       number of consecutive register to read
  *
  */
-static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_read_imu(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-sensbus_t *sensbus = (sensbus_t*)handle;
+  sensbus_t *sensbus = (sensbus_t*)handle;
 
-  if (sensbus->hbus == &hi2c1) {
-    HAL_I2C_Mem_Read(sensbus->hbus, sensbus->i2c_address, reg,
-                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-#if defined(STEVAL_MKI109V3)
-  else if (sensbus->hbus == &hspi2) {
-    /* Read command */
-    reg |= 0x80;
-    HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
-    HAL_SPI_Receive(sensbus->hbus, bufp, len, 1000);
-    HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
-  }
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Read(sensbus->hbus, sensbus->i2c_address, reg,
+                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  /* Read command */
+  reg |= 0x80;
+  HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
+  HAL_SPI_Receive(sensbus->hbus, bufp, len, 1000);
+  HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
+#endif
+  return 0;
+}
+
+/*
+ * @brief  Read generic magnetometer register (platform dependent)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to read
+ * @param  bufp      pointer to buffer that store the data read
+ * @param  len       number of consecutive register to read
+ *
+ */
+static int32_t platform_read_mag(void *handle, uint8_t reg, uint8_t *bufp,
+                             uint16_t len)
+{
+  sensbus_t *sensbus = (sensbus_t*)handle;
+
+#if defined(NUCLEO_F411RE)
+  /* Read multiple command */
+  reg |= 0x80;
+  HAL_I2C_Mem_Read(sensbus->hbus, sensbus->i2c_address, reg,
+                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  /* Read multiple command */
+  reg |= 0xC0;
+  HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
+  HAL_SPI_Receive(sensbus->hbus, bufp, len, 1000);
+  HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
 #endif
   return 0;
 }
