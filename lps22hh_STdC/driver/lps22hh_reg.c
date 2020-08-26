@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -418,10 +418,15 @@ int32_t lps22hh_data_rate_get(stmdev_ctx_t *ctx, lps22hh_odr_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps22hh_pressure_ref_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps22hh_pressure_ref_set(stmdev_ctx_t *ctx, int16_t val)
 {
+  uint8_t buff[2];
   int32_t ret;
+
+  buff[1] = (uint8_t) ((uint16_t)val / 256U);
+  buff[0] = (uint8_t) ((uint16_t)val - (buff[1] * 256U));
   ret = lps22hh_write_reg(ctx, LPS22HH_REF_P_L, buff, 2);
+
   return ret;
 }
 
@@ -436,10 +441,15 @@ int32_t lps22hh_pressure_ref_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps22hh_pressure_ref_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps22hh_pressure_ref_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
+
   ret =  lps22hh_read_reg(ctx, LPS22HH_REF_P_L, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) + (int16_t)buff[0];
+
   return ret;
 }
 
@@ -453,10 +463,15 @@ int32_t lps22hh_pressure_ref_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps22hh_pressure_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps22hh_pressure_offset_set(stmdev_ctx_t *ctx, int16_t val)
 {
+  uint8_t buff[2];
   int32_t ret;
+
+  buff[1] = (uint8_t) ((uint16_t)val / 256U);
+  buff[0] = (uint8_t) ((uint16_t)val - (buff[1] * 256U));
   ret =  lps22hh_write_reg(ctx, LPS22HH_RPDS_L, buff, 2);
+
   return ret;
 }
 
@@ -471,10 +486,15 @@ int32_t lps22hh_pressure_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps22hh_pressure_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps22hh_pressure_offset_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
+
   ret =  lps22hh_read_reg(ctx, LPS22HH_RPDS_L, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) + (int16_t)buff[0];
+
   return ret;
 }
 
@@ -580,11 +600,13 @@ int32_t lps22hh_pressure_raw_get(stmdev_ctx_t *ctx, uint32_t *buff)
 {
   int32_t ret;
   uint8_t reg[3];
+
   ret =  lps22hh_read_reg(ctx, LPS22HH_PRESS_OUT_XL, reg, 3);
   *buff = reg[2];
   *buff = (*buff * 256) + reg[1];
   *buff = (*buff * 256) + reg[0];
   *buff *= 256;
+
   return ret;
 }
 
@@ -600,9 +622,11 @@ int32_t lps22hh_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff)
 {
   int32_t ret;
   uint8_t reg[2];
+
   ret =  lps22hh_read_reg(ctx, LPS22HH_TEMP_OUT_L, reg, 2);
   *buff = reg[1];
   *buff = (*buff * 256) + reg[0];
+
   return ret;
 }
 
@@ -614,10 +638,17 @@ int32_t lps22hh_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps22hh_fifo_pressure_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps22hh_fifo_pressure_raw_get(stmdev_ctx_t *ctx, uint32_t *buff)
 {
   int32_t ret;
-  ret =  lps22hh_read_reg(ctx, LPS22HH_FIFO_DATA_OUT_PRESS_XL, buff, 3);
+  uint8_t reg[3];
+
+  ret =  lps22hh_read_reg(ctx, LPS22HH_FIFO_DATA_OUT_PRESS_XL, reg, 3);
+  *buff = reg[2];
+  *buff = (*buff * 256) + reg[1];
+  *buff = (*buff * 256) + reg[0];
+  *buff *= 256;
+
   return ret;
 }
 
@@ -629,10 +660,15 @@ int32_t lps22hh_fifo_pressure_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps22hh_fifo_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps22hh_fifo_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff)
 {
   int32_t ret;
-  ret =  lps22hh_read_reg(ctx, LPS22HH_FIFO_DATA_OUT_TEMP_L, buff, 2);
+  uint8_t reg[2];
+
+  ret =  lps22hh_read_reg(ctx, LPS22HH_FIFO_DATA_OUT_TEMP_L, reg, 2);
+  *buff = reg[1];
+  *buff = (*buff * 256) + reg[0];
+
   return ret;
 }
 
@@ -1416,10 +1452,10 @@ int32_t lps22hh_int_treshold_set(stmdev_ctx_t *ctx, uint16_t buff)
   int32_t ret;
   lps22hh_ths_p_l_t ths_p_l;
   lps22hh_ths_p_h_t ths_p_h;
-  
-  ths_p_l.ths = (uint8_t)(buff & 0x00FFU);
-  ths_p_h.ths = (uint8_t)((buff & 0x7F00U) >> 8);
-  
+
+  ths_p_h.ths = (uint8_t) (buff / 256U);
+  ths_p_l.ths = (uint8_t) (buff - (ths_p_h.ths * 256U));
+
   ret =  lps22hh_write_reg(ctx, LPS22HH_THS_P_L,
                            (uint8_t*)&ths_p_l, 1);
   if (ret == 0) {
@@ -1448,8 +1484,8 @@ int32_t lps22hh_int_treshold_get(stmdev_ctx_t *ctx, uint16_t *buff)
   if (ret == 0) {
       ret =  lps22hh_read_reg(ctx, LPS22HH_THS_P_H, 
                                (uint8_t*)&ths_p_h, 1);
-      *buff = (uint16_t)ths_p_h.ths << 8;
-      *buff |= (uint16_t)ths_p_l.ths;
+      *buff = (uint16_t)ths_p_h.ths;
+      *buff = (*buff * 256U) + (uint16_t)ths_p_l.ths;
   }  
   return ret;
 }
