@@ -35,6 +35,38 @@ extern "C" {
   *
   */
 
+/** @defgroup  Endianness definitions
+  * @{
+  *
+  */
+
+#ifndef DRV_BYTE_ORDER
+#ifndef __BYTE_ORDER__
+
+#define DRV_LITTLE_ENDIAN 1234
+#define DRV_BIG_ENDIAN    4321
+
+/** if _BYTE_ORDER is not defined, choose the endianness of your architecture
+  * by uncommenting the define which fits your platform endianness
+  */
+//#define DRV_BYTE_ORDER    DRV_BIG_ENDIAN
+#define DRV_BYTE_ORDER    DRV_LITTLE_ENDIAN
+
+#else /* defined __BYTE_ORDER__ */
+
+#define DRV_LITTLE_ENDIAN  __ORDER_LITTLE_ENDIAN__
+#define DRV_BIG_ENDIAN     __ORDER_BIG_ENDIAN__
+#define DRV_BYTE_ORDER     __BYTE_ORDER__
+
+#endif /* __BYTE_ORDER__*/
+#endif /* DRV_BYTE_ORDER */
+
+/**
+  * @}
+  *
+  */
+
+
 /** @defgroup STMicroelectronics sensors common types
   * @{
   *
@@ -44,6 +76,7 @@ extern "C" {
 #define MEMS_SHARED_TYPES
 
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -52,6 +85,16 @@ typedef struct {
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit0       : 1;
+#endif /* DRV_BYTE_ORDER */
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
@@ -139,22 +182,37 @@ typedef struct {
 #define LPS25HB_WHO_AM_I        0x0FU
 #define LPS25HB_RES_CONF        0x10U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t avgp             : 2;
   uint8_t avgt             : 2;
   uint8_t not_used_01      : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01      : 4;
+  uint8_t avgt             : 2;
+  uint8_t avgp             : 2;
+#endif /* DRV_BYTE_ORDER */
 } lps25hb_res_conf_t;
 
 #define LPS25HB_CTRL_REG1       0x20U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t sim              : 1;
   uint8_t reset_az         : 1;
   uint8_t bdu              : 1;
   uint8_t diff_en          : 1;
   uint8_t odr              : 4; /* pd + odr -> odr */
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t odr              : 4; /* pd + odr -> odr */
+  uint8_t diff_en          : 1;
+  uint8_t bdu              : 1;
+  uint8_t reset_az         : 1;
+  uint8_t sim              : 1;
+#endif /* DRV_BYTE_ORDER */
 } lps25hb_ctrl_reg1_t;
 
 #define LPS25HB_CTRL_REG2       0x21U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t one_shot         : 1;
   uint8_t autozero         : 1;
   uint8_t swreset          : 1;
@@ -163,48 +221,95 @@ typedef struct {
   uint8_t stop_on_fth      : 1;
   uint8_t fifo_en          : 1;
   uint8_t boot             : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t boot             : 1;
+  uint8_t fifo_en          : 1;
+  uint8_t stop_on_fth      : 1;
+  uint8_t fifo_mean_dec    : 1;
+  uint8_t i2c_dis          : 1;
+  uint8_t swreset          : 1;
+  uint8_t autozero         : 1;
+  uint8_t one_shot         : 1;
+#endif /* DRV_BYTE_ORDER */
 } lps25hb_ctrl_reg2_t;
 
 #define LPS25HB_CTRL_REG3       0x22U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t int_s           : 2;
   uint8_t not_used_01     : 4;
   uint8_t pp_od           : 1;
   uint8_t int_h_l         : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t int_h_l         : 1;
+  uint8_t pp_od           : 1;
+  uint8_t not_used_01     : 4;
+  uint8_t int_s           : 2;
+#endif /* DRV_BYTE_ORDER */
 } lps25hb_ctrl_reg3_t;
 
 #define LPS25HB_CTRL_REG4       0x23U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t drdy            : 1;
   uint8_t f_ovr           : 1;
   uint8_t f_fth           : 1;
   uint8_t f_empty         : 1;
   uint8_t not_used_01     : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01     : 4;
+  uint8_t f_empty         : 1;
+  uint8_t f_fth           : 1;
+  uint8_t f_ovr           : 1;
+  uint8_t drdy            : 1;
+#endif /* DRV_BYTE_ORDER */
 } lps25hb_ctrl_reg4_t;
 
 #define LPS25HB_INTERRUPT_CFG   0x24U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t pe              : 2;  /* pl_e + ph_e -> pe */
   uint8_t lir             : 1;
   uint8_t not_used_01     : 5;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01     : 5;
+  uint8_t lir             : 1;
+  uint8_t pe              : 2;  /* pl_e + ph_e -> pe */
+#endif /* DRV_BYTE_ORDER */
 } lps25hb_interrupt_cfg_t;
 
 #define LPS25HB_INT_SOURCE      0x25U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ph              : 1;
   uint8_t pl              : 1;
   uint8_t ia              : 1;
   uint8_t not_used_01     : 5;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01     : 5;
+  uint8_t ia              : 1;
+  uint8_t pl              : 1;
+  uint8_t ph              : 1;
+#endif /* DRV_BYTE_ORDER */
 } lps25hb_int_source_t;
 
 #define LPS25HB_STATUS_REG      0x27U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t t_da            : 1;
   uint8_t p_da            : 1;
   uint8_t not_used_01     : 2;
   uint8_t t_or            : 1;
   uint8_t p_or            : 1;
   uint8_t not_used_02     : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_02     : 2;
+  uint8_t p_or            : 1;
+  uint8_t t_or            : 1;
+  uint8_t not_used_01     : 2;
+  uint8_t p_da            : 1;
+  uint8_t t_da            : 1;
+#endif /* DRV_BYTE_ORDER */
 } lps25hb_status_reg_t;
 
 #define LPS25HB_PRESS_OUT_XL    0x28U
@@ -214,16 +319,28 @@ typedef struct {
 #define LPS25HB_TEMP_OUT_H      0x2CU
 #define LPS25HB_FIFO_CTRL       0x2EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t wtm_point       : 5;
   uint8_t f_mode          : 3;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t f_mode          : 3;
+  uint8_t wtm_point       : 5;
+#endif /* DRV_BYTE_ORDER */
 } lps25hb_fifo_ctrl_t;
 
 #define LPS25HB_FIFO_STATUS     0x2FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t fss             : 5;
   uint8_t empty_fifo      : 1;
   uint8_t ovr             : 1;
   uint8_t fth_fifo        : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t fth_fifo        : 1;
+  uint8_t ovr             : 1;
+  uint8_t empty_fifo      : 1;
+  uint8_t fss             : 5;
+#endif /* DRV_BYTE_ORDER */
 } lps25hb_fifo_status_t;
 
 #define LPS25HB_THS_P_L         0x30U
@@ -270,11 +387,11 @@ int32_t lps25hb_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
                           uint8_t *data,
                           uint16_t len);
 
-extern float_t lps25hb_from_lsb_to_hpa(uint32_t lsb);
-extern float_t lps25hb_from_lsb_to_degc(int16_t lsb);
+float_t lps25hb_from_lsb_to_hpa(uint32_t lsb);
+float_t lps25hb_from_lsb_to_degc(int16_t lsb);
 
-int32_t lps25hb_pressure_ref_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lps25hb_pressure_ref_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lps25hb_pressure_ref_set(stmdev_ctx_t *ctx, int32_t val);
+int32_t lps25hb_pressure_ref_get(stmdev_ctx_t *ctx, int32_t *val);
 
 typedef enum {
   LPS25HB_P_AVG_8  = 0,
@@ -336,12 +453,12 @@ int32_t lps25hb_temp_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lps25hb_press_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lps25hb_pressure_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lps25hb_pressure_raw_get(stmdev_ctx_t *ctx, uint32_t *buff);
 
-int32_t lps25hb_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lps25hb_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff);
 
-int32_t lps25hb_pressure_offset_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lps25hb_pressure_offset_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lps25hb_pressure_offset_set(stmdev_ctx_t *ctx, int16_t val);
+int32_t lps25hb_pressure_offset_get(stmdev_ctx_t *ctx, int16_t *val);
 
 int32_t lps25hb_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
@@ -429,8 +546,8 @@ int32_t lps25hb_int_on_press_low_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lps25hb_interrupt_event_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lps25hb_int_threshold_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lps25hb_int_threshold_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lps25hb_int_threshold_set(stmdev_ctx_t *ctx, uint16_t val);
+int32_t lps25hb_int_threshold_get(stmdev_ctx_t *ctx, uint16_t *val);
 
 int32_t lps25hb_stop_on_fifo_threshold_set(stmdev_ctx_t *ctx,
                                            uint8_t val);
