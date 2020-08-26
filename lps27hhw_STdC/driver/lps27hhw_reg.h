@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -35,6 +35,37 @@
   *
   */
 
+/** @defgroup  Endianness definitions
+  * @{
+  *
+  */
+
+#ifndef DRV_BYTE_ORDER
+#ifndef __BYTE_ORDER__
+
+#define DRV_LITTLE_ENDIAN 1234
+#define DRV_BIG_ENDIAN    4321
+
+/** if _BYTE_ORDER is not defined, choose the endianness of your architecture
+  * by uncommenting the define which fits your platform endianness
+  */
+//#define DRV_BYTE_ORDER    DRV_BIG_ENDIAN
+#define DRV_BYTE_ORDER    DRV_LITTLE_ENDIAN
+
+#else /* defined __BYTE_ORDER__ */
+
+#define DRV_LITTLE_ENDIAN  __ORDER_LITTLE_ENDIAN__
+#define DRV_BIG_ENDIAN     __ORDER_BIG_ENDIAN__
+#define DRV_BYTE_ORDER     __BYTE_ORDER__
+
+#endif /* __BYTE_ORDER__*/
+#endif /* DRV_BYTE_ORDER */
+
+/**
+  * @}
+  *
+  */
+
 /** @defgroup STMicroelectronics sensors common types
   * @{
   *
@@ -44,6 +75,7 @@
 #define MEMS_SHARED_TYPES
 
 typedef struct{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -52,6 +84,16 @@ typedef struct{
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit0       : 1;
+#endif /* DRV_BYTE_ORDER */
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
@@ -89,9 +131,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -133,6 +175,7 @@ typedef struct {
 
 #define LPS27HHW_INTERRUPT_CFG                   0x0BU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t pe                              : 2;  /* ple + phe */
   uint8_t lir                             : 1;
   uint8_t diff_en                         : 1;
@@ -140,6 +183,15 @@ typedef struct {
   uint8_t autozero                        : 1;
   uint8_t reset_arp                       : 1;
   uint8_t autorefp                        : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t autorefp                        : 1;
+  uint8_t reset_arp                       : 1;
+  uint8_t autozero                        : 1;
+  uint8_t reset_az                        : 1;
+  uint8_t diff_en                         : 1;
+  uint8_t lir                             : 1;
+  uint8_t pe                              : 2;  /* ple + phe */
+#endif /* DRV_BYTE_ORDER */
 } lps27hhw_interrupt_cfg_t;
 
 #define LPS27HHW_THS_P_L                         0x0CU
@@ -149,12 +201,18 @@ typedef struct {
 
 #define LPS27HHW_THS_P_H                         0x0DU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ths                             : 7;
   uint8_t not_used_01                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01                     : 1;
+  uint8_t ths                             : 7;
+#endif /* DRV_BYTE_ORDER */
 } lps27hhw_ths_p_h_t;
 
 #define LPS27HHW_IF_CTRL                         0x0EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t i2c_disable                     : 1;
   uint8_t i3c_disable                     : 1;
   uint8_t pd_dis_int1                     : 1;
@@ -162,20 +220,39 @@ typedef struct {
   uint8_t sda_pu_en                       : 1;
   uint8_t not_used_01                     : 2;
   uint8_t int_en_i3c                      : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t int_en_i3c                      : 1;
+  uint8_t not_used_01                     : 2;
+  uint8_t sda_pu_en                       : 1;
+  uint8_t sdo_pu_en                       : 1;
+  uint8_t pd_dis_int1                     : 1;
+  uint8_t i3c_disable                     : 1;
+  uint8_t i2c_disable                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lps27hhw_if_ctrl_t;
 
 #define LPS27HHW_WHO_AM_I                        0x0FU
 #define LPS27HHW_CTRL_REG1                       0x10U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t sim                             : 1;
   uint8_t bdu                             : 1;
   uint8_t lpfp_cfg                        : 2;  /* en_lpfp + lpfp_cfg */
   uint8_t odr                             : 3;
   uint8_t not_used_01                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01                     : 1;
+  uint8_t odr                             : 3;
+  uint8_t lpfp_cfg                        : 2;  /* en_lpfp + lpfp_cfg */
+  uint8_t bdu                             : 1;
+  uint8_t sim                             : 1;
+#endif /* DRV_BYTE_ORDER */
+
 } lps27hhw_ctrl_reg1_t;
 
 #define LPS27HHW_CTRL_REG2                       0x11U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t one_shot                        : 1;
   uint8_t low_noise_en                    : 1;
   uint8_t swreset                         : 1;
@@ -184,29 +261,60 @@ typedef struct {
   uint8_t pp_od                           : 1;
   uint8_t int_h_l                         : 1;
   uint8_t boot                            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t boot                            : 1;
+  uint8_t int_h_l                         : 1;
+  uint8_t pp_od                           : 1;
+  uint8_t if_add_inc                      : 1;
+  uint8_t not_used_01                     : 1;
+  uint8_t swreset                         : 1;
+  uint8_t low_noise_en                    : 1;
+  uint8_t one_shot                        : 1;
+#endif /* DRV_BYTE_ORDER */
+
 } lps27hhw_ctrl_reg2_t;
 
 #define LPS27HHW_CTRL_REG3                       0x12U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t int_s                           : 2;
   uint8_t drdy                            : 1;
   uint8_t int_f_ovr                       : 1;
   uint8_t int_f_wtm                       : 1;
   uint8_t int_f_full                      : 1;
   uint8_t not_used_01                     : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01                     : 2;
+  uint8_t int_f_full                      : 1;
+  uint8_t int_f_wtm                       : 1;
+  uint8_t int_f_ovr                       : 1;
+  uint8_t drdy                            : 1;
+  uint8_t int_s                           : 2;
+#endif /* DRV_BYTE_ORDER */
 } lps27hhw_ctrl_reg3_t;
 
 #define LPS27HHW_FIFO_CTRL                       0x13U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t f_mode                          : 3;  /* f_mode + trig_modes */
   uint8_t stop_on_wtm                     : 1;
   uint8_t not_used_01                     : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01                     : 4;
+  uint8_t stop_on_wtm                     : 1;
+  uint8_t f_mode                          : 3;  /* f_mode + trig_modes */
+#endif /* DRV_BYTE_ORDER */
 } lps27hhw_fifo_ctrl_t;
 
 #define LPS27HHW_FIFO_WTM                        0x14U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t wtm                             : 7;
   uint8_t not_used_01                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01                     : 1;
+  uint8_t wtm                             : 7;
+#endif /* DRV_BYTE_ORDER */
 } lps27hhw_fifo_wtm_t;
 
 #define LPS27HHW_REF_P_L                         0x15U
@@ -215,30 +323,54 @@ typedef struct {
 #define LPS27HHW_RPDS_H                          0x19U
 #define LPS27HHW_INT_SOURCE                      0x24U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ph                              : 1;
   uint8_t pl                              : 1;
   uint8_t ia                              : 1;
   uint8_t not_used_01                     : 4;
   uint8_t boot_on                         : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t boot_on                         : 1;
+  uint8_t not_used_01                     : 4;
+  uint8_t ia                              : 1;
+  uint8_t pl                              : 1;
+  uint8_t ph                              : 1;
+#endif /* DRV_BYTE_ORDER */
 } lps27hhw_int_source_t;
 
 #define LPS27HHW_FIFO_STATUS1                    0x25U
 #define LPS27HHW_FIFO_STATUS2                    0x26U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01                     : 5;
   uint8_t fifo_full_ia                    : 1;
   uint8_t fifo_ovr_ia                     : 1;
   uint8_t fifo_wtm_ia                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t fifo_wtm_ia                     : 1;
+  uint8_t fifo_ovr_ia                     : 1;
+  uint8_t fifo_full_ia                    : 1;
+  uint8_t not_used_01                     : 5;
+#endif /* DRV_BYTE_ORDER */
 } lps27hhw_fifo_status2_t;
 
 #define LPS27HHW_STATUS                          0x27U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t p_da                            : 1;
   uint8_t t_da                            : 1;
   uint8_t not_used_01                     : 2;
   uint8_t p_or                            : 1;
   uint8_t t_or                            : 1;
   uint8_t not_used_02                     : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_02                     : 2;
+  uint8_t t_or                            : 1;
+  uint8_t p_or                            : 1;
+  uint8_t not_used_01                     : 2;
+  uint8_t t_da                            : 1;
+  uint8_t p_da                            : 1;
+#endif /* DRV_BYTE_ORDER */
 } lps27hhw_status_t;
 
 #define LPS27HHW_PRESS_OUT_XL                    0x28U
@@ -289,8 +421,8 @@ int32_t lps27hhw_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lps27hhw_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
-extern float_t lps27hhw_from_lsb_to_hpa(int32_t lsb);
-extern float_t lps27hhw_from_lsb_to_celsius(int16_t lsb);
+float_t lps27hhw_from_lsb_to_hpa(int32_t lsb);
+float_t lps27hhw_from_lsb_to_celsius(int16_t lsb);
 
 int32_t lps27hhw_autozero_rst_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps27hhw_autozero_rst_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -326,11 +458,11 @@ typedef enum {
 int32_t lps27hhw_data_rate_set(stmdev_ctx_t *ctx, lps27hhw_odr_t val);
 int32_t lps27hhw_data_rate_get(stmdev_ctx_t *ctx, lps27hhw_odr_t *val);
 
-int32_t lps27hhw_pressure_ref_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lps27hhw_pressure_ref_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lps27hhw_pressure_ref_set(stmdev_ctx_t *ctx, int16_t val);
+int32_t lps27hhw_pressure_ref_get(stmdev_ctx_t *ctx, int16_t *val);
 
-int32_t lps27hhw_pressure_offset_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lps27hhw_pressure_offset_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lps27hhw_pressure_offset_set(stmdev_ctx_t *ctx, int16_t val);
+int32_t lps27hhw_pressure_offset_get(stmdev_ctx_t *ctx, int16_t *val);
 
 typedef struct{
   lps27hhw_int_source_t    int_source;
@@ -346,13 +478,13 @@ int32_t lps27hhw_press_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lps27hhw_temp_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lps27hhw_pressure_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lps27hhw_pressure_raw_get(stmdev_ctx_t *ctx, uint32_t *buff);
 
-int32_t lps27hhw_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lps27hhw_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff);
 
-int32_t lps27hhw_fifo_pressure_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lps27hhw_fifo_pressure_raw_get(stmdev_ctx_t *ctx, uint32_t *buff);
 
-int32_t lps27hhw_fifo_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lps27hhw_fifo_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff);
 
 int32_t lps27hhw_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
