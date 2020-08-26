@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -35,6 +35,37 @@
   *
   */
 
+/** @defgroup  Endianness definitions
+  * @{
+  *
+  */
+
+#ifndef DRV_BYTE_ORDER
+#ifndef __BYTE_ORDER__
+
+#define DRV_LITTLE_ENDIAN 1234
+#define DRV_BIG_ENDIAN    4321
+
+/** if _BYTE_ORDER is not defined, choose the endianness of your architecture
+  * by uncommenting the define which fits your platform endianness
+  */
+//#define DRV_BYTE_ORDER    DRV_BIG_ENDIAN
+#define DRV_BYTE_ORDER    DRV_LITTLE_ENDIAN
+
+#else /* defined __BYTE_ORDER__ */
+
+#define DRV_LITTLE_ENDIAN  __ORDER_LITTLE_ENDIAN__
+#define DRV_BIG_ENDIAN     __ORDER_BIG_ENDIAN__
+#define DRV_BYTE_ORDER     __BYTE_ORDER__
+
+#endif /* __BYTE_ORDER__*/
+#endif /* DRV_BYTE_ORDER */
+
+/**
+  * @}
+  *
+  */
+
 /** @defgroup STMicroelectronics sensors common types
   * @{
   *
@@ -44,6 +75,7 @@
 #define MEMS_SHARED_TYPES
 
 typedef struct{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -52,6 +84,16 @@ typedef struct{
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit0       : 1;
+#endif /* DRV_BYTE_ORDER */
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
@@ -89,9 +131,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using 
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using 
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -132,78 +174,93 @@ typedef struct {
   *
   */
 
-/**
-  * @addtogroup  LIS331DLH_Sensitivity
-  * @brief       These macro are maintained for back compatibility.
-  *              in order to convert data into engineering units please
-  *              use functions:
-  *                -> _from_fs2_to_mg(int16_t lsb);
-  *                -> _from_fs4_to_mg(int16_t lsb);
-  *                -> _from_fs8_to_mg(int16_t lsb);
-  *
-  *              REMOVING the MACRO you are compliant with:
-  *              MISRA-C 2012 [Dir 4.9] -> " avoid function-like macros "
-  * @{
-  *
-  */
-
-#define LIS331DLH_FROM_FS_2g_TO_mg(lsb)    (float)( (lsb >> 4 ) * 1.0f )
-#define LIS331DLH_FROM_FS_4g_TO_mg(lsb)    (float)( (lsb >> 4 ) * 2.0f )
-#define LIS331DLH_FROM_FS_8g_TO_mg(lsb)    (float)( (lsb >> 4 ) * 3.9f )
-
-/**
-  * @}
-  *
-  */
-
 #define LIS331DLH_WHO_AM_I                  0x0FU
 #define LIS331DLH_CTRL_REG1                 0x20U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xen                      : 1;
   uint8_t yen                      : 1;
   uint8_t zen                      : 1;
   uint8_t dr                       : 2;
   uint8_t pm                       : 3;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t pm                       : 3;
+  uint8_t dr                       : 2;
+  uint8_t zen                      : 1;
+  uint8_t yen                      : 1;
+  uint8_t xen                      : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis331dlh_ctrl_reg1_t;
 
 #define LIS331DLH_CTRL_REG2                 0x21U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t hpcf                     : 2;
   uint8_t hpen                     : 2;
   uint8_t fds                      : 1;
   uint8_t hpm                      : 2;
   uint8_t boot                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t boot                     : 1;
+  uint8_t hpm                      : 2;
+  uint8_t fds                      : 1;
+  uint8_t hpen                     : 2;
+  uint8_t hpcf                     : 2;
+#endif /* DRV_BYTE_ORDER */
 } lis331dlh_ctrl_reg2_t;
 
 #define LIS331DLH_CTRL_REG3                 0x22U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t i1_cfg                   : 2;
   uint8_t lir1                     : 1;
   uint8_t i2_cfg                   : 2;
   uint8_t lir2                     : 1;
   uint8_t pp_od                    : 1;
   uint8_t ihl                      : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t ihl                      : 1;
+  uint8_t pp_od                    : 1;
+  uint8_t lir2                     : 1;
+  uint8_t i2_cfg                   : 2;
+  uint8_t lir1                     : 1;
+  uint8_t i1_cfg                   : 2;
+#endif /* DRV_BYTE_ORDER */
 } lis331dlh_ctrl_reg3_t;
 
 #define LIS331DLH_CTRL_REG4                 0x23U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t sim                      : 1;
   uint8_t st                       : 3; /* STsign + ST */
   uint8_t fs                       : 2;
   uint8_t ble                      : 1;
   uint8_t bdu                      : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bdu                      : 1;
+  uint8_t ble                      : 1;
+  uint8_t fs                       : 2;
+  uint8_t st                       : 3; /* STsign + ST */
+  uint8_t sim                      : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis331dlh_ctrl_reg4_t;
 
 #define LIS331DLH_CTRL_REG5                 0x24U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t turnon                   : 2;
   uint8_t not_used_01              : 6;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 6;
+  uint8_t turnon                   : 2;
+#endif /* DRV_BYTE_ORDER */
 } lis331dlh_ctrl_reg5_t;
 
 #define LIS331DLH_HP_FILTER_RESET           0x25U
 #define LIS331DLH_REFERENCE                 0x26U
 #define LIS331DLH_STATUS_REG                0x27U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xda                      : 1;
   uint8_t yda                      : 1;
   uint8_t zda                      : 1;
@@ -212,6 +269,16 @@ typedef struct {
   uint8_t yor                      : 1;
   uint8_t zor                      : 1;
   uint8_t zyxor                    : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t zyxor                    : 1;
+  uint8_t zor                      : 1;
+  uint8_t yor                      : 1;
+  uint8_t _xor                     : 1;
+  uint8_t zyxda                    : 1;
+  uint8_t zda                      : 1;
+  uint8_t yda                      : 1;
+  uint8_t xda                      : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis331dlh_status_reg_t;
 
 #define LIS331DLH_OUT_X_L                   0x28U
@@ -222,6 +289,7 @@ typedef struct {
 #define LIS331DLH_OUT_Z_H                   0x2DU
 #define LIS331DLH_INT1_CFG                  0x30U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xlie                     : 1;
   uint8_t xhie                     : 1;
   uint8_t ylie                     : 1;
@@ -230,10 +298,21 @@ typedef struct {
   uint8_t zhie                     : 1;
   uint8_t _6d                      : 1;
   uint8_t aoi                      : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t aoi                      : 1;
+  uint8_t _6d                      : 1;
+  uint8_t zhie                     : 1;
+  uint8_t zlie                     : 1;
+  uint8_t yhie                     : 1;
+  uint8_t ylie                     : 1;
+  uint8_t xhie                     : 1;
+  uint8_t xlie                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis331dlh_int1_cfg_t;
 
 #define LIS331DLH_INT1_SRC                  0x31U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xl                       : 1;
   uint8_t xh                       : 1;
   uint8_t yl                       : 1;
@@ -242,22 +321,44 @@ typedef struct {
   uint8_t zh                       : 1;
   uint8_t ia                       : 1;
   uint8_t not_used_01              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 1;
+  uint8_t ia                       : 1;
+  uint8_t zh                       : 1;
+  uint8_t zl                       : 1;
+  uint8_t yh                       : 1;
+  uint8_t yl                       : 1;
+  uint8_t xh                       : 1;
+  uint8_t xl                       : 1;
+#endif /* DRV_BYTE_ORDER */
 } lis331dlh_int1_src_t;
 
 #define LIS331DLH_INT1_THS                  0x32U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ths                      : 7;
   uint8_t not_used_01              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 1;
+  uint8_t ths                      : 7;
+#endif /* DRV_BYTE_ORDER */
 } lis331dlh_int1_ths_t;
 
 #define LIS331DLH_INT1_DURATION             0x33U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t d                        : 7;
   uint8_t not_used_01              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 1;
+  uint8_t d                        : 7;
+#endif /* DRV_BYTE_ORDER */
+
 } lis331dlh_int1_duration_t;
 
 #define LIS331DLH_INT2_CFG                  0x34U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xlie                     : 1;
   uint8_t xhie                     : 1;
   uint8_t ylie                     : 1;
@@ -266,10 +367,22 @@ typedef struct {
   uint8_t zhie                     : 1;
   uint8_t _6d                      : 1;
   uint8_t aoi                      : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t aoi                      : 1;
+  uint8_t _6d                      : 1;
+  uint8_t zhie                     : 1;
+  uint8_t zlie                     : 1;
+  uint8_t yhie                     : 1;
+  uint8_t ylie                     : 1;
+  uint8_t xhie                     : 1;
+  uint8_t xlie                     : 1;
+#endif /* DRV_BYTE_ORDER */
+
 } lis331dlh_int2_cfg_t;
 
 #define LIS331DLH_INT2_SRC                  0x35U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xl                       : 1;
   uint8_t xh                       : 1;
   uint8_t yl                       : 1;
@@ -278,18 +391,39 @@ typedef struct {
   uint8_t zh                       : 1;
   uint8_t ia                       : 1;
   uint8_t not_used_01              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 1;
+  uint8_t ia                       : 1;
+  uint8_t zh                       : 1;
+  uint8_t zl                       : 1;
+  uint8_t yh                       : 1;
+  uint8_t yl                       : 1;
+  uint8_t xh                       : 1;
+  uint8_t xl                       : 1;
+#endif /* DRV_BYTE_ORDER */
+
 } lis331dlh_int2_src_t;
 
 #define LIS331DLH_INT2_THS                  0x36U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ths                      : 7;
   uint8_t not_used_01              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 1;
+  uint8_t ths                      : 7;
+#endif /* DRV_BYTE_ORDER */
 } lis331dlh_int2_ths_t;
 
 #define LIS331DLH_INT2_DURATION             0x37U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t d                        : 7;
   uint8_t not_used_01              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 1;
+  uint8_t d                        : 7;
+#endif /* DRV_BYTE_ORDER */
 } lis331dlh_int2_duration_t;
 
 /**
@@ -333,9 +467,9 @@ int32_t lis331dlh_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lis331dlh_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                             uint16_t len);
 
-extern float lis331dlh_from_fs2_to_mg(int16_t lsb);
-extern float lis331dlh_from_fs4_to_mg(int16_t lsb);
-extern float lis331dlh_from_fs8_to_mg(int16_t lsb);
+float lis331dlh_from_fs2_to_mg(int16_t lsb);
+float lis331dlh_from_fs4_to_mg(int16_t lsb);
+float lis331dlh_from_fs8_to_mg(int16_t lsb);
 
 int32_t lis331dlh_axis_x_data_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis331dlh_axis_x_data_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -387,7 +521,7 @@ int32_t lis331dlh_status_reg_get(stmdev_ctx_t *ctx,
 int32_t lis331dlh_flag_data_ready_get(stmdev_ctx_t *ctx,
                                       uint8_t *val);
 
-int32_t lis331dlh_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lis331dlh_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
 int32_t lis331dlh_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
