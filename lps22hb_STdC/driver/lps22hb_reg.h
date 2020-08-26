@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -35,6 +35,37 @@
   *
   */
 
+/** @defgroup  Endianness definitions
+  * @{
+  *
+  */
+
+#ifndef DRV_BYTE_ORDER
+#ifndef __BYTE_ORDER__
+
+#define DRV_LITTLE_ENDIAN 1234
+#define DRV_BIG_ENDIAN    4321
+
+/** if _BYTE_ORDER is not defined, choose the endianness of your architecture
+  * by uncommenting the define which fits your platform endianness
+  */
+//#define DRV_BYTE_ORDER    DRV_BIG_ENDIAN
+#define DRV_BYTE_ORDER    DRV_LITTLE_ENDIAN
+
+#else /* defined __BYTE_ORDER__ */
+
+#define DRV_LITTLE_ENDIAN  __ORDER_LITTLE_ENDIAN__
+#define DRV_BIG_ENDIAN     __ORDER_BIG_ENDIAN__
+#define DRV_BYTE_ORDER     __BYTE_ORDER__
+
+#endif /* __BYTE_ORDER__*/
+#endif /* DRV_BYTE_ORDER */
+
+/**
+  * @}
+  *
+  */
+
 /** @defgroup STMicroelectronics sensors common types
   * @{
   *
@@ -44,6 +75,7 @@
 #define MEMS_SHARED_TYPES
 
 typedef struct{
+#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -52,6 +84,16 @@ typedef struct{
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
+#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+  uint8_t bit7       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit0       : 1;
+#endif /* DRV_BIG_ENDIAN */
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
@@ -89,9 +131,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using 
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using 
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -134,6 +176,7 @@ typedef struct {
 
 #define LPS22HB_INTERRUPT_CFG  0x0BU
 typedef struct {
+#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
   uint8_t pe               : 2; /* ple + phe -> pe */
   uint8_t lir              : 1;
   uint8_t diff_en          : 1;
@@ -141,6 +184,15 @@ typedef struct {
   uint8_t autozero         : 1;
   uint8_t reset_arp        : 1;
   uint8_t autorifp         : 1;
+#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+  uint8_t autorifp         : 1;
+  uint8_t reset_arp        : 1;
+  uint8_t autozero         : 1;
+  uint8_t reset_az         : 1;
+  uint8_t diff_en          : 1;
+  uint8_t lir              : 1;
+  uint8_t pe               : 2; /* ple + phe -> pe */
+#endif /* DRV_BIG_ENDIAN */
 } lps22hb_interrupt_cfg_t;
 
 #define LPS22HB_THS_P_L        0x0CU
@@ -148,15 +200,24 @@ typedef struct {
 #define LPS22HB_WHO_AM_I       0x0FU
 #define LPS22HB_CTRL_REG1      0x10U
 typedef struct {
+#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
   uint8_t sim              : 1;
   uint8_t bdu              : 1;
   uint8_t lpfp             : 2; /* en_lpfp + lpfp_cfg -> lpfp */
   uint8_t odr              : 3;
   uint8_t not_used_01      : 1;
+#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+  uint8_t not_used_01      : 1;
+  uint8_t odr              : 3;
+  uint8_t lpfp             : 2; /* en_lpfp + lpfp_cfg -> lpfp */
+  uint8_t bdu              : 1;
+  uint8_t sim              : 1;
+#endif /* DRV_BIG_ENDIAN */
 } lps22hb_ctrl_reg1_t;
 
 #define LPS22HB_CTRL_REG2      0x11U
 typedef struct {
+#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
   uint8_t one_shot         : 1;
   uint8_t not_used_01      : 1;
   uint8_t swreset          : 1;
@@ -165,10 +226,21 @@ typedef struct {
   uint8_t stop_on_fth      : 1;
   uint8_t fifo_en          : 1;
   uint8_t boot             : 1;
+#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+  uint8_t boot             : 1;
+  uint8_t fifo_en          : 1;
+  uint8_t stop_on_fth      : 1;
+  uint8_t if_add_inc       : 1;
+  uint8_t i2c_dis          : 1;
+  uint8_t swreset          : 1;
+  uint8_t not_used_01      : 1;
+  uint8_t one_shot         : 1;
+#endif /* DRV_BIG_ENDIAN */
 } lps22hb_ctrl_reg2_t;
 
 #define LPS22HB_CTRL_REG3      0x12U
 typedef struct {
+#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
   uint8_t int_s            : 2;
   uint8_t drdy             : 1;
   uint8_t f_ovr            : 1;
@@ -176,13 +248,29 @@ typedef struct {
   uint8_t f_fss5           : 1;
   uint8_t pp_od            : 1;
   uint8_t int_h_l          : 1;
+#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+  uint8_t int_h_l          : 1;
+  uint8_t pp_od            : 1;
+  uint8_t f_fss5           : 1;
+  uint8_t f_fth            : 1;
+  uint8_t f_ovr            : 1;
+  uint8_t drdy             : 1;
+  uint8_t int_s            : 2;
+#endif /* DRV_BIG_ENDIAN */
+
 } lps22hb_ctrl_reg3_t;
 
 
 #define LPS22HB_FIFO_CTRL      0x14U
 typedef struct {
+#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
   uint8_t wtm              : 5;
   uint8_t f_mode           : 3;
+#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+  uint8_t f_mode           : 3;
+  uint8_t wtm              : 5;
+#endif /* DRV_BIG_ENDIAN */
+
 } lps22hb_fifo_ctrl_t;
 
 #define LPS22HB_REF_P_XL       0x15U
@@ -193,34 +281,63 @@ typedef struct {
 
 #define LPS22HB_RES_CONF       0x1AU
 typedef struct {
+#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
   uint8_t lc_en            : 1;
   uint8_t not_used_01      : 7;
+#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+  uint8_t not_used_01      : 7;
+  uint8_t lc_en            : 1;
+#endif /* DRV_BIG_ENDIAN */
+
 } lps22hb_res_conf_t;
 
 #define LPS22HB_INT_SOURCE     0x25U
 typedef struct {
+#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
   uint8_t ph               : 1;
   uint8_t pl               : 1;
   uint8_t ia               : 1;
   uint8_t not_used_01      : 4;
   uint8_t boot_status      : 1;
+#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+  uint8_t boot_status      : 1;
+  uint8_t not_used_01      : 4;
+  uint8_t ia               : 1;
+  uint8_t pl               : 1;
+  uint8_t ph               : 1;
+#endif /* DRV_BIG_ENDIAN */
 } lps22hb_int_source_t;
 
 #define LPS22HB_FIFO_STATUS    0x26U
 typedef struct {
+#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
   uint8_t fss              : 6;
   uint8_t ovr              : 1;
   uint8_t fth_fifo         : 1;
+#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+  uint8_t fth_fifo         : 1;
+  uint8_t ovr              : 1;
+  uint8_t fss              : 6;
+#endif /* DRV_BIG_ENDIAN */
 } lps22hb_fifo_status_t;
 
 #define LPS22HB_STATUS         0x27U
 typedef struct {
+#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
   uint8_t p_da             : 1;
   uint8_t t_da             : 1;
   uint8_t not_used_02      : 2;
   uint8_t p_or             : 1;
   uint8_t t_or             : 1;
   uint8_t not_used_01      : 2;
+#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+  uint8_t not_used_01      : 2;
+  uint8_t t_or             : 1;
+  uint8_t p_or             : 1;
+  uint8_t not_used_02      : 2;
+  uint8_t t_da             : 1;
+  uint8_t p_da             : 1;
+#endif /* DRV_BIG_ENDIAN */
 } lps22hb_status_t;
 
 #define LPS22HB_PRESS_OUT_XL   0x28U
@@ -309,11 +426,11 @@ int32_t lps22hb_data_rate_get(stmdev_ctx_t *ctx, lps22hb_odr_t *val);
 int32_t lps22hb_one_shoot_trigger_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps22hb_one_shoot_trigger_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lps22hb_pressure_ref_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lps22hb_pressure_ref_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lps22hb_pressure_ref_set(stmdev_ctx_t *ctx, int32_t val);
+int32_t lps22hb_pressure_ref_get(stmdev_ctx_t *ctx, int32_t *val);
 
-int32_t lps22hb_pressure_offset_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lps22hb_pressure_offset_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lps22hb_pressure_offset_set(stmdev_ctx_t *ctx, int16_t val);
+int32_t lps22hb_pressure_offset_get(stmdev_ctx_t *ctx, int16_t *val);
 
 int32_t lps22hb_press_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
@@ -323,9 +440,9 @@ int32_t lps22hb_press_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lps22hb_temp_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lps22hb_pressure_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lps22hb_pressure_raw_get(stmdev_ctx_t *ctx, uint32_t *buff);
 
-int32_t lps22hb_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lps22hb_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff);
 
 int32_t lps22hb_low_pass_rst_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
@@ -371,8 +488,8 @@ int32_t lps22hb_int_notification_mode_get(stmdev_ctx_t *ctx,
 int32_t lps22hb_int_generation_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps22hb_int_generation_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lps22hb_int_threshold_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lps22hb_int_threshold_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lps22hb_int_threshold_set(stmdev_ctx_t *ctx, uint16_t val);
+int32_t lps22hb_int_threshold_get(stmdev_ctx_t *ctx, uint16_t *val);
 
 typedef enum {
   LPS22HB_DRDY_OR_FIFO_FLAGS = 0,
