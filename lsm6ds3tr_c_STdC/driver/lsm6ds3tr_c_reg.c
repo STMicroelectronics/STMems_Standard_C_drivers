@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -1166,10 +1166,13 @@ int32_t lsm6ds3tr_c_rounding_mode_get(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm6ds3tr_c_temperature_raw_get(stmdev_ctx_t *ctx,
-                                        uint8_t *buff)
+                                        int16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
   ret = lsm6ds3tr_c_read_reg(ctx, LSM6DS3TR_C_OUT_TEMP_L, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) + (int16_t)buff[0];
   return ret;
 }
 
@@ -1183,10 +1186,17 @@ int32_t lsm6ds3tr_c_temperature_raw_get(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm6ds3tr_c_angular_rate_raw_get(stmdev_ctx_t *ctx,
-                                         uint8_t *buff)
+                                         int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm6ds3tr_c_read_reg(ctx, LSM6DS3TR_C_OUTX_L_G, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
   return ret;
 }
 
@@ -1200,10 +1210,17 @@ int32_t lsm6ds3tr_c_angular_rate_raw_get(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm6ds3tr_c_acceleration_raw_get(stmdev_ctx_t *ctx,
-                                         uint8_t *buff)
+                                         int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm6ds3tr_c_read_reg(ctx, LSM6DS3TR_C_OUTX_L_XL, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
   return ret;
 }
 
@@ -1216,10 +1233,17 @@ int32_t lsm6ds3tr_c_acceleration_raw_get(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm6ds3tr_c_mag_calibrated_raw_get(stmdev_ctx_t *ctx,
-                                           uint8_t *buff)
+                                           int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm6ds3tr_c_read_reg(ctx, LSM6DS3TR_C_OUT_MAG_RAW_X_L, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
   return ret;
 }
 
@@ -6271,12 +6295,19 @@ int32_t lsm6ds3tr_c_mag_soft_iron_mat_get(stmdev_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm6ds3tr_c_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6ds3tr_c_mag_offset_set(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm6ds3tr_c_mem_bank_set(ctx, LSM6DS3TR_C_BANK_A);
 
   if (ret == 0) {
+    buff[1] = (uint8_t) ((uint16_t)val[0] / 256U);
+    buff[0] = (uint8_t) ((uint16_t)val[0] - (buff[1] * 256U));
+    buff[3] = (uint8_t) ((uint16_t)val[1] / 256U);
+    buff[2] = (uint8_t) ((uint16_t)val[1] - (buff[3] * 256U));
+    buff[5] = (uint8_t) ((uint16_t)val[2] / 256U);
+    buff[4] = (uint8_t) ((uint16_t)val[2] - (buff[5] * 256U));
     ret = lsm6ds3tr_c_write_reg(ctx, LSM6DS3TR_C_MAG_OFFX_L, buff, 6);
 
     if (ret == 0) {
@@ -6296,8 +6327,9 @@ int32_t lsm6ds3tr_c_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm6ds3tr_c_mag_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6ds3tr_c_mag_offset_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm6ds3tr_c_mem_bank_set(ctx, LSM6DS3TR_C_BANK_A);
 
@@ -6305,6 +6337,12 @@ int32_t lsm6ds3tr_c_mag_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
     ret = lsm6ds3tr_c_read_reg(ctx, LSM6DS3TR_C_MAG_OFFX_L, buff, 6);
 
     if (ret == 0) {
+      val[0] = (int16_t)buff[1];
+      val[0] = (val[0] * 256) + (int16_t)buff[0];
+      val[1] = (int16_t)buff[3];
+      val[1] = (val[1] * 256) + (int16_t)buff[2];
+      val[2] = (int16_t)buff[5];
+      val[2] = (val[2] * 256) + (int16_t)buff[4];
       ret = lsm6ds3tr_c_mem_bank_set(ctx, LSM6DS3TR_C_USER_BANK);
     }
   }

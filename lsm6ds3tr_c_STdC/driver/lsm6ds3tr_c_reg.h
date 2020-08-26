@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -35,6 +35,37 @@ extern "C" {
   *
   */
 
+/** @defgroup  Endianness definitions
+  * @{
+  *
+  */
+
+#ifndef DRV_BYTE_ORDER
+#ifndef __BYTE_ORDER__
+
+#define DRV_LITTLE_ENDIAN 1234
+#define DRV_BIG_ENDIAN    4321
+
+/** if _BYTE_ORDER is not defined, choose the endianness of your architecture
+  * by uncommenting the define which fits your platform endianness
+  */
+//#define DRV_BYTE_ORDER    DRV_BIG_ENDIAN
+#define DRV_BYTE_ORDER    DRV_LITTLE_ENDIAN
+
+#else /* defined __BYTE_ORDER__ */
+
+#define DRV_LITTLE_ENDIAN  __ORDER_LITTLE_ENDIAN__
+#define DRV_BIG_ENDIAN     __ORDER_BIG_ENDIAN__
+#define DRV_BYTE_ORDER     __BYTE_ORDER__
+
+#endif /* __BYTE_ORDER__*/
+#endif /* DRV_BYTE_ORDER */
+
+/**
+  * @}
+  *
+  */
+
 /** @defgroup STMicroelectronics sensors common types
   * @{
   *
@@ -44,6 +75,7 @@ extern "C" {
 #define MEMS_SHARED_TYPES
 
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -52,6 +84,16 @@ typedef struct {
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit0       : 1;
+#endif /* DRV_BYTE_ORDER */
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
@@ -135,21 +177,37 @@ typedef struct {
 
 #define LSM6DS3TR_C_FUNC_CFG_ACCESS              0x01U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01              : 5;
 uint8_t func_cfg_en              :
   3;  /* func_cfg_en + func_cfg_en_b */
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+uint8_t func_cfg_en              :
+  3;  /* func_cfg_en + func_cfg_en_b */
+  uint8_t not_used_01              : 5;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_func_cfg_access_t;
 
 #define LSM6DS3TR_C_SENSOR_SYNC_TIME_FRAME       0x04U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t tph                      : 4;
   uint8_t not_used_01              : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 4;
+  uint8_t tph                      : 4;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensor_sync_time_frame_t;
 
 #define LSM6DS3TR_C_SENSOR_SYNC_RES_RATIO        0x05U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t rr                       : 2;
   uint8_t not_used_01              : 6;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 6;
+  uint8_t rr                       : 2;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensor_sync_res_ratio_t;
 
 #define LSM6DS3TR_C_FIFO_CTRL1                   0x06U
@@ -159,44 +217,78 @@ typedef struct {
 
 #define LSM6DS3TR_C_FIFO_CTRL2                   0x07U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t fth                      : 3;  /* + FIFO_CTRL1(fth) */
   uint8_t fifo_temp_en             : 1;
   uint8_t not_used_01              : 2;
   uint8_t timer_pedo_fifo_drdy     : 1;
   uint8_t timer_pedo_fifo_en       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t timer_pedo_fifo_en       : 1;
+  uint8_t timer_pedo_fifo_drdy     : 1;
+  uint8_t not_used_01              : 2;
+  uint8_t fifo_temp_en             : 1;
+  uint8_t fth                      : 3;  /* + FIFO_CTRL1(fth) */
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_fifo_ctrl2_t;
 
 #define LSM6DS3TR_C_FIFO_CTRL3                   0x08U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t dec_fifo_xl              : 3;
   uint8_t dec_fifo_gyro            : 3;
   uint8_t not_used_01              : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 2;
+  uint8_t dec_fifo_gyro            : 3;
+  uint8_t dec_fifo_xl              : 3;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_fifo_ctrl3_t;
 
 #define LSM6DS3TR_C_FIFO_CTRL4                   0x09U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t dec_ds3_fifo             : 3;
   uint8_t dec_ds4_fifo             : 3;
   uint8_t only_high_data           : 1;
   uint8_t stop_on_fth              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t stop_on_fth              : 1;
+  uint8_t only_high_data           : 1;
+  uint8_t dec_ds4_fifo             : 3;
+  uint8_t dec_ds3_fifo             : 3;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_fifo_ctrl4_t;
 
 #define LSM6DS3TR_C_FIFO_CTRL5                   0x0AU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t fifo_mode                : 3;
   uint8_t odr_fifo                 : 4;
   uint8_t not_used_01              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 1;
+  uint8_t odr_fifo                 : 4;
+  uint8_t fifo_mode                : 3;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_fifo_ctrl5_t;
 
 #define LSM6DS3TR_C_DRDY_PULSE_CFG_G             0x0BU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t int2_wrist_tilt          : 1;
   uint8_t not_used_01              : 6;
   uint8_t drdy_pulsed              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t drdy_pulsed              : 1;
+  uint8_t not_used_01              : 6;
+  uint8_t int2_wrist_tilt          : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_drdy_pulse_cfg_g_t;
 
 #define LSM6DS3TR_C_INT1_CTRL                    0x0DU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t int1_drdy_xl             : 1;
   uint8_t int1_drdy_g              : 1;
   uint8_t int1_boot                : 1;
@@ -205,10 +297,21 @@ typedef struct {
   uint8_t int1_full_flag           : 1;
   uint8_t int1_sign_mot            : 1;
   uint8_t int1_step_detector       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t int1_step_detector       : 1;
+  uint8_t int1_sign_mot            : 1;
+  uint8_t int1_full_flag           : 1;
+  uint8_t int1_fifo_ovr            : 1;
+  uint8_t int1_fth                 : 1;
+  uint8_t int1_boot                : 1;
+  uint8_t int1_drdy_g              : 1;
+  uint8_t int1_drdy_xl             : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_int1_ctrl_t;
 
 #define LSM6DS3TR_C_INT2_CTRL                    0x0EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t int2_drdy_xl             : 1;
   uint8_t int2_drdy_g              : 1;
   uint8_t int2_drdy_temp           : 1;
@@ -217,26 +320,50 @@ typedef struct {
   uint8_t int2_full_flag           : 1;
   uint8_t int2_step_count_ov       : 1;
   uint8_t int2_step_delta          : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t int2_step_delta          : 1;
+  uint8_t int2_step_count_ov       : 1;
+  uint8_t int2_full_flag           : 1;
+  uint8_t int2_fifo_ovr            : 1;
+  uint8_t int2_fth                 : 1;
+  uint8_t int2_drdy_temp           : 1;
+  uint8_t int2_drdy_g              : 1;
+  uint8_t int2_drdy_xl             : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_int2_ctrl_t;
 
 #define LSM6DS3TR_C_WHO_AM_I                     0x0FU
 #define LSM6DS3TR_C_CTRL1_XL                     0x10U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bw0_xl                   : 1;
   uint8_t lpf1_bw_sel              : 1;
   uint8_t fs_xl                    : 2;
   uint8_t odr_xl                   : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t odr_xl                   : 4;
+  uint8_t fs_xl                    : 2;
+  uint8_t lpf1_bw_sel              : 1;
+  uint8_t bw0_xl                   : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_ctrl1_xl_t;
 
 #define LSM6DS3TR_C_CTRL2_G                      0x11U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01              : 1;
   uint8_t fs_g                     : 3;  /* fs_g + fs_125 */
   uint8_t odr_g                    : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t odr_g                    : 4;
+  uint8_t fs_g                     : 3;  /* fs_g + fs_125 */
+  uint8_t not_used_01              : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_ctrl2_g_t;
 
 #define LSM6DS3TR_C_CTRL3_C                      0x12U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t sw_reset                 : 1;
   uint8_t ble                      : 1;
   uint8_t if_inc                   : 1;
@@ -245,10 +372,21 @@ typedef struct {
   uint8_t h_lactive                : 1;
   uint8_t bdu                      : 1;
   uint8_t boot                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t boot                     : 1;
+  uint8_t bdu                      : 1;
+  uint8_t h_lactive                : 1;
+  uint8_t pp_od                    : 1;
+  uint8_t sim                      : 1;
+  uint8_t if_inc                   : 1;
+  uint8_t ble                      : 1;
+  uint8_t sw_reset                 : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_ctrl3_c_t;
 
 #define LSM6DS3TR_C_CTRL4_C                      0x13U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01              : 1;
   uint8_t lpf1_sel_g               : 1;
   uint8_t i2c_disable              : 1;
@@ -257,38 +395,74 @@ typedef struct {
   uint8_t int2_on_int1             : 1;
   uint8_t sleep                    : 1;
   uint8_t den_xl_en                : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t den_xl_en                : 1;
+  uint8_t sleep                    : 1;
+  uint8_t int2_on_int1             : 1;
+  uint8_t den_drdy_int1            : 1;
+  uint8_t drdy_mask                : 1;
+  uint8_t i2c_disable              : 1;
+  uint8_t lpf1_sel_g               : 1;
+  uint8_t not_used_01              : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_ctrl4_c_t;
 
 #define LSM6DS3TR_C_CTRL5_C                      0x14U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t st_xl                    : 2;
   uint8_t st_g                     : 2;
   uint8_t den_lh                   : 1;
   uint8_t rounding                 : 3;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t rounding                 : 3;
+  uint8_t den_lh                   : 1;
+  uint8_t st_g                     : 2;
+  uint8_t st_xl                    : 2;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_ctrl5_c_t;
 
 #define LSM6DS3TR_C_CTRL6_C                      0x15U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ftype                    : 2;
   uint8_t not_used_01              : 1;
   uint8_t usr_off_w                : 1;
   uint8_t xl_hm_mode               : 1;
 uint8_t den_mode                 :
   3;  /* trig_en + lvl_en + lvl2_en */
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+uint8_t den_mode                 :
+  3;  /* trig_en + lvl_en + lvl2_en */
+  uint8_t xl_hm_mode               : 1;
+  uint8_t usr_off_w                : 1;
+  uint8_t not_used_01              : 1;
+  uint8_t ftype                    : 2;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_ctrl6_c_t;
 
 #define LSM6DS3TR_C_CTRL7_G                      0x16U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01              : 2;
   uint8_t rounding_status          : 1;
   uint8_t not_used_02              : 1;
   uint8_t hpm_g                    : 2;
   uint8_t hp_en_g                  : 1;
   uint8_t g_hm_mode                : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t g_hm_mode                : 1;
+  uint8_t hp_en_g                  : 1;
+  uint8_t hpm_g                    : 2;
+  uint8_t not_used_02              : 1;
+  uint8_t rounding_status          : 1;
+  uint8_t not_used_01              : 2;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_ctrl7_g_t;
 
 #define LSM6DS3TR_C_CTRL8_XL                     0x17U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t low_pass_on_6d           : 1;
   uint8_t not_used_01              : 1;
   uint8_t hp_slope_xl_en           : 1;
@@ -296,10 +470,20 @@ typedef struct {
   uint8_t hp_ref_mode              : 1;
   uint8_t hpcf_xl                  : 2;
   uint8_t lpf2_xl_en               : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t lpf2_xl_en               : 1;
+  uint8_t hpcf_xl                  : 2;
+  uint8_t hp_ref_mode              : 1;
+  uint8_t input_composite          : 1;
+  uint8_t hp_slope_xl_en           : 1;
+  uint8_t not_used_01              : 1;
+  uint8_t low_pass_on_6d           : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_ctrl8_xl_t;
 
 #define LSM6DS3TR_C_CTRL9_XL                     0x18U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01              : 2;
   uint8_t soft_en                  : 1;
   uint8_t not_used_02              : 1;
@@ -307,10 +491,20 @@ typedef struct {
   uint8_t den_z                    : 1;
   uint8_t den_y                    : 1;
   uint8_t den_x                    : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t den_x                    : 1;
+  uint8_t den_y                    : 1;
+  uint8_t den_z                    : 1;
+  uint8_t den_xl_g                 : 1;
+  uint8_t not_used_02              : 1;
+  uint8_t soft_en                  : 1;
+  uint8_t not_used_01              : 2;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_ctrl9_xl_t;
 
 #define LSM6DS3TR_C_CTRL10_C                     0x19U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t sign_motion_en           : 1;
   uint8_t pedo_rst_step            : 1;
   uint8_t func_en                  : 1;
@@ -319,10 +513,21 @@ typedef struct {
   uint8_t timer_en                 : 1;
   uint8_t not_used_01              : 1;
   uint8_t wrist_tilt_en            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t wrist_tilt_en            : 1;
+  uint8_t not_used_01              : 1;
+  uint8_t timer_en                 : 1;
+  uint8_t pedo_en                  : 1;
+  uint8_t tilt_en                  : 1;
+  uint8_t func_en                  : 1;
+  uint8_t pedo_rst_step            : 1;
+  uint8_t sign_motion_en           : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_ctrl10_c_t;
 
 #define LSM6DS3TR_C_MASTER_CONFIG                0x1AU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t master_on                : 1;
   uint8_t iron_en                  : 1;
   uint8_t pass_through_mode        : 1;
@@ -331,10 +536,21 @@ typedef struct {
   uint8_t not_used_01              : 1;
   uint8_t data_valid_sel_fifo      : 1;
   uint8_t drdy_on_int1             : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t drdy_on_int1             : 1;
+  uint8_t data_valid_sel_fifo      : 1;
+  uint8_t not_used_01              : 1;
+  uint8_t start_config             : 1;
+  uint8_t pull_up_en               : 1;
+  uint8_t pass_through_mode        : 1;
+  uint8_t iron_en                  : 1;
+  uint8_t master_on                : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_master_config_t;
 
 #define LSM6DS3TR_C_WAKE_UP_SRC                  0x1BU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t z_wu                     : 1;
   uint8_t y_wu                     : 1;
   uint8_t x_wu                     : 1;
@@ -342,10 +558,20 @@ typedef struct {
   uint8_t sleep_state_ia           : 1;
   uint8_t ff_ia                    : 1;
   uint8_t not_used_01              : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 2;
+  uint8_t ff_ia                    : 1;
+  uint8_t sleep_state_ia           : 1;
+  uint8_t wu_ia                    : 1;
+  uint8_t x_wu                     : 1;
+  uint8_t y_wu                     : 1;
+  uint8_t z_wu                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_wake_up_src_t;
 
 #define LSM6DS3TR_C_TAP_SRC                      0x1CU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t z_tap                    : 1;
   uint8_t y_tap                    : 1;
   uint8_t x_tap                    : 1;
@@ -354,10 +580,21 @@ typedef struct {
   uint8_t single_tap               : 1;
   uint8_t tap_ia                   : 1;
   uint8_t not_used_01              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 1;
+  uint8_t tap_ia                   : 1;
+  uint8_t single_tap               : 1;
+  uint8_t double_tap               : 1;
+  uint8_t tap_sign                 : 1;
+  uint8_t x_tap                    : 1;
+  uint8_t y_tap                    : 1;
+  uint8_t z_tap                    : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_tap_src_t;
 
 #define LSM6DS3TR_C_D6D_SRC                      0x1DU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xl                       : 1;
   uint8_t xh                       : 1;
   uint8_t yl                       : 1;
@@ -366,14 +603,31 @@ typedef struct {
   uint8_t zh                       : 1;
   uint8_t d6d_ia                   : 1;
   uint8_t den_drdy                 : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t den_drdy                 : 1;
+  uint8_t d6d_ia                   : 1;
+  uint8_t zh                       : 1;
+  uint8_t zl                       : 1;
+  uint8_t yh                       : 1;
+  uint8_t yl                       : 1;
+  uint8_t xh                       : 1;
+  uint8_t xl                       : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_d6d_src_t;
 
 #define LSM6DS3TR_C_STATUS_REG                   0x1EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xlda                     : 1;
   uint8_t gda                      : 1;
   uint8_t tda                      : 1;
   uint8_t not_used_01              : 5;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 5;
+  uint8_t tda                      : 1;
+  uint8_t gda                      : 1;
+  uint8_t xlda                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_status_reg_t;
 
 #define LSM6DS3TR_C_OUT_TEMP_L                   0x20U
@@ -392,6 +646,7 @@ typedef struct {
 #define LSM6DS3TR_C_OUTZ_H_XL                    0x2DU
 #define LSM6DS3TR_C_SENSORHUB1_REG               0x2EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -400,10 +655,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensorhub1_reg_t;
 
 #define LSM6DS3TR_C_SENSORHUB2_REG               0x2FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -412,10 +678,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensorhub2_reg_t;
 
 #define LSM6DS3TR_C_SENSORHUB3_REG               0x30U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -424,10 +701,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensorhub3_reg_t;
 
 #define LSM6DS3TR_C_SENSORHUB4_REG               0x31U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -436,10 +724,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensorhub4_reg_t;
 
 #define LSM6DS3TR_C_SENSORHUB5_REG               0x32U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -448,10 +747,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensorhub5_reg_t;
 
 #define LSM6DS3TR_C_SENSORHUB6_REG               0x33U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -460,10 +770,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensorhub6_reg_t;
 
 #define LSM6DS3TR_C_SENSORHUB7_REG               0x34U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -472,10 +793,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensorhub7_reg_t;
 
 #define LSM6DS3TR_C_SENSORHUB8_REG               0x35U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -484,10 +816,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensorhub8_reg_t;
 
 #define LSM6DS3TR_C_SENSORHUB9_REG               0x36U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -496,10 +839,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensorhub9_reg_t;
 
 #define LSM6DS3TR_C_SENSORHUB10_REG              0x37U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -508,10 +862,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensorhub10_reg_t;
 
 #define LSM6DS3TR_C_SENSORHUB11_REG              0x38U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -520,10 +885,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensorhub11_reg_t;
 
 #define LSM6DS3TR_C_SENSORHUB12_REG              0x39U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -532,6 +908,16 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensorhub12_reg_t;
 
 #define LSM6DS3TR_C_FIFO_STATUS1                 0x3AU
@@ -541,12 +927,21 @@ typedef struct {
 
 #define LSM6DS3TR_C_FIFO_STATUS2                 0x3BU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t diff_fifo                : 3;  /* + FIFO_STATUS1(diff_fifo) */
   uint8_t not_used_01              : 1;
   uint8_t fifo_empty               : 1;
   uint8_t fifo_full_smart          : 1;
   uint8_t over_run                 : 1;
   uint8_t waterm                   : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t waterm                   : 1;
+  uint8_t over_run                 : 1;
+  uint8_t fifo_full_smart          : 1;
+  uint8_t fifo_empty               : 1;
+  uint8_t not_used_01              : 1;
+  uint8_t diff_fifo                : 3;  /* + FIFO_STATUS1(diff_fifo) */
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_fifo_status2_t;
 
 #define LSM6DS3TR_C_FIFO_STATUS3                 0x3CU
@@ -557,9 +952,15 @@ uint8_t fifo_pattern             :
 
 #define LSM6DS3TR_C_FIFO_STATUS4                 0x3DU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
 uint8_t fifo_pattern             :
   2;  /* + FIFO_STATUS3(fifo_pattern) */
   uint8_t not_used_01              : 6;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01              : 6;
+uint8_t fifo_pattern             :
+  2;  /* + FIFO_STATUS3(fifo_pattern) */
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_fifo_status4_t;
 
 #define LSM6DS3TR_C_FIFO_DATA_OUT_L              0x3EU
@@ -574,6 +975,7 @@ uint8_t fifo_pattern             :
 
 #define LSM6DS3TR_C_SENSORHUB13_REG              0x4DU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -582,10 +984,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensorhub13_reg_t;
 
 #define LSM6DS3TR_C_SENSORHUB14_REG              0x4EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -594,10 +1007,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensorhub14_reg_t;
 
 #define LSM6DS3TR_C_SENSORHUB15_REG              0x4FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -606,10 +1030,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensorhub15_reg_t;
 
 #define LSM6DS3TR_C_SENSORHUB16_REG              0x50U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -618,10 +1053,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensorhub16_reg_t;
 
 #define LSM6DS3TR_C_SENSORHUB17_REG              0x51U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -630,10 +1076,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensorhub17_reg_t;
 
 #define LSM6DS3TR_C_SENSORHUB18_REG              0x52U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                     : 1;
   uint8_t bit1                     : 1;
   uint8_t bit2                     : 1;
@@ -642,10 +1099,21 @@ typedef struct {
   uint8_t bit5                     : 1;
   uint8_t bit6                     : 1;
   uint8_t bit7                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7                     : 1;
+  uint8_t bit6                     : 1;
+  uint8_t bit5                     : 1;
+  uint8_t bit4                     : 1;
+  uint8_t bit3                     : 1;
+  uint8_t bit2                     : 1;
+  uint8_t bit1                     : 1;
+  uint8_t bit0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_sensorhub18_reg_t;
 
 #define LSM6DS3TR_C_FUNC_SRC1                    0x53U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t sensorhub_end_op         : 1;
   uint8_t si_end_op                : 1;
   uint8_t hi_fail                  : 1;
@@ -654,10 +1122,21 @@ typedef struct {
   uint8_t tilt_ia                  : 1;
   uint8_t sign_motion_ia           : 1;
   uint8_t step_count_delta_ia      : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t step_count_delta_ia      : 1;
+  uint8_t sign_motion_ia           : 1;
+  uint8_t tilt_ia                  : 1;
+  uint8_t step_detected            : 1;
+  uint8_t step_overflow            : 1;
+  uint8_t hi_fail                  : 1;
+  uint8_t si_end_op                : 1;
+  uint8_t sensorhub_end_op         : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_func_src1_t;
 
 #define LSM6DS3TR_C_FUNC_SRC2                    0x54U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t wrist_tilt_ia            : 1;
   uint8_t not_used_01              : 2;
   uint8_t slave0_nack              : 1;
@@ -665,10 +1144,20 @@ typedef struct {
   uint8_t slave2_nack              : 1;
   uint8_t slave3_nack              : 1;
   uint8_t not_used_02              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_02              : 1;
+  uint8_t slave3_nack              : 1;
+  uint8_t slave2_nack              : 1;
+  uint8_t slave1_nack              : 1;
+  uint8_t slave0_nack              : 1;
+  uint8_t not_used_01              : 2;
+  uint8_t wrist_tilt_ia            : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_func_src2_t;
 
 #define LSM6DS3TR_C_WRIST_TILT_IA                0x55U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01              : 2;
   uint8_t wrist_tilt_ia_zneg       : 1;
   uint8_t wrist_tilt_ia_zpos       : 1;
@@ -676,10 +1165,20 @@ typedef struct {
   uint8_t wrist_tilt_ia_ypos       : 1;
   uint8_t wrist_tilt_ia_xneg       : 1;
   uint8_t wrist_tilt_ia_xpos       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t wrist_tilt_ia_xpos       : 1;
+  uint8_t wrist_tilt_ia_xneg       : 1;
+  uint8_t wrist_tilt_ia_ypos       : 1;
+  uint8_t wrist_tilt_ia_yneg       : 1;
+  uint8_t wrist_tilt_ia_zpos       : 1;
+  uint8_t wrist_tilt_ia_zneg       : 1;
+  uint8_t not_used_01              : 2;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_wrist_tilt_ia_t;
 
 #define LSM6DS3TR_C_TAP_CFG                      0x58U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t lir                      : 1;
   uint8_t tap_z_en                 : 1;
   uint8_t tap_y_en                 : 1;
@@ -687,45 +1186,85 @@ typedef struct {
   uint8_t slope_fds                : 1;
   uint8_t inact_en                 : 2;
   uint8_t interrupts_enable        : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t interrupts_enable        : 1;
+  uint8_t inact_en                 : 2;
+  uint8_t slope_fds                : 1;
+  uint8_t tap_x_en                 : 1;
+  uint8_t tap_y_en                 : 1;
+  uint8_t tap_z_en                 : 1;
+  uint8_t lir                      : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_tap_cfg_t;
 
 #define LSM6DS3TR_C_TAP_THS_6D                   0x59U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t tap_ths                  : 5;
   uint8_t sixd_ths                 : 2;
   uint8_t d4d_en                   : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t d4d_en                   : 1;
+  uint8_t sixd_ths                 : 2;
+  uint8_t tap_ths                  : 5;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_tap_ths_6d_t;
 
 #define LSM6DS3TR_C_INT_DUR2                     0x5AU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t shock                    : 2;
   uint8_t quiet                    : 2;
   uint8_t dur                      : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t dur                      : 4;
+  uint8_t quiet                    : 2;
+  uint8_t shock                    : 2;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_int_dur2_t;
 
 #define LSM6DS3TR_C_WAKE_UP_THS                  0x5BU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t wk_ths                   : 6;
   uint8_t not_used_01              : 1;
   uint8_t single_double_tap        : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t single_double_tap        : 1;
+  uint8_t not_used_01              : 1;
+  uint8_t wk_ths                   : 6;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_wake_up_ths_t;
 
 #define LSM6DS3TR_C_WAKE_UP_DUR                  0x5CU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t sleep_dur                : 4;
   uint8_t timer_hr                 : 1;
   uint8_t wake_dur                 : 2;
   uint8_t ff_dur                   : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t ff_dur                   : 1;
+  uint8_t wake_dur                 : 2;
+  uint8_t timer_hr                 : 1;
+  uint8_t sleep_dur                : 4;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_wake_up_dur_t;
 
 #define LSM6DS3TR_C_FREE_FALL                    0x5DU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ff_ths                   : 3;
   uint8_t ff_dur                   : 5;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t ff_dur                   : 5;
+  uint8_t ff_ths                   : 3;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_free_fall_t;
 
 #define LSM6DS3TR_C_MD1_CFG                      0x5EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t int1_timer               : 1;
   uint8_t int1_tilt                : 1;
   uint8_t int1_6d                  : 1;
@@ -734,10 +1273,21 @@ typedef struct {
   uint8_t int1_wu                  : 1;
   uint8_t int1_single_tap          : 1;
   uint8_t int1_inact_state         : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t int1_inact_state         : 1;
+  uint8_t int1_single_tap          : 1;
+  uint8_t int1_wu                  : 1;
+  uint8_t int1_ff                  : 1;
+  uint8_t int1_double_tap          : 1;
+  uint8_t int1_6d                  : 1;
+  uint8_t int1_tilt                : 1;
+  uint8_t int1_timer               : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_md1_cfg_t;
 
 #define LSM6DS3TR_C_MD2_CFG                      0x5FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t int2_iron                : 1;
   uint8_t int2_tilt                : 1;
   uint8_t int2_6d                  : 1;
@@ -746,6 +1296,16 @@ typedef struct {
   uint8_t int2_wu                  : 1;
   uint8_t int2_single_tap          : 1;
   uint8_t int2_inact_state         : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t int2_inact_state         : 1;
+  uint8_t int2_single_tap          : 1;
+  uint8_t int2_wu                  : 1;
+  uint8_t int2_ff                  : 1;
+  uint8_t int2_double_tap          : 1;
+  uint8_t int2_6d                  : 1;
+  uint8_t int2_tilt                : 1;
+  uint8_t int2_iron                : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_md2_cfg_t;
 
 #define LSM6DS3TR_C_MASTER_CMD_CODE              0x60U
@@ -769,8 +1329,13 @@ typedef struct {
 #define LSM6DS3TR_C_Z_OFS_USR                    0x75U
 #define LSM6DS3TR_C_SLV0_ADD                     0x02U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t rw_0                     : 1;
   uint8_t slave0_add               : 7;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t slave0_add               : 7;
+  uint8_t rw_0                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_slv0_add_t;
 
 #define LSM6DS3TR_C_SLV0_SUBADD                  0x03U
@@ -780,16 +1345,28 @@ typedef struct {
 
 #define LSM6DS3TR_C_SLAVE0_CONFIG                0x04U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t slave0_numop             : 3;
   uint8_t src_mode                 : 1;
   uint8_t aux_sens_on              : 2;
   uint8_t slave0_rate              : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t slave0_rate              : 2;
+  uint8_t aux_sens_on              : 2;
+  uint8_t src_mode                 : 1;
+  uint8_t slave0_numop             : 3;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_slave0_config_t;
 
 #define LSM6DS3TR_C_SLV1_ADD                     0x05U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t r_1                      : 1;
   uint8_t slave1_add               : 7;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t slave1_add               : 7;
+  uint8_t r_1                      : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_slv1_add_t;
 
 #define LSM6DS3TR_C_SLV1_SUBADD                  0x06U
@@ -799,16 +1376,28 @@ typedef struct {
 
 #define LSM6DS3TR_C_SLAVE1_CONFIG                0x07U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t slave1_numop             : 3;
   uint8_t not_used_01              : 2;
   uint8_t write_once               : 1;
   uint8_t slave1_rate              : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t slave1_rate              : 2;
+  uint8_t write_once               : 1;
+  uint8_t not_used_01              : 2;
+  uint8_t slave1_numop             : 3;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_slave1_config_t;
 
 #define LSM6DS3TR_C_SLV2_ADD                     0x08U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t r_2                      : 1;
   uint8_t slave2_add               : 7;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t slave2_add               : 7;
+  uint8_t r_2                      : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_slv2_add_t;
 
 #define LSM6DS3TR_C_SLV2_SUBADD                  0x09U
@@ -818,15 +1407,26 @@ typedef struct {
 
 #define LSM6DS3TR_C_SLAVE2_CONFIG                0x0AU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t slave2_numop             : 3;
   uint8_t not_used_01              : 3;
   uint8_t slave2_rate              : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t slave2_rate              : 2;
+  uint8_t not_used_01              : 3;
+  uint8_t slave2_numop             : 3;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_slave2_config_t;
 
 #define LSM6DS3TR_C_SLV3_ADD                     0x0BU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t r_3                      : 1;
   uint8_t slave3_add               : 7;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t slave3_add               : 7;
+  uint8_t r_3                      : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_slv3_add_t;
 
 #define LSM6DS3TR_C_SLV3_SUBADD                  0x0CU
@@ -836,9 +1436,15 @@ typedef struct {
 
 #define LSM6DS3TR_C_SLAVE3_CONFIG                0x0DU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t slave3_numop             : 3;
   uint8_t not_used_01              : 3;
   uint8_t slave3_rate              : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t slave3_rate              : 2;
+  uint8_t not_used_01              : 3;
+  uint8_t slave3_numop             : 3;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_slave3_config_t;
 
 #define LSM6DS3TR_C_DATAWRITE_SRC_MODE_SUB_SLV0  0x0EU
@@ -848,16 +1454,27 @@ typedef struct {
 
 #define LSM6DS3TR_C_CONFIG_PEDO_THS_MIN          0x0FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ths_min                  : 5;
   uint8_t not_used_01              : 2;
   uint8_t pedo_fs                  : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t pedo_fs                  : 1;
+  uint8_t not_used_01              : 2;
+  uint8_t ths_min                  : 5;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_config_pedo_ths_min_t;
 
 #define LSM6DS3TR_C_SM_THS                       0x13U
 #define LSM6DS3TR_C_PEDO_DEB_REG                 0x14U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t deb_step      : 3;
   uint8_t deb_time      : 5;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t deb_time      : 5;
+  uint8_t deb_step      : 3;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_pedo_deb_reg_t;
 
 #define LSM6DS3TR_C_STEP_COUNT_DELTA             0x15U
@@ -880,6 +1497,7 @@ typedef struct {
 #define LSM6DS3TR_C_A_WRIST_TILT_THS             0x54U
 #define LSM6DS3TR_C_A_WRIST_TILT_MASK            0x59U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01              : 2;
   uint8_t  wrist_tilt_mask_zneg    : 1;
   uint8_t  wrist_tilt_mask_zpos    : 1;
@@ -887,6 +1505,15 @@ typedef struct {
   uint8_t  wrist_tilt_mask_ypos    : 1;
   uint8_t  wrist_tilt_mask_xneg    : 1;
   uint8_t  wrist_tilt_mask_xpos    : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t  wrist_tilt_mask_xpos    : 1;
+  uint8_t  wrist_tilt_mask_xneg    : 1;
+  uint8_t  wrist_tilt_mask_ypos    : 1;
+  uint8_t  wrist_tilt_mask_yneg    : 1;
+  uint8_t  wrist_tilt_mask_zpos    : 1;
+  uint8_t  wrist_tilt_mask_zneg    : 1;
+  uint8_t not_used_01              : 2;
+#endif /* DRV_BYTE_ORDER */
 } lsm6ds3tr_c_a_wrist_tilt_mask_t;
 
 /**
@@ -997,18 +1624,18 @@ int32_t lsm6ds3tr_c_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
                               uint8_t *data,
                               uint16_t len);
 
-extern float_t lsm6ds3tr_c_from_fs2g_to_mg(int16_t lsb);
-extern float_t lsm6ds3tr_c_from_fs4g_to_mg(int16_t lsb);
-extern float_t lsm6ds3tr_c_from_fs8g_to_mg(int16_t lsb);
-extern float_t lsm6ds3tr_c_from_fs16g_to_mg(int16_t lsb);
+float_t lsm6ds3tr_c_from_fs2g_to_mg(int16_t lsb);
+float_t lsm6ds3tr_c_from_fs4g_to_mg(int16_t lsb);
+float_t lsm6ds3tr_c_from_fs8g_to_mg(int16_t lsb);
+float_t lsm6ds3tr_c_from_fs16g_to_mg(int16_t lsb);
 
-extern float_t lsm6ds3tr_c_from_fs125dps_to_mdps(int16_t lsb);
-extern float_t lsm6ds3tr_c_from_fs250dps_to_mdps(int16_t lsb);
-extern float_t lsm6ds3tr_c_from_fs500dps_to_mdps(int16_t lsb);
-extern float_t lsm6ds3tr_c_from_fs1000dps_to_mdps(int16_t lsb);
-extern float_t lsm6ds3tr_c_from_fs2000dps_to_mdps(int16_t lsb);
+float_t lsm6ds3tr_c_from_fs125dps_to_mdps(int16_t lsb);
+float_t lsm6ds3tr_c_from_fs250dps_to_mdps(int16_t lsb);
+float_t lsm6ds3tr_c_from_fs500dps_to_mdps(int16_t lsb);
+float_t lsm6ds3tr_c_from_fs1000dps_to_mdps(int16_t lsb);
+float_t lsm6ds3tr_c_from_fs2000dps_to_mdps(int16_t lsb);
 
-extern float_t lsm6ds3tr_c_from_lsb_to_celsius(int16_t lsb);
+float_t lsm6ds3tr_c_from_lsb_to_celsius(int16_t lsb);
 
 typedef enum {
   LSM6DS3TR_C_2g       = 0,
@@ -1178,14 +1805,14 @@ int32_t lsm6ds3tr_c_rounding_mode_get(stmdev_ctx_t *ctx,
                                       lsm6ds3tr_c_rounding_t *val);
 
 int32_t lsm6ds3tr_c_temperature_raw_get(stmdev_ctx_t *ctx,
-                                        uint8_t *buff);
+                                        int16_t *val);
 int32_t lsm6ds3tr_c_angular_rate_raw_get(stmdev_ctx_t *ctx,
-                                         uint8_t *buff);
+                                         int16_t *val);
 int32_t lsm6ds3tr_c_acceleration_raw_get(stmdev_ctx_t *ctx,
-                                         uint8_t *buff);
+                                         int16_t *val);
 
 int32_t lsm6ds3tr_c_mag_calibrated_raw_get(stmdev_ctx_t *ctx,
-                                           uint8_t *buff);
+                                           int16_t *val);
 
 int32_t lsm6ds3tr_c_fifo_raw_data_get(stmdev_ctx_t *ctx,
                                       uint8_t *buffer,
@@ -1837,8 +2464,8 @@ int32_t lsm6ds3tr_c_mag_soft_iron_mat_set(stmdev_ctx_t *ctx,
 int32_t lsm6ds3tr_c_mag_soft_iron_mat_get(stmdev_ctx_t *ctx,
                                           uint8_t *buff);
 
-int32_t lsm6ds3tr_c_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6ds3tr_c_mag_offset_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6ds3tr_c_mag_offset_set(stmdev_ctx_t *ctx, int16_t *val);
+int32_t lsm6ds3tr_c_mag_offset_get(stmdev_ctx_t *ctx, int16_t *val);
 
 int32_t lsm6ds3tr_c_func_en_set(stmdev_ctx_t *ctx, uint8_t val);
 
