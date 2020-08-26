@@ -334,9 +334,12 @@ int32_t lps33k_one_shoot_trigger_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps33k_pressure_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps33k_pressure_offset_set(stmdev_ctx_t *ctx, int16_t val)
 {
+  uint8_t buff[2];
   int32_t ret;
+  buff[1] = (uint8_t) ((uint16_t)val / 256U);
+  buff[0] = (uint8_t) ((uint16_t)val - (buff[1] * 256U));
   ret =  lps33k_write_reg(ctx, LPS33K_RPDS_L, buff, 2);
   return ret;
 }
@@ -350,10 +353,13 @@ int32_t lps33k_pressure_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps33k_pressure_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps33k_pressure_offset_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
   ret =  lps33k_read_reg(ctx, LPS33K_RPDS_L, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) + (int16_t)buff[0];
   return ret;
 }
 
@@ -433,10 +439,15 @@ int32_t lps33k_temp_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps33k_pressure_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps33k_pressure_raw_get(stmdev_ctx_t *ctx, uint32_t *buff)
 {
+  uint8_t reg[3];
   int32_t ret;
-  ret =  lps33k_read_reg(ctx, LPS33K_PRESS_OUT_XL, buff, 3);
+  ret =  lps33k_read_reg(ctx, LPS33K_PRESS_OUT_XL, reg, 3);
+  *buff = reg[2];
+  *buff = (*buff * 256) + reg[1];
+  *buff = (*buff * 256) + reg[0];
+  *buff *= 256;
   return ret;
 }
 
@@ -448,10 +459,13 @@ int32_t lps33k_pressure_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps33k_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps33k_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff)
 {
+  uint8_t reg[2];
   int32_t ret;
-  ret =  lps33k_read_reg(ctx, LPS33K_TEMP_OUT_L, (uint8_t *) buff, 2);
+  ret =  lps33k_read_reg(ctx, LPS33K_TEMP_OUT_L, (uint8_t *) reg, 2);
+  *buff = reg[1];
+  *buff = (*buff * 256) + reg[0];
   return ret;
 }
 
