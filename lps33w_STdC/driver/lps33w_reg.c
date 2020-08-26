@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -504,9 +504,14 @@ int32_t lps33w_one_shoot_trigger_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps33w_pressure_ref_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps33w_pressure_ref_set(stmdev_ctx_t *ctx, int32_t val)
 {
+  uint8_t buff[3];
   int32_t ret;
+  buff[2] = (uint8_t) ((uint32_t)val / 65536U);
+  buff[1] = (uint8_t) ((uint32_t)val - (buff[2] * 65536U)) / 256U;
+  buff[0] = (uint8_t) ((uint32_t)val - (buff[2] * 65536U) -
+                       (buff[1] * 256U) );
   ret =  lps33w_write_reg(ctx, LPS33W_REF_P_XL, buff, 3);
   return ret;
 }
@@ -521,10 +526,14 @@ int32_t lps33w_pressure_ref_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps33w_pressure_ref_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps33w_pressure_ref_get(stmdev_ctx_t *ctx, int32_t *val)
 {
+  uint8_t buff[3];
   int32_t ret;
   ret =  lps33w_read_reg(ctx, LPS33W_REF_P_XL, buff, 3);
+  *val = (int32_t)buff[2];
+  *val = (*val * 256) + (int32_t)buff[1];
+  *val = (*val * 256) + (int32_t)buff[0];
   return ret;
 }
 
@@ -537,9 +546,12 @@ int32_t lps33w_pressure_ref_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps33w_pressure_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps33w_pressure_offset_set(stmdev_ctx_t *ctx, int16_t val)
 {
+  uint8_t buff[2];
   int32_t ret;
+  buff[1] = (uint8_t) ((uint16_t)val / 256U);
+  buff[0] = (uint8_t) ((uint16_t)val - (buff[1] * 256U));
   ret =  lps33w_write_reg(ctx, LPS33W_RPDS_L, buff, 2);
   return ret;
 }
@@ -553,10 +565,13 @@ int32_t lps33w_pressure_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps33w_pressure_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps33w_pressure_offset_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
   ret =  lps33w_read_reg(ctx, LPS33W_RPDS_L, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) + (int16_t)buff[0];
   return ret;
 }
 
@@ -636,10 +651,15 @@ int32_t lps33w_temp_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps33w_pressure_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps33w_pressure_raw_get(stmdev_ctx_t *ctx, uint32_t *buff)
 {
+  uint8_t reg[3];
   int32_t ret;
-  ret =  lps33w_read_reg(ctx, LPS33W_PRESS_OUT_XL, buff, 3);
+  ret =  lps33w_read_reg(ctx, LPS33W_PRESS_OUT_XL, reg, 3);
+  *buff = reg[2];
+  *buff = (*buff * 256) + reg[1];
+  *buff = (*buff * 256) + reg[0];
+  *buff *= 256;
   return ret;
 }
 
@@ -651,10 +671,13 @@ int32_t lps33w_pressure_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps33w_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps33w_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff)
 {
+  uint8_t reg[2];
   int32_t ret;
-  ret =  lps33w_read_reg(ctx, LPS33W_TEMP_OUT_L, (uint8_t *) buff, 2);
+  ret =  lps33w_read_reg(ctx, LPS33W_TEMP_OUT_L, (uint8_t *) reg, 2);
+  *buff = reg[1];
+  *buff = (*buff * 256) + reg[0];
   return ret;
 }
 
@@ -1048,9 +1071,12 @@ int32_t lps33w_int_generation_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps33w_int_threshold_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps33w_int_threshold_set(stmdev_ctx_t *ctx, uint16_t val)
 {
+  uint8_t buff[2];
   int32_t ret;
+  buff[1] = (uint8_t) (val / 256U);
+  buff[0] = (uint8_t) (val - (buff[1] * 256U));
   ret =  lps33w_write_reg(ctx, LPS33W_THS_P_L, (uint8_t *) buff, 2);
   return ret;
 }
@@ -1063,10 +1089,13 @@ int32_t lps33w_int_threshold_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps33w_int_threshold_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lps33w_int_threshold_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
   ret =  lps33w_read_reg(ctx, LPS33W_THS_P_L, (uint8_t *) buff, 2);
+  *val = buff[1];
+  *val = (*val * 256) + buff[0];
   return ret;
 }
 
