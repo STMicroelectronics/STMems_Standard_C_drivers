@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -1188,11 +1188,14 @@ int32_t lsm6ds3_temp_flag_data_ready_get(stmdev_ctx_t *ctx,
   * @param  buff        buffer that stores data read
   *
   */
-int32_t lsm6ds3_timestamp_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6ds3_timestamp_raw_get(stmdev_ctx_t *ctx, uint32_t *val)
 {
+  uint8_t buff[3];
   int32_t ret;
-  ret = lsm6ds3_read_reg(ctx, LSM6DS3_TIMESTAMP0_REG, buff,
-                         3);
+  ret = lsm6ds3_read_reg(ctx, LSM6DS3_TIMESTAMP0_REG, buff, 3);
+  *val = buff[2];
+  *val = (*val * 256U) +  buff[1];
+  *val = (*val * 256U) +  buff[0];
   return ret;
 }
 
@@ -1411,10 +1414,13 @@ int32_t lsm6ds3_rounding_mode_get(stmdev_ctx_t *ctx,
   * @param  buff        buffer that stores data read
   *
   */
-int32_t lsm6ds3_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6ds3_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
   ret = lsm6ds3_read_reg(ctx, LSM6DS3_OUT_TEMP_L, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) + (int16_t)buff[0];
   return ret;
 }
 
@@ -1426,10 +1432,17 @@ int32_t lsm6ds3_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @param  buff        buffer that stores data read
   *
   */
-int32_t lsm6ds3_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6ds3_angular_rate_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm6ds3_read_reg(ctx, LSM6DS3_OUTX_L_G, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
   return ret;
 }
 
@@ -1441,10 +1454,17 @@ int32_t lsm6ds3_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @param  buff        buffer that stores data read
   *
   */
-int32_t lsm6ds3_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6ds3_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm6ds3_read_reg(ctx, LSM6DS3_OUTX_L_XL, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
   return ret;
 }
 
@@ -1471,10 +1491,13 @@ int32_t lsm6ds3_fifo_raw_data_get(stmdev_ctx_t *ctx, uint8_t *buffer,
   * @param  buff        buffer that stores data read
   *
   */
-int32_t lsm6ds3_number_of_steps_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6ds3_number_of_steps_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
   ret = lsm6ds3_read_reg(ctx, LSM6DS3_STEP_COUNTER_L, buff, 2);
+  *val = buff[1];
+  *val = (*val * 256U) +  buff[0];
   return ret;
 }
 
@@ -1486,10 +1509,17 @@ int32_t lsm6ds3_number_of_steps_get(stmdev_ctx_t *ctx, uint8_t *buff)
   *
   */
 int32_t lsm6ds3_mag_calibrated_raw_get(stmdev_ctx_t *ctx,
-                                       uint8_t *buff)
+                                       int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm6ds3_read_reg(ctx, LSM6DS3_OUT_MAG_RAW_X_L, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
   return ret;
 }
 
@@ -4751,17 +4781,20 @@ int32_t lsm6ds3_pedo_step_reset_get(stmdev_ctx_t *ctx, uint8_t *val)
 /**
   * @brief   Step counter timestamp information register (r). When a step is
   *          detected, the value of TIMESTAMP_REG register is copied in
-  *          STEP_TIMESTAMP_L..[get]
+  *          STEP_TIMESTAMP_L.[get]
   *
   * @param  ctx         read / write interface definitions(ptr)
   * @param  buff        buffer that stores data read
   *
   */
 int32_t lsm6ds3_pedo_timestamp_raw_get(stmdev_ctx_t *ctx,
-                                       uint8_t *buff)
+                                       uint16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
   ret = lsm6ds3_read_reg(ctx, LSM6DS3_STEP_TIMESTAMP_L, buff, 2);
+  *val = buff[1];
+  *val = (*val * 256U) +  buff[0];
   return ret;
 }
 
@@ -5588,12 +5621,19 @@ int32_t lsm6ds3_mag_soft_iron_coeff_get(stmdev_ctx_t *ctx,
   * @param  buff        buffer that stores data to be write
   *
   */
-int32_t lsm6ds3_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6ds3_mag_offset_set(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm6ds3_mem_bank_set(ctx, LSM6DS3_EMBEDDED_FUNC_BANK);
 
   if (ret == 0) {
+    buff[1] = (uint8_t) ((uint16_t)val[0] / 256U);
+    buff[0] = (uint8_t) ((uint16_t)val[0] - (buff[1] * 256U));
+    buff[3] = (uint8_t) ((uint16_t)val[1] / 256U);
+    buff[2] = (uint8_t) ((uint16_t)val[1] - (buff[3] * 256U));
+    buff[5] = (uint8_t) ((uint16_t)val[2] / 256U);
+    buff[4] = (uint8_t) ((uint16_t)val[2] - (buff[5] * 256U));
     ret = lsm6ds3_write_reg(ctx, LSM6DS3_MAG_OFFX_L, buff, 6);
   }
 
@@ -5612,8 +5652,9 @@ int32_t lsm6ds3_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @param  buff        buffer that stores data read
   *
   */
-int32_t lsm6ds3_mag_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6ds3_mag_offset_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm6ds3_mem_bank_set(ctx, LSM6DS3_EMBEDDED_FUNC_BANK);
 
@@ -5622,6 +5663,12 @@ int32_t lsm6ds3_mag_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
   }
 
   if (ret == 0) {
+    val[0] = (int16_t)buff[1];
+    val[0] = (val[0] * 256) + (int16_t)buff[0];
+    val[1] = (int16_t)buff[3];
+    val[1] = (val[1] * 256) + (int16_t)buff[2];
+    val[2] = (int16_t)buff[5];
+    val[2] = (val[2] * 256) + (int16_t)buff[4];
     ret = lsm6ds3_mem_bank_set(ctx, LSM6DS3_USER_BANK);
   }
 
