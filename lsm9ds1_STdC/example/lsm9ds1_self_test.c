@@ -112,8 +112,8 @@ static const float min_st_xl_limit[] = {70.0f, 70.0f,  70.0f};
 static const float max_st_xl_limit[] = {1500.0f, 1500.0f, 1500.0f};
 
 /* Self test limits in mdps @ 2000 dps*/
-static const float min_st_gy_limit[] = {200.0f, 200.0f,  200.0f};
-static const float max_st_gy_limit[] = {800.0f, 800.0f, 800.0f};
+static const float min_st_gy_limit[] = {200000.0f, 200000.0f, 200000.0f};
+static const float max_st_gy_limit[] = {800000.0f, 800000.0f, 800000.0f};
 
 /* Private variables ---------------------------------------------------------*/
 #if defined(STEVAL_MKI109V3)
@@ -236,7 +236,7 @@ void lis9ds1_self_test(void)
     /* Check if new value available */
     do {
       lsm9ds1_dev_status_get(&dev_ctx_mag, &dev_ctx_imu, &reg);
-    } while(reg.status_mag.zyxda);
+    } while(!reg.status_mag.zyxda);
     /* Read data and accumulate */
     lsm9ds1_magnetic_raw_get(&dev_ctx_mag, data_raw.u8bit);
     for (j = 0; j < 3; j++){
@@ -326,7 +326,7 @@ void lis9ds1_self_test(void)
     /* Check if new value available */
     do {
       lsm9ds1_dev_status_get(&dev_ctx_imu, &dev_ctx_imu, &reg);
-    } while(reg.status_imu.xlda);
+    } while(!reg.status_imu.xlda);
     /* Read data and accumulate */
     lsm9ds1_acceleration_raw_get(&dev_ctx_imu, data_raw.u8bit);
     for (j = 0; j < 3; j++){
@@ -416,7 +416,7 @@ void lis9ds1_self_test(void)
     /* Check if new value available */
     do {
       lsm9ds1_dev_status_get(&dev_ctx_imu, &dev_ctx_imu, &reg);
-    } while(reg.status_imu.gda);
+    } while(!reg.status_imu.gda);
     /* Read data and accumulate */
     lsm9ds1_angular_rate_raw_get(&dev_ctx_imu, data_raw.u8bit);
     for (j = 0; j < 3; j++){
