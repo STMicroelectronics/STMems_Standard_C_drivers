@@ -281,7 +281,7 @@ void lsm6dsm_self_test(void)
   for (i = 0; i < 5; i++){
     /* Check if new value available */
     do {
-      lsm6dsm_xl_flag_data_ready_get(&dev_ctx, &drdy);
+      lsm6dsm_gy_flag_data_ready_get(&dev_ctx, &drdy);
     } while(!drdy);
     /* Read data and accumulate the mg value */
     lsm6dsm_angular_rate_raw_get(&dev_ctx, data_raw.u8bit);
@@ -306,7 +306,7 @@ void lsm6dsm_self_test(void)
   for (i = 0; i < 5; i++){
     /* Check if new value available */
     do {
-      lsm6dsm_xl_flag_data_ready_get(&dev_ctx, &drdy);
+      lsm6dsm_gy_flag_data_ready_get(&dev_ctx, &drdy);
     } while(!drdy);
     /* Read data and accumulate the mg value */
     lsm6dsm_angular_rate_raw_get(&dev_ctx, data_raw.u8bit);
