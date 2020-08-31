@@ -859,7 +859,8 @@ static void get_diff_2x(int16_t diff[6], uint8_t input[6])
   */
 static void get_diff_3x(int16_t diff[9], uint8_t input[6])
 {
-  uint32_t decode_temp;
+  uint16_t decode_temp;
+  uint16_t dummy;
 
   for (uint8_t i = 0; i < 3U; i++) {
 
@@ -867,12 +868,12 @@ static void get_diff_3x(int16_t diff[9], uint8_t input[6])
 
     for (uint8_t j = 0; j < 3U; j++) {
 
-      decode_temp &= ( (uint32_t)0x1FU << (5U * j) );
-      decode_temp = decode_temp >> (5U * j);
-
-      int16_t temp = (int16_t)decode_temp;
-
-      diff[j + (3U * i)] = (temp < 16) ? temp : (temp - 32);
+      dummy = decode_temp & ( (uint16_t)0x1FU << (5U * j) );
+      dummy = dummy >> (5U * j);
+      if (dummy >= 16U) {
+        dummy -= 32U;
+      }
+      diff[j + (3U * i)] = (int16_t)dummy;
     }
   }
 }
