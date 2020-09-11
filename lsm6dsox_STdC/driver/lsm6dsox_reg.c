@@ -8938,11 +8938,11 @@ int32_t lsm6dsox_sh_data_rate_set(stmdev_ctx_t *ctx, lsm6dsox_shub_odr_t val)
 
   ret = lsm6dsox_mem_bank_set(ctx, LSM6DSOX_SENSOR_HUB_BANK);
   if (ret == 0) {
-    ret = lsm6dsox_read_reg(ctx, LSM6DSOX_SLV1_CONFIG, (uint8_t*)&reg, 1);
+    ret = lsm6dsox_read_reg(ctx, LSM6DSOX_SLV0_CONFIG, (uint8_t*)&reg, 1);
   }
   if (ret == 0) {
     reg.shub_odr = (uint8_t)val;
-    ret = lsm6dsox_write_reg(ctx, LSM6DSOX_SLV1_CONFIG, (uint8_t*)&reg, 1);
+    ret = lsm6dsox_write_reg(ctx, LSM6DSOX_SLV0_CONFIG, (uint8_t*)&reg, 1);
   }
   if (ret == 0) {
     ret = lsm6dsox_mem_bank_set(ctx, LSM6DSOX_USER_BANK);
@@ -8966,7 +8966,7 @@ int32_t lsm6dsox_sh_data_rate_get(stmdev_ctx_t *ctx,
 
   ret = lsm6dsox_mem_bank_set(ctx, LSM6DSOX_SENSOR_HUB_BANK);
   if (ret == 0) {
-    ret = lsm6dsox_read_reg(ctx, LSM6DSOX_SLV1_CONFIG, (uint8_t*)&reg, 1);
+    ret = lsm6dsox_read_reg(ctx, LSM6DSOX_SLV0_CONFIG, (uint8_t*)&reg, 1);
   }
   if (ret == 0) {
     switch (reg.shub_odr) {
