@@ -675,8 +675,8 @@ int32_t lis2de12_act_timeout_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis2de12_act_timeout_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
-  LIS2DE12_PULL_UP_DISCONNECT  = 0,
-  LIS2DE12_PULL_UP_CONNECT     = 1,
+  LIS2DE12_PULL_UP_DISCONNECT  = 1,
+  LIS2DE12_PULL_UP_CONNECT     = 0,
 } lis2de12_sdo_pu_disc_t;
 int32_t lis2de12_pin_sdo_sa0_mode_set(stmdev_ctx_t *ctx,
                                       lis2de12_sdo_pu_disc_t val);
