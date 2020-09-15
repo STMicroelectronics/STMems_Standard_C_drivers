@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -616,9 +616,16 @@ int32_t lsm303ah_mg_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303ah_mg_user_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm303ah_mg_user_offset_set(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
+  buff[1] = (uint8_t) ((uint16_t)val[0] / 256U);
+  buff[0] = (uint8_t) ((uint16_t)val[0] - (buff[1] * 256U));
+  buff[3] = (uint8_t) ((uint16_t)val[1] / 256U);
+  buff[2] = (uint8_t) ((uint16_t)val[1] - (buff[3] * 256U));
+  buff[5] = (uint8_t) ((uint16_t)val[2] / 256U);
+  buff[4] = (uint8_t) ((uint16_t)val[2] - (buff[5] * 256U));
   ret = lsm303ah_write_reg(ctx, LSM303AH_OFFSET_X_REG_L_M, buff, 6);
   return ret;
 }
@@ -635,10 +642,17 @@ int32_t lsm303ah_mg_user_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303ah_mg_user_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm303ah_mg_user_offset_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm303ah_read_reg(ctx, LSM303AH_OFFSET_X_REG_L_M, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
   return ret;
 }
 
@@ -1038,11 +1052,17 @@ int32_t lsm303ah_xl_temperature_raw_get(stmdev_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303ah_acceleration_raw_get(stmdev_ctx_t *ctx,
-                                      uint8_t *buff)
+int32_t lsm303ah_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm303ah_read_reg(ctx, LSM303AH_OUT_X_L_A, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
   return ret;
 }
 
@@ -1054,10 +1074,17 @@ int32_t lsm303ah_acceleration_raw_get(stmdev_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303ah_magnetic_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm303ah_magnetic_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm303ah_read_reg(ctx, LSM303AH_OUTX_L_REG_M, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
   return ret;
 }
 
@@ -1069,10 +1096,13 @@ int32_t lsm303ah_magnetic_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm303ah_number_of_steps_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm303ah_number_of_steps_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
   ret = lsm303ah_read_reg(ctx, LSM303AH_STEP_COUNTER_L_A, buff, 2);
+  *val = buff[1];
+  *val = (*val * 256U) +  buff[0];
   return ret;
 }
 
@@ -2416,9 +2446,12 @@ int32_t lsm303ah_mg_int_gen_source_get(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm303ah_mg_int_gen_treshold_set(stmdev_ctx_t *ctx,
-                                         uint8_t *buff)
+                                         uint16_t val)
 {
+  uint8_t buff[2];
   int32_t ret;
+  buff[1] = (uint8_t) (val / 256U);
+  buff[0] = (uint8_t) (val - (buff[1] * 256U));
   ret = lsm303ah_write_reg(ctx, LSM303AH_INT_THS_L_REG_M, buff, 2);
   return ret;
 }
@@ -2434,10 +2467,13 @@ int32_t lsm303ah_mg_int_gen_treshold_set(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm303ah_mg_int_gen_treshold_get(stmdev_ctx_t *ctx,
-                                         uint8_t *buff)
+                                         uint16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
   ret = lsm303ah_read_reg(ctx, LSM303AH_INT_THS_L_REG_M, buff, 2);
+  *val = buff[1];
+  *val = (*val * 256U) +  buff[0];
   return ret;
 }
 
