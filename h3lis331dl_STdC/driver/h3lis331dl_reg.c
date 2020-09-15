@@ -86,17 +86,17 @@ int32_t h3lis331dl_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
 
 float_t h3lis331dl_from_fs100_to_mg(int16_t lsb)
 {
-  return ((float_t)lsb * 49.0f);
+  return ((float_t)lsb * 3.0625f);
 }
 
 float_t h3lis331dl_from_fs200_to_mg(int16_t lsb)
 {
-  return ((float_t)lsb * 98.0f);
+  return ((float_t)lsb * 6.125f);
 }
 
 float_t h3lis331dl_from_fs400_to_mg(int16_t lsb)
 {
-  return ((float_t)lsb * 195.0f);
+  return ((float_t)lsb * 12.1875f);
 }
 
 /**
