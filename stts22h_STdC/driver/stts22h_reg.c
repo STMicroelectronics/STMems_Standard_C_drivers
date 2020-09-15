@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -315,23 +315,16 @@ int32_t stts22h_temp_flag_data_ready_get(stmdev_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t stts22h_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff)
+int32_t stts22h_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
-  uint16_t temperature;
-  uint8_t temperature_low;
+  uint8_t buff[2];
   int32_t ret;
-  ret = stts22h_read_reg(ctx, STTS22H_TEMP_L_OUT,
-                         &temperature_low, 1);
-
-  if (ret == 0) {
-    ret = stts22h_read_reg(ctx, STTS22H_TEMP_H_OUT,
-                           (uint8_t *)&temperature, 1);
-    temperature  = (temperature << 8) + temperature_low;
-    *buff = (int16_t)temperature;
-  }
-
+  ret = stts22h_read_reg(ctx, STTS22H_TEMP_L_OUT, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) + (int16_t)buff[0];
   return ret;
 }
+
 /**
   * @}
   *
