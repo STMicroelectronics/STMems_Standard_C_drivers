@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -366,19 +366,18 @@ int32_t stts751_flag_busy_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff)
+int32_t stts751_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
-  uint16_t temperature;
-  uint8_t temperature_low;
+  uint8_t buff[2];
   int32_t ret;
   ret = stts751_read_reg(ctx, STTS751_TEMPERATURE_HIGH,
-                         (uint8_t *)&temperature, 1);
+                         (uint8_t *)&buff[1], 1);
 
   if (ret == 0) {
     ret = stts751_read_reg(ctx, STTS751_TEMPERATURE_LOW,
-                           &temperature_low, 1);
-    temperature  = (temperature << 8) + temperature_low;
-    *buff = (int16_t)temperature;
+                           &buff[0], 1);
+    *val = (int16_t)buff[1];
+    *val = (*val * 256) + (int16_t)buff[0];
   }
 
   return ret;
@@ -460,20 +459,14 @@ int32_t stts751_pin_event_route_get(stmdev_ctx_t *ctx, uint8_t *val)
   *
   */
 int32_t stts751_high_temperature_threshold_set(stmdev_ctx_t *ctx,
-                                               int16_t buff)
+                                               int16_t val)
 {
-  uint8_t *temperature_ptr;
+  uint8_t buff[2];
   int32_t ret;
-  temperature_ptr = (uint8_t *)&buff;
-  ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_HIGH_LIMIT_LOW,
-                          (uint8_t *)temperature_ptr, 1);
-
-  if (ret == 0) {
-    temperature_ptr++;
-    ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_HIGH_LIMIT_HIGH,
-                            (uint8_t *)temperature_ptr, 1);
-  }
-
+  buff[0] = (uint8_t) ((uint16_t)val / 256U);
+  buff[1] = (uint8_t) ((uint16_t)val - (buff[1] * 256U));
+  ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_HIGH_LIMIT_HIGH,
+                          buff, 2);
   return ret;
 }
 
@@ -486,21 +479,14 @@ int32_t stts751_high_temperature_threshold_set(stmdev_ctx_t *ctx,
   *
   */
 int32_t stts751_high_temperature_threshold_get(stmdev_ctx_t *ctx,
-                                               int16_t *buff)
+                                               int16_t *val)
 {
-  uint16_t temperature;
-  uint8_t temperature_low;
+  uint8_t buff[2];
   int32_t ret;
-  ret = stts751_read_reg(ctx, STTS751_TEMPERATURE_HIGH_LIMIT_HIGH,
-                         (uint8_t *)&temperature, 1);
-
-  if (ret == 0) {
-    ret = stts751_read_reg(ctx, STTS751_TEMPERATURE_HIGH_LIMIT_LOW,
-                           &temperature_low, 1);
-    temperature  = (temperature << 8) + temperature_low;
-    *buff = (int16_t)temperature;
-  }
-
+  ret = stts751_read_reg(ctx, STTS751_TEMPERATURE_HIGH_LIMIT_HIGH, buff,
+                         2);
+  *val = (int16_t)buff[0];
+  *val = (*val * 256) + (int16_t)buff[1];
   return ret;
 }
 
@@ -513,20 +499,14 @@ int32_t stts751_high_temperature_threshold_get(stmdev_ctx_t *ctx,
   *
   */
 int32_t stts751_low_temperature_threshold_set(stmdev_ctx_t *ctx,
-                                              int16_t buff)
+                                              int16_t val)
 {
-  uint8_t *temperature_ptr;
+  uint8_t buff[2];
   int32_t ret;
-  temperature_ptr = (uint8_t *)&buff;
-  ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_LOW_LIMIT_LOW,
-                          (uint8_t *)temperature_ptr, 1);
-
-  if (ret == 0) {
-    temperature_ptr++;
-    ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_LOW_LIMIT_HIGH,
-                            (uint8_t *)temperature_ptr, 1);
-  }
-
+  buff[0] = (uint8_t) ((uint16_t)val / 256U);
+  buff[1] = (uint8_t) ((uint16_t)val - (buff[1] * 256U));
+  ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_LOW_LIMIT_HIGH, buff,
+                          2);
   return ret;
 }
 
@@ -539,21 +519,14 @@ int32_t stts751_low_temperature_threshold_set(stmdev_ctx_t *ctx,
   *
   */
 int32_t stts751_low_temperature_threshold_get(stmdev_ctx_t *ctx,
-                                              int16_t *buff)
+                                              int16_t *val)
 {
-  uint16_t temperature;
-  uint8_t temperature_low;
+  uint8_t buff[2];
   int32_t ret;
-  ret = stts751_read_reg(ctx, STTS751_TEMPERATURE_LOW_LIMIT_HIGH,
-                         (uint8_t *)&temperature, 1);
-
-  if (ret == 0) {
-    ret = stts751_read_reg(ctx, STTS751_TEMPERATURE_LOW_LIMIT_LOW,
-                           &temperature_low, 1);
-    temperature  = (temperature << 8) + temperature_low;
-    *buff = (int16_t)temperature;
-  }
-
+  ret = stts751_read_reg(ctx, STTS751_TEMPERATURE_LOW_LIMIT_HIGH, buff,
+                         2);
+  *val = (int16_t)buff[0];
+  *val = (*val * 256) + (int16_t)buff[1];
   return ret;
 }
 
@@ -561,7 +534,6 @@ int32_t stts751_low_temperature_threshold_get(stmdev_ctx_t *ctx,
   * @}
   *
   */
-
 
 /**
 * @defgroup  STTS751 over temperature alarm

@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -35,6 +35,37 @@ extern "C" {
   *
   */
 
+/** @defgroup  Endianness definitions
+  * @{
+  *
+  */
+
+#ifndef DRV_BYTE_ORDER
+#ifndef __BYTE_ORDER__
+
+#define DRV_LITTLE_ENDIAN 1234
+#define DRV_BIG_ENDIAN    4321
+
+/** if _BYTE_ORDER is not defined, choose the endianness of your architecture
+  * by uncommenting the define which fits your platform endianness
+  */
+//#define DRV_BYTE_ORDER    DRV_BIG_ENDIAN
+#define DRV_BYTE_ORDER    DRV_LITTLE_ENDIAN
+
+#else /* defined __BYTE_ORDER__ */
+
+#define DRV_LITTLE_ENDIAN  __ORDER_LITTLE_ENDIAN__
+#define DRV_BIG_ENDIAN     __ORDER_BIG_ENDIAN__
+#define DRV_BYTE_ORDER     __BYTE_ORDER__
+
+#endif /* __BYTE_ORDER__*/
+#endif /* DRV_BYTE_ORDER */
+
+/**
+  * @}
+  *
+  */
+
 /** @defgroup STMicroelectronics sensors common types
   * @{
   *
@@ -44,6 +75,7 @@ extern "C" {
 #define MEMS_SHARED_TYPES
 
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -52,6 +84,16 @@ typedef struct {
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit0       : 1;
+#endif /* DRV_BYTE_ORDER */
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
@@ -149,27 +191,48 @@ typedef struct {
 #define STTS751_TEMPERATURE_HIGH            0x00U
 #define STTS751_STATUS                      0x01U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t thrm                       : 1;
   uint8_t not_used_01                : 4;
   uint8_t t_low                      : 1;
   uint8_t t_high                     : 1;
   uint8_t busy                       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t busy                       : 1;
+  uint8_t t_high                     : 1;
+  uint8_t t_low                      : 1;
+  uint8_t not_used_01                : 4;
+  uint8_t thrm                       : 1;
+#endif /* DRV_BYTE_ORDER */
 } stts751_status_t;
 
 #define STTS751_TEMPERATURE_LOW             0x02U
 #define STTS751_CONFIGURATION               0x03U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01                : 2;
   uint8_t tres                       : 2;
   uint8_t not_used_02                : 2;
   uint8_t stop                       : 1;
   uint8_t mask1                      : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t mask1                      : 1;
+  uint8_t stop                       : 1;
+  uint8_t not_used_02                : 2;
+  uint8_t tres                       : 2;
+  uint8_t not_used_01                : 2;
+#endif /* DRV_BYTE_ORDER */
 } stts751_configuration_t;
 
 #define STTS751_CONVERSION_RATE             0x04U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t conv                       : 4;
   uint8_t not_used_01                : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01                : 4;
+  uint8_t conv                       : 4;
+#endif /* DRV_BYTE_ORDER */
 } stts751_conversion_rate_t;
 
 #define STTS751_TEMPERATURE_HIGH_LIMIT_HIGH 0x05U
@@ -181,8 +244,13 @@ typedef struct {
 #define STTS751_THERM_HYSTERESIS            0x21U
 #define STTS751_SMBUS_TIMEOUT               0x22U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01                : 7;
   uint8_t timeout                    : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t timeout                    : 1;
+  uint8_t not_used_01                : 7;
+#endif /* DRV_BYTE_ORDER */
 } stts751_smbus_timeout_t;
 
 #define STTS751_PRODUCT_ID                  0xFDU
@@ -222,8 +290,8 @@ int32_t stts751_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
                           uint8_t *data,
                           uint16_t len);
 
-extern float stts751_from_lsb_to_celsius(int16_t lsb);
-extern int16_t stts751_from_celsius_to_lsb(float celsius);
+float stts751_from_lsb_to_celsius(int16_t lsb);
+int16_t stts751_from_celsius_to_lsb(float celsius);
 
 typedef enum {
   STTS751_TEMP_ODR_OFF        = 0x80,
@@ -259,21 +327,21 @@ int32_t stts751_status_reg_get(stmdev_ctx_t *ctx,
 
 int32_t stts751_flag_busy_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t stts751_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff);
+int32_t stts751_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
 int32_t stts751_pin_event_route_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t stts751_pin_event_route_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 
 int32_t stts751_high_temperature_threshold_set(stmdev_ctx_t *ctx,
-                                               int16_t buff);
+                                               int16_t val);
 int32_t stts751_high_temperature_threshold_get(stmdev_ctx_t *ctx,
-                                               int16_t *buff);
+                                               int16_t *val);
 
 int32_t stts751_low_temperature_threshold_set(stmdev_ctx_t *ctx,
-                                              int16_t buff);
+                                              int16_t val);
 int32_t stts751_low_temperature_threshold_get(stmdev_ctx_t *ctx,
-                                              int16_t *buff);
+                                              int16_t *val);
 
 int32_t stts751_ota_thermal_limit_set(stmdev_ctx_t *ctx, int8_t val);
 int32_t stts751_ota_thermal_limit_get(stmdev_ctx_t *ctx, int8_t *val);
