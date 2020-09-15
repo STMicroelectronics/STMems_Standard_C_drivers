@@ -22,8 +22,7 @@
  *
  * - STEVAL_MKI109V3 + STEVAL-MKI184V1
  * - NUCLEO_F411RE + STEVAL-MKI184V1
- *
- * and STM32CubeMX tool with STM32CubeF4 MCU Package
+ * - DISCOVERY_SPC584B + STEVAL-MKI184V1
  *
  * Used interfaces:
  *
@@ -32,6 +31,9 @@
  *
  * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
  *                    - I2C(Default) / SPI(supported)
+ *
+ * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -45,13 +47,19 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-//#define STEVAL_MKI109V3
-#define NUCLEO_F411RE
+
+//#define STEVAL_MKI109V3  /* little endian */
+#define NUCLEO_F411RE    /* little endian */
+//#define SPC584B_DIS      /* big endian */
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
-
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
@@ -59,26 +67,32 @@
 /* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
+#elif defined(SPC584B_DIS)
+/* DISCOVERY_SPC584B: Define communication interface */
+#define SENSOR_BUS I2CD1
+
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "stm32f4xx_hal.h"
 #include "ism303dac_reg.h"
+
+#if defined(NUCLEO_F411RE)
+#include "stm32f4xx_hal.h"
+#include "usart.h"
 #include "gpio.h"
 #include "i2c.h"
-#if defined(STEVAL_MKI109V3)
-#include "usbd_cdc_if.h"
-#include "spi.h"
-#elif defined(NUCLEO_F411RE)
-#include "usart.h"
-#endif
 
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
+#include "usbd_cdc_if.h"
+#include "gpio.h"
+#include "spi.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
+#endif
 
 typedef struct {
   void*   hbus;
@@ -126,6 +140,15 @@ static sensbus_t mag_bus = {&SENSOR_BUS,
                             ISM303DAC_I2C_ADD_MG,
                             0,
                             0};
+#elif defined(SPC584B_DIS)
+static sensbus_t xl_bus =  {&SENSOR_BUS,
+                            ISM303DAC_I2C_ADD_XL,
+                            0,
+                            0};
+static sensbus_t mag_bus = {&SENSOR_BUS,
+                            ISM303DAC_I2C_ADD_MG,
+                            0,
+                            0};
 #endif
 /* Extern variables ----------------------------------------------------------*/
 
@@ -150,8 +173,8 @@ void ism303dac_self_test(void)
   stmdev_ctx_t dev_ctx_xl;
   stmdev_ctx_t dev_ctx_mg;
   uint8_t tx_buffer[1000];
-  axis3bit16_t data_raw;
   float meas_st_off[3];
+  int16_t data_raw[3];
   float meas_st_on[3];
   ism303dac_reg_t reg;
   float test_val[3];
@@ -220,7 +243,7 @@ void ism303dac_self_test(void)
     ism303dac_xl_status_reg_get(&dev_ctx_xl, &reg.status_a);
   } while(!reg.status_a.drdy);
   /* Read dummy data and discard it */
-  ism303dac_acceleration_raw_get(&dev_ctx_xl, data_raw.u8bit);
+  ism303dac_acceleration_raw_get(&dev_ctx_xl, data_raw);
 
   /* Read samples and get the average vale for each axis */
   for (i = 0; i < SAMPLES_XL; i++){
@@ -229,9 +252,9 @@ void ism303dac_self_test(void)
       ism303dac_xl_status_reg_get(&dev_ctx_xl, &reg.status_a);
     } while(!reg.status_a.drdy);
     /* Read data and accumulate the mg value */
-    ism303dac_acceleration_raw_get(&dev_ctx_xl, data_raw.u8bit);
+    ism303dac_acceleration_raw_get(&dev_ctx_xl, data_raw);
     for (j=0; j<3; j++){
-      meas_st_off[j] += ism303dac_from_fs2g_to_mg(data_raw.i16bit[j]);
+      meas_st_off[j] += ism303dac_from_fs2g_to_mg(data_raw[j]);
     }
   }
   /* Calculate the mg average values */
@@ -251,7 +274,7 @@ void ism303dac_self_test(void)
     ism303dac_xl_status_reg_get(&dev_ctx_xl, &reg.status_a);
   } while(!reg.status_a.drdy);
   /* Read dummy data and discard it */
-  ism303dac_acceleration_raw_get(&dev_ctx_xl, data_raw.u8bit);
+  ism303dac_acceleration_raw_get(&dev_ctx_xl, data_raw);
 
   /* Read samples and get the average vale for each axis */
   for (i = 0; i < SAMPLES_XL; i++){
@@ -260,9 +283,9 @@ void ism303dac_self_test(void)
         ism303dac_xl_status_reg_get(&dev_ctx_xl, &reg.status_a);
       } while(!reg.status_a.drdy);
     /* Read data and accumulate the mg value */
-    ism303dac_acceleration_raw_get(&dev_ctx_xl, data_raw.u8bit);
+    ism303dac_acceleration_raw_get(&dev_ctx_xl, data_raw);
     for (j=0; j<3; j++){
-      meas_st_on[j] += ism303dac_from_fs2g_to_mg(data_raw.i16bit[j]);
+      meas_st_on[j] += ism303dac_from_fs2g_to_mg(data_raw[j]);
     }
   }
   /* Calculate the mg average values */
@@ -318,7 +341,7 @@ void ism303dac_self_test(void)
     ism303dac_mg_status_get(&dev_ctx_mg, &reg.status_reg_m);
   } while(!reg.status_reg_m.zyxda);
   /* Read dummy data and discard it */
-  ism303dac_magnetic_raw_get(&dev_ctx_mg, data_raw.u8bit);
+  ism303dac_magnetic_raw_get(&dev_ctx_mg, data_raw);
 
   /* Read samples and get the average vale for each axis */
   memset(meas_st_off, 0x00, 3*sizeof(float));
@@ -328,9 +351,9 @@ void ism303dac_self_test(void)
       ism303dac_mg_status_get(&dev_ctx_mg, &reg.status_reg_m);
     } while(!reg.status_reg_m.zyxda);
     /* Read data and accumulate the mg value */
-    ism303dac_magnetic_raw_get(&dev_ctx_mg, data_raw.u8bit);
+    ism303dac_magnetic_raw_get(&dev_ctx_mg, data_raw);
     for (j = 0; j < 3; j++){
-      meas_st_off[j] += ism303dac_from_lsb_to_mG(data_raw.i16bit[j]);
+      meas_st_off[j] += ism303dac_from_lsb_to_mG(data_raw[j]);
     }
   }
   /* Calculate the mg average values */
@@ -349,7 +372,7 @@ void ism303dac_self_test(void)
     ism303dac_mg_status_get(&dev_ctx_mg, &reg.status_reg_m);
   } while(!reg.status_reg_m.zyxda);
   /* Read dummy data and discard it */
-  ism303dac_magnetic_raw_get(&dev_ctx_mg, data_raw.u8bit);
+  ism303dac_magnetic_raw_get(&dev_ctx_mg, data_raw);
 
   /* Read samples and get the average vale for each axis */
   memset(meas_st_on, 0x00, 3*sizeof(float));
@@ -359,9 +382,9 @@ void ism303dac_self_test(void)
       ism303dac_mg_status_get(&dev_ctx_mg, &reg.status_reg_m);
     } while(!reg.status_reg_m.zyxda);
     /* Read data and accumulate the mg value */
-    ism303dac_magnetic_raw_get(&dev_ctx_mg, data_raw.u8bit);
+    ism303dac_magnetic_raw_get(&dev_ctx_mg, data_raw);
     for (j = 0; j < 3; j++){
-      meas_st_on[j] += ism303dac_from_lsb_to_mG(data_raw.i16bit[j]);
+      meas_st_on[j] += ism303dac_from_lsb_to_mG(data_raw[j]);
     }
   }
 
@@ -418,18 +441,18 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 {
 sensbus_t *sensbus = (sensbus_t*)handle;
 
-  if (sensbus->hbus == &hi2c1) {
-    HAL_I2C_Mem_Write(sensbus->hbus, sensbus->i2c_address, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-#if defined(STEVAL_MKI109V3)
-  else if (sensbus->hbus == &hspi2) {
-    HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
-    HAL_SPI_Transmit(sensbus->hbus, bufp, len, 1000);
-    HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
-  }
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Write(sensbus->hbus, sensbus->i2c_address, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
+  HAL_SPI_Transmit(sensbus->hbus, bufp, len, 1000);
+  HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_write(sensbus->hbus, sensbus->i2c_address & 0xFE, reg, bufp, len);
 #endif
+
   return 0;
 }
 
@@ -448,20 +471,19 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 {
 sensbus_t *sensbus = (sensbus_t*)handle;
 
-  if (sensbus->hbus == &hi2c1) {
+#if defined(NUCLEO_F411RE)
     HAL_I2C_Mem_Read(sensbus->hbus, sensbus->i2c_address, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-#if defined(STEVAL_MKI109V3)
-  else if (sensbus->hbus == &hspi2) {
-    /* Read command */
-    reg |= 0x80;
-    HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
-    HAL_SPI_Receive(sensbus->hbus, bufp, len, 1000);
-    HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
-  }
+#elif defined(STEVAL_MKI109V3)
+  reg |= 0x80;
+  HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
+  HAL_SPI_Receive(sensbus->hbus, bufp, len, 1000);
+  HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_read(sensbus->hbus, sensbus->i2c_address & 0xFE, reg, bufp, len);
 #endif
+
   return 0;
 }
 
@@ -474,12 +496,13 @@ sensbus_t *sensbus = (sensbus_t*)handle;
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE
+#if defined(NUCLEO_F411RE)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
-  #ifdef STEVAL_MKI109V3
+#elif defined(STEVAL_MKI109V3)
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#elif defined(SPC584B_DIS)
+  sd_lld_write(&SD2, tx_buffer, len);
+#endif
 }
 
 /*
@@ -490,7 +513,11 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
+#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
   HAL_Delay(ms);
+#elif defined(SPC584B_DIS)
+  osalThreadDelayMilliseconds(ms);
+#endif
 }
 
 /*
@@ -506,4 +533,3 @@ static void platform_init(void)
   HAL_Delay(1000);
 #endif
 }
-
