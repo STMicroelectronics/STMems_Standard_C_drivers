@@ -57,24 +57,14 @@
 
 #include <string.h>
 #include <stdio.h>
-#include "stm32f4xx_hal.h"
 #include "iis3dhhc_reg.h"
-#include "gpio.h"
-#include "i2c.h"
+
 #if defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
 #include "usbd_cdc_if.h"
+#include "gpio.h"
 #include "spi.h"
 #endif
-
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
 #ifdef MKI109V2
@@ -89,8 +79,8 @@ typedef union{
 #define TX_BUF_DIM         1000
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static axis1bit16_t data_raw_temperature;
+static int16_t data_raw_acceleration[3];
+static int16_t data_raw_temperature;
 static float acceleration_mg[3];
 static float temperature_degC;
 static uint8_t whoamI, rst;
@@ -160,20 +150,20 @@ void iis3dhhc_read_data_polling(void)
     if (reg.status.zyxda)
     {
       /* Read magnetic field data */
-      memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
-      iis3dhhc_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = iis3dhhc_from_lsb_to_mg( data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = iis3dhhc_from_lsb_to_mg( data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = iis3dhhc_from_lsb_to_mg( data_raw_acceleration.i16bit[2]);
+      memset(data_raw_acceleration, 0x00, 3*sizeof(int16_t));
+      iis3dhhc_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
+      acceleration_mg[0] = iis3dhhc_from_lsb_to_mg( data_raw_acceleration[0]);
+      acceleration_mg[1] = iis3dhhc_from_lsb_to_mg( data_raw_acceleration[1]);
+      acceleration_mg[2] = iis3dhhc_from_lsb_to_mg( data_raw_acceleration[2]);
      
       sprintf((char*)tx_buffer, "Magnetic field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
      
       /* Read temperature data */
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      iis3dhhc_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = iis3dhhc_from_lsb_to_celsius( data_raw_temperature.i16bit );
+      memset(&data_raw_temperature, 0x00, sizeof(int16_t));
+      iis3dhhc_temperature_raw_get(&dev_ctx, &data_raw_temperature);
+      temperature_degC = iis3dhhc_from_lsb_to_celsius( &data_raw_temperature );
       
       sprintf((char*)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC );
       tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
@@ -195,13 +185,10 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #endif
   return 0;
 }
@@ -220,15 +207,12 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
-	/* Read command */
-	reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Receive(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
+  /* Read command */
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #endif
   return 0;
 }
@@ -255,7 +239,9 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
+  #ifdef STEVAL_MKI109V3
   HAL_Delay(ms);
+  #endif
 }
 
 /*
