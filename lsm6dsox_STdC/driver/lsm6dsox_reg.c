@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -1363,10 +1363,15 @@ int32_t lsm6dsox_timestamp_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dsox_timestamp_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsox_timestamp_raw_get(stmdev_ctx_t *ctx, uint32_t *val)
 {
+  uint8_t buff[4];
   int32_t ret;
   ret = lsm6dsox_read_reg(ctx, LSM6DSOX_TIMESTAMP0, buff, 4);
+  *val = buff[3];
+  *val = (*val * 256U) +  buff[2];
+  *val = (*val * 256U) +  buff[1];
+  *val = (*val * 256U) +  buff[0];
   return ret;
 }
 
@@ -1526,10 +1531,13 @@ int32_t lsm6dsox_rounding_on_status_get(stmdev_ctx_t *ctx,
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dsox_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsox_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
   ret = lsm6dsox_read_reg(ctx, LSM6DSOX_OUT_TEMP_L, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) + (int16_t)buff[0];
   return ret;
 }
 
@@ -1541,11 +1549,17 @@ int32_t lsm6dsox_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dsox_angular_rate_raw_get(stmdev_ctx_t *ctx,
-                                      uint8_t *buff)
+int32_t lsm6dsox_angular_rate_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm6dsox_read_reg(ctx, LSM6DSOX_OUTX_L_G, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
   return ret;
 }
 
@@ -1557,11 +1571,17 @@ int32_t lsm6dsox_angular_rate_raw_get(stmdev_ctx_t *ctx,
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dsox_acceleration_raw_get(stmdev_ctx_t *ctx,
-                                      uint8_t *buff)
+int32_t lsm6dsox_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm6dsox_read_reg(ctx, LSM6DSOX_OUTX_L_A, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
   return ret;
 }
 
@@ -1589,9 +1609,18 @@ int32_t lsm6dsox_fifo_out_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   *
   */
 int32_t lsm6dsox_ois_angular_rate_raw_get(stmdev_ctx_t *ctx,
-                                          uint8_t *buff)
+                                          int16_t *val)
 {
-  return lsm6dsox_read_reg(ctx, LSM6DSOX_UI_OUTX_L_G_OIS, buff, 6);
+  uint8_t buff[6];
+  int32_t ret;
+  ret = lsm6dsox_read_reg(ctx, LSM6DSOX_UI_OUTX_L_G_OIS, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
+  return ret;
 }
 
 /**
@@ -1604,9 +1633,18 @@ int32_t lsm6dsox_ois_angular_rate_raw_get(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm6dsox_ois_acceleration_raw_get(stmdev_ctx_t *ctx,
-                                          uint8_t *buff)
+                                          int16_t *val)
 {
-  return lsm6dsox_read_reg(ctx, LSM6DSOX_UI_OUTX_L_A_OIS, buff, 6);
+  uint8_t buff[6];
+  int32_t ret;
+  ret = lsm6dsox_read_reg(ctx, LSM6DSOX_UI_OUTX_L_A_OIS, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
+  return ret;
 }
 
 /**
@@ -1620,9 +1658,14 @@ int32_t lsm6dsox_ois_acceleration_raw_get(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm6dsox_aux_temperature_raw_get(stmdev_ctx_t *ctx,
-                                         uint8_t *buff)
+                                         int16_t *val)
 {
-  return lsm6dsox_read_reg(ctx, LSM6DSOX_SPI2_OUT_TEMP_L, buff, 2);
+  uint8_t buff[2];
+  int32_t ret;
+  ret = lsm6dsox_read_reg(ctx, LSM6DSOX_SPI2_OUT_TEMP_L, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) + (int16_t)buff[0];
+  return ret;
 }
 
 /**
@@ -1636,9 +1679,18 @@ int32_t lsm6dsox_aux_temperature_raw_get(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm6dsox_aux_ois_angular_rate_raw_get(stmdev_ctx_t *ctx,
-                                              uint8_t *buff)
+                                              int16_t *val)
 {
-  return lsm6dsox_read_reg(ctx, LSM6DSOX_SPI2_OUTX_L_G_OIS, buff, 6);
+  uint8_t buff[6];
+  int32_t ret;
+  ret = lsm6dsox_read_reg(ctx, LSM6DSOX_SPI2_OUTX_L_G_OIS, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
+  return ret;
 }
 
 /**
@@ -1652,9 +1704,18 @@ int32_t lsm6dsox_aux_ois_angular_rate_raw_get(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm6dsox_aux_ois_acceleration_raw_get(stmdev_ctx_t *ctx,
-                                              uint8_t *buff)
+                                              int16_t *val)
 {
-  return lsm6dsox_read_reg(ctx, LSM6DSOX_SPI2_OUTX_L_A_OIS, buff, 6);
+  uint8_t buff[6];
+  int32_t ret;
+  ret = lsm6dsox_read_reg(ctx, LSM6DSOX_SPI2_OUTX_L_A_OIS, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
+  return ret;
 }
 
 /**
@@ -1664,13 +1725,16 @@ int32_t lsm6dsox_aux_ois_acceleration_raw_get(stmdev_ctx_t *ctx,
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dsox_number_of_steps_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsox_number_of_steps_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
   ret = lsm6dsox_mem_bank_set(ctx, LSM6DSOX_EMBEDDED_FUNC_BANK);
 
   if (ret == 0) {
     ret = lsm6dsox_read_reg(ctx, LSM6DSOX_STEP_COUNTER_L, buff, 2);
+    *val = buff[1];
+    *val = (*val * 256U) +  buff[0];
   }
 
   if (ret == 0) {
@@ -7567,18 +7631,18 @@ int32_t lsm6dsox_pedo_debounce_steps_get(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm6dsox_pedo_steps_period_set(stmdev_ctx_t *ctx,
-                                       uint8_t *buff)
+                                       uint16_t val)
 {
+  uint8_t buff[2];
   int32_t ret;
-  uint8_t index;
-  index = 0x00U;
+  buff[1] = (uint8_t) (val / 256U);
+  buff[0] = (uint8_t) (val - (buff[1] * 256U));
   ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_PEDO_SC_DELTAT_L,
-                                  &buff[index]);
+                                  &buff[0]);
 
   if (ret == 0) {
-    index++;
     ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_PEDO_SC_DELTAT_H,
-                                    &buff[index]);
+                                    &buff[1]);
   }
 
   return ret;
@@ -7592,18 +7656,18 @@ int32_t lsm6dsox_pedo_steps_period_set(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm6dsox_pedo_steps_period_get(stmdev_ctx_t *ctx,
-                                       uint8_t *buff)
+                                       uint16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
-  uint8_t index;
-  index = 0x00U;
   ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_PEDO_SC_DELTAT_L,
-                                 &buff[index]);
+                                 &buff[0]);
 
   if (ret == 0) {
-    index++;
     ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_PEDO_SC_DELTAT_H,
-                                   &buff[index]);
+                                   &buff[1]);
+    *val = buff[1];
+    *val = (*val * 256U) +  buff[0];
   }
 
   return ret;
@@ -7769,18 +7833,18 @@ int32_t lsm6dsox_tilt_flag_data_ready_get(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm6dsox_sh_mag_sensitivity_set(stmdev_ctx_t *ctx,
-                                        uint8_t *buff)
+                                        uint16_t val)
 {
+  uint8_t buff[2];
   int32_t ret;
-  uint8_t index;
-  index = 0x00U;
+  buff[1] = (uint8_t) (val / 256U);
+  buff[0] = (uint8_t) (val - (buff[1] * 256U));
   ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_MAG_SENSITIVITY_L,
-                                  &buff[index]);
+                                  &buff[0]);
 
   if (ret == 0) {
-    index++;
     ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_MAG_SENSITIVITY_H,
-                                    &buff[index]);
+                                    &buff[1]);
   }
 
   return ret;
@@ -7795,18 +7859,18 @@ int32_t lsm6dsox_sh_mag_sensitivity_set(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm6dsox_sh_mag_sensitivity_get(stmdev_ctx_t *ctx,
-                                        uint8_t *buff)
+                                        uint16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
-  uint8_t index;
-  index = 0x00U;
   ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_MAG_SENSITIVITY_L,
-                                 &buff[index]);
+                                 &buff[0]);
 
   if (ret == 0) {
-    index++;
     ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_MAG_SENSITIVITY_H,
-                                   &buff[index]);
+                                   &buff[1]);
+    *val = buff[1];
+    *val = (*val * 256U) +  buff[0];
   }
 
   return ret;
@@ -7821,18 +7885,18 @@ int32_t lsm6dsox_sh_mag_sensitivity_get(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm6dsox_mlc_mag_sensitivity_set(stmdev_ctx_t *ctx,
-                                         uint8_t *buff)
+                                         uint16_t val)
 {
+  uint8_t buff[2];
   int32_t ret;
-  uint8_t index;
-  index = 0x00U;
+  buff[1] = (uint8_t) (val / 256U);
+  buff[0] = (uint8_t) (val - (buff[1] * 256U));
   ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_MLC_MAG_SENSITIVITY_L,
-                                  &buff[index]);
+                                  &buff[0]);
 
   if (ret == 0) {
-    index++;
     ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_MLC_MAG_SENSITIVITY_H,
-                                    &buff[index]);
+                                    &buff[1]);
   }
 
   return ret;
@@ -7847,18 +7911,18 @@ int32_t lsm6dsox_mlc_mag_sensitivity_set(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm6dsox_mlc_mag_sensitivity_get(stmdev_ctx_t *ctx,
-                                         uint8_t *buff)
+                                         uint16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
-  uint8_t index;
-  index = 0x00U;
   ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_MLC_MAG_SENSITIVITY_L,
-                                 &buff[index]);
+                                 &buff[0]);
 
   if (ret == 0) {
-    index++;
     ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_MLC_MAG_SENSITIVITY_H,
-                                   &buff[index]);
+                                   &buff[1]);
+    *val = buff[1];
+    *val = (*val * 256U) +  buff[0];
   }
 
   return ret;
@@ -7872,42 +7936,49 @@ int32_t lsm6dsox_mlc_mag_sensitivity_get(stmdev_ctx_t *ctx,
   * @param  buff     buffer that contains data to write
   *
   */
-int32_t lsm6dsox_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsox_mag_offset_set(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
-  uint8_t index;
-  index = 0x00U;
+  uint8_t i;
+  buff[1] = (uint8_t) ((uint16_t)val[0] / 256U);
+  buff[0] = (uint8_t) ((uint16_t)val[0] - (buff[1] * 256U));
+  buff[3] = (uint8_t) ((uint16_t)val[1] / 256U);
+  buff[2] = (uint8_t) ((uint16_t)val[1] - (buff[3] * 256U));
+  buff[5] = (uint8_t) ((uint16_t)val[2] / 256U);
+  buff[4] = (uint8_t) ((uint16_t)val[2] - (buff[5] * 256U));
+  i = 0x00U;
   ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_MAG_OFFX_L,
-                                  &buff[index]);
+                                  &buff[i]);
 
   if (ret == 0) {
-    index++;
+    i++;
     ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_MAG_OFFX_H,
-                                    &buff[index]);
+                                    &buff[i]);
   }
 
   if (ret == 0) {
-    index++;
+    i++;
     ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_MAG_OFFY_L,
-                                    &buff[index]);
+                                    &buff[i]);
   }
 
   if (ret == 0) {
-    index++;
+    i++;
     ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_MAG_OFFY_H,
-                                    &buff[index]);
+                                    &buff[i]);
   }
 
   if (ret == 0) {
-    index++;
+    i++;
     ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_MAG_OFFZ_L,
-                                    &buff[index]);
+                                    &buff[i]);
   }
 
   if (ret == 0) {
-    index++;
+    i++;
     ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_MAG_OFFZ_H,
-                                    &buff[index]);
+                                    &buff[i]);
   }
 
   return ret;
@@ -7920,44 +7991,51 @@ int32_t lsm6dsox_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dsox_mag_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsox_mag_offset_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
-  uint8_t index;
-  index = 0x00U;
+  uint8_t i;
+  i = 0x00U;
   ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_MAG_OFFX_L,
-                                 &buff[index]);
+                                 &buff[i]);
 
   if (ret == 0) {
-    index++;
+    i++;
     ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_MAG_OFFX_H,
-                                   &buff[index]);
+                                   &buff[i]);
   }
 
   if (ret == 0) {
-    index++;
+    i++;
     ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_MAG_OFFY_L,
-                                   &buff[index]);
+                                   &buff[i]);
   }
 
   if (ret == 0) {
-    index++;
+    i++;
     ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_MAG_OFFY_H,
-                                   &buff[index]);
+                                   &buff[i]);
   }
 
   if (ret == 0) {
-    index++;
+    i++;
     ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_MAG_OFFZ_L,
-                                   &buff[index]);
+                                   &buff[i]);
   }
 
   if (ret == 0) {
-    index++;
+    i++;
     ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_MAG_OFFZ_H,
-                                   &buff[index]);
+                                   &buff[i]);
   }
 
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
   return ret;
 }
 
@@ -7974,10 +8052,23 @@ int32_t lsm6dsox_mag_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that contains data to write
   *
   */
-int32_t lsm6dsox_mag_soft_iron_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsox_mag_soft_iron_set(stmdev_ctx_t *ctx, uint16_t *val)
 {
-  int32_t ret;
+  uint8_t buff[12];
   uint8_t index;
+  int32_t ret;
+  buff[1] = (uint8_t) (val[0] / 256U);
+  buff[0] = (uint8_t) (val[0] - (buff[1] * 256U));
+  buff[3] = (uint8_t) (val[1] / 256U);
+  buff[2] = (uint8_t) (val[1] - (buff[3] * 256U));
+  buff[5] = (uint8_t) (val[2] / 256U);
+  buff[4] = (uint8_t) (val[2] - (buff[5] * 256U));
+  buff[7] = (uint8_t) (val[3] / 256U);
+  buff[6] = (uint8_t) (val[3] - (buff[1] * 256U));
+  buff[9] = (uint8_t) (val[4] / 256U);
+  buff[8] = (uint8_t) (val[4] - (buff[3] * 256U));
+  buff[11] = (uint8_t) (val[5] / 256U);
+  buff[10] = (uint8_t) (val[5] - (buff[5] * 256U));
   index = 0x00U;
   ret = lsm6dsox_ln_pg_write_byte(ctx, LSM6DSOX_MAG_SI_XX_L,
                                   &buff[index]);
@@ -8065,10 +8156,11 @@ int32_t lsm6dsox_mag_soft_iron_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dsox_mag_soft_iron_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsox_mag_soft_iron_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
-  int32_t ret;
+  uint8_t buff[12];
   uint8_t index;
+  int32_t ret;
   index = 0x00U;
   ret = lsm6dsox_ln_pg_read_byte(ctx, LSM6DSOX_MAG_SI_XX_L,
                                  &buff[index]);
@@ -8139,6 +8231,18 @@ int32_t lsm6dsox_mag_soft_iron_get(stmdev_ctx_t *ctx, uint8_t *buff)
                                    &buff[index]);
   }
 
+  val[0] = buff[1];
+  val[0] = (val[0] * 256U) +  buff[0];
+  val[1] = buff[3];
+  val[1] = (val[1] * 256U) +  buff[2];
+  val[2] = buff[5];
+  val[2] = (val[2] * 256U) +  buff[4];
+  val[3] = buff[7];
+  val[3] = (val[3] * 256U) +  buff[6];
+  val[4] = buff[9];
+  val[4] = (val[4] * 256U) +  buff[8];
+  val[5] = buff[11];
+  val[6] = (val[5] * 256U) +  buff[10];
   return ret;
 }
 
@@ -8480,9 +8584,12 @@ int32_t lsm6dsox_fsm_enable_get(stmdev_ctx_t *ctx,
   * @param  buff     buffer that contains data to write
   *
   */
-int32_t lsm6dsox_long_cnt_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsox_long_cnt_set(stmdev_ctx_t *ctx, uint16_t val)
 {
+  uint8_t buff[2];
   int32_t ret;
+  buff[1] = (uint8_t) (val / 256U);
+  buff[0] = (uint8_t) (val - (buff[1] * 256U));
   ret = lsm6dsox_mem_bank_set(ctx, LSM6DSOX_EMBEDDED_FUNC_BANK);
 
   if (ret == 0) {
@@ -8504,13 +8611,16 @@ int32_t lsm6dsox_long_cnt_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @param  buff     buffer that stores data read
   *
   */
-int32_t lsm6dsox_long_cnt_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsox_long_cnt_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
   ret = lsm6dsox_mem_bank_set(ctx, LSM6DSOX_EMBEDDED_FUNC_BANK);
 
   if (ret == 0) {
     ret = lsm6dsox_read_reg(ctx, LSM6DSOX_FSM_LONG_COUNTER_L, buff, 2);
+    *val = buff[1];
+    *val = (*val * 256U) +  buff[0];
   }
 
   if (ret == 0) {
