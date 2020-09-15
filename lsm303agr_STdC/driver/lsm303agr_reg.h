@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -35,6 +35,37 @@ extern "C" {
   *
   */
 
+/** @defgroup Endianness definitions
+  * @{
+  *
+  */
+
+#ifndef DRV_BYTE_ORDER
+#ifndef __BYTE_ORDER__
+
+#define DRV_LITTLE_ENDIAN 1234
+#define DRV_BIG_ENDIAN    4321
+
+/** if _BYTE_ORDER is not defined, choose the endianness of your architecture
+  * by uncommenting the define which fits your platform endianness
+  */
+//#define DRV_BYTE_ORDER    DRV_BIG_ENDIAN
+#define DRV_BYTE_ORDER    DRV_LITTLE_ENDIAN
+
+#else /* defined __BYTE_ORDER__ */
+
+#define DRV_LITTLE_ENDIAN  __ORDER_LITTLE_ENDIAN__
+#define DRV_BIG_ENDIAN     __ORDER_BIG_ENDIAN__
+#define DRV_BYTE_ORDER     __BYTE_ORDER__
+
+#endif /* __BYTE_ORDER__*/
+#endif /* DRV_BYTE_ORDER */
+
+/**
+  * @}
+  *
+  */
+
 /** @defgroup STMicroelectronics sensors common types
   * @{
   *
@@ -44,6 +75,7 @@ extern "C" {
 #define MEMS_SHARED_TYPES
 
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -52,6 +84,16 @@ typedef struct {
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit0       : 1;
+#endif /* DRV_BYTE_ORDER */
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
@@ -136,11 +178,19 @@ typedef struct {
 
 #define LSM303AGR_STATUS_REG_AUX_A           0x07U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01            : 2;
   uint8_t tda                    : 1;
   uint8_t not_used_02            : 3;
   uint8_t tor                    : 1;
   uint8_t not_used_03            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_03            : 1;
+  uint8_t tor                    : 1;
+  uint8_t not_used_02            : 3;
+  uint8_t tda                    : 1;
+  uint8_t not_used_01            : 2;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_status_reg_aux_a_t;
 
 #define LSM303AGR_OUT_TEMP_L_A               0x0CU
@@ -150,30 +200,52 @@ typedef struct {
 
 #define LSM303AGR_TEMP_CFG_REG_A             0x1FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01            : 6;
   uint8_t temp_en                : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t temp_en                : 2;
+  uint8_t not_used_01            : 6;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_temp_cfg_reg_a_t;
 
 #define LSM303AGR_CTRL_REG1_A                0x20U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xen                    : 1;
   uint8_t yen                    : 1;
   uint8_t zen                    : 1;
   uint8_t lpen                   : 1;
   uint8_t odr                    : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t odr                    : 4;
+  uint8_t lpen                   : 1;
+  uint8_t zen                    : 1;
+  uint8_t yen                    : 1;
+  uint8_t xen                    : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_ctrl_reg1_a_t;
 
 #define LSM303AGR_CTRL_REG2_A                0x21U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
 uint8_t hp                     :
   3; /* HPCLICK + HPIS2 + HPIS1 -> HP */
   uint8_t fds                    : 1;
   uint8_t hpcf                   : 2;
   uint8_t hpm                    : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t hpm                    : 2;
+  uint8_t hpcf                   : 2;
+  uint8_t fds                    : 1;
+uint8_t hp                     :
+  3; /* HPCLICK + HPIS2 + HPIS1 -> HP */
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_ctrl_reg2_a_t;
 
 #define LSM303AGR_CTRL_REG3_A                0x22U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01            : 1;
   uint8_t i1_overrun             : 1;
   uint8_t i1_wtm                 : 1;
@@ -182,20 +254,40 @@ typedef struct {
   uint8_t i1_aoi2                : 1;
   uint8_t i1_aoi1                : 1;
   uint8_t i1_click               : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t i1_click               : 1;
+  uint8_t i1_aoi1                : 1;
+  uint8_t i1_aoi2                : 1;
+  uint8_t i1_drdy1               : 1;
+  uint8_t i1_drdy2               : 1;
+  uint8_t i1_wtm                 : 1;
+  uint8_t i1_overrun             : 1;
+  uint8_t not_used_01            : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_ctrl_reg3_a_t;
 
 #define LSM303AGR_CTRL_REG4_A                0x23U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t spi_enable             : 1;
   uint8_t st                     : 2;
   uint8_t hr                     : 1;
   uint8_t fs                     : 2;
   uint8_t ble                    : 1;
   uint8_t bdu                    : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bdu                    : 1;
+  uint8_t ble                    : 1;
+  uint8_t fs                     : 2;
+  uint8_t hr                     : 1;
+  uint8_t st                     : 2;
+  uint8_t spi_enable             : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_ctrl_reg4_a_t;
 
 #define LSM303AGR_CTRL_REG5_A                0x24U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t d4d_int2               : 1;
   uint8_t lir_int2               : 1;
   uint8_t d4d_int1               : 1;
@@ -203,10 +295,20 @@ typedef struct {
   uint8_t not_used_01            : 2;
   uint8_t fifo_en                : 1;
   uint8_t boot                   : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t boot                   : 1;
+  uint8_t fifo_en                : 1;
+  uint8_t not_used_01            : 2;
+  uint8_t lir_int1               : 1;
+  uint8_t d4d_int1               : 1;
+  uint8_t lir_int2               : 1;
+  uint8_t d4d_int2               : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_ctrl_reg5_a_t;
 
 #define LSM303AGR_CTRL_REG6_A               0x25U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01            : 1;
   uint8_t h_lactive              : 1;
   uint8_t not_used_02            : 1;
@@ -215,11 +317,22 @@ typedef struct {
   uint8_t i2_int2                : 1;
   uint8_t i2_int1                : 1;
   uint8_t i2_clicken             : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t i2_clicken             : 1;
+  uint8_t i2_int1                : 1;
+  uint8_t i2_int2                : 1;
+  uint8_t boot_i2                : 1;
+  uint8_t p2_act                 : 1;
+  uint8_t not_used_02            : 1;
+  uint8_t h_lactive              : 1;
+  uint8_t not_used_01            : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_ctrl_reg6_a_t;
 
 #define LSM303AGR_REFERENCE_A               0x26U
 #define LSM303AGR_STATUS_REG_A              0x27U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xda                    : 1;
   uint8_t yda                    : 1;
   uint8_t zda                    : 1;
@@ -228,6 +341,16 @@ typedef struct {
   uint8_t yor                    : 1;
   uint8_t zor                    : 1;
   uint8_t zyxor                  : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t zyxor                  : 1;
+  uint8_t zor                    : 1;
+  uint8_t yor                    : 1;
+  uint8_t _xor                   : 1;
+  uint8_t zyxda                  : 1;
+  uint8_t zda                    : 1;
+  uint8_t yda                    : 1;
+  uint8_t xda                    : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_status_reg_a_t;
 
 #define LSM303AGR_OUT_X_L_A                 0x28U
@@ -238,21 +361,35 @@ typedef struct {
 #define LSM303AGR_OUT_Z_H_A                 0x2DU
 #define LSM303AGR_FIFO_CTRL_REG_A           0x2EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t fth                    : 5;
   uint8_t tr                     : 1;
   uint8_t fm                     : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t fm                     : 2;
+  uint8_t tr                     : 1;
+  uint8_t fth                    : 5;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_fifo_ctrl_reg_a_t;
 
 #define LSM303AGR_FIFO_SRC_REG_A            0x2FU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t fss                    : 5;
   uint8_t empty                  : 1;
   uint8_t ovrn_fifo              : 1;
   uint8_t wtm                    : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t wtm                    : 1;
+  uint8_t ovrn_fifo              : 1;
+  uint8_t empty                  : 1;
+  uint8_t fss                    : 5;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_fifo_src_reg_a_t;
 
 #define LSM303AGR_INT1_CFG_A                0x30U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xlie                   : 1; /* or XDOWNE */
   uint8_t xhie                   : 1; /* or XUPE */
   uint8_t ylie                   : 1; /* or YDOWNE */
@@ -261,10 +398,21 @@ typedef struct {
   uint8_t zhie                   : 1; /* or ZUPE */
   uint8_t _6d                    : 1;
   uint8_t aoi                    : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t aoi                    : 1;
+  uint8_t _6d                    : 1;
+  uint8_t zhie                   : 1; /* or ZUPE */
+  uint8_t zlie                   : 1; /* or ZDOWNE */
+  uint8_t yhie                   : 1; /* or YUPE */
+  uint8_t ylie                   : 1; /* or YDOWNE */
+  uint8_t xhie                   : 1; /* or XUPE */
+  uint8_t xlie                   : 1; /* or XDOWNE */
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_int1_cfg_a_t;
 
 #define LSM303AGR_INT1_SRC_A                0x31U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xl                     : 1;
   uint8_t xh                     : 1;
   uint8_t yl                     : 1;
@@ -273,22 +421,43 @@ typedef struct {
   uint8_t zh                     : 1;
   uint8_t ia                     : 1;
   uint8_t not_used_01            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01            : 1;
+  uint8_t ia                     : 1;
+  uint8_t zh                     : 1;
+  uint8_t zl                     : 1;
+  uint8_t yh                     : 1;
+  uint8_t yl                     : 1;
+  uint8_t xh                     : 1;
+  uint8_t xl                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_int1_src_a_t;
 
 #define LSM303AGR_INT1_THS_A                0x32U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ths                    : 7;
   uint8_t not_used_01            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01            : 1;
+  uint8_t ths                    : 7;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_int1_ths_a_t;
 
 #define LSM303AGR_INT1_DURATION_A           0x33U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t d                      : 7;
   uint8_t not_used_01            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01            : 1;
+  uint8_t d                      : 7;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_int1_duration_a_t;
 
 #define LSM303AGR_INT2_CFG_A                0x34U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xlie                   : 1;
   uint8_t xhie                   : 1;
   uint8_t ylie                   : 1;
@@ -297,10 +466,21 @@ typedef struct {
   uint8_t zhie                   : 1;
   uint8_t _6d                    : 1;
   uint8_t aoi                    : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t aoi                    : 1;
+  uint8_t _6d                    : 1;
+  uint8_t zhie                   : 1;
+  uint8_t zlie                   : 1;
+  uint8_t yhie                   : 1;
+  uint8_t ylie                   : 1;
+  uint8_t xhie                   : 1;
+  uint8_t xlie                   : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_int2_cfg_a_t;
 
 #define LSM303AGR_INT2_SRC_A                0x35U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xl                     : 1;
   uint8_t xh                     : 1;
   uint8_t yl                     : 1;
@@ -309,22 +489,43 @@ typedef struct {
   uint8_t zh                     : 1;
   uint8_t ia                     : 1;
   uint8_t not_used_01            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01            : 1;
+  uint8_t ia                     : 1;
+  uint8_t zh                     : 1;
+  uint8_t zl                     : 1;
+  uint8_t yh                     : 1;
+  uint8_t yl                     : 1;
+  uint8_t xh                     : 1;
+  uint8_t xl                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_int2_src_a_t;
 
 #define LSM303AGR_INT2_THS_A                0x36U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ths                    : 7;
   uint8_t not_used_01            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01            : 1;
+  uint8_t ths                    : 7;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_int2_ths_a_t;
 
 #define LSM303AGR_INT2_DURATION_A           0x37U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t d                      : 7;
   uint8_t not_used_01            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01            : 1;
+  uint8_t d                      : 7;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_int2_duration_a_t;
 
 #define LSM303AGR_CLICK_CFG_A               0x38U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xs                     : 1;
   uint8_t xd                     : 1;
   uint8_t ys                     : 1;
@@ -332,10 +533,20 @@ typedef struct {
   uint8_t zs                     : 1;
   uint8_t zd                     : 1;
   uint8_t not_used_01            : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01            : 2;
+  uint8_t zd                     : 1;
+  uint8_t zs                     : 1;
+  uint8_t yd                     : 1;
+  uint8_t ys                     : 1;
+  uint8_t xd                     : 1;
+  uint8_t xs                     : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_click_cfg_a_t;
 
 #define LSM303AGR_CLICK_SRC_A               0x39U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t x                      : 1;
   uint8_t y                      : 1;
   uint8_t z                      : 1;
@@ -344,18 +555,38 @@ typedef struct {
   uint8_t dclick                 : 1;
   uint8_t ia                     : 1;
   uint8_t not_used_01            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01            : 1;
+  uint8_t ia                     : 1;
+  uint8_t dclick                 : 1;
+  uint8_t sclick                 : 1;
+  uint8_t sign                   : 1;
+  uint8_t z                      : 1;
+  uint8_t y                      : 1;
+  uint8_t x                      : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_click_src_a_t;
 
 #define LSM303AGR_CLICK_THS_A               0x3AU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ths                    : 7;
   uint8_t not_used_01            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01            : 1;
+  uint8_t ths                    : 7;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_click_ths_a_t;
 
 #define LSM303AGR_TIME_LIMIT_A              0x3BU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t tli                    : 7;
   uint8_t not_used_01            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01            : 1;
+  uint8_t tli                    : 7;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_time_limit_a_t;
 
 #define LSM303AGR_TIME_LATENCY_A            0x3CU
@@ -370,8 +601,13 @@ typedef struct {
 
 #define LSM303AGR_ACT_THS_A                 0x3EU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t acth                   : 7;
   uint8_t not_used_01            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01            : 1;
+  uint8_t acth                   : 7;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_act_ths_a_t;
 
 #define LSM303AGR_ACT_DUR_A                 0x3FU
@@ -388,25 +624,43 @@ typedef struct {
 #define LSM303AGR_WHO_AM_I_M                0x4FU
 #define LSM303AGR_CFG_REG_A_M               0x60U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t md                     : 2;
   uint8_t odr                    : 2;
   uint8_t lp                     : 1;
   uint8_t soft_rst               : 1;
   uint8_t reboot                 : 1;
   uint8_t comp_temp_en           : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t comp_temp_en           : 1;
+  uint8_t reboot                 : 1;
+  uint8_t soft_rst               : 1;
+  uint8_t lp                     : 1;
+  uint8_t odr                    : 2;
+  uint8_t md                     : 2;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_cfg_reg_a_m_t;
 
 #define LSM303AGR_CFG_REG_B_M               0x61U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t lpf                    : 1;
   uint8_t set_rst                : 2; /* OFF_CANC + Set_FREQ */
   uint8_t int_on_dataoff         : 1;
   uint8_t off_canc_one_shot      : 1;
   uint8_t not_used_01            : 3;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01            : 3;
+  uint8_t off_canc_one_shot      : 1;
+  uint8_t int_on_dataoff         : 1;
+  uint8_t set_rst                : 2; /* OFF_CANC + Set_FREQ */
+  uint8_t lpf                    : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_cfg_reg_b_m_t;
 
 #define LSM303AGR_CFG_REG_C_M               0x62U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t int_mag                : 1;
   uint8_t self_test              : 1;
   uint8_t not_used_01            : 1;
@@ -415,10 +669,21 @@ typedef struct {
   uint8_t i2c_dis                : 1;
   uint8_t int_mag_pin            : 1;
   uint8_t not_used_02            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_02            : 1;
+  uint8_t int_mag_pin            : 1;
+  uint8_t i2c_dis                : 1;
+  uint8_t bdu                    : 1;
+  uint8_t ble                    : 1;
+  uint8_t not_used_01            : 1;
+  uint8_t self_test              : 1;
+  uint8_t int_mag                : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_cfg_reg_c_m_t;
 
 #define LSM303AGR_INT_CRTL_REG_M            0x63U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ien                    : 1;
   uint8_t iel                    : 1;
   uint8_t iea                    : 1;
@@ -426,11 +691,21 @@ typedef struct {
   uint8_t zien                   : 1;
   uint8_t yien                   : 1;
   uint8_t xien                   : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t xien                   : 1;
+  uint8_t yien                   : 1;
+  uint8_t zien                   : 1;
+  uint8_t not_used_01            : 2;
+  uint8_t iea                    : 1;
+  uint8_t iel                    : 1;
+  uint8_t ien                    : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_int_crtl_reg_m_t;
 
 #define LSM303AGR_INT_SOURCE_REG_M          0x64U
 typedef struct {
-  uint8_t _int                    : 1;
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t _int                   : 1;
   uint8_t mroi                   : 1;
   uint8_t n_th_s_z               : 1;
   uint8_t n_th_s_y               : 1;
@@ -438,12 +713,23 @@ typedef struct {
   uint8_t p_th_s_z               : 1;
   uint8_t p_th_s_y               : 1;
   uint8_t p_th_s_x               : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t p_th_s_x               : 1;
+  uint8_t p_th_s_y               : 1;
+  uint8_t p_th_s_z               : 1;
+  uint8_t n_th_s_x               : 1;
+  uint8_t n_th_s_y               : 1;
+  uint8_t n_th_s_z               : 1;
+  uint8_t mroi                   : 1;
+  uint8_t _int                   : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_int_source_reg_m_t;
 
 #define LSM303AGR_INT_THS_L_REG_M           0x65U
 #define LSM303AGR_INT_THS_H_REG_M           0x66U
 #define LSM303AGR_STATUS_REG_M              0x67U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xda                    : 1;
   uint8_t yda                    : 1;
   uint8_t zda                    : 1;
@@ -452,6 +738,16 @@ typedef struct {
   uint8_t yor                    : 1;
   uint8_t zor                    : 1;
   uint8_t zyxor                  : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t zyxor                  : 1;
+  uint8_t zor                    : 1;
+  uint8_t yor                    : 1;
+  uint8_t _xor                   : 1;
+  uint8_t zyxda                  : 1;
+  uint8_t zda                    : 1;
+  uint8_t yda                    : 1;
+  uint8_t xda                    : 1;
+#endif /* DRV_BYTE_ORDER */
 } lsm303agr_status_reg_m_t;
 
 #define LSM303AGR_OUTX_L_REG_M              0x68U
@@ -523,25 +819,25 @@ int32_t lsm303agr_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
                             uint8_t *data,
                             uint16_t len);
 
-extern float_t lsm303agr_from_fs_2g_hr_to_mg(int16_t lsb);
-extern float_t lsm303agr_from_fs_4g_hr_to_mg(int16_t lsb);
-extern float_t lsm303agr_from_fs_8g_hr_to_mg(int16_t lsb);
-extern float_t lsm303agr_from_fs_16g_hr_to_mg(int16_t lsb);
-extern float_t lsm303agr_from_lsb_hr_to_celsius(int16_t lsb);
+float_t lsm303agr_from_fs_2g_hr_to_mg(int16_t lsb);
+float_t lsm303agr_from_fs_4g_hr_to_mg(int16_t lsb);
+float_t lsm303agr_from_fs_8g_hr_to_mg(int16_t lsb);
+float_t lsm303agr_from_fs_16g_hr_to_mg(int16_t lsb);
+float_t lsm303agr_from_lsb_hr_to_celsius(int16_t lsb);
 
-extern float_t lsm303agr_from_fs_2g_nm_to_mg(int16_t lsb);
-extern float_t lsm303agr_from_fs_4g_nm_to_mg(int16_t lsb);
-extern float_t lsm303agr_from_fs_8g_nm_to_mg(int16_t lsb);
-extern float_t lsm303agr_from_fs_16g_nm_to_mg(int16_t lsb);
-extern float_t lsm303agr_from_lsb_nm_to_celsius(int16_t lsb);
+float_t lsm303agr_from_fs_2g_nm_to_mg(int16_t lsb);
+float_t lsm303agr_from_fs_4g_nm_to_mg(int16_t lsb);
+float_t lsm303agr_from_fs_8g_nm_to_mg(int16_t lsb);
+float_t lsm303agr_from_fs_16g_nm_to_mg(int16_t lsb);
+float_t lsm303agr_from_lsb_nm_to_celsius(int16_t lsb);
 
-extern float_t lsm303agr_from_fs_2g_lp_to_mg(int16_t lsb);
-extern float_t lsm303agr_from_fs_4g_lp_to_mg(int16_t lsb);
-extern float_t lsm303agr_from_fs_8g_lp_to_mg(int16_t lsb);
-extern float_t lsm303agr_from_fs_16g_lp_to_mg(int16_t lsb);
-extern float_t lsm303agr_from_lsb_lp_to_celsius(int16_t lsb);
+float_t lsm303agr_from_fs_2g_lp_to_mg(int16_t lsb);
+float_t lsm303agr_from_fs_4g_lp_to_mg(int16_t lsb);
+float_t lsm303agr_from_fs_8g_lp_to_mg(int16_t lsb);
+float_t lsm303agr_from_fs_16g_lp_to_mg(int16_t lsb);
+float_t lsm303agr_from_lsb_lp_to_celsius(int16_t lsb);
 
-extern float_t lsm303agr_from_lsb_to_mgauss(int16_t lsb);
+float_t lsm303agr_from_lsb_to_mgauss(int16_t lsb);
 
 int32_t lsm303agr_temp_status_reg_get(stmdev_ctx_t *ctx,
                                       uint8_t *buff);
@@ -552,7 +848,7 @@ int32_t lsm303agr_temp_data_ready_get(stmdev_ctx_t *ctx,
 int32_t lsm303agr_temp_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm303agr_temperature_raw_get(stmdev_ctx_t *ctx,
-                                      uint8_t *buff);
+                                      int16_t *val);
 
 typedef enum {
   LSM303AGR_TEMP_DISABLE  = 0,
@@ -643,7 +939,7 @@ int32_t lsm303agr_xl_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t lsm303agr_xl_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm303agr_acceleration_raw_get(stmdev_ctx_t *ctx,
-                                       uint8_t *buff);
+                                       int16_t *val);
 
 int32_t lsm303agr_xl_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
@@ -842,9 +1138,9 @@ int32_t lsm303agr_xl_spi_mode_get(stmdev_ctx_t *ctx,
                                   lsm303agr_sim_a_t *val);
 
 int32_t lsm303agr_mag_user_offset_set(stmdev_ctx_t *ctx,
-                                      uint8_t *buff);
+                                      int16_t *val);
 int32_t lsm303agr_mag_user_offset_get(stmdev_ctx_t *ctx,
-                                      uint8_t *buff);
+                                      int16_t *val);
 
 typedef enum {
   LSM303AGR_CONTINUOUS_MODE  = 0,
@@ -914,7 +1210,7 @@ int32_t lsm303agr_mag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm303agr_mag_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm303agr_magnetic_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm303agr_magnetic_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
 int32_t lsm303agr_mag_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
@@ -966,9 +1262,10 @@ int32_t lsm303agr_mag_int_gen_source_get(stmdev_ctx_t *ctx,
                                          lsm303agr_int_source_reg_m_t *val);
 
 int32_t lsm303agr_mag_int_gen_treshold_set(stmdev_ctx_t *ctx,
-                                           uint8_t *buff);
+                                           int16_t val);
 int32_t lsm303agr_mag_int_gen_treshold_get(stmdev_ctx_t *ctx,
-                                           uint8_t *buff);
+                                           int16_t *val);
+
 typedef enum {
   LSM303AGR_I2C_ENABLE   = 0,
   LSM303AGR_I2C_DISABLE  = 1,
