@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -1256,10 +1256,15 @@ int32_t lsm6dsr_timestamp_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm6dsr_timestamp_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsr_timestamp_raw_get(stmdev_ctx_t *ctx, uint32_t *val)
 {
+  uint8_t buff[4];
   int32_t ret;
   ret = lsm6dsr_read_reg(ctx, LSM6DSR_TIMESTAMP0, buff, 4);
+  *val = buff[3];
+  *val = (*val * 256U) +  buff[2];
+  *val = (*val * 256U) +  buff[1];
+  *val = (*val * 256U) +  buff[0];
   return ret;
 }
 
@@ -1348,10 +1353,13 @@ int32_t lsm6dsr_rounding_mode_get(stmdev_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm6dsr_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsr_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
   ret = lsm6dsr_read_reg(ctx, LSM6DSR_OUT_TEMP_L, buff, 2);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
   return ret;
 }
 
@@ -1364,10 +1372,17 @@ int32_t lsm6dsr_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm6dsr_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsr_angular_rate_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm6dsr_read_reg(ctx, LSM6DSR_OUTX_L_G, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
   return ret;
 }
 
@@ -1380,10 +1395,17 @@ int32_t lsm6dsr_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm6dsr_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsr_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm6dsr_read_reg(ctx, LSM6DSR_OUTX_L_A, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
   return ret;
 }
 
@@ -1410,8 +1432,9 @@ int32_t lsm6dsr_fifo_out_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm6dsr_number_of_steps_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsr_number_of_steps_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
   ret = lsm6dsr_mem_bank_set(ctx, LSM6DSR_EMBEDDED_FUNC_BANK);
 
@@ -1420,6 +1443,8 @@ int32_t lsm6dsr_number_of_steps_get(stmdev_ctx_t *ctx, uint8_t *buff)
   }
 
   if (ret == 0) {
+    *val = buff[1];
+    *val = (*val * 256U) +  buff[0];
     ret = lsm6dsr_mem_bank_set(ctx, LSM6DSR_USER_BANK);
   }
 
@@ -7920,19 +7945,18 @@ int32_t lsm6dsr_pedo_debounce_steps_get(stmdev_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm6dsr_pedo_steps_period_set(stmdev_ctx_t *ctx,
-                                      uint8_t *buff)
+int32_t lsm6dsr_pedo_steps_period_set(stmdev_ctx_t *ctx, uint16_t val)
 {
+  uint8_t buff[2];
   int32_t ret;
-  uint8_t i;
-  i = 0x00U;
+  buff[1] = (uint8_t) (val / 256U);
+  buff[0] = (uint8_t) (val - (buff[1] * 256U));
   ret = lsm6dsr_ln_pg_write_byte(ctx, LSM6DSR_PEDO_SC_DELTAT_L,
-                                 &buff[i]);
+                                 &buff[0]);
 
   if (ret == 0) {
-    i++;
     ret = lsm6dsr_ln_pg_write_byte(ctx, LSM6DSR_PEDO_SC_DELTAT_H,
-                                   &buff[i]);
+                                   &buff[1]);
   }
 
   return ret;
@@ -7947,18 +7971,18 @@ int32_t lsm6dsr_pedo_steps_period_set(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm6dsr_pedo_steps_period_get(stmdev_ctx_t *ctx,
-                                      uint8_t *buff)
+                                      uint16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
-  uint8_t i;
-  i = 0x00U;
   ret = lsm6dsr_ln_pg_read_byte(ctx, LSM6DSR_PEDO_SC_DELTAT_L,
-                                &buff[i]);
+                                &buff[0]);
 
   if (ret == 0) {
-    i++;
     ret = lsm6dsr_ln_pg_read_byte(ctx, LSM6DSR_PEDO_SC_DELTAT_H,
-                                  &buff[i]);
+                                  &buff[1]);
+    *val = buff[1];
+    *val = (*val * 256U) +  buff[0];
   }
 
   return ret;
@@ -8332,18 +8356,18 @@ int32_t lsm6dsr_tilt_flag_data_ready_get(stmdev_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm6dsr_mag_sensitivity_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsr_mag_sensitivity_set(stmdev_ctx_t *ctx, uint16_t val)
 {
+  uint8_t buff[2];
   int32_t ret;
-  uint8_t i;
-  i = 0x00U;
+  buff[1] = (uint8_t) (val / 256U);
+  buff[0] = (uint8_t) (val - (buff[1] * 256U));
   ret = lsm6dsr_ln_pg_write_byte(ctx, LSM6DSR_MAG_SENSITIVITY_L,
-                                 &buff[i]);
+                                 &buff[0]);
 
   if (ret == 0) {
-    i++;
     ret = lsm6dsr_ln_pg_write_byte(ctx, LSM6DSR_MAG_SENSITIVITY_H,
-                                   &buff[i]);
+                                   &buff[1]);
   }
 
   return ret;
@@ -8357,18 +8381,18 @@ int32_t lsm6dsr_mag_sensitivity_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm6dsr_mag_sensitivity_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsr_mag_sensitivity_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
-  uint8_t i;
-  i = 0x00U;
   ret = lsm6dsr_ln_pg_read_byte(ctx, LSM6DSR_MAG_SENSITIVITY_L,
-                                &buff[i]);
+                                &buff[0]);
 
   if (ret == 0) {
-    i++;
     ret = lsm6dsr_ln_pg_read_byte(ctx, LSM6DSR_MAG_SENSITIVITY_H,
-                                  &buff[i]);
+                                  &buff[1]);
+    *val = buff[1];
+    *val = (*val * 256U) +  buff[0];
   }
 
   return ret;
@@ -8382,10 +8406,17 @@ int32_t lsm6dsr_mag_sensitivity_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm6dsr_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsr_mag_offset_set(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   uint8_t i;
+  buff[1] = (uint8_t) ((uint16_t)val[0] / 256U);
+  buff[0] = (uint8_t) ((uint16_t)val[0] - (buff[1] * 256U));
+  buff[3] = (uint8_t) ((uint16_t)val[1] / 256U);
+  buff[2] = (uint8_t) ((uint16_t)val[1] - (buff[3] * 256U));
+  buff[5] = (uint8_t) ((uint16_t)val[2] / 256U);
+  buff[4] = (uint8_t) ((uint16_t)val[2] - (buff[5] * 256U));
   i = 0x00U;
   ret = lsm6dsr_ln_pg_write_byte(ctx, LSM6DSR_MAG_OFFX_L, &buff[i]);
 
@@ -8425,8 +8456,9 @@ int32_t lsm6dsr_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm6dsr_mag_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsr_mag_offset_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   uint8_t i;
   i = 0x00U;
@@ -8455,6 +8487,12 @@ int32_t lsm6dsr_mag_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
   if (ret == 0) {
     i++;
     ret = lsm6dsr_ln_pg_read_byte(ctx, LSM6DSR_MAG_OFFZ_H, &buff[i]);
+    val[0] = (int16_t)buff[1];
+    val[0] = (val[0] * 256) + (int16_t)buff[0];
+    val[1] = (int16_t)buff[3];
+    val[1] = (val[1] * 256) + (int16_t)buff[2];
+    val[2] = (int16_t)buff[5];
+    val[2] = (val[2] * 256) + (int16_t)buff[4];
   }
 
   return ret;
@@ -8473,9 +8511,22 @@ int32_t lsm6dsr_mag_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm6dsr_mag_soft_iron_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsr_mag_soft_iron_set(stmdev_ctx_t *ctx,  int16_t *val)
 {
+  uint8_t buff[12];
   int32_t ret;
+  buff[1] = (uint8_t) ((uint16_t)val[0] / 256U);
+  buff[0] = (uint8_t) ((uint16_t)val[0] - (buff[1] * 256U));
+  buff[3] = (uint8_t) ((uint16_t)val[1] / 256U);
+  buff[2] = (uint8_t) ((uint16_t)val[1] - (buff[3] * 256U));
+  buff[5] = (uint8_t) ((uint16_t)val[2] / 256U);
+  buff[4] = (uint8_t) ((uint16_t)val[2] - (buff[5] * 256U));
+  buff[7] = (uint8_t) ((uint16_t)val[3] / 256U);
+  buff[6] = (uint8_t) ((uint16_t)val[3] - (buff[7] * 256U));
+  buff[9] = (uint8_t) ((uint16_t)val[4] / 256U);
+  buff[8] = (uint8_t) ((uint16_t)val[4] - (buff[9] * 256U));
+  buff[11] = (uint8_t) ((uint16_t)val[5] / 256U);
+  buff[10] = (uint8_t) ((uint16_t)val[5] - (buff[11] * 256U));
   uint8_t i;
   i = 0x00U;
   ret = lsm6dsr_ln_pg_write_byte(ctx, LSM6DSR_MAG_SI_XX_L, &buff[i]);
@@ -8551,8 +8602,9 @@ int32_t lsm6dsr_mag_soft_iron_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm6dsr_mag_soft_iron_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsr_mag_soft_iron_get(stmdev_ctx_t *ctx,  int16_t *val)
 {
+  uint8_t buff[12];
   int32_t ret;
   uint8_t i;
   i = 0x00U;
@@ -8613,6 +8665,18 @@ int32_t lsm6dsr_mag_soft_iron_get(stmdev_ctx_t *ctx, uint8_t *buff)
     ret = lsm6dsr_ln_pg_read_byte(ctx, LSM6DSR_MAG_SI_ZZ_H, &buff[i]);
   }
 
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
+  val[3] = (int16_t)buff[7];
+  val[3] = (val[3] * 256) + (int16_t)buff[6];
+  val[4] = (int16_t)buff[9];
+  val[4] = (val[4] * 256) + (int16_t)buff[8];
+  val[5] = (int16_t)buff[11];
+  val[5] = (val[5] * 256) + (int16_t)buff[10];
   return ret;
 }
 
@@ -9058,9 +9122,12 @@ int32_t lsm6dsr_fsm_enable_get(stmdev_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm6dsr_long_cnt_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsr_long_cnt_set(stmdev_ctx_t *ctx, uint16_t val)
 {
+  uint8_t buff[2];
   int32_t ret;
+  buff[1] = (uint8_t) (val / 256U);
+  buff[0] = (uint8_t) (val - (buff[1] * 256U));
   ret = lsm6dsr_mem_bank_set(ctx, LSM6DSR_EMBEDDED_FUNC_BANK);
 
   if (ret == 0) {
@@ -9083,8 +9150,9 @@ int32_t lsm6dsr_long_cnt_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm6dsr_long_cnt_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm6dsr_long_cnt_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
   ret = lsm6dsr_mem_bank_set(ctx, LSM6DSR_EMBEDDED_FUNC_BANK);
 
@@ -9094,6 +9162,8 @@ int32_t lsm6dsr_long_cnt_get(stmdev_ctx_t *ctx, uint8_t *buff)
 
   if (ret == 0) {
     ret = lsm6dsr_mem_bank_set(ctx, LSM6DSR_USER_BANK);
+    *val = buff[1];
+    *val = (*val * 256U) +  buff[0];
   }
 
   return ret;
@@ -9358,18 +9428,18 @@ int32_t lsm6dsr_fsm_init_get(stmdev_ctx_t *ctx, uint8_t *val)
   *
   */
 int32_t lsm6dsr_long_cnt_int_value_set(stmdev_ctx_t *ctx,
-                                       uint8_t *buff)
+                                       uint16_t val)
 {
+  uint8_t buff[2];
   int32_t ret;
-  uint8_t i;
-  i = 0x00U;
+  buff[1] = (uint8_t) (val / 256U);
+  buff[0] = (uint8_t) (val - (buff[1] * 256U));
   ret = lsm6dsr_ln_pg_write_byte(ctx, LSM6DSR_FSM_LC_TIMEOUT_L,
-                                 &buff[i]);
+                                 &buff[0]);
 
   if (ret == 0) {
-    i++;
     ret = lsm6dsr_ln_pg_write_byte(ctx, LSM6DSR_FSM_LC_TIMEOUT_H,
-                                   &buff[i]);
+                                   &buff[1]);
   }
 
   return ret;
@@ -9387,18 +9457,18 @@ int32_t lsm6dsr_long_cnt_int_value_set(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm6dsr_long_cnt_int_value_get(stmdev_ctx_t *ctx,
-                                       uint8_t *buff)
+                                       uint16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
-  uint8_t i;
-  i = 0x00U;
   ret = lsm6dsr_ln_pg_read_byte(ctx, LSM6DSR_FSM_LC_TIMEOUT_L,
-                                &buff[i]);
+                                &buff[0]);
 
   if (ret == 0) {
-    i++;
     ret = lsm6dsr_ln_pg_read_byte(ctx, LSM6DSR_FSM_LC_TIMEOUT_H,
-                                  &buff[i]);
+                                  &buff[1]);
+    *val = buff[1];
+    *val = (*val * 256U) +  buff[0];
   }
 
   return ret;
@@ -9451,19 +9521,18 @@ int32_t lsm6dsr_fsm_number_of_programs_get(stmdev_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm6dsr_fsm_start_address_set(stmdev_ctx_t *ctx,
-                                      uint8_t *buff)
+int32_t lsm6dsr_fsm_start_address_set(stmdev_ctx_t *ctx, uint16_t val)
 {
+  uint8_t buff[2];
   int32_t ret;
-  uint8_t i;
-  i = 0x00U;
+  buff[1] = (uint8_t) (val / 256U);
+  buff[0] = (uint8_t) (val - (buff[1] * 256U));
   ret = lsm6dsr_ln_pg_write_byte(ctx, LSM6DSR_FSM_START_ADD_L,
-                                 &buff[i]);
+                                 &buff[0]);
 
   if (ret == 0) {
-    i++;
     ret = lsm6dsr_ln_pg_write_byte(ctx, LSM6DSR_FSM_START_ADD_H,
-                                   &buff[i]);
+                                   &buff[1]);
   }
 
   return ret;
@@ -9479,16 +9548,16 @@ int32_t lsm6dsr_fsm_start_address_set(stmdev_ctx_t *ctx,
   *
   */
 int32_t lsm6dsr_fsm_start_address_get(stmdev_ctx_t *ctx,
-                                      uint8_t *buff)
+                                      uint16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
-  uint8_t i;
-  i = 0x00U;
-  ret = lsm6dsr_ln_pg_read_byte(ctx, LSM6DSR_FSM_START_ADD_L, &buff[i]);
+  ret = lsm6dsr_ln_pg_read_byte(ctx, LSM6DSR_FSM_START_ADD_L, &buff[0]);
 
   if (ret == 0) {
-    i++;
-    ret = lsm6dsr_ln_pg_read_byte(ctx, LSM6DSR_FSM_START_ADD_H, &buff[i]);
+    ret = lsm6dsr_ln_pg_read_byte(ctx, LSM6DSR_FSM_START_ADD_H, &buff[1]);
+    *val = buff[1];
+    *val = (*val * 256U) +  buff[0];
   }
 
   return ret;
