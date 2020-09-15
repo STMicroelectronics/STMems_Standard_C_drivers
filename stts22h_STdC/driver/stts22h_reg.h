@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -35,6 +35,37 @@ extern "C" {
   *
   */
 
+/** @defgroup  Endianness definitions
+  * @{
+  *
+  */
+
+#ifndef DRV_BYTE_ORDER
+#ifndef __BYTE_ORDER__
+
+#define DRV_LITTLE_ENDIAN 1234
+#define DRV_BIG_ENDIAN    4321
+
+/** if _BYTE_ORDER is not defined, choose the endianness of your architecture
+  * by uncommenting the define which fits your platform endianness
+  */
+//#define DRV_BYTE_ORDER    DRV_BIG_ENDIAN
+#define DRV_BYTE_ORDER    DRV_LITTLE_ENDIAN
+
+#else /* defined __BYTE_ORDER__ */
+
+#define DRV_LITTLE_ENDIAN  __ORDER_LITTLE_ENDIAN__
+#define DRV_BIG_ENDIAN     __ORDER_BIG_ENDIAN__
+#define DRV_BYTE_ORDER     __BYTE_ORDER__
+
+#endif /* __BYTE_ORDER__*/
+#endif /* DRV_BYTE_ORDER */
+
+/**
+  * @}
+  *
+  */
+
 /** @defgroup STMicroelectronics sensors common types
   * @{
   *
@@ -44,6 +75,7 @@ extern "C" {
 #define MEMS_SHARED_TYPES
 
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -52,6 +84,16 @@ typedef struct {
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t bit7       : 1;
+  uint8_t bit6       : 1;
+  uint8_t bit5       : 1;
+  uint8_t bit4       : 1;
+  uint8_t bit3       : 1;
+  uint8_t bit2       : 1;
+  uint8_t bit1       : 1;
+  uint8_t bit0       : 1;
+#endif /* DRV_BYTE_ORDER */
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
@@ -146,6 +188,7 @@ typedef struct {
 
 #define STTS22H_CTRL                         0x04U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t one_shot            : 1;
   uint8_t time_out_dis        : 1;
   uint8_t freerun             : 1;
@@ -153,25 +196,49 @@ typedef struct {
   uint8_t avg                 : 2;
   uint8_t bdu                 : 1;
   uint8_t low_odr_start       : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t low_odr_start       : 1;
+  uint8_t bdu                 : 1;
+  uint8_t avg                 : 2;
+  uint8_t if_add_inc          : 1;
+  uint8_t freerun             : 1;
+  uint8_t time_out_dis        : 1;
+  uint8_t one_shot            : 1;
+#endif /* DRV_BYTE_ORDER */
 } stts22h_ctrl_t;
 
 #define STTS22H_STATUS                       0x05U
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t busy                : 1;
   uint8_t over_thh            : 1;
   uint8_t under_thl           : 1;
   uint8_t not_used_01         : 5;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_01         : 5;
+  uint8_t under_thl           : 1;
+  uint8_t over_thh            : 1;
+  uint8_t busy                : 1;
+#endif /* DRV_BYTE_ORDER */
 } stts22h_status_t;
 
 #define STTS22H_TEMP_L_OUT                   0x06U
 #define STTS22H_TEMP_H_OUT                   0x07U
 #define STTS22H_SOFTWARE_RESET               0x0CU
 typedef struct {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01         : 1;
   uint8_t sw_reset            : 1;
   uint8_t not_used_02         : 4;
   uint8_t low_odr_enable      : 1;
   uint8_t not_used_03         : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used_03         : 1;
+  uint8_t low_odr_enable      : 1;
+  uint8_t not_used_02         : 4;
+  uint8_t sw_reset            : 1;
+  uint8_t not_used_01         : 1;
+#endif /* DRV_BYTE_ORDER */
 } stts22h_software_reset_t;
 
 
@@ -209,7 +276,7 @@ int32_t stts22h_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
                           uint8_t *data,
                           uint16_t len);
 
-extern float_t stts22h_from_lsb_to_celsius(int16_t lsb);
+float_t stts22h_from_lsb_to_celsius(int16_t lsb);
 
 typedef enum {
   STTS22H_POWER_DOWN   = 0x00,
@@ -232,7 +299,7 @@ int32_t stts22h_block_data_update_get(stmdev_ctx_t *ctx,
 int32_t stts22h_temp_flag_data_ready_get(stmdev_ctx_t *ctx,
                                          uint8_t *val);
 
-int32_t stts22h_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff);
+int32_t stts22h_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
 int32_t stts22h_dev_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
