@@ -817,9 +817,16 @@ int32_t lsm9ds1_block_data_update_get(stmdev_ctx_t *ctx_mag,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm9ds1_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm9ds1_mag_offset_set(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
+  buff[1] = (uint8_t) ((uint16_t)val[0] / 256U);
+  buff[0] = (uint8_t) ((uint16_t)val[0] - (buff[1] * 256U));
+  buff[3] = (uint8_t) ((uint16_t)val[1] / 256U);
+  buff[2] = (uint8_t) ((uint16_t)val[1] - (buff[3] * 256U));
+  buff[5] = (uint8_t) ((uint16_t)val[2] / 256U);
+  buff[4] = (uint8_t) ((uint16_t)val[2] - (buff[5] * 256U));
   ret = lsm9ds1_write_reg(ctx, LSM9DS1_OFFSET_X_REG_L_M, buff, 6);
   return ret;
 }
@@ -834,10 +841,17 @@ int32_t lsm9ds1_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm9ds1_mag_offset_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm9ds1_mag_offset_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm9ds1_read_reg(ctx, LSM9DS1_OFFSET_X_REG_L_M, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
   return ret;
 }
 
@@ -1183,10 +1197,13 @@ int32_t lsm9ds1_mag_flag_data_ready_get(stmdev_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm9ds1_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm9ds1_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
   ret = lsm9ds1_read_reg(ctx, LSM9DS1_OUT_TEMP_L, buff, 2);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
   return ret;
 }
 
@@ -1199,10 +1216,17 @@ int32_t lsm9ds1_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm9ds1_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm9ds1_angular_rate_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm9ds1_read_reg(ctx, LSM9DS1_OUT_X_L_G, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
   return ret;
 }
 
@@ -1215,10 +1239,17 @@ int32_t lsm9ds1_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm9ds1_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm9ds1_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm9ds1_read_reg(ctx, LSM9DS1_OUT_X_L_XL, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
   return ret;
 }
 
@@ -1231,10 +1262,17 @@ int32_t lsm9ds1_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lsm9ds1_magnetic_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lsm9ds1_magnetic_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
+  uint8_t buff[6];
   int32_t ret;
   ret = lsm9ds1_read_reg(ctx, LSM9DS1_OUT_X_L_M, buff, 6);
+  val[0] = (int16_t)buff[1];
+  val[0] = (val[0] * 256) + (int16_t)buff[0];
+  val[1] = (int16_t)buff[3];
+  val[1] = (val[1] * 256) + (int16_t)buff[2];
+  val[2] = (int16_t)buff[5];
+  val[2] = (val[2] * 256) + (int16_t)buff[4];
   return ret;
 }
 
