@@ -24,6 +24,7 @@
  *
  * - STEVAL_MKI109V3 + STEVAL-MKI182V1
  * - NUCLEO_F411RE + STEVAL-MKI182V1
+ * - DISCOVERY_SPC584B + STEVAL-MKI182V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -34,6 +35,9 @@
  *
  * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
  *                    - I2C(Default) / SPI(supported)
+ *
+ * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -47,13 +51,19 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-//#define STEVAL_MKI109V3
-#define NUCLEO_F411RE
+
+//#define STEVAL_MKI109V3  /* little endian */
+#define NUCLEO_F411RE    /* little endian */
+//#define SPC584B_DIS      /* big endian */
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
-
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
@@ -61,31 +71,32 @@
 /* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
+#elif defined(SPC584B_DIS)
+/* DISCOVERY_SPC584B: Define communication interface */
+#define SENSOR_BUS I2CD1
+
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
+#include "ism330dlc_reg.h"
+
+#if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
-#include <ism330dlc_reg.h>
+#include "usart.h"
 #include "gpio.h"
 #include "i2c.h"
-#if defined(STEVAL_MKI109V3)
+
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
 #include "usbd_cdc_if.h"
+#include "gpio.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE)
-#include "usart.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
 #endif
-
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
 
@@ -128,7 +139,7 @@ static void platform_init(void);
 void ism330dlc_self_test(void)
 {
   uint8_t tx_buffer[1000];
-  axis3bit16_t data_raw;
+  int16_t data_raw[3];
   stmdev_ctx_t dev_ctx;
   float val_st_off[3];
   float val_st_on[3];
@@ -182,7 +193,7 @@ void ism330dlc_self_test(void)
     ism330dlc_xl_flag_data_ready_get(&dev_ctx, &drdy);
   } while(!drdy);
   /* Read dummy data and discard it */
-  ism330dlc_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
+  ism330dlc_acceleration_raw_get(&dev_ctx, data_raw);
 
   /* Read 5 sample and get the average vale for each axis */
   memset(val_st_off, 0x00, 3*sizeof(float));
@@ -192,9 +203,9 @@ void ism330dlc_self_test(void)
       ism330dlc_xl_flag_data_ready_get(&dev_ctx, &drdy);
     } while(!drdy);
     /* Read data and accumulate the mg value */
-    ism330dlc_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
+    ism330dlc_acceleration_raw_get(&dev_ctx, data_raw);
     for (j = 0; j < 3; j++){
-      val_st_off[j] += ism330dlc_from_fs4g_to_mg(data_raw.i16bit[j]);
+      val_st_off[j] += ism330dlc_from_fs4g_to_mg(data_raw[j]);
     }
   }
 
@@ -215,7 +226,7 @@ void ism330dlc_self_test(void)
     ism330dlc_xl_flag_data_ready_get(&dev_ctx, &drdy);
   } while(!drdy);
   /* Read dummy data and discard it */
-  ism330dlc_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
+  ism330dlc_acceleration_raw_get(&dev_ctx, data_raw);
 
 
   /* Read 5 sample and get the average vale for each axis */
@@ -226,9 +237,9 @@ void ism330dlc_self_test(void)
       ism330dlc_xl_flag_data_ready_get(&dev_ctx, &drdy);
     } while(!drdy);
     /* Read data and accumulate the mg value */
-    ism330dlc_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
+    ism330dlc_acceleration_raw_get(&dev_ctx, data_raw);
     for (j = 0; j < 3; j++){
-      val_st_on[j] += ism330dlc_from_fs4g_to_mg(data_raw.i16bit[j]);
+      val_st_on[j] += ism330dlc_from_fs4g_to_mg(data_raw[j]);
     }
   }
 
@@ -273,7 +284,7 @@ void ism330dlc_self_test(void)
     ism330dlc_gy_flag_data_ready_get(&dev_ctx, &drdy);
   } while(!drdy);
   /* Read dummy data and discard it */
-  ism330dlc_angular_rate_raw_get(&dev_ctx, data_raw.u8bit);
+  ism330dlc_angular_rate_raw_get(&dev_ctx, data_raw);
 
   /* Read 5 sample and get the average vale for each axis */
 
@@ -284,9 +295,9 @@ void ism330dlc_self_test(void)
       ism330dlc_gy_flag_data_ready_get(&dev_ctx, &drdy);
     } while(!drdy);
     /* Read data and accumulate the mg value */
-    ism330dlc_angular_rate_raw_get(&dev_ctx, data_raw.u8bit);
+    ism330dlc_angular_rate_raw_get(&dev_ctx, data_raw);
     for (j = 0; j < 3; j++){
-      val_st_off[j] += ism330dlc_from_fs2000dps_to_mdps(data_raw.i16bit[j]);
+      val_st_off[j] += ism330dlc_from_fs2000dps_to_mdps(data_raw[j]);
     }
   }
   /* Calculate the mg average values */
@@ -309,9 +320,9 @@ void ism330dlc_self_test(void)
       ism330dlc_gy_flag_data_ready_get(&dev_ctx, &drdy);
     } while(!drdy);
     /* Read data and accumulate the mg value */
-    ism330dlc_angular_rate_raw_get(&dev_ctx, data_raw.u8bit);
+    ism330dlc_angular_rate_raw_get(&dev_ctx, data_raw);
     for (j = 0; j < 3; j++){
-      val_st_on[j] += ism330dlc_from_fs2000dps_to_mdps(data_raw.i16bit[j]);
+      val_st_on[j] += ism330dlc_from_fs2000dps_to_mdps(data_raw[j]);
     }
   }
 
