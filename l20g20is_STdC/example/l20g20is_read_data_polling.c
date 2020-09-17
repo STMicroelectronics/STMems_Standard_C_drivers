@@ -43,7 +43,7 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-#define STEVAL_MKI109V3
+//#define STEVAL_MKI109V3
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
@@ -55,24 +55,20 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "stm32f4xx_hal.h"
 #include "l20g20is_reg.h"
-#include "gpio.h"
-#include "i2c.h"
+
 #if defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
 #include "usbd_cdc_if.h"
+#include "gpio.h"
 #include "spi.h"
 #endif
 
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_angular_rate;
+static int16_t data_raw_angular_rate[3];
 static float angular_rate_mdps[3];
 static l20g20is_dev_status_t reg;
 static uint8_t rst, whoami;
@@ -105,7 +101,7 @@ void l20g20is_read_data_polling(void)
   stmdev_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = (void*)&SENSOR_BUS;
+  dev_ctx.handle = &SENSOR_BUS;
 
   /* Check device ID */
   l20g20is_dev_id_get(&dev_ctx, &whoami);
@@ -151,12 +147,12 @@ void l20g20is_read_data_polling(void)
     if ( reg.xyda_ois )
     {
       /* Read imu data */
-      memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
+      memset(data_raw_angular_rate, 0x00, 3 * sizeof(int16_t));
 
-      l20g20is_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
+      l20g20is_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate);
 
-      angular_rate_mdps[0] = l20g20is_from_fs200dps_to_mdps(data_raw_angular_rate.i16bit[0]);
-      angular_rate_mdps[1] = l20g20is_from_fs200dps_to_mdps(data_raw_angular_rate.i16bit[1]);
+      angular_rate_mdps[0] = l20g20is_from_fs200dps_to_mdps(data_raw_angular_rate[0]);
+      angular_rate_mdps[1] = l20g20is_from_fs200dps_to_mdps(data_raw_angular_rate[1]);
       angular_rate_mdps[2] = 0x00;
 
       sprintf((char*)tx_buffer, "[mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
@@ -234,7 +230,9 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
+  #ifdef STEVAL_MKI109V3
   HAL_Delay(ms);
+  #endif
 }
 
 /*
