@@ -221,7 +221,7 @@ void ism330dlc_read_data_polling(void)
       /* Read temperature data */
       memset( &data_raw_temperature, 0x00, sizeof(int16_t));
       ism330dlc_temperature_raw_get(&dev_ctx, &data_raw_temperature);
-      temperature_degC = ism330dlc_from_lsb_to_celsius( &data_raw_temperature );
+      temperature_degC = ism330dlc_from_lsb_to_celsius( data_raw_temperature );
       
       sprintf((char*)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC );
       tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
