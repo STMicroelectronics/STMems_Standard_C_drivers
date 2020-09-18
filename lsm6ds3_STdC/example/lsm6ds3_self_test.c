@@ -281,7 +281,7 @@ void lsm6ds3_self_test(void)
   for (i = 0; i < 5; i++){
     /* Check if new value available */
     do {
-      lsm6ds3_xl_flag_data_ready_get(&dev_ctx, &drdy);
+      lsm6ds3_gy_flag_data_ready_get(&dev_ctx, &drdy);
     } while(!drdy);
     /* Read data and accumulate the mg value */
     lsm6ds3_angular_rate_raw_get(&dev_ctx, data_raw.u8bit);
@@ -306,7 +306,7 @@ void lsm6ds3_self_test(void)
   for (i = 0; i < 5; i++){
     /* Check if new value available */
     do {
-      lsm6ds3_xl_flag_data_ready_get(&dev_ctx, &drdy);
+      lsm6ds3_gy_flag_data_ready_get(&dev_ctx, &drdy);
     } while(!drdy);
     /* Read data and accumulate the mg value */
     lsm6ds3_angular_rate_raw_get(&dev_ctx, data_raw.u8bit);
@@ -335,7 +335,7 @@ void lsm6ds3_self_test(void)
   /* Disable Self Test */
   lsm6ds3_gy_self_test_set(&dev_ctx, LSM6DS3_GY_ST_DISABLE);
   /* Disable sensor. */
-  lsm6ds3_xl_data_rate_set(&dev_ctx, LSM6DS3_GY_ODR_OFF);
+  lsm6ds3_gy_data_rate_set(&dev_ctx, LSM6DS3_GY_ODR_OFF);
 
   if (st_result == ST_PASS) {
     sprintf((char*)tx_buffer, "Self Test - PASS\r\n" );
