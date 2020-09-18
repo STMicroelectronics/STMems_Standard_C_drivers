@@ -68,7 +68,7 @@ typedef union{
 /* Self test limits. */
 #define    MIN_ST_XL_LIMIT_mg     68.0f
 #define    MAX_ST_XL_LIMIT_mg   1440.0f
-#define    MIX_ST_MG_LIMIT_mG     15.0f
+#define    MIN_ST_MG_LIMIT_mG     15.0f
 #define    MAX_ST_MG_LIMIT_mG    500.0f
 /* Self test results. */
 #define    ST_PASS     1U
@@ -308,8 +308,8 @@ void lsm303agr_self_test(void)
 
   /* Check self test limit */
   for (i = 0; i < 3; i++){
-    if (( MIX_ST_MG_LIMIT_mG > test_val[i] ) || 
-		    ( test_val[i] > MIX_ST_MG_LIMIT_mG)){
+    if (( MIN_ST_MG_LIMIT_mG > test_val[i] ) || 
+		    ( test_val[i] > MAX_ST_MG_LIMIT_mG)){
       st_result = ST_FAIL;
 	  }
 	}
