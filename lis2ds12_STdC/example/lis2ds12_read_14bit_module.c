@@ -24,8 +24,7 @@
  *
  * - STEVAL_MKI109V3 + STEVAL-MKI174V1
  * - NUCLEO_F411RE + STEVAL-MKI174V1
- *
- * and STM32CubeMX tool with STM32CubeF4 MCU Package
+ * - DISCOVERY_SPC584B + STEVAL-MKI174V1
  *
  * Used interfaces:
  *
@@ -35,76 +34,73 @@
  * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
  *                    - Sensor side: I2C(Default) / SPI(supported)
  *
+ * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
+ *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
  * `tx_com` and 'platform_init' is required.
  *
  */
 
-//#define STEVAL_MKI109V3
-//#define NUCLEO_F411RE_X_NUCLEO_IKS01A1
-#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
-
-/* Includes ------------------------------------------------------------------*/
-/*
- * Specific platform includes:
- *
- * STEVAL_MKI109V3    -> USB  (Virtual COM) to PC
- * NUCLEO_STM32F411RE -> UART (COM) to USB bridge
- *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A1 -> SPI N/A
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 -> SPI N/A
- *
- */
 /* STMicroelectronics evaluation boards definition
  *
  * Please uncomment ONLY the evaluation boards in use.
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-//#define STEVAL_MKI109V3
-#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+
+//#define STEVAL_MKI109V3  /* little endian */
+#define NUCLEO_F411RE    /* little endian */
+//#define SPC584B_DIS      /* big endian */
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
+
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
-
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
-#endif
+#elif defined(SPC584B_DIS)
+/* DISCOVERY_SPC584B: Define communication interface */
+#define SENSOR_BUS I2CD1
 
+#endif
+/* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "stm32f4xx_hal.h"
 #include "lis2ds12_reg.h"
+
+#if defined(NUCLEO_F411RE)
+#include "stm32f4xx_hal.h"
+#include "usart.h"
 #include "gpio.h"
 #include "i2c.h"
-#ifdef STEVAL_MKI109V3
-#include "usbd_cdc_if.h"
-#include "spi.h"
-#endif
-#ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A1
-#include "usart.h"
-#endif
-#ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
-#include "usart.h"
-#endif
 
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
+#include "usbd_cdc_if.h"
+#include "gpio.h"
+#include "spi.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
+#endif
 
 /* Private macro -------------------------------------------------------------*/
 #define    BOOT_TIME         20 //ms
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
+static int16_t data_raw_acceleration[3];
 static float magnitude[30];
 static uint8_t tx_buffer[1000];
 
@@ -233,17 +229,17 @@ void lis2ds12_14bit_module(void)
       //lis2ds12_read_reg(&dev_ctx,  LIS2DS12_OUT_X_L, (uint8_t*) acceleration_mg, 256 * 3);
       j = 0;
       for (i=0; i<10; i++){
-        lis2ds12_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+        lis2ds12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
 
-        magnitude[j++] = lis2ds12_from_fs4g_to_mg(data_raw_acceleration.i16bit[0]);
+        magnitude[j++] = lis2ds12_from_fs4g_to_mg(data_raw_acceleration[0]);
         sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\r\n",magnitude[j-1]);
         tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
 
-        magnitude[j++] = lis2ds12_from_fs4g_to_mg(data_raw_acceleration.i16bit[1]);
+        magnitude[j++] = lis2ds12_from_fs4g_to_mg(data_raw_acceleration[1]);
         sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\r\n",magnitude[j-1]);
         tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
 
-        magnitude[j++] = lis2ds12_from_fs4g_to_mg(data_raw_acceleration.i16bit[2]);
+        magnitude[j++] = lis2ds12_from_fs4g_to_mg(data_raw_acceleration[2]);
         sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\r\n",magnitude[j-1]);
         tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
 
@@ -259,83 +255,77 @@ void lis2ds12_14bit_module(void)
 }
 
 
-/**
-  * @brief  Write generic device register
-  *
-  * @param  lis2dw12_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t reg: register to write
-  * @param  uint8_t* data: pointer to data to write in register reg
-  * @param  uint16_t len: number of consecutive register to write
-  *
-*/
-static int32_t platform_write(void *handle, uint8_t Reg, uint8_t *Bufp,
+/*
+ * @brief  Write generic device register (platform dependent)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to write
+ * @param  bufp      pointer to data to write in register reg
+ * @param  len       number of consecutive register to write
+ *
+ */
+static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
-    HAL_I2C_Mem_Write(handle, LIS2DS12_I2C_ADD_H, Reg,
-                      I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
-  }
-#ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &Reg, 1, 1000);
-    HAL_SPI_Transmit(handle, Bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Write(handle, LIS2DS12_I2C_ADD_L, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_write(handle,  LIS2DS12_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
 
-/**
-  * @brief  Write generic device register
-  *
-  * @param  lis2dw12_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t reg: register to write
-  * @param  uint8_t* data: pointer to data to write in register reg
-  * @param  uint16_t len: number of consecutive register to write
-  *
-  *
-  */
-static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
+/*
+ * @brief  Read generic device register (platform dependent)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to read
+ * @param  bufp      pointer to buffer that store the data read
+ * @param  len       number of consecutive register to read
+ *
+ */
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
-      HAL_I2C_Mem_Read(handle, LIS2DS12_I2C_ADD_H, Reg,
-                       I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
-  }
-#ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
-    Reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &Reg, 1, 1000);
-    HAL_SPI_Receive(handle, Bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Read(handle, LIS2DS12_I2C_ADD_L, reg,
+                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_read(handle, LIS2DS12_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
 
-/**
-  * @brief  Write generic device register
-  *
-  * @param  lis2dw12_ctx_t *ctx: read / write interface definitions
-  * @param  uint8_t reg: register to write
-  * @param  uint8_t* data: pointer to data to write in register reg
-  * @param  uint16_t len: number of consecutive register to write
-  *
-*/
-static void tx_com( uint8_t *tx_buffer, uint16_t len )
+/*
+ * @brief  Write generic device register (platform dependent)
+ *
+ * @param  tx_buffer     buffer to trasmit
+ * @param  len           number of byte to send
+ *
+ */
+static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_STM32F411RE
-  HAL_UART_Transmit( &huart2, tx_buffer, len, 1000 );
-  #endif
-  #ifdef STEVAL_MKI109V3
-  CDC_Transmit_FS( tx_buffer, len );
-  #endif
+#if defined(NUCLEO_F411RE)
+  HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  CDC_Transmit_FS(tx_buffer, len);
+#elif defined(SPC584B_DIS)
+  sd_lld_write(&SD2, tx_buffer, len);
+#endif
 }
 
 /*
@@ -346,7 +336,11 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len )
  */
 static void platform_delay(uint32_t ms)
 {
+#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
   HAL_Delay(ms);
+#elif defined(SPC584B_DIS)
+  osalThreadDelayMilliseconds(ms);
+#endif
 }
 
 /*
