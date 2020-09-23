@@ -250,7 +250,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 }
 
 /*
- * @brief  Write generic device register (platform dependent)
+ * @brief  Send buffer to console (platform dependent)
  *
  * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
