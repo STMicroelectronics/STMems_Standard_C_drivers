@@ -1536,6 +1536,26 @@ int32_t ism330dhcx_steps_reset(stmdev_ctx_t *ctx)
 }
 
 /**
+  * @brief  prgsens_out: [get] Output value of all MLCx decision trees.
+  *
+  * @param  ctx_t *ctx: read / write interface definitions
+  * @param  uint8_t * : buffer that stores data read
+  *
+  */
+int32_t ism330dhcx_mlc_out_get(stmdev_ctx_t *ctx, uint8_t *buff)
+{
+  int32_t ret;
+  ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_EMBEDDED_FUNC_BANK);
+  if (ret == 0) {
+    ret = ism330dhcx_read_reg(ctx, ISM330DHCX_MLC0_SRC, buff, 8);
+  }
+  if (ret == 0) {
+    ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_USER_BANK);
+  }
+  return ret;
+}
+
+/**
   * @}
   *
   */
