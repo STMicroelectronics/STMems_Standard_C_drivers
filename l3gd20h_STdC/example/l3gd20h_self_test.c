@@ -24,16 +24,20 @@
  *
  * - STEVAL_MKI109V3 + STEVAL-MKI136V1
  * - NUCLEO_F411RE + STEVAL-MKI136V1
+ * - DISCOVERY_SPC584B + STEVAL-MKI136V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
  * Used interfaces:
  *
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
- *                    - Sensor side: SPI(Default) / I2C(supported)
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
- * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
- *                    - I2C(Default) / SPI(supported)
+ * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
+ *                                       - I2C(Default) / SPI(N/A)
+ *
+ * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -47,13 +51,20 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-//#define STEVAL_MKI109V3
-#define NUCLEO_F411RE
+
+//#define STEVAL_MKI109V3  /* little endian */
+#define NUCLEO_F411RE    /* little endian */
+//#define SPC584B_DIS      /* big endian */
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
+
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
-
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
@@ -61,32 +72,32 @@
 /* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
+#elif defined(SPC584B_DIS)
+/* DISCOVERY_SPC584B: Define communication interface */
+#define SENSOR_BUS I2CD1
+
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
+#include "l3gd20h_reg.h"
+
+#if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
-#include <l3gd20h_reg.h>
+#include "usart.h"
 #include "gpio.h"
 #include "i2c.h"
-#if defined(STEVAL_MKI109V3)
+
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
 #include "usbd_cdc_if.h"
+#include "gpio.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE)
-#include "usart.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
 #endif
-
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
-
 /* Private macro -------------------------------------------------------------*/
 
 #define    BOOT_TIME        10 //ms
@@ -125,8 +136,8 @@ static void platform_init(void);
 void l3gd20h_self_test(void)
 {
   uint8_t tx_buffer[1000];
-  axis3bit16_t data_raw;
   stmdev_ctx_t dev_ctx;
+  int16_t data_raw[3];
   float val_st_off[3];
   float val_st_on[3];
   float test_val[3];
@@ -179,7 +190,7 @@ void l3gd20h_self_test(void)
     l3gd20h_gy_flag_data_ready_get(&dev_ctx, &drdy);
   } while(!drdy);
   /* Read dummy data and discard it */
-  l3gd20h_angular_rate_raw_get(&dev_ctx, data_raw.u8bit);
+  l3gd20h_angular_rate_raw_get(&dev_ctx, data_raw);
 
   /* Read 5 sample and get the average vale for each axis */
 
@@ -190,9 +201,9 @@ void l3gd20h_self_test(void)
       l3gd20h_gy_flag_data_ready_get(&dev_ctx, &drdy);
     } while(!drdy);
     /* Read data and accumulate the mg value */
-    l3gd20h_angular_rate_raw_get(&dev_ctx, data_raw.u8bit);
+    l3gd20h_angular_rate_raw_get(&dev_ctx, data_raw);
     for (j = 0; j < 3; j++){
-      val_st_off[j] += l3gd20h_from_fs2000_to_mdps(data_raw.i16bit[j]);
+      val_st_off[j] += l3gd20h_from_fs2000_to_mdps(data_raw[j]);
     }
   }
   /* Calculate the mg average values */
@@ -215,9 +226,9 @@ void l3gd20h_self_test(void)
       l3gd20h_gy_flag_data_ready_get(&dev_ctx, &drdy);
     } while(!drdy);
     /* Read data and accumulate the mg value */
-    l3gd20h_angular_rate_raw_get(&dev_ctx, data_raw.u8bit);
+    l3gd20h_angular_rate_raw_get(&dev_ctx, data_raw);
     for (j = 0; j < 3; j++){
-      val_st_on[j] += l3gd20h_from_fs2000_to_mdps(data_raw.i16bit[j]);
+      val_st_on[j] += l3gd20h_from_fs2000_to_mdps(data_raw[j]);
     }
   }
 
@@ -265,19 +276,16 @@ void l3gd20h_self_test(void)
 static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
-    HAL_I2C_Mem_Write(handle, L3GD20H_I2C_ADD_L, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-#ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Write(handle, L3GD20H_I2C_ADD_L, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_write(handle,  L3GD20H_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
@@ -295,40 +303,37 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
-    HAL_I2C_Mem_Read(handle, L3GD20H_I2C_ADD_L, reg,
-                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-#ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
-    /* Read command */
-    reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Receive(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Read(handle, L3GD20H_I2C_ADD_L, reg,
+                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_read(handle, L3GD20H_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
 
 /*
- * @brief  Write generic device register (platform dependent)
+ * @brief  Send buffer to console (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE
+#if defined(NUCLEO_F411RE)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
-  #ifdef STEVAL_MKI109V3
+#elif defined(STEVAL_MKI109V3)
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#elif defined(SPC584B_DIS)
+  sd_lld_write(&SD2, tx_buffer, len);
+#endif
 }
 
 /*
@@ -339,7 +344,11 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
+#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
   HAL_Delay(ms);
+#elif defined(SPC584B_DIS)
+  osalThreadDelayMilliseconds(ms);
+#endif
 }
 
 /*
