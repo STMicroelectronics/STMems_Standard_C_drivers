@@ -2580,12 +2580,12 @@ int32_t ism303dac_xl_act_sleep_dur_set(stmdev_ctx_t *ctx, uint8_t val)
   ism303dac_wake_up_dur_a_t wake_up_dur_a;
   int32_t ret;
 
-  ret = ism303dac_read_reg(ctx, ISM303DAC_WAKE_UP_THS_A,
+  ret = ism303dac_read_reg(ctx, ISM303DAC_WAKE_UP_DUR_A,
                            (uint8_t*)&wake_up_dur_a, 1);
   if(ret == 0){
 
     wake_up_dur_a.sleep_dur = val;
-    ret = ism303dac_write_reg(ctx, ISM303DAC_WAKE_UP_THS_A,
+    ret = ism303dac_write_reg(ctx, ISM303DAC_WAKE_UP_DUR_A,
                               (uint8_t*)&wake_up_dur_a, 1);
   }
   return ret;
