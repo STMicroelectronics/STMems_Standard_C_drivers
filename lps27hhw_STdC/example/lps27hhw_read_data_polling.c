@@ -132,7 +132,7 @@ static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
 
-void example_main(void)
+void lps27hhw_read_data_polling(void)
 {
   /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
