@@ -2563,10 +2563,9 @@ int32_t lsm6dsox_den_mark_axis_z_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsox_den_mark_axis_z_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
-  LSM6DSOX_PEDO_DISABLE              = 0x00,
-  LSM6DSOX_PEDO_BASE_MODE            = 0x01,
-  LSM6DSOX_FALSE_STEP_REJ            = 0x13,
-  LSM6DSOX_FALSE_STEP_REJ_ADV_MODE   = 0x33,
+  LSM6DSOX_PEDO_BASE_MODE            = 0x00,
+  LSM6DSOX_FALSE_STEP_REJ            = 0x10,
+  LSM6DSOX_FALSE_STEP_REJ_ADV_MODE   = 0x30,
 } lsm6dsox_pedo_md_t;
 int32_t lsm6dsox_pedo_sens_set(stmdev_ctx_t *ctx, lsm6dsox_pedo_md_t val);
 int32_t lsm6dsox_pedo_sens_get(stmdev_ctx_t *ctx, lsm6dsox_pedo_md_t *val);
@@ -2598,14 +2597,8 @@ int32_t lsm6dsox_pedo_int_mode_set(stmdev_ctx_t *ctx,
 int32_t lsm6dsox_pedo_int_mode_get(stmdev_ctx_t *ctx,
                                   lsm6dsox_carry_count_en_t *val);
 
-int32_t lsm6dsox_motion_sens_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dsox_motion_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
-
 int32_t lsm6dsox_motion_flag_data_ready_get(stmdev_ctx_t *ctx,
                                                 uint8_t *val);
-
-int32_t lsm6dsox_tilt_sens_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dsox_tilt_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm6dsox_tilt_flag_data_ready_get(stmdev_ctx_t *ctx,
                                               uint8_t *val);
@@ -2663,9 +2656,6 @@ int32_t lsm6dsox_mag_x_orient_get(stmdev_ctx_t *ctx,
 
 int32_t lsm6dsox_long_cnt_flag_data_ready_get(stmdev_ctx_t *ctx,
                                              uint8_t *val);
-
-int32_t lsm6dsox_emb_fsm_en_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dsox_emb_fsm_en_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef struct {
     lsm6dsox_fsm_enable_a_t          fsm_enable_a;
@@ -2728,9 +2718,6 @@ int32_t lsm6dsox_fsm_number_of_programs_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t lsm6dsox_fsm_start_address_set(stmdev_ctx_t *ctx, uint16_t val);
 int32_t lsm6dsox_fsm_start_address_get(stmdev_ctx_t *ctx, uint16_t *val);
 
-int32_t lsm6dsox_mlc_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dsox_mlc_get(stmdev_ctx_t *ctx, uint8_t *val);
-
 int32_t lsm6dsox_mlc_status_get(stmdev_ctx_t *ctx,
                                 lsm6dsox_mlc_status_mainpage_t *val);
 
@@ -2767,7 +2754,7 @@ typedef struct {
 } lsm6dsox_emb_sh_read_t;
 int32_t lsm6dsox_sh_read_data_raw_get(stmdev_ctx_t *ctx,
                                      lsm6dsox_emb_sh_read_t *val,
-									 uint8_t len);
+                                     uint8_t len);
 
 typedef enum {
   LSM6DSOX_SLV_0       = 0,
@@ -3254,6 +3241,7 @@ int32_t lsm6dsox_mode_set(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
                           lsm6dsox_md_t *val);
 int32_t lsm6dsox_mode_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
                           lsm6dsox_md_t *val);
+
 typedef struct {
   struct {
     struct {
@@ -3282,6 +3270,20 @@ typedef struct {
 } lsm6dsox_data_t;
 int32_t lsm6dsox_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
                           lsm6dsox_md_t *md, lsm6dsox_data_t *data);
+
+typedef struct {
+  uint8_t sig_mot      : 1; /* significant motion */
+  uint8_t tilt         : 1; /* tilt detection  */
+  uint8_t step         : 1; /* step counter/detector */
+  uint8_t mlc          : 1; /* machine learning core */
+  uint8_t fsm          : 1; /* finite state machine */
+  uint8_t fifo_compr   : 1; /* mlc 8 interrupt event */
+} lsm6dsox_emb_sens_t;
+int32_t lsm6dsox_embedded_sens_set(stmdev_ctx_t *ctx,
+                                   lsm6dsox_emb_sens_t *emb_sens);
+int32_t lsm6dsox_embedded_sens_get(stmdev_ctx_t *ctx,
+                                   lsm6dsox_emb_sens_t *emb_sens);
+int32_t lsm6dsox_embedded_sens_off(stmdev_ctx_t *ctx);
 
 /**
   * @}
