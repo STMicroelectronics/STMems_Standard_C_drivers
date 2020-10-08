@@ -117,6 +117,7 @@ static void platform_init(void);
 /* Main Example --------------------------------------------------------------*/
 void lsm6dsox_fifo_pedo_simple(void)
 {
+  lsm6dsox_emb_sens_t emb_sens;
   stmdev_ctx_t ag_ctx;
 
   /* Uncomment to configure INT 1 */
@@ -186,6 +187,8 @@ void lsm6dsox_fifo_pedo_simple(void)
 
   /* Enable pedometer */
   lsm6dsox_pedo_sens_set(&ag_ctx, LSM6DSOX_PEDO_BASE_MODE);
+  emb_sens.step = PROPERTY_ENABLE;
+  lsm6dsox_enbedded_sens_set(&ag_ctx, &emb_sens);
   lsm6dsox_fifo_pedo_batch_set(&ag_ctx, PROPERTY_ENABLE);
   lsm6dsox_steps_reset(&ag_ctx);
 

@@ -1,11 +1,11 @@
 /*
  ******************************************************************************
- * @file    machine_learning_core.c
+ * @file    multi_conf.c
  * @author  Sensors Software Solution Team
  * @brief   The purpose of this example is to show how use the device
  *          Machine Learning Core (MLC) starting from an ".h" file 
  *          generated through with the tool "Machine Learning Core" 
- *          of Unico GUI.
+ *          of Unico GUI mixed with other functionalities.
  *
  ******************************************************************************
  * @attention
@@ -33,15 +33,11 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3 + STEVAL-MKI197V1
  * - NUCLEO_F411RE + STEVAL-MKI197V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
  * Used interfaces:
- *
- * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
- *                    - Sensor side: SPI(Default) / I2C(supported)
  *
  * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
  *                    - I2C(Default) / SPI(supported)
@@ -57,7 +53,7 @@
 #include <stdio.h>
 #include "stm32f4xx_hal.h"
 #include <lsm6dsox_reg.h>
-#include <lsm6dsox_vibration_monitoring.h>
+#include <lsm6dsox_yoga_pose_recognition.h>
 #include "gpio.h"
 #include "i2c.h"
 #include "usart.h"
@@ -86,16 +82,16 @@ static void platform_delay(uint32_t ms);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 
 /* Main Example --------------------------------------------------------------*/
-void lsm6dsox_mlc(void)
+void lsm6dsox_multi_conf(void)
 {
   /* Variable declaration */
+  stmdev_ctx_t dev_ctx;
   lsm6dsox_pin_int1_route_t pin_int1_route;
   lsm6dsox_all_sources_t status;
   lsm6dsox_emb_sens_t emb_sens;
-  stmdev_ctx_t dev_ctx;
-
-  uint8_t                     mlc_out[8];
-  uint32_t                    i;
+  uint8_t mlc_out[8];
+  uint32_t i;
+  uint16_t steps;
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
@@ -117,11 +113,11 @@ void lsm6dsox_mlc(void)
   } while (rst);
 
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(lsm6dsox_vibration_monitoring) /
+  for ( i = 0; i < (sizeof(lsm6dsox_yoga_pose_recognition) /
                     sizeof(ucf_line_t) ); i++ ){
   
-    lsm6dsox_write_reg(&dev_ctx, lsm6dsox_vibration_monitoring[i].address,
-                       (uint8_t*)&lsm6dsox_vibration_monitoring[i].data, 1);
+    lsm6dsox_write_reg(&dev_ctx, lsm6dsox_yoga_pose_recognition[i].address,
+                       (uint8_t*)&lsm6dsox_yoga_pose_recognition[i].data, 1);
      
   } 
   /* End Machine Learning Core configuration */
@@ -134,8 +130,8 @@ void lsm6dsox_mlc(void)
    */
 
   /* Turn off embedded features */
-  lsm6dsox_enbedded_sens_get(&dev_ctx, &emb_sens);
-  lsm6dsox_enbedded_sens_off(&dev_ctx);
+  lsm6dsox_embedded_sens_get(&dev_ctx, &emb_sens);
+  lsm6dsox_embedded_sens_off(&dev_ctx);
   platform_delay(10);
 
   /* Turn off Sensors */
@@ -152,35 +148,168 @@ void lsm6dsox_mlc(void)
   lsm6dsox_xl_full_scale_set(&dev_ctx, LSM6DSOX_4g);
   lsm6dsox_gy_full_scale_set(&dev_ctx, LSM6DSOX_2000dps);
 
+  /* Enable Tap detection on X, Y, Z */
+  lsm6dsox_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsox_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsox_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /* Set Tap threshold to 01000b, therefore the tap threshold
+   * is 500 mg (= 12 * FS_XL / 32 )
+   */
+  lsm6dsox_tap_threshold_x_set(&dev_ctx, 0x04);
+  lsm6dsox_tap_threshold_y_set(&dev_ctx, 0x04);
+  lsm6dsox_tap_threshold_z_set(&dev_ctx, 0x04);
+  /* Configure Single and Double Tap parameter
+   *
+   * For the maximum time between two consecutive detected taps, the DUR
+   * field of the INT_DUR2 register is set to 0111b, therefore the Duration
+   * time is 538.5 ms (= 7 * 32 * ODR_XL)
+   *
+   * The SHOCK field of the INT_DUR2 register is set to 11b, therefore
+   * the Shock time is 57.36 ms (= 3 * 8 * ODR_XL)
+   *
+   * The QUIET field of the INT_DUR2 register is set to 11b, therefore
+   * the Quiet time is 28.68 ms (= 3 * 4 * ODR_XL)
+   */
+  lsm6dsox_tap_dur_set(&dev_ctx, 0x07);
+  lsm6dsox_tap_quiet_set(&dev_ctx, 0x03);
+  lsm6dsox_tap_shock_set(&dev_ctx, 0x03);
+
+  /* Enable Single and Double Tap detection. */
+  lsm6dsox_tap_mode_set(&dev_ctx, LSM6DSOX_BOTH_SINGLE_DOUBLE);
+
+  /* Apply high-pass digital filter on Wake-Up function */
+  lsm6dsox_xl_hp_path_internal_set(&dev_ctx, LSM6DSOX_USE_SLOPE);
+
+  /* Set Wake-Up threshold: 1 LSb corresponds to FS_XL/2^6 */
+  lsm6dsox_wkup_threshold_set(&dev_ctx, 4);
+
+  /* Set threshold to 60 degrees. */
+  lsm6dsox_6d_threshold_set(&dev_ctx, LSM6DSOX_DEG_60);
+
+  /* LPF2 on 6D/4D function selection. */
+  lsm6dsox_xl_lp2_on_6d_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsox_4d_mode_set(&dev_ctx, PROPERTY_DISABLE);
+
+  /* Set Free Fall duration to 3 and 6 samples event duration */
+  lsm6dsox_ff_dur_set(&dev_ctx, 0x06);
+  lsm6dsox_ff_threshold_set(&dev_ctx, LSM6DSOX_FF_TSH_312mg);
+
+  /* Enable Tilt in embedded function. */
+  emb_sens.tilt = PROPERTY_ENABLE;
+
+  /* Enable pedometer */
+  emb_sens.step = PROPERTY_ENABLE;
+  lsm6dsox_pedo_sens_set(&dev_ctx, LSM6DSOX_FALSE_STEP_REJ_ADV_MODE);
+
   /* Route signals on interrupt pin 1 */
   lsm6dsox_pin_int1_route_get(&dev_ctx, &pin_int1_route);
   pin_int1_route.mlc1 = PROPERTY_ENABLE;
+  pin_int1_route.step_detector = PROPERTY_ENABLE;
+  pin_int1_route.wake_up =  PROPERTY_ENABLE;
+  pin_int1_route.tilt = PROPERTY_ENABLE;
+  pin_int1_route.double_tap = PROPERTY_ENABLE;
+  pin_int1_route.single_tap = PROPERTY_ENABLE;
+  pin_int1_route.six_d = PROPERTY_ENABLE;
+  pin_int1_route.free_fall = PROPERTY_ENABLE;
   lsm6dsox_pin_int1_route_set(&dev_ctx, pin_int1_route);
-
   /* Configure interrupt pin mode notification */
   lsm6dsox_int_notification_set(&dev_ctx, LSM6DSOX_BASE_PULSED_EMB_LATCHED);
 
   /* Enable embedded features */
-  lsm6dsox_enbedded_sens_set(&dev_ctx, &emb_sens);
+  lsm6dsox_embedded_sens_set(&dev_ctx, &emb_sens);
 
   /* Set Output Data Rate.
    * Selected data rate have to be equal or greater with respect
    * with MLC data rate.
    */
-  lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_26Hz);
-  lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_OFF);
- 
+  lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_417Hz);
+  lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_208Hz);
+
+  /* Reset steps of pedometer */
+  lsm6dsox_steps_reset(&dev_ctx);
+
   /* Main loop */
   while(1)
   {
     /* Read interrupt source registers in polling mode (no int) */
     lsm6dsox_all_sources_get(&dev_ctx, &status);
-    if (status.mlc1){
-     
+    if (status.wake_up){
+      sprintf((char*)tx_buffer, "Wake-Up event on ");
+      if (status.wake_up_x)
+        strcat((char*)tx_buffer, "X");
+      if (status.wake_up_y)
+        strcat((char*)tx_buffer, "Y");
+      if (status.wake_up_z)
+        strcat((char*)tx_buffer, "Z");
+      strcat((char*)tx_buffer, " direction\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
+    if (status.step_detector){
+        /* Read steps */
+        lsm6dsox_number_of_steps_get(&dev_ctx, (uint8_t*)&steps);
+        sprintf((char*)tx_buffer, "steps :%d\r\n", steps);
+        tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
+    if (status.mlc1) {
       lsm6dsox_mlc_out_get(&dev_ctx, mlc_out);
       sprintf((char*)tx_buffer, "Detect MLC interrupt code: %02X\r\n",
               mlc_out[0]);
-       
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
+    if (status.double_tap) {
+      sprintf((char*)tx_buffer, "D-Tap: ");
+      if (status.tap_x)
+        strcat((char*)tx_buffer, "x-axis");
+      else if (status.tap_y)
+        strcat((char*)tx_buffer, "y-axis");
+      else
+        strcat((char*)tx_buffer, "z-axis");
+      if (status.tap_sign)
+        strcat((char*)tx_buffer, " negative");
+      else
+        strcat((char*)tx_buffer, " positive");
+      strcat((char*)tx_buffer, " sign\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
+    if (status.single_tap) {
+      sprintf((char*)tx_buffer, "S-Tap: ");
+      if (status.tap_x)
+        strcat((char*)tx_buffer, "x-axis");
+      else if (status.tap_y)
+        strcat((char*)tx_buffer, "y-axis");
+      else
+        strcat((char*)tx_buffer, "z-axis");
+      if (status.tap_sign)
+        strcat((char*)tx_buffer, " negative");
+      else
+        strcat((char*)tx_buffer, " positive");
+      strcat((char*)tx_buffer, " sign\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
+    if (status.tilt) {
+        sprintf((char*)tx_buffer, "TILT Detected\r\n");
+        tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
+    if (status.six_d) {
+      sprintf((char*)tx_buffer, "6D Or. switched to ");
+      if (status.six_d_xh)
+          strcat((char*)tx_buffer, "XH");
+      if (status.six_d_xl)
+          strcat((char*)tx_buffer, "XL");
+      if (status.six_d_yh)
+          strcat((char*)tx_buffer, "YH");
+      if (status.six_d_yl)
+          strcat((char*)tx_buffer, "YL");
+      if (status.six_d_zh)
+          strcat((char*)tx_buffer, "ZH");
+      if (status.six_d_zl)
+          strcat((char*)tx_buffer, "ZL");
+      strcat((char*)tx_buffer, "\r\n");
+      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    }
+    if (status.free_fall) {
+      sprintf((char*)tx_buffer, "Free Fall Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
@@ -199,7 +328,7 @@ void lsm6dsox_mlc(void)
 static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
-    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_L, reg,
+    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_H, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   return 0;
 }
@@ -217,7 +346,7 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-    HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_L, reg,
+    HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_H, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   return 0;
 }

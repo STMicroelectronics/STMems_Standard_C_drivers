@@ -120,8 +120,9 @@ sensor_data_t sensor_data;
 /* Main Example --------------------------------------------------------------*/
 void lsm6dsox_compressed_fifo(void)
 {
-  stmdev_ctx_t dev_ctx;
+  lsm6dsox_emb_sens_t emb_sens;
   uint16_t out_slot_size;
+  stmdev_ctx_t dev_ctx;
 
   /* Uncomment to configure INT 1 */
   //lsm6dsox_pin_int1_route_t int1_route;
@@ -178,9 +179,11 @@ void lsm6dsox_compressed_fifo(void)
   lsm6dsox_fifo_mode_set(&dev_ctx, LSM6DSOX_STREAM_MODE);
 
   /* Enable FIFO compression on all samples */
-  lsm6dsox_compression_algo_set(&dev_ctx, LSM6DSOX_CMP_DISABLE);
+  lsm6dsox_compression_algo_set(&dev_ctx, LSM6DSOX_CMP_ALWAYS);
+  emb_sens.fifo_compr = PROPERTY_ENABLE;
+  lsm6dsox_enbedded_sens_set(&dev_ctx, &emb_sens);
 
-  /* Enable drdy 75 μs pulse: uncomment if interrupt must be pulsed */
+  /* Enable drdy 75 us pulse: uncomment if interrupt must be pulsed */
   //lsm6dsox_data_ready_mode_set(&dev_ctx, LSM6DSOX_DRDY_PULSED);
 
   /*

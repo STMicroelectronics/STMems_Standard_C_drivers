@@ -143,9 +143,10 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 void lsm6dsox_fsm(void)
 {
   /* Variable declaration */
-  stmdev_ctx_t              dev_ctx;
+  stmdev_ctx_t                dev_ctx;
   lsm6dsox_pin_int1_route_t   pin_int1_route;
   lsm6dsox_emb_fsm_enable_t   fsm_enable;
+  lsm6dsox_emb_sens_t         emb_sens;
   lsm6dsox_fsm_out_t          fsm_out;
   lsm6dsox_all_sources_t      status;
   uint16_t                   fsm_addr;
@@ -265,9 +266,13 @@ void lsm6dsox_fsm(void)
   lsm6dsox_ln_pg_write(&dev_ctx, fsm_addr, (uint8_t*)lsm6so_prg_wrist_tilt,
                       sizeof(lsm6so_prg_wrist_tilt));
 
+  emb_sens.fsm = PROPERTY_ENABLE;
+  lsm6dsox_enbedded_sens_set(&dev_ctx, &emb_sens);
  /*
   * End Finite State Machine configuration
   */
+
+
 
   /* Set Output Data Rate */
   lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_104Hz);
