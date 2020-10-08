@@ -47,7 +47,7 @@
   *
   */
 int32_t lsm6dsr_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
-                           uint16_t len)
+                         uint16_t len)
 {
   int32_t ret;
   ret = ctx->read_reg(ctx->handle, reg, data, len);
@@ -65,7 +65,7 @@ int32_t lsm6dsr_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 int32_t lsm6dsr_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
-                            uint16_t len)
+                          uint16_t len)
 {
   int32_t ret;
   ret = ctx->write_reg(ctx->handle, reg, data, len);
