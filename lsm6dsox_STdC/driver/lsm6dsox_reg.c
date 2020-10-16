@@ -1794,14 +1794,12 @@ int32_t lsm6dsox_ln_pg_write(stmdev_ctx_t *ctx, uint16_t address,
   }
 
   if (ret == 0) {
-
     for (i = 0; ( (i < len) && (ret == 0) ); i++)
     {
       ret = lsm6dsox_write_reg(ctx, LSM6DSOX_PAGE_VALUE, &buf[i], 1);
-
+      lsb++;
       /* Check if page wrap */
       if ( (lsb == 0x00U) && (ret == 0) ) {
-        lsb++;
         msb++;
         ret = lsm6dsox_read_reg(ctx, LSM6DSOX_PAGE_SEL, (uint8_t*)&page_sel, 1);
         if (ret == 0) {
@@ -1812,10 +1810,11 @@ int32_t lsm6dsox_ln_pg_write(stmdev_ctx_t *ctx, uint16_t address,
         }
       }
     }
-    page_sel.page_sel = 0;
-    page_sel.not_used_01 = 1;
-    ret = lsm6dsox_write_reg(ctx, LSM6DSOX_PAGE_SEL, (uint8_t*) &page_sel, 1);
   }
+  page_sel.page_sel = 0;
+  page_sel.not_used_01 = 1;
+  ret = lsm6dsox_write_reg(ctx, LSM6DSOX_PAGE_SEL, (uint8_t*) &page_sel, 1);
+
   if (ret == 0) {
 
     ret = lsm6dsox_read_reg(ctx, LSM6DSOX_PAGE_RW, (uint8_t*) &page_rw, 1);
