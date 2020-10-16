@@ -134,8 +134,8 @@ void lsm6dsox_mlc(void)
    */
 
   /* Turn off embedded features */
-  lsm6dsox_enbedded_sens_get(&dev_ctx, &emb_sens);
-  lsm6dsox_enbedded_sens_off(&dev_ctx);
+  lsm6dsox_embedded_sens_get(&dev_ctx, &emb_sens);
+  lsm6dsox_embedded_sens_off(&dev_ctx);
   platform_delay(10);
 
   /* Turn off Sensors */
@@ -161,7 +161,7 @@ void lsm6dsox_mlc(void)
   lsm6dsox_int_notification_set(&dev_ctx, LSM6DSOX_BASE_PULSED_EMB_LATCHED);
 
   /* Enable embedded features */
-  lsm6dsox_enbedded_sens_set(&dev_ctx, &emb_sens);
+  lsm6dsox_embedded_sens_set(&dev_ctx, &emb_sens);
 
   /* Set Output Data Rate.
    * Selected data rate have to be equal or greater with respect

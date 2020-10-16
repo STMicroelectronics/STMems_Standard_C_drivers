@@ -150,7 +150,7 @@ void example_main_tilt_lsm6dsox(void)
 
   /* Enable Tilt in embedded function. */
   emb_sens.tilt = PROPERTY_ENABLE;
-  lsm6dsox_enbedded_sens_set(&dev_ctx, &emb_sens);
+  lsm6dsox_embedded_sens_set(&dev_ctx, &emb_sens);
 
   /* Uncomment if interrupt generation on Tilt INT1 pin */
   //lsm6dsox_pin_int1_route_get(&dev_ctx, &int1_route);

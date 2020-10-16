@@ -181,7 +181,7 @@ void lsm6dsox_compressed_fifo(void)
   /* Enable FIFO compression on all samples */
   lsm6dsox_compression_algo_set(&dev_ctx, LSM6DSOX_CMP_ALWAYS);
   emb_sens.fifo_compr = PROPERTY_ENABLE;
-  lsm6dsox_enbedded_sens_set(&dev_ctx, &emb_sens);
+  lsm6dsox_embedded_sens_set(&dev_ctx, &emb_sens);
 
   /* Enable drdy 75 us pulse: uncomment if interrupt must be pulsed */
   //lsm6dsox_data_ready_mode_set(&dev_ctx, LSM6DSOX_DRDY_PULSED);

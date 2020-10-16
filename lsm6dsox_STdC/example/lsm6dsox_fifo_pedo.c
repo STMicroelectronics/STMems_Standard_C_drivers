@@ -188,7 +188,7 @@ void lsm6dsox_fifo_pedo_simple(void)
   /* Enable pedometer */
   lsm6dsox_pedo_sens_set(&ag_ctx, LSM6DSOX_PEDO_BASE_MODE);
   emb_sens.step = PROPERTY_ENABLE;
-  lsm6dsox_enbedded_sens_set(&ag_ctx, &emb_sens);
+  lsm6dsox_embedded_sens_set(&ag_ctx, &emb_sens);
   lsm6dsox_fifo_pedo_batch_set(&ag_ctx, PROPERTY_ENABLE);
   lsm6dsox_steps_reset(&ag_ctx);
 

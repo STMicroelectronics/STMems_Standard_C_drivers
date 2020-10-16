@@ -267,7 +267,7 @@ void lsm6dsox_fsm(void)
                       sizeof(lsm6so_prg_wrist_tilt));
 
   emb_sens.fsm = PROPERTY_ENABLE;
-  lsm6dsox_enbedded_sens_set(&dev_ctx, &emb_sens);
+  lsm6dsox_embedded_sens_set(&dev_ctx, &emb_sens);
  /*
   * End Finite State Machine configuration
   */
