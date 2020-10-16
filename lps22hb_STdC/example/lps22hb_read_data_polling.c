@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,8 +22,9 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3
+ * - STEVAL_MKI109V3 + STEVAL-MET001V1
  * - NUCLEO_F411RE + X_NUCLEO_IKS01A2
+ * - DISCOVERY_SPC584B + STEVAL-MET001V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -32,8 +33,11 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE + X_NUCLEO_IKS01A2 - Host side: UART(COM) to USB bridge
- *                                       - I2C(Default) / SPI(N/A)
+ * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ *                    - I2C(Default) / SPI(supported)
+ *
+ * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -47,51 +51,58 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-//#define STEVAL_MKI109V3
-#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+
+//#define STEVAL_MKI109V3  /* little endian */
+#define NUCLEO_F411RE    /* little endian */
+//#define SPC584B_DIS      /* big endian */
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
-
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
+
+#elif defined(SPC584B_DIS)
+/* DISCOVERY_SPC584B: Define communication interface */
+#define SENSOR_BUS I2CD1
 
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+#include "lps22hb_reg.h"
 #include <string.h>
 #include <stdio.h>
+
+#if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
-#include <lps22hb_reg.h>
+#include "usart.h"
 #include "gpio.h"
 #include "i2c.h"
-#if defined(STEVAL_MKI109V3)
+
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
 #include "usbd_cdc_if.h"
+#include "gpio.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-#include "usart.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
 #endif
-
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
-
-typedef union{
-  int32_t i32bit;
-  uint8_t u8bit[4];
-} axis1bit32_t;
 
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static axis1bit32_t data_raw_pressure;
-static axis1bit16_t data_raw_temperature;
+static uint32_t data_raw_pressure;
+static int16_t data_raw_temperature;
 static float pressure_hPa;
 static float temperature_degC;
 static uint8_t whoamI, rst;
@@ -158,18 +169,18 @@ void example_main_lps22hb(void)
     lps22hb_press_data_ready_get(&dev_ctx, &reg);
     if (reg)
     {
-      memset(data_raw_pressure.u8bit, 0x00, sizeof(int32_t));
-      lps22hb_pressure_raw_get(&dev_ctx, data_raw_pressure.u8bit);
+      memset(&data_raw_pressure, 0x00, sizeof(int32_t));
+      lps22hb_pressure_raw_get(&dev_ctx, &data_raw_pressure);
      
-      pressure_hPa = lps22hb_from_lsb_to_hpa(data_raw_pressure.i32bit);
+      pressure_hPa = lps22hb_from_lsb_to_hpa(data_raw_pressure);
       sprintf((char*)tx_buffer, "pressure [hPa]:%6.2f\r\n", pressure_hPa);
 
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
 
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      lps22hb_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
+      memset(&data_raw_temperature, 0x00, sizeof(int16_t));
+      lps22hb_temperature_raw_get(&dev_ctx, &data_raw_temperature);
 
-      temperature_degC = lps22hb_from_lsb_to_degc(data_raw_temperature.i16bit);
+      temperature_degC = lps22hb_from_lsb_to_degc(data_raw_temperature);
       sprintf((char*)tx_buffer, "temperature [degC]:%6.2f\r\n", temperature_degC);
 
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
@@ -191,19 +202,16 @@ void example_main_lps22hb(void)
 static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
-    HAL_I2C_Mem_Write(handle, LPS22HB_I2C_ADD_H, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-#ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Write(handle, LPS22HB_I2C_ADD_H, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_write(handle,  LPS22HB_I2C_ADD_H & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
@@ -221,21 +229,17 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
-    HAL_I2C_Mem_Read(handle, LPS22HB_I2C_ADD_H, reg,
-                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-#ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
-    /* Read command */
-    reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Receive(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Read(handle, LPS22HB_I2C_ADD_H, reg,
+                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_read(handle, LPS22HB_I2C_ADD_H & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
@@ -249,12 +253,28 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#if defined(NUCLEO_F411RE)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
-  #ifdef STEVAL_MKI109V3
+#elif defined(STEVAL_MKI109V3)
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#elif defined(SPC584B_DIS)
+  sd_lld_write(&SD2, tx_buffer, len);
+#endif
+}
+
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
+  HAL_Delay(ms);
+#elif defined(SPC584B_DIS)
+  osalThreadDelayMilliseconds(ms);
+#endif
 }
 
 /*
@@ -262,9 +282,12 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
 }
+
