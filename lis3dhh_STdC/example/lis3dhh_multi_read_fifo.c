@@ -43,41 +43,41 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-#define STEVAL_MKI109V3
+
+//#define STEVAL_MKI109V3  /* little endian */
+
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
-
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#else
-#error "Please leave STEVAL_MKI109V3 defined: this sensor support SPI only interface"
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "stm32f4xx_hal.h"
 #include "lis3dhh_reg.h"
-#include "gpio.h"
-#include "i2c.h"
-#if defined(STEVAL_MKI109V3)
-#include "usbd_cdc_if.h"
-#include "spi.h"
-#endif
 
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
+#if defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
+#include "usbd_cdc_if.h"
+#include "gpio.h"
+#include "spi.h"
+
+#endif
 
 /* Private macro -------------------------------------------------------------*/
 #define    BOOT_TIME   10 //ms
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
+static int16_t data_raw_acceleration[3];
 static float acceleration_mg[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
@@ -159,11 +159,11 @@ void lis3dhh_multi_read_fifo(void)
       while (num-- > 0)
       {
         /* Read XL samples */
-        memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-        lis3dhh_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-        acceleration_mg[0] = lis3dhh_from_lsb_to_mg(data_raw_acceleration.i16bit[0]);
-        acceleration_mg[1] = lis3dhh_from_lsb_to_mg(data_raw_acceleration.i16bit[1]);
-        acceleration_mg[2] = lis3dhh_from_lsb_to_mg(data_raw_acceleration.i16bit[2]);
+        memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
+        lis3dhh_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
+        acceleration_mg[0] = lis3dhh_from_lsb_to_mg(data_raw_acceleration[0]);
+        acceleration_mg[1] = lis3dhh_from_lsb_to_mg(data_raw_acceleration[1]);
+        acceleration_mg[2] = lis3dhh_from_lsb_to_mg(data_raw_acceleration[2]);
 
         sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                 acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
@@ -247,7 +247,9 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
-  HAL_Delay(ms);
+#ifdef STEVAL_MKI109V3
+HAL_Delay(ms);
+#endif
 }
 
 /*

@@ -43,40 +43,35 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-#define STEVAL_MKI109V3
+
+//#define STEVAL_MKI109V3  /* little endian */
+
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
-
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#else
-#error "Please leave STEVAL_MKI109V3 defined: this sensor support SPI only interface"
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "stm32f4xx_hal.h"
-#include <lis3dhh_reg.h>
-#include "gpio.h"
-#include "i2c.h"
+#include "lis3dhh_reg.h"
+
 #if defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
 #include "usbd_cdc_if.h"
+#include "gpio.h"
 #include "spi.h"
+
 #endif
-
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
 
@@ -115,7 +110,7 @@ static void platform_init(void);
 void lis3dhh_self_test(void)
 {
   uint8_t tx_buffer[1000];
-  axis3bit16_t data_raw;
+  int16_t data_raw[3];
   stmdev_ctx_t dev_ctx;
   float val_st_off[3];
   float val_st_on[3];
@@ -167,22 +162,22 @@ void lis3dhh_self_test(void)
 
   /* Check if new value available */
   do {
-    lis3dhh_xl_flag_data_ready_get(&dev_ctx, &drdy);
+    lis3dhh_xl_data_ready_get(&dev_ctx, &drdy);
   } while(!drdy);
   /* Read dummy data and discard it */
-  lis3dhh_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
+  lis3dhh_acceleration_raw_get(&dev_ctx, data_raw);
 
   /* Read 5 sample and get the average vale for each axis */
   memset(val_st_off, 0x00, 3*sizeof(float));
   for (i = 0; i < 5; i++){
     /* Check if new value available */
     do {
-      lis3dhh_xl_flag_data_ready_get(&dev_ctx, &drdy);
+      lis3dhh_xl_data_ready_get(&dev_ctx, &drdy);
     } while(!drdy);
     /* Read data and accumulate the mg value */
-    lis3dhh_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
+    lis3dhh_acceleration_raw_get(&dev_ctx, data_raw);
     for (j = 0; j < 3; j++){
-      val_st_off[j] += lis3dhh_from_fs4g_to_mg(data_raw.i16bit[j]);
+      val_st_off[j] += lis3dhh_from_lsb_to_mg(data_raw[j]);
     }
   }
 
@@ -192,7 +187,7 @@ void lis3dhh_self_test(void)
   }
 
   /* Enable Self Test positive (or negative) */
-  lis3dhh_xl_self_test_set(&dev_ctx, LIS3DHH_XL_ST_NEGATIVE);
+  lis3dhh_self_test_set(&dev_ctx, LIS3DHH_ST_NEGATIVE);
   //lis3dhh_xl_self_test_set(&dev_ctx, LIS3DHH_XL_ST_POSITIVE);
 
   /* Wait stable output */
@@ -200,10 +195,10 @@ void lis3dhh_self_test(void)
 
   /* Check if new value available */
   do {
-    lis3dhh_xl_flag_data_ready_get(&dev_ctx, &drdy);
+    lis3dhh_xl_data_ready_get(&dev_ctx, &drdy);
   } while(!drdy);
   /* Read dummy data and discard it */
-  lis3dhh_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
+  lis3dhh_acceleration_raw_get(&dev_ctx, data_raw);
 
 
   /* Read 5 sample and get the average vale for each axis */
@@ -211,12 +206,12 @@ void lis3dhh_self_test(void)
   for (i = 0; i < 5; i++){
     /* Check if new value available */
     do {
-      lis3dhh_xl_flag_data_ready_get(&dev_ctx, &drdy);
+      lis3dhh_xl_data_ready_get(&dev_ctx, &drdy);
     } while(!drdy);
     /* Read data and accumulate the mg value */
-    lis3dhh_acceleration_raw_get(&dev_ctx, data_raw.u8bit);
+    lis3dhh_acceleration_raw_get(&dev_ctx, data_raw);
     for (j = 0; j < 3; j++){
-      val_st_on[j] += lis3dhh_from_fs4g_to_mg(data_raw.i16bit[j]);
+      val_st_on[j] += lis3dhh_from_lsb_to_mg(data_raw[j]);
     }
   }
 
@@ -240,9 +235,9 @@ void lis3dhh_self_test(void)
   }
 
   /* Disable Self Test */
-  lis3dhh_xl_self_test_set(&dev_ctx, LIS3DHH_XL_ST_DISABLE);
+  lis3dhh_self_test_set(&dev_ctx, LIS3DHH_ST_DISABLE);
   /* Disable sensor. */
-  lis3dhh_xl_data_rate_set(&dev_ctx, LIS3DHH_XL_ODR_OFF);
+  lis3dhh_data_rate_set(&dev_ctx, LIS3DHH_POWER_DOWN);
 
   if (st_result == ST_PASS) {
     sprintf((char*)tx_buffer, "Self Test - PASS\r\n" );
@@ -327,7 +322,9 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
+  #ifdef STEVAL_MKI109V3
   HAL_Delay(ms);
+  #endif
 }
 
 /*

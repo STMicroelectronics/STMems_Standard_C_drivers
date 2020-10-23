@@ -43,47 +43,42 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-#define STEVAL_MKI109V3
+
+//#define STEVAL_MKI109V3  /* little endian */
+
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
-
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#else
-#error "Please leave STEVAL_MKI109V3 defined: this sensor support SPI only interface"
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "stm32f4xx_hal.h"
 #include "lis3dhh_reg.h"
-#include "gpio.h"
-#include "i2c.h"
+
 #if defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
 #include "usbd_cdc_if.h"
+#include "gpio.h"
 #include "spi.h"
+
 #endif
-
-typedef union{
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
-typedef union{
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
 #define    BOOT_TIME   10 //ms
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static axis1bit16_t data_raw_temperature;
+static int16_t data_raw_acceleration[3];
+static int16_t data_raw_temperature;
 static float acceleration_mg[3];
 static float temperature_degC;
 static uint8_t whoamI, rst;
@@ -148,20 +143,20 @@ void lis3dhh_read_data_polling(void)
     if (reg)
     {
       /* Read acceleration data */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      lis3dhh_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
-      acceleration_mg[0] = lis3dhh_from_lsb_to_mg(data_raw_acceleration.i16bit[0]);
-      acceleration_mg[1] = lis3dhh_from_lsb_to_mg(data_raw_acceleration.i16bit[1]);
-      acceleration_mg[2] = lis3dhh_from_lsb_to_mg(data_raw_acceleration.i16bit[2]);
+      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
+      lis3dhh_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
+      acceleration_mg[0] = lis3dhh_from_lsb_to_mg(data_raw_acceleration[0]);
+      acceleration_mg[1] = lis3dhh_from_lsb_to_mg(data_raw_acceleration[1]);
+      acceleration_mg[2] = lis3dhh_from_lsb_to_mg(data_raw_acceleration[2]);
 
       sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
 
       /* Read temperature data */
-      memset(data_raw_temperature.u8bit, 0, sizeof(int16_t));
-      lis3dhh_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = lis3dhh_from_lsb_to_celsius(data_raw_temperature.i16bit);
+      memset(&data_raw_temperature, 0, sizeof(int16_t));
+      lis3dhh_temperature_raw_get(&dev_ctx, &data_raw_temperature);
+      temperature_degC = lis3dhh_from_lsb_to_celsius(data_raw_temperature);
 
       sprintf((char*)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
@@ -243,7 +238,9 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
+  #ifdef STEVAL_MKI109V3
   HAL_Delay(ms);
+  #endif
 }
 
 /*
