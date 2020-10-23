@@ -7,7 +7,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2019 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -36,27 +36,30 @@
   */
 
 /** @defgroup  Endianness definitions
+  * @{
   *
   */
 
+#ifndef DRV_BYTE_ORDER
 #ifndef __BYTE_ORDER__
 
-#define ORDER_LITTLE_ENDIAN 1234
-#define ORDER_BIG_ENDIAN    4321
+#define DRV_LITTLE_ENDIAN 1234
+#define DRV_BIG_ENDIAN    4321
 
-/** if BYTE_ORDER is not defined, choose the endianness of your architecture
+/** if _BYTE_ORDER is not defined, choose the endianness of your architecture
   * by uncommenting the define which fits your platform endianness
   */
-//#define BYTE_ORDER         ORDER_BIG_ENDIAN
-#define BYTE_ORDER         ORDER_LITTLE_ENDIAN
+//#define DRV_BYTE_ORDER    DRV_BIG_ENDIAN
+#define DRV_BYTE_ORDER    DRV_LITTLE_ENDIAN
 
 #else /* defined __BYTE_ORDER__ */
 
-#define ORDER_LITTLE_ENDIAN __ORDER_LITTLE_ENDIAN__
-#define ORDER_BIG_ENDIAN    __ORDER_BIG_ENDIAN__
-#define BYTE_ORDER          __BYTE_ORDER__
+#define DRV_LITTLE_ENDIAN  __ORDER_LITTLE_ENDIAN__
+#define DRV_BIG_ENDIAN     __ORDER_BIG_ENDIAN__
+#define DRV_BYTE_ORDER     __BYTE_ORDER__
 
-#endif /* BYTE_ORDER */
+#endif /* __BYTE_ORDER__*/
+#endif /* DRV_BYTE_ORDER */
 
 /**
   * @}
@@ -72,7 +75,7 @@
 #define MEMS_SHARED_TYPES
 
 typedef struct{
-#if BYTE_ORDER == ORDER_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -81,7 +84,7 @@ typedef struct{
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
-#elif BYTE_ORDER == ORDER_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t bit7       : 1;
   uint8_t bit6       : 1;
   uint8_t bit5       : 1;
@@ -90,7 +93,7 @@ typedef struct{
   uint8_t bit2       : 1;
   uint8_t bit1       : 1;
   uint8_t bit0       : 1;
-#endif /* BYTE_ORDER */
+#endif /* DRV_BYTE_ORDER */
 } bitwise_t;
 
 #define PROPERTY_DISABLE                (0U)
@@ -128,9 +131,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using 
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using 
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -170,116 +173,87 @@ typedef struct {
   *
   */
 
-/**
-  * @addtogroup  LIS3MDL_Sensitivity
-  * @brief       These macro are maintained for back compatibility.
-  *              in order to convert data into engineering units please
-  *              use functions:
-  *                -> _from_fs4_to_gauss(int16_t lsb);
-  *                -> _from_fs8_to_gauss(int16_t lsb);
-  *                -> _from_fs12_to_gauss(int16_t lsb);
-  *                -> _from_fs16_to_gauss(int16_t lsb);
-  *                -> _from_lsb_to_celsius(int16_t lsb);
-  *
-  *              REMOVING the MACRO you are compliant with:
-  *              MISRA-C 2012 [Dir 4.9] -> " avoid function-like macros "
-  * @{
-  *
-  */
-
-#define LIS3MDL_FROM_FS_4G_TO_G(lsb)     (float)( lsb / 6842.0f )
-#define LIS3MDL_FROM_FS_8G_TO_G(lsb)     (float)( lsb / 3421.0f )
-#define LIS3MDL_FROM_FS_12G_TO_G(lsb)    (float)( lsb / 2281.0f )
-#define LIS3MDL_FROM_FS_16G_TO_G(lsb)    (float)( lsb / 1711.0f )
-
-#define LIS3MDL_FROM_LSB_TO_degC(lsb)    (float)(lsb / 8.0f ) + ( 25.0f )
-
-/**
-  * @}
-  *
-  */
-
 #define LIS3MDL_WHO_AM_I       0x0FU
 #define LIS3MDL_CTRL_REG1      0x20U
 typedef struct{
-#if BYTE_ORDER == ORDER_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t st              : 1;
   uint8_t om              : 6; /* om + do + fast_odr -> om */
   uint8_t temp_en         : 1;
-#elif BYTE_ORDER == ORDER_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t temp_en         : 1;
   uint8_t om              : 6; /* om + do + fast_odr -> om */
   uint8_t st              : 1;
-#endif /* BYTE_ORDER */
+#endif /* DRV_BYTE_ORDER */
 } lis3mdl_ctrl_reg1_t;
 
 #define LIS3MDL_CTRL_REG2      0x21U
 typedef struct{
-#if BYTE_ORDER == ORDER_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01     : 2;
   uint8_t soft_rst        : 1;
   uint8_t reboot          : 1;
   uint8_t not_used_02     : 1;
   uint8_t fs              : 2;
   uint8_t not_used_03     : 1;
-#elif BYTE_ORDER == ORDER_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t not_used_03     : 1;
   uint8_t fs              : 2;
   uint8_t not_used_02     : 1;
   uint8_t reboot          : 1;
   uint8_t soft_rst        : 1;
   uint8_t not_used_01     : 2;
-#endif /* BYTE_ORDER */
+#endif /* DRV_BYTE_ORDER */
 } lis3mdl_ctrl_reg2_t;
 
 #define LIS3MDL_CTRL_REG3      0x22U
 typedef struct{
-#if BYTE_ORDER == ORDER_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t md              : 2;
   uint8_t sim             : 1;
   uint8_t not_used_01     : 2;
   uint8_t lp              : 1;
   uint8_t not_used_02     : 2;
-#elif BYTE_ORDER == ORDER_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t not_used_02     : 2;
   uint8_t lp              : 1;
   uint8_t not_used_01     : 2;
   uint8_t sim             : 1;
   uint8_t md              : 2;
-#endif /* BYTE_ORDER */
+#endif /* DRV_BYTE_ORDER */
 } lis3mdl_ctrl_reg3_t;
 
 #define LIS3MDL_CTRL_REG4      0x23U
 typedef struct{
-#if BYTE_ORDER == ORDER_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01     : 1;
   uint8_t ble             : 1;
   uint8_t omz             : 2;
   uint8_t not_used_02     : 4;
-#elif BYTE_ORDER == ORDER_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t not_used_02     : 4;
   uint8_t omz             : 2;
   uint8_t ble             : 1;
   uint8_t not_used_01     : 1;
-#endif /* BYTE_ORDER */
+#endif /* DRV_BYTE_ORDER */
 } lis3mdl_ctrl_reg4_t;
 
 #define LIS3MDL_CTRL_REG5      0x24U
 typedef struct{
-#if BYTE_ORDER == ORDER_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01     : 6;
   uint8_t bdu             : 1;
   uint8_t fast_read       : 1;
-#elif BYTE_ORDER == ORDER_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t fast_read       : 1;
   uint8_t bdu             : 1;
   uint8_t not_used_01     : 6;
-#endif /* BYTE_ORDER */
+#endif /* DRV_BYTE_ORDER */
 } lis3mdl_ctrl_reg5_t;
 
 #define LIS3MDL_STATUS_REG     0x27U
 typedef struct{
-#if BYTE_ORDER == ORDER_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t xda             : 1;
   uint8_t yda             : 1;
   uint8_t zda             : 1;
@@ -288,7 +262,7 @@ typedef struct{
   uint8_t yor             : 1;
   uint8_t zor             : 1;
   uint8_t zyxor           : 1;
-#elif BYTE_ORDER == ORDER_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t zyxor           : 1;
   uint8_t zor             : 1;
   uint8_t yor             : 1;
@@ -297,7 +271,7 @@ typedef struct{
   uint8_t zda             : 1;
   uint8_t yda             : 1;
   uint8_t xda             : 1;
-#endif /* BYTE_ORDER */
+#endif /* DRV_BYTE_ORDER */
 } lis3mdl_status_reg_t;
 
 #define LIS3MDL_OUT_X_L        0x28U
@@ -310,7 +284,7 @@ typedef struct{
 #define LIS3MDL_TEMP_OUT_H     0x2FU
 #define LIS3MDL_INT_CFG        0x30U
 typedef struct{
-#if BYTE_ORDER == ORDER_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ien             : 1;
   uint8_t lir             : 1;
   uint8_t iea             : 1;
@@ -318,7 +292,7 @@ typedef struct{
   uint8_t zien            : 1;
   uint8_t yien            : 1;
   uint8_t xien            : 1;
-#elif BYTE_ORDER == ORDER_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t xien            : 1;
   uint8_t yien            : 1;
   uint8_t zien            : 1;
@@ -326,12 +300,12 @@ typedef struct{
   uint8_t iea             : 1;
   uint8_t lir             : 1;
   uint8_t ien             : 1;
-#endif /* BYTE_ORDER */
+#endif /* DRV_BYTE_ORDER */
 } lis3mdl_int_cfg_t;
 
 #define LIS3MDL_INT_SRC        0x31U
 typedef struct{
-#if BYTE_ORDER == ORDER_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t int_            : 1;
   uint8_t mroi            : 1;
   uint8_t nth_z           : 1;
@@ -340,7 +314,7 @@ typedef struct{
   uint8_t pth_z           : 1;
   uint8_t pth_y           : 1;
   uint8_t pth_x           : 1;
-#elif BYTE_ORDER == ORDER_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t pth_x           : 1;
   uint8_t pth_y           : 1;
   uint8_t pth_z           : 1;
@@ -349,7 +323,7 @@ typedef struct{
   uint8_t nth_z           : 1;
   uint8_t mroi            : 1;
   uint8_t int_            : 1;
-#endif /* BYTE_ORDER */
+#endif /* DRV_BYTE_ORDER */
 } lis3mdl_int_src_t;
 
 #define LIS3MDL_INT_THS_L      0x32U
@@ -390,11 +364,11 @@ int32_t lis3mdl_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
 int32_t lis3mdl_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
                           uint16_t len);
 
-extern float lis3mdl_from_fs4_to_gauss(int16_t lsb);
-extern float lis3mdl_from_fs8_to_gauss(int16_t lsb);
-extern float lis3mdl_from_fs12_to_gauss(int16_t lsb);
-extern float lis3mdl_from_fs16_to_gauss(int16_t lsb);
-extern float lis3mdl_from_lsb_to_celsius(int16_t lsb);
+float lis3mdl_from_fs4_to_gauss(int16_t lsb);
+float lis3mdl_from_fs8_to_gauss(int16_t lsb);
+float lis3mdl_from_fs12_to_gauss(int16_t lsb);
+float lis3mdl_from_fs16_to_gauss(int16_t lsb);
+float lis3mdl_from_lsb_to_celsius(int16_t lsb);
 
 typedef enum{
   LIS3MDL_LP_Hz625      = 0x00,
@@ -472,9 +446,9 @@ int32_t lis3mdl_mag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lis3mdl_mag_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3mdl_magnetic_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lis3mdl_magnetic_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
-int32_t lis3mdl_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lis3mdl_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
 int32_t lis3mdl_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
@@ -547,8 +521,8 @@ int32_t lis3mdl_int_pos_y_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lis3mdl_int_pos_x_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3mdl_int_threshold_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lis3mdl_int_threshold_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lis3mdl_int_threshold_set(stmdev_ctx_t *ctx, uint16_t val);
+int32_t lis3mdl_int_threshold_get(stmdev_ctx_t *ctx, uint16_t *val);
 
 typedef enum{
   LIS3MDL_SPI_4_WIRE   = 0,
