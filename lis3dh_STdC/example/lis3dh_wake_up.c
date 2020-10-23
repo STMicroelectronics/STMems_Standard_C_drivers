@@ -1,9 +1,9 @@
 /*
  ******************************************************************************
- * @file    read_data_polling.c
+ * @file    wake_up.c
  * @author  Sensors Software Solution Team
- * @brief   This file shows how to extract data from the sensor in 
- *          polling mode.
+ * @brief   This file show the simplest way to detect wake-up from sensor.
+ *          This sample show how to use HP filter.
  *
  ******************************************************************************
  * @attention
@@ -103,10 +103,6 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static int16_t data_raw_acceleration[3];
-static int16_t data_raw_temperature;
-static float acceleration_mg[3];
-static float temperature_degC;
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 
@@ -123,82 +119,90 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
-static void tx_com(uint8_t *tx_buffer, uint16_t len);
-static void platform_delay(uint32_t ms);
+static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void lis3dh_read_data_polling(void)
+void lis3dh_wake_up(void)
 {
-  /* Initialize mems driver interface */
+  /*  Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
+  lis3dh_int1_cfg_t int1_cfg;
+  lis3dh_ctrl_reg3_t ctrl_reg3;
+  uint8_t dummy;
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &SENSOR_BUS; 
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /* Wait boot time and initialize platform specific hardware */
+  /* Initialize platform specific hardware */
   platform_init();
 
-  /* Wait sensor boot time */
-  platform_delay(5);
-
-  /* Check device ID */
+  /*  Check device ID */
   lis3dh_device_id_get(&dev_ctx, &whoamI);
-  if (whoamI != LIS3DH_ID){
-    while(1) {
+  if (whoamI != LIS3DH_ID) {
+    while(1)
+    {
       /* manage here device not found */
     }
   }
 
-  /* Enable Block Data Update. */
-  lis3dh_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  /* High-pass filter enabled on interrupt activity 1 */
+  lis3dh_high_pass_int_conf_set(&dev_ctx, LIS3DH_ON_INT1_GEN);
 
-  /* Set Output Data Rate to 1Hz. */
-  lis3dh_data_rate_set(&dev_ctx, LIS3DH_ODR_1Hz);
+  /* Enable HP filter for wake-up event detection
+   *
+   * Use this setting to remove gravity on data output */
+  lis3dh_high_pass_on_outputs_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /* Set full scale to 2g. */
+  /* Enable AOI1 on int1 pin */
+  lis3dh_pin_int1_config_get(&dev_ctx, &ctrl_reg3);
+  ctrl_reg3.i1_ia1 = PROPERTY_ENABLE;
+  lis3dh_pin_int1_config_set(&dev_ctx, &ctrl_reg3);
+
+  /* Interrupt 1 pin latched */
+  lis3dh_int1_pin_notification_mode_set(&dev_ctx,
+                            LIS3DH_INT1_LATCHED);
+
+  /* Set full scale to 2 g */
   lis3dh_full_scale_set(&dev_ctx, LIS3DH_2g);
 
-  /* Enable temperature sensor. */
-  lis3dh_aux_adc_set(&dev_ctx, LIS3DH_AUX_ON_TEMPERATURE);
+  /* Set interrupt threshold to 0x10 -> 250 mg */
+  lis3dh_int1_gen_threshold_set(&dev_ctx, 0x10);
 
-  /* Set device in continuous mode with 12 bit resol. */
+  /* Set no time duration */
+  lis3dh_int1_gen_duration_set(&dev_ctx, 0);
+
+  /* Dummy read to force the HP filter to current acceleration value. */
+  lis3dh_filter_reference_get(&dev_ctx, &dummy);
+
+  /* Configure wake-up interrupt event on all axis */
+  lis3dh_int1_gen_conf_get(&dev_ctx, &int1_cfg);
+  int1_cfg.zhie = PROPERTY_ENABLE;
+  int1_cfg.yhie = PROPERTY_ENABLE;
+  int1_cfg.xhie = PROPERTY_ENABLE;
+  int1_cfg.aoi = PROPERTY_DISABLE;
+  lis3dh_int1_gen_conf_set(&dev_ctx, &int1_cfg);
+
+  /* Set device in HR mode */
   lis3dh_operating_mode_set(&dev_ctx, LIS3DH_HR_12bit);
- 
-  /* Read samples in polling mode (no int) */
-  while(1) {
-    lis3dh_reg_t reg;
 
-    /* Read output only if new value available */
-    lis3dh_xl_data_ready_get(&dev_ctx, &reg.byte);
-    if (reg.byte) {
-      /* Read accelerometer data */
-      memset(data_raw_acceleration, 0x00, 3*sizeof(int16_t));
-      lis3dh_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-      acceleration_mg[0] =
-        lis3dh_from_fs2_hr_to_mg(data_raw_acceleration[0]);
-      acceleration_mg[1] =
-        lis3dh_from_fs2_hr_to_mg(data_raw_acceleration[1]);
-      acceleration_mg[2] =
-        lis3dh_from_fs2_hr_to_mg(data_raw_acceleration[2]);
-     
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    }
-   
-    lis3dh_temp_data_ready_get(&dev_ctx, &reg.byte);
-    if (reg.byte) {
-      /* Read temperature data */
-      memset(&data_raw_temperature, 0x00, sizeof(int16_t));
-      lis3dh_temperature_raw_get(&dev_ctx, &data_raw_temperature);
-      temperature_degC =
-        lis3dh_from_lsb_hr_to_celsius(data_raw_temperature);
-      
-      sprintf((char*)tx_buffer,
-              "Temperature [degC]:%6.2f\r\n",
-              temperature_degC);
+  /* Set Output Data Rate to 100 Hz */
+  lis3dh_data_rate_set(&dev_ctx, LIS3DH_ODR_100Hz);
+
+  while(1)
+  {
+    lis3dh_int1_src_t src;
+
+    /* Read INT pin 1 in polling mode
+     * or read src status register
+     */
+    lis3dh_int1_gen_source_get(&dev_ctx, &src);
+    if (src.xh || src.yh || src.zh) {
+      lis3dh_int1_gen_source_get(&dev_ctx, &src);
+      sprintf((char*)tx_buffer, "wake-up detected : "
+              "x %d, y %d, z %d\r\n",
+              src.xh, src.yh, src.zh);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
@@ -316,5 +320,4 @@ static void platform_init(void)
   HAL_Delay(1000);
 #endif
 }
-
 
