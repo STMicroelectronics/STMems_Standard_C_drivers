@@ -44,7 +44,7 @@
  * following target board and redefine yours.
  */
 
-//#define STEVAL_MKI109V3  /* little endian */
+#define STEVAL_MKI109V3  /* little endian */
 
 
 /* ATTENTION: By default the driver is little endian. If you need switch
