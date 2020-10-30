@@ -1,9 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_polling.c
+ * @file    wake_up.c
  * @author  Sensors Software Solution Team
- * @brief   This file shows how to extract data from the sensor in 
- *          polling mode.
+ * @brief   LIS3DE driver file
  *
  ******************************************************************************
  * @attention
@@ -71,6 +70,10 @@
 /* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
+/* Pin configured as platform interrupt from LIS3DE INT1. */
+#define LIS3DE_INT1_PIN GPIO_PIN_4
+#define LIS3DE_INT1_GPIO_PORT GPIOA
+
 #elif defined(SPC584B_DIS)
 /* DISCOVERY_SPC584B: Define communication interface */
 #define SENSOR_BUS I2CD1
@@ -99,12 +102,10 @@
 #endif
 
 /* Private macro -------------------------------------------------------------*/
+#define TX_BUF_DIM          1000
 
 /* Private variables ---------------------------------------------------------*/
-static int16_t data_raw_acceleration[3];
-static float acceleration_mg[3];
-static uint8_t whoamI;
-static uint8_t tx_buffer[1000];
+static uint8_t tx_buffer[TX_BUF_DIM];
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -122,63 +123,95 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 static void tx_com(uint8_t *tx_buffer, uint16_t len);
 static void platform_delay(uint32_t ms);
 static void platform_init(void);
+static int32_t platform_reap_int_pin(void);
 
 /* Main Example --------------------------------------------------------------*/
-void lis3de_read_data_polling(void)
+
+/*
+ * High-pass filter enabled on interrupt activity 1
+ * Threshold = 250 mg
+ * Configure wake-up event
+ * Poll INT1 pin waiting for the wake-up event
+ */
+void lis3de_wake_up(void)
 {
-  /* Initialize mems driver interface */
+  /* Initialize mems driver interface. */
   stmdev_ctx_t dev_ctx;
+  lis3de_ig1_cfg_t ig1_cfg;
+  lis3de_ctrl_reg3_t ctrl_reg3;
+  uint8_t whoamI;
+  //uint8_t dummy;
 
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &SENSOR_BUS; 
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /* Wait boot time and initialize platform specific hardware */
-  platform_init();
-
-  /* Wait sensor boot time */
-  platform_delay(5);
-
-  /* Check device ID */
+  /* Check device ID. */
+  whoamI = 0;
   lis3de_device_id_get(&dev_ctx, &whoamI);
-  if (whoamI != LIS3DE_ID){
-    while(1) {
-      /* manage here device not found */
-    }
-  }
+  if (whoamI != LIS3DE_ID)
+    while(1); /* manage here device not found */
 
-  /* Enable Block Data Update. */
-  lis3de_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Set Output Data Rate to 100 Hz. */
+  lis3de_data_rate_set(&dev_ctx, LIS3DE_ODR_100Hz);
 
-  /* Set Output Data Rate to 1Hz. */
-  lis3de_data_rate_set(&dev_ctx, LIS3DE_ODR_1Hz);
+  /*
+   * High-pass filter enabled on interrupt activity 1.
+   * Uncomment if HP filter enabled.
+   */
+  //lis3de_high_pass_int_conf_set(&dev_ctx, LIS3DE_ON_INT1_GEN);
 
-  /* Set full scale to 2g. */
+  /*
+   * Enable HP filter for wake-up event detection.
+   * Uncomment if HP filter enabled.
+   */
+  //lis3de_high_pass_on_outputs_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /* Enable AOI1 on int1 pin. */
+  memset((uint8_t *)&ctrl_reg3, 0, sizeof(ctrl_reg3));
+  ctrl_reg3.int1_ig1 = PROPERTY_ENABLE;
+  lis3de_pin_int1_config_set(&dev_ctx, &ctrl_reg3);
+
+  /* Interrupt 1 pin latched. */
+  lis3de_int1_pin_notification_mode_set(&dev_ctx, LIS3DE_INT1_LATCHED);
+
+  /* Set full scale to 2 g. */
   lis3de_full_scale_set(&dev_ctx, LIS3DE_2g);
 
-  /* Enable temperature sensor. */
-  lis3de_aux_adc_set(&dev_ctx, LIS3DE_AUX_ON_TEMPERATURE);
+  /* Set interrupt threshold to 0x10 -> 250 mg. */
+  lis3de_int1_gen_threshold_set(&dev_ctx, 0x10);
 
-  /* Set device in normal mode. */
-  lis3de_operating_mode_set(&dev_ctx, LIS3DE_NM);
- 
-  /* Read samples in polling mode (no int) */
-  while(1) {
-    lis3de_reg_t reg;
+  /* Set no time duration. */
+  lis3de_int1_gen_duration_set(&dev_ctx, 0);
 
-    /* Read output only if new value available */
-    lis3de_xl_data_ready_get(&dev_ctx, &reg.byte);
-    if (reg.byte) {
-      /* Read accelerometer data */
-      memset(data_raw_acceleration, 0x00, 3*sizeof(int16_t));
-      lis3de_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-      acceleration_mg[0] = lis3de_from_fs2_to_mg(data_raw_acceleration[0]);
-      acceleration_mg[1] = lis3de_from_fs2_to_mg(data_raw_acceleration[1]);
-      acceleration_mg[2] = lis3de_from_fs2_to_mg(data_raw_acceleration[2]);
-     
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+  /*
+   * Dummy read to force the HP filter to current acceleration value.
+   * Uncomment if HP filter enabled.
+   */
+  //lis3de_filter_reference_get(&dev_ctx, &dummy);
+
+  /* Configure wake-up event. */
+  ig1_cfg.zhie = PROPERTY_ENABLE;
+  ig1_cfg.yhie = PROPERTY_ENABLE;
+  ig1_cfg.xhie = PROPERTY_ENABLE;
+  ig1_cfg.aoi = PROPERTY_DISABLE;
+  lis3de_int1_gen_conf_set(&dev_ctx, &ig1_cfg);
+
+  /* Set device in HR mode. */
+  lis3de_operating_mode_set(&dev_ctx, LIS3DE_LP);
+
+  while(1)
+  {
+    /* Read INT pin 1 in polling mode. */
+     lis3de_ig1_source_t src;
+
+    if (platform_reap_int_pin())
+    {
+      lis3de_int1_gen_source_get(&dev_ctx, &src);
+      sprintf((char*)tx_buffer, "wake-up detected : "
+              "x %d, y %d, z %d\r\n",
+              src.xh, src.yh, src.zh);
+      tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
     }
   }
 }
@@ -295,3 +328,16 @@ static void platform_init(void)
   HAL_Delay(1000);
 #endif
 }
+
+/*
+ * @brief  Function to read external interrupt pin.
+ */
+static int32_t platform_reap_int_pin(void)
+{
+#ifdef NUCLEO_F411RE
+    return HAL_GPIO_ReadPin(LIS3DE_INT1_GPIO_PORT, LIS3DE_INT1_PIN);
+#else /* NUCLEO_STM32F411RE */
+    return 0;
+#endif /* NUCLEO_STM32F411RE */
+}
+

@@ -1,9 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_polling.c
+ * @file    free_fall.c
  * @author  Sensors Software Solution Team
- * @brief   This file shows how to extract data from the sensor in 
- *          polling mode.
+ * @brief   LIS3DE driver file
  *
  ******************************************************************************
  * @attention
@@ -71,6 +70,10 @@
 /* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
+/* Pin configured as platform interrupt from LIS3DE INT1. */
+#define LIS3DE_INT1_PIN GPIO_PIN_4
+#define LIS3DE_INT1_GPIO_PORT GPIOA
+
 #elif defined(SPC584B_DIS)
 /* DISCOVERY_SPC584B: Define communication interface */
 #define SENSOR_BUS I2CD1
@@ -98,17 +101,17 @@
 #include "components.h"
 #endif
 
+
 /* Private macro -------------------------------------------------------------*/
+#define TX_BUF_DIM          1000
 
 /* Private variables ---------------------------------------------------------*/
-static int16_t data_raw_acceleration[3];
-static float acceleration_mg[3];
-static uint8_t whoamI;
-static uint8_t tx_buffer[1000];
+static uint8_t tx_buffer[TX_BUF_DIM];
 
 /* Extern variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
+
 /*
  *   WARNING:
  *   Functions declare in this section are defined at the end of this file
@@ -122,62 +125,81 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 static void tx_com(uint8_t *tx_buffer, uint16_t len);
 static void platform_delay(uint32_t ms);
 static void platform_init(void);
+static int32_t platform_reap_int_pin(void);
 
 /* Main Example --------------------------------------------------------------*/
-void lis3de_read_data_polling(void)
-{
-  /* Initialize mems driver interface */
-  stmdev_ctx_t dev_ctx;
 
+/*
+ * Set interrupt threshold to 16h -> 350 mg
+ * Set interrupt Duration to 03h -> minimum event duration 30 ms
+ * Configure free-fall recognition
+ * Poll on platform INT pin 1 waiting for free fall event detection
+ */
+void lis3de_freefall(void)
+{
+  stmdev_ctx_t dev_ctx;
+  lis3de_ctrl_reg3_t ctrl_reg3;
+  lis3de_ig1_cfg_t ig1_cfg;
+ 
+  uint8_t whoamI;
+
+  /* Initialize mems driver interface. */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &SENSOR_BUS; 
+  dev_ctx.handle = &SENSOR_BUS;
 
-  /* Wait boot time and initialize platform specific hardware */
-  platform_init();
-
-  /* Wait sensor boot time */
-  platform_delay(5);
-
-  /* Check device ID */
+  /* Check device ID. */
+  whoamI = 0;
   lis3de_device_id_get(&dev_ctx, &whoamI);
-  if (whoamI != LIS3DE_ID){
-    while(1) {
-      /* manage here device not found */
-    }
-  }
+  if (whoamI != LIS3DE_ID)
+    while(1); /* manage here device not found */
 
-  /* Enable Block Data Update. */
-  lis3de_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Set Output Data Rate to 100 Hz. */
+  lis3de_data_rate_set(&dev_ctx, LIS3DE_ODR_100Hz);
 
-  /* Set Output Data Rate to 1Hz. */
-  lis3de_data_rate_set(&dev_ctx, LIS3DE_ODR_1Hz);
-
-  /* Set full scale to 2g. */
+  /* Set full scale to 2 g. */
   lis3de_full_scale_set(&dev_ctx, LIS3DE_2g);
 
-  /* Enable temperature sensor. */
-  lis3de_aux_adc_set(&dev_ctx, LIS3DE_AUX_ON_TEMPERATURE);
+  /* Enable AOI1 interrupt on INT pin 1. */
+  memset((uint8_t *)&ctrl_reg3, 0, sizeof(ctrl_reg3));
+  ctrl_reg3.int1_ig1 = PROPERTY_ENABLE;
+  lis3de_pin_int1_config_set(&dev_ctx, &ctrl_reg3);
 
-  /* Set device in normal mode. */
-  lis3de_operating_mode_set(&dev_ctx, LIS3DE_NM);
- 
-  /* Read samples in polling mode (no int) */
-  while(1) {
-    lis3de_reg_t reg;
+  /* Enable Interrupt 1 pin latched. */
+  lis3de_int1_pin_notification_mode_set(&dev_ctx, LIS3DE_INT1_LATCHED);
 
-    /* Read output only if new value available */
-    lis3de_xl_data_ready_get(&dev_ctx, &reg.byte);
-    if (reg.byte) {
-      /* Read accelerometer data */
-      memset(data_raw_acceleration, 0x00, 3*sizeof(int16_t));
-      lis3de_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-      acceleration_mg[0] = lis3de_from_fs2_to_mg(data_raw_acceleration[0]);
-      acceleration_mg[1] = lis3de_from_fs2_to_mg(data_raw_acceleration[1]);
-      acceleration_mg[2] = lis3de_from_fs2_to_mg(data_raw_acceleration[2]);
-     
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+  /*
+   * Set threshold to 16h -> 350 mg
+   * Set Duration to 03h -> minimum event duration
+   * If acceleration an all axis is below the threshold for more
+   * than 30 ms than device is falling down
+   */
+  lis3de_int1_gen_threshold_set(&dev_ctx, 0x16);
+  lis3de_int1_gen_duration_set(&dev_ctx, 0x03);
+
+  /*
+   * Configure free-fall recognition
+   * Enable condiction (AND) for x, y, z acc. data below threshold.
+   */
+  memset((uint8_t *)&ig1_cfg, 0, sizeof(ig1_cfg));
+  ig1_cfg.aoi = PROPERTY_ENABLE;
+  ig1_cfg.zlie = PROPERTY_ENABLE;
+  ig1_cfg.ylie = PROPERTY_ENABLE;
+  ig1_cfg.xlie = PROPERTY_ENABLE;
+  lis3de_int1_gen_conf_set(&dev_ctx, &ig1_cfg);
+
+  /* Set device in HR mode. */
+  lis3de_operating_mode_set(&dev_ctx, LIS3DE_LP);
+
+  while(1)
+  {
+ /* Read INT pin 1 in polling mode. */
+  lis3de_ig1_source_t src;
+
+    if (platform_reap_int_pin())
+    {
+      lis3de_int1_gen_source_get(&dev_ctx, &src);
+      sprintf((char*)tx_buffer, "freefall detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }
@@ -294,4 +316,16 @@ static void platform_init(void)
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
 #endif
+}
+
+/*
+ * @brief  Function to read external interrupt pin.
+ */
+static int32_t platform_reap_int_pin(void)
+{
+#ifdef NUCLEO_F411RE
+    return HAL_GPIO_ReadPin(LIS3DE_INT1_GPIO_PORT, LIS3DE_INT1_PIN);
+#else /* NUCLEO_STM32F411RE */
+    return 0;
+#endif /* NUCLEO_STM32F411RE */
 }
