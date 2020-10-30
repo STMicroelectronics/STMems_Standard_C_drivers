@@ -929,6 +929,46 @@ int32_t iis2iclx_fifo_out_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
   */
 
 /**
+  * @brief  DEVICE_CONF bit configuration[set]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of device_conf in reg CTRL9_XL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t iis2iclx_device_conf_set(stmdev_ctx_t *ctx, uint8_t val)
+{
+  iis2iclx_ctrl9_xl_t ctrl9_xl;
+  int32_t ret;
+
+  ret = iis2iclx_read_reg(ctx, IIS2ICLX_CTRL9_XL, (uint8_t*)&ctrl9_xl, 1);
+  if(ret == 0){
+    ctrl9_xl.device_conf = (uint8_t)val;
+    ret = iis2iclx_write_reg(ctx, IIS2ICLX_CTRL9_XL, (uint8_t*)&ctrl9_xl, 1);
+  }
+  return ret;
+}
+
+/**
+  * @brief  DEVICE_CONF bit configuration[get]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of device_conf in reg CTRL9_XL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t iis2iclx_device_conf_get(stmdev_ctx_t *ctx, uint8_t *val)
+{
+  iis2iclx_ctrl9_xl_t ctrl9_xl;
+  int32_t ret;
+
+  ret = iis2iclx_read_reg(ctx, IIS2ICLX_CTRL9_XL, (uint8_t*)&ctrl9_xl, 1);
+  *val = ctrl9_xl.device_conf;
+
+  return ret;
+}
+
+/**
   * @brief  Difference in percentage of the effective ODR (and timestamp rate)
   *         with respect to the typical.[set]
   *         Step:  0.15%. 8-bit format, 2's complement.
@@ -3476,6 +3516,9 @@ int32_t iis2iclx_fifo_xl_batch_get(stmdev_ctx_t *ctx,
     case IIS2ICLX_XL_NOT_BATCHED:
       *val = IIS2ICLX_XL_NOT_BATCHED;
       break;
+    case IIS2ICLX_XL_BATCHED_AT_1Hz6:
+      *val = IIS2ICLX_XL_BATCHED_AT_1Hz6;
+      break;
     case IIS2ICLX_XL_BATCHED_AT_12Hz5:
       *val = IIS2ICLX_XL_BATCHED_AT_12Hz5;
       break;
@@ -3617,6 +3660,9 @@ int32_t iis2iclx_fifo_temp_batch_get(stmdev_ctx_t *ctx,
   switch (fifo_ctrl4.odr_t_batch){
     case IIS2ICLX_TEMP_NOT_BATCHED:
       *val = IIS2ICLX_TEMP_NOT_BATCHED;
+      break;
+    case IIS2ICLX_TEMP_BATCHED_AT_1Hz6:
+      *val = IIS2ICLX_TEMP_BATCHED_AT_1Hz6;
       break;
     case IIS2ICLX_TEMP_BATCHED_AT_52Hz:
       *val = IIS2ICLX_TEMP_BATCHED_AT_52Hz;

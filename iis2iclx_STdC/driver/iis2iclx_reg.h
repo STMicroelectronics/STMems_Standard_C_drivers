@@ -2435,6 +2435,9 @@ int32_t iis2iclx_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
 int32_t iis2iclx_fifo_out_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
+int32_t iis2iclx_device_conf_set(stmdev_ctx_t *ctx, uint8_t val);
+int32_t iis2iclx_device_conf_get(stmdev_ctx_t *ctx, uint8_t *val);
+
 int32_t iis2iclx_odr_cal_reg_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t iis2iclx_odr_cal_reg_get(stmdev_ctx_t *ctx, uint8_t *val);
 
@@ -2688,7 +2691,8 @@ int32_t iis2iclx_fifo_stop_on_wtm_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t iis2iclx_fifo_stop_on_wtm_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
-  IIS2ICLX_XL_NOT_BATCHED       =  0,
+  IIS2ICLX_XL_NOT_BATCHED        =  0,
+  IIS2ICLX_XL_BATCHED_AT_1Hz6    = 11,
   IIS2ICLX_XL_BATCHED_AT_12Hz5   =  1,
   IIS2ICLX_XL_BATCHED_AT_26Hz    =  2,
   IIS2ICLX_XL_BATCHED_AT_52Hz    =  3,
@@ -2713,6 +2717,7 @@ int32_t iis2iclx_fifo_mode_get(stmdev_ctx_t *ctx, iis2iclx_fifo_mode_t *val);
 
 typedef enum {
   IIS2ICLX_TEMP_NOT_BATCHED        = 0,
+  IIS2ICLX_TEMP_BATCHED_AT_1Hz6    = 1,
   IIS2ICLX_TEMP_BATCHED_AT_12Hz5   = 2,
   IIS2ICLX_TEMP_BATCHED_AT_52Hz    = 3,
 } iis2iclx_odr_t_batch_t;

@@ -14,4 +14,4 @@ every hardware.
 
 www.st.com/mems
 
-IIS2ICLX DS rev4.0
+IIS2ICLX DS rev5.0
