@@ -210,7 +210,7 @@ static int32_t platform_read_int_pin(void)
 #endif /* LSM6DSOX_INT1 */
 
 #else /* NUCLEO_STM32F411RE */
-    return 0;
+    return 0; // Check the interrupt pin
 #endif /* NUCLEO_STM32F411RE */
 }
 
@@ -281,7 +281,7 @@ static int32_t lsm6dsox_read_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
   uint8_t drdy;
   lsm6dsox_status_master_t master_status;
   lsm6dsox_sh_cfg_read_t val = {
-      .slv_add = LIS2MDL_I2C_ADD,
+      .slv_add = LIS2MDL_I2C_ADD >> 1,
       .slv_subadd = reg,
       .slv_len = len,
   };
@@ -296,7 +296,7 @@ static int32_t lsm6dsox_read_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
   lsm6dsox_sh_slave_connected_set(&ag_ctx, LSM6DSOX_SLV_0);
 
   /* Enable I2C Master and I2C master. */
-   lsm6dsox_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
+  lsm6dsox_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
 
   /* Enable accelerometer to trigger Sensor Hub operation. */
   lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_104Hz);
@@ -320,7 +320,7 @@ static int32_t lsm6dsox_read_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
   lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_OFF);
 
   /* Read SensorHub registers. */
-  lsm6dsox_sh_read_data_raw_get(&ag_ctx, (lsm6dsox_emb_sh_read_t*)&data, len);
+  lsm6dsox_sh_read_data_raw_get(&ag_ctx, (lsm6dsox_emb_sh_read_t*)data, len);
 
   return mm_error;
 }
@@ -337,7 +337,7 @@ static int32_t lsm6dsox_write_lis2mdl_cx(void* ctx, uint8_t reg, uint8_t* data,
   uint8_t drdy;
   lsm6dsox_status_master_t master_status;
   lsm6dsox_sh_cfg_write_t val = {
-      .slv0_add = LIS2MDL_I2C_ADD,
+      .slv0_add = LIS2MDL_I2C_ADD >> 1,
       .slv0_subadd = reg,
       .slv0_data = *data,
   };
@@ -500,7 +500,7 @@ void lsm6dsox_hub_fifo_lis2mdl_timestamp_simple(void)
   /* Enable latched interrupt notification. */
   lsm6dsox_int_notification_set(&ag_ctx, LSM6DSOX_ALL_INT_LATCHED);
 
- /* Enable drdy 75 μs pulse: uncomment if interrupt must be pulsed. */
+ /* Enable drdy 75 us pulse: uncomment if interrupt must be pulsed. */
  //lsm6dsox_data_ready_mode_set(&ag_ctx, LSM6DSOX_DRDY_PULSED);
 
 #ifdef LSM6DSOX_INT1
@@ -510,8 +510,8 @@ void lsm6dsox_hub_fifo_lis2mdl_timestamp_simple(void)
    * Remember that INT1 pin is used by sensor to switch in I3C mode.
    */
   lsm6dsox_pin_int1_route_get(&ag_ctx, &int1_route);
-  int1_route.int1_ctrl.int1_fifo_th = PROPERTY_ENABLE;
-  lsm6dsox_pin_int1_route_set(&ag_ctx, &int1_route);
+  int1_route.fifo_th = PROPERTY_ENABLE;
+  lsm6dsox_pin_int1_route_set(&ag_ctx, int1_route);
 #else /* LSM6DSOX_INT1 */
   /* FIFO watermark interrupt routed on INT2 pin. */
   lsm6dsox_pin_int2_route_get(&ag_ctx, NULL, &int2_route);
