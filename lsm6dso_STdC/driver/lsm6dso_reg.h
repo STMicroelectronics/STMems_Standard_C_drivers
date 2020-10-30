@@ -2369,10 +2369,9 @@ int32_t lsm6dso_den_mark_axis_z_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dso_den_mark_axis_z_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
-  LSM6DSO_PEDO_DISABLE              = 0x00,
-  LSM6DSO_PEDO_BASE_MODE            = 0x01,
-  LSM6DSO_FALSE_STEP_REJ            = 0x13,
-  LSM6DSO_FALSE_STEP_REJ_ADV_MODE   = 0x33,
+  LSM6DSO_PEDO_BASE_MODE            = 0x00,
+  LSM6DSO_FALSE_STEP_REJ            = 0x10,
+  LSM6DSO_FALSE_STEP_REJ_ADV_MODE   = 0x30,
 } lsm6dso_pedo_md_t;
 int32_t lsm6dso_pedo_sens_set(stmdev_ctx_t *ctx, lsm6dso_pedo_md_t val);
 int32_t lsm6dso_pedo_sens_get(stmdev_ctx_t *ctx, lsm6dso_pedo_md_t *val);
@@ -2396,14 +2395,8 @@ int32_t lsm6dso_pedo_int_mode_set(stmdev_ctx_t *ctx,
 int32_t lsm6dso_pedo_int_mode_get(stmdev_ctx_t *ctx,
                                   lsm6dso_carry_count_en_t *val);
 
-int32_t lsm6dso_motion_sens_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso_motion_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
-
 int32_t lsm6dso_motion_flag_data_ready_get(stmdev_ctx_t *ctx,
                                                 uint8_t *val);
-
-int32_t lsm6dso_tilt_sens_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso_tilt_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm6dso_tilt_flag_data_ready_get(stmdev_ctx_t *ctx,
                                               uint8_t *val);
@@ -2458,9 +2451,6 @@ int32_t lsm6dso_mag_x_orient_get(stmdev_ctx_t *ctx,
 
 int32_t lsm6dso_long_cnt_flag_data_ready_get(stmdev_ctx_t *ctx,
                                              uint8_t *val);
-
-int32_t lsm6dso_emb_fsm_en_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso_emb_fsm_en_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef struct {
     lsm6dso_fsm_enable_a_t          fsm_enable_a;
@@ -2997,6 +2987,20 @@ typedef struct {
 } lsm6dso_data_t;
 int32_t lsm6dso_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
                           lsm6dso_md_t *md, lsm6dso_data_t *data);
+
+typedef struct {
+  uint8_t sig_mot      : 1; /* significant motion */
+  uint8_t tilt         : 1; /* tilt detection  */
+  uint8_t step         : 1; /* step counter/detector */
+  uint8_t step_adv     : 1; /* step counter advanced mode */
+  uint8_t fsm          : 1; /* finite state machine */
+  uint8_t fifo_compr   : 1; /* FIFO compression */
+} lsm6dso_emb_sens_t;
+int32_t lsm6dso_embedded_sens_set(stmdev_ctx_t *ctx,
+                                   lsm6dso_emb_sens_t *emb_sens);
+int32_t lsm6dso_embedded_sens_get(stmdev_ctx_t *ctx,
+                                   lsm6dso_emb_sens_t *emb_sens);
+int32_t lsm6dso_embedded_sens_off(stmdev_ctx_t *ctx);
 
 /**
   * @}

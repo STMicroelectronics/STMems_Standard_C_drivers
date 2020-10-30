@@ -5106,28 +5106,12 @@ int32_t lsm6dso_compression_algo_init_get(stmdev_ctx_t *ctx, uint8_t *val)
 int32_t lsm6dso_compression_algo_set(stmdev_ctx_t *ctx,
                                      lsm6dso_uncoptr_rate_t val)
 {
-  lsm6dso_emb_func_en_b_t emb_func_en_b;
   lsm6dso_fifo_ctrl2_t fifo_ctrl2;
   int32_t ret;
 
-  ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_B,
-                           (uint8_t*)&emb_func_en_b, 1);
-  }
-  if (ret == 0) {
-    emb_func_en_b.fifo_compr_en = ((uint8_t)val & 0x04U) >> 2;
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_EN_B,
-                            (uint8_t*)&emb_func_en_b, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
-  }
-  if (ret == 0) {
+  ret = lsm6dso_read_reg(ctx, LSM6DSO_FIFO_CTRL2,
+                         (uint8_t*)&fifo_ctrl2, 1);
 
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_FIFO_CTRL2,
-                           (uint8_t*)&fifo_ctrl2, 1);
-  }
   if (ret == 0) {
     fifo_ctrl2.fifo_compr_rt_en = ((uint8_t)val & 0x04U) >> 2;
     fifo_ctrl2.uncoptr_rate = (uint8_t)val & 0x03U;
@@ -6535,41 +6519,15 @@ int32_t lsm6dso_den_mark_axis_z_get(stmdev_ctx_t *ctx, uint8_t *val)
   */
 int32_t lsm6dso_pedo_sens_set(stmdev_ctx_t *ctx, lsm6dso_pedo_md_t val)
 {
-  lsm6dso_emb_func_en_a_t emb_func_en_a;
-  lsm6dso_emb_func_en_b_t emb_func_en_b;
   lsm6dso_pedo_cmd_reg_t pedo_cmd_reg;
   int32_t ret;
 
   ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_PEDO_CMD_REG,
                                 (uint8_t*)&pedo_cmd_reg);
-  if (ret == 0) {
-    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_A,
-                           (uint8_t*)&emb_func_en_a, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_B,
-                           (uint8_t*)&emb_func_en_b, 1);
 
-    emb_func_en_a.pedo_en = (uint8_t)val & 0x01U;
-    emb_func_en_b.pedo_adv_en = ((uint8_t)val & 0x02U)>>1;
+  if (ret == 0) {
     pedo_cmd_reg.fp_rejection_en = ((uint8_t)val & 0x10U)>>4;
     pedo_cmd_reg.ad_det_en = ((uint8_t)val & 0x20U)>>5;
-  }
-  if (ret == 0) {
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_EN_A,
-                            (uint8_t*)&emb_func_en_a, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_EN_B,
-                            (uint8_t*)&emb_func_en_b, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
-  }
-  if (ret == 0) {
     ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_PEDO_CMD_REG,
                                    (uint8_t*)&pedo_cmd_reg);
   }
@@ -6585,32 +6543,12 @@ int32_t lsm6dso_pedo_sens_set(stmdev_ctx_t *ctx, lsm6dso_pedo_md_t val)
   */
 int32_t lsm6dso_pedo_sens_get(stmdev_ctx_t *ctx, lsm6dso_pedo_md_t *val)
 {
-  lsm6dso_emb_func_en_a_t emb_func_en_a;
-  lsm6dso_emb_func_en_b_t emb_func_en_b;
   lsm6dso_pedo_cmd_reg_t pedo_cmd_reg;
   int32_t ret;
 
   ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_PEDO_CMD_REG,
                                 (uint8_t*)&pedo_cmd_reg);
-  if (ret == 0) {
-    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_A,
-                           (uint8_t*)&emb_func_en_a, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_B,
-                           (uint8_t*)&emb_func_en_b, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
-  }
-  switch ( (pedo_cmd_reg.ad_det_en <<5) | (pedo_cmd_reg.fp_rejection_en << 4) |
-           (emb_func_en_b.pedo_adv_en << 1) | emb_func_en_a.pedo_en) {
-    case LSM6DSO_PEDO_DISABLE:
-      *val = LSM6DSO_PEDO_DISABLE;
-      break;
+  switch ( (pedo_cmd_reg.ad_det_en <<5) | (pedo_cmd_reg.fp_rejection_en << 4) ) {
     case LSM6DSO_PEDO_BASE_MODE:
       *val = LSM6DSO_PEDO_BASE_MODE;
       break;
@@ -6621,7 +6559,7 @@ int32_t lsm6dso_pedo_sens_get(stmdev_ctx_t *ctx, lsm6dso_pedo_md_t *val)
       *val = LSM6DSO_FALSE_STEP_REJ_ADV_MODE;
       break;
     default:
-      *val = LSM6DSO_PEDO_DISABLE;
+      *val = LSM6DSO_PEDO_BASE_MODE;
       break;
   }
   return ret;
@@ -6789,55 +6727,6 @@ int32_t lsm6dso_pedo_int_mode_get(stmdev_ctx_t *ctx,
 */
 
 /**
-  * @brief  Enable significant motion detection function.[set]
-  *
-  * @param  ctx      read / write interface definitions
-  * @param  val      change the values of sign_motion_en in reg EMB_FUNC_EN_A
-  *
-  */
-int32_t lsm6dso_motion_sens_set(stmdev_ctx_t *ctx, uint8_t val)
-{
-  lsm6dso_emb_func_en_a_t reg;
-  int32_t ret;
-
-  ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_A, (uint8_t*)&reg, 1);
-  }
-  if (ret == 0) {
-    reg.sign_motion_en = val;
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_EN_A, (uint8_t*)&reg, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
-  }
-  return ret;
-}
-
-/**
-  * @brief  Enable significant motion detection function.[get]
-  *
-  * @param  ctx      read / write interface definitions
-  * @param  val      change the values of sign_motion_en in reg EMB_FUNC_EN_A
-  *
-  */
-int32_t lsm6dso_motion_sens_get(stmdev_ctx_t *ctx, uint8_t *val)
-{
-  lsm6dso_emb_func_en_a_t reg;
-  int32_t ret;
-
-  ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_A, (uint8_t*)&reg, 1);
-  }
-  if (ret == 0) {
-    *val = reg.sign_motion_en;
-    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
-  }
-  return ret;
-}
-
-/**
   * @brief   Interrupt status bit for significant motion detection.[get]
   *
   * @param  ctx      read / write interface definitions
@@ -6873,56 +6762,6 @@ int32_t lsm6dso_motion_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @{
   *
 */
-
-/**
-  * @brief  Enable tilt calculation.[set]
-  *
-  * @param  ctx      read / write interface definitions
-  * @param  val      change the values of tilt_en in reg EMB_FUNC_EN_A
-  *
-  */
-int32_t lsm6dso_tilt_sens_set(stmdev_ctx_t *ctx, uint8_t val)
-{
-  lsm6dso_emb_func_en_a_t reg;
-  int32_t ret;
-
-  ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_A, (uint8_t*)&reg, 1);
-  }
-  if (ret == 0) {
-    reg.tilt_en = val;
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_EN_A, (uint8_t*)&reg, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
-  }
-  return ret;
-}
-
-/**
-  * @brief  Enable tilt calculation.[get]
-  *
-  * @param  ctx      read / write interface definitions
-  * @param  val      change the values of tilt_en in reg EMB_FUNC_EN_A
-  *
-  */
-int32_t lsm6dso_tilt_sens_get(stmdev_ctx_t *ctx, uint8_t *val)
-{
-  lsm6dso_emb_func_en_a_t reg;
-  int32_t ret;
-
-  ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_A, (uint8_t*)&reg, 1);
-  }
-  if (ret == 0) {
-    *val = reg.tilt_en;
-    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
-  }
-
-  return ret;
-}
 
 /**
   * @brief  Interrupt status bit for tilt detection.[get]
@@ -7472,59 +7311,6 @@ int32_t lsm6dso_long_cnt_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 }
 
 /**
-  * @brief  Final State Machine global enable.[set]
-  *
-  * @param  ctx      read / write interface definitions
-  * @param  val      change the values of fsm_en in reg EMB_FUNC_EN_B
-  *
-  */
-int32_t lsm6dso_emb_fsm_en_set(stmdev_ctx_t *ctx, uint8_t val)
-{
-  int32_t ret;
-  lsm6dso_emb_func_en_b_t reg;
-
-  ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_B, (uint8_t*)&reg, 1);
-  }
-  if (ret == 0) {
-    reg.fsm_en = val;
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_EN_B, (uint8_t*)&reg, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
-  }
-  return ret;
-}
-
-/**
-  * @brief  Final State Machine global enable.[get]
-  *
-  * @param  ctx      read / write interface definitions
-  * @param  uint8_t *: return the values of fsm_en in reg EMB_FUNC_EN_B
-  *
-  */
-int32_t lsm6dso_emb_fsm_en_get(stmdev_ctx_t *ctx, uint8_t *val)
-{
-  int32_t ret;
-  lsm6dso_emb_func_en_b_t reg;
-
-  ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_B, (uint8_t*)&reg, 1);
-  }
-  if (ret == 0) {
-    *val = reg.fsm_en;
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_EN_B, (uint8_t*)&reg, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
-  }
-
-  return ret;
-}
-
-/**
   * @brief  Final State Machine enable.[set]
   *
   * @param  ctx      read / write interface definitions
@@ -7535,7 +7321,6 @@ int32_t lsm6dso_fsm_enable_set(stmdev_ctx_t *ctx,
                                lsm6dso_emb_fsm_enable_t *val)
 {
   int32_t ret;
-  lsm6dso_emb_func_en_b_t reg;
 
   ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
   if (ret == 0) {
@@ -7545,37 +7330,6 @@ int32_t lsm6dso_fsm_enable_set(stmdev_ctx_t *ctx,
   if (ret == 0) {
     ret = lsm6dso_write_reg(ctx, LSM6DSO_FSM_ENABLE_B,
                             (uint8_t*)&val->fsm_enable_b, 1);
-  }
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_B, (uint8_t*)&reg, 1);
-  }
-  if (ret == 0) {
-    if ( (val->fsm_enable_a.fsm1_en   |
-          val->fsm_enable_a.fsm2_en   |
-          val->fsm_enable_a.fsm3_en   |
-          val->fsm_enable_a.fsm4_en   |
-          val->fsm_enable_a.fsm5_en   |
-          val->fsm_enable_a.fsm6_en   |
-          val->fsm_enable_a.fsm7_en   |
-          val->fsm_enable_a.fsm8_en   |
-          val->fsm_enable_b.fsm9_en   |
-          val->fsm_enable_b.fsm10_en  |
-          val->fsm_enable_b.fsm11_en  |
-          val->fsm_enable_b.fsm12_en  |
-          val->fsm_enable_b.fsm13_en  |
-          val->fsm_enable_b.fsm14_en  |
-          val->fsm_enable_b.fsm15_en  |
-          val->fsm_enable_b.fsm16_en  )
-        != PROPERTY_DISABLE)
-    {
-      reg.fsm_en = PROPERTY_ENABLE;
-    }
-    else
-    {
-      reg.fsm_en = PROPERTY_DISABLE;
-    }
-
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_EN_B, (uint8_t*)&reg, 1);
   }
   if (ret == 0) {
     ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
@@ -10880,6 +10634,138 @@ int32_t lsm6dso_data_get(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
         data->ois.xl.mg[i] = 0.0f;
         break;
     }
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Embedded functions.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of registers
+  *                  EMB_FUNC_EN_A e EMB_FUNC_EN_B.
+  *
+  */
+int32_t lsm6dso_embedded_sens_set(stmdev_ctx_t *ctx,
+                                   lsm6dso_emb_sens_t *val)
+{
+  lsm6dso_emb_func_en_a_t emb_func_en_a;
+  lsm6dso_emb_func_en_b_t emb_func_en_b;
+  int32_t ret;
+
+  ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_A,
+                            (uint8_t*)&emb_func_en_a, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_B,
+                           (uint8_t*)&emb_func_en_b, 1);
+
+    emb_func_en_b.fsm_en = val->fsm;
+    emb_func_en_a.tilt_en = val->tilt;
+    emb_func_en_a.pedo_en = val->step;
+    emb_func_en_b.pedo_adv_en = val->step_adv;
+    emb_func_en_a.sign_motion_en = val->sig_mot;
+    emb_func_en_b.fifo_compr_en = val->fifo_compr;
+
+  }
+  if (ret == 0) {
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_EN_A,
+                            (uint8_t*)&emb_func_en_a, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_EN_B,
+                            (uint8_t*)&emb_func_en_b, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Embedded functions.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      get the values of registers
+  *                  EMB_FUNC_EN_A e EMB_FUNC_EN_B.
+  *
+  */
+int32_t lsm6dso_embedded_sens_get(stmdev_ctx_t *ctx,
+                                   lsm6dso_emb_sens_t *emb_sens)
+{
+  lsm6dso_emb_func_en_a_t emb_func_en_a;
+  lsm6dso_emb_func_en_b_t emb_func_en_b;
+  int32_t ret;
+
+  ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_A,
+                           (uint8_t*)&emb_func_en_a, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_B,
+                           (uint8_t*)&emb_func_en_b, 1);
+
+    emb_sens->fsm = emb_func_en_b.fsm_en;
+    emb_sens->tilt = emb_func_en_a.tilt_en;
+    emb_sens->step = emb_func_en_a.pedo_en;
+    emb_sens->step_adv = emb_func_en_b.pedo_adv_en;
+    emb_sens->sig_mot = emb_func_en_a.sign_motion_en;
+    emb_sens->fifo_compr = emb_func_en_b.fifo_compr_en;
+
+  }
+  if (ret == 0) {
+    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  turn off all embedded functions.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      get the values of registers
+  *                  EMB_FUNC_EN_A e EMB_FUNC_EN_B.
+  *
+  */
+int32_t lsm6dso_embedded_sens_off(stmdev_ctx_t *ctx)
+{
+  lsm6dso_emb_func_en_a_t emb_func_en_a;
+  lsm6dso_emb_func_en_b_t emb_func_en_b;
+  int32_t ret;
+
+  ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_EMBEDDED_FUNC_BANK);
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_A,
+                            (uint8_t*)&emb_func_en_a, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_EN_B,
+                           (uint8_t*)&emb_func_en_b, 1);
+
+    emb_func_en_b.fsm_en = PROPERTY_DISABLE;
+    emb_func_en_a.tilt_en = PROPERTY_DISABLE;
+    emb_func_en_a.pedo_en = PROPERTY_DISABLE;
+    emb_func_en_b.pedo_adv_en = PROPERTY_DISABLE;
+    emb_func_en_a.sign_motion_en = PROPERTY_DISABLE;
+    emb_func_en_b.fifo_compr_en = PROPERTY_DISABLE;
+
+  }
+  if (ret == 0) {
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_EN_A,
+                            (uint8_t*)&emb_func_en_a, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_write_reg(ctx, LSM6DSO_EMB_FUNC_EN_B,
+                            (uint8_t*)&emb_func_en_b, 1);
+  }
+  if (ret == 0) {
+    ret = lsm6dso_mem_bank_set(ctx, LSM6DSO_USER_BANK);
   }
 
   return ret;
