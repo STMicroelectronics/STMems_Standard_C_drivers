@@ -122,8 +122,9 @@ void lsm6dsox_129694_02(void)
 
   /* Enable pedometer */
   lsm6dsox_pedo_sens_set(&dev_ctx, LSM6DSOX_FALSE_STEP_REJ_ADV_MODE);
+  emb_sens.step = PROPERTY_ENABLE;
   emb_sens.mlc = PROPERTY_ENABLE;
-  lsm6dsox_enbedded_sens_set(&dev_ctx, &emb_sens);
+  lsm6dsox_embedded_sens_set(&dev_ctx, &emb_sens);
 
   /* Route signals on interrupt pin 1 */
   lsm6dsox_pin_int1_route_get(&dev_ctx, &pin_int1_route);
