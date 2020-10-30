@@ -75,7 +75,7 @@
 #define MEMS_SHARED_TYPES
 
 typedef struct{
-#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -84,7 +84,7 @@ typedef struct{
   uint8_t bit5       : 1;
   uint8_t bit6       : 1;
   uint8_t bit7       : 1;
-#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t bit7       : 1;
   uint8_t bit6       : 1;
   uint8_t bit5       : 1;
@@ -131,7 +131,7 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-  *              You can create a sensor configuration by your own or using 
+  *              You can create a sensor configuration by your own or using
   *              Unico / Unicleo tools available on STMicroelectronics
   *              web site.
   *
@@ -176,7 +176,7 @@ typedef struct {
 
 #define LPS22HB_INTERRUPT_CFG  0x0BU
 typedef struct {
-#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t pe               : 2; /* ple + phe -> pe */
   uint8_t lir              : 1;
   uint8_t diff_en          : 1;
@@ -184,7 +184,7 @@ typedef struct {
   uint8_t autozero         : 1;
   uint8_t reset_arp        : 1;
   uint8_t autorifp         : 1;
-#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t autorifp         : 1;
   uint8_t reset_arp        : 1;
   uint8_t autozero         : 1;
@@ -200,13 +200,13 @@ typedef struct {
 #define LPS22HB_WHO_AM_I       0x0FU
 #define LPS22HB_CTRL_REG1      0x10U
 typedef struct {
-#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t sim              : 1;
   uint8_t bdu              : 1;
   uint8_t lpfp             : 2; /* en_lpfp + lpfp_cfg -> lpfp */
   uint8_t odr              : 3;
   uint8_t not_used_01      : 1;
-#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t not_used_01      : 1;
   uint8_t odr              : 3;
   uint8_t lpfp             : 2; /* en_lpfp + lpfp_cfg -> lpfp */
@@ -217,7 +217,7 @@ typedef struct {
 
 #define LPS22HB_CTRL_REG2      0x11U
 typedef struct {
-#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t one_shot         : 1;
   uint8_t not_used_01      : 1;
   uint8_t swreset          : 1;
@@ -226,7 +226,7 @@ typedef struct {
   uint8_t stop_on_fth      : 1;
   uint8_t fifo_en          : 1;
   uint8_t boot             : 1;
-#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t boot             : 1;
   uint8_t fifo_en          : 1;
   uint8_t stop_on_fth      : 1;
@@ -240,7 +240,7 @@ typedef struct {
 
 #define LPS22HB_CTRL_REG3      0x12U
 typedef struct {
-#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t int_s            : 2;
   uint8_t drdy             : 1;
   uint8_t f_ovr            : 1;
@@ -248,7 +248,7 @@ typedef struct {
   uint8_t f_fss5           : 1;
   uint8_t pp_od            : 1;
   uint8_t int_h_l          : 1;
-#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t int_h_l          : 1;
   uint8_t pp_od            : 1;
   uint8_t f_fss5           : 1;
@@ -263,10 +263,10 @@ typedef struct {
 
 #define LPS22HB_FIFO_CTRL      0x14U
 typedef struct {
-#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t wtm              : 5;
   uint8_t f_mode           : 3;
-#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t f_mode           : 3;
   uint8_t wtm              : 5;
 #endif /* DRV_BIG_ENDIAN */
@@ -281,10 +281,10 @@ typedef struct {
 
 #define LPS22HB_RES_CONF       0x1AU
 typedef struct {
-#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t lc_en            : 1;
   uint8_t not_used_01      : 7;
-#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t not_used_01      : 7;
   uint8_t lc_en            : 1;
 #endif /* DRV_BIG_ENDIAN */
@@ -293,13 +293,13 @@ typedef struct {
 
 #define LPS22HB_INT_SOURCE     0x25U
 typedef struct {
-#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t ph               : 1;
   uint8_t pl               : 1;
   uint8_t ia               : 1;
   uint8_t not_used_01      : 4;
   uint8_t boot_status      : 1;
-#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t boot_status      : 1;
   uint8_t not_used_01      : 4;
   uint8_t ia               : 1;
@@ -310,11 +310,11 @@ typedef struct {
 
 #define LPS22HB_FIFO_STATUS    0x26U
 typedef struct {
-#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t fss              : 6;
   uint8_t ovr              : 1;
   uint8_t fth_fifo         : 1;
-#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t fth_fifo         : 1;
   uint8_t ovr              : 1;
   uint8_t fss              : 6;
@@ -323,14 +323,14 @@ typedef struct {
 
 #define LPS22HB_STATUS         0x27U
 typedef struct {
-#if DRV_BIG_ENDIAN == DRV_LITTLE_ENDIAN
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t p_da             : 1;
   uint8_t t_da             : 1;
   uint8_t not_used_02      : 2;
   uint8_t p_or             : 1;
   uint8_t t_or             : 1;
   uint8_t not_used_01      : 2;
-#elif DRV_BIG_ENDIAN == DRV_BIG_ENDIAN
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t not_used_01      : 2;
   uint8_t t_or             : 1;
   uint8_t p_or             : 1;

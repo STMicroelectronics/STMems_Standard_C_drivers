@@ -85,7 +85,7 @@ int32_t lps22hb_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
 
 float_t lps22hb_from_lsb_to_hpa(int32_t lsb)
 {
-  return ( (float_t)lsb / 4096.0f );
+  return ( (float_t)lsb / 1048576.0f );
 }
 
 float_t lps22hb_from_lsb_to_degc(int16_t lsb)
