@@ -172,6 +172,7 @@ void lsm6dso_fsm(void)
   stmdev_ctx_t               dev_ctx;
   lsm6dso_pin_int1_route_t   pin_int1_route;
   lsm6dso_emb_fsm_enable_t   fsm_enable;
+  lsm6dso_emb_sens_t         emb_sens;
   lsm6dso_fsm_out_t          fsm_out;
   lsm6dso_all_sources_t      status;
   uint16_t                   fsm_addr;
@@ -289,6 +290,9 @@ void lsm6dso_fsm(void)
   /* wrist_tilt */
   lsm6dso_ln_pg_write(&dev_ctx, fsm_addr, (uint8_t*)lsm6so_prg_wrist_tilt,
                       sizeof(lsm6so_prg_wrist_tilt));
+
+  emb_sens.fsm = PROPERTY_ENABLE;
+  lsm6dso_embedded_sens_set(&dev_ctx, &emb_sens);
  /* End Finite State Machine configuration */
 
   /* Set Output Data Rate */

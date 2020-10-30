@@ -99,6 +99,7 @@ static void platform_init(void);
 /* Main Example --------------------------------------------------------------*/
 void lsm6dso_pedometer(void)
 {
+  lsm6dso_emb_sens_t emb_sens;
   stmdev_ctx_t ag_ctx;
   /* Uncomment to configure INT 1 */
   //lsm6dso_pin_int1_route_t int1_route;
@@ -162,6 +163,9 @@ void lsm6dso_pedometer(void)
 
   /* Enable pedometer */
   lsm6dso_pedo_sens_set(&ag_ctx, LSM6DSO_FALSE_STEP_REJ_ADV_MODE);
+  emb_sens.step = PROPERTY_ENABLE;
+  emb_sens.step_adv = PROPERTY_ENABLE;
+  lsm6dso_embedded_sens_set(&ag_ctx, &emb_sens);
  
   while(1) {
       /* Read steps */

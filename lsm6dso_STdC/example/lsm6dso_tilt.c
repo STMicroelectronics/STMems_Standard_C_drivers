@@ -106,6 +106,7 @@ static void platform_init(void);
 /* Main Example --------------------------------------------------------------*/
 void example_main_tilt_lsm6dso(void)
 {
+  lsm6dso_emb_sens_t emb_sens;
   stmdev_ctx_t dev_ctx;
 
   /* Uncomment to configure INT 1 */
@@ -147,7 +148,8 @@ void example_main_tilt_lsm6dso(void)
   lsm6dso_xl_full_scale_set(&dev_ctx, LSM6DSO_2g);
 
   /* Enable Tilt in embedded function. */
-  lsm6dso_tilt_sens_set(&dev_ctx, PROPERTY_ENABLE);
+  emb_sens.tilt = PROPERTY_ENABLE;
+  lsm6dso_embedded_sens_set(&dev_ctx, &emb_sens);
 
   /* Uncomment if interrupt generation on Tilt INT1 pin */
   //lsm6dso_pin_int1_route_get(&dev_ctx, &int1_route);
