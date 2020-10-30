@@ -15,4 +15,4 @@ every hardware.
 www.st.com/mems
 
 
-LPS22CH DS rev1.0
+LPS22CH DS rev2.0

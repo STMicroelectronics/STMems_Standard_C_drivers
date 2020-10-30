@@ -685,7 +685,7 @@ int32_t lps22ch_fifo_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff)
   */
 
 /**
-  * @brief  DeviceWhoamI[get]
+  * @brief  DeviceWhoamI.[get]
   *
   * @param  ctx      read / write interface definitions
   * @param  buff     buffer that stores data read
@@ -955,6 +955,59 @@ int32_t lps22ch_i2c_interface_get(stmdev_ctx_t *ctx,
         break;
     }
 
+  return ret;
+}
+
+/**
+  * @brief  Enable/Disable I3C interface.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      change the values of i2c_disable in reg IF_CTRL
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t lps22ch_i3c_interface_set(stmdev_ctx_t *ctx,
+                                  lps22ch_i3c_disable_t val)
+{
+  lps22ch_if_ctrl_t reg;
+  int32_t ret;
+
+  ret = lps22ch_read_reg(ctx, LPS22CH_IF_CTRL, (uint8_t *)&reg, 1);
+  if (ret == 0) {
+    reg.i3c_disable = (uint8_t)val;
+    reg.int_en_i3c = (uint8_t)~val;
+    ret = lps22ch_write_reg(ctx, LPS22CH_IF_CTRL, (uint8_t *)&reg, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Enable/Disable I3C interface.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      Get the values of i2c_disable in reg IF_CTRL
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t lps22ch_i3c_interface_get(stmdev_ctx_t *ctx,
+                                  lps22ch_i3c_disable_t *val)
+{
+  lps22ch_if_ctrl_t reg;
+  int32_t ret;
+
+  ret = lps22ch_read_reg(ctx, LPS22CH_IF_CTRL, (uint8_t *)&reg, 1);
+  switch (reg.i3c_disable) {
+      case LPS22CH_I3C_ENABLE:
+        *val = LPS22CH_I3C_ENABLE;
+        break;
+      case LPS22CH_I3C_DISABLE:
+        *val = LPS22CH_I3C_DISABLE;
+        break;
+      default:
+        *val = LPS22CH_I3C_ENABLE;
+        break;
+    }
   return ret;
 }
 
@@ -1403,7 +1456,7 @@ int32_t lps22ch_int_treshold_set(stmdev_ctx_t *ctx, uint16_t buff)
   ret =  lps22ch_write_reg(ctx, LPS22CH_THS_P_L,
                            (uint8_t*)&ths_p_l, 1);
   if (ret == 0) {
-      ret =  lps22ch_write_reg(ctx, LPS22CH_THS_P_H, 
+      ret =  lps22ch_write_reg(ctx, LPS22CH_THS_P_H,
                                (uint8_t*)&ths_p_h, 1);
   }
   return ret;
@@ -1422,15 +1475,15 @@ int32_t lps22ch_int_treshold_get(stmdev_ctx_t *ctx, uint16_t *buff)
   int32_t ret;
   lps22ch_ths_p_l_t ths_p_l;
   lps22ch_ths_p_h_t ths_p_h;
-  
+
   ret =  lps22ch_read_reg(ctx, LPS22CH_THS_P_L,
                            (uint8_t*)&ths_p_l, 1);
   if (ret == 0) {
-      ret =  lps22ch_read_reg(ctx, LPS22CH_THS_P_H, 
+      ret =  lps22ch_read_reg(ctx, LPS22CH_THS_P_H,
                                (uint8_t*)&ths_p_h, 1);
       *buff = (uint16_t)ths_p_h.ths;
       *buff = (*buff * 256U) + (uint16_t)ths_p_l.ths;
-  }  
+  }
   return ret;
 }
 

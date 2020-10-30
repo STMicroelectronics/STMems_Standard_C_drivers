@@ -131,7 +131,7 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-  *              You can create a sensor configuration by your own or using 
+  *              You can create a sensor configuration by your own or using
   *              Unico / Unicleo tools available on STMicroelectronics
   *              web site.
   *
@@ -214,17 +214,19 @@ typedef struct {
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t i2c_disable                     : 1;
-  uint8_t not_used_01                     : 1;
+  uint8_t i3c_disable                     : 1;
   uint8_t pd_dis_int1                     : 1;
   uint8_t sdo_pu_en                       : 1;
   uint8_t sda_pu_en                       : 1;
-  uint8_t not_used_02                     : 3;
+  uint8_t not_used                        : 2;
+  uint8_t int_en_i3c                      : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-  uint8_t not_used_02                     : 3;
+  uint8_t int_en_i3c                      : 1;
+  uint8_t not_used                        : 2;
   uint8_t sda_pu_en                       : 1;
   uint8_t sdo_pu_en                       : 1;
   uint8_t pd_dis_int1                     : 1;
-  uint8_t not_used_01                     : 1;
+  uint8_t i3c_disable                     : 1;
   uint8_t i2c_disable                     : 1;
 #endif /* DRV_BYTE_ORDER */
 } lps22ch_if_ctrl_t;
@@ -509,6 +511,15 @@ int32_t lps22ch_i2c_interface_set(stmdev_ctx_t *ctx,
                                   lps22ch_i2c_disable_t val);
 int32_t lps22ch_i2c_interface_get(stmdev_ctx_t *ctx,
                                   lps22ch_i2c_disable_t *val);
+
+typedef enum {
+  LPS22CH_I3C_ENABLE    = 0,
+  LPS22CH_I3C_DISABLE   = 1,
+} lps22ch_i3c_disable_t;
+int32_t lps22ch_i3c_interface_set(stmdev_ctx_t *ctx,
+                                  lps22ch_i3c_disable_t val);
+int32_t lps22ch_i3c_interface_get(stmdev_ctx_t *ctx,
+                                  lps22ch_i3c_disable_t *val);
 
 typedef enum {
   LPS22CH_PULL_UP_DISCONNECT    = 0,

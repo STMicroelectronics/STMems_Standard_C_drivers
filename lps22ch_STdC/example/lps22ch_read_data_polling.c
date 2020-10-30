@@ -154,6 +154,9 @@ void lps22ch_read_data_polling(void)
   if ( whoamI != LPS22CH_ID )
     while(1); /*manage here device not found */
 
+  /* Disable I3C interface */
+  lps22ch_i3c_interface_set(&dev_ctx, LPS22CH_I3C_DISABLE);
+
   /* Restore default configuration */
   lps22ch_reset_set(&dev_ctx, PROPERTY_ENABLE);
   do {
