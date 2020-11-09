@@ -9048,7 +9048,8 @@ int32_t ism330dhcx_mlc_data_rate_get(stmdev_ctx_t *ctx,
   *
   */
 int32_t ism330dhcx_sh_read_data_raw_get(stmdev_ctx_t *ctx,
-                                       ism330dhcx_emb_sh_read_t *val)
+                                       ism330dhcx_emb_sh_read_t *val,
+									   uint8_t len)
 {
   int32_t ret;
 
@@ -9056,7 +9057,7 @@ int32_t ism330dhcx_sh_read_data_raw_get(stmdev_ctx_t *ctx,
 
   if(ret == 0){
     ret = ism330dhcx_read_reg(ctx, ISM330DHCX_SENSOR_HUB_1,
-                              (uint8_t*)val, 18);
+                              (uint8_t*)val, len);
   }
   if(ret == 0){
     ret = ism330dhcx_mem_bank_set(ctx, ISM330DHCX_USER_BANK);
