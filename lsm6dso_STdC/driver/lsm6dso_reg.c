@@ -9739,6 +9739,9 @@ int32_t lsm6dso_mode_set(stmdev_ctx_t *ctx, stmdev_ctx_t *aux_ctx,
   int32_t ret;
 
   ret = 0;
+  /* FIXME: Remove warnings with STM32CubeIDE */
+  ctrl3_c.not_used_01 = 0;
+  ctrl4_c.not_used_01 = 0;
 
   /* reading input configuration */
   xl_hm_mode = ( (uint8_t)val->ui.xl.odr & 0x10U ) >> 4;
