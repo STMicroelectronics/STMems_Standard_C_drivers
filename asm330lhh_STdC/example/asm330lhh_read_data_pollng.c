@@ -121,7 +121,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -137,38 +138,33 @@ void asm330lhh_read_data_polling(void)
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Init test platform */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   asm330lhh_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != ASM330LHH_ID)
-    while(1);
+    while (1);
 
   /* Restore default configuration */
   asm330lhh_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     asm330lhh_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Start device configuration. */
   asm330lhh_device_conf_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Enable Block Data Update */
   asm330lhh_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set Output Data Rate */
   asm330lhh_xl_data_rate_set(&dev_ctx, ASM330LHH_XL_ODR_12Hz5);
   asm330lhh_gy_data_rate_set(&dev_ctx, ASM330LHH_GY_ODR_12Hz5);
-
   /* Set full scale */
   asm330lhh_xl_full_scale_set(&dev_ctx, ASM330LHH_2g);
   asm330lhh_gy_full_scale_set(&dev_ctx, ASM330LHH_2000dps);
-
   /* Configure filtering chain(No aux interface)
    * Accelerometer - LPF1 + LPF2 path
    */
@@ -176,14 +172,12 @@ void asm330lhh_read_data_polling(void)
   asm330lhh_xl_filter_lp2_set(&dev_ctx, PROPERTY_ENABLE);
 
   /* Read samples in polling mode (no int */
-  while(1)
-  {
+  while (1) {
     uint8_t reg;
-
     /* Read output only if new xl value is available */
     asm330lhh_xl_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
+
+    if (reg) {
       /* Read acceleration field data */
       memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
       asm330lhh_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
@@ -193,15 +187,15 @@ void asm330lhh_read_data_polling(void)
         asm330lhh_from_fs2g_to_mg(data_raw_acceleration[1]);
       acceleration_mg[2] =
         asm330lhh_from_fs2g_to_mg(data_raw_acceleration[2]);
-
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+      sprintf((char *)tx_buffer,
+              "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     asm330lhh_gy_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
+
+    if (reg) {
       /* Read angular rate field data */
       memset(data_raw_angular_rate, 0x00, 3 * sizeof(int16_t));
       asm330lhh_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate);
@@ -211,23 +205,23 @@ void asm330lhh_read_data_polling(void)
         asm330lhh_from_fs2000dps_to_mdps(data_raw_angular_rate[1]);
       angular_rate_mdps[2] =
         asm330lhh_from_fs2000dps_to_mdps(data_raw_angular_rate[2]);
-
-      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+      sprintf((char *)tx_buffer,
+              "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
               angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     asm330lhh_temp_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
+
+    if (reg) {
       /* Read temperature data */
       memset(&data_raw_temperature, 0x00, sizeof(int16_t));
       asm330lhh_temperature_raw_get(&dev_ctx, &data_raw_temperature);
-      temperature_degC = asm330lhh_from_lsb_to_celsius(data_raw_temperature);
-
-      sprintf((char*)tx_buffer,
+      temperature_degC = asm330lhh_from_lsb_to_celsius(
+                           data_raw_temperature);
+      sprintf((char *)tx_buffer,
               "Temperature [degC]:%6.2f\r\n", temperature_degC);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -242,17 +236,18 @@ void asm330lhh_read_data_polling(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-    HAL_I2C_Mem_Write(handle, ASM330LHH_I2C_ADD_L, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  HAL_I2C_Mem_Write(handle, ASM330LHH_I2C_ADD_L, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_write(handle,  ASM330LHH_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
@@ -276,11 +271,11 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   HAL_I2C_Mem_Read(handle, ASM330LHH_I2C_ADD_L, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Receive(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_read(handle, ASM330LHH_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif

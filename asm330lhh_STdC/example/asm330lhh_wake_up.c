@@ -116,7 +116,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -128,79 +129,73 @@ static void platform_init(void);
 void asm330lhh_wake_up(void)
 {
   stmdev_ctx_t dev_ctx;
-
   /* Uncomment to configure INT 1 */
   //asm330lhh_pin_int1_route_t int1_route;
-
   /* Uncomment to configure INT 2 */
   asm330lhh_pin_int2_route_t int2_route;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Init test platform */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   asm330lhh_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != ASM330LHH_ID)
-    while(1);
+    while (1);
 
   /* Restore default configuration */
   asm330lhh_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     asm330lhh_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Start device configuration. */
   asm330lhh_device_conf_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set XL Output Data Rate to 416 Hz */
   asm330lhh_xl_data_rate_set(&dev_ctx, ASM330LHH_XL_ODR_417Hz);
-
   /* Set 2g full XL scale */
   asm330lhh_xl_full_scale_set(&dev_ctx, ASM330LHH_2g);
-
   /* Apply high-pass digital filter on Wake-Up function */
   asm330lhh_xl_hp_path_internal_set(&dev_ctx, ASM330LHH_USE_SLOPE);
-
   /* Set Wake-Up threshold: 1 LSb corresponds to FS_XL/2^6 */
   asm330lhh_wkup_threshold_set(&dev_ctx, 2);
-
   /* Uncomment interrupt generation on Wake-Up INT1 pin */
   //asm330lhh_pin_int1_route_get(&dev_ctx, &int1_route);
   //int1_route.md1_cfg.int1_wu = PROPERTY_ENABLE;
   //asm330lhh_pin_int1_route_set(&dev_ctx, &int1_route);
-
   /* Enable if interrupt generation on Wake-Up INT2 pin */
   asm330lhh_pin_int2_route_get(&dev_ctx, &int2_route);
   int2_route.md2_cfg.int2_wu = PROPERTY_ENABLE;
   asm330lhh_pin_int2_route_set(&dev_ctx, &int2_route);
 
   /* Wait Events */
-  while(1)
-  {
+  while (1) {
     asm330lhh_all_sources_t all_source;
-
     /* Check if Wake-Up events */
     asm330lhh_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.wake_up_src.wu_ia)
-    {
-      sprintf((char*)tx_buffer, "Wake-Up event on ");
-      if (all_source.wake_up_src.x_wu)
-        strcat((char*)tx_buffer, "X");
-      if (all_source.wake_up_src.y_wu)
-        strcat((char*)tx_buffer, "Y");
-      if (all_source.wake_up_src.z_wu)
-        strcat((char*)tx_buffer, "Z");
 
-      strcat((char*)tx_buffer, " direction\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    if (all_source.wake_up_src.wu_ia) {
+      sprintf((char *)tx_buffer, "Wake-Up event on ");
+
+      if (all_source.wake_up_src.x_wu) {
+        strcat((char *)tx_buffer, "X");
+      }
+
+      if (all_source.wake_up_src.y_wu) {
+        strcat((char *)tx_buffer, "Y");
+      }
+
+      if (all_source.wake_up_src.z_wu) {
+        strcat((char *)tx_buffer, "Z");
+      }
+
+      strcat((char *)tx_buffer, " direction\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -215,17 +210,18 @@ void asm330lhh_wake_up(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-    HAL_I2C_Mem_Write(handle, ASM330LHH_I2C_ADD_L, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  HAL_I2C_Mem_Write(handle, ASM330LHH_I2C_ADD_L, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_write(handle,  ASM330LHH_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
@@ -249,11 +245,11 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   HAL_I2C_Mem_Read(handle, ASM330LHH_I2C_ADD_L, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Receive(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_read(handle, ASM330LHH_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
