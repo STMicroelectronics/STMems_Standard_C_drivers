@@ -78,7 +78,7 @@
 #include "usart.h"
 #endif
 
-typedef union{
+typedef union {
   int16_t i16bit[3];
   uint8_t u8bit[6];
 } axis3bit16_t;
@@ -153,7 +153,8 @@ static stmdev_ctx_t dev_ctx;
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -173,11 +174,9 @@ static void LSM6DSL_Read_FIFO_Pattern(void)
    * xl_num accelerometer triplets. The sequence has always following order:
    * gyro first, accelerometer second
    */
-  while(gy_num > 0 || xl_num > 0)
-  {
+  while (gy_num > 0 || xl_num > 0) {
     /* Read gyro samples */
-    if (test_6dsl_gyro.enable && gy_num > 0)
-    {
+    if (test_6dsl_gyro.enable && gy_num > 0) {
       lsm6dsm_fifo_raw_data_get(&dev_ctx, data_raw_angular_rate.u8bit,
                                 3 * sizeof(int16_t));
       angular_rate_mdps[0] =
@@ -186,16 +185,15 @@ static void LSM6DSL_Read_FIFO_Pattern(void)
         lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[1]);
       angular_rate_mdps[2] =
         lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
-
-      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+      sprintf((char *)tx_buffer,
+              "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
               angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
+      tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
       gy_num--;
     }
 
     /* Read XL samples */
-    if (test_6dsl_xl.enable && xl_num > 0)
-    {
+    if (test_6dsl_xl.enable && xl_num > 0) {
       lsm6dsm_fifo_raw_data_get(&dev_ctx, data_raw_acceleration.u8bit,
                                 3 * sizeof(int16_t));
       acceleration_mg[0] =
@@ -204,10 +202,10 @@ static void LSM6DSL_Read_FIFO_Pattern(void)
         lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
       acceleration_mg[2] =
         lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
-
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+      sprintf((char *)tx_buffer,
+              "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
+      tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
       xl_num--;
     }
   }
@@ -222,86 +220,81 @@ static void LSM6DSL_ACC_GYRO_sample_Callback_fifo(void)
 {
   uint16_t num = 0;
   uint16_t num_pattern = 0;
-
   /* Read number of word in FIFO */
   lsm6dsm_fifo_data_level_get(&dev_ctx, &num);
   num_pattern = num / pattern_len;
 
-  while (num_pattern-- > 0)
+  while (num_pattern-- > 0) {
     LSM6DSL_Read_FIFO_Pattern();
+  }
 }
 
 /*
  * Following routine calculate the FIFO pattern composition based
  * on gyro and acc enable state and ODR freq
  */
-static uint16_t LSM6DSL_Calculate_FIFO_Pattern(uint16_t *min_odr, uint16_t *max_odr)
+static uint16_t LSM6DSL_Calculate_FIFO_Pattern(uint16_t *min_odr,
+                                               uint16_t *max_odr)
 {
   uint16_t fifo_samples_tot_num = 0;
 
   /* Calculate min_odr and max_odr for current configuration */
-  if (test_6dsl_gyro.enable)
-  {
+  if (test_6dsl_gyro.enable) {
     test_6dsl_gyro.odr_hz_val = LSM6DSM_ODR_LSB_TO_HZ(test_6dsl_gyro.odr);
     *max_odr = MAX_ODR(*max_odr, test_6dsl_gyro.odr_hz_val);
     *min_odr = MIN_ODR(*min_odr, test_6dsl_gyro.odr_hz_val);
   }
 
-  if (test_6dsl_xl.enable)
-  {
+  if (test_6dsl_xl.enable) {
     test_6dsl_xl.odr_hz_val = LSM6DSM_ODR_LSB_TO_HZ(test_6dsl_xl.odr);
     *max_odr = MAX_ODR(*max_odr, test_6dsl_xl.odr_hz_val);
     *min_odr = MIN_ODR(*min_odr, test_6dsl_xl.odr_hz_val);
   }
 
   /* Calculate how many samples for each sensor are in current FIFO pattern */
-  if (test_6dsl_gyro.enable)
-  {
-    test_6dsl_gyro.samples_num_in_pattern = test_6dsl_gyro.odr_hz_val / *min_odr;
+  if (test_6dsl_gyro.enable) {
+    test_6dsl_gyro.samples_num_in_pattern = test_6dsl_gyro.odr_hz_val /
+                                            *min_odr;
     test_6dsl_gyro.decimation =  *max_odr / test_6dsl_gyro.odr_hz_val;
     fifo_samples_tot_num += test_6dsl_gyro.samples_num_in_pattern;
   }
 
-  if (test_6dsl_xl.enable)
-  {
-    test_6dsl_xl.samples_num_in_pattern = test_6dsl_xl.odr_hz_val / *min_odr;
+  if (test_6dsl_xl.enable) {
+    test_6dsl_xl.samples_num_in_pattern = test_6dsl_xl.odr_hz_val /
+                                          *min_odr;
     test_6dsl_xl.decimation =  *max_odr / test_6dsl_xl.odr_hz_val;
     fifo_samples_tot_num += test_6dsl_xl.samples_num_in_pattern;
   }
 
   /* Return the total number of 16-bit samples in the pattern */
-  return(6 * fifo_samples_tot_num);
+  return (6 * fifo_samples_tot_num);
 }
 
 /* Main Example --------------------------------------------------------------*/
 void example_main_fifo_lsm6dsm(void)
 {
   uint16_t max_odr = 0, min_odr = 0xffff;
-
   /* Interrupt generation on FIFO watermark INT1/INT2 pin */
   //lsm6dsm_int2_route_t int_2_reg;
   //lsm6dsm_int1_route_t int_1_reg;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Init test platform */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(15);
-
   /* Check device ID */
   lsm6dsm_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LSM6DSM_ID)
-    while(1)
-    {
+    while (1) {
       /* manage here device not found */
     }
 
   /* Restore default configuration */
   lsm6dsm_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lsm6dsm_reset_get(&dev_ctx, &rst);
   } while (rst);
@@ -309,45 +302,37 @@ void example_main_fifo_lsm6dsm(void)
   /* Set XL and Gyro Output Data Rate */
   lsm6dsm_xl_data_rate_set(&dev_ctx, test_6dsl_xl.odr);
   lsm6dsm_gy_data_rate_set(&dev_ctx, test_6dsl_gyro.odr);
-
   /* Set XL full scale and Gyro full scale */
   lsm6dsm_xl_full_scale_set(&dev_ctx, test_6dsl_xl.fs);
   lsm6dsm_gy_full_scale_set(&dev_ctx, test_6dsl_gyro.fs);
-
   /* Calculate number of sensors samples in each FIFO pattern */
   pattern_len = LSM6DSL_Calculate_FIFO_Pattern(&min_odr, &max_odr);
-
   /* Set FIFO watermark to a multiple of a pattern */
   lsm6dsm_fifo_watermark_set(&dev_ctx, pattern_len);
-
   /* Set FIFO mode to Stream mode */
   lsm6dsm_fifo_mode_set(&dev_ctx, LSM6DSM_STREAM_MODE);
-
   /* Enable FIFO watermark interrupt generation on INT1 pin */
   //lsm6dsm_pin_int1_route_get(&dev_ctx, &int_1_reg);
   //int_1_reg.int1_fth = PROPERTY_ENABLE;
   //lsm6dsm_pin_int1_route_set(&dev_ctx, int_1_reg);
-
   /* FIFO watermark interrupt on INT2 pin */
   //lsm6dsm_pin_int2_route_get(&dev_ctx, &int_2_reg);
   //int_2_reg.int2_fth = PROPERTY_ENABLE;
   //lsm6dsm_pin_int2_route_set(&dev_ctx, int_2_reg);
-
   /* Set ODR FIFO */
   lsm6dsm_fifo_data_rate_set(&dev_ctx, LSM6DSM_FIFO_416Hz);
-
   /* Set FIFO sensor decimator */
   lsm6dsm_fifo_xl_batch_set(&dev_ctx, test_6dsl_xl.decimation);
   lsm6dsm_fifo_gy_batch_set(&dev_ctx, test_6dsl_gyro.decimation);
 
-  while(1)
-  {
+  while (1) {
     uint8_t wt;
-
     /* Read FIFO watermark flag in polling mode */
     lsm6dsm_fifo_wtm_flag_get(&dev_ctx, &wt);
-    if (wt)
+
+    if (wt) {
       LSM6DSL_ACC_GYRO_sample_Callback_fifo();
+    }
   }
 }
 
@@ -361,22 +346,24 @@ void example_main_fifo_lsm6dsm(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     HAL_I2C_Mem_Write(handle, LSM6DSM_I2C_ADD_H, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
+
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
+
+  else if (handle == &hspi2) {
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Transmit(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+
 #endif
   return 0;
 }
@@ -394,14 +381,14 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     HAL_I2C_Mem_Read(handle, LSM6DSM_I2C_ADD_H, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
+
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
+
+  else if (handle == &hspi2) {
     /* Read command */
     reg |= 0x80;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
@@ -409,6 +396,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
     HAL_SPI_Receive(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+
 #endif
   return 0;
 }
@@ -416,18 +404,18 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
-  #ifdef STEVAL_MKI109V3
+#endif
+#ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#endif
 }
 
 /*

@@ -93,7 +93,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -107,64 +108,55 @@ void lsm6dsm_wrist_tilt(void)
   /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
   lsm6dsm_int2_route_t int_2_reg;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Init test platform */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(15);
-
   /* Check device ID */
   lsm6dsm_device_id_get(&dev_ctx, &whoamI);
-  if (whoamI != LSM6DSM_ID)
-  {
-    while(1)
-    {
+
+  if (whoamI != LSM6DSM_ID) {
+    while (1) {
       /* manage here device not found */
     }
   }
 
   /* Restore default configuration */
   lsm6dsm_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
-      lsm6dsm_reset_get(&dev_ctx, &rst);
+    lsm6dsm_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Enable Wrist Tilt function */
   lsm6dsm_wrist_tilt_sens_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Enable interrupt generation on Tilt INT1 pin */
   lsm6dsm_int_notification_set(&dev_ctx, LSM6DSM_INT_LATCHED);
   lsm6dsm_pin_int2_route_get(&dev_ctx, &int_2_reg);
   int_2_reg.int2_wrist_tilt = PROPERTY_ENABLE;
   lsm6dsm_pin_int2_route_set(&dev_ctx, int_2_reg);
   lsm6dsm_all_on_int1_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set XL Output Data Rate:The tilt function works at 26 Hz,
    * so the accelerometer ODR must be set at 26 Hz or higher values
    */
   lsm6dsm_xl_data_rate_set(&dev_ctx, LSM6DSM_XL_ODR_26Hz);
-
   /* Set 2g full XL scale */
   lsm6dsm_xl_full_scale_set(&dev_ctx, LSM6DSM_2g);
 
   /* Wait Events */
-  while(1)
-  {
+  while (1) {
     lsm6dsm_all_sources_t all_source;
-
     /*
      * Check if Tilt events
      */
     lsm6dsm_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.func_src2.wrist_tilt_ia)
-    {
-      sprintf((char*)tx_buffer, "Wrist TILT Detected\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+    if (all_source.func_src2.wrist_tilt_ia) {
+      sprintf((char *)tx_buffer, "Wrist TILT Detected\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     /*
@@ -184,22 +176,24 @@ void lsm6dsm_wrist_tilt(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     HAL_I2C_Mem_Write(handle, LSM6DSM_I2C_ADD_H, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
+
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
+
+  else if (handle == &hspi2) {
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Transmit(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+
 #endif
   return 0;
 }
@@ -217,14 +211,14 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     HAL_I2C_Mem_Read(handle, LSM6DSM_I2C_ADD_H, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
+
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
+
+  else if (handle == &hspi2) {
     /* Read command */
     reg |= 0x80;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
@@ -232,6 +226,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
     HAL_SPI_Receive(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+
 #endif
   return 0;
 }
@@ -239,18 +234,18 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
-  #ifdef STEVAL_MKI109V3
+#endif
+#ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#endif
 }
 
 /*
