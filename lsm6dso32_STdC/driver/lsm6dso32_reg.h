@@ -23,7 +23,7 @@
 #define LSM6DSO32_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -43,7 +43,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -65,8 +65,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -134,7 +136,8 @@ typedef struct {
 #define LSM6DSO32_FUNC_CFG_ACCESS              0x01U
 typedef struct {
   uint8_t not_used_00              : 6;
-  uint8_t reg_access               : 2; /* shub_reg_access + func_cfg_access */
+uint8_t reg_access               :
+  2; /* shub_reg_access + func_cfg_access */
 } lsm6dso32_func_cfg_access_t;
 
 #define LSM6DSO32_PIN_CTRL                     0x02U
@@ -266,7 +269,8 @@ typedef struct {
   uint8_t ftype                    : 3;
   uint8_t usr_off_w                : 1;
   uint8_t xl_hm_mode               : 1;
-  uint8_t den_mode                 : 3;   /* trig_en + lvl1_en + lvl2_en */
+uint8_t den_mode                 :
+  3;   /* trig_en + lvl1_en + lvl2_en */
 } lsm6dso32_ctrl6_c_t;
 
 #define LSM6DSO32_CTRL7_G                      0x16U
@@ -397,7 +401,7 @@ typedef struct {
   uint8_t is_fsm6                 : 1;
   uint8_t is_fsm7                 : 1;
   uint8_t is_fsm8                 : 1;
-  } lsm6dso32_fsm_status_a_mainpage_t;
+} lsm6dso32_fsm_status_a_mainpage_t;
 
 #define LSM6DSO32_FSM_STATUS_B_MAINPAGE        0x37U
 typedef struct {
@@ -734,7 +738,8 @@ typedef struct {
 #define LSM6DSO32_FSM_LONG_COUNTER_H           0x49U
 #define LSM6DSO32_FSM_LONG_COUNTER_CLEAR       0x4AU
 typedef struct {
-  uint8_t fsm_lc_clr               : 2;  /* fsm_lc_cleared + fsm_lc_clear */
+uint8_t fsm_lc_clr               :
+  2;  /* fsm_lc_cleared + fsm_lc_clear */
   uint8_t not_used_01              : 6;
 } lsm6dso32_fsm_long_counter_clear_t;
 
@@ -1020,218 +1025,218 @@ typedef struct {
 #define LSM6DSO32_PEDO_SC_DELTAT_H             0x1D1U
 #define LSM6DSO32_SENSOR_HUB_1                 0x02U
 typedef struct {
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 } lsm6dso32_sensor_hub_1_t;
 
 #define LSM6DSO32_SENSOR_HUB_2                 0x03U
 typedef struct {
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 } lsm6dso32_sensor_hub_2_t;
 
 #define LSM6DSO32_SENSOR_HUB_3                 0x04U
 typedef struct {
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 } lsm6dso32_sensor_hub_3_t;
 
 #define LSM6DSO32_SENSOR_HUB_4                 0x05U
 typedef struct {
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 } lsm6dso32_sensor_hub_4_t;
 
 #define LSM6DSO32_SENSOR_HUB_5                 0x06U
 typedef struct {
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 } lsm6dso32_sensor_hub_5_t;
 
 #define LSM6DSO32_SENSOR_HUB_6                 0x07U
 typedef struct {
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 } lsm6dso32_sensor_hub_6_t;
 
 #define LSM6DSO32_SENSOR_HUB_7                 0x08U
 typedef struct {
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 } lsm6dso32_sensor_hub_7_t;
 
 #define LSM6DSO32_SENSOR_HUB_8                 0x09U
 typedef struct {
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 } lsm6dso32_sensor_hub_8_t;
 
 #define LSM6DSO32_SENSOR_HUB_9                 0x0AU
 typedef struct {
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 } lsm6dso32_sensor_hub_9_t;
 
 #define LSM6DSO32_SENSOR_HUB_10                0x0BU
 typedef struct {
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 } lsm6dso32_sensor_hub_10_t;
 
 #define LSM6DSO32_SENSOR_HUB_11                0x0CU
 typedef struct {
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 } lsm6dso32_sensor_hub_11_t;
 
 #define LSM6DSO32_SENSOR_HUB_12                0x0DU
 typedef struct {
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 } lsm6dso32_sensor_hub_12_t;
 
 #define LSM6DSO32_SENSOR_HUB_13                0x0EU
 typedef struct {
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 } lsm6dso32_sensor_hub_13_t;
 
 #define LSM6DSO32_SENSOR_HUB_14                0x0FU
 typedef struct {
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 } lsm6dso32_sensor_hub_14_t;
 
 #define LSM6DSO32_SENSOR_HUB_15                0x10U
 typedef struct {
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 } lsm6dso32_sensor_hub_15_t;
 
 #define LSM6DSO32_SENSOR_HUB_16                0x11U
 typedef struct {
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 } lsm6dso32_sensor_hub_16_t;
 
 #define LSM6DSO32_SENSOR_HUB_17                0x12U
 typedef struct {
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 } lsm6dso32_sensor_hub_17_t;
 
 #define LSM6DSO32_SENSOR_HUB_18                0x13U
 typedef struct {
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 } lsm6dso32_sensor_hub_18_t;
 
 #define LSM6DSO32_MASTER_CONFIG                0x14U
@@ -1346,7 +1351,7 @@ typedef struct {
   * @{
   *
   */
-typedef union{
+typedef union {
   lsm6dso32_func_cfg_access_t               func_cfg_access;
   lsm6dso32_pin_ctrl_t                      pin_ctrl;
   lsm6dso32_fifo_ctrl1_t                    fifo_ctrl1;
@@ -1471,9 +1476,11 @@ typedef union{
   *
   */
 
-int32_t lsm6dso32_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lsm6dso32_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                           uint8_t *data,
                            uint16_t len);
-int32_t lsm6dso32_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lsm6dso32_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                            uint8_t *data,
                             uint16_t len);
 
 extern float_t lsm6dso32_from_fs4_to_mg(int16_t lsb);
@@ -1579,8 +1586,10 @@ int32_t lsm6dso32_gy_data_rate_set(stmdev_ctx_t *ctx,
 int32_t lsm6dso32_gy_data_rate_get(stmdev_ctx_t *ctx,
                                    lsm6dso32_odr_g_t *val);
 
-int32_t lsm6dso32_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_block_data_update_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t lsm6dso32_block_data_update_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 typedef enum {
   LSM6DSO32_LSb_1mg  = 0,
@@ -1605,22 +1614,31 @@ int32_t lsm6dso32_all_sources_get(stmdev_ctx_t *ctx,
                                   lsm6dso32_all_sources_t *val);
 
 int32_t lsm6dso32_status_reg_get(stmdev_ctx_t *ctx,
-                               lsm6dso32_status_reg_t *val);
+                                 lsm6dso32_status_reg_t *val);
 
-int32_t lsm6dso32_xl_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_xl_flag_data_ready_get(stmdev_ctx_t *ctx,
+                                         uint8_t *val);
 
-int32_t lsm6dso32_gy_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_gy_flag_data_ready_get(stmdev_ctx_t *ctx,
+                                         uint8_t *val);
 
-int32_t lsm6dso32_temp_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_temp_flag_data_ready_get(stmdev_ctx_t *ctx,
+                                           uint8_t *val);
 
-int32_t lsm6dso32_xl_usr_offset_x_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dso32_xl_usr_offset_x_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dso32_xl_usr_offset_x_set(stmdev_ctx_t *ctx,
+                                      uint8_t *buff);
+int32_t lsm6dso32_xl_usr_offset_x_get(stmdev_ctx_t *ctx,
+                                      uint8_t *buff);
 
-int32_t lsm6dso32_xl_usr_offset_y_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dso32_xl_usr_offset_y_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dso32_xl_usr_offset_y_set(stmdev_ctx_t *ctx,
+                                      uint8_t *buff);
+int32_t lsm6dso32_xl_usr_offset_y_get(stmdev_ctx_t *ctx,
+                                      uint8_t *buff);
 
-int32_t lsm6dso32_xl_usr_offset_z_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dso32_xl_usr_offset_z_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dso32_xl_usr_offset_z_set(stmdev_ctx_t *ctx,
+                                      uint8_t *buff);
+int32_t lsm6dso32_xl_usr_offset_z_get(stmdev_ctx_t *ctx,
+                                      uint8_t *buff);
 
 int32_t lsm6dso32_xl_usr_offset_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dso32_xl_usr_offset_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -1641,16 +1659,19 @@ int32_t lsm6dso32_rounding_mode_set(stmdev_ctx_t *ctx,
 int32_t lsm6dso32_rounding_mode_get(stmdev_ctx_t *ctx,
                                     lsm6dso32_rounding_t *val);
 
-int32_t lsm6dso32_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dso32_temperature_raw_get(stmdev_ctx_t *ctx,
+                                      uint8_t *buff);
 
-int32_t lsm6dso32_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dso32_angular_rate_raw_get(stmdev_ctx_t *ctx,
+                                       uint8_t *buff);
 
 int32_t lsm6dso32_acceleration_raw_get(stmdev_ctx_t *ctx,
-                                           uint8_t *buff);
+                                       uint8_t *buff);
 
 int32_t lsm6dso32_fifo_out_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t lsm6dso32_number_of_steps_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dso32_number_of_steps_get(stmdev_ctx_t *ctx,
+                                      uint8_t *buff);
 
 int32_t lsm6dso32_steps_reset(stmdev_ctx_t *ctx);
 
@@ -1667,7 +1688,8 @@ int32_t lsm6dso32_mem_bank_set(stmdev_ctx_t *ctx,
 int32_t lsm6dso32_mem_bank_get(stmdev_ctx_t *ctx,
                                lsm6dso32_reg_access_t *val);
 
-int32_t lsm6dso32_ln_pg_write_byte(stmdev_ctx_t *ctx, uint16_t address,
+int32_t lsm6dso32_ln_pg_write_byte(stmdev_ctx_t *ctx,
+                                   uint16_t address,
                                    uint8_t *val);
 int32_t lsm6dso32_ln_pg_read_byte(stmdev_ctx_t *ctx, uint16_t address,
                                   uint8_t *val);
@@ -1775,8 +1797,10 @@ int32_t lsm6dso32_xl_hp_path_on_out_set(stmdev_ctx_t *ctx,
 int32_t lsm6dso32_xl_hp_path_on_out_get(stmdev_ctx_t *ctx,
                                         lsm6dso32_hp_slope_xl_en_t *val);
 
-int32_t lsm6dso32_xl_fast_settling_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_xl_fast_settling_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_xl_fast_settling_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t lsm6dso32_xl_fast_settling_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 typedef enum {
   LSM6DSO32_USE_SLOPE = 0,
@@ -1812,8 +1836,10 @@ typedef enum {
   LSM6DSO32_SPI_4_WIRE = 0,
   LSM6DSO32_SPI_3_WIRE = 1,
 } lsm6dso32_sim_t;
-int32_t lsm6dso32_spi_mode_set(stmdev_ctx_t *ctx, lsm6dso32_sim_t val);
-int32_t lsm6dso32_spi_mode_get(stmdev_ctx_t *ctx, lsm6dso32_sim_t *val);
+int32_t lsm6dso32_spi_mode_set(stmdev_ctx_t *ctx,
+                               lsm6dso32_sim_t val);
+int32_t lsm6dso32_spi_mode_get(stmdev_ctx_t *ctx,
+                               lsm6dso32_sim_t *val);
 
 typedef enum {
   LSM6DSO32_I2C_ENABLE  = 0,
@@ -1846,11 +1872,11 @@ int32_t lsm6dso32_int1_mode_get(stmdev_ctx_t *ctx,
                                 lsm6dso32_int1_pd_en_t *val);
 
 typedef struct {
-    lsm6dso32_int1_ctrl_t          int1_ctrl;
-    lsm6dso32_md1_cfg_t            md1_cfg;
-    lsm6dso32_emb_func_int1_t      emb_func_int1;
-    lsm6dso32_fsm_int1_a_t         fsm_int1_a;
-    lsm6dso32_fsm_int1_b_t         fsm_int1_b;
+  lsm6dso32_int1_ctrl_t          int1_ctrl;
+  lsm6dso32_md1_cfg_t            md1_cfg;
+  lsm6dso32_emb_func_int1_t      emb_func_int1;
+  lsm6dso32_fsm_int1_a_t         fsm_int1_a;
+  lsm6dso32_fsm_int1_b_t         fsm_int1_b;
 } lsm6dso32_pin_int1_route_t;
 int32_t lsm6dso32_pin_int1_route_set(stmdev_ctx_t *ctx,
                                      lsm6dso32_pin_int1_route_t *val);
@@ -1873,8 +1899,10 @@ typedef enum {
   LSM6DSO32_PUSH_PULL   = 0,
   LSM6DSO32_OPEN_DRAIN  = 1,
 } lsm6dso32_pp_od_t;
-int32_t lsm6dso32_pin_mode_set(stmdev_ctx_t *ctx, lsm6dso32_pp_od_t val);
-int32_t lsm6dso32_pin_mode_get(stmdev_ctx_t *ctx, lsm6dso32_pp_od_t *val);
+int32_t lsm6dso32_pin_mode_set(stmdev_ctx_t *ctx,
+                               lsm6dso32_pp_od_t val);
+int32_t lsm6dso32_pin_mode_get(stmdev_ctx_t *ctx,
+                               lsm6dso32_pp_od_t *val);
 
 typedef enum {
   LSM6DSO32_ACTIVE_HIGH = 0,
@@ -1929,7 +1957,7 @@ typedef enum {
 int32_t lsm6dso32_act_pin_notification_set(stmdev_ctx_t *ctx,
                                            lsm6dso32_sleep_status_on_int_t val);
 int32_t lsm6dso32_act_pin_notification_get(stmdev_ctx_t *ctx,
-                                          lsm6dso32_sleep_status_on_int_t *val);
+                                           lsm6dso32_sleep_status_on_int_t *val);
 
 typedef enum {
   LSM6DSO32_XL_AND_GY_NOT_AFFECTED      = 0,
@@ -1945,17 +1973,24 @@ int32_t lsm6dso32_act_mode_get(stmdev_ctx_t *ctx,
 int32_t lsm6dso32_act_sleep_dur_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dso32_act_sleep_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6dso32_tap_detection_on_z_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_tap_detection_on_z_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_tap_detection_on_z_set(stmdev_ctx_t *ctx,
+                                         uint8_t val);
+int32_t lsm6dso32_tap_detection_on_z_get(stmdev_ctx_t *ctx,
+                                         uint8_t *val);
 
-int32_t lsm6dso32_tap_detection_on_y_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_tap_detection_on_y_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_tap_detection_on_y_set(stmdev_ctx_t *ctx,
+                                         uint8_t val);
+int32_t lsm6dso32_tap_detection_on_y_get(stmdev_ctx_t *ctx,
+                                         uint8_t *val);
 
-int32_t lsm6dso32_tap_detection_on_x_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_tap_detection_on_x_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_tap_detection_on_x_set(stmdev_ctx_t *ctx,
+                                         uint8_t val);
+int32_t lsm6dso32_tap_detection_on_x_get(stmdev_ctx_t *ctx,
+                                         uint8_t *val);
 
 int32_t lsm6dso32_tap_threshold_x_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_tap_threshold_x_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_tap_threshold_x_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 typedef enum {
   LSM6DSO32_XYZ = 0,
@@ -1971,10 +2006,12 @@ int32_t lsm6dso32_tap_axis_priority_get(stmdev_ctx_t *ctx,
                                         lsm6dso32_tap_priority_t *val);
 
 int32_t lsm6dso32_tap_threshold_y_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_tap_threshold_y_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_tap_threshold_y_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lsm6dso32_tap_threshold_z_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_tap_threshold_z_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_tap_threshold_z_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lsm6dso32_tap_shock_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dso32_tap_shock_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -2020,7 +2057,8 @@ int32_t lsm6dso32_ff_dur_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dso32_ff_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm6dso32_fifo_watermark_set(stmdev_ctx_t *ctx, uint16_t val);
-int32_t lsm6dso32_fifo_watermark_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t lsm6dso32_fifo_watermark_get(stmdev_ctx_t *ctx,
+                                     uint16_t *val);
 
 int32_t lsm6dso32_compression_algo_init_set(stmdev_ctx_t *ctx,
                                             uint8_t val);
@@ -2049,8 +2087,10 @@ int32_t lsm6dso32_compression_algo_real_time_set(stmdev_ctx_t *ctx,
 int32_t lsm6dso32_compression_algo_real_time_get(stmdev_ctx_t *ctx,
                                                  uint8_t *val);
 
-int32_t lsm6dso32_fifo_stop_on_wtm_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_fifo_stop_on_wtm_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_fifo_stop_on_wtm_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t lsm6dso32_fifo_stop_on_wtm_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 typedef enum {
   LSM6DSO32_XL_NOT_BATCHED       =  0,
@@ -2156,15 +2196,18 @@ int32_t lsm6dso32_fifo_cnt_event_batch_set(stmdev_ctx_t *ctx,
 int32_t lsm6dso32_fifo_cnt_event_batch_get(stmdev_ctx_t *ctx,
                                            lsm6dso32_trig_counter_bdr_t *val);
 
-int32_t lsm6dso32_rst_batch_counter_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_rst_batch_counter_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_rst_batch_counter_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t lsm6dso32_rst_batch_counter_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 int32_t lsm6dso32_batch_counter_threshold_set(stmdev_ctx_t *ctx,
                                               uint16_t val);
 int32_t lsm6dso32_batch_counter_threshold_get(stmdev_ctx_t *ctx,
                                               uint16_t *val);
 
-int32_t lsm6dso32_fifo_data_level_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t lsm6dso32_fifo_data_level_get(stmdev_ctx_t *ctx,
+                                      uint16_t *val);
 
 int32_t lsm6dso32_fifo_status_get(stmdev_ctx_t *ctx,
                                   lsm6dso32_fifo_status2_t *val);
@@ -2179,19 +2222,28 @@ int32_t lsm6dso32_fifo_sensor_tag_get(stmdev_ctx_t *ctx,
                                       lsm6dso32_fifo_tag_t *val);
 
 int32_t lsm6dso32_fifo_pedo_batch_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_fifo_pedo_batch_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_fifo_pedo_batch_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
-int32_t lsm6dso32_sh_batch_slave_0_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_sh_batch_slave_0_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_sh_batch_slave_0_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t lsm6dso32_sh_batch_slave_0_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
-int32_t lsm6dso32_sh_batch_slave_1_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_sh_batch_slave_1_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_sh_batch_slave_1_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t lsm6dso32_sh_batch_slave_1_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
-int32_t lsm6dso32_sh_batch_slave_2_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_sh_batch_slave_2_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_sh_batch_slave_2_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t lsm6dso32_sh_batch_slave_2_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
-int32_t lsm6dso32_sh_batch_slave_3_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_sh_batch_slave_3_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_sh_batch_slave_3_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t lsm6dso32_sh_batch_slave_3_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 typedef enum {
   LSM6DSO32_DEN_DISABLE    = 0,
@@ -2225,13 +2277,16 @@ int32_t lsm6dso32_den_enable_get(stmdev_ctx_t *ctx,
                                  lsm6dso32_den_xl_g_t *val);
 
 int32_t lsm6dso32_den_mark_axis_x_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_den_mark_axis_x_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_den_mark_axis_x_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lsm6dso32_den_mark_axis_y_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_den_mark_axis_y_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_den_mark_axis_y_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lsm6dso32_den_mark_axis_z_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_den_mark_axis_z_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_den_mark_axis_z_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 typedef enum {
   LSM6DSO32_PEDO_DISABLE              = 0x00,
@@ -2245,15 +2300,18 @@ int32_t lsm6dso32_pedo_sens_set(stmdev_ctx_t *ctx,
 int32_t lsm6dso32_pedo_sens_get(stmdev_ctx_t *ctx,
                                 lsm6dso32_pedo_md_t *val);
 
-int32_t lsm6dso32_pedo_step_detect_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_pedo_step_detect_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 int32_t lsm6dso32_pedo_debounce_steps_set(stmdev_ctx_t *ctx,
                                           uint8_t *buff);
 int32_t lsm6dso32_pedo_debounce_steps_get(stmdev_ctx_t *ctx,
                                           uint8_t *buff);
 
-int32_t lsm6dso32_pedo_steps_period_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dso32_pedo_steps_period_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dso32_pedo_steps_period_set(stmdev_ctx_t *ctx,
+                                        uint8_t *buff);
+int32_t lsm6dso32_pedo_steps_period_get(stmdev_ctx_t *ctx,
+                                        uint8_t *buff);
 
 typedef enum {
   LSM6DSO32_EVERY_STEP     = 0,
@@ -2276,8 +2334,10 @@ int32_t lsm6dso32_tilt_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t lsm6dso32_tilt_flag_data_ready_get(stmdev_ctx_t *ctx,
                                            uint8_t *val);
 
-int32_t lsm6dso32_mag_sensitivity_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dso32_mag_sensitivity_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dso32_mag_sensitivity_set(stmdev_ctx_t *ctx,
+                                      uint8_t *buff);
+int32_t lsm6dso32_mag_sensitivity_get(stmdev_ctx_t *ctx,
+                                      uint8_t *buff);
 
 int32_t lsm6dso32_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff);
 int32_t lsm6dso32_mag_offset_get(stmdev_ctx_t *ctx, uint8_t *buff);
@@ -2331,8 +2391,8 @@ int32_t lsm6dso32_emb_fsm_en_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dso32_emb_fsm_en_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef struct {
-    lsm6dso32_fsm_enable_a_t          fsm_enable_a;
-    lsm6dso32_fsm_enable_b_t          fsm_enable_b;
+  lsm6dso32_fsm_enable_a_t          fsm_enable_a;
+  lsm6dso32_fsm_enable_b_t          fsm_enable_b;
 } lsm6dso32_emb_fsm_enable_t;
 int32_t lsm6dso32_fsm_enable_set(stmdev_ctx_t *ctx,
                                  lsm6dso32_emb_fsm_enable_t *val);
@@ -2353,24 +2413,25 @@ int32_t lsm6dso32_long_clr_get(stmdev_ctx_t *ctx,
                                lsm6dso32_fsm_lc_clr_t *val);
 
 typedef struct {
-    lsm6dso32_fsm_outs1_t    fsm_outs1;
-    lsm6dso32_fsm_outs2_t    fsm_outs2;
-    lsm6dso32_fsm_outs3_t    fsm_outs3;
-    lsm6dso32_fsm_outs4_t    fsm_outs4;
-    lsm6dso32_fsm_outs5_t    fsm_outs5;
-    lsm6dso32_fsm_outs6_t    fsm_outs6;
-    lsm6dso32_fsm_outs7_t    fsm_outs7;
-    lsm6dso32_fsm_outs8_t    fsm_outs8;
-    lsm6dso32_fsm_outs1_t    fsm_outs9;
-    lsm6dso32_fsm_outs2_t    fsm_outs10;
-    lsm6dso32_fsm_outs3_t    fsm_outs11;
-    lsm6dso32_fsm_outs4_t    fsm_outs12;
-    lsm6dso32_fsm_outs5_t    fsm_outs13;
-    lsm6dso32_fsm_outs6_t    fsm_outs14;
-    lsm6dso32_fsm_outs7_t    fsm_outs15;
-    lsm6dso32_fsm_outs8_t    fsm_outs16;
+  lsm6dso32_fsm_outs1_t    fsm_outs1;
+  lsm6dso32_fsm_outs2_t    fsm_outs2;
+  lsm6dso32_fsm_outs3_t    fsm_outs3;
+  lsm6dso32_fsm_outs4_t    fsm_outs4;
+  lsm6dso32_fsm_outs5_t    fsm_outs5;
+  lsm6dso32_fsm_outs6_t    fsm_outs6;
+  lsm6dso32_fsm_outs7_t    fsm_outs7;
+  lsm6dso32_fsm_outs8_t    fsm_outs8;
+  lsm6dso32_fsm_outs1_t    fsm_outs9;
+  lsm6dso32_fsm_outs2_t    fsm_outs10;
+  lsm6dso32_fsm_outs3_t    fsm_outs11;
+  lsm6dso32_fsm_outs4_t    fsm_outs12;
+  lsm6dso32_fsm_outs5_t    fsm_outs13;
+  lsm6dso32_fsm_outs6_t    fsm_outs14;
+  lsm6dso32_fsm_outs7_t    fsm_outs15;
+  lsm6dso32_fsm_outs8_t    fsm_outs16;
 } lsm6dso32_fsm_out_t;
-int32_t lsm6dso32_fsm_out_get(stmdev_ctx_t *ctx, lsm6dso32_fsm_out_t *val);
+int32_t lsm6dso32_fsm_out_get(stmdev_ctx_t *ctx,
+                              lsm6dso32_fsm_out_t *val);
 
 typedef enum {
   LSM6DSO32_ODR_FSM_12Hz5 = 0,
@@ -2386,36 +2447,40 @@ int32_t lsm6dso32_fsm_data_rate_get(stmdev_ctx_t *ctx,
 int32_t lsm6dso32_fsm_init_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dso32_fsm_init_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6dso32_long_cnt_int_value_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dso32_long_cnt_int_value_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dso32_long_cnt_int_value_set(stmdev_ctx_t *ctx,
+                                         uint8_t *buff);
+int32_t lsm6dso32_long_cnt_int_value_get(stmdev_ctx_t *ctx,
+                                         uint8_t *buff);
 
 int32_t lsm6dso32_fsm_number_of_programs_set(stmdev_ctx_t *ctx,
                                              uint8_t *buff);
 int32_t lsm6dso32_fsm_number_of_programs_get(stmdev_ctx_t *ctx,
                                              uint8_t *buff);
 
-int32_t lsm6dso32_fsm_start_address_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dso32_fsm_start_address_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dso32_fsm_start_address_set(stmdev_ctx_t *ctx,
+                                        uint8_t *buff);
+int32_t lsm6dso32_fsm_start_address_get(stmdev_ctx_t *ctx,
+                                        uint8_t *buff);
 
 typedef struct {
-    lsm6dso32_sensor_hub_1_t   sh_byte_1;
-    lsm6dso32_sensor_hub_2_t   sh_byte_2;
-    lsm6dso32_sensor_hub_3_t   sh_byte_3;
-    lsm6dso32_sensor_hub_4_t   sh_byte_4;
-    lsm6dso32_sensor_hub_5_t   sh_byte_5;
-    lsm6dso32_sensor_hub_6_t   sh_byte_6;
-    lsm6dso32_sensor_hub_7_t   sh_byte_7;
-    lsm6dso32_sensor_hub_8_t   sh_byte_8;
-    lsm6dso32_sensor_hub_9_t   sh_byte_9;
-    lsm6dso32_sensor_hub_10_t  sh_byte_10;
-    lsm6dso32_sensor_hub_11_t  sh_byte_11;
-    lsm6dso32_sensor_hub_12_t  sh_byte_12;
-    lsm6dso32_sensor_hub_13_t  sh_byte_13;
-    lsm6dso32_sensor_hub_14_t  sh_byte_14;
-    lsm6dso32_sensor_hub_15_t  sh_byte_15;
-    lsm6dso32_sensor_hub_16_t  sh_byte_16;
-    lsm6dso32_sensor_hub_17_t  sh_byte_17;
-    lsm6dso32_sensor_hub_18_t  sh_byte_18;
+  lsm6dso32_sensor_hub_1_t   sh_byte_1;
+  lsm6dso32_sensor_hub_2_t   sh_byte_2;
+  lsm6dso32_sensor_hub_3_t   sh_byte_3;
+  lsm6dso32_sensor_hub_4_t   sh_byte_4;
+  lsm6dso32_sensor_hub_5_t   sh_byte_5;
+  lsm6dso32_sensor_hub_6_t   sh_byte_6;
+  lsm6dso32_sensor_hub_7_t   sh_byte_7;
+  lsm6dso32_sensor_hub_8_t   sh_byte_8;
+  lsm6dso32_sensor_hub_9_t   sh_byte_9;
+  lsm6dso32_sensor_hub_10_t  sh_byte_10;
+  lsm6dso32_sensor_hub_11_t  sh_byte_11;
+  lsm6dso32_sensor_hub_12_t  sh_byte_12;
+  lsm6dso32_sensor_hub_13_t  sh_byte_13;
+  lsm6dso32_sensor_hub_14_t  sh_byte_14;
+  lsm6dso32_sensor_hub_15_t  sh_byte_15;
+  lsm6dso32_sensor_hub_16_t  sh_byte_16;
+  lsm6dso32_sensor_hub_17_t  sh_byte_17;
+  lsm6dso32_sensor_hub_18_t  sh_byte_18;
 } lsm6dso32_emb_sh_read_t;
 int32_t lsm6dso32_sh_read_data_raw_get(stmdev_ctx_t *ctx,
                                        lsm6dso32_emb_sh_read_t *val);
@@ -2444,7 +2509,8 @@ int32_t lsm6dso32_sh_pin_mode_get(stmdev_ctx_t *ctx,
                                   lsm6dso32_shub_pu_en_t *val);
 
 int32_t lsm6dso32_sh_pass_through_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dso32_sh_pass_through_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dso32_sh_pass_through_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 typedef enum {
   LSM6DSO32_EXT_ON_INT2_PIN = 0,
@@ -2478,7 +2544,7 @@ int32_t lsm6dso32_sh_data_rate_set(stmdev_ctx_t *ctx,
 int32_t lsm6dso32_sh_data_rate_get(stmdev_ctx_t *ctx,
                                    lsm6dso32_shub_odr_t *val);
 
-typedef struct{
+typedef struct {
   uint8_t   slv0_add;
   uint8_t   slv0_subadd;
   uint8_t   slv0_data;
@@ -2486,7 +2552,7 @@ typedef struct{
 int32_t lsm6dso32_sh_cfg_write(stmdev_ctx_t *ctx,
                                lsm6dso32_sh_cfg_write_t *val);
 
-typedef struct{
+typedef struct {
   uint8_t   slv_add;
   uint8_t   slv_subadd;
   uint8_t   slv_len;
