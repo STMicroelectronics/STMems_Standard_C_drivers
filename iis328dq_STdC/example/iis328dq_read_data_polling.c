@@ -118,7 +118,8 @@ static uint8_t tx_buffer[TX_BUF_DIM];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -134,52 +135,49 @@ void iis328dq_read_data_polling(void)
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
   /* Check device ID */
   whoamI = 0;
   iis328dq_device_id_get(&dev_ctx, &whoamI);
+
   if ( whoamI != IIS328DQ_ID )
-    while(1); /*manage here device not found */
+    while (1); /*manage here device not found */
 
   /* Enable Block Data Update */
   iis328dq_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set full scale */
   iis328dq_full_scale_set(&dev_ctx, IIS328DQ_2g);
-
   /* Configure filtering chain */
   /* Accelerometer - High Pass / Slope path */
   iis328dq_hp_path_set(&dev_ctx, IIS328DQ_HP_DISABLE);
   //iis328dq_hp_path_set(&dev_ctx, IIS328DQ_HP_ON_OUT);
   //iis328dq_hp_reset_get(&dev_ctx);
-
   /* Set Output Data Rate */
   iis328dq_data_rate_set(&dev_ctx, IIS328DQ_ODR_5Hz);
 
   /* Read samples in polling mode (no int) */
-  while(1)
-  {
+  while (1) {
     /* Read output only if new value is available */
     iis328dq_reg_t reg;
     iis328dq_status_reg_get(&dev_ctx, &reg.status_reg);
 
-    if (reg.status_reg.zyxda)
-    {
+    if (reg.status_reg.zyxda) {
       /* Read acceleration data */
-      memset(data_raw_acceleration, 0x00, 3*sizeof(int16_t));
+      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
       iis328dq_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-      acceleration_mg[0] = iis328dq_from_fs2_to_mg( data_raw_acceleration[0]);
-      acceleration_mg[1] = iis328dq_from_fs2_to_mg( data_raw_acceleration[1]);
-      acceleration_mg[2] = iis328dq_from_fs2_to_mg( data_raw_acceleration[2]);
-     
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+      acceleration_mg[0] = iis328dq_from_fs2_to_mg(
+                             data_raw_acceleration[0]);
+      acceleration_mg[1] = iis328dq_from_fs2_to_mg(
+                             data_raw_acceleration[1]);
+      acceleration_mg[2] = iis328dq_from_fs2_to_mg(
+                             data_raw_acceleration[2]);
+      sprintf((char *)tx_buffer,
+              "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
+      tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
     }
   }
 }
@@ -194,10 +192,10 @@ void iis328dq_read_data_polling(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
-
 #if defined(NUCLEO_F411RE)
   /* Write multiple command */
   reg |= 0x80;
