@@ -116,7 +116,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -132,60 +133,58 @@ void lis2hh12_read_data_polling(void)
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lis2hh12_dev_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LIS2HH12_ID)
-    while(1); /* manage here device not found */
+    while (1); /* manage here device not found */
 
   /* Restore default configuration */
   lis2hh12_dev_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lis2hh12_dev_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Enable Block Data Update */
   lis2hh12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /* Set full scale */ 
+  /* Set full scale */
   lis2hh12_xl_full_scale_set(&dev_ctx, LIS2HH12_8g);
-
   /* Configure filtering chain */
-  /* Accelerometer data output- filter path / bandwidth */ 
+  /* Accelerometer data output- filter path / bandwidth */
   lis2hh12_xl_filter_aalias_bandwidth_set(&dev_ctx, LIS2HH12_AUTO);
   lis2hh12_xl_filter_out_path_set(&dev_ctx, LIS2HH12_FILT_LP);
-  lis2hh12_xl_filter_low_bandwidth_set(&dev_ctx, LIS2HH12_LP_ODR_DIV_400);
-  /* Accelerometer interrrupt - filter path / bandwidth */
+  lis2hh12_xl_filter_low_bandwidth_set(&dev_ctx,
+                                       LIS2HH12_LP_ODR_DIV_400);
+  /* Accelerometer interrupt - filter path / bandwidth */
   lis2hh12_xl_filter_int_path_set(&dev_ctx, LIS2HH12_HP_DISABLE);
-
   /* Set Output Data Rate */
   lis2hh12_xl_data_rate_set(&dev_ctx, LIS2HH12_XL_ODR_100Hz);
 
   /*  Read samples in polling mode (no int) */
-  while(1)
-  {
+  while (1) {
     uint8_t reg;
-
     /*  Read output only if new value is available */
     lis2hh12_xl_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
+
+    if (reg) {
       /* Read acceleration data  */
       memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
       lis2hh12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-      acceleration_mg[0] = lis2hh12_from_fs8g_to_mg(data_raw_acceleration[0]);
-      acceleration_mg[1] = lis2hh12_from_fs8g_to_mg(data_raw_acceleration[1]);
-      acceleration_mg[2] = lis2hh12_from_fs8g_to_mg(data_raw_acceleration[2]);
-     
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+      acceleration_mg[0] = lis2hh12_from_fs8g_to_mg(
+                             data_raw_acceleration[0]);
+      acceleration_mg[1] = lis2hh12_from_fs8g_to_mg(
+                             data_raw_acceleration[1]);
+      acceleration_mg[2] = lis2hh12_from_fs8g_to_mg(
+                             data_raw_acceleration[2]);
+      sprintf((char *)tx_buffer,
+              "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -200,7 +199,8 @@ void lis2hh12_read_data_polling(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
@@ -248,7 +248,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */

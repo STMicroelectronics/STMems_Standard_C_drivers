@@ -23,7 +23,7 @@
 #define LIS2HH12_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -74,7 +74,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
@@ -107,8 +107,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -131,7 +133,7 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-  *              You can create a sensor configuration by your own or using 
+  *              You can create a sensor configuration by your own or using
   *              Unico / Unicleo tools available on STMicroelectronics
   *              web site.
   *
@@ -518,7 +520,7 @@ typedef struct {
   * @{
   *
   */
-typedef union{
+typedef union {
   lis2hh12_act_ths_t       act_ths;
   lis2hh12_act_dur_t       act_dur;
   lis2hh12_ctrl1_t         ctrl1;
@@ -546,9 +548,11 @@ typedef union{
   *
   */
 
-int32_t lis2hh12_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lis2hh12_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
                           uint16_t len);
-int32_t lis2hh12_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lis2hh12_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                           uint8_t *data,
                            uint16_t len);
 
 float_t lis2hh12_from_fs2g_to_mg(int16_t lsb);
@@ -561,11 +565,15 @@ typedef struct {
   uint8_t yen              : 1;
   uint8_t zen              : 1;
 } lis2hh12_xl_axis_t;
-int32_t lis2hh12_xl_axis_set(stmdev_ctx_t *ctx, lis2hh12_xl_axis_t val);
-int32_t lis2hh12_xl_axis_get(stmdev_ctx_t *ctx, lis2hh12_xl_axis_t *val);
+int32_t lis2hh12_xl_axis_set(stmdev_ctx_t *ctx,
+                             lis2hh12_xl_axis_t val);
+int32_t lis2hh12_xl_axis_get(stmdev_ctx_t *ctx,
+                             lis2hh12_xl_axis_t *val);
 
-int32_t lis2hh12_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis2hh12_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis2hh12_block_data_update_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t lis2hh12_block_data_update_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 typedef enum {
   LIS2HH12_XL_ODR_OFF      = 0x00,
@@ -598,14 +606,18 @@ typedef enum {
   LIS2HH12_EVERY_4_SAMPLES = 0x02,
   LIS2HH12_EVERY_8_SAMPLES = 0x03,
 } lis2hh12_dec_t;
-int32_t lis2hh12_xl_decimation_set(stmdev_ctx_t *ctx, lis2hh12_dec_t val);
-int32_t lis2hh12_xl_decimation_get(stmdev_ctx_t *ctx, lis2hh12_dec_t *val);
+int32_t lis2hh12_xl_decimation_set(stmdev_ctx_t *ctx,
+                                   lis2hh12_dec_t val);
+int32_t lis2hh12_xl_decimation_get(stmdev_ctx_t *ctx,
+                                   lis2hh12_dec_t *val);
 
-int32_t lis2hh12_xl_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis2hh12_xl_flag_data_ready_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 int32_t lis2hh12_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
-int32_t lis2hh12_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val);
+int32_t lis2hh12_acceleration_raw_get(stmdev_ctx_t *ctx,
+                                      int16_t *val);
 
 int32_t lis2hh12_dev_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
@@ -687,8 +699,10 @@ int32_t lis2hh12_xl_filter_aalias_bandwidth_set(stmdev_ctx_t *ctx,
 int32_t lis2hh12_xl_filter_aalias_bandwidth_get(stmdev_ctx_t *ctx,
                                                 lis2hh12_xl_filt_aa_bw_t *val);
 
-int32_t lis2hh12_xl_filter_reference_set(stmdev_ctx_t *ctx, int16_t *val);
-int32_t lis2hh12_xl_filter_reference_get(stmdev_ctx_t *ctx, int16_t *val);
+int32_t lis2hh12_xl_filter_reference_set(stmdev_ctx_t *ctx,
+                                         int16_t *val);
+int32_t lis2hh12_xl_filter_reference_get(stmdev_ctx_t *ctx,
+                                         int16_t *val);
 
 typedef enum {
   LIS2HH12_SPI_4_WIRE = 0x00,
@@ -732,8 +746,10 @@ typedef enum {
   LIS2HH12_PUSH_PULL       = 0x00,
   LIS2HH12_OPEN_DRAIN      = 0x01,
 } lis2hh12_pp_od_t;
-int32_t lis2hh12_pin_mode_set(stmdev_ctx_t *ctx, lis2hh12_pp_od_t val);
-int32_t lis2hh12_pin_mode_get(stmdev_ctx_t *ctx, lis2hh12_pp_od_t *val);
+int32_t lis2hh12_pin_mode_set(stmdev_ctx_t *ctx,
+                              lis2hh12_pp_od_t val);
+int32_t lis2hh12_pin_mode_get(stmdev_ctx_t *ctx,
+                              lis2hh12_pp_od_t *val);
 
 typedef enum {
   LIS2HH12_ACTIVE_HIGH     = 0x00,
@@ -848,8 +864,10 @@ typedef enum {
   LIS2HH12_ENABLE_ON_IG1_4D    = 0x11,
   LIS2HH12_ENABLE_ON_IG2_4D    = 0x12,
 } lis2hh12_6d_mode_t;
-int32_t lis2hh12_6d_mode_set(stmdev_ctx_t *ctx, lis2hh12_6d_mode_t val);
-int32_t lis2hh12_6d_mode_get(stmdev_ctx_t *ctx, lis2hh12_6d_mode_t *val);
+int32_t lis2hh12_6d_mode_set(stmdev_ctx_t *ctx,
+                             lis2hh12_6d_mode_t val);
+int32_t lis2hh12_6d_mode_get(stmdev_ctx_t *ctx,
+                             lis2hh12_6d_mode_t *val);
 
 int32_t lis2hh12_fifo_watermark_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis2hh12_fifo_watermark_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -863,8 +881,10 @@ typedef enum {
   LIS2HH12_BYPASS_TO_STREAM_MODE = 0x14,
   LIS2HH12_BYPASS_TO_FIFO_MODE   = 0x17,
 } lis2hh12_fifo_md_t;
-int32_t lis2hh12_fifo_mode_set(stmdev_ctx_t *ctx, lis2hh12_fifo_md_t val);
-int32_t lis2hh12_fifo_mode_get(stmdev_ctx_t *ctx, lis2hh12_fifo_md_t *val);
+int32_t lis2hh12_fifo_mode_set(stmdev_ctx_t *ctx,
+                               lis2hh12_fifo_md_t val);
+int32_t lis2hh12_fifo_mode_get(stmdev_ctx_t *ctx,
+                               lis2hh12_fifo_md_t *val);
 
 typedef struct {
   uint8_t fss             : 1;
