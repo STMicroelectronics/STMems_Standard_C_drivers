@@ -23,7 +23,7 @@
 #define AIS2DW12_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -75,7 +75,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
@@ -113,8 +113,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -221,7 +223,8 @@ typedef struct {
 #define AIS2DW12_CTRL3                       0x22U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-  uint8_t slp_mode                   : 2;  /* slp_mode_sel + slp_mode_1 */
+uint8_t slp_mode                   :
+  2;  /* slp_mode_sel + slp_mode_1 */
   uint8_t not_used_01                : 1;
   uint8_t h_lactive                  : 1;
   uint8_t lir                        : 1;
@@ -233,7 +236,8 @@ typedef struct {
   uint8_t lir                        : 1;
   uint8_t h_lactive                  : 1;
   uint8_t not_used_01                : 1;
-  uint8_t slp_mode                   : 2;  /* slp_mode_sel + slp_mode_1 */
+uint8_t slp_mode                   :
+  2;  /* slp_mode_sel + slp_mode_1 */
 #endif /* DRV_BYTE_ORDER */
 } ais2dw12_ctrl3_t;
 
@@ -524,7 +528,7 @@ typedef struct {
   * @{
   *
   */
-typedef union{
+typedef union {
   ais2dw12_ctrl1_t                   ctrl1;
   ais2dw12_ctrl2_t                   ctrl2;
   ais2dw12_ctrl3_t                   ctrl3;
@@ -552,9 +556,11 @@ typedef union{
   *
   */
 
-int32_t ais2dw12_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t ais2dw12_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
                           uint16_t len);
-int32_t ais2dw12_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t ais2dw12_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                           uint8_t *data,
                            uint16_t len);
 
 float_t ais2dw12_from_fs2_to_mg(int16_t lsb);
@@ -574,8 +580,10 @@ typedef enum {
   AIS2DW12_SINGLE_PWR_MD_2                    = 0x09,
   AIS2DW12_SINGLE_PWR_MD_12bit                = 0x08,
 } ais2dw12_mode_t;
-int32_t ais2dw12_power_mode_set(stmdev_ctx_t *ctx, ais2dw12_mode_t val);
-int32_t ais2dw12_power_mode_get(stmdev_ctx_t *ctx, ais2dw12_mode_t *val);
+int32_t ais2dw12_power_mode_set(stmdev_ctx_t *ctx,
+                                ais2dw12_mode_t val);
+int32_t ais2dw12_power_mode_get(stmdev_ctx_t *ctx,
+                                ais2dw12_mode_t *val);
 
 typedef enum {
   AIS2DW12_XL_ODR_OFF            = 0x00,
@@ -588,23 +596,28 @@ typedef enum {
   AIS2DW12_XL_SET_PIN_TRIG       = 0x22,  /* Use this only in SINGLE mode */
 } ais2dw12_odr_t;
 int32_t ais2dw12_data_rate_set(stmdev_ctx_t *ctx, ais2dw12_odr_t val);
-int32_t ais2dw12_data_rate_get(stmdev_ctx_t *ctx, ais2dw12_odr_t *val);
+int32_t ais2dw12_data_rate_get(stmdev_ctx_t *ctx,
+                               ais2dw12_odr_t *val);
 
-int32_t ais2dw12_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ais2dw12_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ais2dw12_block_data_update_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t ais2dw12_block_data_update_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 typedef enum {
   AIS2DW12_2g     = 0,
   AIS2DW12_4g     = 1,
 } ais2dw12_fs_t;
 int32_t ais2dw12_full_scale_set(stmdev_ctx_t *ctx, ais2dw12_fs_t val);
-int32_t ais2dw12_full_scale_get(stmdev_ctx_t *ctx, ais2dw12_fs_t *val);
+int32_t ais2dw12_full_scale_get(stmdev_ctx_t *ctx,
+                                ais2dw12_fs_t *val);
 
-int32_t ais2dw12_status_reg_get(stmdev_ctx_t *ctx, ais2dw12_status_t *val);
+int32_t ais2dw12_status_reg_get(stmdev_ctx_t *ctx,
+                                ais2dw12_status_t *val);
 
 int32_t ais2dw12_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-typedef struct{
+typedef struct {
   ais2dw12_status_dup_t   status_dup;
   ais2dw12_wake_up_src_t  wake_up_src;
   ais2dw12_sixd_src_t     sixd_src;
@@ -627,13 +640,14 @@ typedef enum {
   AIS2DW12_LSb_15mg6    = 1,
 } ais2dw12_usr_off_w_t;
 int32_t ais2dw12_offset_weight_set(stmdev_ctx_t *ctx,
-                                      ais2dw12_usr_off_w_t val);
+                                   ais2dw12_usr_off_w_t val);
 int32_t ais2dw12_offset_weight_get(stmdev_ctx_t *ctx,
-                                      ais2dw12_usr_off_w_t *val);
+                                   ais2dw12_usr_off_w_t *val);
 
 int32_t ais2dw12_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
-int32_t ais2dw12_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val);
+int32_t ais2dw12_acceleration_raw_get(stmdev_ctx_t *ctx,
+                                      int16_t *val);
 
 int32_t ais2dw12_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
@@ -668,8 +682,10 @@ typedef enum {
   AIS2DW12_USER_OFFSET_ON_OUT  = 0x01,
   AIS2DW12_HIGH_PASS_ON_OUT    = 0x10,
 } ais2dw12_fds_t;
-int32_t ais2dw12_filter_path_set(stmdev_ctx_t *ctx, ais2dw12_fds_t val);
-int32_t ais2dw12_filter_path_get(stmdev_ctx_t *ctx, ais2dw12_fds_t *val);
+int32_t ais2dw12_filter_path_set(stmdev_ctx_t *ctx,
+                                 ais2dw12_fds_t val);
+int32_t ais2dw12_filter_path_get(stmdev_ctx_t *ctx,
+                                 ais2dw12_fds_t *val);
 
 typedef enum {
   AIS2DW12_ODR_DIV_2     = 0,
@@ -678,9 +694,9 @@ typedef enum {
   AIS2DW12_ODR_DIV_20    = 3,
 } ais2dw12_bw_filt_t;
 int32_t ais2dw12_filter_bandwidth_set(stmdev_ctx_t *ctx,
-                                         ais2dw12_bw_filt_t val);
+                                      ais2dw12_bw_filt_t val);
 int32_t ais2dw12_filter_bandwidth_get(stmdev_ctx_t *ctx,
-                                         ais2dw12_bw_filt_t *val);
+                                      ais2dw12_bw_filt_t *val);
 
 int32_t ais2dw12_reference_mode_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ais2dw12_reference_mode_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -705,8 +721,10 @@ typedef enum {
   AIS2DW12_PULL_UP_CONNECT     = 0,
   AIS2DW12_PULL_UP_DISCONNECT  = 1,
 } ais2dw12_cs_pu_disc_t;
-int32_t ais2dw12_cs_mode_set(stmdev_ctx_t *ctx, ais2dw12_cs_pu_disc_t val);
-int32_t ais2dw12_cs_mode_get(stmdev_ctx_t *ctx, ais2dw12_cs_pu_disc_t *val);
+int32_t ais2dw12_cs_mode_set(stmdev_ctx_t *ctx,
+                             ais2dw12_cs_pu_disc_t val);
+int32_t ais2dw12_cs_mode_get(stmdev_ctx_t *ctx,
+                             ais2dw12_cs_pu_disc_t *val);
 
 typedef enum {
   AIS2DW12_ACTIVE_HIGH  = 0,
@@ -730,8 +748,10 @@ typedef enum {
   AIS2DW12_PUSH_PULL   = 0,
   AIS2DW12_OPEN_DRAIN  = 1,
 } ais2dw12_pp_od_t;
-int32_t ais2dw12_pin_mode_set(stmdev_ctx_t *ctx, ais2dw12_pp_od_t val);
-int32_t ais2dw12_pin_mode_get(stmdev_ctx_t *ctx, ais2dw12_pp_od_t *val);
+int32_t ais2dw12_pin_mode_set(stmdev_ctx_t *ctx,
+                              ais2dw12_pp_od_t val);
+int32_t ais2dw12_pin_mode_get(stmdev_ctx_t *ctx,
+                              ais2dw12_pp_od_t *val);
 
 int32_t ais2dw12_pin_int1_route_set(stmdev_ctx_t *ctx,
                                     ais2dw12_ctrl4_int1_t *val);
@@ -766,8 +786,10 @@ typedef enum {
   AIS2DW12_DETECT_ACT_INACT    = 1,
   AIS2DW12_DETECT_STAT_MOTION  = 3,
 } ais2dw12_sleep_on_t;
-int32_t ais2dw12_act_mode_set(stmdev_ctx_t *ctx, ais2dw12_sleep_on_t val);
-int32_t ais2dw12_act_mode_get(stmdev_ctx_t *ctx, ais2dw12_sleep_on_t *val);
+int32_t ais2dw12_act_mode_set(stmdev_ctx_t *ctx,
+                              ais2dw12_sleep_on_t val);
+int32_t ais2dw12_act_mode_get(stmdev_ctx_t *ctx,
+                              ais2dw12_sleep_on_t *val);
 
 int32_t ais2dw12_act_sleep_dur_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ais2dw12_act_sleep_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -778,7 +800,8 @@ int32_t ais2dw12_6d_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t ais2dw12_4d_mode_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ais2dw12_4d_mode_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t ais2dw12_6d_src_get(stmdev_ctx_t *ctx, ais2dw12_sixd_src_t *val);
+int32_t ais2dw12_6d_src_get(stmdev_ctx_t *ctx,
+                            ais2dw12_sixd_src_t *val);
 
 typedef enum {
   AIS2DW12_ODR_DIV_2_FEED   = 0,
@@ -817,8 +840,10 @@ typedef enum {
   AIS2DW12_BYPASS_TO_STREAM_MODE   = 4,
   AIS2DW12_STREAM_MODE             = 6,
 } ais2dw12_fmode_t;
-int32_t ais2dw12_fifo_mode_set(stmdev_ctx_t *ctx, ais2dw12_fmode_t val);
-int32_t ais2dw12_fifo_mode_get(stmdev_ctx_t *ctx, ais2dw12_fmode_t *val);
+int32_t ais2dw12_fifo_mode_set(stmdev_ctx_t *ctx,
+                               ais2dw12_fmode_t val);
+int32_t ais2dw12_fifo_mode_get(stmdev_ctx_t *ctx,
+                               ais2dw12_fmode_t *val);
 
 int32_t ais2dw12_fifo_data_level_get(stmdev_ctx_t *ctx, uint8_t *val);
 
