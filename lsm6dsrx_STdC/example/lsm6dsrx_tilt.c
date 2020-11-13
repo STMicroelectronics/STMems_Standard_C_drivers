@@ -116,7 +116,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -128,53 +129,45 @@ static void platform_init(void);
 void lsm6dsrx_tilt(void)
 {
   stmdev_ctx_t dev_ctx;
-
   /* Uncomment to configure INT 1 */
   //lsm6dsrx_pin_int1_route_t int1_route;
   /* Uncomment to configure INT 2 */
   lsm6dsrx_pin_int2_route_t int2_route;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Init test platform */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lsm6dsrx_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LSM6DSRX_ID)
-    while(1);
+    while (1);
 
   /* Restore default configuration */
   lsm6dsrx_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lsm6dsrx_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Disable I3C interface */
   lsm6dsrx_i3c_disable_set(&dev_ctx, LSM6DSRX_I3C_DISABLE);
-
   /* Set XL Output Data Rate: The tilt function works at 26 Hz,
    * so the accelerometer ODR must be set at 26 Hz or higher values
    */
   lsm6dsrx_xl_data_rate_set(&dev_ctx, LSM6DSRX_XL_ODR_26Hz);
-
   /* Set 2g full XL scale. */
   lsm6dsrx_xl_full_scale_set(&dev_ctx, LSM6DSRX_2g);
-
   /* Enable Tilt in embedded function. */
   lsm6dsrx_tilt_sens_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Uncomment if interrupt generation on Tilt INT1 pin */
   //lsm6dsrx_pin_int1_route_get(&dev_ctx, &int1_route);
   //int1_route.emb_func_int1.int1_tilt = PROPERTY_ENABLE;
   //lsm6dsrx_pin_int1_route_set(&dev_ctx, &int1_route);
-
   /* Uncomment if interrupt generation on Tilt INT2 pin */
   lsm6dsrx_pin_int2_route_get(&dev_ctx, &int2_route);
   int2_route.emb_func_int2.int2_tilt = PROPERTY_ENABLE;
@@ -184,16 +177,14 @@ void lsm6dsrx_tilt(void)
   //lsm6dsrx_int_notification_set(&dev_ctx, PROPERTY_ENABLE);
 
   /* Wait Events. */
-  while(1)
-  {
+  while (1) {
     uint8_t is_tilt;
-
     /* Check if Tilt events */
     lsm6dsrx_tilt_flag_data_ready_get(&dev_ctx, &is_tilt);
-    if (is_tilt)
-    {
-      sprintf((char*)tx_buffer, "TILT Detected\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+    if (is_tilt) {
+      sprintf((char *)tx_buffer, "TILT Detected\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -208,17 +199,18 @@ void lsm6dsrx_tilt(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-    HAL_I2C_Mem_Write(handle, LSM6DSRX_I2C_ADD_L, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  HAL_I2C_Mem_Write(handle, LSM6DSRX_I2C_ADD_L, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_write(handle,  LSM6DSRX_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
@@ -242,11 +234,11 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   HAL_I2C_Mem_Read(handle, LSM6DSRX_I2C_ADD_L, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Receive(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_read(handle, LSM6DSRX_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif

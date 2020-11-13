@@ -23,7 +23,7 @@
 #define LSM6DSRX_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -74,7 +74,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
@@ -107,8 +107,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -177,9 +179,11 @@ typedef struct {
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01              : 6;
-  uint8_t reg_access               : 2; /* shub_reg_access + func_cfg_access */
+uint8_t reg_access               :
+  2; /* shub_reg_access + func_cfg_access */
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-  uint8_t reg_access               : 2; /* shub_reg_access + func_cfg_access */
+uint8_t reg_access               :
+  2; /* shub_reg_access + func_cfg_access */
   uint8_t not_used_01              : 6;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_func_cfg_access_t;
@@ -440,9 +444,11 @@ typedef struct {
   uint8_t ftype                    : 3;
   uint8_t usr_off_w                : 1;
   uint8_t xl_hm_mode               : 1;
-  uint8_t den_mode                 : 3;   /* trig_en + lvl1_en + lvl2_en */
+uint8_t den_mode                 :
+  3;   /* trig_en + lvl1_en + lvl2_en */
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-  uint8_t den_mode                 : 3;   /* trig_en + lvl1_en + lvl2_en */
+uint8_t den_mode                 :
+  3;   /* trig_en + lvl1_en + lvl2_en */
   uint8_t xl_hm_mode               : 1;
   uint8_t usr_off_w                : 1;
   uint8_t ftype                    : 3;
@@ -1474,11 +1480,13 @@ typedef struct {
 #define LSM6DSRX_FSM_LONG_COUNTER_CLEAR       0x4AU
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-  uint8_t fsm_lc_clr               : 2;  /* fsm_lc_cleared + fsm_lc_clear */
+uint8_t fsm_lc_clr               :
+  2;  /* fsm_lc_cleared + fsm_lc_clear */
   uint8_t not_used_01              : 6;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t not_used_01              : 6;
-  uint8_t fsm_lc_clr               : 2;  /* fsm_lc_cleared + fsm_lc_clear */
+uint8_t fsm_lc_clr               :
+  2;  /* fsm_lc_cleared + fsm_lc_clear */
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_fsm_long_counter_clear_t;
 
@@ -2013,414 +2021,414 @@ typedef struct {
 #define LSM6DSRX_SENSOR_HUB_1                 0x02U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_sensor_hub_1_t;
 
 #define LSM6DSRX_SENSOR_HUB_2                 0x03U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_sensor_hub_2_t;
 
 #define LSM6DSRX_SENSOR_HUB_3                 0x04U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_sensor_hub_3_t;
 
 #define LSM6DSRX_SENSOR_HUB_4                 0x05U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_sensor_hub_4_t;
 
 #define LSM6DSRX_SENSOR_HUB_5                 0x06U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_sensor_hub_5_t;
 
 #define LSM6DSRX_SENSOR_HUB_6                 0x07U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_sensor_hub_6_t;
 
 #define LSM6DSRX_SENSOR_HUB_7                 0x08U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_sensor_hub_7_t;
 
 #define LSM6DSRX_SENSOR_HUB_8                 0x09U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_sensor_hub_8_t;
 
 #define LSM6DSRX_SENSOR_HUB_9                 0x0AU
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_sensor_hub_9_t;
 
 #define LSM6DSRX_SENSOR_HUB_10                0x0BU
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_sensor_hub_10_t;
 
 #define LSM6DSRX_SENSOR_HUB_11                0x0CU
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_sensor_hub_11_t;
 
 #define LSM6DSRX_SENSOR_HUB_12                0x0DU
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_sensor_hub_12_t;
 
 #define LSM6DSRX_SENSOR_HUB_13                0x0EU
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_sensor_hub_13_t;
 
 #define LSM6DSRX_SENSOR_HUB_14                0x0FU
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_sensor_hub_14_t;
 
 #define LSM6DSRX_SENSOR_HUB_15                0x10U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_sensor_hub_15_t;
 
 #define LSM6DSRX_SENSOR_HUB_16                0x11U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_sensor_hub_16_t;
 
 #define LSM6DSRX_SENSOR_HUB_17                0x12U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_sensor_hub_17_t;
 
 #define LSM6DSRX_SENSOR_HUB_18                0x13U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } lsm6dsrx_sensor_hub_18_t;
 
@@ -2601,7 +2609,7 @@ typedef struct {
   * @{
   *
   */
-typedef union{
+typedef union {
   lsm6dsrx_func_cfg_access_t               func_cfg_access;
   lsm6dsrx_pin_ctrl_t                      pin_ctrl;
   lsm6dsrx_s4s_tph_l_t                     s4s_tph_l;
@@ -2740,10 +2748,12 @@ typedef union{
   *
   */
 
-int32_t lsm6dsrx_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
-                         uint16_t len);
-int32_t lsm6dsrx_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lsm6dsrx_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
                           uint16_t len);
+int32_t lsm6dsrx_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                           uint8_t *data,
+                           uint16_t len);
 
 float_t lsm6dsrx_from_fs2g_to_mg(int16_t lsb);
 float_t lsm6dsrx_from_fs4g_to_mg(int16_t lsb);
@@ -2764,8 +2774,10 @@ typedef enum {
   LSM6DSRX_4g   = 2,
   LSM6DSRX_8g   = 3,
 } lsm6dsrx_fs_xl_t;
-int32_t lsm6dsrx_xl_full_scale_set(stmdev_ctx_t *ctx, lsm6dsrx_fs_xl_t val);
-int32_t lsm6dsrx_xl_full_scale_get(stmdev_ctx_t *ctx, lsm6dsrx_fs_xl_t *val);
+int32_t lsm6dsrx_xl_full_scale_set(stmdev_ctx_t *ctx,
+                                   lsm6dsrx_fs_xl_t val);
+int32_t lsm6dsrx_xl_full_scale_get(stmdev_ctx_t *ctx,
+                                   lsm6dsrx_fs_xl_t *val);
 
 typedef enum {
   LSM6DSRX_XL_ODR_OFF    = 0,
@@ -2781,8 +2793,10 @@ typedef enum {
   LSM6DSRX_XL_ODR_6667Hz = 10,
   LSM6DSRX_XL_ODR_6Hz5   = 11, /* (low power only) */
 } lsm6dsrx_odr_xl_t;
-int32_t lsm6dsrx_xl_data_rate_set(stmdev_ctx_t *ctx, lsm6dsrx_odr_xl_t val);
-int32_t lsm6dsrx_xl_data_rate_get(stmdev_ctx_t *ctx, lsm6dsrx_odr_xl_t *val);
+int32_t lsm6dsrx_xl_data_rate_set(stmdev_ctx_t *ctx,
+                                  lsm6dsrx_odr_xl_t val);
+int32_t lsm6dsrx_xl_data_rate_get(stmdev_ctx_t *ctx,
+                                  lsm6dsrx_odr_xl_t *val);
 
 typedef enum {
   LSM6DSRX_125dps = 2,
@@ -2792,8 +2806,10 @@ typedef enum {
   LSM6DSRX_2000dps = 12,
   LSM6DSRX_4000dps = 1,
 } lsm6dsrx_fs_g_t;
-int32_t lsm6dsrx_gy_full_scale_set(stmdev_ctx_t *ctx, lsm6dsrx_fs_g_t val);
-int32_t lsm6dsrx_gy_full_scale_get(stmdev_ctx_t *ctx, lsm6dsrx_fs_g_t *val);
+int32_t lsm6dsrx_gy_full_scale_set(stmdev_ctx_t *ctx,
+                                   lsm6dsrx_fs_g_t val);
+int32_t lsm6dsrx_gy_full_scale_get(stmdev_ctx_t *ctx,
+                                   lsm6dsrx_fs_g_t *val);
 
 typedef enum {
   LSM6DSRX_GY_ODR_OFF    = 0,
@@ -2809,39 +2825,41 @@ typedef enum {
   LSM6DSRX_GY_ODR_6667Hz = 10,
 } lsm6dsrx_odr_g_t;
 int32_t lsm6dsrx_gy_data_rate_set(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_odr_g_t val);
+                                  lsm6dsrx_odr_g_t val);
 int32_t lsm6dsrx_gy_data_rate_get(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_odr_g_t *val);
+                                  lsm6dsrx_odr_g_t *val);
 
-int32_t lsm6dsrx_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dsrx_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_block_data_update_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t lsm6dsrx_block_data_update_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 typedef enum {
   LSM6DSRX_LSb_1mg  = 0,
   LSM6DSRX_LSb_16mg = 1,
 } lsm6dsrx_usr_off_w_t;
 int32_t lsm6dsrx_xl_offset_weight_set(stmdev_ctx_t *ctx,
-                                     lsm6dsrx_usr_off_w_t val);
+                                      lsm6dsrx_usr_off_w_t val);
 int32_t lsm6dsrx_xl_offset_weight_get(stmdev_ctx_t *ctx,
-                                     lsm6dsrx_usr_off_w_t *val);
+                                      lsm6dsrx_usr_off_w_t *val);
 
 typedef enum {
   LSM6DSRX_HIGH_PERFORMANCE_MD  = 0,
   LSM6DSRX_LOW_NORMAL_POWER_MD  = 1,
 } lsm6dsrx_xl_hm_mode_t;
 int32_t lsm6dsrx_xl_power_mode_set(stmdev_ctx_t *ctx,
-                                  lsm6dsrx_xl_hm_mode_t val);
+                                   lsm6dsrx_xl_hm_mode_t val);
 int32_t lsm6dsrx_xl_power_mode_get(stmdev_ctx_t *ctx,
-                                  lsm6dsrx_xl_hm_mode_t *val);
+                                   lsm6dsrx_xl_hm_mode_t *val);
 
 typedef enum {
   LSM6DSRX_GY_HIGH_PERFORMANCE  = 0,
   LSM6DSRX_GY_NORMAL            = 1,
 } lsm6dsrx_g_hm_mode_t;
 int32_t lsm6dsrx_gy_power_mode_set(stmdev_ctx_t *ctx,
-                                  lsm6dsrx_g_hm_mode_t val);
+                                   lsm6dsrx_g_hm_mode_t val);
 int32_t lsm6dsrx_gy_power_mode_get(stmdev_ctx_t *ctx,
-                                  lsm6dsrx_g_hm_mode_t *val);
+                                   lsm6dsrx_g_hm_mode_t *val);
 
 typedef struct {
   lsm6dsrx_all_int_src_t           all_int_src;
@@ -2853,27 +2871,36 @@ typedef struct {
   lsm6dsrx_fsm_status_a_t          fsm_status_a;
   lsm6dsrx_fsm_status_b_t          fsm_status_b;
   lsm6dsrx_mlc_status_mainpage_t   mlc_status;
-  } lsm6dsrx_all_sources_t;
+} lsm6dsrx_all_sources_t;
 int32_t lsm6dsrx_all_sources_get(stmdev_ctx_t *ctx,
-                                lsm6dsrx_all_sources_t *val);
+                                 lsm6dsrx_all_sources_t *val);
 
 int32_t lsm6dsrx_status_reg_get(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_status_reg_t *val);
+                                lsm6dsrx_status_reg_t *val);
 
-int32_t lsm6dsrx_xl_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_xl_flag_data_ready_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
-int32_t lsm6dsrx_gy_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_gy_flag_data_ready_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
-int32_t lsm6dsrx_temp_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_temp_flag_data_ready_get(stmdev_ctx_t *ctx,
+                                          uint8_t *val);
 
-int32_t lsm6dsrx_xl_usr_offset_x_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dsrx_xl_usr_offset_x_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dsrx_xl_usr_offset_x_set(stmdev_ctx_t *ctx,
+                                     uint8_t *buff);
+int32_t lsm6dsrx_xl_usr_offset_x_get(stmdev_ctx_t *ctx,
+                                     uint8_t *buff);
 
-int32_t lsm6dsrx_xl_usr_offset_y_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dsrx_xl_usr_offset_y_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dsrx_xl_usr_offset_y_set(stmdev_ctx_t *ctx,
+                                     uint8_t *buff);
+int32_t lsm6dsrx_xl_usr_offset_y_get(stmdev_ctx_t *ctx,
+                                     uint8_t *buff);
 
-int32_t lsm6dsrx_xl_usr_offset_z_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dsrx_xl_usr_offset_z_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dsrx_xl_usr_offset_z_set(stmdev_ctx_t *ctx,
+                                     uint8_t *buff);
+int32_t lsm6dsrx_xl_usr_offset_z_get(stmdev_ctx_t *ctx,
+                                     uint8_t *buff);
 
 int32_t lsm6dsrx_xl_usr_offset_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_xl_usr_offset_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -2892,22 +2919,25 @@ typedef enum {
   LSM6DSRX_ROUND_GY_XL   = 3,
 } lsm6dsrx_rounding_t;
 int32_t lsm6dsrx_rounding_mode_set(stmdev_ctx_t *ctx,
-                                  lsm6dsrx_rounding_t val);
+                                   lsm6dsrx_rounding_t val);
 int32_t lsm6dsrx_rounding_mode_get(stmdev_ctx_t *ctx,
-                                  lsm6dsrx_rounding_t *val);
+                                   lsm6dsrx_rounding_t *val);
 
 int32_t lsm6dsrx_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
-int32_t lsm6dsrx_angular_rate_raw_get(stmdev_ctx_t *ctx, int16_t *val);
+int32_t lsm6dsrx_angular_rate_raw_get(stmdev_ctx_t *ctx,
+                                      int16_t *val);
 
-int32_t lsm6dsrx_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val);
+int32_t lsm6dsrx_acceleration_raw_get(stmdev_ctx_t *ctx,
+                                      int16_t *val);
 
 int32_t lsm6dsrx_fifo_out_raw_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm6dsrx_odr_cal_reg_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_odr_cal_reg_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6dsrx_number_of_steps_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t lsm6dsrx_number_of_steps_get(stmdev_ctx_t *ctx,
+                                     uint16_t *val);
 
 int32_t lsm6dsrx_steps_reset(stmdev_ctx_t *ctx);
 
@@ -2916,25 +2946,28 @@ typedef enum {
   LSM6DSRX_SENSOR_HUB_BANK     = 1,
   LSM6DSRX_EMBEDDED_FUNC_BANK  = 2,
 } lsm6dsrx_reg_access_t;
-int32_t lsm6dsrx_mem_bank_set(stmdev_ctx_t *ctx, lsm6dsrx_reg_access_t val);
-int32_t lsm6dsrx_mem_bank_get(stmdev_ctx_t *ctx, lsm6dsrx_reg_access_t *val);
+int32_t lsm6dsrx_mem_bank_set(stmdev_ctx_t *ctx,
+                              lsm6dsrx_reg_access_t val);
+int32_t lsm6dsrx_mem_bank_get(stmdev_ctx_t *ctx,
+                              lsm6dsrx_reg_access_t *val);
 
 int32_t lsm6dsrx_ln_pg_write_byte(stmdev_ctx_t *ctx, uint16_t address,
-                                 uint8_t *val);
+                                  uint8_t *val);
 int32_t lsm6dsrx_ln_pg_write(stmdev_ctx_t *ctx, uint16_t address,
-                            uint8_t *buf, uint8_t len);
+                             uint8_t *buf, uint8_t len);
 int32_t lsm6dsrx_ln_pg_read_byte(stmdev_ctx_t *ctx, uint16_t add,
-                                uint8_t *val);
-int32_t lsm6dsrx_ln_pg_read(stmdev_ctx_t *ctx, uint16_t address, uint8_t *val);
+                                 uint8_t *val);
+int32_t lsm6dsrx_ln_pg_read(stmdev_ctx_t *ctx, uint16_t address,
+                            uint8_t *val);
 
 typedef enum {
   LSM6DSRX_DRDY_LATCHED = 0,
   LSM6DSRX_DRDY_PULSED  = 1,
 } lsm6dsrx_dataready_pulsed_t;
 int32_t lsm6dsrx_data_ready_mode_set(stmdev_ctx_t *ctx,
-                                    lsm6dsrx_dataready_pulsed_t val);
+                                     lsm6dsrx_dataready_pulsed_t val);
 int32_t lsm6dsrx_data_ready_mode_get(stmdev_ctx_t *ctx,
-                                    lsm6dsrx_dataready_pulsed_t *val);
+                                     lsm6dsrx_dataready_pulsed_t *val);
 
 int32_t lsm6dsrx_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
@@ -2952,16 +2985,20 @@ typedef enum {
   LSM6DSRX_XL_ST_POSITIVE = 1,
   LSM6DSRX_XL_ST_NEGATIVE = 2,
 } lsm6dsrx_st_xl_t;
-int32_t lsm6dsrx_xl_self_test_set(stmdev_ctx_t *ctx, lsm6dsrx_st_xl_t val);
-int32_t lsm6dsrx_xl_self_test_get(stmdev_ctx_t *ctx, lsm6dsrx_st_xl_t *val);
+int32_t lsm6dsrx_xl_self_test_set(stmdev_ctx_t *ctx,
+                                  lsm6dsrx_st_xl_t val);
+int32_t lsm6dsrx_xl_self_test_get(stmdev_ctx_t *ctx,
+                                  lsm6dsrx_st_xl_t *val);
 
 typedef enum {
   LSM6DSRX_GY_ST_DISABLE  = 0,
   LSM6DSRX_GY_ST_POSITIVE = 1,
   LSM6DSRX_GY_ST_NEGATIVE = 3,
 } lsm6dsrx_st_g_t;
-int32_t lsm6dsrx_gy_self_test_set(stmdev_ctx_t *ctx, lsm6dsrx_st_g_t val);
-int32_t lsm6dsrx_gy_self_test_get(stmdev_ctx_t *ctx, lsm6dsrx_st_g_t *val);
+int32_t lsm6dsrx_gy_self_test_set(stmdev_ctx_t *ctx,
+                                  lsm6dsrx_st_g_t val);
+int32_t lsm6dsrx_gy_self_test_get(stmdev_ctx_t *ctx,
+                                  lsm6dsrx_st_g_t *val);
 
 int32_t lsm6dsrx_xl_filter_lp2_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_xl_filter_lp2_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -2969,8 +3006,10 @@ int32_t lsm6dsrx_xl_filter_lp2_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t lsm6dsrx_gy_filter_lp1_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_gy_filter_lp1_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6dsrx_filter_settling_mask_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dsrx_filter_settling_mask_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_filter_settling_mask_set(stmdev_ctx_t *ctx,
+                                          uint8_t val);
+int32_t lsm6dsrx_filter_settling_mask_get(stmdev_ctx_t *ctx,
+                                          uint8_t *val);
 
 typedef enum {
   LSM6DSRX_ULTRA_LIGHT  = 0,
@@ -2982,8 +3021,10 @@ typedef enum {
   LSM6DSRX_AGGRESSIVE   = 6,
   LSM6DSRX_XTREME       = 7,
 } lsm6dsrx_ftype_t;
-int32_t lsm6dsrx_gy_lp1_bandwidth_set(stmdev_ctx_t *ctx, lsm6dsrx_ftype_t val);
-int32_t lsm6dsrx_gy_lp1_bandwidth_get(stmdev_ctx_t *ctx, lsm6dsrx_ftype_t *val);
+int32_t lsm6dsrx_gy_lp1_bandwidth_set(stmdev_ctx_t *ctx,
+                                      lsm6dsrx_ftype_t val);
+int32_t lsm6dsrx_gy_lp1_bandwidth_get(stmdev_ctx_t *ctx,
+                                      lsm6dsrx_ftype_t *val);
 
 int32_t lsm6dsrx_xl_lp2_on_6d_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_xl_lp2_on_6d_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3014,21 +3055,22 @@ typedef enum {
   LSM6DSRX_LP_ODR_DIV_800            = 0x07,
 } lsm6dsrx_hp_slope_xl_en_t;
 int32_t lsm6dsrx_xl_hp_path_on_out_set(stmdev_ctx_t *ctx,
-                                      lsm6dsrx_hp_slope_xl_en_t val);
+                                       lsm6dsrx_hp_slope_xl_en_t val);
 int32_t lsm6dsrx_xl_hp_path_on_out_get(stmdev_ctx_t *ctx,
-                                      lsm6dsrx_hp_slope_xl_en_t *val);
+                                       lsm6dsrx_hp_slope_xl_en_t *val);
 
 int32_t lsm6dsrx_xl_fast_settling_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dsrx_xl_fast_settling_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_xl_fast_settling_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 typedef enum {
   LSM6DSRX_USE_SLOPE = 0,
   LSM6DSRX_USE_HPF   = 1,
 } lsm6dsrx_slope_fds_t;
 int32_t lsm6dsrx_xl_hp_path_internal_set(stmdev_ctx_t *ctx,
-                                        lsm6dsrx_slope_fds_t val);
+                                         lsm6dsrx_slope_fds_t val);
 int32_t lsm6dsrx_xl_hp_path_internal_get(stmdev_ctx_t *ctx,
-                                        lsm6dsrx_slope_fds_t *val);
+                                         lsm6dsrx_slope_fds_t *val);
 
 typedef enum {
   LSM6DSRX_HP_FILTER_NONE     = 0x00,
@@ -3038,34 +3080,39 @@ typedef enum {
   LSM6DSRX_HP_FILTER_1Hz04    = 0x83,
 } lsm6dsrx_hpm_g_t;
 int32_t lsm6dsrx_gy_hp_path_internal_set(stmdev_ctx_t *ctx,
-                                        lsm6dsrx_hpm_g_t val);
+                                         lsm6dsrx_hpm_g_t val);
 int32_t lsm6dsrx_gy_hp_path_internal_get(stmdev_ctx_t *ctx,
-                                        lsm6dsrx_hpm_g_t *val);
+                                         lsm6dsrx_hpm_g_t *val);
 
 typedef enum {
   LSM6DSRX_AUX_PULL_UP_DISC       = 0,
   LSM6DSRX_AUX_PULL_UP_CONNECT    = 1,
 } lsm6dsrx_ois_pu_dis_t;
 int32_t lsm6dsrx_aux_sdo_ocs_mode_set(stmdev_ctx_t *ctx,
-                                     lsm6dsrx_ois_pu_dis_t val);
+                                      lsm6dsrx_ois_pu_dis_t val);
 int32_t lsm6dsrx_aux_sdo_ocs_mode_get(stmdev_ctx_t *ctx,
-                                     lsm6dsrx_ois_pu_dis_t *val);
+                                      lsm6dsrx_ois_pu_dis_t *val);
 
 typedef enum {
   LSM6DSRX_AUX_ON                    = 1,
   LSM6DSRX_AUX_ON_BY_AUX_INTERFACE   = 0,
 } lsm6dsrx_ois_on_t;
-int32_t lsm6dsrx_aux_pw_on_ctrl_set(stmdev_ctx_t *ctx, lsm6dsrx_ois_on_t val);
-int32_t lsm6dsrx_aux_pw_on_ctrl_get(stmdev_ctx_t *ctx, lsm6dsrx_ois_on_t *val);
+int32_t lsm6dsrx_aux_pw_on_ctrl_set(stmdev_ctx_t *ctx,
+                                    lsm6dsrx_ois_on_t val);
+int32_t lsm6dsrx_aux_pw_on_ctrl_get(stmdev_ctx_t *ctx,
+                                    lsm6dsrx_ois_on_t *val);
 
 int32_t lsm6dsrx_aux_status_reg_get(stmdev_ctx_t *ctx,
-                                   lsm6dsrx_status_spiaux_t *val);
+                                    lsm6dsrx_status_spiaux_t *val);
 
-int32_t lsm6dsrx_aux_xl_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_aux_xl_flag_data_ready_get(stmdev_ctx_t *ctx,
+                                            uint8_t *val);
 
-int32_t lsm6dsrx_aux_gy_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_aux_gy_flag_data_ready_get(stmdev_ctx_t *ctx,
+                                            uint8_t *val);
 
-int32_t lsm6dsrx_aux_gy_flag_settling_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_aux_gy_flag_settling_get(stmdev_ctx_t *ctx,
+                                          uint8_t *val);
 
 typedef enum {
   LSM6DSRX_AUX_XL_DISABLE = 0,
@@ -3073,37 +3120,42 @@ typedef enum {
   LSM6DSRX_AUX_XL_NEG     = 2,
 } lsm6dsrx_st_xl_ois_t;
 int32_t lsm6dsrx_aux_xl_self_test_set(stmdev_ctx_t *ctx,
-                                     lsm6dsrx_st_xl_ois_t val);
+                                      lsm6dsrx_st_xl_ois_t val);
 int32_t lsm6dsrx_aux_xl_self_test_get(stmdev_ctx_t *ctx,
-                                     lsm6dsrx_st_xl_ois_t *val);
+                                      lsm6dsrx_st_xl_ois_t *val);
 
 typedef enum {
   LSM6DSRX_AUX_DEN_ACTIVE_LOW     = 0,
   LSM6DSRX_AUX_DEN_ACTIVE_HIGH    = 1,
 } lsm6dsrx_den_lh_ois_t;
 int32_t lsm6dsrx_aux_den_polarity_set(stmdev_ctx_t *ctx,
-                                     lsm6dsrx_den_lh_ois_t val);
+                                      lsm6dsrx_den_lh_ois_t val);
 int32_t lsm6dsrx_aux_den_polarity_get(stmdev_ctx_t *ctx,
-                                     lsm6dsrx_den_lh_ois_t *val);
+                                      lsm6dsrx_den_lh_ois_t *val);
 
 typedef enum {
   LSM6DSRX_AUX_DEN_DISABLE         = 0,
   LSM6DSRX_AUX_DEN_LEVEL_LATCH     = 3,
   LSM6DSRX_AUX_DEN_LEVEL_TRIG      = 2,
 } lsm6dsrx_lvl2_ois_t;
-int32_t lsm6dsrx_aux_den_mode_set(stmdev_ctx_t *ctx, lsm6dsrx_lvl2_ois_t val);
-int32_t lsm6dsrx_aux_den_mode_get(stmdev_ctx_t *ctx, lsm6dsrx_lvl2_ois_t *val);
+int32_t lsm6dsrx_aux_den_mode_set(stmdev_ctx_t *ctx,
+                                  lsm6dsrx_lvl2_ois_t val);
+int32_t lsm6dsrx_aux_den_mode_get(stmdev_ctx_t *ctx,
+                                  lsm6dsrx_lvl2_ois_t *val);
 
 int32_t lsm6dsrx_aux_drdy_on_int2_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dsrx_aux_drdy_on_int2_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_aux_drdy_on_int2_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 typedef enum {
   LSM6DSRX_AUX_DISABLE  = 0,
   LSM6DSRX_MODE_3_GY    = 1,
   LSM6DSRX_MODE_4_GY_XL = 3,
 } lsm6dsrx_ois_en_spi2_t;
-int32_t lsm6dsrx_aux_mode_set(stmdev_ctx_t *ctx, lsm6dsrx_ois_en_spi2_t val);
-int32_t lsm6dsrx_aux_mode_get(stmdev_ctx_t *ctx, lsm6dsrx_ois_en_spi2_t *val);
+int32_t lsm6dsrx_aux_mode_set(stmdev_ctx_t *ctx,
+                              lsm6dsrx_ois_en_spi2_t val);
+int32_t lsm6dsrx_aux_mode_get(stmdev_ctx_t *ctx,
+                              lsm6dsrx_ois_en_spi2_t *val);
 
 typedef enum {
   LSM6DSRX_125dps_AUX  =  0x04,
@@ -3113,16 +3165,18 @@ typedef enum {
   LSM6DSRX_2000dps_AUX =  0x03,
 } lsm6dsrx_fs_g_ois_t;
 int32_t lsm6dsrx_aux_gy_full_scale_set(stmdev_ctx_t *ctx,
-                                      lsm6dsrx_fs_g_ois_t val);
+                                       lsm6dsrx_fs_g_ois_t val);
 int32_t lsm6dsrx_aux_gy_full_scale_get(stmdev_ctx_t *ctx,
-                                      lsm6dsrx_fs_g_ois_t *val);
+                                       lsm6dsrx_fs_g_ois_t *val);
 
 typedef enum {
   LSM6DSRX_AUX_SPI_4_WIRE = 0,
   LSM6DSRX_AUX_SPI_3_WIRE = 1,
 } lsm6dsrx_sim_ois_t;
-int32_t lsm6dsrx_aux_spi_mode_set(stmdev_ctx_t *ctx, lsm6dsrx_sim_ois_t val);
-int32_t lsm6dsrx_aux_spi_mode_get(stmdev_ctx_t *ctx, lsm6dsrx_sim_ois_t *val);
+int32_t lsm6dsrx_aux_spi_mode_set(stmdev_ctx_t *ctx,
+                                  lsm6dsrx_sim_ois_t val);
+int32_t lsm6dsrx_aux_spi_mode_get(stmdev_ctx_t *ctx,
+                                  lsm6dsrx_sim_ois_t *val);
 
 typedef enum {
   LSM6DSRX_351Hz39 = 0,
@@ -3131,9 +3185,9 @@ typedef enum {
   LSM6DSRX_937Hz91 = 3,
 } lsm6dsrx_ftype_ois_t;
 int32_t lsm6dsrx_aux_gy_lp1_bandwidth_set(stmdev_ctx_t *ctx,
-                                         lsm6dsrx_ftype_ois_t val);
+                                          lsm6dsrx_ftype_ois_t val);
 int32_t lsm6dsrx_aux_gy_lp1_bandwidth_get(stmdev_ctx_t *ctx,
-                                         lsm6dsrx_ftype_ois_t *val);
+                                          lsm6dsrx_ftype_ois_t *val);
 
 typedef enum {
   LSM6DSRX_AUX_HP_DISABLE = 0x00,
@@ -3143,18 +3197,18 @@ typedef enum {
   LSM6DSRX_AUX_HP_1Hz040  = 0x13,
 } lsm6dsrx_hpm_ois_t;
 int32_t lsm6dsrx_aux_gy_hp_bandwidth_set(stmdev_ctx_t *ctx,
-                                        lsm6dsrx_hpm_ois_t val);
+                                         lsm6dsrx_hpm_ois_t val);
 int32_t lsm6dsrx_aux_gy_hp_bandwidth_get(stmdev_ctx_t *ctx,
-                                        lsm6dsrx_hpm_ois_t *val);
+                                         lsm6dsrx_hpm_ois_t *val);
 
 typedef enum {
   LSM6DSRX_ENABLE_CLAMP  = 0,
   LSM6DSRX_DISABLE_CLAMP = 1,
 } lsm6dsrx_st_ois_clampdis_t;
 int32_t lsm6dsrx_aux_gy_clamp_set(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_st_ois_clampdis_t val);
+                                  lsm6dsrx_st_ois_clampdis_t val);
 int32_t lsm6dsrx_aux_gy_clamp_get(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_st_ois_clampdis_t *val);
+                                  lsm6dsrx_st_ois_clampdis_t *val);
 
 typedef enum {
   LSM6DSRX_AUX_GY_DISABLE = 0,
@@ -3162,9 +3216,9 @@ typedef enum {
   LSM6DSRX_AUX_GY_NEG     = 3,
 } lsm6dsrx_st_ois_t;
 int32_t lsm6dsrx_aux_gy_self_test_set(stmdev_ctx_t *ctx,
-                                     lsm6dsrx_st_ois_t val);
+                                      lsm6dsrx_st_ois_t val);
 int32_t lsm6dsrx_aux_gy_self_test_get(stmdev_ctx_t *ctx,
-                                     lsm6dsrx_st_ois_t *val);
+                                      lsm6dsrx_st_ois_t *val);
 
 typedef enum {
   LSM6DSRX_631Hz = 0,
@@ -3177,9 +3231,9 @@ typedef enum {
   LSM6DSRX_4Hz11 = 7,
 } lsm6dsrx_filter_xl_conf_ois_t;
 int32_t lsm6dsrx_aux_xl_bandwidth_set(stmdev_ctx_t *ctx,
-                                     lsm6dsrx_filter_xl_conf_ois_t val);
+                                      lsm6dsrx_filter_xl_conf_ois_t val);
 int32_t lsm6dsrx_aux_xl_bandwidth_get(stmdev_ctx_t *ctx,
-                                     lsm6dsrx_filter_xl_conf_ois_t *val);
+                                      lsm6dsrx_filter_xl_conf_ois_t *val);
 
 typedef enum {
   LSM6DSRX_AUX_2g  = 0,
@@ -3188,23 +3242,27 @@ typedef enum {
   LSM6DSRX_AUX_8g  = 3,
 } lsm6dsrx_fs_xl_ois_t;
 int32_t lsm6dsrx_aux_xl_full_scale_set(stmdev_ctx_t *ctx,
-                                      lsm6dsrx_fs_xl_ois_t val);
+                                       lsm6dsrx_fs_xl_ois_t val);
 int32_t lsm6dsrx_aux_xl_full_scale_get(stmdev_ctx_t *ctx,
-                                      lsm6dsrx_fs_xl_ois_t *val);
+                                       lsm6dsrx_fs_xl_ois_t *val);
 
 typedef enum {
   LSM6DSRX_PULL_UP_DISC       = 0,
   LSM6DSRX_PULL_UP_CONNECT    = 1,
 } lsm6dsrx_sdo_pu_en_t;
-int32_t lsm6dsrx_sdo_sa0_mode_set(stmdev_ctx_t *ctx, lsm6dsrx_sdo_pu_en_t val);
-int32_t lsm6dsrx_sdo_sa0_mode_get(stmdev_ctx_t *ctx, lsm6dsrx_sdo_pu_en_t *val);
+int32_t lsm6dsrx_sdo_sa0_mode_set(stmdev_ctx_t *ctx,
+                                  lsm6dsrx_sdo_pu_en_t val);
+int32_t lsm6dsrx_sdo_sa0_mode_get(stmdev_ctx_t *ctx,
+                                  lsm6dsrx_sdo_pu_en_t *val);
 
 typedef enum {
   LSM6DSRX_PULL_DOWN_CONNECT       = 0,
   LSM6DSRX_PULL_DOWN_DISC          = 1,
 } lsm6dsrx_pd_dis_int1_t;
-int32_t lsm6dsrx_int1_mode_set(stmdev_ctx_t *ctx, lsm6dsrx_pd_dis_int1_t val);
-int32_t lsm6dsrx_int1_mode_get(stmdev_ctx_t *ctx, lsm6dsrx_pd_dis_int1_t *val);
+int32_t lsm6dsrx_int1_mode_set(stmdev_ctx_t *ctx,
+                               lsm6dsrx_pd_dis_int1_t val);
+int32_t lsm6dsrx_int1_mode_get(stmdev_ctx_t *ctx,
+                               lsm6dsrx_pd_dis_int1_t *val);
 
 typedef enum {
   LSM6DSRX_SPI_4_WIRE = 0,
@@ -3218,9 +3276,9 @@ typedef enum {
   LSM6DSRX_I2C_DISABLE = 1,
 } lsm6dsrx_i2c_disable_t;
 int32_t lsm6dsrx_i2c_interface_set(stmdev_ctx_t *ctx,
-                                  lsm6dsrx_i2c_disable_t val);
+                                   lsm6dsrx_i2c_disable_t val);
 int32_t lsm6dsrx_i2c_interface_get(stmdev_ctx_t *ctx,
-                                  lsm6dsrx_i2c_disable_t *val);
+                                   lsm6dsrx_i2c_disable_t *val);
 
 typedef enum {
   LSM6DSRX_I3C_DISABLE         = 0x80,
@@ -3230,9 +3288,9 @@ typedef enum {
   LSM6DSRX_I3C_ENABLE_T_25ms   = 0x03,
 } lsm6dsrx_i3c_disable_t;
 int32_t lsm6dsrx_i3c_disable_set(stmdev_ctx_t *ctx,
-                                lsm6dsrx_i3c_disable_t val);
+                                 lsm6dsrx_i3c_disable_t val);
 int32_t lsm6dsrx_i3c_disable_get(stmdev_ctx_t *ctx,
-                                lsm6dsrx_i3c_disable_t *val);
+                                 lsm6dsrx_i3c_disable_t *val);
 
 typedef struct {
   lsm6dsrx_int1_ctrl_t          int1_ctrl;
@@ -3243,9 +3301,9 @@ typedef struct {
   lsm6dsrx_mlc_int1_t           mlc_int1;
 } lsm6dsrx_pin_int1_route_t;
 int32_t lsm6dsrx_pin_int1_route_set(stmdev_ctx_t *ctx,
-                                   lsm6dsrx_pin_int1_route_t *val);
+                                    lsm6dsrx_pin_int1_route_t *val);
 int32_t lsm6dsrx_pin_int1_route_get(stmdev_ctx_t *ctx,
-                                   lsm6dsrx_pin_int1_route_t *val);
+                                    lsm6dsrx_pin_int1_route_t *val);
 
 typedef struct {
   lsm6dsrx_int2_ctrl_t          int2_ctrl;
@@ -3256,23 +3314,27 @@ typedef struct {
   lsm6dsrx_mlc_int2_t           mlc_int2;
 } lsm6dsrx_pin_int2_route_t;
 int32_t lsm6dsrx_pin_int2_route_set(stmdev_ctx_t *ctx,
-                                   lsm6dsrx_pin_int2_route_t *val);
+                                    lsm6dsrx_pin_int2_route_t *val);
 int32_t lsm6dsrx_pin_int2_route_get(stmdev_ctx_t *ctx,
-                                   lsm6dsrx_pin_int2_route_t *val);
+                                    lsm6dsrx_pin_int2_route_t *val);
 
 typedef enum {
   LSM6DSRX_PUSH_PULL   = 0,
   LSM6DSRX_OPEN_DRAIN  = 1,
 } lsm6dsrx_pp_od_t;
-int32_t lsm6dsrx_pin_mode_set(stmdev_ctx_t *ctx, lsm6dsrx_pp_od_t val);
-int32_t lsm6dsrx_pin_mode_get(stmdev_ctx_t *ctx, lsm6dsrx_pp_od_t *val);
+int32_t lsm6dsrx_pin_mode_set(stmdev_ctx_t *ctx,
+                              lsm6dsrx_pp_od_t val);
+int32_t lsm6dsrx_pin_mode_get(stmdev_ctx_t *ctx,
+                              lsm6dsrx_pp_od_t *val);
 
 typedef enum {
   LSM6DSRX_ACTIVE_HIGH = 0,
   LSM6DSRX_ACTIVE_LOW  = 1,
 } lsm6dsrx_h_lactive_t;
-int32_t lsm6dsrx_pin_polarity_set(stmdev_ctx_t *ctx, lsm6dsrx_h_lactive_t val);
-int32_t lsm6dsrx_pin_polarity_get(stmdev_ctx_t *ctx, lsm6dsrx_h_lactive_t *val);
+int32_t lsm6dsrx_pin_polarity_set(stmdev_ctx_t *ctx,
+                                  lsm6dsrx_h_lactive_t val);
+int32_t lsm6dsrx_pin_polarity_get(stmdev_ctx_t *ctx,
+                                  lsm6dsrx_h_lactive_t *val);
 
 int32_t lsm6dsrx_all_on_int1_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_all_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3283,25 +3345,27 @@ typedef enum {
   LSM6DSRX_BASE_PULSED_EMB_LATCHED   = 2,
   LSM6DSRX_ALL_INT_LATCHED           = 3,
 } lsm6dsrx_lir_t;
-int32_t lsm6dsrx_int_notification_set(stmdev_ctx_t *ctx, lsm6dsrx_lir_t val);
-int32_t lsm6dsrx_int_notification_get(stmdev_ctx_t *ctx, lsm6dsrx_lir_t *val);
+int32_t lsm6dsrx_int_notification_set(stmdev_ctx_t *ctx,
+                                      lsm6dsrx_lir_t val);
+int32_t lsm6dsrx_int_notification_get(stmdev_ctx_t *ctx,
+                                      lsm6dsrx_lir_t *val);
 
 typedef enum {
   LSM6DSRX_LSb_FS_DIV_64       = 0,
   LSM6DSRX_LSb_FS_DIV_256      = 1,
 } lsm6dsrx_wake_ths_w_t;
 int32_t lsm6dsrx_wkup_ths_weight_set(stmdev_ctx_t *ctx,
-                                    lsm6dsrx_wake_ths_w_t val);
+                                     lsm6dsrx_wake_ths_w_t val);
 int32_t lsm6dsrx_wkup_ths_weight_get(stmdev_ctx_t *ctx,
-                                    lsm6dsrx_wake_ths_w_t *val);
+                                     lsm6dsrx_wake_ths_w_t *val);
 
 int32_t lsm6dsrx_wkup_threshold_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_wkup_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm6dsrx_xl_usr_offset_on_wkup_set(stmdev_ctx_t *ctx,
-                                          uint8_t val);
+                                           uint8_t val);
 int32_t lsm6dsrx_xl_usr_offset_on_wkup_get(stmdev_ctx_t *ctx,
-                                          uint8_t *val);
+                                           uint8_t *val);
 
 int32_t lsm6dsrx_wkup_dur_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_wkup_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3314,9 +3378,9 @@ typedef enum {
   LSM6DSRX_DRIVE_SLEEP_STATUS    = 1,
 } lsm6dsrx_sleep_status_on_int_t;
 int32_t lsm6dsrx_act_pin_notification_set(stmdev_ctx_t *ctx,
-                                         lsm6dsrx_sleep_status_on_int_t val);
+                                          lsm6dsrx_sleep_status_on_int_t val);
 int32_t lsm6dsrx_act_pin_notification_get(stmdev_ctx_t *ctx,
-                                         lsm6dsrx_sleep_status_on_int_t *val);
+                                          lsm6dsrx_sleep_status_on_int_t *val);
 
 typedef enum {
   LSM6DSRX_XL_AND_GY_NOT_AFFECTED      = 0,
@@ -3325,21 +3389,27 @@ typedef enum {
   LSM6DSRX_XL_12Hz5_GY_PD              = 3,
 } lsm6dsrx_inact_en_t;
 int32_t lsm6dsrx_act_mode_set(stmdev_ctx_t *ctx,
-                             lsm6dsrx_inact_en_t val);
+                              lsm6dsrx_inact_en_t val);
 int32_t lsm6dsrx_act_mode_get(stmdev_ctx_t *ctx,
-                             lsm6dsrx_inact_en_t *val);
+                              lsm6dsrx_inact_en_t *val);
 
 int32_t lsm6dsrx_act_sleep_dur_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_act_sleep_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6dsrx_tap_detection_on_z_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dsrx_tap_detection_on_z_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_tap_detection_on_z_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t lsm6dsrx_tap_detection_on_z_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
-int32_t lsm6dsrx_tap_detection_on_y_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dsrx_tap_detection_on_y_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_tap_detection_on_y_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t lsm6dsrx_tap_detection_on_y_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
-int32_t lsm6dsrx_tap_detection_on_x_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dsrx_tap_detection_on_x_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_tap_detection_on_x_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t lsm6dsrx_tap_detection_on_x_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 int32_t lsm6dsrx_tap_threshold_x_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_tap_threshold_x_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3353,9 +3423,9 @@ typedef enum {
   LSM6DSRX_ZXY = 6,
 } lsm6dsrx_tap_priority_t;
 int32_t lsm6dsrx_tap_axis_priority_set(stmdev_ctx_t *ctx,
-                                      lsm6dsrx_tap_priority_t val);
+                                       lsm6dsrx_tap_priority_t val);
 int32_t lsm6dsrx_tap_axis_priority_get(stmdev_ctx_t *ctx,
-                                      lsm6dsrx_tap_priority_t *val);
+                                       lsm6dsrx_tap_priority_t *val);
 
 int32_t lsm6dsrx_tap_threshold_y_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_tap_threshold_y_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3377,9 +3447,9 @@ typedef enum {
   LSM6DSRX_BOTH_SINGLE_DOUBLE = 1,
 } lsm6dsrx_single_double_tap_t;
 int32_t lsm6dsrx_tap_mode_set(stmdev_ctx_t *ctx,
-                             lsm6dsrx_single_double_tap_t val);
+                              lsm6dsrx_single_double_tap_t val);
 int32_t lsm6dsrx_tap_mode_get(stmdev_ctx_t *ctx,
-                             lsm6dsrx_single_double_tap_t *val);
+                              lsm6dsrx_single_double_tap_t *val);
 
 typedef enum {
   LSM6DSRX_DEG_80  = 0,
@@ -3388,9 +3458,9 @@ typedef enum {
   LSM6DSRX_DEG_50  = 3,
 } lsm6dsrx_sixd_ths_t;
 int32_t lsm6dsrx_6d_threshold_set(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_sixd_ths_t val);
+                                  lsm6dsrx_sixd_ths_t val);
 int32_t lsm6dsrx_6d_threshold_get(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_sixd_ths_t *val);
+                                  lsm6dsrx_sixd_ths_t *val);
 
 int32_t lsm6dsrx_4d_mode_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_4d_mode_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3406,9 +3476,9 @@ typedef enum {
   LSM6DSRX_FF_TSH_500mg = 7,
 } lsm6dsrx_ff_ths_t;
 int32_t lsm6dsrx_ff_threshold_set(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_ff_ths_t val);
+                                  lsm6dsrx_ff_ths_t val);
 int32_t lsm6dsrx_ff_threshold_get(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_ff_ths_t *val);
+                                  lsm6dsrx_ff_ths_t *val);
 
 int32_t lsm6dsrx_ff_dur_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_ff_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3417,9 +3487,9 @@ int32_t lsm6dsrx_fifo_watermark_set(stmdev_ctx_t *ctx, uint16_t val);
 int32_t lsm6dsrx_fifo_watermark_get(stmdev_ctx_t *ctx, uint16_t *val);
 
 int32_t lsm6dsrx_compression_algo_init_set(stmdev_ctx_t *ctx,
-                                          uint8_t val);
+                                           uint8_t val);
 int32_t lsm6dsrx_compression_algo_init_get(stmdev_ctx_t *ctx,
-                                          uint8_t *val);
+                                           uint8_t *val);
 
 typedef enum {
   LSM6DSRX_CMP_DISABLE  = 0x00,
@@ -3429,22 +3499,23 @@ typedef enum {
   LSM6DSRX_CMP_32_TO_1  = 0x07,
 } lsm6dsrx_uncoptr_rate_t;
 int32_t lsm6dsrx_compression_algo_set(stmdev_ctx_t *ctx,
-                                     lsm6dsrx_uncoptr_rate_t val);
+                                      lsm6dsrx_uncoptr_rate_t val);
 int32_t lsm6dsrx_compression_algo_get(stmdev_ctx_t *ctx,
-                                     lsm6dsrx_uncoptr_rate_t *val);
+                                      lsm6dsrx_uncoptr_rate_t *val);
 
 int32_t lsm6dsrx_fifo_virtual_sens_odr_chg_set(stmdev_ctx_t *ctx,
-                                              uint8_t val);
-int32_t lsm6dsrx_fifo_virtual_sens_odr_chg_get(stmdev_ctx_t *ctx,
-                                              uint8_t *val);
-
-int32_t lsm6dsrx_compression_algo_real_time_set(stmdev_ctx_t *ctx,
                                                uint8_t val);
-int32_t lsm6dsrx_compression_algo_real_time_get(stmdev_ctx_t *ctx,
+int32_t lsm6dsrx_fifo_virtual_sens_odr_chg_get(stmdev_ctx_t *ctx,
                                                uint8_t *val);
 
+int32_t lsm6dsrx_compression_algo_real_time_set(stmdev_ctx_t *ctx,
+                                                uint8_t val);
+int32_t lsm6dsrx_compression_algo_real_time_get(stmdev_ctx_t *ctx,
+                                                uint8_t *val);
+
 int32_t lsm6dsrx_fifo_stop_on_wtm_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dsrx_fifo_stop_on_wtm_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_fifo_stop_on_wtm_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 typedef enum {
   LSM6DSRX_XL_NOT_BATCHED       =  0,
@@ -3460,8 +3531,10 @@ typedef enum {
   LSM6DSRX_XL_BATCHED_AT_6667Hz  = 10,
   LSM6DSRX_XL_BATCHED_AT_6Hz5    = 11,
 } lsm6dsrx_bdr_xl_t;
-int32_t lsm6dsrx_fifo_xl_batch_set(stmdev_ctx_t *ctx, lsm6dsrx_bdr_xl_t val);
-int32_t lsm6dsrx_fifo_xl_batch_get(stmdev_ctx_t *ctx, lsm6dsrx_bdr_xl_t *val);
+int32_t lsm6dsrx_fifo_xl_batch_set(stmdev_ctx_t *ctx,
+                                   lsm6dsrx_bdr_xl_t val);
+int32_t lsm6dsrx_fifo_xl_batch_get(stmdev_ctx_t *ctx,
+                                   lsm6dsrx_bdr_xl_t *val);
 
 typedef enum {
   LSM6DSRX_GY_NOT_BATCHED         = 0,
@@ -3477,8 +3550,10 @@ typedef enum {
   LSM6DSRX_GY_BATCHED_AT_6667Hz   = 10,
   LSM6DSRX_GY_BATCHED_6Hz5        = 11,
 } lsm6dsrx_bdr_gy_t;
-int32_t lsm6dsrx_fifo_gy_batch_set(stmdev_ctx_t *ctx, lsm6dsrx_bdr_gy_t val);
-int32_t lsm6dsrx_fifo_gy_batch_get(stmdev_ctx_t *ctx, lsm6dsrx_bdr_gy_t *val);
+int32_t lsm6dsrx_fifo_gy_batch_set(stmdev_ctx_t *ctx,
+                                   lsm6dsrx_bdr_gy_t val);
+int32_t lsm6dsrx_fifo_gy_batch_get(stmdev_ctx_t *ctx,
+                                   lsm6dsrx_bdr_gy_t *val);
 
 typedef enum {
   LSM6DSRX_BYPASS_MODE             = 0,
@@ -3488,8 +3563,10 @@ typedef enum {
   LSM6DSRX_STREAM_MODE             = 6,
   LSM6DSRX_BYPASS_TO_FIFO_MODE     = 7,
 } lsm6dsrx_fifo_mode_t;
-int32_t lsm6dsrx_fifo_mode_set(stmdev_ctx_t *ctx, lsm6dsrx_fifo_mode_t val);
-int32_t lsm6dsrx_fifo_mode_get(stmdev_ctx_t *ctx, lsm6dsrx_fifo_mode_t *val);
+int32_t lsm6dsrx_fifo_mode_set(stmdev_ctx_t *ctx,
+                               lsm6dsrx_fifo_mode_t val);
+int32_t lsm6dsrx_fifo_mode_get(stmdev_ctx_t *ctx,
+                               lsm6dsrx_fifo_mode_t *val);
 
 typedef enum {
   LSM6DSRX_TEMP_NOT_BATCHED        = 0,
@@ -3498,9 +3575,9 @@ typedef enum {
   LSM6DSRX_TEMP_BATCHED_AT_1Hz6    = 3,
 } lsm6dsrx_odr_t_batch_t;
 int32_t lsm6dsrx_fifo_temp_batch_set(stmdev_ctx_t *ctx,
-                                    lsm6dsrx_odr_t_batch_t val);
+                                     lsm6dsrx_odr_t_batch_t val);
 int32_t lsm6dsrx_fifo_temp_batch_get(stmdev_ctx_t *ctx,
-                                    lsm6dsrx_odr_t_batch_t *val);
+                                     lsm6dsrx_odr_t_batch_t *val);
 
 typedef enum {
   LSM6DSRX_NO_DECIMATION = 0,
@@ -3509,31 +3586,34 @@ typedef enum {
   LSM6DSRX_DEC_32        = 3,
 } lsm6dsrx_odr_ts_batch_t;
 int32_t lsm6dsrx_fifo_timestamp_decimation_set(stmdev_ctx_t *ctx,
-                                              lsm6dsrx_odr_ts_batch_t val);
+                                               lsm6dsrx_odr_ts_batch_t val);
 int32_t lsm6dsrx_fifo_timestamp_decimation_get(stmdev_ctx_t *ctx,
-                                              lsm6dsrx_odr_ts_batch_t *val);
+                                               lsm6dsrx_odr_ts_batch_t *val);
 
 typedef enum {
   LSM6DSRX_XL_BATCH_EVENT   = 0,
   LSM6DSRX_GYRO_BATCH_EVENT = 1,
 } lsm6dsrx_trig_counter_bdr_t;
 int32_t lsm6dsrx_fifo_cnt_event_batch_set(stmdev_ctx_t *ctx,
-                                         lsm6dsrx_trig_counter_bdr_t val);
+                                          lsm6dsrx_trig_counter_bdr_t val);
 int32_t lsm6dsrx_fifo_cnt_event_batch_get(stmdev_ctx_t *ctx,
-                                         lsm6dsrx_trig_counter_bdr_t *val);
+                                          lsm6dsrx_trig_counter_bdr_t *val);
 
-int32_t lsm6dsrx_rst_batch_counter_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dsrx_rst_batch_counter_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_rst_batch_counter_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t lsm6dsrx_rst_batch_counter_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 int32_t lsm6dsrx_batch_counter_threshold_set(stmdev_ctx_t *ctx,
-                                            uint16_t val);
+                                             uint16_t val);
 int32_t lsm6dsrx_batch_counter_threshold_get(stmdev_ctx_t *ctx,
-                                            uint16_t *val);
+                                             uint16_t *val);
 
-int32_t lsm6dsrx_fifo_data_level_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t lsm6dsrx_fifo_data_level_get(stmdev_ctx_t *ctx,
+                                     uint16_t *val);
 
 int32_t lsm6dsrx_fifo_status_get(stmdev_ctx_t *ctx,
-                                lsm6dsrx_fifo_status2_t *val);
+                                 lsm6dsrx_fifo_status2_t *val);
 
 int32_t lsm6dsrx_fifo_full_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
@@ -3566,22 +3646,26 @@ typedef enum {
   LSM6DSRX_SENSORHUB_NACK_TAG  = 0x19,
 } lsm6dsrx_fifo_tag_t;
 int32_t lsm6dsrx_fifo_sensor_tag_get(stmdev_ctx_t *ctx,
-                                    lsm6dsrx_fifo_tag_t *val);
+                                     lsm6dsrx_fifo_tag_t *val);
 
 int32_t lsm6dsrx_fifo_pedo_batch_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_fifo_pedo_batch_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm6dsrx_sh_batch_slave_0_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dsrx_sh_batch_slave_0_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_sh_batch_slave_0_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lsm6dsrx_sh_batch_slave_1_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dsrx_sh_batch_slave_1_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_sh_batch_slave_1_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lsm6dsrx_sh_batch_slave_2_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dsrx_sh_batch_slave_2_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_sh_batch_slave_2_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lsm6dsrx_sh_batch_slave_3_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6dsrx_sh_batch_slave_3_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_sh_batch_slave_3_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 typedef enum {
   LSM6DSRX_DEN_DISABLE    = 0,
@@ -3591,18 +3675,18 @@ typedef enum {
   LSM6DSRX_EDGE_TRIGGER   = 4,
 } lsm6dsrx_den_mode_t;
 int32_t lsm6dsrx_den_mode_set(stmdev_ctx_t *ctx,
-                             lsm6dsrx_den_mode_t val);
+                              lsm6dsrx_den_mode_t val);
 int32_t lsm6dsrx_den_mode_get(stmdev_ctx_t *ctx,
-                             lsm6dsrx_den_mode_t *val);
+                              lsm6dsrx_den_mode_t *val);
 
 typedef enum {
   LSM6DSRX_DEN_ACT_LOW  = 0,
   LSM6DSRX_DEN_ACT_HIGH = 1,
 } lsm6dsrx_den_lh_t;
 int32_t lsm6dsrx_den_polarity_set(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_den_lh_t val);
+                                  lsm6dsrx_den_lh_t val);
 int32_t lsm6dsrx_den_polarity_get(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_den_lh_t *val);
+                                  lsm6dsrx_den_lh_t *val);
 
 typedef enum {
   LSM6DSRX_STAMP_IN_GY_DATA     = 0,
@@ -3610,9 +3694,9 @@ typedef enum {
   LSM6DSRX_STAMP_IN_GY_XL_DATA  = 2,
 } lsm6dsrx_den_xl_g_t;
 int32_t lsm6dsrx_den_enable_set(stmdev_ctx_t *ctx,
-                               lsm6dsrx_den_xl_g_t val);
+                                lsm6dsrx_den_xl_g_t val);
 int32_t lsm6dsrx_den_enable_get(stmdev_ctx_t *ctx,
-                               lsm6dsrx_den_xl_g_t *val);
+                                lsm6dsrx_den_xl_g_t *val);
 
 int32_t lsm6dsrx_den_mark_axis_x_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_den_mark_axis_x_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3626,36 +3710,43 @@ int32_t lsm6dsrx_den_mark_axis_z_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t lsm6dsrx_pedo_sens_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_pedo_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6dsrx_pedo_step_detect_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_pedo_step_detect_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
-int32_t lsm6dsrx_pedo_debounce_steps_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6dsrx_pedo_debounce_steps_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6dsrx_pedo_debounce_steps_set(stmdev_ctx_t *ctx,
+                                         uint8_t *buff);
+int32_t lsm6dsrx_pedo_debounce_steps_get(stmdev_ctx_t *ctx,
+                                         uint8_t *buff);
 
-int32_t lsm6dsrx_pedo_steps_period_set(stmdev_ctx_t *ctx, uint16_t val);
-int32_t lsm6dsrx_pedo_steps_period_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t lsm6dsrx_pedo_steps_period_set(stmdev_ctx_t *ctx,
+                                       uint16_t val);
+int32_t lsm6dsrx_pedo_steps_period_get(stmdev_ctx_t *ctx,
+                                       uint16_t *val);
 
 typedef enum {
   LSM6DSRX_EVERY_STEP     = 0,
   LSM6DSRX_COUNT_OVERFLOW = 1,
 } lsm6dsrx_carry_count_en_t;
 int32_t lsm6dsrx_pedo_int_mode_set(stmdev_ctx_t *ctx,
-                                  lsm6dsrx_carry_count_en_t val);
+                                   lsm6dsrx_carry_count_en_t val);
 int32_t lsm6dsrx_pedo_int_mode_get(stmdev_ctx_t *ctx,
-                                  lsm6dsrx_carry_count_en_t *val);
+                                   lsm6dsrx_carry_count_en_t *val);
 
 int32_t lsm6dsrx_motion_sens_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_motion_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm6dsrx_motion_flag_data_ready_get(stmdev_ctx_t *ctx,
-                                           uint8_t *val);
+                                            uint8_t *val);
 
 int32_t lsm6dsrx_tilt_sens_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_tilt_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6dsrx_tilt_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6dsrx_tilt_flag_data_ready_get(stmdev_ctx_t *ctx,
+                                          uint8_t *val);
 
 int32_t lsm6dsrx_mag_sensitivity_set(stmdev_ctx_t *ctx, uint16_t val);
-int32_t lsm6dsrx_mag_sensitivity_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t lsm6dsrx_mag_sensitivity_get(stmdev_ctx_t *ctx,
+                                     uint16_t *val);
 
 int32_t lsm6dsrx_mag_offset_set(stmdev_ctx_t *ctx, int16_t *val);
 int32_t lsm6dsrx_mag_offset_get(stmdev_ctx_t *ctx, int16_t *val);
@@ -3672,9 +3763,9 @@ typedef enum {
   LSM6DSRX_Z_EQ_Z     = 5,
 } lsm6dsrx_mag_z_axis_t;
 int32_t lsm6dsrx_mag_z_orient_set(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_mag_z_axis_t val);
+                                  lsm6dsrx_mag_z_axis_t val);
 int32_t lsm6dsrx_mag_z_orient_get(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_mag_z_axis_t *val);
+                                  lsm6dsrx_mag_z_axis_t *val);
 
 typedef enum {
   LSM6DSRX_Y_EQ_Y     = 0,
@@ -3685,9 +3776,9 @@ typedef enum {
   LSM6DSRX_Y_EQ_Z     = 5,
 } lsm6dsrx_mag_y_axis_t;
 int32_t lsm6dsrx_mag_y_orient_set(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_mag_y_axis_t val);
+                                  lsm6dsrx_mag_y_axis_t val);
 int32_t lsm6dsrx_mag_y_orient_get(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_mag_y_axis_t *val);
+                                  lsm6dsrx_mag_y_axis_t *val);
 
 typedef enum {
   LSM6DSRX_X_EQ_Y     = 0,
@@ -3698,24 +3789,24 @@ typedef enum {
   LSM6DSRX_X_EQ_Z     = 5,
 } lsm6dsrx_mag_x_axis_t;
 int32_t lsm6dsrx_mag_x_orient_set(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_mag_x_axis_t val);
+                                  lsm6dsrx_mag_x_axis_t val);
 int32_t lsm6dsrx_mag_x_orient_get(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_mag_x_axis_t *val);
+                                  lsm6dsrx_mag_x_axis_t *val);
 
 int32_t lsm6dsrx_long_cnt_flag_data_ready_get(stmdev_ctx_t *ctx,
-                                             uint8_t *val);
+                                              uint8_t *val);
 
 int32_t lsm6dsrx_emb_fsm_en_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_emb_fsm_en_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef struct {
-    lsm6dsrx_fsm_enable_a_t          fsm_enable_a;
-    lsm6dsrx_fsm_enable_b_t          fsm_enable_b;
+  lsm6dsrx_fsm_enable_a_t          fsm_enable_a;
+  lsm6dsrx_fsm_enable_b_t          fsm_enable_b;
 } lsm6dsrx_emb_fsm_enable_t;
 int32_t lsm6dsrx_fsm_enable_set(stmdev_ctx_t *ctx,
-                               lsm6dsrx_emb_fsm_enable_t *val);
+                                lsm6dsrx_emb_fsm_enable_t *val);
 int32_t lsm6dsrx_fsm_enable_get(stmdev_ctx_t *ctx,
-                               lsm6dsrx_emb_fsm_enable_t *val);
+                                lsm6dsrx_emb_fsm_enable_t *val);
 
 int32_t lsm6dsrx_long_cnt_set(stmdev_ctx_t *ctx, uint16_t val);
 int32_t lsm6dsrx_long_cnt_get(stmdev_ctx_t *ctx, uint16_t *val);
@@ -3726,29 +3817,30 @@ typedef enum {
   LSM6DSRX_LC_CLEAR_DONE = 2,
 } lsm6dsrx_fsm_lc_clr_t;
 int32_t lsm6dsrx_long_clr_set(stmdev_ctx_t *ctx,
-                             lsm6dsrx_fsm_lc_clr_t val);
+                              lsm6dsrx_fsm_lc_clr_t val);
 int32_t lsm6dsrx_long_clr_get(stmdev_ctx_t *ctx,
-                             lsm6dsrx_fsm_lc_clr_t *val);
+                              lsm6dsrx_fsm_lc_clr_t *val);
 
 typedef struct {
-    lsm6dsrx_fsm_outs1_t    fsm_outs1;
-    lsm6dsrx_fsm_outs2_t    fsm_outs2;
-    lsm6dsrx_fsm_outs3_t    fsm_outs3;
-    lsm6dsrx_fsm_outs4_t    fsm_outs4;
-    lsm6dsrx_fsm_outs5_t    fsm_outs5;
-    lsm6dsrx_fsm_outs6_t    fsm_outs6;
-    lsm6dsrx_fsm_outs7_t    fsm_outs7;
-    lsm6dsrx_fsm_outs8_t    fsm_outs8;
-    lsm6dsrx_fsm_outs9_t    fsm_outs9;
-    lsm6dsrx_fsm_outs10_t    fsm_outs10;
-    lsm6dsrx_fsm_outs11_t    fsm_outs11;
-    lsm6dsrx_fsm_outs12_t    fsm_outs12;
-    lsm6dsrx_fsm_outs13_t    fsm_outs13;
-    lsm6dsrx_fsm_outs14_t    fsm_outs14;
-    lsm6dsrx_fsm_outs15_t    fsm_outs15;
-    lsm6dsrx_fsm_outs16_t    fsm_outs16;
+  lsm6dsrx_fsm_outs1_t    fsm_outs1;
+  lsm6dsrx_fsm_outs2_t    fsm_outs2;
+  lsm6dsrx_fsm_outs3_t    fsm_outs3;
+  lsm6dsrx_fsm_outs4_t    fsm_outs4;
+  lsm6dsrx_fsm_outs5_t    fsm_outs5;
+  lsm6dsrx_fsm_outs6_t    fsm_outs6;
+  lsm6dsrx_fsm_outs7_t    fsm_outs7;
+  lsm6dsrx_fsm_outs8_t    fsm_outs8;
+  lsm6dsrx_fsm_outs9_t    fsm_outs9;
+  lsm6dsrx_fsm_outs10_t    fsm_outs10;
+  lsm6dsrx_fsm_outs11_t    fsm_outs11;
+  lsm6dsrx_fsm_outs12_t    fsm_outs12;
+  lsm6dsrx_fsm_outs13_t    fsm_outs13;
+  lsm6dsrx_fsm_outs14_t    fsm_outs14;
+  lsm6dsrx_fsm_outs15_t    fsm_outs15;
+  lsm6dsrx_fsm_outs16_t    fsm_outs16;
 } lsm6dsrx_fsm_out_t;
-int32_t lsm6dsrx_fsm_out_get(stmdev_ctx_t *ctx, lsm6dsrx_fsm_out_t *val);
+int32_t lsm6dsrx_fsm_out_get(stmdev_ctx_t *ctx,
+                             lsm6dsrx_fsm_out_t *val);
 
 typedef enum {
   LSM6DSRX_ODR_FSM_12Hz5 = 0,
@@ -3757,23 +3849,27 @@ typedef enum {
   LSM6DSRX_ODR_FSM_104Hz = 3,
 } lsm6dsrx_fsm_odr_t;
 int32_t lsm6dsrx_fsm_data_rate_set(stmdev_ctx_t *ctx,
-                                  lsm6dsrx_fsm_odr_t val);
+                                   lsm6dsrx_fsm_odr_t val);
 int32_t lsm6dsrx_fsm_data_rate_get(stmdev_ctx_t *ctx,
-                                  lsm6dsrx_fsm_odr_t *val);
+                                   lsm6dsrx_fsm_odr_t *val);
 
 int32_t lsm6dsrx_fsm_init_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_fsm_init_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6dsrx_long_cnt_int_value_set(stmdev_ctx_t *ctx, uint16_t val);
-int32_t lsm6dsrx_long_cnt_int_value_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t lsm6dsrx_long_cnt_int_value_set(stmdev_ctx_t *ctx,
+                                        uint16_t val);
+int32_t lsm6dsrx_long_cnt_int_value_get(stmdev_ctx_t *ctx,
+                                        uint16_t *val);
 
 int32_t lsm6dsrx_fsm_number_of_programs_set(stmdev_ctx_t *ctx,
-                                           uint8_t *buff);
+                                            uint8_t *buff);
 int32_t lsm6dsrx_fsm_number_of_programs_get(stmdev_ctx_t *ctx,
-                                           uint8_t *buff);
+                                            uint8_t *buff);
 
-int32_t lsm6dsrx_fsm_start_address_set(stmdev_ctx_t *ctx, uint16_t val);
-int32_t lsm6dsrx_fsm_start_address_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t lsm6dsrx_fsm_start_address_set(stmdev_ctx_t *ctx,
+                                       uint16_t val);
+int32_t lsm6dsrx_fsm_start_address_get(stmdev_ctx_t *ctx,
+                                       uint16_t *val);
 
 int32_t lsm6dsrx_mlc_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_mlc_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3788,37 +3884,39 @@ typedef enum {
   LSM6DSRX_ODR_PRGS_104Hz = 3,
 } lsm6dsrx_mlc_odr_t;
 int32_t lsm6dsrx_mlc_data_rate_set(stmdev_ctx_t *ctx,
-                                       lsm6dsrx_mlc_odr_t val);
+                                   lsm6dsrx_mlc_odr_t val);
 int32_t lsm6dsrx_mlc_data_rate_get(stmdev_ctx_t *ctx,
                                    lsm6dsrx_mlc_odr_t *val);
 
 int32_t lsm6dsrx_mlc_out_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t lsm6dsrx_mlc_mag_sensitivity_set(stmdev_ctx_t *ctx, uint16_t val);
-int32_t lsm6dsrx_mlc_mag_sensitivity_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t lsm6dsrx_mlc_mag_sensitivity_set(stmdev_ctx_t *ctx,
+                                         uint16_t val);
+int32_t lsm6dsrx_mlc_mag_sensitivity_get(stmdev_ctx_t *ctx,
+                                         uint16_t *val);
 
 typedef struct {
-    lsm6dsrx_sensor_hub_1_t   sh_byte_1;
-    lsm6dsrx_sensor_hub_2_t   sh_byte_2;
-    lsm6dsrx_sensor_hub_3_t   sh_byte_3;
-    lsm6dsrx_sensor_hub_4_t   sh_byte_4;
-    lsm6dsrx_sensor_hub_5_t   sh_byte_5;
-    lsm6dsrx_sensor_hub_6_t   sh_byte_6;
-    lsm6dsrx_sensor_hub_7_t   sh_byte_7;
-    lsm6dsrx_sensor_hub_8_t   sh_byte_8;
-    lsm6dsrx_sensor_hub_9_t   sh_byte_9;
-    lsm6dsrx_sensor_hub_10_t  sh_byte_10;
-    lsm6dsrx_sensor_hub_11_t  sh_byte_11;
-    lsm6dsrx_sensor_hub_12_t  sh_byte_12;
-    lsm6dsrx_sensor_hub_13_t  sh_byte_13;
-    lsm6dsrx_sensor_hub_14_t  sh_byte_14;
-    lsm6dsrx_sensor_hub_15_t  sh_byte_15;
-    lsm6dsrx_sensor_hub_16_t  sh_byte_16;
-    lsm6dsrx_sensor_hub_17_t  sh_byte_17;
-    lsm6dsrx_sensor_hub_18_t  sh_byte_18;
+  lsm6dsrx_sensor_hub_1_t   sh_byte_1;
+  lsm6dsrx_sensor_hub_2_t   sh_byte_2;
+  lsm6dsrx_sensor_hub_3_t   sh_byte_3;
+  lsm6dsrx_sensor_hub_4_t   sh_byte_4;
+  lsm6dsrx_sensor_hub_5_t   sh_byte_5;
+  lsm6dsrx_sensor_hub_6_t   sh_byte_6;
+  lsm6dsrx_sensor_hub_7_t   sh_byte_7;
+  lsm6dsrx_sensor_hub_8_t   sh_byte_8;
+  lsm6dsrx_sensor_hub_9_t   sh_byte_9;
+  lsm6dsrx_sensor_hub_10_t  sh_byte_10;
+  lsm6dsrx_sensor_hub_11_t  sh_byte_11;
+  lsm6dsrx_sensor_hub_12_t  sh_byte_12;
+  lsm6dsrx_sensor_hub_13_t  sh_byte_13;
+  lsm6dsrx_sensor_hub_14_t  sh_byte_14;
+  lsm6dsrx_sensor_hub_15_t  sh_byte_15;
+  lsm6dsrx_sensor_hub_16_t  sh_byte_16;
+  lsm6dsrx_sensor_hub_17_t  sh_byte_17;
+  lsm6dsrx_sensor_hub_18_t  sh_byte_18;
 } lsm6dsrx_emb_sh_read_t;
 int32_t lsm6dsrx_sh_read_data_raw_get(stmdev_ctx_t *ctx,
-                                     lsm6dsrx_emb_sh_read_t *val);
+                                      lsm6dsrx_emb_sh_read_t *val);
 
 typedef enum {
   LSM6DSRX_SLV_0       = 0,
@@ -3827,9 +3925,9 @@ typedef enum {
   LSM6DSRX_SLV_0_1_2_3 = 3,
 } lsm6dsrx_aux_sens_on_t;
 int32_t lsm6dsrx_sh_slave_connected_set(stmdev_ctx_t *ctx,
-                                       lsm6dsrx_aux_sens_on_t val);
+                                        lsm6dsrx_aux_sens_on_t val);
 int32_t lsm6dsrx_sh_slave_connected_get(stmdev_ctx_t *ctx,
-                                       lsm6dsrx_aux_sens_on_t *val);
+                                        lsm6dsrx_aux_sens_on_t *val);
 
 int32_t lsm6dsrx_sh_master_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_sh_master_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3839,9 +3937,9 @@ typedef enum {
   LSM6DSRX_INTERNAL_PULL_UP = 1,
 } lsm6dsrx_shub_pu_en_t;
 int32_t lsm6dsrx_sh_pin_mode_set(stmdev_ctx_t *ctx,
-                                lsm6dsrx_shub_pu_en_t val);
+                                 lsm6dsrx_shub_pu_en_t val);
 int32_t lsm6dsrx_sh_pin_mode_get(stmdev_ctx_t *ctx,
-                                lsm6dsrx_shub_pu_en_t *val);
+                                 lsm6dsrx_shub_pu_en_t *val);
 
 int32_t lsm6dsrx_sh_pass_through_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_sh_pass_through_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3851,18 +3949,18 @@ typedef enum {
   LSM6DSRX_XL_GY_DRDY      = 0,
 } lsm6dsrx_start_config_t;
 int32_t lsm6dsrx_sh_syncro_mode_set(stmdev_ctx_t *ctx,
-                                   lsm6dsrx_start_config_t val);
+                                    lsm6dsrx_start_config_t val);
 int32_t lsm6dsrx_sh_syncro_mode_get(stmdev_ctx_t *ctx,
-                                   lsm6dsrx_start_config_t *val);
+                                    lsm6dsrx_start_config_t *val);
 
 typedef enum {
   LSM6DSRX_EACH_SH_CYCLE    = 0,
   LSM6DSRX_ONLY_FIRST_CYCLE = 1,
 } lsm6dsrx_write_once_t;
 int32_t lsm6dsrx_sh_write_mode_set(stmdev_ctx_t *ctx,
-                                  lsm6dsrx_write_once_t val);
+                                   lsm6dsrx_write_once_t val);
 int32_t lsm6dsrx_sh_write_mode_get(stmdev_ctx_t *ctx,
-                                  lsm6dsrx_write_once_t *val);
+                                   lsm6dsrx_write_once_t *val);
 
 int32_t lsm6dsrx_sh_reset_set(stmdev_ctx_t *ctx);
 int32_t lsm6dsrx_sh_reset_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3874,43 +3972,43 @@ typedef enum {
   LSM6DSRX_SH_ODR_13Hz  = 3,
 } lsm6dsrx_shub_odr_t;
 int32_t lsm6dsrx_sh_data_rate_set(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_shub_odr_t val);
+                                  lsm6dsrx_shub_odr_t val);
 int32_t lsm6dsrx_sh_data_rate_get(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_shub_odr_t *val);
+                                  lsm6dsrx_shub_odr_t *val);
 
-typedef struct{
+typedef struct {
   uint8_t   slv0_add;
   uint8_t   slv0_subadd;
   uint8_t   slv0_data;
 } lsm6dsrx_sh_cfg_write_t;
 int32_t lsm6dsrx_sh_cfg_write(stmdev_ctx_t *ctx,
-                             lsm6dsrx_sh_cfg_write_t *val);
+                              lsm6dsrx_sh_cfg_write_t *val);
 
-typedef struct{
+typedef struct {
   uint8_t   slv_add;
   uint8_t   slv_subadd;
   uint8_t   slv_len;
 } lsm6dsrx_sh_cfg_read_t;
 int32_t lsm6dsrx_sh_slv0_cfg_read(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_sh_cfg_read_t *val);
+                                  lsm6dsrx_sh_cfg_read_t *val);
 int32_t lsm6dsrx_sh_slv1_cfg_read(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_sh_cfg_read_t *val);
+                                  lsm6dsrx_sh_cfg_read_t *val);
 int32_t lsm6dsrx_sh_slv2_cfg_read(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_sh_cfg_read_t *val);
+                                  lsm6dsrx_sh_cfg_read_t *val);
 int32_t lsm6dsrx_sh_slv3_cfg_read(stmdev_ctx_t *ctx,
-                                 lsm6dsrx_sh_cfg_read_t *val);
+                                  lsm6dsrx_sh_cfg_read_t *val);
 
 int32_t lsm6dsrx_sh_status_get(stmdev_ctx_t *ctx,
-                              lsm6dsrx_status_master_t *val);
+                               lsm6dsrx_status_master_t *val);
 
 typedef enum {
   LSM6DSRX_S4S_TPH_7bit   = 0,
   LSM6DSRX_S4S_TPH_15bit  = 1,
 } lsm6dsrx_s4s_tph_res_t;
 int32_t lsm6dsrx_s4s_tph_res_set(stmdev_ctx_t *ctx,
-                                lsm6dsrx_s4s_tph_res_t val);
+                                 lsm6dsrx_s4s_tph_res_t val);
 int32_t lsm6dsrx_s4s_tph_res_get(stmdev_ctx_t *ctx,
-                                lsm6dsrx_s4s_tph_res_t *val);
+                                 lsm6dsrx_s4s_tph_res_t *val);
 
 int32_t lsm6dsrx_s4s_tph_val_set(stmdev_ctx_t *ctx, uint16_t val);
 int32_t lsm6dsrx_s4s_tph_val_get(stmdev_ctx_t *ctx, uint16_t *val);
@@ -3922,9 +4020,9 @@ typedef enum {
   LSM6DSRX_S4S_DT_RES_14 = 3,
 } lsm6dsrx_s4s_res_ratio_t;
 int32_t lsm6dsrx_s4s_res_ratio_set(stmdev_ctx_t *ctx,
-                                  lsm6dsrx_s4s_res_ratio_t val);
+                                   lsm6dsrx_s4s_res_ratio_t val);
 int32_t lsm6dsrx_s4s_res_ratio_get(stmdev_ctx_t *ctx,
-                                  lsm6dsrx_s4s_res_ratio_t *val);
+                                   lsm6dsrx_s4s_res_ratio_t *val);
 
 int32_t lsm6dsrx_s4s_command_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6dsrx_s4s_command_get(stmdev_ctx_t *ctx, uint8_t *val);

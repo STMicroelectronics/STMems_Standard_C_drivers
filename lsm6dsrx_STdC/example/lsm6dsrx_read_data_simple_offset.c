@@ -124,7 +124,8 @@ static uint8_t whoamI, rst;
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -136,41 +137,35 @@ static void platform_init(void);
 void lsm6dsrx_simple_offset(void)
 {
   stmdev_ctx_t dev_ctx;
-
   /* Example of XL offset to apply to acc. output */
   uint8_t offset[3] = { 0x30, 0x40, 0x7E };
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Init test platform */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lsm6dsrx_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LSM6DSRX_ID)
-    while(1);
+    while (1);
 
   /* Restore default configuration */
   lsm6dsrx_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lsm6dsrx_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Disable I3C interface */
   lsm6dsrx_i3c_disable_set(&dev_ctx, LSM6DSRX_I3C_DISABLE);
-
   /* Enable Block Data Update */
   lsm6dsrx_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Weight of XL user offset to 2^(-10) g/LSB */
   lsm6dsrx_xl_offset_weight_set(&dev_ctx, LSM6DSRX_LSb_1mg);
-
   /* Accelerometer X,Y,Z axis user offset correction expressed
    * in two’s complement. Set X to 48mg, Y tp 64 mg, Z to -127 mg
    */
@@ -178,15 +173,12 @@ void lsm6dsrx_simple_offset(void)
   lsm6dsrx_xl_usr_offset_y_set(&dev_ctx, &offset[1]);
   lsm6dsrx_xl_usr_offset_z_set(&dev_ctx, &offset[2]);
   lsm6dsrx_xl_usr_offset_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set Output Data Rate */
   lsm6dsrx_xl_data_rate_set(&dev_ctx, LSM6DSRX_XL_ODR_12Hz5);
   lsm6dsrx_gy_data_rate_set(&dev_ctx, LSM6DSRX_GY_ODR_12Hz5);
-
   /* Set full scale */
   lsm6dsrx_xl_full_scale_set(&dev_ctx, LSM6DSRX_2g);
   lsm6dsrx_gy_full_scale_set(&dev_ctx, LSM6DSRX_2000dps);
-
   /* Configure filtering chain(No aux interface).
    * Accelerometer - LPF1 + LPF2 path
    */
@@ -194,14 +186,12 @@ void lsm6dsrx_simple_offset(void)
   lsm6dsrx_xl_filter_lp2_set(&dev_ctx, PROPERTY_ENABLE);
 
   /* Read samples in polling mode (no int). */
-  while(1)
-  {
+  while (1) {
     uint8_t reg;
-
     /* Read output only if new xl value is available */
     lsm6dsrx_xl_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
+
+    if (reg) {
       /* Read acceleration field data */
       memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
       lsm6dsrx_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
@@ -210,16 +200,16 @@ void lsm6dsrx_simple_offset(void)
       acceleration_mg[1] =
         lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration[1]);
       acceleration_mg[2] =
-         lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration[2]);
-
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+        lsm6dsrx_from_fs2g_to_mg(data_raw_acceleration[2]);
+      sprintf((char *)tx_buffer,
+              "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     lsm6dsrx_gy_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
+
+    if (reg) {
       /* Read angular rate field data */
       memset(data_raw_angular_rate, 0x00, 3 * sizeof(int16_t));
       lsm6dsrx_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate);
@@ -229,23 +219,22 @@ void lsm6dsrx_simple_offset(void)
         lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate[1]);
       angular_rate_mdps[2] =
         lsm6dsrx_from_fs2000dps_to_mdps(data_raw_angular_rate[2]);
-
-      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+      sprintf((char *)tx_buffer,
+              "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
               angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     lsm6dsrx_temp_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
+
+    if (reg) {
       /* Read temperature data. */
       memset(&data_raw_temperature, 0x00, sizeof(int16_t));
       lsm6dsrx_temperature_raw_get(&dev_ctx, &data_raw_temperature);
       temperature_degC = lsm6dsrx_from_lsb_to_celsius(data_raw_temperature);
-
-      sprintf((char*)tx_buffer,
-             "Temperature [degC]:%6.2f\r\n", temperature_degC);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      sprintf((char *)tx_buffer,
+              "Temperature [degC]:%6.2f\r\n", temperature_degC);
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -260,17 +249,18 @@ void lsm6dsrx_simple_offset(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-    HAL_I2C_Mem_Write(handle, LSM6DSRX_I2C_ADD_L, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  HAL_I2C_Mem_Write(handle, LSM6DSRX_I2C_ADD_L, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_write(handle,  LSM6DSRX_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
@@ -294,11 +284,11 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   HAL_I2C_Mem_Read(handle, LSM6DSRX_I2C_ADD_L, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Receive(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_read(handle, LSM6DSRX_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
