@@ -114,7 +114,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -128,39 +129,32 @@ void lis3dh_orientation(void)
   stmdev_ctx_t dev_ctx;
   lis3dh_int1_cfg_t _6d_cfg;
   lis3dh_ctrl_reg3_t ctrl_reg3;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /*  Check device ID */
   lis3dh_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LIS3DH_ID) {
-    while(1) {
-    /* manage here device not found */
+    while (1) {
+      /* manage here device not found */
     }
   }
 
   /* Set Output Data Rate to 25 Hz */
   lis3dh_data_rate_set(&dev_ctx, LIS3DH_ODR_25Hz);
-
   /* Set full scale to 2 g */
   lis3dh_full_scale_set(&dev_ctx, LIS3DH_2g);
-
   /* Set interrupt threshold to 0x12 -> 288 mg */
   lis3dh_int1_gen_threshold_set(&dev_ctx, 0x12);
-
   /* Enable AOI1 on int1 pin */
   lis3dh_pin_int1_config_get(&dev_ctx, &ctrl_reg3);
   ctrl_reg3.i1_ia1 = PROPERTY_ENABLE;
   lis3dh_pin_int1_config_set(&dev_ctx, &ctrl_reg3);
-
   /* Set no time duration. */
   lis3dh_int1_gen_duration_set(&dev_ctx, 0);
-
   /* Configure for movement recognition on all axis
    *
    * Follow a short definition of movement recognition
@@ -186,46 +180,48 @@ void lis3dh_orientation(void)
   _6d_cfg.zlie = PROPERTY_ENABLE;
   _6d_cfg.zhie = PROPERTY_ENABLE;
   lis3dh_int1_gen_conf_set(&dev_ctx, &_6d_cfg);
-
   /* Set device in HR mode */
   lis3dh_operating_mode_set(&dev_ctx, LIS3DH_HR_12bit);
 
-  while(1)
-  {
+  while (1) {
     lis3dh_reg_t all_source;
-
     /* Read INT pin 1 in polling mode */
     lis3dh_int1_gen_source_get(&dev_ctx, &all_source.int1_src);
 
     /* Check 6D Orientation */
-    switch(all_source.byte & 0x3f)
-    {
-    case 0x01:
-      sprintf((char*)tx_buffer, "6D Or. position XL\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      break;
-    case 0x02:
-      sprintf((char*)tx_buffer, "6D Or. position XH\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      break;
-    case 0x04:
-      sprintf((char*)tx_buffer, "6D Or. position YL\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      break;
-    case 0x08:
-      sprintf((char*)tx_buffer, "6D Or. position YH\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      break;
-    case 0x10:
-      sprintf((char*)tx_buffer, "6D Or. position ZL\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      break;
-    case 0x20:
-      sprintf((char*)tx_buffer, "6D Or. position ZH\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      break;
-    default:
-      break;
+    switch (all_source.byte & 0x3f) {
+      case 0x01:
+        sprintf((char *)tx_buffer, "6D Or. position XL\r\n");
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
+        break;
+
+      case 0x02:
+        sprintf((char *)tx_buffer, "6D Or. position XH\r\n");
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
+        break;
+
+      case 0x04:
+        sprintf((char *)tx_buffer, "6D Or. position YL\r\n");
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
+        break;
+
+      case 0x08:
+        sprintf((char *)tx_buffer, "6D Or. position YH\r\n");
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
+        break;
+
+      case 0x10:
+        sprintf((char *)tx_buffer, "6D Or. position ZL\r\n");
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
+        break;
+
+      case 0x20:
+        sprintf((char *)tx_buffer, "6D Or. position ZH\r\n");
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
+        break;
+
+      default:
+        break;
     }
   }
 }
@@ -240,7 +236,8 @@ void lis3dh_orientation(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)

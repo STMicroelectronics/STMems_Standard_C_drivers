@@ -23,7 +23,7 @@
 #define LIS3DH_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -74,7 +74,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
@@ -107,8 +107,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -131,7 +133,7 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-  *              You can create a sensor configuration by your own or using 
+  *              You can create a sensor configuration by your own or using
   *              Unico / Unicleo tools available on STMicroelectronics
   *              web site.
   *
@@ -636,15 +638,15 @@ typedef struct {
   * @defgroup LIS3DH_Register_Union
   * @brief    This union group all the registers that has a bitfield
   *           description.
-  *           This union is usefull but not need by the driver.
+  *           This union is useful but not need by the driver.
   *
-  *           REMOVING this union you are complient with:
+  *           REMOVING this union you are compliant with:
   *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
   *
   * @{
   *
   */
-typedef union{
+typedef union {
   lis3dh_status_reg_aux_t status_reg_aux;
   lis3dh_ctrl_reg0_t      ctrl_reg0;
   lis3dh_temp_cfg_reg_t   temp_cfg_reg;
@@ -682,10 +684,11 @@ typedef union{
   *
   */
 
-int32_t lis3dh_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
-                          uint16_t len);
-int32_t lis3dh_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
-                           uint16_t len);
+int32_t lis3dh_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t *data,
+                        uint16_t len);
+int32_t lis3dh_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                         uint8_t *data,
+                         uint16_t len);
 
 float lis3dh_from_fs2_hr_to_mg(int16_t lsb);
 float lis3dh_from_fs4_hr_to_mg(int16_t lsb);
@@ -728,9 +731,9 @@ typedef enum {
   LIS3DH_LP_8bit    = 2,
 } lis3dh_op_md_t;
 int32_t lis3dh_operating_mode_set(stmdev_ctx_t *ctx,
-                                    lis3dh_op_md_t val);
+                                  lis3dh_op_md_t val);
 int32_t lis3dh_operating_mode_get(stmdev_ctx_t *ctx,
-                                    lis3dh_op_md_t *val);
+                                  lis3dh_op_md_t *val);
 
 typedef enum {
   LIS3DH_POWER_DOWN                      = 0x00,
@@ -747,8 +750,10 @@ typedef enum {
 int32_t lis3dh_data_rate_set(stmdev_ctx_t *ctx, lis3dh_odr_t val);
 int32_t lis3dh_data_rate_get(stmdev_ctx_t *ctx, lis3dh_odr_t *val);
 
-int32_t lis3dh_high_pass_on_outputs_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis3dh_high_pass_on_outputs_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis3dh_high_pass_on_outputs_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t lis3dh_high_pass_on_outputs_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 typedef enum {
   LIS3DH_AGGRESSIVE  = 0,
@@ -757,9 +762,9 @@ typedef enum {
   LIS3DH_LIGHT       = 3,
 } lis3dh_hpcf_t;
 int32_t lis3dh_high_pass_bandwidth_set(stmdev_ctx_t *ctx,
-                                         lis3dh_hpcf_t val);
+                                       lis3dh_hpcf_t val);
 int32_t lis3dh_high_pass_bandwidth_get(stmdev_ctx_t *ctx,
-                                         lis3dh_hpcf_t *val);
+                                       lis3dh_hpcf_t *val);
 
 typedef enum {
   LIS3DH_NORMAL_WITH_RST  = 0,
@@ -767,8 +772,10 @@ typedef enum {
   LIS3DH_NORMAL           = 2,
   LIS3DH_AUTORST_ON_INT   = 3,
 } lis3dh_hpm_t;
-int32_t lis3dh_high_pass_mode_set(stmdev_ctx_t *ctx, lis3dh_hpm_t val);
-int32_t lis3dh_high_pass_mode_get(stmdev_ctx_t *ctx, lis3dh_hpm_t *val);
+int32_t lis3dh_high_pass_mode_set(stmdev_ctx_t *ctx,
+                                  lis3dh_hpm_t val);
+int32_t lis3dh_high_pass_mode_get(stmdev_ctx_t *ctx,
+                                  lis3dh_hpm_t *val);
 
 typedef enum {
   LIS3DH_2g   = 0,
@@ -811,32 +818,35 @@ int32_t lis3dh_data_format_get(stmdev_ctx_t *ctx, lis3dh_ble_t *val);
 int32_t lis3dh_boot_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis3dh_boot_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3dh_status_get(stmdev_ctx_t *ctx, lis3dh_status_reg_t *val);
+int32_t lis3dh_status_get(stmdev_ctx_t *ctx,
+                          lis3dh_status_reg_t *val);
 
 int32_t lis3dh_int1_gen_conf_set(stmdev_ctx_t *ctx,
-                                   lis3dh_int1_cfg_t *val);
+                                 lis3dh_int1_cfg_t *val);
 int32_t lis3dh_int1_gen_conf_get(stmdev_ctx_t *ctx,
-                                   lis3dh_int1_cfg_t *val);
+                                 lis3dh_int1_cfg_t *val);
 
 int32_t lis3dh_int1_gen_source_get(stmdev_ctx_t *ctx,
-                                     lis3dh_int1_src_t *val);
+                                   lis3dh_int1_src_t *val);
 
 int32_t lis3dh_int1_gen_threshold_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis3dh_int1_gen_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis3dh_int1_gen_threshold_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lis3dh_int1_gen_duration_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis3dh_int1_gen_duration_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lis3dh_int2_gen_conf_set(stmdev_ctx_t *ctx,
-                                   lis3dh_int2_cfg_t *val);
+                                 lis3dh_int2_cfg_t *val);
 int32_t lis3dh_int2_gen_conf_get(stmdev_ctx_t *ctx,
-                                   lis3dh_int2_cfg_t *val);
+                                 lis3dh_int2_cfg_t *val);
 
 int32_t lis3dh_int2_gen_source_get(stmdev_ctx_t *ctx,
-                                     lis3dh_int2_src_t *val);
+                                   lis3dh_int2_src_t *val);
 
 int32_t lis3dh_int2_gen_threshold_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis3dh_int2_gen_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis3dh_int2_gen_threshold_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lis3dh_int2_gen_duration_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis3dh_int2_gen_duration_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -852,43 +862,45 @@ typedef enum {
   LIS3DH_ON_INT1_INT2_TAP_GEN     = 7,
 } lis3dh_hp_t;
 int32_t lis3dh_high_pass_int_conf_set(stmdev_ctx_t *ctx,
-                                        lis3dh_hp_t val);
+                                      lis3dh_hp_t val);
 int32_t lis3dh_high_pass_int_conf_get(stmdev_ctx_t *ctx,
-                                        lis3dh_hp_t *val);
+                                      lis3dh_hp_t *val);
 
 int32_t lis3dh_pin_int1_config_set(stmdev_ctx_t *ctx,
-                                     lis3dh_ctrl_reg3_t *val);
+                                   lis3dh_ctrl_reg3_t *val);
 int32_t lis3dh_pin_int1_config_get(stmdev_ctx_t *ctx,
-                                     lis3dh_ctrl_reg3_t *val);
+                                   lis3dh_ctrl_reg3_t *val);
 
 int32_t lis3dh_int2_pin_detect_4d_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis3dh_int2_pin_detect_4d_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis3dh_int2_pin_detect_4d_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 typedef enum {
   LIS3DH_INT2_PULSED   = 0,
   LIS3DH_INT2_LATCHED  = 1,
 } lis3dh_lir_int2_t;
 int32_t lis3dh_int2_pin_notification_mode_set(stmdev_ctx_t *ctx,
-                                                lis3dh_lir_int2_t val);
+                                              lis3dh_lir_int2_t val);
 int32_t lis3dh_int2_pin_notification_mode_get(stmdev_ctx_t *ctx,
-                                                lis3dh_lir_int2_t *val);
+                                              lis3dh_lir_int2_t *val);
 
 int32_t lis3dh_int1_pin_detect_4d_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis3dh_int1_pin_detect_4d_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis3dh_int1_pin_detect_4d_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 typedef enum {
   LIS3DH_INT1_PULSED   = 0,
   LIS3DH_INT1_LATCHED  = 1,
 } lis3dh_lir_int1_t;
 int32_t lis3dh_int1_pin_notification_mode_set(stmdev_ctx_t *ctx,
-                                                lis3dh_lir_int1_t val);
+                                              lis3dh_lir_int1_t val);
 int32_t lis3dh_int1_pin_notification_mode_get(stmdev_ctx_t *ctx,
-                                                lis3dh_lir_int1_t *val);
+                                              lis3dh_lir_int1_t *val);
 
 int32_t lis3dh_pin_int2_config_set(stmdev_ctx_t *ctx,
-                                     lis3dh_ctrl_reg6_t *val);
+                                   lis3dh_ctrl_reg6_t *val);
 int32_t lis3dh_pin_int2_config_get(stmdev_ctx_t *ctx,
-                                     lis3dh_ctrl_reg6_t *val);
+                                   lis3dh_ctrl_reg6_t *val);
 
 int32_t lis3dh_fifo_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis3dh_fifo_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -901,9 +913,9 @@ typedef enum {
   LIS3DH_INT2_GEN = 1,
 } lis3dh_tr_t;
 int32_t lis3dh_fifo_trigger_event_set(stmdev_ctx_t *ctx,
-                                        lis3dh_tr_t val);
+                                      lis3dh_tr_t val);
 int32_t lis3dh_fifo_trigger_event_get(stmdev_ctx_t *ctx,
-                                        lis3dh_tr_t *val);
+                                      lis3dh_tr_t *val);
 
 typedef enum {
   LIS3DH_BYPASS_MODE           = 0,
@@ -915,7 +927,7 @@ int32_t lis3dh_fifo_mode_set(stmdev_ctx_t *ctx, lis3dh_fm_t val);
 int32_t lis3dh_fifo_mode_get(stmdev_ctx_t *ctx, lis3dh_fm_t *val);
 
 int32_t lis3dh_fifo_status_get(stmdev_ctx_t *ctx,
-                                 lis3dh_fifo_src_reg_t *val);
+                               lis3dh_fifo_src_reg_t *val);
 
 int32_t lis3dh_fifo_data_level_get(stmdev_ctx_t *ctx, uint8_t *val);
 
@@ -925,11 +937,13 @@ int32_t lis3dh_fifo_ovr_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lis3dh_fifo_fth_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3dh_tap_conf_set(stmdev_ctx_t *ctx, lis3dh_click_cfg_t *val);
-int32_t lis3dh_tap_conf_get(stmdev_ctx_t *ctx, lis3dh_click_cfg_t *val);
+int32_t lis3dh_tap_conf_set(stmdev_ctx_t *ctx,
+                            lis3dh_click_cfg_t *val);
+int32_t lis3dh_tap_conf_get(stmdev_ctx_t *ctx,
+                            lis3dh_click_cfg_t *val);
 
 int32_t lis3dh_tap_source_get(stmdev_ctx_t *ctx,
-                                lis3dh_click_src_t *val);
+                              lis3dh_click_src_t *val);
 
 int32_t lis3dh_tap_threshold_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis3dh_tap_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -939,9 +953,9 @@ typedef enum {
   LIS3DH_TAP_LATCHED  = 1,
 } lis3dh_lir_click_t;
 int32_t lis3dh_tap_notification_mode_set(stmdev_ctx_t *ctx,
-                                           lis3dh_lir_click_t val);
+                                         lis3dh_lir_click_t val);
 int32_t lis3dh_tap_notification_mode_get(stmdev_ctx_t *ctx,
-                                           lis3dh_lir_click_t *val);
+                                         lis3dh_lir_click_t *val);
 
 int32_t lis3dh_shock_dur_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis3dh_shock_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -950,7 +964,8 @@ int32_t lis3dh_quiet_dur_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis3dh_quiet_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lis3dh_double_tap_timeout_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis3dh_double_tap_timeout_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis3dh_double_tap_timeout_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lis3dh_act_threshold_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis3dh_act_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -963,9 +978,9 @@ typedef enum {
   LIS3DH_PULL_UP_CONNECT     = 1,
 } lis3dh_sdo_pu_disc_t;
 int32_t lis3dh_pin_sdo_sa0_mode_set(stmdev_ctx_t *ctx,
-                                      lis3dh_sdo_pu_disc_t val);
+                                    lis3dh_sdo_pu_disc_t val);
 int32_t lis3dh_pin_sdo_sa0_mode_get(stmdev_ctx_t *ctx,
-                                      lis3dh_sdo_pu_disc_t *val);
+                                    lis3dh_sdo_pu_disc_t *val);
 
 typedef enum {
   LIS3DH_SPI_4_WIRE = 0,
