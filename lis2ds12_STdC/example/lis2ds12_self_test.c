@@ -123,7 +123,8 @@
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -143,126 +144,126 @@ void lis2ds12_self_test(void)
   float test_val[3];
   uint8_t st_result;
   uint8_t i, j;
-
   /* Initialize mems driver interface */
   dev_ctx_xl.write_reg = platform_write;
   dev_ctx_xl.read_reg = platform_read;
   dev_ctx_xl.handle = &SENSOR_BUS;
-
   /* Initialize self test results */
   st_result = ST_PASS;
-
   /* Wait boot time and initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lis2ds12_device_id_get(&dev_ctx_xl, &reg.byte);
-  if (reg.byte != LIS2DS12_ID){
-    while(1) {
+
+  if (reg.byte != LIS2DS12_ID) {
+    while (1) {
       /* manage here device not found */
     }
   }
 
   /* Enable Block Data Update. */
   lis2ds12_block_data_update_set(&dev_ctx_xl, PROPERTY_ENABLE);
-
   /* Set full scale to 2g. */
   lis2ds12_xl_full_scale_set(&dev_ctx_xl, LIS2DS12_2g);
-
   /* Set Output Data Rate. */
   lis2ds12_xl_data_rate_set(&dev_ctx_xl, LIS2DS12_XL_ODR_50Hz_HR);
-
   /* Wait stable output */
   platform_delay(WAIT_TIME);
 
   /* Check if new value available */
   do {
     lis2ds12_status_reg_get(&dev_ctx_xl, &reg.status);
-  } while(!reg.status.drdy);
+  } while (!reg.status.drdy);
+
   /* Read dummy data and discard it */
   lis2ds12_acceleration_raw_get(&dev_ctx_xl, data_raw);
 
   /* Read samples and get the average vale for each axis */
-  for (i = 0; i < SAMPLES; i++){
+  for (i = 0; i < SAMPLES; i++) {
     /* Check if new value available */
-      do {
-        lis2ds12_status_reg_get(&dev_ctx_xl, &reg.status);
-      } while(!reg.status.drdy);
+    do {
+      lis2ds12_status_reg_get(&dev_ctx_xl, &reg.status);
+    } while (!reg.status.drdy);
+
     /* Read data and accumulate the mg value */
     lis2ds12_acceleration_raw_get(&dev_ctx_xl, data_raw);
-    for (j=0; j<3; j++){
+
+    for (j = 0; j < 3; j++) {
       maes_st_off[j] += lis2ds12_from_fs2g_to_mg(data_raw[j]);
     }
   }
+
   /* Calculate the mg average values */
-  for (i=0; i<3; i++){
+  for (i = 0; i < 3; i++) {
     maes_st_off[i] /= SAMPLES;
   }
 
   /* Enable Self Test positive (or negative) */
   lis2ds12_xl_self_test_set(&dev_ctx_xl, LIS2DS12_XL_ST_POSITIVE);
   //lis2ds12_xl_self_test_set(&dev_ctx_xl, LIS2DS12_ST_NEGATIVE);
-
   /* Wait stable output */
   platform_delay(WAIT_TIME);
 
   /* Check if new value available */
   do {
     lis2ds12_status_reg_get(&dev_ctx_xl, &reg.status);
-  } while(!reg.status.drdy);
+  } while (!reg.status.drdy);
+
   /* Read dummy data and discard it */
   lis2ds12_acceleration_raw_get(&dev_ctx_xl, data_raw);
 
   /* Read samples and get the average vale for each axis */
-  for (i = 0; i < SAMPLES; i++){
+  for (i = 0; i < SAMPLES; i++) {
     /* Check if new value available */
-      do {
-        lis2ds12_status_reg_get(&dev_ctx_xl, &reg.status);
-      } while(!reg.status.drdy);
+    do {
+      lis2ds12_status_reg_get(&dev_ctx_xl, &reg.status);
+    } while (!reg.status.drdy);
+
     /* Read data and accumulate the mg value */
     lis2ds12_acceleration_raw_get(&dev_ctx_xl, data_raw);
-    for (j=0; j<3; j++){
+
+    for (j = 0; j < 3; j++) {
       maes_st_on[j] += lis2ds12_from_fs2g_to_mg(data_raw[j]);
     }
   }
+
   /* Calculate the mg average values */
-  for (i=0; i<3; i++){
+  for (i = 0; i < 3; i++) {
     maes_st_on[i] /= SAMPLES;
   }
 
   /* Calculate the mg values for self test */
-  for (i=0; i<3; i++){
+  for (i = 0; i < 3; i++) {
     test_val[i] = fabs((maes_st_on[i] - maes_st_off[i]));
   }
 
-
   /* Check self test limit */
-  for (i=0; i<3; i++){
+  for (i = 0; i < 3; i++) {
     if (( MIN_ST_LIMIT_mg > test_val[i] ) ||
-        ( test_val[i] > MAX_ST_LIMIT_mg)){
-        st_result = ST_FAIL;
+        ( test_val[i] > MAX_ST_LIMIT_mg)) {
+      st_result = ST_FAIL;
     }
-    tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+    tx_com(tx_buffer, strlen((char const *)tx_buffer));
   }
 
   /* Disable Self Test */
   lis2ds12_xl_self_test_set(&dev_ctx_xl, LIS2DS12_XL_ST_DISABLE);
-
   /* Disable sensor. */
   lis2ds12_xl_data_rate_set(&dev_ctx_xl, LIS2DS12_XL_ODR_OFF);
 
   /* Print self test result */
   if (st_result == ST_PASS) {
-    sprintf((char*)tx_buffer, "Self Test - PASS\r\n" );
+    sprintf((char *)tx_buffer, "Self Test - PASS\r\n" );
   }
-  else {
-    sprintf((char*)tx_buffer, "Self Test - FAIL\r\n" );
-  }
-  tx_com(tx_buffer, strlen((char const*)tx_buffer));
 
+  else {
+    sprintf((char *)tx_buffer, "Self Test - FAIL\r\n" );
+  }
+
+  tx_com(tx_buffer, strlen((char const *)tx_buffer));
 }
 
 /*
@@ -275,7 +276,8 @@ void lis2ds12_self_test(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
@@ -323,7 +325,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */

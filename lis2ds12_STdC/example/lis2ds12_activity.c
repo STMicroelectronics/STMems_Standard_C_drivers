@@ -115,7 +115,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -128,45 +129,38 @@ void lis2ds12_activity(void)
 {
   /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
-
   /* Check device ID */
   lis2ds12_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LIS2DS12_ID)
-    while(1)
-    {
+    while (1) {
       /* manage here device not found */
     }
 
   /* Restore default configuration */
   lis2ds12_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lis2ds12_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Set XL and Gyro Output Data Rate */
   lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_200Hz_HR);
-
   /* Set 2g full XL scale and 250 dps full Gyro */
   lis2ds12_xl_full_scale_set(&dev_ctx, LIS2DS12_2g);
-
   /* Set wake-up duration:
    * this field is set to 0010b, corresponding to
    *
    * 10 ms (= 2 * 1 / ODR)
    */
   lis2ds12_wkup_dur_set(&dev_ctx, 0x02);
-
   /* Set sleep duration:
    * this field is set to 0010b, corresponding to
    *
@@ -176,7 +170,6 @@ void lis2ds12_activity(void)
    * ODR is internally set to 12.5 Hz
    */
   lis2ds12_act_sleep_dur_set(&dev_ctx, 0x02);
-
   /* Set Activity wake-up threshold:
    * set to 000010b, therefore the activity/inactivity
    * threshold is 62.5 mg(= 2 * FS / 64)
@@ -184,22 +177,19 @@ void lis2ds12_activity(void)
   lis2ds12_wkup_threshold_set(&dev_ctx, 0x02);
 
   /* Wait Events */
-  while(1)
-  {
+  while (1) {
     lis2ds12_all_sources_t all_source;
-
     /* Check if Activity/Inactivity events */
     lis2ds12_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.wake_up_src.sleep_state_ia)
-    {
-      sprintf((char*)tx_buffer, "Inactivity Detected\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+    if (all_source.wake_up_src.sleep_state_ia) {
+      sprintf((char *)tx_buffer, "Inactivity Detected\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
-    if (all_source.wake_up_src.wu_ia)
-    {
-      sprintf((char*)tx_buffer, "Activity Detected\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    if (all_source.wake_up_src.wu_ia) {
+      sprintf((char *)tx_buffer, "Activity Detected\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -214,7 +204,8 @@ void lis2ds12_activity(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
@@ -262,7 +253,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */

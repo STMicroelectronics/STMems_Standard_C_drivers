@@ -114,7 +114,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -127,68 +128,57 @@ void lis2ds12_single_tap_(void)
 {
   /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lis2ds12_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LIS2DS12_ID)
-    while(1)
-    {
+    while (1) {
       /* manage here device not found */
     }
 
   /* Restore default configuration */
   lis2ds12_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lis2ds12_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Set XL Output Data Rate */
   lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_400Hz_HR);
-
   /* Set 2g full XL scale */
   lis2ds12_xl_full_scale_set(&dev_ctx, LIS2DS12_2g);
-
   /* Enable Tap detection on X, Y, Z */
   lis2ds12_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
   lis2ds12_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
   lis2ds12_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
   lis2ds12_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set Tap threshold to 01001b, therefore the tap threshold is
    * 562.5 mg (= 9 * FS_XL / 2 5 )
    */
   lis2ds12_tap_threshold_set(&dev_ctx, 0x09);
-
   /* Configure Single Tap parameter */
   //lis2ds12_tap_dur_set(&dev_ctx, 0x0);
   lis2ds12_tap_quiet_set(&dev_ctx, 0x01);
   lis2ds12_tap_shock_set(&dev_ctx, 0x02);
-
   /* Enable Single Tap detection only */
   lis2ds12_tap_mode_set(&dev_ctx, LIS2DS12_ONLY_SINGLE);
 
   /* Wait Events */
-  while(1)
-  {
+  while (1) {
     lis2ds12_all_sources_t all_source;
-
     lis2ds12_all_sources_get(&dev_ctx, &all_source);
 
     /* Check if Single Tap events */
-    if (all_source.tap_src.single_tap)
-    {
-      sprintf((char*)tx_buffer, "Tap Detected\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    if (all_source.tap_src.single_tap) {
+      sprintf((char *)tx_buffer, "Tap Detected\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -203,7 +193,8 @@ void lis2ds12_single_tap_(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
@@ -251,7 +242,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */

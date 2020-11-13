@@ -116,7 +116,8 @@ static uint8_t whoamI, rst;
  *
  *
  */
-static int32_t platform_write(void *handle, uint8_t Reg, uint8_t *Bufp,
+static int32_t platform_write(void *handle, uint8_t Reg,
+                              uint8_t *Bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
                              uint16_t len);
@@ -132,43 +133,37 @@ uint16_t samples, fail;
  */
 void lis2ds12_14bit_module(void)
 {
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
-
   /* Initialize mems driver interface. */
   stmdev_ctx_t dev_ctx;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /*
    *  Check device ID.
    */
   whoamI = 0;
   lis2ds12_device_id_get(&dev_ctx, &whoamI);
+
   if ( whoamI != LIS2DS12_ID )
-    while(1); /*manage here device not found */
+    while (1); /*manage here device not found */
 
   /*
    *  Restore default configuration.
    */
   lis2ds12_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lis2ds12_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Enable Block Data Update. */
   lis2ds12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set full scale. */
   lis2ds12_xl_full_scale_set(&dev_ctx, LIS2DS12_4g);
-
   /* Configure filtering chain. */
   /* Accelerometer - High Pass / Slope path */
   //lis2ds12_xl_hp_path_set(&dev_ctx, LIS2DS12_HP_ON_OUTPUTS);
@@ -180,7 +175,6 @@ void lis2ds12_14bit_module(void)
   lis2ds12_fifo_mode_set(&dev_ctx, LIS2DS12_FIFO_MODE);
   /* FIFO watermark level selection. */
   lis2ds12_fifo_watermark_set(&dev_ctx, 10);
-
   /* Select the signal that need to route on int1 pad. */
   lis2ds12_pin_int1_route_t pin1;
   pin1.int1_6d = 0;
@@ -193,7 +187,6 @@ void lis2ds12_14bit_module(void)
   pin1.int1_tap = 0;
   pin1.int1_wu = 0;
   lis2ds12_pin_int1_route_set(&dev_ctx, pin1);
-
   /* Select the signal that need to route on int2 pad. */
   lis2ds12_pin_int2_route_t pin2;
   pin2.int2_boot = 0;
@@ -203,53 +196,47 @@ void lis2ds12_14bit_module(void)
   pin2.int2_step_det = 0;
   pin2.int2_tilt = 0;
   lis2ds12_pin_int2_route_set(&dev_ctx, pin2);
-
   /* Set Output Data Rate. Maximum ODR supported is 800Hz */
   lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_100Hz_HR);
   fail = 0;
+
   /* Read samples in polling mode (no int). */
-  while(1)
-  {
+  while (1) {
     uint8_t i, j;
     uint8_t fifo_ths_flag;
     uint8_t fifo_full_flag;
-
     /* Read fifo when is full. */
     lis2ds12_fifo_wtm_flag_get(&dev_ctx, &fifo_ths_flag);
     lis2ds12_fifo_full_flag_get(&dev_ctx, &fifo_full_flag);
 
-
-    if (fifo_ths_flag)
-    {
+    if (fifo_ths_flag) {
       HAL_Delay(500);
-
       /* Read acceleration data. */
       //memset(data_raw_acceleration.u8bit, 0x00, 3*sizeof(int16_t));
       lis2ds12_fifo_data_level_get(&dev_ctx, &samples);
       //lis2ds12_read_reg(&dev_ctx,  LIS2DS12_OUT_X_L, (uint8_t*) acceleration_mg, 256 * 3);
       j = 0;
-      for (i=0; i<10; i++){
+
+      for (i = 0; i < 10; i++) {
         lis2ds12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-
         magnitude[j++] = lis2ds12_from_fs4g_to_mg(data_raw_acceleration[0]);
-        sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\r\n",magnitude[j-1]);
-        tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
-
+        sprintf((char *)tx_buffer, "Acceleration [mg]:%4.2f\r\n",
+                magnitude[j - 1]);
+        tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
         magnitude[j++] = lis2ds12_from_fs4g_to_mg(data_raw_acceleration[1]);
-        sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\r\n",magnitude[j-1]);
-        tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
-
+        sprintf((char *)tx_buffer, "Acceleration [mg]:%4.2f\r\n",
+                magnitude[j - 1]);
+        tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
         magnitude[j++] = lis2ds12_from_fs4g_to_mg(data_raw_acceleration[2]);
-        sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\r\n",magnitude[j-1]);
-        tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
-
+        sprintf((char *)tx_buffer, "Acceleration [mg]:%4.2f\r\n",
+                magnitude[j - 1]);
+        tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
       }
 
       /* FIFO mode selection: FIFO_MODE */
       lis2ds12_fifo_mode_set(&dev_ctx, LIS2DS12_BYPASS_MODE);
       /* FIFO mode selection: FIFO_MODE */
       lis2ds12_fifo_mode_set(&dev_ctx, LIS2DS12_FIFO_MODE);
-
     }
   }
 }
@@ -265,7 +252,8 @@ void lis2ds12_14bit_module(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
@@ -313,7 +301,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */

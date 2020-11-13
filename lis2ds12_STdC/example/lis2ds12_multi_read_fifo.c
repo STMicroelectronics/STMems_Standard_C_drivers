@@ -122,7 +122,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -135,61 +136,51 @@ void lis2ds12_read_fifo(void)
 {
   /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lis2ds12_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LIS2DS12_ID)
-    while(1)
-    {
+    while (1) {
       /* manage here device not found */
     }
 
   /* Restore default configuration. */
   lis2ds12_reset_set(&dev_ctx, PROPERTY_ENABLE);
-  do
-  {
+
+  do {
     lis2ds12_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Set XL Output Data Rate */
   lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_50Hz_HR);
-
   /* Set XL full scale */
   lis2ds12_xl_full_scale_set(&dev_ctx, LIS2DS12_2g);
-
   /* Set FIFO watermark to FIFO_WATERMARK */
   lis2ds12_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
-
   /* Set FIFO mode to Stream mode (aka Continuous Mode) */
   lis2ds12_fifo_mode_set(&dev_ctx, LIS2DS12_STREAM_MODE);
 
   /* Wait Events */
-  while(1)
-  {
+  while (1) {
     uint8_t num_pattern;
     uint8_t flags;
     uint16_t num = 0;
-
     /* Check if FIFO level over threshold */
     lis2ds12_fifo_wtm_flag_get(&dev_ctx, &flags);
-    if (flags)
-    {
+
+    if (flags) {
       /* Read number of sample in FIFO */
       lis2ds12_fifo_data_level_get(&dev_ctx, &num);
       num_pattern = num / OUT_XYZ_SIZE;
 
-      while (num_pattern-- > 0)
-      {
+      while (num_pattern-- > 0) {
         /* Read XL samples */
         lis2ds12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
         acceleration_mg[0] =
@@ -198,10 +189,10 @@ void lis2ds12_read_fifo(void)
           lis2ds12_from_fs2g_to_mg(data_raw_acceleration[1]);
         acceleration_mg[2] =
           lis2ds12_from_fs2g_to_mg(data_raw_acceleration[2]);
-
-        sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+        sprintf((char *)tx_buffer,
+                "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                 acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-        tx_com(tx_buffer, strlen((char const*)tx_buffer));
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
       }
     }
   }
@@ -217,7 +208,8 @@ void lis2ds12_read_fifo(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
@@ -265,7 +257,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */

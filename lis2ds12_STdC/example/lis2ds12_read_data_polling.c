@@ -117,7 +117,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -130,63 +131,58 @@ void lis2ds12_read_data_simple(void)
 {
   /* Initialize mems driver interface. */
   stmdev_ctx_t dev_ctx;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lis2ds12_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LIS2DS12_ID)
-    while(1)
-    {
+    while (1) {
       /* manage here device not found */
     }
 
   /* Restore default configuration */
   lis2ds12_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lis2ds12_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Enable Block Data Update. */
   lis2ds12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set full scale. */
   lis2ds12_xl_full_scale_set(&dev_ctx, LIS2DS12_2g);
-
   /* Configure filtering chain. */
   /* Accelerometer - High Pass / Slope path */
   //lis2ds12_xl_hp_path_set(&dev_ctx, LIS2DS12_HP_ON_OUTPUTS);
-
   /* Set Output Data Rate. */
   lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_100Hz_LP);
 
   /* Read samples in polling mode (no int). */
-  while(1)
-  {
+  while (1) {
     /* Read output only if new value is available. */
     lis2ds12_reg_t reg;
     lis2ds12_status_reg_get(&dev_ctx, &reg.status);
 
-    if (reg.status.drdy)
-    {
+    if (reg.status.drdy) {
       /* Read acceleration data. */
-      memset(data_raw_acceleration, 0x00, 3*sizeof(int16_t));
+      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
       lis2ds12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-      acceleration_mg[0] = lis2ds12_from_fs2g_to_mg( data_raw_acceleration[0]);
-      acceleration_mg[1] = lis2ds12_from_fs2g_to_mg( data_raw_acceleration[1]);
-      acceleration_mg[2] = lis2ds12_from_fs2g_to_mg( data_raw_acceleration[2]);
-
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+      acceleration_mg[0] = lis2ds12_from_fs2g_to_mg(
+                             data_raw_acceleration[0]);
+      acceleration_mg[1] = lis2ds12_from_fs2g_to_mg(
+                             data_raw_acceleration[1]);
+      acceleration_mg[2] = lis2ds12_from_fs2g_to_mg(
+                             data_raw_acceleration[2]);
+      sprintf((char *)tx_buffer,
+              "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -201,7 +197,8 @@ void lis2ds12_read_data_simple(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
@@ -249,7 +246,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */

@@ -114,7 +114,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -127,38 +128,32 @@ void lis2ds12_orientation_6D(void)
 {
   /* Initialize mems driver interface. */
   stmdev_ctx_t dev_ctx;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
-
   /* Check device ID */
   lis2ds12_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LIS2DS12_ID)
-    while(1)
-    {
+    while (1) {
       /* manage here device not found */
     }
 
   /* Restore default configuration. */
   lis2ds12_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lis2ds12_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Set XL Output Data Rate. */
   lis2ds12_xl_data_rate_set(&dev_ctx, LIS2DS12_XL_ODR_400Hz_HR);
-
   /* Set 2g full XL scale. */
   lis2ds12_xl_full_scale_set(&dev_ctx, LIS2DS12_2g);
-
   /* Set threshold to 60 degrees. */
   lis2ds12_6d_threshold_set(&dev_ctx, LIS2DS12_DEG_60);
 
@@ -166,29 +161,40 @@ void lis2ds12_orientation_6D(void)
   //lis2ds12_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
 
   /* Wait Events. */
-  while(1)
-  {
+  while (1) {
     lis2ds12_all_sources_t all_source;
-
     /* Check if 6D Orientation events. */
     lis2ds12_all_sources_get(&dev_ctx, &all_source);
-    if (all_source._6d_src._6d_ia)
-    {
-      sprintf((char*)tx_buffer, "6D Or. switched to ");
-      if (all_source._6d_src.xh)
-        strcat((char*)tx_buffer, "XH");
-      if (all_source._6d_src.xl)
-        strcat((char*)tx_buffer, "XL");
-      if (all_source._6d_src.yh)
-        strcat((char*)tx_buffer, "YH");
-      if (all_source._6d_src.yl)
-        strcat((char*)tx_buffer, "YL");
-      if (all_source._6d_src.zh)
-        strcat((char*)tx_buffer, "ZH");
-      if (all_source._6d_src.zl)
-        strcat((char*)tx_buffer, "ZL");
-      strcat((char*)tx_buffer, "\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+    if (all_source._6d_src._6d_ia) {
+      sprintf((char *)tx_buffer, "6D Or. switched to ");
+
+      if (all_source._6d_src.xh) {
+        strcat((char *)tx_buffer, "XH");
+      }
+
+      if (all_source._6d_src.xl) {
+        strcat((char *)tx_buffer, "XL");
+      }
+
+      if (all_source._6d_src.yh) {
+        strcat((char *)tx_buffer, "YH");
+      }
+
+      if (all_source._6d_src.yl) {
+        strcat((char *)tx_buffer, "YL");
+      }
+
+      if (all_source._6d_src.zh) {
+        strcat((char *)tx_buffer, "ZH");
+      }
+
+      if (all_source._6d_src.zl) {
+        strcat((char *)tx_buffer, "ZL");
+      }
+
+      strcat((char *)tx_buffer, "\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -203,7 +209,8 @@ void lis2ds12_orientation_6D(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
@@ -251,7 +258,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
