@@ -23,7 +23,7 @@
 #define LSM303AH_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -43,7 +43,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -65,8 +65,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -89,9 +91,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using 
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -119,7 +121,7 @@ typedef struct {
   *
   */
 
-  /** I2C Device Address 8 bit format **/
+/** I2C Device Address 8 bit format **/
 #define LSM303AH_I2C_ADD_XL       0x3BU
 #define LSM303AH_I2C_ADD_MG       0x3DU
 
@@ -469,7 +471,7 @@ typedef struct {
   * @{
   *
   */
-typedef union{
+typedef union {
   lsm303ah_ctrl1_a_t                      ctrl1_a;
   lsm303ah_ctrl2_a_t                      ctrl2_a;
   lsm303ah_ctrl3_a_t                      ctrl3_a;
@@ -510,9 +512,11 @@ typedef union{
   *
   */
 
-int32_t lsm303ah_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lsm303ah_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
                           uint16_t len);
-int32_t lsm303ah_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lsm303ah_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                           uint8_t *data,
                            uint16_t len);
 
 extern float_t lsm303ah_from_fs2g_to_mg(int16_t lsb);
@@ -537,11 +541,15 @@ int32_t lsm303ah_xl_all_sources_get(stmdev_ctx_t *ctx,
                                     lsm303ah_xl_all_sources_t *val);
 
 
-int32_t lsm303ah_xl_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm303ah_xl_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_xl_block_data_update_set(stmdev_ctx_t *ctx,
+                                          uint8_t val);
+int32_t lsm303ah_xl_block_data_update_get(stmdev_ctx_t *ctx,
+                                          uint8_t *val);
 
-int32_t lsm303ah_mg_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm303ah_mg_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_mg_block_data_update_set(stmdev_ctx_t *ctx,
+                                          uint8_t val);
+int32_t lsm303ah_mg_block_data_update_get(stmdev_ctx_t *ctx,
+                                          uint8_t *val);
 
 typedef enum {
   LSM303AH_MG_LSB_AT_LOW_ADD  = 0,
@@ -584,8 +592,10 @@ typedef enum {
   LSM303AH_XL_ODR_3k2Hz_HF    = 0x16,
   LSM303AH_XL_ODR_6k4Hz_HF    = 0x17,
 } lsm303ah_xl_odr_t;
-int32_t lsm303ah_xl_data_rate_set(stmdev_ctx_t *ctx, lsm303ah_xl_odr_t val);
-int32_t lsm303ah_xl_data_rate_get(stmdev_ctx_t *ctx, lsm303ah_xl_odr_t *val);
+int32_t lsm303ah_xl_data_rate_set(stmdev_ctx_t *ctx,
+                                  lsm303ah_xl_odr_t val);
+int32_t lsm303ah_xl_data_rate_get(stmdev_ctx_t *ctx,
+                                  lsm303ah_xl_odr_t *val);
 
 int32_t lsm303ah_xl_status_reg_get(stmdev_ctx_t *ctx,
                                    lsm303ah_status_a_t *val);
@@ -593,7 +603,8 @@ int32_t lsm303ah_xl_status_reg_get(stmdev_ctx_t *ctx,
 int32_t lsm303ah_mg_status_get(stmdev_ctx_t *ctx,
                                lsm303ah_status_reg_m_t *val);
 
-int32_t lsm303ah_xl_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_xl_flag_data_ready_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 int32_t lsm303ah_mg_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t lsm303ah_mg_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -631,8 +642,10 @@ int32_t lsm303ah_mg_power_mode_set(stmdev_ctx_t *ctx,
 int32_t lsm303ah_mg_power_mode_get(stmdev_ctx_t *ctx,
                                    lsm303ah_mg_lp_t *val);
 
-int32_t lsm303ah_mg_offset_temp_comp_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm303ah_mg_offset_temp_comp_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_mg_offset_temp_comp_set(stmdev_ctx_t *ctx,
+                                         uint8_t val);
+int32_t lsm303ah_mg_offset_temp_comp_get(stmdev_ctx_t *ctx,
+                                         uint8_t *val);
 
 typedef enum {
   LSM303AH_MG_SET_SENS_ODR_DIV_63        = 0,
@@ -654,18 +667,23 @@ int32_t lsm303ah_acceleration_module_raw_get(stmdev_ctx_t *ctx,
 
 int32_t lsm303ah_magnetic_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t lsm303ah_xl_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm303ah_xl_temperature_raw_get(stmdev_ctx_t *ctx,
+                                        uint8_t *buff);
 
-int32_t lsm303ah_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm303ah_acceleration_raw_get(stmdev_ctx_t *ctx,
+                                      uint8_t *buff);
 
-int32_t lsm303ah_number_of_steps_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm303ah_number_of_steps_get(stmdev_ctx_t *ctx,
+                                     uint8_t *buff);
 
 int32_t lsm303ah_xl_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
 int32_t lsm303ah_mg_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
-int32_t lsm303ah_xl_auto_increment_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm303ah_xl_auto_increment_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_xl_auto_increment_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t lsm303ah_xl_auto_increment_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 typedef enum {
   LSM303AH_XL_USER_BANK   = 0,
@@ -691,8 +709,10 @@ typedef enum {
   LSM303AH_XL_ST_POSITIVE    = 1,
   LSM303AH_XL_ST_NEGATIVE    = 2,
 } lsm303ah_xl_st_t;
-int32_t lsm303ah_xl_self_test_set(stmdev_ctx_t *ctx, lsm303ah_xl_st_t val);
-int32_t lsm303ah_xl_self_test_get(stmdev_ctx_t *ctx, lsm303ah_xl_st_t *val);
+int32_t lsm303ah_xl_self_test_set(stmdev_ctx_t *ctx,
+                                  lsm303ah_xl_st_t val);
+int32_t lsm303ah_xl_self_test_get(stmdev_ctx_t *ctx,
+                                  lsm303ah_xl_st_t *val);
 
 int32_t lsm303ah_mg_self_test_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm303ah_mg_self_test_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -728,8 +748,10 @@ typedef enum {
   LSM303AH_XL_SPI_4_WIRE   = 0,
   LSM303AH_XL_SPI_3_WIRE   = 1,
 } lsm303ah_xl_sim_t;
-int32_t lsm303ah_xl_spi_mode_set(stmdev_ctx_t *ctx, lsm303ah_xl_sim_t val);
-int32_t lsm303ah_xl_spi_mode_get(stmdev_ctx_t *ctx, lsm303ah_xl_sim_t *val);
+int32_t lsm303ah_xl_spi_mode_set(stmdev_ctx_t *ctx,
+                                 lsm303ah_xl_sim_t val);
+int32_t lsm303ah_xl_spi_mode_get(stmdev_ctx_t *ctx,
+                                 lsm303ah_xl_sim_t *val);
 
 typedef enum {
   LSM303AH_XL_I2C_ENABLE   = 0,
@@ -785,7 +807,7 @@ int32_t lsm303ah_xl_int_notification_set(stmdev_ctx_t *ctx,
 int32_t lsm303ah_xl_int_notification_get(stmdev_ctx_t *ctx,
                                          lsm303ah_xl_lir_t *val);
 
-typedef struct{
+typedef struct {
   uint8_t int1_drdy               : 1;
   uint8_t int1_fth                : 1;
   uint8_t int1_6d                 : 1;
@@ -800,7 +822,7 @@ int32_t lsm303ah_xl_pin_int1_route_set(stmdev_ctx_t *ctx,
 int32_t lsm303ah_xl_pin_int1_route_get(stmdev_ctx_t *ctx,
                                        lsm303ah_xl_pin_int1_route_t *val);
 
-typedef struct{
+typedef struct {
   uint8_t int2_boot               : 1;
   uint8_t int2_tilt               : 1;
   uint8_t int2_sig_mot            : 1;
@@ -830,8 +852,10 @@ int32_t lsm303ah_mg_int_gen_conf_get(stmdev_ctx_t *ctx,
 int32_t lsm303ah_mg_int_gen_source_get(stmdev_ctx_t *ctx,
                                        lsm303ah_int_source_reg_m_t *val);
 
-int32_t lsm303ah_mg_int_gen_treshold_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm303ah_mg_int_gen_treshold_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm303ah_mg_int_gen_treshold_set(stmdev_ctx_t *ctx,
+                                         uint8_t *buff);
+int32_t lsm303ah_mg_int_gen_treshold_get(stmdev_ctx_t *ctx,
+                                         uint8_t *buff);
 
 typedef enum {
   LSM303AH_MG_CHECK_BEFORE  = 0,
@@ -842,8 +866,10 @@ int32_t lsm303ah_mg_offset_int_conf_set(stmdev_ctx_t *ctx,
 int32_t lsm303ah_mg_offset_int_conf_get(stmdev_ctx_t *ctx,
                                         lsm303ah_mg_int_on_dataoff_t *val);
 
-int32_t lsm303ah_xl_wkup_threshold_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm303ah_xl_wkup_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_xl_wkup_threshold_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t lsm303ah_xl_wkup_threshold_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 int32_t lsm303ah_xl_wkup_dur_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm303ah_xl_wkup_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -852,19 +878,27 @@ int32_t lsm303ah_xl_sleep_mode_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm303ah_xl_sleep_mode_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm303ah_xl_act_sleep_dur_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm303ah_xl_act_sleep_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_xl_act_sleep_dur_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
-int32_t lsm303ah_xl_tap_detection_on_z_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm303ah_xl_tap_detection_on_z_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_xl_tap_detection_on_z_set(stmdev_ctx_t *ctx,
+                                           uint8_t val);
+int32_t lsm303ah_xl_tap_detection_on_z_get(stmdev_ctx_t *ctx,
+                                           uint8_t *val);
 
-int32_t lsm303ah_xl_tap_detection_on_y_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm303ah_xl_tap_detection_on_y_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_xl_tap_detection_on_y_set(stmdev_ctx_t *ctx,
+                                           uint8_t val);
+int32_t lsm303ah_xl_tap_detection_on_y_get(stmdev_ctx_t *ctx,
+                                           uint8_t *val);
 
-int32_t lsm303ah_xl_tap_detection_on_x_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm303ah_xl_tap_detection_on_x_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_xl_tap_detection_on_x_set(stmdev_ctx_t *ctx,
+                                           uint8_t val);
+int32_t lsm303ah_xl_tap_detection_on_x_get(stmdev_ctx_t *ctx,
+                                           uint8_t *val);
 
 int32_t lsm303ah_xl_tap_threshold_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm303ah_xl_tap_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_xl_tap_threshold_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lsm303ah_xl_tap_shock_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm303ah_xl_tap_shock_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -901,7 +935,8 @@ int32_t lsm303ah_xl_6d_threshold_get(stmdev_ctx_t *ctx,
 int32_t lsm303ah_xl_4d_mode_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm303ah_xl_4d_mode_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm303ah_xl_6d_src_get(stmdev_ctx_t *ctx, lsm303ah_6d_src_a_t *val);
+int32_t lsm303ah_xl_6d_src_get(stmdev_ctx_t *ctx,
+                               lsm303ah_6d_src_a_t *val);
 
 int32_t lsm303ah_xl_ff_dur_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm303ah_xl_ff_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -926,22 +961,30 @@ int32_t lsm303ah_xl_fifo_mode_set(stmdev_ctx_t *ctx,
 int32_t lsm303ah_xl_fifo_mode_get(stmdev_ctx_t *ctx,
                                   lsm303ah_xl_fmode_t *val);
 
-int32_t lsm303ah_xl_fifo_watermark_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm303ah_xl_fifo_watermark_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_xl_fifo_watermark_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t lsm303ah_xl_fifo_watermark_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
-int32_t lsm303ah_xl_fifo_full_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_xl_fifo_full_flag_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
-int32_t lsm303ah_xl_fifo_ovr_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_xl_fifo_ovr_flag_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
-int32_t lsm303ah_xl_fifo_wtm_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_xl_fifo_wtm_flag_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
-int32_t lsm303ah_xl_fifo_data_level_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t lsm303ah_xl_fifo_data_level_get(stmdev_ctx_t *ctx,
+                                        uint16_t *val);
 
 int32_t lsm303ah_xl_fifo_src_get(stmdev_ctx_t *ctx,
                                  lsm303ah_fifo_src_a_t *val);
 
-int32_t lsm303ah_xl_pedo_threshold_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm303ah_xl_pedo_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_xl_pedo_threshold_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t lsm303ah_xl_pedo_threshold_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 typedef enum {
   LSM303AH_XL_PEDO_AT_2g  = 0,
@@ -952,8 +995,10 @@ int32_t lsm303ah_xl_pedo_full_scale_set(stmdev_ctx_t *ctx,
 int32_t lsm303ah_xl_pedo_full_scale_get(stmdev_ctx_t *ctx,
                                         lsm303ah_xl_pedo4g_t *val);
 
-int32_t lsm303ah_xl_pedo_step_reset_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm303ah_xl_pedo_step_reset_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_xl_pedo_step_reset_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t lsm303ah_xl_pedo_step_reset_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 int32_t lsm303ah_xl_pedo_step_detect_flag_get(stmdev_ctx_t *ctx,
                                               uint8_t *val);
@@ -961,22 +1006,28 @@ int32_t lsm303ah_xl_pedo_step_detect_flag_get(stmdev_ctx_t *ctx,
 int32_t lsm303ah_xl_pedo_sens_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm303ah_xl_pedo_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm303ah_xl_pedo_debounce_steps_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm303ah_xl_pedo_debounce_steps_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_xl_pedo_debounce_steps_set(stmdev_ctx_t *ctx,
+                                            uint8_t val);
+int32_t lsm303ah_xl_pedo_debounce_steps_get(stmdev_ctx_t *ctx,
+                                            uint8_t *val);
 
 int32_t lsm303ah_xl_pedo_timeout_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm303ah_xl_pedo_timeout_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm303ah_xl_pedo_steps_period_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm303ah_xl_pedo_steps_period_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm303ah_xl_pedo_steps_period_set(stmdev_ctx_t *ctx,
+                                          uint8_t *buff);
+int32_t lsm303ah_xl_pedo_steps_period_get(stmdev_ctx_t *ctx,
+                                          uint8_t *buff);
 int32_t lsm303ah_xl_motion_data_ready_flag_get(stmdev_ctx_t *ctx,
                                                uint8_t *val);
 
 int32_t lsm303ah_xl_motion_sens_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm303ah_xl_motion_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm303ah_xl_motion_threshold_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm303ah_xl_motion_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303ah_xl_motion_threshold_set(stmdev_ctx_t *ctx,
+                                         uint8_t val);
+int32_t lsm303ah_xl_motion_threshold_get(stmdev_ctx_t *ctx,
+                                         uint8_t *val);
 
 int32_t lsm303ah_xl_tilt_data_ready_flag_get(stmdev_ctx_t *ctx,
                                              uint8_t *val);
