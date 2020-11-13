@@ -77,13 +77,13 @@
 #include "usart.h"
 #endif
 
-typedef union{
+typedef union {
   int16_t i16bit[3];
   uint8_t u8bit[6];
 } axis3bit16_t;
 
 typedef struct {
-  void*   hbus;
+  void   *hbus;
   uint8_t i2c_address;
   uint8_t cs_port;
   uint8_t cs_pin;
@@ -120,20 +120,24 @@ static const float max_st_gy_limit[] = {800000.0f, 800000.0f, 800000.0f};
 static sensbus_t imu_bus = {&SENSOR_BUS,
                             0,
                             CS_DEV_GPIO_Port,
-                            CS_DEV_Pin};
+                            CS_DEV_Pin
+                           };
 static sensbus_t mag_bus = {&SENSOR_BUS,
                             0,
                             CS_RF_GPIO_Port,
-                            CS_RF_Pin};
+                            CS_RF_Pin
+                           };
 #elif defined(NUCLEO_F411RE)
 static sensbus_t mag_bus = {&SENSOR_BUS,
                             LSM9DS1_MAG_I2C_ADD_H,
                             0,
-                            0};
+                            0
+                           };
 static sensbus_t imu_bus = {&SENSOR_BUS,
                             LSM9DS1_IMU_I2C_ADD_H,
                             0,
-                            0};
+                            0
+                           };
 #endif
 /* Extern variables ----------------------------------------------------------*/
 
@@ -145,13 +149,17 @@ static sensbus_t imu_bus = {&SENSOR_BUS,
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write_imu(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write_imu(void *handle, uint8_t reg,
+                                  uint8_t *bufp,
                                   uint16_t len);
-static int32_t platform_read_imu(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_read_imu(void *handle, uint8_t reg,
+                                 uint8_t *bufp,
                                  uint16_t len);
-static int32_t platform_write_mag(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write_mag(void *handle, uint8_t reg,
+                                  uint8_t *bufp,
                                   uint16_t len);
-static int32_t platform_read_mag(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_read_mag(void *handle, uint8_t reg,
+                                 uint8_t *bufp,
                                  uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
@@ -173,121 +181,121 @@ void lis9ds1_self_test(void)
   uint8_t rst;
   uint8_t i;
   uint8_t j;
-
-
   /* Initialize inertial sensors (IMU) driver interface */
   dev_ctx_imu.write_reg = platform_write_imu;
   dev_ctx_imu.read_reg = platform_read_imu;
-  dev_ctx_imu.handle = (void*)&imu_bus;
-
+  dev_ctx_imu.handle = (void *)&imu_bus;
   /* Initialize magnetic sensors driver interface */
   dev_ctx_mag.write_reg = platform_write_mag;
   dev_ctx_mag.read_reg = platform_read_mag;
-  dev_ctx_mag.handle = (void*)&mag_bus;
-
+  dev_ctx_mag.handle = (void *)&mag_bus;
   /* Init test platform */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lsm9ds1_dev_id_get(&dev_ctx_mag, &dev_ctx_imu, &whoamI);
-  if (whoamI.imu != LSM9DS1_IMU_ID || whoamI.mag != LSM9DS1_MAG_ID){
-    while(1){
+
+  if (whoamI.imu != LSM9DS1_IMU_ID || whoamI.mag != LSM9DS1_MAG_ID) {
+    while (1) {
       /* manage here device not found */
     }
   }
 
   /* Restore default configuration */
   lsm9ds1_dev_reset_set(&dev_ctx_mag, &dev_ctx_imu, PROPERTY_ENABLE);
+
   do {
     lsm9ds1_dev_reset_get(&dev_ctx_mag, &dev_ctx_imu, &rst);
   } while (rst);
 
   /* Enable Block Data Update */
-  lsm9ds1_block_data_update_set(&dev_ctx_mag, &dev_ctx_imu, PROPERTY_ENABLE);
-
+  lsm9ds1_block_data_update_set(&dev_ctx_mag, &dev_ctx_imu,
+                                PROPERTY_ENABLE);
   /* Initialize test variable */
   st_result = ST_PASS;
-
   /*
    * START MAGNETOMETER SELF TEST PROCEDURE
    */
-
   /* Set Full Scale */
   lsm9ds1_mag_full_scale_set(&dev_ctx_mag, LSM9DS1_12Ga);
   /* Set Output Data Rate */
   lsm9ds1_mag_data_rate_set(&dev_ctx_mag, LSM9DS1_MAG_LP_80Hz);
-
   /* Wait stable output */
   platform_delay(WAIT_TIME_MAG);
 
   /* Check if new value available */
   do {
     lsm9ds1_dev_status_get(&dev_ctx_mag, &dev_ctx_imu, &reg);
-  } while(!reg.status_mag.zyxda);
+  } while (!reg.status_mag.zyxda);
+
   /* Read dummy data and discard it */
   lsm9ds1_magnetic_raw_get(&dev_ctx_mag, data_raw.u8bit);
-
   /* Read samples and get the average vale for each axis */
-  memset(val_st_off, 0x00, 3*sizeof(float));
-  for (i = 0; i < SAMPLES; i++){
+  memset(val_st_off, 0x00, 3 * sizeof(float));
+
+  for (i = 0; i < SAMPLES; i++) {
     /* Check if new value available */
     do {
       lsm9ds1_dev_status_get(&dev_ctx_mag, &dev_ctx_imu, &reg);
-    } while(!reg.status_mag.zyxda);
+    } while (!reg.status_mag.zyxda);
+
     /* Read data and accumulate */
     lsm9ds1_magnetic_raw_get(&dev_ctx_mag, data_raw.u8bit);
-    for (j = 0; j < 3; j++){
+
+    for (j = 0; j < 3; j++) {
       val_st_off[j] += lsm9ds1_from_fs12gauss_to_mG(data_raw.i16bit[j]);
     }
   }
+
   /* Calculate the average values */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     val_st_off[i] /= SAMPLES;
   }
 
   /* Enable Self Test */
   lsm9ds1_mag_self_test_set(&dev_ctx_mag, PROPERTY_ENABLE);
-
   /* Wait stable output */
   platform_delay(WAIT_TIME_MAG);
 
   /* Check if new value available */
   do {
     lsm9ds1_dev_status_get(&dev_ctx_mag, &dev_ctx_imu, &reg);
-  } while(!reg.status_mag.zyxda);
+  } while (!reg.status_mag.zyxda);
+
   /* Read dummy data and discard it */
   lsm9ds1_magnetic_raw_get(&dev_ctx_mag, data_raw.u8bit);
-
   /* Read samples and get the average vale for each axis */
-  memset(val_st_on, 0x00, 3*sizeof(float));
-  for (i = 0; i < SAMPLES; i++){
+  memset(val_st_on, 0x00, 3 * sizeof(float));
+
+  for (i = 0; i < SAMPLES; i++) {
     /* Check if new value available */
     do {
       lsm9ds1_dev_status_get(&dev_ctx_mag, &dev_ctx_imu, &reg);
-    } while(!reg.status_mag.zyxda);
+    } while (!reg.status_mag.zyxda);
+
     /* Read data and accumulate */
     lsm9ds1_magnetic_raw_get(&dev_ctx_mag, data_raw.u8bit);
-    for (j = 0; j < 3; j++){
+
+    for (j = 0; j < 3; j++) {
       val_st_on[j] += lsm9ds1_from_fs12gauss_to_mG(data_raw.i16bit[j]);
     }
   }
 
   /* Calculate the average values */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     val_st_on[i] /= SAMPLES;
   }
 
   /* Calculate the values for self test */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
   }
+
   /* Check self test limit */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     if (( min_st_mag_limit[i] > test_val[i] ) ||
-        ( test_val[i] > max_st_mag_limit[i])){
+        ( test_val[i] > max_st_mag_limit[i])) {
       st_result = ST_FAIL;
     }
   }
@@ -296,88 +304,91 @@ void lis9ds1_self_test(void)
   lsm9ds1_mag_self_test_set(&dev_ctx_mag, PROPERTY_DISABLE);
   /* Disable sensor. */
   lsm9ds1_mag_data_rate_set(&dev_ctx_mag, LSM9DS1_MAG_POWER_DOWN);
-
   /*
    * END MAGNETOMETER SELF TEST PROCEDURE
    */
-
   /*
    * START ACCELEROMETER SELF TEST PROCEDURE
    */
-
   /* Set Full Scale */
   lsm9ds1_xl_full_scale_set(&dev_ctx_imu, LSM9DS1_2g);
   /* Set Output Data Rate */
   lsm9ds1_imu_data_rate_set(&dev_ctx_imu, LSM9DS1_GY_OFF_XL_50Hz);
-
   /* Wait stable output */
   platform_delay(WAIT_TIME_XL);
 
   /* Check if new value available */
   do {
     lsm9ds1_dev_status_get(&dev_ctx_imu, &dev_ctx_imu, &reg);
-  } while(!reg.status_imu.xlda);
+  } while (!reg.status_imu.xlda);
+
   /* Read dummy data and discard it */
   lsm9ds1_acceleration_raw_get(&dev_ctx_imu, data_raw.u8bit);
-
   /* Read samples and get the average vale for each axis */
-  memset(val_st_off, 0x00, 3*sizeof(float));
-  for (i = 0; i < SAMPLES; i++){
+  memset(val_st_off, 0x00, 3 * sizeof(float));
+
+  for (i = 0; i < SAMPLES; i++) {
     /* Check if new value available */
     do {
       lsm9ds1_dev_status_get(&dev_ctx_imu, &dev_ctx_imu, &reg);
-    } while(!reg.status_imu.xlda);
+    } while (!reg.status_imu.xlda);
+
     /* Read data and accumulate */
     lsm9ds1_acceleration_raw_get(&dev_ctx_imu, data_raw.u8bit);
-    for (j = 0; j < 3; j++){
+
+    for (j = 0; j < 3; j++) {
       val_st_off[j] += lsm9ds1_from_fs2g_to_mg(data_raw.i16bit[j]);
     }
   }
+
   /* Calculate the average values */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     val_st_off[i] /= SAMPLES;
   }
 
   /* Enable Self Test */
   lsm9ds1_xl_self_test_set(&dev_ctx_imu, PROPERTY_ENABLE);
-
   /* Wait stable output */
   platform_delay(WAIT_TIME_XL);
 
   /* Check if new value available */
   do {
     lsm9ds1_dev_status_get(&dev_ctx_imu, &dev_ctx_imu, &reg);
-  } while(!reg.status_imu.xlda);
+  } while (!reg.status_imu.xlda);
+
   /* Read dummy data and discard it */
   lsm9ds1_acceleration_raw_get(&dev_ctx_imu, data_raw.u8bit);
-
   /* Read samples and get the average vale for each axis */
-  memset(val_st_on, 0x00, 3*sizeof(float));
-  for (i = 0; i < SAMPLES; i++){
+  memset(val_st_on, 0x00, 3 * sizeof(float));
+
+  for (i = 0; i < SAMPLES; i++) {
     /* Check if new value available */
     do {
       lsm9ds1_dev_status_get(&dev_ctx_imu, &dev_ctx_imu, &reg);
-    } while(!reg.status_imu.xlda);
+    } while (!reg.status_imu.xlda);
+
     /* Read data and accumulate */
     lsm9ds1_acceleration_raw_get(&dev_ctx_imu, data_raw.u8bit);
-    for (j = 0; j < 3; j++){
+
+    for (j = 0; j < 3; j++) {
       val_st_on[j] += lsm9ds1_from_fs2g_to_mg(data_raw.i16bit[j]);
     }
   }
 
   /* Calculate the average values */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     val_st_on[i] /= SAMPLES;
   }
 
   /* Calculate the values for self test */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
   }
+
   /* Check self test limit */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     if (( min_st_xl_limit[i] > test_val[i] ) ||
-        ( test_val[i] > max_st_xl_limit[i])){
+        ( test_val[i] > max_st_xl_limit[i])) {
       st_result = ST_FAIL;
     }
   }
@@ -386,88 +397,91 @@ void lis9ds1_self_test(void)
   lsm9ds1_xl_self_test_set(&dev_ctx_imu, PROPERTY_DISABLE);
   /* Disable sensor. */
   lsm9ds1_imu_data_rate_set(&dev_ctx_imu, LSM9DS1_IMU_OFF);
-
   /*
    * END ACCELEROMETER SELF TEST PROCEDURE
    */
-
   /*
    * START GYROSCOPE SELF TEST PROCEDURE
    */
-
   /* Set Full Scale */
   lsm9ds1_gy_full_scale_set(&dev_ctx_imu, LSM9DS1_2000dps);
   /* Set Output Data Rate */
   lsm9ds1_imu_data_rate_set(&dev_ctx_imu, LSM9DS1_XL_OFF_GY_238Hz);
-
   /* Wait stable output */
   platform_delay(WAIT_TIME_GY);
 
   /* Check if new value available */
   do {
     lsm9ds1_dev_status_get(&dev_ctx_imu, &dev_ctx_imu, &reg);
-  } while(!reg.status_imu.gda);
+  } while (!reg.status_imu.gda);
+
   /* Read dummy data and discard it */
   lsm9ds1_angular_rate_raw_get(&dev_ctx_imu, data_raw.u8bit);
-
   /* Read samples and get the average vale for each axis */
-  memset(val_st_off, 0x00, 3*sizeof(float));
-  for (i = 0; i < SAMPLES; i++){
+  memset(val_st_off, 0x00, 3 * sizeof(float));
+
+  for (i = 0; i < SAMPLES; i++) {
     /* Check if new value available */
     do {
       lsm9ds1_dev_status_get(&dev_ctx_imu, &dev_ctx_imu, &reg);
-    } while(!reg.status_imu.gda);
+    } while (!reg.status_imu.gda);
+
     /* Read data and accumulate */
     lsm9ds1_angular_rate_raw_get(&dev_ctx_imu, data_raw.u8bit);
-    for (j = 0; j < 3; j++){
+
+    for (j = 0; j < 3; j++) {
       val_st_off[j] += lsm9ds1_from_fs2000dps_to_mdps(data_raw.i16bit[j]);
     }
   }
+
   /* Calculate the average values */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     val_st_off[i] /= SAMPLES;
   }
 
   /* Enable Self Test */
   lsm9ds1_gy_self_test_set(&dev_ctx_imu, PROPERTY_ENABLE);
-
   /* Wait stable output */
   platform_delay(WAIT_TIME_GY);
 
   /* Check if new value available */
   do {
     lsm9ds1_dev_status_get(&dev_ctx_imu, &dev_ctx_imu, &reg);
-  } while(!reg.status_imu.gda);
+  } while (!reg.status_imu.gda);
+
   /* Read dummy data and discard it */
   lsm9ds1_angular_rate_raw_get(&dev_ctx_imu, data_raw.u8bit);
-
   /* Read samples and get the average vale for each axis */
-  memset(val_st_on, 0x00, 3*sizeof(float));
-  for (i = 0; i < SAMPLES; i++){
+  memset(val_st_on, 0x00, 3 * sizeof(float));
+
+  for (i = 0; i < SAMPLES; i++) {
     /* Check if new value available */
     do {
       lsm9ds1_dev_status_get(&dev_ctx_imu, &dev_ctx_imu, &reg);
-    } while(!reg.status_imu.gda);
+    } while (!reg.status_imu.gda);
+
     /* Read data and accumulate */
     lsm9ds1_angular_rate_raw_get(&dev_ctx_imu, data_raw.u8bit);
-    for (j = 0; j < 3; j++){
+
+    for (j = 0; j < 3; j++) {
       val_st_on[j] += lsm9ds1_from_fs2000dps_to_mdps(data_raw.i16bit[j]);
     }
   }
 
   /* Calculate the average values */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     val_st_on[i] /= SAMPLES;
   }
 
   /* Calculate the values for self test */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
   }
+
   /* Check self test limit */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     if (( min_st_gy_limit[i] > test_val[i] ) ||
-        ( test_val[i] > max_st_gy_limit[i])){
+        ( test_val[i] > max_st_gy_limit[i])) {
       st_result = ST_FAIL;
     }
   }
@@ -482,12 +496,14 @@ void lis9ds1_self_test(void)
    */
 
   if (st_result == ST_PASS) {
-    sprintf((char*)tx_buffer, "Self Test - PASS\r\n" );
+    sprintf((char *)tx_buffer, "Self Test - PASS\r\n" );
   }
+
   else {
-    sprintf((char*)tx_buffer, "Self Test - FAIL\r\n" );
+    sprintf((char *)tx_buffer, "Self Test - FAIL\r\n" );
   }
-  tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+  tx_com(tx_buffer, strlen((char const *)tx_buffer));
 }
 
 /*
@@ -500,11 +516,11 @@ void lis9ds1_self_test(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write_imu(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write_imu(void *handle, uint8_t reg,
+                                  uint8_t *bufp,
                                   uint16_t len)
 {
-  sensbus_t *sensbus = (sensbus_t*)handle;
-
+  sensbus_t *sensbus = (sensbus_t *)handle;
 #if defined(NUCLEO_F411RE)
   HAL_I2C_Mem_Write(sensbus->hbus, sensbus->i2c_address, reg,
                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
@@ -527,11 +543,11 @@ static int32_t platform_write_imu(void *handle, uint8_t reg, uint8_t *bufp,
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write_mag(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write_mag(void *handle, uint8_t reg,
+                                  uint8_t *bufp,
                                   uint16_t len)
 {
-  sensbus_t *sensbus = (sensbus_t*)handle;
-
+  sensbus_t *sensbus = (sensbus_t *)handle;
 #if defined(NUCLEO_F411RE)
   /* Write multiple command */
   reg |= 0x80;
@@ -558,11 +574,11 @@ static int32_t platform_write_mag(void *handle, uint8_t reg, uint8_t *bufp,
  * @param  len       number of consecutive register to read
  *
  */
-static int32_t platform_read_imu(void *handle, uint8_t reg, uint8_t *bufp,
-                             uint16_t len)
+static int32_t platform_read_imu(void *handle, uint8_t reg,
+                                 uint8_t *bufp,
+                                 uint16_t len)
 {
-  sensbus_t *sensbus = (sensbus_t*)handle;
-
+  sensbus_t *sensbus = (sensbus_t *)handle;
 #if defined(NUCLEO_F411RE)
   HAL_I2C_Mem_Read(sensbus->hbus, sensbus->i2c_address, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
@@ -587,11 +603,11 @@ static int32_t platform_read_imu(void *handle, uint8_t reg, uint8_t *bufp,
  * @param  len       number of consecutive register to read
  *
  */
-static int32_t platform_read_mag(void *handle, uint8_t reg, uint8_t *bufp,
-                             uint16_t len)
+static int32_t platform_read_mag(void *handle, uint8_t reg,
+                                 uint8_t *bufp,
+                                 uint16_t len)
 {
-  sensbus_t *sensbus = (sensbus_t*)handle;
-
+  sensbus_t *sensbus = (sensbus_t *)handle;
 #if defined(NUCLEO_F411RE)
   /* Read multiple command */
   reg |= 0x80;
@@ -611,18 +627,18 @@ static int32_t platform_read_mag(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE
+#ifdef NUCLEO_F411RE
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
-  #ifdef STEVAL_MKI109V3
+#endif
+#ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#endif
 }
 
 /*
