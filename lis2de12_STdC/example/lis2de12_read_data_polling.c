@@ -118,7 +118,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -131,50 +132,40 @@ void lis2de12_read_data_polling(void)
 {
   /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lis2de12_device_id_get(&dev_ctx, &whoamI);
-  if (whoamI != LIS2DE12_ID)
-  {
-    while(1)
-    {
+
+  if (whoamI != LIS2DE12_ID) {
+    while (1) {
       /* manage here device not found */
     }
   }
 
   /* Enable Block Data Update */
   lis2de12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set Output Data Rate to 1Hz */
   lis2de12_data_rate_set(&dev_ctx, LIS2DE12_ODR_1Hz);
-
   /* Set full scale to 2g */
   lis2de12_full_scale_set(&dev_ctx, LIS2DE12_2g);
-
-  /* Enable temperature sensor */ 
+  /* Enable temperature sensor */
   lis2de12_temperature_meas_set(&dev_ctx, LIS2DE12_TEMP_ENABLE);
 
   /* Read samples in polling mode (no int) */
-  while(1)
-  {
+  while (1) {
     lis2de12_reg_t reg;
-
     /* Read output only if new value available */
     lis2de12_xl_data_ready_get(&dev_ctx, &reg.byte);
-    if (reg.byte)
-    {
+
+    if (reg.byte) {
       /* Read accelerometer data */
-      memset(data_raw_acceleration, 0x00, 3*sizeof(int16_t));
+      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
       lis2de12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
       acceleration_mg[0] =
         lis2de12_from_fs2_to_mg(data_raw_acceleration[0]);
@@ -182,25 +173,24 @@ void lis2de12_read_data_polling(void)
         lis2de12_from_fs2_to_mg(data_raw_acceleration[1]);
       acceleration_mg[2] =
         lis2de12_from_fs2_to_mg(data_raw_acceleration[2]);
-    
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+      sprintf((char *)tx_buffer,
+              "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
-  
-    lis2de12_temp_data_ready_get(&dev_ctx, &reg.byte);    
-    if (reg.byte)    
-    {
+
+    lis2de12_temp_data_ready_get(&dev_ctx, &reg.byte);
+
+    if (reg.byte) {
       /* Read temperature data */
       memset(&data_raw_temperature, 0x00, sizeof(int16_t));
       lis2de12_temperature_raw_get(&dev_ctx, &data_raw_temperature);
       temperature_degC =
         lis2de12_from_lsb_to_celsius(data_raw_temperature);
-     
-      sprintf((char*)tx_buffer,
+      sprintf((char *)tx_buffer,
               "Temperature [degC]:%6.2f\r\n",
               temperature_degC);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -215,7 +205,8 @@ void lis2de12_read_data_polling(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
