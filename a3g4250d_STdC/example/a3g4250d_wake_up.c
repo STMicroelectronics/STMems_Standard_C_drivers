@@ -17,7 +17,7 @@
  *
  ******************************************************************************
  */
- 
+
 /*
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
@@ -114,7 +114,8 @@ static uint8_t whoamI;
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -128,22 +129,19 @@ void a3g4250d_wake_up(void)
   a3g4250d_int1_route_t int1_reg;
   a3g4250d_int1_cfg_t int1_cfg;
   stmdev_ctx_t dev_ctx;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   a3g4250d_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != A3G4250D_ID)
-    while(1); /*manage here device not found */
+    while (1); /*manage here device not found */
 
   /* The value of 1 LSB of the threshold corresponds to ~7.5 mdps
    * Set Threshold ~100 dps on X, Y and Z axis
@@ -151,10 +149,8 @@ void a3g4250d_wake_up(void)
   a3g4250d_int_x_treshold_set(&dev_ctx, 0x3415);
   a3g4250d_int_y_treshold_set(&dev_ctx, 0x3415);
   a3g4250d_int_z_treshold_set(&dev_ctx, 0x3415);
- 
   /* Set event duration to 0 1/ODR */
   a3g4250d_int_on_threshold_dur_set(&dev_ctx, 0);
-
   /* Simple interrupt configuration for detect wake-up
    *
    * The angular rate applied along either the
@@ -170,32 +166,36 @@ void a3g4250d_wake_up(void)
   int1_cfg.yhie = PROPERTY_ENABLE;
   a3g4250d_int_on_threshold_conf_set(&dev_ctx, &int1_cfg);
   a3g4250d_int_on_threshold_mode_set(&dev_ctx, A3G4250D_INT1_ON_TH_OR);
-
   /* Configure interrupt on INT1 */
   a3g4250d_pin_int1_route_get(&dev_ctx, &int1_reg);
   int1_reg.i1_int1 = PROPERTY_ENABLE;
   a3g4250d_pin_int1_route_set(&dev_ctx, int1_reg);
-
   /* Set Output Data Rate */
   a3g4250d_data_rate_set(&dev_ctx, A3G4250D_ODR_100Hz);
 
   /* Wait Events Loop */
-  while(1) {
+  while (1) {
     a3g4250d_int1_src_t int1_src;
-
-      /* Read interrupt status */
+    /* Read interrupt status */
     a3g4250d_int_on_threshold_src_get(&dev_ctx, &int1_src);
-    if (int1_src.ia) {
-      sprintf((char*)tx_buffer, "wake-up event on ");
-      if (int1_src.zh)
-        sprintf((char*)tx_buffer, "%sz", tx_buffer);
-      if (int1_src.yh)
-        sprintf((char*)tx_buffer, "%sy", tx_buffer);
-      if (int1_src.xh)
-        sprintf((char*)tx_buffer, "%sx", tx_buffer);
 
-      sprintf((char*)tx_buffer, "%s\r\n", tx_buffer);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    if (int1_src.ia) {
+      sprintf((char *)tx_buffer, "wake-up event on ");
+
+      if (int1_src.zh) {
+        sprintf((char *)tx_buffer, "%sz", tx_buffer);
+      }
+
+      if (int1_src.yh) {
+        sprintf((char *)tx_buffer, "%sy", tx_buffer);
+      }
+
+      if (int1_src.xh) {
+        sprintf((char *)tx_buffer, "%sx", tx_buffer);
+      }
+
+      sprintf((char *)tx_buffer, "%s\r\n", tx_buffer);
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -210,17 +210,18 @@ void a3g4250d_wake_up(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-    HAL_I2C_Mem_Write(handle, A3G4250D_I2C_ADD_L, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  HAL_I2C_Mem_Write(handle, A3G4250D_I2C_ADD_L, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_write(handle,  A3G4250D_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
@@ -244,11 +245,11 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   HAL_I2C_Mem_Read(handle, A3G4250D_I2C_ADD_L, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Receive(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_read(handle, A3G4250D_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif

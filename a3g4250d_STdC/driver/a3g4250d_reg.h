@@ -23,7 +23,7 @@
 #define A3G4250D_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -71,7 +71,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
@@ -104,8 +104,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -128,7 +130,7 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-  *              You can create a sensor configuration by your own or using 
+  *              You can create a sensor configuration by your own or using
   *              Unico / Unicleo tools available on STMicroelectronics
   *              web site.
   *
@@ -436,7 +438,7 @@ typedef struct {
   *
   */
 
-typedef union{
+typedef union {
   a3g4250d_ctrl_reg1_t        ctrl_reg1;
   a3g4250d_ctrl_reg2_t        ctrl_reg2;
   a3g4250d_ctrl_reg3_t        ctrl_reg3;
@@ -464,9 +466,11 @@ typedef union{
   *
   */
 
-int32_t a3g4250d_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t a3g4250d_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
                           uint16_t len);
-int32_t a3g4250d_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t a3g4250d_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                           uint8_t *data,
                            uint16_t len);
 
 float_t a3g4250d_from_fs245dps_to_mdps(int16_t lsb);
@@ -497,9 +501,11 @@ int32_t a3g4250d_status_reg_get(stmdev_ctx_t *ctx,
 
 int32_t a3g4250d_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t a3g4250d_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t a3g4250d_temperature_raw_get(stmdev_ctx_t *ctx,
+                                     uint8_t *buff);
 
-int32_t a3g4250d_angular_rate_raw_get(stmdev_ctx_t *ctx, int16_t *val);
+int32_t a3g4250d_angular_rate_raw_get(stmdev_ctx_t *ctx,
+                                      int16_t *val);
 
 int32_t a3g4250d_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
@@ -515,8 +521,10 @@ typedef enum {
   A3G4250D_AUX_LSB_AT_LOW_ADD   = 0,
   A3G4250D_AUX_MSB_AT_LOW_ADD   = 1,
 } a3g4250d_ble_t;
-int32_t a3g4250d_data_format_set(stmdev_ctx_t *ctx, a3g4250d_ble_t val);
-int32_t a3g4250d_data_format_get(stmdev_ctx_t *ctx, a3g4250d_ble_t *val);
+int32_t a3g4250d_data_format_set(stmdev_ctx_t *ctx,
+                                 a3g4250d_ble_t val);
+int32_t a3g4250d_data_format_get(stmdev_ctx_t *ctx,
+                                 a3g4250d_ble_t *val);
 
 int32_t a3g4250d_boot_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t a3g4250d_boot_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -527,8 +535,10 @@ typedef enum {
   A3G4250D_CUT_OFF_HIGH       = 2,
   A3G4250D_CUT_OFF_VERY_HIGH  = 3,
 } a3g4250d_bw_t;
-int32_t a3g4250d_lp_bandwidth_set(stmdev_ctx_t *ctx, a3g4250d_bw_t val);
-int32_t a3g4250d_lp_bandwidth_get(stmdev_ctx_t *ctx, a3g4250d_bw_t *val);
+int32_t a3g4250d_lp_bandwidth_set(stmdev_ctx_t *ctx,
+                                  a3g4250d_bw_t val);
+int32_t a3g4250d_lp_bandwidth_get(stmdev_ctx_t *ctx,
+                                  a3g4250d_bw_t *val);
 
 typedef enum {
   A3G4250D_HP_LEVEL_0   = 0,
@@ -578,8 +588,10 @@ int32_t a3g4250d_filter_path_internal_set(stmdev_ctx_t *ctx,
 int32_t a3g4250d_filter_path_internal_get(stmdev_ctx_t *ctx,
                                           a3g4250d_int1_sel_t *val);
 
-int32_t a3g4250d_hp_reference_value_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t a3g4250d_hp_reference_value_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t a3g4250d_hp_reference_value_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t a3g4250d_hp_reference_value_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 typedef enum {
   A3G4250D_SPI_4_WIRE  = 0,
@@ -612,8 +624,10 @@ typedef enum {
   A3G4250D_PUSH_PULL   = 0,
   A3G4250D_OPEN_DRAIN  = 1,
 } a3g4250d_pp_od_t;
-int32_t a3g4250d_pin_mode_set(stmdev_ctx_t *ctx, a3g4250d_pp_od_t val);
-int32_t a3g4250d_pin_mode_get(stmdev_ctx_t *ctx, a3g4250d_pp_od_t *val);
+int32_t a3g4250d_pin_mode_set(stmdev_ctx_t *ctx,
+                              a3g4250d_pp_od_t val);
+int32_t a3g4250d_pin_mode_get(stmdev_ctx_t *ctx,
+                              a3g4250d_pp_od_t *val);
 
 typedef enum {
   A3G4250D_ACTIVE_HIGH  = 0,
@@ -659,8 +673,10 @@ int32_t a3g4250d_int_y_treshold_get(stmdev_ctx_t *ctx, uint16_t *val);
 int32_t a3g4250d_int_z_treshold_set(stmdev_ctx_t *ctx, uint16_t val);
 int32_t a3g4250d_int_z_treshold_get(stmdev_ctx_t *ctx, uint16_t *val);
 
-int32_t a3g4250d_int_on_threshold_dur_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t a3g4250d_int_on_threshold_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t a3g4250d_int_on_threshold_dur_set(stmdev_ctx_t *ctx,
+                                          uint8_t val);
+int32_t a3g4250d_int_on_threshold_dur_get(stmdev_ctx_t *ctx,
+                                          uint8_t *val);
 
 int32_t a3g4250d_fifo_enable_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t a3g4250d_fifo_enable_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -673,8 +689,10 @@ typedef enum {
   A3G4250D_FIFO_MODE            = 0x01,
   A3G4250D_FIFO_STREAM_MODE     = 0x02,
 } a3g4250d_fifo_mode_t;
-int32_t a3g4250d_fifo_mode_set(stmdev_ctx_t *ctx, a3g4250d_fifo_mode_t val);
-int32_t a3g4250d_fifo_mode_get(stmdev_ctx_t *ctx, a3g4250d_fifo_mode_t *val);
+int32_t a3g4250d_fifo_mode_set(stmdev_ctx_t *ctx,
+                               a3g4250d_fifo_mode_t val);
+int32_t a3g4250d_fifo_mode_get(stmdev_ctx_t *ctx,
+                               a3g4250d_fifo_mode_t *val);
 
 int32_t a3g4250d_fifo_data_level_get(stmdev_ctx_t *ctx, uint8_t *val);
 
