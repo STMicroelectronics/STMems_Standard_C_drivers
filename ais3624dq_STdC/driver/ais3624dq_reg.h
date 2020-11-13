@@ -23,7 +23,7 @@
 #define AIS3624DQ_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -74,7 +74,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
@@ -107,8 +107,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -131,7 +133,7 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-  *              You can create a sensor configuration by your own or using 
+  *              You can create a sensor configuration by your own or using
   *              Unico / Unicleo tools available on STMicroelectronics
   *              web site.
   *
@@ -437,7 +439,7 @@ typedef struct {
   * @{
   *
   */
-typedef union{
+typedef union {
   ais3624dq_ctrl_reg1_t                     ctrl_reg1;
   ais3624dq_ctrl_reg2_t                     ctrl_reg2;
   ais3624dq_ctrl_reg3_t                     ctrl_reg3;
@@ -461,9 +463,11 @@ typedef union{
   *
   */
 
-int32_t ais3624dq_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t ais3624dq_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                           uint8_t *data,
                            uint16_t len);
-int32_t ais3624dq_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t ais3624dq_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                            uint8_t *data,
                             uint16_t len);
 
 float_t ais3624dq_from_fs6_to_mg(int16_t lsb);
@@ -491,8 +495,10 @@ typedef enum {
   AIS3624DQ_ODR_400Hz = 0x21,
   AIS3624DQ_ODR_1kHz  = 0x31,
 } ais3624dq_dr_t;
-int32_t ais3624dq_data_rate_set(stmdev_ctx_t *ctx, ais3624dq_dr_t val);
-int32_t ais3624dq_data_rate_get(stmdev_ctx_t *ctx, ais3624dq_dr_t *val);
+int32_t ais3624dq_data_rate_set(stmdev_ctx_t *ctx,
+                                ais3624dq_dr_t val);
+int32_t ais3624dq_data_rate_get(stmdev_ctx_t *ctx,
+                                ais3624dq_dr_t *val);
 
 typedef enum {
   AIS3624DQ_NORMAL_MODE      = 0,
@@ -508,11 +514,15 @@ typedef enum {
   AIS3624DQ_12g  = 1,
   AIS3624DQ_24g  = 3,
 } ais3624dq_fs_t;
-int32_t ais3624dq_full_scale_set(stmdev_ctx_t *ctx, ais3624dq_fs_t val);
-int32_t ais3624dq_full_scale_get(stmdev_ctx_t *ctx, ais3624dq_fs_t *val);
+int32_t ais3624dq_full_scale_set(stmdev_ctx_t *ctx,
+                                 ais3624dq_fs_t val);
+int32_t ais3624dq_full_scale_get(stmdev_ctx_t *ctx,
+                                 ais3624dq_fs_t *val);
 
-int32_t ais3624dq_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ais3624dq_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ais3624dq_block_data_update_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t ais3624dq_block_data_update_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 int32_t ais3624dq_status_reg_get(stmdev_ctx_t *ctx,
                                  ais3624dq_status_reg_t *val);
@@ -520,7 +530,8 @@ int32_t ais3624dq_status_reg_get(stmdev_ctx_t *ctx,
 int32_t ais3624dq_flag_data_ready_get(stmdev_ctx_t *ctx,
                                       uint8_t *val);
 
-int32_t ais3624dq_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val);
+int32_t ais3624dq_acceleration_raw_get(stmdev_ctx_t *ctx,
+                                       int16_t *val);
 
 int32_t ais3624dq_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
@@ -532,15 +543,19 @@ typedef enum {
   AIS3624DQ_ST_POSITIVE  = 1,
   AIS3624DQ_ST_NEGATIVE  = 5,
 } ais3624dq_st_t;
-int32_t ais3624dq_self_test_set(stmdev_ctx_t *ctx, ais3624dq_st_t val);
-int32_t ais3624dq_self_test_get(stmdev_ctx_t *ctx, ais3624dq_st_t *val);
+int32_t ais3624dq_self_test_set(stmdev_ctx_t *ctx,
+                                ais3624dq_st_t val);
+int32_t ais3624dq_self_test_get(stmdev_ctx_t *ctx,
+                                ais3624dq_st_t *val);
 
 typedef enum {
   AIS3624DQ_LSB_AT_LOW_ADD  = 0,
   AIS3624DQ_MSB_AT_LOW_ADD  = 1,
 } ais3624dq_ble_t;
-int32_t ais3624dq_data_format_set(stmdev_ctx_t *ctx, ais3624dq_ble_t val);
-int32_t ais3624dq_data_format_get(stmdev_ctx_t *ctx, ais3624dq_ble_t *val);
+int32_t ais3624dq_data_format_set(stmdev_ctx_t *ctx,
+                                  ais3624dq_ble_t val);
+int32_t ais3624dq_data_format_get(stmdev_ctx_t *ctx,
+                                  ais3624dq_ble_t *val);
 
 typedef enum {
   AIS3624DQ_CUT_OFF_8Hz   = 0,
@@ -563,20 +578,26 @@ typedef enum {
   AIS3624DQ_HP_ON_INT2_OUT        = 6,
   AIS3624DQ_HP_ON_INT1_OUT        = 5,
 } ais3624dq_hpen_t;
-int32_t ais3624dq_hp_path_set(stmdev_ctx_t *ctx, ais3624dq_hpen_t val);
-int32_t ais3624dq_hp_path_get(stmdev_ctx_t *ctx, ais3624dq_hpen_t *val);
+int32_t ais3624dq_hp_path_set(stmdev_ctx_t *ctx,
+                              ais3624dq_hpen_t val);
+int32_t ais3624dq_hp_path_get(stmdev_ctx_t *ctx,
+                              ais3624dq_hpen_t *val);
 
 int32_t ais3624dq_hp_reset_get(stmdev_ctx_t *ctx);
 
-int32_t ais3624dq_hp_reference_value_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ais3624dq_hp_reference_value_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ais3624dq_hp_reference_value_set(stmdev_ctx_t *ctx,
+                                         uint8_t val);
+int32_t ais3624dq_hp_reference_value_get(stmdev_ctx_t *ctx,
+                                         uint8_t *val);
 
 typedef enum {
   AIS3624DQ_SPI_4_WIRE  = 0,
   AIS3624DQ_SPI_3_WIRE  = 1,
 } ais3624dq_sim_t;
-int32_t ais3624dq_spi_mode_set(stmdev_ctx_t *ctx, ais3624dq_sim_t val);
-int32_t ais3624dq_spi_mode_get(stmdev_ctx_t *ctx, ais3624dq_sim_t *val);
+int32_t ais3624dq_spi_mode_set(stmdev_ctx_t *ctx,
+                               ais3624dq_sim_t val);
+int32_t ais3624dq_spi_mode_get(stmdev_ctx_t *ctx,
+                               ais3624dq_sim_t *val);
 
 typedef enum {
   AIS3624DQ_PAD1_INT1_SRC           = 0,
@@ -622,8 +643,10 @@ typedef enum {
   AIS3624DQ_PUSH_PULL   = 0,
   AIS3624DQ_OPEN_DRAIN  = 1,
 } ais3624dq_pp_od_t;
-int32_t ais3624dq_pin_mode_set(stmdev_ctx_t *ctx, ais3624dq_pp_od_t val);
-int32_t ais3624dq_pin_mode_get(stmdev_ctx_t *ctx, ais3624dq_pp_od_t *val);
+int32_t ais3624dq_pin_mode_set(stmdev_ctx_t *ctx,
+                               ais3624dq_pp_od_t val);
+int32_t ais3624dq_pin_mode_get(stmdev_ctx_t *ctx,
+                               ais3624dq_pp_od_t *val);
 
 typedef enum {
   AIS3624DQ_ACTIVE_HIGH  = 0,
@@ -712,8 +735,10 @@ int32_t ais3624dq_int1_6d_mode_get(stmdev_ctx_t *ctx,
 int32_t ais3624dq_int1_6d_src_get(stmdev_ctx_t *ctx,
                                   ais3624dq_int1_src_t *val);
 
-int32_t ais3624dq_int1_6d_treshold_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ais3624dq_int1_6d_treshold_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ais3624dq_int1_6d_treshold_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t ais3624dq_int1_6d_treshold_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 typedef enum {
   AIS3624DQ_6D_INT2_DISABLE   = 0,
@@ -728,8 +753,10 @@ int32_t ais3624dq_int2_6d_mode_get(stmdev_ctx_t *ctx,
 int32_t ais3624dq_int2_6d_src_get(stmdev_ctx_t *ctx,
                                   ais3624dq_int2_src_t *val);
 
-int32_t ais3624dq_int2_6d_treshold_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ais3624dq_int2_6d_treshold_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ais3624dq_int2_6d_treshold_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t ais3624dq_int2_6d_treshold_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 /**
   *@}

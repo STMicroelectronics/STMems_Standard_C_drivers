@@ -123,7 +123,8 @@ static const float max_st_limit[] = {1450.0f, 1450.0f, 2610.0f};
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -143,126 +144,126 @@ void ais3624dq_self_test(void)
   float test_val[3];
   uint8_t st_result;
   uint8_t i, j;
-
   /* Initialize mems driver interface */
   dev_ctx_xl.write_reg = platform_write;
   dev_ctx_xl.read_reg = platform_read;
   dev_ctx_xl.handle = &SENSOR_BUS;
-
   /* Initialize self test results */
   st_result = ST_PASS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   ais3624dq_device_id_get(&dev_ctx_xl, &reg.byte);
-  if (reg.byte != AIS3624DQ_ID){
-    while(1) {
+
+  if (reg.byte != AIS3624DQ_ID) {
+    while (1) {
       /* manage here device not found */
     }
   }
 
   /* Enable Block Data Update. */
   ais3624dq_block_data_update_set(&dev_ctx_xl, PROPERTY_ENABLE);
-
   /* Set full scale to 2g. */
   ais3624dq_full_scale_set(&dev_ctx_xl, AIS3624DQ_6g);
-
   /* Set Output Data Rate. */
   ais3624dq_data_rate_set(&dev_ctx_xl, AIS3624DQ_ODR_50Hz);
-
   /* Wait stable output */
   platform_delay(WAIT_TIME);
 
   /* Check if new value available */
   do {
     ais3624dq_status_reg_get(&dev_ctx_xl, &reg.status_reg);
-  } while(!reg.status_reg.zyxda);
+  } while (!reg.status_reg.zyxda);
+
   /* Read dummy data and discard it */
   ais3624dq_acceleration_raw_get(&dev_ctx_xl, data_raw);
 
   /* Read samples and get the average vale for each axis */
-  for (i = 0; i < SAMPLES; i++){
+  for (i = 0; i < SAMPLES; i++) {
     /* Check if new value available */
-      do {
-        ais3624dq_status_reg_get(&dev_ctx_xl, &reg.status_reg);
-      } while(!reg.status_reg.zyxda);
+    do {
+      ais3624dq_status_reg_get(&dev_ctx_xl, &reg.status_reg);
+    } while (!reg.status_reg.zyxda);
+
     /* Read data and accumulate the mg value */
     ais3624dq_acceleration_raw_get(&dev_ctx_xl, data_raw);
-    for (j=0; j<3; j++){
+
+    for (j = 0; j < 3; j++) {
       maes_st_off[j] += ais3624dq_from_fs6_to_mg(data_raw[j]);
     }
   }
+
   /* Calculate the mg average values */
-  for (i=0; i<3; i++){
+  for (i = 0; i < 3; i++) {
     maes_st_off[i] /= SAMPLES;
   }
 
   /* Enable Self Test positive (or negative) */
   ais3624dq_self_test_set(&dev_ctx_xl, AIS3624DQ_ST_POSITIVE);
   //ais3624dq_self_test_set(&dev_ctx_xl, AIS3624DQ_ST_NEGATIVE);
-
   /* Wait stable output */
   platform_delay(WAIT_TIME);
 
   /* Check if new value available */
   do {
     ais3624dq_status_reg_get(&dev_ctx_xl, &reg.status_reg);
-  } while(!reg.status_reg.zyxda);
+  } while (!reg.status_reg.zyxda);
+
   /* Read dummy data and discard it */
   ais3624dq_acceleration_raw_get(&dev_ctx_xl, data_raw);
 
   /* Read samples and get the average vale for each axis */
-  for (i = 0; i < SAMPLES; i++){
+  for (i = 0; i < SAMPLES; i++) {
     /* Check if new value available */
-      do {
-        ais3624dq_status_reg_get(&dev_ctx_xl, &reg.status_reg);
-      } while(!reg.status_reg.zyxda);
+    do {
+      ais3624dq_status_reg_get(&dev_ctx_xl, &reg.status_reg);
+    } while (!reg.status_reg.zyxda);
+
     /* Read data and accumulate the mg value */
     ais3624dq_acceleration_raw_get(&dev_ctx_xl, data_raw);
-    for (j=0; j<3; j++){
+
+    for (j = 0; j < 3; j++) {
       maes_st_on[j] += ais3624dq_from_fs6_to_mg(data_raw[j]);
     }
   }
+
   /* Calculate the mg average values */
-  for (i=0; i<3; i++){
+  for (i = 0; i < 3; i++) {
     maes_st_on[i] /= SAMPLES;
   }
 
   /* Calculate the mg values for self test */
-  for (i=0; i<3; i++){
+  for (i = 0; i < 3; i++) {
     test_val[i] = fabs((maes_st_on[i] - maes_st_off[i]));
   }
 
-
   /* Check self test limit */
-  for (i=0; i<3; i++){
+  for (i = 0; i < 3; i++) {
     if (( min_st_limit[i] > test_val[i] ) ||
-        ( test_val[i] > max_st_limit[i])){
-        st_result = ST_FAIL;
+        ( test_val[i] > max_st_limit[i])) {
+      st_result = ST_FAIL;
     }
-    tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+    tx_com(tx_buffer, strlen((char const *)tx_buffer));
   }
 
   /* Disable Self Test */
   ais3624dq_self_test_set(&dev_ctx_xl, AIS3624DQ_ST_DISABLE);
-
   /* Disable sensor. */
   ais3624dq_data_rate_set(&dev_ctx_xl, AIS3624DQ_ODR_OFF);
 
   /* Print self test result */
   if (st_result == ST_PASS) {
-    sprintf((char*)tx_buffer, "Self Test - PASS\r\n" );
+    sprintf((char *)tx_buffer, "Self Test - PASS\r\n" );
   }
-  else {
-    sprintf((char*)tx_buffer, "Self Test - FAIL\r\n" );
-  }
-  tx_com(tx_buffer, strlen((char const*)tx_buffer));
 
+  else {
+    sprintf((char *)tx_buffer, "Self Test - FAIL\r\n" );
+  }
+
+  tx_com(tx_buffer, strlen((char const *)tx_buffer));
 }
 
 /*
@@ -275,7 +276,8 @@ void ais3624dq_self_test(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)

@@ -114,7 +114,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -126,58 +127,54 @@ static void platform_init(void);
 void ais3624dq_read_data_polling(void)
 {
   stmdev_ctx_t dev_ctx;
-
   /* Uncomment to use interrupts on drdy */
   //a3g4250d_int2_route_t int2_reg;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   whoamI = 0;
   ais3624dq_device_id_get(&dev_ctx, &whoamI);
+
   if ( whoamI != AIS3624DQ_ID )
-    while(1); /*manage here device not found */
- 
+    while (1); /*manage here device not found */
+
   /* Enable Block Data Update */
   ais3624dq_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
- 
-  /* Set full scale */ 
+  /* Set full scale */
   ais3624dq_full_scale_set(&dev_ctx, AIS3624DQ_6g);
- 
-  /* Configure filtering chain */ 
+  /* Configure filtering chain */
   ais3624dq_hp_path_set(&dev_ctx, AIS3624DQ_HP_DISABLE);
   //ais3624dq_hp_path_set(&dev_ctx, AIS3624DQ_HP_ON_OUT);
   //ais3624dq_hp_reset_get(&dev_ctx);
-
   /* Set Output Data Rate */
   ais3624dq_data_rate_set(&dev_ctx, AIS3624DQ_ODR_5Hz);
- 
+
   /* Read samples in polling mode (no int) */
-  while(1)
-  {
+  while (1) {
     /* Read output only if new value is available */
     ais3624dq_reg_t reg;
     ais3624dq_status_reg_get(&dev_ctx, &reg.status_reg);
 
-    if (reg.status_reg.zyxda){
+    if (reg.status_reg.zyxda) {
       /* Read acceleration data */
-      memset(data_raw_acceleration, 0x00, 3*sizeof(int16_t));
+      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
       ais3624dq_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-      acceleration_mg[0] = ais3624dq_from_fs6_to_mg( data_raw_acceleration[0]);
-      acceleration_mg[1] = ais3624dq_from_fs6_to_mg( data_raw_acceleration[1]);
-      acceleration_mg[2] = ais3624dq_from_fs6_to_mg( data_raw_acceleration[2]);
-     
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+      acceleration_mg[0] = ais3624dq_from_fs6_to_mg(
+                             data_raw_acceleration[0]);
+      acceleration_mg[1] = ais3624dq_from_fs6_to_mg(
+                             data_raw_acceleration[1]);
+      acceleration_mg[2] = ais3624dq_from_fs6_to_mg(
+                             data_raw_acceleration[2]);
+      sprintf((char *)tx_buffer,
+              "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
+      tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
     }
   }
 }
@@ -192,7 +189,8 @@ void ais3624dq_read_data_polling(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
