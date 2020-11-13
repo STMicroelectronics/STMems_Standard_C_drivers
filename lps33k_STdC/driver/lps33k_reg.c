@@ -27,7 +27,7 @@
   *
   */
 
-/** 
+/**
   * @defgroup    LPS33K_Interfaces_functions
   * @brief       This section provide a set of functions used to read and
   *              write a generic register of the device.
@@ -45,8 +45,8 @@
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps33k_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
-                         uint16_t len)
+int32_t lps33k_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t *data,
+                        uint16_t len)
 {
   int32_t ret;
   ret = ctx->read_reg(ctx->handle, reg, data, len);
@@ -63,8 +63,9 @@ int32_t lps33k_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps33k_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
-                          uint16_t len)
+int32_t lps33k_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                         uint8_t *data,
+                         uint16_t len)
 {
   int32_t ret;
   ret = ctx->write_reg(ctx->handle, reg, data, len);
@@ -118,12 +119,15 @@ int32_t lps33k_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps33k_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                        1);
 
-  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg1.bdu = val;
-    ret = lps33k_write_reg(ctx, LPS33K_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+    ret = lps33k_write_reg(ctx, LPS33K_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                           1);
   }
+
   return ret;
 }
 
@@ -139,10 +143,9 @@ int32_t lps33k_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps33k_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
-
-  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                        1);
   *val = ctrl_reg1.bdu;
-
   return ret;
 }
 
@@ -155,21 +158,24 @@ int32_t lps33k_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val)
   *
   */
 int32_t lps33k_low_pass_filter_mode_set(stmdev_ctx_t *ctx,
-                                          lps33k_lpfp_t val)
+                                        lps33k_lpfp_t val)
 {
   lps33k_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                        1);
 
-  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg1.lpfp = (uint8_t)val;
-    ret = lps33k_write_reg(ctx, LPS33K_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+    ret = lps33k_write_reg(ctx, LPS33K_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                           1);
   }
+
   return ret;
 }
 
 /**
-  * @brief   Low-pass bandwidth selection.[get] 
+  * @brief   Low-pass bandwidth selection.[get]
   *
   * @param  ctx    Read / write interface definitions
   * @param  val    Get the values of lpfp in reg CTRL_REG1
@@ -177,26 +183,31 @@ int32_t lps33k_low_pass_filter_mode_set(stmdev_ctx_t *ctx,
   *
   */
 int32_t lps33k_low_pass_filter_mode_get(stmdev_ctx_t *ctx,
-                                         lps33k_lpfp_t *val)
+                                        lps33k_lpfp_t *val)
 {
   lps33k_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                        1);
 
-  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  switch (ctrl_reg1.lpfp){
+  switch (ctrl_reg1.lpfp) {
     case LPS33K_LPF_ODR_DIV_2:
       *val = LPS33K_LPF_ODR_DIV_2;
       break;
+
     case LPS33K_LPF_ODR_DIV_9:
       *val = LPS33K_LPF_ODR_DIV_9;
       break;
+
     case LPS33K_LPF_ODR_DIV_20:
       *val = LPS33K_LPF_ODR_DIV_20;
       break;
+
     default:
       *val = LPS33K_LPF_ODR_DIV_2;
       break;
   }
+
   return ret;
 }
 
@@ -212,12 +223,15 @@ int32_t lps33k_data_rate_set(stmdev_ctx_t *ctx, lps33k_odr_t val)
 {
   lps33k_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                        1);
 
-  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg1.odr = (uint8_t)val;
-    ret = lps33k_write_reg(ctx, LPS33K_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+    ret = lps33k_write_reg(ctx, LPS33K_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                           1);
   }
+
   return ret;
 }
 
@@ -233,27 +247,34 @@ int32_t lps33k_data_rate_get(stmdev_ctx_t *ctx, lps33k_odr_t *val)
 {
   lps33k_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                        1);
 
-  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  switch (ctrl_reg1.odr){
+  switch (ctrl_reg1.odr) {
     case LPS33K_POWER_DOWN:
       *val = LPS33K_POWER_DOWN;
       break;
+
     case LPS33K_ODR_1_Hz:
       *val = LPS33K_ODR_1_Hz;
       break;
+
     case LPS33K_ODR_10_Hz:
       *val = LPS33K_ODR_10_Hz;
       break;
+
     case LPS33K_ODR_25_Hz:
       *val = LPS33K_ODR_25_Hz;
       break;
+
     case LPS33K_ODR_50_Hz:
       *val = LPS33K_ODR_50_Hz;
       break;
+
     case LPS33K_ODR_75_Hz:
       *val = LPS33K_ODR_75_Hz;
       break;
+
     default:
       *val = LPS33K_ODR_1_Hz;
       break;
@@ -263,7 +284,7 @@ int32_t lps33k_data_rate_get(stmdev_ctx_t *ctx, lps33k_odr_t *val)
 }
 
 /**
-  * @brief  One-shot mode. Device perform a single measure.[set] 
+  * @brief  One-shot mode. Device perform a single measure.[set]
   *
   * @param  ctx    Read / write interface definitions
   * @param  val    Change the values of one_shot in reg CTRL_REG2
@@ -274,12 +295,15 @@ int32_t lps33k_one_shoot_trigger_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps33k_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                        1);
 
-  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg2.one_shot = val;
-    ret = lps33k_write_reg(ctx, LPS33K_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+    ret = lps33k_write_reg(ctx, LPS33K_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                           1);
   }
+
   return ret;
 }
 
@@ -295,10 +319,9 @@ int32_t lps33k_one_shoot_trigger_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps33k_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
-
-  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                        1);
   *val = ctrl_reg2.one_shot;
-
   return ret;
 }
 
@@ -346,10 +369,8 @@ int32_t lps33k_press_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps33k_status_t status;
   int32_t ret;
-
-  ret = lps33k_read_reg(ctx, LPS33K_STATUS, (uint8_t*)&status, 1);
+  ret = lps33k_read_reg(ctx, LPS33K_STATUS, (uint8_t *)&status, 1);
   *val = status.p_da;
-
   return ret;
 }
 
@@ -365,10 +386,8 @@ int32_t lps33k_temp_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps33k_status_t status;
   int32_t ret;
-
-  ret = lps33k_read_reg(ctx, LPS33K_STATUS, (uint8_t*)&status, 1);
+  ret = lps33k_read_reg(ctx, LPS33K_STATUS, (uint8_t *)&status, 1);
   *val = status.t_da;
-
   return ret;
 }
 
@@ -384,10 +403,8 @@ int32_t lps33k_press_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps33k_status_t status;
   int32_t ret;
-
-  ret = lps33k_read_reg(ctx, LPS33K_STATUS, (uint8_t*)&status, 1);
+  ret = lps33k_read_reg(ctx, LPS33K_STATUS, (uint8_t *)&status, 1);
   *val = status.p_or;
-
   return ret;
 }
 
@@ -403,10 +420,8 @@ int32_t lps33k_temp_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps33k_status_t status;
   int32_t ret;
-
-  ret = lps33k_read_reg(ctx, LPS33K_STATUS, (uint8_t*)&status, 1);
+  ret = lps33k_read_reg(ctx, LPS33K_STATUS, (uint8_t *)&status, 1);
   *val = status.t_or;
-
   return ret;
 }
 
@@ -436,7 +451,7 @@ int32_t lps33k_pressure_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 int32_t lps33k_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
-  ret =  lps33k_read_reg(ctx, LPS33K_TEMP_OUT_L, (uint8_t*) buff, 2);
+  ret =  lps33k_read_reg(ctx, LPS33K_TEMP_OUT_L, (uint8_t *) buff, 2);
   return ret;
 }
 
@@ -454,7 +469,7 @@ int32_t lps33k_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff)
 int32_t lps33k_low_pass_rst_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
-  ret =  lps33k_read_reg(ctx, LPS33K_LPFP_RES, (uint8_t*) buff, 1);
+  ret =  lps33k_read_reg(ctx, LPS33K_LPFP_RES, (uint8_t *) buff, 1);
   return ret;
 }
 
@@ -465,7 +480,7 @@ int32_t lps33k_low_pass_rst_get(stmdev_ctx_t *ctx, uint8_t *buff)
 
 /**
   * @defgroup    LPS33K_common
-  * @brief       This section group common usefull functions
+  * @brief       This section group common useful functions
   * @{
   *
   */
@@ -481,7 +496,7 @@ int32_t lps33k_low_pass_rst_get(stmdev_ctx_t *ctx, uint8_t *buff)
 int32_t lps33k_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
-  ret =  lps33k_read_reg(ctx, LPS33K_WHO_AM_I, (uint8_t*) buff, 1);
+  ret =  lps33k_read_reg(ctx, LPS33K_WHO_AM_I, (uint8_t *) buff, 1);
   return ret;
 }
 
@@ -497,12 +512,15 @@ int32_t lps33k_reset_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps33k_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                        1);
 
-  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg2.swreset = val;
-    ret = lps33k_write_reg(ctx, LPS33K_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+    ret = lps33k_write_reg(ctx, LPS33K_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                           1);
   }
+
   return ret;
 }
 
@@ -518,10 +536,9 @@ int32_t lps33k_reset_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps33k_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
-
-  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                        1);
   *val = ctrl_reg2.swreset;
-
   return ret;
 }
 
@@ -537,12 +554,15 @@ int32_t lps33k_boot_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps33k_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                        1);
 
-  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg2.boot = val;
-    ret = lps33k_write_reg(ctx, LPS33K_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+    ret = lps33k_write_reg(ctx, LPS33K_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                           1);
   }
+
   return ret;
 }
 
@@ -558,10 +578,9 @@ int32_t lps33k_boot_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps33k_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
-
-  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                        1);
   *val = ctrl_reg2.boot;
-
   return ret;
 }
 
@@ -577,12 +596,13 @@ int32_t lps33k_low_power_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps33k_res_conf_t res_conf;
   int32_t ret;
+  ret = lps33k_read_reg(ctx, LPS33K_RES_CONF, (uint8_t *)&res_conf, 1);
 
-  ret = lps33k_read_reg(ctx, LPS33K_RES_CONF, (uint8_t*)&res_conf, 1);
-  if(ret == 0){
+  if (ret == 0) {
     res_conf.lc_en = val;
-    ret = lps33k_write_reg(ctx, LPS33K_RES_CONF, (uint8_t*)&res_conf, 1);
+    ret = lps33k_write_reg(ctx, LPS33K_RES_CONF, (uint8_t *)&res_conf, 1);
   }
+
   return ret;
 }
 
@@ -598,10 +618,8 @@ int32_t lps33k_low_power_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps33k_res_conf_t res_conf;
   int32_t ret;
-
-  ret = lps33k_read_reg(ctx, LPS33K_RES_CONF, (uint8_t*)&res_conf, 1);
+  ret = lps33k_read_reg(ctx, LPS33K_RES_CONF, (uint8_t *)&res_conf, 1);
   *val = res_conf.lc_en;
-
   return ret;
 }
 
@@ -631,12 +649,15 @@ int32_t lps33k_auto_add_inc_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps33k_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                        1);
 
-  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg2.if_add_inc = val;
-    ret = lps33k_write_reg(ctx, LPS33K_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+    ret = lps33k_write_reg(ctx, LPS33K_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                           1);
   }
+
   return ret;
 }
 
@@ -653,10 +674,9 @@ int32_t lps33k_auto_add_inc_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps33k_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
-
-  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  ret = lps33k_read_reg(ctx, LPS33K_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                        1);
   *val = ctrl_reg2.if_add_inc;
-
   return ret;
 }
 

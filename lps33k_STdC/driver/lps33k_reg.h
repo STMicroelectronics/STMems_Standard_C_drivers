@@ -23,7 +23,7 @@
 #define LPS33K_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -43,7 +43,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -65,8 +65,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -89,9 +91,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using 
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -120,7 +122,7 @@ typedef struct {
   *
   */
 
-  /** I2C Device Address 8 bit format. **/
+/** I2C Device Address 8 bit format. **/
 #define LPS33K_I2C_ADD       0xBBU
 
 /** Device Identification (Who am I) **/
@@ -191,7 +193,7 @@ typedef struct {
   *
   */
 
-typedef union{
+typedef union {
   lps33k_ctrl_reg1_t          ctrl_reg1;
   lps33k_ctrl_reg2_t          ctrl_reg2;
   lps33k_res_conf_t           res_conf;
@@ -205,10 +207,11 @@ typedef union{
   *
   */
 
-int32_t lps33k_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lps33k_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t *data,
+                        uint16_t len);
+int32_t lps33k_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                         uint8_t *data,
                          uint16_t len);
-int32_t lps33k_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
-                          uint16_t len);
 
 extern float_t lps33k_from_lsb_to_hpa(int32_t lsb);
 extern float_t lps33k_from_lsb_to_degc(int16_t lsb);
@@ -222,9 +225,9 @@ typedef enum {
   LPS33K_LPF_ODR_DIV_20 = 3,
 } lps33k_lpfp_t;
 int32_t lps33k_low_pass_filter_mode_set(stmdev_ctx_t *ctx,
-                                         lps33k_lpfp_t val);
+                                        lps33k_lpfp_t val);
 int32_t lps33k_low_pass_filter_mode_get(stmdev_ctx_t *ctx,
-                                         lps33k_lpfp_t *val);
+                                        lps33k_lpfp_t *val);
 
 typedef enum {
   LPS33K_POWER_DOWN  = 0,
