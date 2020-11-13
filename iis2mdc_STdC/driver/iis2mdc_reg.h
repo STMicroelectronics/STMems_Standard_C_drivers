@@ -23,7 +23,7 @@
 #define IIS2MDC_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -74,7 +74,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
@@ -107,8 +107,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -131,9 +133,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using 
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -317,7 +319,7 @@ typedef struct {
 #define IIS2MDC_TEMP_OUT_L_REG          0x6EU
 #define IIS2MDC_TEMP_OUT_H_REG          0x6FU
 
-typedef union{
+typedef union {
   iis2mdc_cfg_reg_a_t            cfg_reg_a;
   iis2mdc_cfg_reg_b_t            cfg_reg_b;
   iis2mdc_cfg_reg_c_t            cfg_reg_c;
@@ -328,9 +330,11 @@ typedef union{
   uint8_t                        byte;
 } iis2mdc_reg_t;
 
-int32_t iis2mdc_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t iis2mdc_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                         uint8_t *data,
                          uint16_t len);
-int32_t iis2mdc_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t iis2mdc_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
                           uint16_t len);
 
 float_t iis2mdc_from_lsb_to_mgauss(int16_t lsb);
@@ -343,8 +347,10 @@ typedef enum {
   IIS2MDC_SINGLE_TRIGGER   = 1,
   IIS2MDC_POWER_DOWN       = 2,
 } iis2mdc_md_t;
-int32_t iis2mdc_operating_mode_set(stmdev_ctx_t *ctx, iis2mdc_md_t val);
-int32_t iis2mdc_operating_mode_get(stmdev_ctx_t *ctx, iis2mdc_md_t *val);
+int32_t iis2mdc_operating_mode_set(stmdev_ctx_t *ctx,
+                                   iis2mdc_md_t val);
+int32_t iis2mdc_operating_mode_get(stmdev_ctx_t *ctx,
+                                   iis2mdc_md_t *val);
 
 typedef enum {
   IIS2MDC_ODR_10Hz   = 0,
@@ -390,7 +396,8 @@ int32_t iis2mdc_set_rst_sensor_single_get(stmdev_ctx_t *ctx,
                                           uint8_t *val);
 
 int32_t iis2mdc_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t iis2mdc_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t iis2mdc_block_data_update_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t iis2mdc_mag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
@@ -416,9 +423,11 @@ typedef enum {
   IIS2MDC_MSB_AT_LOW_ADD  = 1,
 } iis2mdc_ble_t;
 int32_t iis2mdc_data_format_set(stmdev_ctx_t *ctx, iis2mdc_ble_t val);
-int32_t iis2mdc_data_format_get(stmdev_ctx_t *ctx, iis2mdc_ble_t *val);
+int32_t iis2mdc_data_format_get(stmdev_ctx_t *ctx,
+                                iis2mdc_ble_t *val);
 
-int32_t iis2mdc_status_get(stmdev_ctx_t *ctx, iis2mdc_status_reg_t *val);
+int32_t iis2mdc_status_get(stmdev_ctx_t *ctx,
+                           iis2mdc_status_reg_t *val);
 
 typedef enum {
   IIS2MDC_CHECK_BEFORE  = 0,

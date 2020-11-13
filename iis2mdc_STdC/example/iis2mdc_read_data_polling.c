@@ -119,7 +119,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -135,50 +136,44 @@ void iis2mdc_read_data_polling(void)
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
 #if defined(STEVAL_MKI109V3)
   /* Default SPI mode is 3 wire, so enable 4 wire mode */
   iis2mdc_spi_mode_set(&dev_ctx, LIS2MDL_SPI_4_WIRE);
 #endif
-
   /* Check device ID */
   whoamI = 0;
   iis2mdc_device_id_get(&dev_ctx, &whoamI);
+
   if ( whoamI != IIS2MDC_ID )
-    while(1); /*manage here device not found */
-  
+    while (1); /*manage here device not found */
+
   /* Restore default configuration */
   iis2mdc_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     iis2mdc_reset_get(&dev_ctx, &rst);
   } while (rst);
-  
+
   /* Enable Block Data Update */
   iis2mdc_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-  
   /* Set Output Data Rate */
   iis2mdc_data_rate_set(&dev_ctx, IIS2MDC_ODR_10Hz);
-  
-  /* Set / Reset sensor mode */ 
+  /* Set / Reset sensor mode */
   iis2mdc_set_rst_mode_set(&dev_ctx, IIS2MDC_SENS_OFF_CANC_EVERY_ODR);
-  
-  /* Enable temperature compensation */ 
+  /* Enable temperature compensation */
   iis2mdc_offset_temp_comp_set(&dev_ctx, PROPERTY_ENABLE);
-  
-  /* Set device in continuos mode */  
+  /* Set device in continuous mode */
   iis2mdc_operating_mode_set(&dev_ctx, IIS2MDC_CONTINUOUS_MODE);
- 
+
   /* Read samples in polling mode (no int) */
-  while(1)
-  {
+  while (1) {
     /* Read output only if new value is available */
     iis2mdc_mag_data_ready_get(&dev_ctx, &drdy);
+
     if (drdy) {
       /* Read magnetic field data */
       memset(data_raw_magnetic, 0x00, 3 * sizeof(int16_t));
@@ -186,18 +181,18 @@ void iis2mdc_read_data_polling(void)
       magnetic_mG[0] = iis2mdc_from_lsb_to_mgauss( data_raw_magnetic[0]);
       magnetic_mG[1] = iis2mdc_from_lsb_to_mgauss( data_raw_magnetic[1]);
       magnetic_mG[2] = iis2mdc_from_lsb_to_mgauss( data_raw_magnetic[2]);
-     
-      sprintf((char*)tx_buffer, "Magnetic field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
+      sprintf((char *)tx_buffer,
+              "Magnetic field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
-      tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
-     
+      tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
       /* Read temperature data */
       memset( &data_raw_temperature, 0x00, sizeof(int16_t) );
       iis2mdc_temperature_raw_get( &dev_ctx, &data_raw_temperature );
-      temperature_degC = iis2mdc_from_lsb_to_celsius ( data_raw_temperature );
-      
-      sprintf((char*)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC );
-      tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
+      temperature_degC = iis2mdc_from_lsb_to_celsius (
+                           data_raw_temperature );
+      sprintf((char *)tx_buffer, "Temperature [degC]:%6.2f\r\n",
+              temperature_degC );
+      tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
     }
   }
 }
@@ -212,17 +207,18 @@ void iis2mdc_read_data_polling(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-    HAL_I2C_Mem_Write(handle, IIS2MDC_I2C_ADD, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  HAL_I2C_Mem_Write(handle, IIS2MDC_I2C_ADD, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_write(handle,  IIS2MDC_I2C_ADD & 0xFE, reg, bufp, len);
 #endif
@@ -246,11 +242,11 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   HAL_I2C_Mem_Read(handle, IIS2MDC_I2C_ADD, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Receive(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_read(handle, IIS2MDC_I2C_ADD & 0xFE, reg, bufp, len);
 #endif
@@ -260,18 +256,18 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE
+#ifdef NUCLEO_F411RE
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
-  #ifdef STEVAL_MKI109V3
+#endif
+#ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#endif
 }
 
 /* @brief  platform specific delay (platform dependent)
