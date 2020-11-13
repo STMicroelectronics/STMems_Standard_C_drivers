@@ -115,7 +115,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -129,162 +130,166 @@ void iis2dlpc_double_tap_(void)
   /*Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
   iis2dlpc_reg_t int_route;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /*Initialize platform specific hardware */
   platform_init();
-
   /*Check device ID */
   iis2dlpc_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != IIS2DLPC_ID)
-    while(1)
-    {
+    while (1) {
       /* manage here device not found */
     }
 
   /*Restore default configuration */
   iis2dlpc_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     iis2dlpc_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /*Set full scale */
   iis2dlpc_full_scale_set(&dev_ctx, IIS2DLPC_2g);
-
   /*Configure power mode */
-  iis2dlpc_power_mode_set(&dev_ctx, IIS2DLPC_CONT_LOW_PWR_LOW_NOISE_12bit);
-
+  iis2dlpc_power_mode_set(&dev_ctx,
+                          IIS2DLPC_CONT_LOW_PWR_LOW_NOISE_12bit);
   /*Set Output Data Rate */
   iis2dlpc_data_rate_set(&dev_ctx, IIS2DLPC_XL_ODR_400Hz);
-
   /*Enable Tap detection on X, Y, Z */
   iis2dlpc_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
   iis2dlpc_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
   iis2dlpc_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
-
   /*Set Tap threshold on all axis */
   iis2dlpc_tap_threshold_x_set(&dev_ctx, 12);
   iis2dlpc_tap_threshold_y_set(&dev_ctx, 12);
   iis2dlpc_tap_threshold_z_set(&dev_ctx, 12);
-
   /*Configure Double Tap parameter */
   iis2dlpc_tap_dur_set(&dev_ctx, 7);
   iis2dlpc_tap_quiet_set(&dev_ctx, 3);
   iis2dlpc_tap_shock_set(&dev_ctx, 3);
-
   /*Enable Double Tap detection */
   iis2dlpc_tap_mode_set(&dev_ctx, IIS2DLPC_BOTH_SINGLE_DOUBLE);
-
   /*Enable single tap detection interrupt */
   iis2dlpc_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
   int_route.ctrl4_int1_pad_ctrl.int1_tap = PROPERTY_ENABLE;
   iis2dlpc_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
 
   /*Wait Events. */
-  while(1)
-  {
+  while (1) {
     iis2dlpc_all_sources_t all_source;
-
     /* Check Double Tap events */
     iis2dlpc_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.tap_src.double_tap)
-    {
-      sprintf((char*)tx_buffer, "Double Tap Detected: Sign %s",
+
+    if (all_source.tap_src.double_tap) {
+      sprintf((char *)tx_buffer, "Double Tap Detected: Sign %s",
               all_source.tap_src.tap_sign ? "positive" : "negative");
-      if (all_source.tap_src.x_tap)
-        sprintf((char*)tx_buffer, "%s on X", tx_buffer);
-      if (all_source.tap_src.y_tap)
-        sprintf((char*)tx_buffer, "%s on Y", tx_buffer);
-      if (all_source.tap_src.z_tap)
-        sprintf((char*)tx_buffer, "%s on Z", tx_buffer);
-      sprintf((char*)tx_buffer, "%s axis\r\n", tx_buffer);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+      if (all_source.tap_src.x_tap) {
+        sprintf((char *)tx_buffer, "%s on X", tx_buffer);
+      }
+
+      if (all_source.tap_src.y_tap) {
+        sprintf((char *)tx_buffer, "%s on Y", tx_buffer);
+      }
+
+      if (all_source.tap_src.z_tap) {
+        sprintf((char *)tx_buffer, "%s on Z", tx_buffer);
+      }
+
+      sprintf((char *)tx_buffer, "%s axis\r\n", tx_buffer);
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     /* Check Single Tap events */
-    if (all_source.tap_src.single_tap)
-    {
-      sprintf((char*)tx_buffer, "Tap Detected: Sign %s",
+    if (all_source.tap_src.single_tap) {
+      sprintf((char *)tx_buffer, "Tap Detected: Sign %s",
               all_source.tap_src.tap_sign ? "positive" : "negative");
-      if (all_source.tap_src.x_tap)
-        sprintf((char*)tx_buffer, "%s on X", tx_buffer);
-      if (all_source.tap_src.y_tap)
-        sprintf((char*)tx_buffer, "%s on Y", tx_buffer);
-      if (all_source.tap_src.z_tap)
-        sprintf((char*)tx_buffer, "%s on Z", tx_buffer);
-      sprintf((char*)tx_buffer, "%s axis\r\n", tx_buffer);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+      if (all_source.tap_src.x_tap) {
+        sprintf((char *)tx_buffer, "%s on X", tx_buffer);
+      }
+
+      if (all_source.tap_src.y_tap) {
+        sprintf((char *)tx_buffer, "%s on Y", tx_buffer);
+      }
+
+      if (all_source.tap_src.z_tap) {
+        sprintf((char *)tx_buffer, "%s on Z", tx_buffer);
+      }
+
+      sprintf((char *)tx_buffer, "%s axis\r\n", tx_buffer);
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
 
- /*
-  * @brief  Write generic device register (platform dependent)
-  *
-  * @param  handle    customizable argument. In this examples is used in
-  *                   order to select the correct sensor bus handler.
-  * @param  reg       register to write
-  * @param  bufp      pointer to data to write in register reg
-  * @param  len       number of consecutive register to write
-  *
-  */
- static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
-                               uint16_t len)
- {
+/*
+ * @brief  Write generic device register (platform dependent)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to write
+ * @param  bufp      pointer to data to write in register reg
+ * @param  len       number of consecutive register to write
+ *
+ */
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
+                              uint16_t len)
+{
 #if defined(NUCLEO_F411RE)
-    HAL_I2C_Mem_Write(handle, IIS2DLPC_I2C_ADD_L, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  HAL_I2C_Mem_Write(handle, IIS2DLPC_I2C_ADD_L, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_write(handle,  IIS2DLPC_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
-   return 0;
- }
+  return 0;
+}
 
- /*
-  * @brief  Read generic device register (platform dependent)
-  *
-  * @param  handle    customizable argument. In this examples is used in
-  *                   order to select the correct sensor bus handler.
-  * @param  reg       register to read
-  * @param  bufp      pointer to buffer that store the data read
-  * @param  len       number of consecutive register to read
-  *
-  */
- static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
-                              uint16_t len)
- {
+/*
+ * @brief  Read generic device register (platform dependent)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to read
+ * @param  bufp      pointer to buffer that store the data read
+ * @param  len       number of consecutive register to read
+ *
+ */
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
+                             uint16_t len)
+{
 #if defined(NUCLEO_F411RE)
   HAL_I2C_Mem_Read(handle, IIS2DLPC_I2C_ADD_L, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Receive(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_read(handle, IIS2DLPC_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
-   return 0;
- }
+  return 0;
+}
 
- /*
-  * @brief  Write generic device register (platform dependent)
-  *
-  * @param  tx_buffer     buffer to trasmit
-  * @param  len           number of byte to send
-  *
-  */
- static void tx_com(uint8_t *tx_buffer, uint16_t len)
- {
+/*
+ * @brief  Write generic device register (platform dependent)
+ *
+ * @param  tx_buffer     buffer to transmit
+ * @param  len           number of byte to send
+ *
+ */
+static void tx_com(uint8_t *tx_buffer, uint16_t len)
+{
 #if defined(NUCLEO_F411RE)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
 #elif defined(STEVAL_MKI109V3)
@@ -292,7 +297,7 @@ void iis2dlpc_double_tap_(void)
 #elif defined(SPC584B_DIS)
   sd_lld_write(&SD2, tx_buffer, len);
 #endif
- }
+}
 
 /*
  * @brief  platform specific delay (platform dependent)

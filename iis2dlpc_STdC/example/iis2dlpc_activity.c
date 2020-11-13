@@ -117,7 +117,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -132,157 +133,145 @@ void iis2dlpc_activity(void)
   /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
   iis2dlpc_reg_t int_route;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   iis2dlpc_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != IIS2DLPC_ID)
-    while(1) {
+    while (1) {
       /* manage here device not found */
     }
 
   /* Restore default configuration */
   iis2dlpc_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     iis2dlpc_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Set full scale */
   iis2dlpc_full_scale_set(&dev_ctx, IIS2DLPC_2g);
-
   /* Configure filtering chain
    * Accelerometer - filter path / bandwidth
    */
   iis2dlpc_filter_path_set(&dev_ctx, IIS2DLPC_LPF_ON_OUT);
   iis2dlpc_filter_bandwidth_set(&dev_ctx, IIS2DLPC_ODR_DIV_4);
-
   /* Configure power mode */
-  iis2dlpc_power_mode_set(&dev_ctx, IIS2DLPC_CONT_LOW_PWR_LOW_NOISE_12bit);
-
+  iis2dlpc_power_mode_set(&dev_ctx,
+                          IIS2DLPC_CONT_LOW_PWR_LOW_NOISE_12bit);
   /* Set wake-up duration
    * Wake up duration event 1LSb = 1 / ODR
    */
   iis2dlpc_wkup_dur_set(&dev_ctx, 2);
-
   /* Set sleep duration
    * Duration to go in sleep mode (1 LSb = 512 / ODR)
    */
   iis2dlpc_act_sleep_dur_set(&dev_ctx, 2);
-
   /*Set Activity wake-up threshold
    * Threshold for wake-up 1 LSB = FS_XL / 64
    */
   iis2dlpc_wkup_threshold_set(&dev_ctx, 2);
-
   /* Data sent to wake-up interrupt function */
   iis2dlpc_wkup_feed_data_set(&dev_ctx, IIS2DLPC_HP_FEED);
-
   /* Config activity / inactivity or stationary / motion detection */
   iis2dlpc_act_mode_set(&dev_ctx, IIS2DLPC_DETECT_ACT_INACT);
-
   /* Enable activity detection interrupt */
   iis2dlpc_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
   int_route.ctrl4_int1_pad_ctrl.int1_wu = PROPERTY_ENABLE;
   iis2dlpc_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
-
   /* Set Output Data Rate */
   iis2dlpc_data_rate_set(&dev_ctx, IIS2DLPC_XL_ODR_200Hz);
 
   /* Wait Events */
-  while(1)
-  {
+  while (1) {
     iis2dlpc_all_sources_t all_source;
-
     /* Read status register */
     iis2dlpc_all_sources_get(&dev_ctx, &all_source);
 
     /* Check if Activity/Inactivity events */
-    if (all_source.wake_up_src.sleep_state_ia)
-    {
-      sprintf((char*)tx_buffer, "Inactivity Detected\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    if (all_source.wake_up_src.sleep_state_ia) {
+      sprintf((char *)tx_buffer, "Inactivity Detected\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
-    if (all_source.wake_up_src.wu_ia)
-    {
-      sprintf((char*)tx_buffer, "Activity Detected\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+    if (all_source.wake_up_src.wu_ia) {
+      sprintf((char *)tx_buffer, "Activity Detected\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
 
- /*
-  * @brief  Write generic device register (platform dependent)
-  *
-  * @param  handle    customizable argument. In this examples is used in
-  *                   order to select the correct sensor bus handler.
-  * @param  reg       register to write
-  * @param  bufp      pointer to data to write in register reg
-  * @param  len       number of consecutive register to write
-  *
-  */
- static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
-                               uint16_t len)
- {
+/*
+ * @brief  Write generic device register (platform dependent)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to write
+ * @param  bufp      pointer to data to write in register reg
+ * @param  len       number of consecutive register to write
+ *
+ */
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
+                              uint16_t len)
+{
 #if defined(NUCLEO_F411RE)
-    HAL_I2C_Mem_Write(handle, IIS2DLPC_I2C_ADD_L, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  HAL_I2C_Mem_Write(handle, IIS2DLPC_I2C_ADD_L, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_write(handle,  IIS2DLPC_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
-   return 0;
- }
+  return 0;
+}
 
- /*
-  * @brief  Read generic device register (platform dependent)
-  *
-  * @param  handle    customizable argument. In this examples is used in
-  *                   order to select the correct sensor bus handler.
-  * @param  reg       register to read
-  * @param  bufp      pointer to buffer that store the data read
-  * @param  len       number of consecutive register to read
-  *
-  */
- static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
-                              uint16_t len)
- {
+/*
+ * @brief  Read generic device register (platform dependent)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to read
+ * @param  bufp      pointer to buffer that store the data read
+ * @param  len       number of consecutive register to read
+ *
+ */
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
+                             uint16_t len)
+{
 #if defined(NUCLEO_F411RE)
   HAL_I2C_Mem_Read(handle, IIS2DLPC_I2C_ADD_L, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Receive(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_read(handle, IIS2DLPC_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
-   return 0;
- }
+  return 0;
+}
 
- /*
-  * @brief  Write generic device register (platform dependent)
-  *
-  * @param  tx_buffer     buffer to trasmit
-  * @param  len           number of byte to send
-  *
-  */
- static void tx_com(uint8_t *tx_buffer, uint16_t len)
- {
+/*
+ * @brief  Write generic device register (platform dependent)
+ *
+ * @param  tx_buffer     buffer to transmit
+ * @param  len           number of byte to send
+ *
+ */
+static void tx_com(uint8_t *tx_buffer, uint16_t len)
+{
 #if defined(NUCLEO_F411RE)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
 #elif defined(STEVAL_MKI109V3)
@@ -290,7 +279,7 @@ void iis2dlpc_activity(void)
 #elif defined(SPC584B_DIS)
   sd_lld_write(&SD2, tx_buffer, len);
 #endif
- }
+}
 
 /*
  * @brief  platform specific delay (platform dependent)
