@@ -3,8 +3,8 @@
  * @file    machine_learning_core.c
  * @author  Sensors Software Solution Team
  * @brief   The purpose of this example is to show how use the device
- *          Machine Learning Core (MLC) starting from an ".h" file 
- *          generated through with the tool "Machine Learning Core" 
+ *          Machine Learning Core (MLC) starting from an ".h" file
+ *          generated through with the tool "Machine Learning Core"
  *          of Unico GUI.
  *
  ******************************************************************************
@@ -78,7 +78,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -93,95 +94,81 @@ void lsm6dsox_mlc(void)
   lsm6dsox_all_sources_t status;
   lsm6dsox_emb_sens_t emb_sens;
   stmdev_ctx_t dev_ctx;
-
   uint8_t                     mlc_out[8];
   uint32_t                    i;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg  = platform_read;
   dev_ctx.handle    = &hi2c1;
-
   /* Wait sensor boot time */
   platform_delay(10);
-
   /* Check device ID */
   lsm6dsox_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LSM6DSOX_ID)
-    while(1);
+    while (1);
 
   /* Restore default configuration */
   lsm6dsox_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lsm6dsox_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Start Machine Learning Core configuration */
   for ( i = 0; i < (sizeof(lsm6dsox_vibration_monitoring) /
-                    sizeof(ucf_line_t) ); i++ ){
-  
+                    sizeof(ucf_line_t) ); i++ ) {
     lsm6dsox_write_reg(&dev_ctx, lsm6dsox_vibration_monitoring[i].address,
-                       (uint8_t*)&lsm6dsox_vibration_monitoring[i].data, 1);
-     
-  } 
-  /* End Machine Learning Core configuration */
+                       (uint8_t *)&lsm6dsox_vibration_monitoring[i].data, 1);
+  }
 
+  /* End Machine Learning Core configuration */
   /* At this point the device is ready to run but if you need you can also
    * interact with the device but taking in account the MLC configuration.
    *
    * For more information about Machine Learning Core tool please refer
    * to AN5259 "LSM6DSOX: Machine Learning Core".
    */
-
   /* Turn off embedded features */
   lsm6dsox_embedded_sens_get(&dev_ctx, &emb_sens);
   lsm6dsox_embedded_sens_off(&dev_ctx);
   platform_delay(10);
-
   /* Turn off Sensors */
   lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_OFF);
   lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_OFF);
- 
   /* Disable I3C interface */
   lsm6dsox_i3c_disable_set(&dev_ctx, LSM6DSOX_I3C_DISABLE);
-
   /* Enable Block Data Update */
   lsm6dsox_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set full scale */
   lsm6dsox_xl_full_scale_set(&dev_ctx, LSM6DSOX_4g);
   lsm6dsox_gy_full_scale_set(&dev_ctx, LSM6DSOX_2000dps);
-
   /* Route signals on interrupt pin 1 */
   lsm6dsox_pin_int1_route_get(&dev_ctx, &pin_int1_route);
   pin_int1_route.mlc1 = PROPERTY_ENABLE;
   lsm6dsox_pin_int1_route_set(&dev_ctx, pin_int1_route);
-
   /* Configure interrupt pin mode notification */
-  lsm6dsox_int_notification_set(&dev_ctx, LSM6DSOX_BASE_PULSED_EMB_LATCHED);
-
+  lsm6dsox_int_notification_set(&dev_ctx,
+                                LSM6DSOX_BASE_PULSED_EMB_LATCHED);
   /* Enable embedded features */
   lsm6dsox_embedded_sens_set(&dev_ctx, &emb_sens);
-
   /* Set Output Data Rate.
    * Selected data rate have to be equal or greater with respect
    * with MLC data rate.
    */
   lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_26Hz);
   lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_OFF);
- 
+
   /* Main loop */
-  while(1)
-  {
+  while (1) {
     /* Read interrupt source registers in polling mode (no int) */
     lsm6dsox_all_sources_get(&dev_ctx, &status);
-    if (status.mlc1){
-     
+
+    if (status.mlc1) {
       lsm6dsox_mlc_out_get(&dev_ctx, mlc_out);
-      sprintf((char*)tx_buffer, "Detect MLC interrupt code: %02X\r\n",
+      sprintf((char *)tx_buffer, "Detect MLC interrupt code: %02X\r\n",
               mlc_out[0]);
-       
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -196,11 +183,12 @@ void lsm6dsox_mlc(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
-    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_L, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_L, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   return 0;
 }
 
@@ -217,8 +205,8 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-    HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_L, reg,
-                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_L, reg,
+                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   return 0;
 }
 
@@ -236,7 +224,7 @@ static void platform_delay(uint32_t ms)
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */

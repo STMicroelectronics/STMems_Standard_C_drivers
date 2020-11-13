@@ -94,7 +94,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -106,56 +107,47 @@ static void platform_init(void);
 void example_main_double_tap_lsm6dsox(void)
 {
   stmdev_ctx_t dev_ctx;
-
   /* Uncomment to configure INT 1 */
   //lsm6dsox_pin_int1_route_t int1_route;
-
   /* Uncomment to configure INT 2 */
   lsm6dsox_pin_int2_route_t int2_route;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
-
   /* Init test platform */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(10);
-
   /* Check device ID */
   lsm6dsox_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LSM6DSOX_ID)
-    while(1);
+    while (1);
 
   /* Restore default configuration */
   lsm6dsox_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lsm6dsox_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Disable I3C interface */
   lsm6dsox_i3c_disable_set(&dev_ctx, LSM6DSOX_I3C_DISABLE);
-
   /* Set XL Output Data Rate to 417 Hz */
   lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_417Hz);
-
   /* Set 2g full XL scale */
   lsm6dsox_xl_full_scale_set(&dev_ctx, LSM6DSOX_2g);
-
   /* Enable Tap detection on X, Y, Z */
   lsm6dsox_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
   lsm6dsox_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
   lsm6dsox_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set Tap threshold to 01000b, therefore the tap threshold
    * is 500 mg (= 12 * FS_XL / 32 )
    */
   lsm6dsox_tap_threshold_x_set(&dev_ctx, 0x08);
   lsm6dsox_tap_threshold_y_set(&dev_ctx, 0x08);
   lsm6dsox_tap_threshold_z_set(&dev_ctx, 0x08);
-
   /* Configure Single and Double Tap parameter
    *
    * For the maximum time between two consecutive detected taps, the DUR
@@ -171,68 +163,81 @@ void example_main_double_tap_lsm6dsox(void)
   lsm6dsox_tap_dur_set(&dev_ctx, 0x07);
   lsm6dsox_tap_quiet_set(&dev_ctx, 0x03);
   lsm6dsox_tap_shock_set(&dev_ctx, 0x03);
-
   /* Enable Single and Double Tap detection. */
   lsm6dsox_tap_mode_set(&dev_ctx, LSM6DSOX_BOTH_SINGLE_DOUBLE);
-
   /* For single tap only uncomments next function */
   //lsm6dsox_tap_mode_set(&dev_ctx, LSM6DSOX_ONLY_SINGLE);
-
   /* Enable interrupt generation on Single and Double Tap INT1 pin */
   //lsm6dsox_pin_int1_route_get(&dev_ctx, &int1_route);
-
   /* For single tap only comment next function */
   //int1_route.reg.md1_cfg.int1_double_tap = PROPERTY_ENABLE;
   //int1_route.reg.md1_cfg.int1_single_tap = PROPERTY_ENABLE;
   //lsm6dsox_pin_int1_route_set(&dev_ctx, &int1_route);
-
   /* Uncomment if interrupt generation on Single and Double Tap INT2 pin */
   lsm6dsox_pin_int2_route_get(&dev_ctx, NULL, &int2_route);
-
   /* For single tap only comment next function */
   int2_route.double_tap = PROPERTY_ENABLE;
   int2_route.single_tap = PROPERTY_ENABLE;
   lsm6dsox_pin_int2_route_set(&dev_ctx, NULL, int2_route);
 
   /* Wait Events */
-  while(1)
-  {
+  while (1) {
     lsm6dsox_all_sources_t all_source;
-
     /* Check if Tap events */
     lsm6dsox_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.double_tap)
-    {
-      sprintf((char*)tx_buffer, "D-Tap: ");
-      if (all_source.tap_x)
-        strcat((char*)tx_buffer, "x-axis");
-      else if (all_source.tap_x)
-        strcat((char*)tx_buffer, "y-axis");
-      else
-        strcat((char*)tx_buffer, "z-axis");
-      if (all_source.tap_sign)
-        strcat((char*)tx_buffer, " negative");
-      else
-        strcat((char*)tx_buffer, " positive");
-      strcat((char*)tx_buffer, " sign\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+    if (all_source.double_tap) {
+      sprintf((char *)tx_buffer, "D-Tap: ");
+
+      if (all_source.tap_x) {
+        strcat((char *)tx_buffer, "x-axis");
+      }
+
+      else if (all_source.tap_x) {
+        strcat((char *)tx_buffer, "y-axis");
+      }
+
+      else {
+        strcat((char *)tx_buffer, "z-axis");
+      }
+
+      if (all_source.tap_sign) {
+        strcat((char *)tx_buffer, " negative");
+      }
+
+      else {
+        strcat((char *)tx_buffer, " positive");
+      }
+
+      strcat((char *)tx_buffer, " sign\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
-    if (all_source.single_tap)
-    {
-      sprintf((char*)tx_buffer, "S-Tap: ");
-      if (all_source.tap_x)
-        strcat((char*)tx_buffer, "x-axis");
-      else if (all_source.tap_y)
-        strcat((char*)tx_buffer, "y-axis");
-      else
-        strcat((char*)tx_buffer, "z-axis");
-      if (all_source.tap_sign)
-        strcat((char*)tx_buffer, " negative");
-      else
-        strcat((char*)tx_buffer, " positive");
-      strcat((char*)tx_buffer, " sign\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    if (all_source.single_tap) {
+      sprintf((char *)tx_buffer, "S-Tap: ");
+
+      if (all_source.tap_x) {
+        strcat((char *)tx_buffer, "x-axis");
+      }
+
+      else if (all_source.tap_y) {
+        strcat((char *)tx_buffer, "y-axis");
+      }
+
+      else {
+        strcat((char *)tx_buffer, "z-axis");
+      }
+
+      if (all_source.tap_sign) {
+        strcat((char *)tx_buffer, " negative");
+      }
+
+      else {
+        strcat((char *)tx_buffer, " positive");
+      }
+
+      strcat((char *)tx_buffer, " sign\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -247,22 +252,24 @@ void example_main_double_tap_lsm6dsox(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_L, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
+
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
+
+  else if (handle == &hspi2) {
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Transmit(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+
 #endif
   return 0;
 }
@@ -280,14 +287,14 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_L, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
+
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
+
+  else if (handle == &hspi2) {
     /* Read command */
     reg |= 0x80;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
@@ -295,6 +302,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
     HAL_SPI_Receive(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+
 #endif
   return 0;
 }
@@ -302,18 +310,18 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
-  #ifdef STEVAL_MKI109V3
+#endif
+#ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#endif
 }
 
 /*

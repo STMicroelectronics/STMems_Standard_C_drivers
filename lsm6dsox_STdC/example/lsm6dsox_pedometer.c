@@ -74,7 +74,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -90,70 +91,63 @@ void lsm6dsox_129694_02(void)
   lsm6dsox_emb_sens_t emb_sens;
   stmdev_ctx_t dev_ctx;
   uint16_t steps;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg  = platform_read;
   dev_ctx.handle    = &hi2c1;
-
   /* Wait sensor boot time */
   platform_delay(10);
-
   /* Check device ID */
   lsm6dsox_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LSM6DSOX_ID)
-    while(1);
+    while (1);
 
   /* Restore default configuration */
   lsm6dsox_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lsm6dsox_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Disable I3C interface */
   lsm6dsox_i3c_disable_set(&dev_ctx, LSM6DSOX_I3C_DISABLE);
-
   /* Enable Block Data Update */
   lsm6dsox_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set full scale */
   lsm6dsox_xl_full_scale_set(&dev_ctx, LSM6DSOX_4g);
   lsm6dsox_gy_full_scale_set(&dev_ctx, LSM6DSOX_2000dps);
-
   /* Enable pedometer */
   lsm6dsox_pedo_sens_set(&dev_ctx, LSM6DSOX_FALSE_STEP_REJ_ADV_MODE);
   emb_sens.step = PROPERTY_ENABLE;
   emb_sens.mlc = PROPERTY_ENABLE;
   lsm6dsox_embedded_sens_set(&dev_ctx, &emb_sens);
-
   /* Route signals on interrupt pin 1 */
   lsm6dsox_pin_int1_route_get(&dev_ctx, &pin_int1_route);
   pin_int1_route.step_detector = PROPERTY_ENABLE;
   lsm6dsox_pin_int1_route_set(&dev_ctx, pin_int1_route);
-
   /* Configure interrupt pin mode notification */
-  lsm6dsox_int_notification_set(&dev_ctx, LSM6DSOX_BASE_PULSED_EMB_LATCHED);
-
+  lsm6dsox_int_notification_set(&dev_ctx,
+                                LSM6DSOX_BASE_PULSED_EMB_LATCHED);
   /* Set Output Data Rate.
    * Selected data rate have to be equal or greater with respect
    * with MLC data rate.
    */
   lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_26Hz);
   lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_OFF);
-
   /* Reset steps of pedometer */
   lsm6dsox_steps_reset(&dev_ctx);
 
   /* Main loop */
-  while(1)
-  {
+  while (1) {
     /* Read interrupt source registers in polling mode (no int) */
     lsm6dsox_all_sources_get(&dev_ctx, &status);
-    if (status.step_detector){
-        /* Read steps */
-        lsm6dsox_number_of_steps_get(&dev_ctx, (uint8_t*)&steps);
-        sprintf((char*)tx_buffer, "steps :%d\r\n", steps);
-        tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+    if (status.step_detector) {
+      /* Read steps */
+      lsm6dsox_number_of_steps_get(&dev_ctx, (uint8_t *)&steps);
+      sprintf((char *)tx_buffer, "steps :%d\r\n", steps);
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -168,11 +162,12 @@ void lsm6dsox_129694_02(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
-    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_H, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_H, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   return 0;
 }
 
@@ -189,8 +184,8 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-    HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_H, reg,
-                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_H, reg,
+                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   return 0;
 }
 
@@ -208,7 +203,7 @@ static void platform_delay(uint32_t ms)
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
