@@ -114,7 +114,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -128,37 +129,31 @@ void iis2dh_free_fall(void)
   iis2dh_ctrl_reg3_t ctrl_reg3;
   iis2dh_int1_cfg_t int1_cfg;
   stmdev_ctx_t dev_ctx;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   iis2dh_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != IIS2DH_ID) {
-    while(1) {
+    while (1) {
       /* manage here device not found */
     }
   }
 
   /* Set full scale to 2 g */
   iis2dh_full_scale_set(&dev_ctx, IIS2DH_2g);
-
   /* Enable AOI1 interrupt on INT pin 1 */
   iis2dh_pin_int1_config_get(&dev_ctx, &ctrl_reg3);
   ctrl_reg3.i1_aoi1 = PROPERTY_ENABLE;
   iis2dh_pin_int1_config_set(&dev_ctx, &ctrl_reg3);
-
   /* Enable Interrupt 1 pin latched */
   iis2dh_int1_pin_notification_mode_set(&dev_ctx, IIS2DH_INT1_LATCHED);
-
   /* Set threshold to 16h -> 350mg
    * Set Duration to 03h -> minimum event duration ~= 30 msec
    * If acceleration an all axis is below the threshold for more
@@ -166,7 +161,6 @@ void iis2dh_free_fall(void)
    */
   iis2dh_int1_gen_threshold_set(&dev_ctx, 0x16);
   iis2dh_int1_gen_duration_set(&dev_ctx, 0x02);
-
   /* Configure free-fall recognition
    * Set interrupt condition (AND) for x, y, z acc. data below
    * threshold
@@ -177,21 +171,19 @@ void iis2dh_free_fall(void)
   int1_cfg.ylie = PROPERTY_ENABLE;
   int1_cfg.xlie = PROPERTY_ENABLE;
   iis2dh_int1_gen_conf_set(&dev_ctx, &int1_cfg);
-
   /* Set device in HR mode */
   iis2dh_operating_mode_set(&dev_ctx, IIS2DH_HR_12bit);
-
   /* Set Output Data Rate to 100 Hz */
   iis2dh_data_rate_set(&dev_ctx, IIS2DH_ODR_100Hz);
 
-  while(1) {
+  while (1) {
     /* Check INT 1 pin or read source register */
     iis2dh_reg_t all_source;
-
     iis2dh_int1_gen_source_get(&dev_ctx, &all_source.int1_src);
+
     if (!(all_source.byte & 0x3f)) {
-      sprintf((char*)tx_buffer, "freefall detected\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      sprintf((char *)tx_buffer, "freefall detected\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -206,10 +198,10 @@ void iis2dh_free_fall(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
-
 #if defined(NUCLEO_F411RE)
   /* Write multiple command */
   reg |= 0x80;
@@ -243,7 +235,6 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-
 #if defined(NUCLEO_F411RE)
   /* Read multiple command */
   reg |= 0x80;

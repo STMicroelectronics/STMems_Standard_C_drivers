@@ -114,7 +114,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -129,54 +130,43 @@ void iis2dh_wake_up(void)
   iis2dh_int1_cfg_t int1_cfg;
   stmdev_ctx_t dev_ctx;
   uint8_t dummy;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   iis2dh_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != IIS2DH_ID) {
-    while(1) {
+    while (1) {
       /* manage here device not found */
     }
   }
 
   /* High-pass filter enabled on interrupt activity 1 */
   iis2dh_high_pass_int_conf_set(&dev_ctx, IIS2DH_ON_INT1_GEN);
-
   /* Enable HP filter for wake-up event detection
    * Use this setting to remove gravity on data output
    */
   iis2dh_high_pass_on_outputs_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Enable AOI1 on int1 pin */
   iis2dh_pin_int1_config_get(&dev_ctx, &ctrl_reg3);
   ctrl_reg3.i1_aoi1 = PROPERTY_ENABLE;
   iis2dh_pin_int1_config_set(&dev_ctx, &ctrl_reg3);
-
   /* Interrupt 1 pin latched */
   iis2dh_int1_pin_notification_mode_set(&dev_ctx, IIS2DH_INT1_LATCHED);
-
   /* Set full scale to 2 g */
   iis2dh_full_scale_set(&dev_ctx, IIS2DH_2g);
-
   /* Set interrupt threshold to 0x10 -> 250 mg */
   iis2dh_int1_gen_threshold_set(&dev_ctx, 0x10);
-
   /* Set no time duration */
   iis2dh_int1_gen_duration_set(&dev_ctx, 0);
-
   /* Dummy read to force the HP filter to current acceleration value. */
   iis2dh_filter_reference_get(&dev_ctx, &dummy);
-
   /* Configure wake-up interrupt event on all axis */
   iis2dh_int1_gen_conf_get(&dev_ctx, &int1_cfg);
   int1_cfg.zhie = PROPERTY_ENABLE;
@@ -184,26 +174,24 @@ void iis2dh_wake_up(void)
   int1_cfg.xhie = PROPERTY_ENABLE;
   int1_cfg.aoi = PROPERTY_DISABLE;
   iis2dh_int1_gen_conf_set(&dev_ctx, &int1_cfg);
-
   /* Set device in HR mode */
   iis2dh_operating_mode_set(&dev_ctx, IIS2DH_HR_12bit);
-
   /* Set Output Data Rate to 100 Hz */
   iis2dh_data_rate_set(&dev_ctx, IIS2DH_ODR_100Hz);
 
-  while(1) {
+  while (1) {
     iis2dh_int1_src_t src;
-
     /* Read INT pin 1 in polling mode
      * or read src status register
      */
     iis2dh_int1_gen_source_get(&dev_ctx, &src);
+
     if (src.xh || src.yh || src.zh) {
       iis2dh_int1_gen_source_get(&dev_ctx, &src);
-      sprintf((char*)tx_buffer, "wake-up detected : "
+      sprintf((char *)tx_buffer, "wake-up detected : "
               "x %d, y %d, z %d\r\n",
               src.xh, src.yh, src.zh);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -218,10 +206,10 @@ void iis2dh_wake_up(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
-
 #if defined(NUCLEO_F411RE)
   /* Write multiple command */
   reg |= 0x80;
@@ -255,7 +243,6 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-
 #if defined(NUCLEO_F411RE)
   /* Read multiple command */
   reg |= 0x80;

@@ -114,7 +114,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -128,30 +129,25 @@ void iis2dh_tap_double(void)
   iis2dh_ctrl_reg3_t ctrl_reg3;
   iis2dh_click_cfg_t click_cfg;
   stmdev_ctx_t dev_ctx;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   iis2dh_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != IIS2DH_ID) {
-    while(1) {
+    while (1) {
       /* manage here device not found */
     }
   }
 
-
   /* Set full scale to 2 g. */
   iis2dh_full_scale_set(&dev_ctx, IIS2DH_2g);
-
   /* Set click threshold to 12h -> 0.281 g
    * 1 LSB = full scale/128
    *
@@ -164,41 +160,35 @@ void iis2dh_tap_double(void)
   iis2dh_shock_dur_set(&dev_ctx, 0x20);
   iis2dh_quiet_dur_set(&dev_ctx, 0x20);
   iis2dh_double_tap_timeout_set(&dev_ctx, 0x30);
-
   /* Enable Click interrupt on INT pin 1 */
   iis2dh_pin_int1_config_get(&dev_ctx, &ctrl_reg3);
   ctrl_reg3.i1_click = PROPERTY_ENABLE;
   iis2dh_pin_int1_config_set(&dev_ctx, &ctrl_reg3);
   iis2dh_int1_gen_duration_set(&dev_ctx, 0);
-
   /* Enable double click on all axis */
   iis2dh_tap_conf_get(&dev_ctx, &click_cfg);
   click_cfg.xd = PROPERTY_ENABLE;
   click_cfg.yd = PROPERTY_ENABLE;
   click_cfg.zd = PROPERTY_ENABLE;
   iis2dh_tap_conf_set(&dev_ctx, &click_cfg);
-
   /* Set device in HR mode. */
   iis2dh_operating_mode_set(&dev_ctx, IIS2DH_HR_12bit);
-
   /* Set Output Data Rate.
    * The recommended accelerometer ODR for single and
    * double-click recognition is 400 Hz or higher.
    */
   iis2dh_data_rate_set(&dev_ctx, IIS2DH_ODR_400Hz);
 
-  while(1)
-  {
+  while (1) {
     iis2dh_click_src_t src;
-
     /* Check double tap event */
     iis2dh_tap_source_get(&dev_ctx, &src);
-    if (src.dclick)
-    {
-      sprintf((char*)tx_buffer, "d-click detected : "
+
+    if (src.dclick) {
+      sprintf((char *)tx_buffer, "d-click detected : "
               "x %d, y %d, z %d, sign %d\r\n",
-               src.x, src.y, src.z, src.sign);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+              src.x, src.y, src.z, src.sign);
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -213,10 +203,10 @@ void iis2dh_tap_double(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
-
 #if defined(NUCLEO_F411RE)
   /* Write multiple command */
   reg |= 0x80;
@@ -250,7 +240,6 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-
 #if defined(NUCLEO_F411RE)
   /* Read multiple command */
   reg |= 0x80;
