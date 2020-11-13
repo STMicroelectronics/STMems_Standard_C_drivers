@@ -112,7 +112,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -126,78 +127,74 @@ void lis331dlh_orientation_6D(void)
   /*
    * Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lis331dlh_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LIS331DLH_ID) {
-    while(1) {
+    while (1) {
       /* manage here device not found */
     }
   }
 
   /* Set full scale */
   lis331dlh_full_scale_set(&dev_ctx, LIS331DLH_2g);
-
   /* Disable HP filter */
   lis331dlh_hp_path_set(&dev_ctx, LIS331DLH_HP_DISABLE);
-
   /* Set no duration */
   lis331dlh_int1_dur_set(&dev_ctx, 0);
-
   /* Set 6D position detection */
   lis331dlh_int1_6d_mode_set(&dev_ctx, LIS331DLH_6D_INT1_POSITION);
-
   /* Apply 6D Orientation axis threshold */
   lis331dlh_int1_treshold_set(&dev_ctx, 33);
-
   /* Set Output Data Rate */
   lis331dlh_data_rate_set(&dev_ctx, LIS331DLH_ODR_100Hz);
 
   /* Wait Events */
-  while(1)
-  {
+  while (1) {
     lis331dlh_reg_t all_source;
-
     lis331dlh_int1_src_get(&dev_ctx, &all_source.int1_src);
 
     /* Check 6D Orientation */
-    switch(all_source.byte & 0x3f)
-    {
-    case 0x01:
-      sprintf((char*)tx_buffer, "6D Or. position XL\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      break;
-    case 0x02:
-      sprintf((char*)tx_buffer, "6D Or. position XH\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      break;
-    case 0x04:
-      sprintf((char*)tx_buffer, "6D Or. position YL\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      break;
-    case 0x08:
-      sprintf((char*)tx_buffer, "6D Or. position YH\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      break;
-    case 0x10:
-      sprintf((char*)tx_buffer, "6D Or. position ZL\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      break;
-    case 0x20:
-      sprintf((char*)tx_buffer, "6D Or. position ZH\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-      break;
-    default:
-      break;
+    switch (all_source.byte & 0x3f) {
+      case 0x01:
+        sprintf((char *)tx_buffer, "6D Or. position XL\r\n");
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
+        break;
+
+      case 0x02:
+        sprintf((char *)tx_buffer, "6D Or. position XH\r\n");
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
+        break;
+
+      case 0x04:
+        sprintf((char *)tx_buffer, "6D Or. position YL\r\n");
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
+        break;
+
+      case 0x08:
+        sprintf((char *)tx_buffer, "6D Or. position YH\r\n");
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
+        break;
+
+      case 0x10:
+        sprintf((char *)tx_buffer, "6D Or. position ZL\r\n");
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
+        break;
+
+      case 0x20:
+        sprintf((char *)tx_buffer, "6D Or. position ZH\r\n");
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
+        break;
+
+      default:
+        break;
     }
   }
 }
@@ -212,12 +209,13 @@ void lis331dlh_orientation_6D(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
   /* Write multiple command */
-   reg |= 0x80;
+  reg |= 0x80;
   HAL_I2C_Mem_Write(handle, LIS331DLH_I2C_ADD_L, reg,
                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)

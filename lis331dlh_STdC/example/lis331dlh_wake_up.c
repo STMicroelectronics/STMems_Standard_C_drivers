@@ -112,7 +112,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -127,26 +128,23 @@ void lis331dlh_wake_up(void)
    * Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
   int1_on_th_conf_t int_route;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
   /* Check device ID */
   lis331dlh_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LIS331DLH_ID)
-    while(1)
-    {
+    while (1) {
       /* manage here device not found */
     }
 
   /* Set full scale */
   lis331dlh_full_scale_set(&dev_ctx, LIS331DLH_2g);
-
   /* Apply high-pass digital filter on Wake-Up function
    *
    * Comment out this configuration in case of HP filter
@@ -156,58 +154,48 @@ void lis331dlh_wake_up(void)
   lis331dlh_hp_path_set(&dev_ctx, LIS331DLH_HP_ON_INT1_OUT);
   lis331dlh_hp_bandwidth_set(&dev_ctx, LIS331DLH_CUT_OFF_16Hz);
   lis331dlh_reference_mode_set(&dev_ctx, LIS331DLH_NORMAL_MODE);
-
   /* Apply high-pass digital filter on Wake-Up function
    * Duration time is set to zero so Wake-Up interrupt signal
    * is generated for each X,Y,Z filtered data exceeding the
    * configured threshold
    */
   lis331dlh_int1_dur_set(&dev_ctx, 0);
-
   /* Set wake-up threshold to 250 mg */
   lis331dlh_int1_treshold_set(&dev_ctx, 16);
-
   /* Dummy read to force the HP filter to
    * actual acceleration value
    * (i.e. set reference acceleration/tilt value
    */
   lis331dlh_hp_reset_get(&dev_ctx);
-
   /* Enable interrupt generation on Wake-Up INT1 pin */
   lis331dlh_int1_on_threshold_conf_get(&dev_ctx, &int_route);
   int_route.int1_xhie = PROPERTY_ENABLE;
   int_route.int1_yhie = PROPERTY_ENABLE;
-
   /* If HP filter is off take in account of 1g related to gravity */
   int_route.int1_zhie = PROPERTY_ENABLE;
   lis331dlh_int1_on_threshold_conf_set(&dev_ctx, int_route);
-
   /* Set Output Data Rate */
   lis331dlh_data_rate_set(&dev_ctx, LIS331DLH_ODR_100Hz);
 
   /* Wait Events */
-  while(1)
-  {
+  while (1) {
     lis331dlh_int1_src_t all_source;
-
     /* Check Wake-Up events */
     lis331dlh_int1_src_get(&dev_ctx, &all_source);
-    if (all_source.xh)
-    {
-      sprintf((char*)tx_buffer, "Wake-Up event on X\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+    if (all_source.xh) {
+      sprintf((char *)tx_buffer, "Wake-Up event on X\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
-    if (all_source.yh)
-    {
-      sprintf((char*)tx_buffer, "Wake-Up event on Y\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    if (all_source.yh) {
+      sprintf((char *)tx_buffer, "Wake-Up event on Y\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
-    if (all_source.zh)
-    {
-      sprintf((char*)tx_buffer, "Wake-Up event on Z\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    if (all_source.zh) {
+      sprintf((char *)tx_buffer, "Wake-Up event on Z\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     lis331dlh_hp_reset_get(&dev_ctx);
@@ -224,12 +212,13 @@ void lis331dlh_wake_up(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
   /* Write multiple command */
-   reg |= 0x80;
+  reg |= 0x80;
   HAL_I2C_Mem_Write(handle, LIS331DLH_I2C_ADD_L, reg,
                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)

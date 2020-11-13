@@ -113,7 +113,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -127,62 +128,54 @@ void lis331dlh_free_fall(void)
   /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
   int1_on_th_conf_t int_route;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lis331dlh_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LIS331DLH_ID) {
-    while(1) {
+    while (1) {
       /* manage here device not found */
     }
   }
 
   /* Set full scale */
   lis331dlh_full_scale_set(&dev_ctx, LIS331DLH_2g);
-
   /* Disable HP filter */
   lis331dlh_hp_path_set(&dev_ctx, LIS331DLH_HP_DISABLE);
-
   /* Set minimum event duration for free fall */
   lis331dlh_int1_dur_set(&dev_ctx, 3);
-
   /* Apply free-fall axis threshold to 350mg */
   lis331dlh_int1_treshold_set(&dev_ctx, 22);
-
   /* Enable interrupt generation on free fall INT1 pin */
-  lis331dlh_int1_on_threshold_mode_set(&dev_ctx, LIS331DLH_INT1_ON_THRESHOLD_AND);
+  lis331dlh_int1_on_threshold_mode_set(&dev_ctx,
+                                       LIS331DLH_INT1_ON_THRESHOLD_AND);
   lis331dlh_int1_on_threshold_conf_get(&dev_ctx, &int_route);
   int_route.int1_xlie = PROPERTY_ENABLE;
   int_route.int1_ylie = PROPERTY_ENABLE;
   int_route.int1_zlie = PROPERTY_ENABLE;
   lis331dlh_int1_on_threshold_conf_set(&dev_ctx, int_route);
-
   /* Set Output Data Rate */
   lis331dlh_data_rate_set(&dev_ctx, LIS331DLH_ODR_100Hz);
 
   /* Wait Events */
-  while(1)
-  {
+  while (1) {
     lis331dlh_int1_src_t all_source;
-
     /* Check free fall events
      *
      * You can test the event of zl && yl &&xl or check
      * the interrupt int1 pin
      */
     lis331dlh_int1_src_get(&dev_ctx, &all_source);
-    if (all_source.xl && all_source.yl && all_source.zl)
-    {
-      sprintf((char*)tx_buffer, "Free fall\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+    if (all_source.xl && all_source.yl && all_source.zl) {
+      sprintf((char *)tx_buffer, "Free fall\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -197,12 +190,13 @@ void lis331dlh_free_fall(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
   /* Write multiple command */
-   reg |= 0x80;
+  reg |= 0x80;
   HAL_I2C_Mem_Write(handle, LIS331DLH_I2C_ADD_L, reg,
                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
