@@ -91,33 +91,35 @@ static uint8_t tx_buffer[TX_BUF_DIM];
  *   Replace the functions "platform_write" and "platform_read" with your
  *   platform specific read and write function.
  *   This example use an STM32 evaluation board and CubeMX tool.
- *   In this case the "*handle" variable is usefull in order to select the
+ *   In this case the "*handle" variable is useful in order to select the
  *   correct interface but the usage uf "*handle" is not mandatory.
  */
 
-static int32_t platform_write(void *handle, uint8_t Reg, uint8_t *Bufp,
+static int32_t platform_write(void *handle, uint8_t Reg,
+                              uint8_t *Bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     HAL_I2C_Mem_Write(handle, LPS33HW_I2C_ADD_H, Reg,
                       I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
   }
-#ifdef MKI109V2 
-  else if (handle == &hspi2)
-  {
+
+#ifdef MKI109V2
+
+  else if (handle == &hspi2) {
     HAL_GPIO_WritePin(CS_SPI2_GPIO_Port, CS_SPI2_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &Reg, 1, 1000);
     HAL_SPI_Transmit(handle, Bufp, len, 1000);
     HAL_GPIO_WritePin(CS_SPI2_GPIO_Port, CS_SPI2_Pin, GPIO_PIN_SET);
   }
-  else if (handle == &hspi1)
-  {
+
+  else if (handle == &hspi1) {
     HAL_GPIO_WritePin(CS_SPI1_GPIO_Port, CS_SPI1_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &Reg, 1, 1000);
     HAL_SPI_Transmit(handle, Bufp, len, 1000);
     HAL_GPIO_WritePin(CS_SPI1_GPIO_Port, CS_SPI1_Pin, GPIO_PIN_SET);
   }
+
 #endif
   return 0;
 }
@@ -125,29 +127,30 @@ static int32_t platform_write(void *handle, uint8_t Reg, uint8_t *Bufp,
 static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
-      HAL_I2C_Mem_Read(handle, LPS33HW_I2C_ADD_H, Reg,
-                       I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
+  if (handle == &hi2c1) {
+    HAL_I2C_Mem_Read(handle, LPS33HW_I2C_ADD_H, Reg,
+                     I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
   }
-#ifdef MKI109V2  
-  else if (handle == &hspi2)
-  {
+
+#ifdef MKI109V2
+
+  else if (handle == &hspi2) {
     Reg |= 0x80;
     HAL_GPIO_WritePin(CS_DEV_GPIO_Port, CS_DEV_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &Reg, 1, 1000);
     HAL_SPI_Receive(handle, Bufp, len, 1000);
     HAL_GPIO_WritePin(CS_DEV_GPIO_Port, CS_DEV_Pin, GPIO_PIN_SET);
   }
-  else
-  {
+
+  else {
     Reg |= 0x80;
     HAL_GPIO_WritePin(CS_RF_GPIO_Port, CS_RF_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &Reg, 1, 1000);
     HAL_SPI_Receive(handle, Bufp, len, 1000);
     HAL_GPIO_WritePin(CS_RF_GPIO_Port, CS_RF_Pin, GPIO_PIN_SET);
   }
-#endif 
+
+#endif
   return 0;
 }
 
@@ -156,12 +159,12 @@ static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
  */
 void tx_com( uint8_t *tx_buffer, uint16_t len )
 {
-  #ifdef NUCLEO_STM32F411RE 
+#ifdef NUCLEO_STM32F411RE
   HAL_UART_Transmit( &huart2, tx_buffer, len, 1000 );
-  #endif
-  #ifdef MKI109V2 
+#endif
+#ifdef MKI109V2
   CDC_Transmit_FS( tx_buffer, len );
-  #endif
+#endif
 }
 
 /* Main Example --------------------------------------------------------------*/
@@ -174,21 +177,25 @@ void example_main(void)
   lps33hw_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1; 
+  dev_ctx.handle = &hi2c1;
   /*
    *  Check device ID
    */
   whoamI = 0;
   lps33hw_device_id_get(&dev_ctx, &whoamI);
+
   if ( whoamI != LPS33HW_ID )
-    while(1); /*manage here device not found */
+    while (1); /*manage here device not found */
+
   /*
    *  Restore default configuration
    */
   lps33hw_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lps33hw_reset_get(&dev_ctx, &rst);
   } while (rst);
+
   /*
    *  Enable Block Data Update
    */
@@ -197,36 +204,33 @@ void example_main(void)
    * Set Output Data Rate
    */
   lps33hw_data_rate_set(&dev_ctx, LPS33HW_ODR_10_Hz);
- 
+
   /*
    * Read samples in polling mode (no int)
    */
-  while(1)
-  {
+  while (1) {
     /*
      * Read output only if new value is available
      */
     lps33hw_reg_t reg;
     lps33hw_read_reg(&dev_ctx, LPS33HW_STATUS, (uint8_t *)&reg, 1);
 
-    if (reg.status.p_da)
-    {
+    if (reg.status.p_da) {
       memset(data_raw_pressure.u8bit, 0x00, sizeof(int32_t));
       lps33hw_pressure_raw_get(&dev_ctx, data_raw_pressure.u8bit);
       pressure_hPa = lps33hw_from_lsb_to_hpa( data_raw_pressure.i32bit);
-     
-      sprintf((char*)tx_buffer, "pressure [hPa]:%6.2f\r\n", pressure_hPa);
-      tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
+      sprintf((char *)tx_buffer, "pressure [hPa]:%6.2f\r\n", pressure_hPa);
+      tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
     }
 
-    if (reg.status.t_da)
-    {
+    if (reg.status.t_da) {
       memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
       lps33hw_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-      temperature_degC = lps33hw_from_lsb_to_degc( data_raw_temperature.i16bit );
-     
-      sprintf((char*)tx_buffer, "temperature [degC]:%6.2f\r\n", temperature_degC );
-      tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
+      temperature_degC = lps33hw_from_lsb_to_degc(
+                           data_raw_temperature.i16bit );
+      sprintf((char *)tx_buffer, "temperature [degC]:%6.2f\r\n",
+              temperature_degC );
+      tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
     }
   }
 }
