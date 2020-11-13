@@ -126,7 +126,8 @@ static const float max_st_limit[] = {3000.0f, 3000.0f, 1000.0f};
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -149,22 +150,21 @@ void lis3mdl_self_test(void)
   uint8_t rst;
   uint8_t i;
   uint8_t j;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Init test platform */
   platform_init();
-
   /* Check device ID */
   lis3mdl_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LIS3MDL_ID)
-    while(1);
+    while (1);
 
   /* Restore default configuration */
   lis3mdl_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lis3mdl_reset_get(&dev_ctx, &rst);
   } while (rst);
@@ -179,76 +179,83 @@ void lis3mdl_self_test(void)
   platform_delay(WAIT_TIME_00);
   /* Set Operating mode */
   lis3mdl_operating_mode_set(&dev_ctx, LIS3MDL_CONTINUOUS_MODE);
-
   /* Wait stable output */
   platform_delay(WAIT_TIME_01);
 
   /* Check if new value available */
   do {
     lis3mdl_mag_data_ready_get(&dev_ctx, &drdy);
-  } while(!drdy);
+  } while (!drdy);
+
   /* Read dummy data and discard it */
   lis3mdl_magnetic_raw_get(&dev_ctx, data_raw);
-
   /* Read samples and get the average vale for each axis */
-  memset(val_st_off, 0x00, 3*sizeof(float));
-  for (i = 0; i < SAMPLES; i++){
+  memset(val_st_off, 0x00, 3 * sizeof(float));
+
+  for (i = 0; i < SAMPLES; i++) {
     /* Check if new value available */
     do {
       lis3mdl_mag_data_ready_get(&dev_ctx, &drdy);
-    } while(!drdy);
+    } while (!drdy);
+
     /* Read data and accumulate the mg value */
     lis3mdl_magnetic_raw_get(&dev_ctx, data_raw);
-    for (j = 0; j < 3; j++){
+
+    for (j = 0; j < 3; j++) {
       val_st_off[j] += lis3mdl_from_fs12_to_gauss(data_raw[j]);
     }
   }
+
   /* Calculate the mg average values */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     val_st_off[i] /= SAMPLES;
   }
 
   /* Enable Self Test */
   lis3mdl_self_test_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Wait stable output */
   platform_delay(WAIT_TIME_02);
 
   /* Check if new value available */
   do {
     lis3mdl_mag_data_ready_get(&dev_ctx, &drdy);
-  } while(!drdy);
+  } while (!drdy);
+
   /* Read dummy data and discard it */
   lis3mdl_magnetic_raw_get(&dev_ctx, data_raw);
-
   /* Read samples and get the average vale for each axis */
-  memset(val_st_on, 0x00, 3*sizeof(float));
-  for (i = 0; i < SAMPLES; i++){
+  memset(val_st_on, 0x00, 3 * sizeof(float));
+
+  for (i = 0; i < SAMPLES; i++) {
     /* Check if new value available */
     do {
       lis3mdl_mag_data_ready_get(&dev_ctx, &drdy);
-    } while(!drdy);
+    } while (!drdy);
+
     /* Read data and accumulate the mg value */
     lis3mdl_magnetic_raw_get(&dev_ctx, data_raw);
-    for (j = 0; j < 3; j++){
+
+    for (j = 0; j < 3; j++) {
       val_st_on[j] += lis3mdl_from_fs12_to_gauss(data_raw[j]);
     }
   }
 
   /* Calculate the mg average values */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     val_st_on[i] /= SAMPLES;
   }
 
   st_result = ST_PASS;
+
   /* Calculate the mg values for self test */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
   }
+
   /* Check self test limit */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     if (( min_st_limit[i] > test_val[i] ) ||
-        ( test_val[i] > max_st_limit[i])){
+        ( test_val[i] > max_st_limit[i])) {
       st_result = ST_FAIL;
     }
   }
@@ -259,12 +266,14 @@ void lis3mdl_self_test(void)
   lis3mdl_operating_mode_set(&dev_ctx, LIS3MDL_POWER_DOWN);
 
   if (st_result == ST_PASS) {
-    sprintf((char*)tx_buffer, "Self Test - PASS\r\n" );
+    sprintf((char *)tx_buffer, "Self Test - PASS\r\n" );
   }
+
   else {
-    sprintf((char*)tx_buffer, "Self Test - FAIL\r\n" );
+    sprintf((char *)tx_buffer, "Self Test - FAIL\r\n" );
   }
-  tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+  tx_com(tx_buffer, strlen((char const *)tx_buffer));
 }
 
 /*
@@ -277,7 +286,8 @@ void lis3mdl_self_test(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)

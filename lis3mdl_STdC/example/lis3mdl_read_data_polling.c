@@ -118,7 +118,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -133,64 +134,60 @@ void lis3mdl_read_data_polling(void)
   stmdev_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &SENSOR_BUS; 
-
+  dev_ctx.handle = &SENSOR_BUS;
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Check device ID */
   lis3mdl_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LIS3MDL_ID)
-    while(1); /*manage here device not found */
+    while (1); /*manage here device not found */
 
   /* Restore default configuration */
   lis3mdl_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lis3mdl_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Enable Block Data Update */
   lis3mdl_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set Output Data Rate */
   lis3mdl_data_rate_set(&dev_ctx, LIS3MDL_HP_1Hz25);
-
   /* Set full scale */
   lis3mdl_full_scale_set(&dev_ctx, LIS3MDL_16_GAUSS);
-
   /* Enable temperature sensor */
   lis3mdl_temperature_meas_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /* Set device in continuos mode */
+  /* Set device in continuous mode */
   lis3mdl_operating_mode_set(&dev_ctx, LIS3MDL_CONTINUOUS_MODE);
- 
-  /* Read samples in polling mode (no int) */
-  while(1)
-  {
-    uint8_t reg;
 
+  /* Read samples in polling mode (no int) */
+  while (1) {
+    uint8_t reg;
     /* Read output only if new value is available */
     lis3mdl_mag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
+
+    if (reg) {
       /* Read magnetic field data */
-      memset(data_raw_magnetic, 0x00, 3*sizeof(int16_t));
+      memset(data_raw_magnetic, 0x00, 3 * sizeof(int16_t));
       lis3mdl_magnetic_raw_get(&dev_ctx, data_raw_magnetic);
-      magnetic_mG[0] = 1000 * lis3mdl_from_fs16_to_gauss(data_raw_magnetic[0]);
-      magnetic_mG[1] = 1000 * lis3mdl_from_fs16_to_gauss(data_raw_magnetic[1]);
-      magnetic_mG[2] = 1000 * lis3mdl_from_fs16_to_gauss(data_raw_magnetic[2]);
-     
-      sprintf((char*)tx_buffer, "Magnetic field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
+      magnetic_mG[0] = 1000 * lis3mdl_from_fs16_to_gauss(
+                         data_raw_magnetic[0]);
+      magnetic_mG[1] = 1000 * lis3mdl_from_fs16_to_gauss(
+                         data_raw_magnetic[1]);
+      magnetic_mG[2] = 1000 * lis3mdl_from_fs16_to_gauss(
+                         data_raw_magnetic[2]);
+      sprintf((char *)tx_buffer,
+              "Magnetic field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-     
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
       /* Read temperature data */
       memset(&data_raw_temperature, 0x00, sizeof(int16_t));
       lis3mdl_temperature_raw_get(&dev_ctx, &data_raw_temperature);
       temperature_degC = lis3mdl_from_lsb_to_celsius(data_raw_temperature);
-      
-      sprintf((char*)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      sprintf((char *)tx_buffer, "Temperature [degC]:%6.2f\r\n",
+              temperature_degC);
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -205,7 +202,8 @@ void lis3mdl_read_data_polling(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)

@@ -121,7 +121,8 @@ static uint16_t threshold = (uint16_t)(1711 * 0.192f);
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -133,56 +134,47 @@ static void platform_init(void);
 void lis3mdl_interrupt(void)
 {
   lis3mdl_int_cfg_t int_ctrl;
-
   /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Check device ID */
   lis3mdl_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LIS3MDL_ID) {
-    while(1) {
+    while (1) {
       /* manage here device not found */
     }
   }
 
   /* Restore default configuration */
   lis3mdl_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lis3mdl_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Enable Block Data Update */
   lis3mdl_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set Output Data Rate */
   lis3mdl_data_rate_set(&dev_ctx, LIS3MDL_HP_1Hz25);
-
   /* Set full scale */
   lis3mdl_full_scale_set(&dev_ctx, LIS3MDL_16_GAUSS);
-
   /* Enable temperature sensor */
   lis3mdl_temperature_meas_set(&dev_ctx, PROPERTY_ENABLE);
-
-  /* Set device in continuos mode */
+  /* Set device in continuous mode */
   lis3mdl_operating_mode_set(&dev_ctx, LIS3MDL_CONTINUOUS_MODE);
-
   /* Enable interrupt generation on interrupt */
   lis3mdl_int_generation_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set interrupt threshold
    *
    * The sample code exploits a threshold and notify it by
    * hardware through the INT/DRDY pin
    */
   lis3mdl_int_threshold_set(&dev_ctx, threshold);
-
   int_ctrl.iea = PROPERTY_ENABLE;
   int_ctrl.ien = PROPERTY_ENABLE;
   int_ctrl.zien = PROPERTY_ENABLE;
@@ -191,45 +183,58 @@ void lis3mdl_interrupt(void)
   lis3mdl_int_config_set(&dev_ctx, &int_ctrl);
 
   /* Read samples in polling mode */
-  while(1)
-  {
+  while (1) {
     uint8_t reg;
     char *exceeds_info;
     lis3mdl_int_src_t source;
-
     /* Read output only if new value is available
      * It's also possible to use interrupt pin for trigger
      */
     lis3mdl_mag_data_ready_get(&dev_ctx, &reg);
+
     if (reg) {
       /* Read magnetic field data */
       memset(data_raw_magnetic, 0x00, 3 * sizeof(int16_t));
       lis3mdl_magnetic_raw_get(&dev_ctx, data_raw_magnetic);
-      magnetic_mG[0] = 1000 * lis3mdl_from_fs16_to_gauss(data_raw_magnetic[0]);
-      magnetic_mG[1] = 1000 * lis3mdl_from_fs16_to_gauss(data_raw_magnetic[1]);
-      magnetic_mG[2] = 1000 * lis3mdl_from_fs16_to_gauss(data_raw_magnetic[2]);
+      magnetic_mG[0] = 1000 * lis3mdl_from_fs16_to_gauss(
+                         data_raw_magnetic[0]);
+      magnetic_mG[1] = 1000 * lis3mdl_from_fs16_to_gauss(
+                         data_raw_magnetic[1]);
+      magnetic_mG[2] = 1000 * lis3mdl_from_fs16_to_gauss(
+                         data_raw_magnetic[2]);
       exceeds_info = NULL;
-
       /* Read LIS3MDL INT SRC register */
       lis3mdl_int_source_get(&dev_ctx, &source);
-      if (source.nth_x)
-        exceeds_info = "X-axis neg";
-      else if (source.nth_y)
-        exceeds_info = "Y-axis neg";
-      else if (source.nth_z)
-        exceeds_info = "Z-axis neg";
-      else if (source.pth_x)
-        exceeds_info = "X-axis pos";
-      else if (source.pth_y)
-        exceeds_info = "Y-axis pos";
-      else if (source.pth_z)
-        exceeds_info = "Z-axis pos";
 
-      sprintf((char*)tx_buffer,
+      if (source.nth_x) {
+        exceeds_info = "X-axis neg";
+      }
+
+      else if (source.nth_y) {
+        exceeds_info = "Y-axis neg";
+      }
+
+      else if (source.nth_z) {
+        exceeds_info = "Z-axis neg";
+      }
+
+      else if (source.pth_x) {
+        exceeds_info = "X-axis pos";
+      }
+
+      else if (source.pth_y) {
+        exceeds_info = "Y-axis pos";
+      }
+
+      else if (source.pth_z) {
+        exceeds_info = "Z-axis pos";
+      }
+
+      sprintf((char *)tx_buffer,
               "Magnetic [mG]:%4.2f\t%4.2f\t%4.2f (%s)\r\n",
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2],
               exceeds_info != NULL ? exceeds_info : "");
-              tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -244,7 +249,8 @@ void lis3mdl_interrupt(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
