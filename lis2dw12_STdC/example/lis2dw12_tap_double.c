@@ -116,7 +116,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -130,97 +131,99 @@ void lis2dw12_double_tap(void)
   /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
   lis2dw12_reg_t int_route;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lis2dw12_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LIS2DW12_ID)
-    while(1)
-    {
+    while (1) {
       /* manage here device not found */
     }
 
   /* Restore default configuration */
   lis2dw12_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lis2dw12_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Set full scale */
   lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_2g);
-
   /* Configure power mode */
-  lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
-
+  lis2dw12_power_mode_set(&dev_ctx,
+                          LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
   /* Set Output Data Rate */
   lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_400Hz);
-
   /* Enable Tap detection on X, Y, Z */
   lis2dw12_tap_detection_on_z_set(&dev_ctx, PROPERTY_ENABLE);
   lis2dw12_tap_detection_on_y_set(&dev_ctx, PROPERTY_ENABLE);
   lis2dw12_tap_detection_on_x_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set Tap threshold on all axis */
   lis2dw12_tap_threshold_x_set(&dev_ctx, 12);
   lis2dw12_tap_threshold_y_set(&dev_ctx, 12);
   lis2dw12_tap_threshold_z_set(&dev_ctx, 12);
-
   /* Configure Double Tap parameter */
   lis2dw12_tap_dur_set(&dev_ctx, 7);
   lis2dw12_tap_quiet_set(&dev_ctx, 3);
   lis2dw12_tap_shock_set(&dev_ctx, 3);
-
   /* Enable Double Tap detection */
   lis2dw12_tap_mode_set(&dev_ctx, LIS2DW12_BOTH_SINGLE_DOUBLE);
-
   /* Enable single tap detection interrupt */
   lis2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
   int_route.ctrl4_int1_pad_ctrl.int1_tap = PROPERTY_ENABLE;
   lis2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
 
   /* Wait Events. */
-  while(1)
-  {
+  while (1) {
     lis2dw12_all_sources_t all_source;
-
     /* Check Double Tap events */
     lis2dw12_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.tap_src.double_tap)
-    {
-      sprintf((char*)tx_buffer, "Double Tap Detected: Sign %s",
+
+    if (all_source.tap_src.double_tap) {
+      sprintf((char *)tx_buffer, "Double Tap Detected: Sign %s",
               all_source.tap_src.tap_sign ? "positive" : "negative");
-      if (all_source.tap_src.x_tap)
-        sprintf((char*)tx_buffer, "%s on X", tx_buffer);
-      if (all_source.tap_src.y_tap)
-        sprintf((char*)tx_buffer, "%s on Y", tx_buffer);
-      if (all_source.tap_src.z_tap)
-        sprintf((char*)tx_buffer, "%s on Z", tx_buffer);
-      sprintf((char*)tx_buffer, "%s axis\r\n", tx_buffer);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+      if (all_source.tap_src.x_tap) {
+        sprintf((char *)tx_buffer, "%s on X", tx_buffer);
+      }
+
+      if (all_source.tap_src.y_tap) {
+        sprintf((char *)tx_buffer, "%s on Y", tx_buffer);
+      }
+
+      if (all_source.tap_src.z_tap) {
+        sprintf((char *)tx_buffer, "%s on Z", tx_buffer);
+      }
+
+      sprintf((char *)tx_buffer, "%s axis\r\n", tx_buffer);
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     /* Check Single Tap events */
-    if (all_source.tap_src.single_tap)
-    {
-      sprintf((char*)tx_buffer, "Tap Detected: Sign %s",
+    if (all_source.tap_src.single_tap) {
+      sprintf((char *)tx_buffer, "Tap Detected: Sign %s",
               all_source.tap_src.tap_sign ? "positive" : "negative");
-      if (all_source.tap_src.x_tap)
-        sprintf((char*)tx_buffer, "%s on X", tx_buffer);
-      if (all_source.tap_src.y_tap)
-        sprintf((char*)tx_buffer, "%s on Y", tx_buffer);
-      if (all_source.tap_src.z_tap)
-        sprintf((char*)tx_buffer, "%s on Z", tx_buffer);
-      sprintf((char*)tx_buffer, "%s axis\r\n", tx_buffer);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+      if (all_source.tap_src.x_tap) {
+        sprintf((char *)tx_buffer, "%s on X", tx_buffer);
+      }
+
+      if (all_source.tap_src.y_tap) {
+        sprintf((char *)tx_buffer, "%s on Y", tx_buffer);
+      }
+
+      if (all_source.tap_src.z_tap) {
+        sprintf((char *)tx_buffer, "%s on Z", tx_buffer);
+      }
+
+      sprintf((char *)tx_buffer, "%s axis\r\n", tx_buffer);
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -235,17 +238,18 @@ void lis2dw12_double_tap(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-    HAL_I2C_Mem_Write(handle, LIS2DW12_I2C_ADD_L, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  HAL_I2C_Mem_Write(handle, LIS2DW12_I2C_ADD_L, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_write(handle,  LIS2DW12_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
@@ -269,11 +273,11 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   HAL_I2C_Mem_Read(handle, LIS2DW12_I2C_ADD_L, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Receive(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_read(handle, LIS2DW12_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
@@ -283,7 +287,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
