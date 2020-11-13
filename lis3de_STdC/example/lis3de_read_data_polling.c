@@ -2,7 +2,7 @@
  ******************************************************************************
  * @file    read_data_polling.c
  * @author  Sensors Software Solution Team
- * @brief   This file shows how to extract data from the sensor in 
+ * @brief   This file shows how to extract data from the sensor in
  *          polling mode.
  *
  ******************************************************************************
@@ -115,7 +115,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -128,57 +129,50 @@ void lis3de_read_data_polling(void)
 {
   /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &SENSOR_BUS; 
-
+  dev_ctx.handle = &SENSOR_BUS;
   /* Wait boot time and initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(5);
-
   /* Check device ID */
   lis3de_device_id_get(&dev_ctx, &whoamI);
-  if (whoamI != LIS3DE_ID){
-    while(1) {
+
+  if (whoamI != LIS3DE_ID) {
+    while (1) {
       /* manage here device not found */
     }
   }
 
   /* Enable Block Data Update. */
   lis3de_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set Output Data Rate to 1Hz. */
   lis3de_data_rate_set(&dev_ctx, LIS3DE_ODR_1Hz);
-
   /* Set full scale to 2g. */
   lis3de_full_scale_set(&dev_ctx, LIS3DE_2g);
-
   /* Enable temperature sensor. */
   lis3de_aux_adc_set(&dev_ctx, LIS3DE_AUX_ON_TEMPERATURE);
-
   /* Set device in normal mode. */
   lis3de_operating_mode_set(&dev_ctx, LIS3DE_NM);
- 
-  /* Read samples in polling mode (no int) */
-  while(1) {
-    lis3de_reg_t reg;
 
+  /* Read samples in polling mode (no int) */
+  while (1) {
+    lis3de_reg_t reg;
     /* Read output only if new value available */
     lis3de_xl_data_ready_get(&dev_ctx, &reg.byte);
+
     if (reg.byte) {
       /* Read accelerometer data */
-      memset(data_raw_acceleration, 0x00, 3*sizeof(int16_t));
+      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
       lis3de_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
       acceleration_mg[0] = lis3de_from_fs2_to_mg(data_raw_acceleration[0]);
       acceleration_mg[1] = lis3de_from_fs2_to_mg(data_raw_acceleration[1]);
       acceleration_mg[2] = lis3de_from_fs2_to_mg(data_raw_acceleration[2]);
-     
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+      sprintf((char *)tx_buffer,
+              "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -193,7 +187,8 @@ void lis3de_read_data_polling(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)

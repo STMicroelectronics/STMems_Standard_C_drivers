@@ -123,7 +123,8 @@ static stmdev_ctx_t dev_ctx;
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -135,71 +136,61 @@ static void platform_init(void);
 void lis3de_fifo_read(void)
 {
   uint8_t whoamI;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   whoamI = 0;
   lis3de_device_id_get(&dev_ctx, &whoamI);
+
   if ( whoamI != LIS3DE_ID )
-    while(1); /*manage here device not found */
+    while (1); /*manage here device not found */
 
   /* Enable Block Data Update. */
   lis3de_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set Output Data Rate to 100 hz. */
   lis3de_data_rate_set(&dev_ctx, LIS3DE_ODR_100Hz);
-
   /* Set full scale to 2 g. */
   lis3de_full_scale_set(&dev_ctx, LIS3DE_2g);
-
   /*
    * Set operating mode to high resolution.
    */
   lis3de_operating_mode_set(&dev_ctx, LIS3DE_LP);
-
   /* Set FIFO watermark to FIFO_WATERMARK samples. */
   lis3de_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
-
   /*
    * Set FIFO mode to Stream mode: Accumulate samples and
    * override old data.
    */
   lis3de_fifo_mode_set(&dev_ctx, LIS3DE_DYNAMIC_STREAM_MODE);
-
   /* Enable FIFO. */
   lis3de_fifo_set(&dev_ctx, PROPERTY_ENABLE);
 
-  while(1)
-  {
+  while (1) {
     uint8_t flags;
     uint8_t num = 0;
-
     /* Check if FIFO level over threshold. */
     lis3de_fifo_fth_flag_get(&dev_ctx, &flags);
-    if (flags)
-    {
-        /* Read number of sample in FIFO. */
-        lis3de_fifo_data_level_get(&dev_ctx, &num);
 
-        while (num-- > 0)
-        {
-            /* Read XL samples. */
-            lis3de_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-            acceleration_mg[0] = lis3de_from_fs2_to_mg(data_raw_acceleration[0]);
-            acceleration_mg[1] = lis3de_from_fs2_to_mg(data_raw_acceleration[1]);
-            acceleration_mg[2] = lis3de_from_fs2_to_mg(data_raw_acceleration[2]);
+    if (flags) {
+      /* Read number of sample in FIFO. */
+      lis3de_fifo_data_level_get(&dev_ctx, &num);
 
-            sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-                       acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-            tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
-        }
+      while (num-- > 0) {
+        /* Read XL samples. */
+        lis3de_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
+        acceleration_mg[0] = lis3de_from_fs2_to_mg(data_raw_acceleration[0]);
+        acceleration_mg[1] = lis3de_from_fs2_to_mg(data_raw_acceleration[1]);
+        acceleration_mg[2] = lis3de_from_fs2_to_mg(data_raw_acceleration[2]);
+        sprintf((char *)tx_buffer,
+                "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+                acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+        tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
+      }
     }
-    else
-    {
-        /* Force compiler to generate code, avoiding I2C polling stress. */
-        for (volatile uint32_t i = 0; i < 10000; i++);
+
+    else {
+      /* Force compiler to generate code, avoiding I2C polling stress. */
+      for (volatile uint32_t i = 0; i < 10000; i++);
     }
   }
 }
@@ -214,7 +205,8 @@ void lis3de_fifo_read(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)

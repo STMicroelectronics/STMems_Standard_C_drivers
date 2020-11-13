@@ -118,7 +118,8 @@ static uint8_t tx_buffer[TX_BUF_DIM];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -140,34 +141,28 @@ void lis3de_freefall(void)
   stmdev_ctx_t dev_ctx;
   lis3de_ctrl_reg3_t ctrl_reg3;
   lis3de_ig1_cfg_t ig1_cfg;
- 
   uint8_t whoamI;
-
   /* Initialize mems driver interface. */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Check device ID. */
   whoamI = 0;
   lis3de_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LIS3DE_ID)
-    while(1); /* manage here device not found */
+    while (1); /* manage here device not found */
 
   /* Set Output Data Rate to 100 Hz. */
   lis3de_data_rate_set(&dev_ctx, LIS3DE_ODR_100Hz);
-
   /* Set full scale to 2 g. */
   lis3de_full_scale_set(&dev_ctx, LIS3DE_2g);
-
   /* Enable AOI1 interrupt on INT pin 1. */
   memset((uint8_t *)&ctrl_reg3, 0, sizeof(ctrl_reg3));
   ctrl_reg3.int1_ig1 = PROPERTY_ENABLE;
   lis3de_pin_int1_config_set(&dev_ctx, &ctrl_reg3);
-
   /* Enable Interrupt 1 pin latched. */
   lis3de_int1_pin_notification_mode_set(&dev_ctx, LIS3DE_INT1_LATCHED);
-
   /*
    * Set threshold to 16h -> 350 mg
    * Set Duration to 03h -> minimum event duration
@@ -176,7 +171,6 @@ void lis3de_freefall(void)
    */
   lis3de_int1_gen_threshold_set(&dev_ctx, 0x16);
   lis3de_int1_gen_duration_set(&dev_ctx, 0x03);
-
   /*
    * Configure free-fall recognition
    * Enable condiction (AND) for x, y, z acc. data below threshold.
@@ -187,20 +181,17 @@ void lis3de_freefall(void)
   ig1_cfg.ylie = PROPERTY_ENABLE;
   ig1_cfg.xlie = PROPERTY_ENABLE;
   lis3de_int1_gen_conf_set(&dev_ctx, &ig1_cfg);
-
   /* Set device in HR mode. */
   lis3de_operating_mode_set(&dev_ctx, LIS3DE_LP);
 
-  while(1)
-  {
- /* Read INT pin 1 in polling mode. */
-  lis3de_ig1_source_t src;
+  while (1) {
+    /* Read INT pin 1 in polling mode. */
+    lis3de_ig1_source_t src;
 
-    if (platform_reap_int_pin())
-    {
+    if (platform_reap_int_pin()) {
       lis3de_int1_gen_source_get(&dev_ctx, &src);
-      sprintf((char*)tx_buffer, "freefall detected\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      sprintf((char *)tx_buffer, "freefall detected\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -215,7 +206,8 @@ void lis3de_freefall(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
@@ -324,8 +316,8 @@ static void platform_init(void)
 static int32_t platform_reap_int_pin(void)
 {
 #ifdef NUCLEO_F411RE
-    return HAL_GPIO_ReadPin(LIS3DE_INT1_GPIO_PORT, LIS3DE_INT1_PIN);
+  return HAL_GPIO_ReadPin(LIS3DE_INT1_GPIO_PORT, LIS3DE_INT1_PIN);
 #else /* NUCLEO_STM32F411RE */
-    return 0;
+  return 0;
 #endif /* NUCLEO_STM32F411RE */
 }
