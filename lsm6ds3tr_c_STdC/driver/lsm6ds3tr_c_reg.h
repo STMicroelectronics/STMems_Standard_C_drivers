@@ -23,7 +23,7 @@
 #define LSM6DS3TR_C_DRIVER_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -43,7 +43,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -65,8 +65,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -89,7 +91,7 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-  *              You can create a sensor configuration by your own or using 
+  *              You can create a sensor configuration by your own or using
   *              Unico / Unicleo tools available on STMicroelectronics
   *              web site.
   *
@@ -134,7 +136,8 @@ typedef struct {
 #define LSM6DS3TR_C_FUNC_CFG_ACCESS              0x01U
 typedef struct {
   uint8_t not_used_01              : 5;
-  uint8_t func_cfg_en              : 3;  /* func_cfg_en + func_cfg_en_b */
+uint8_t func_cfg_en              :
+  3;  /* func_cfg_en + func_cfg_en_b */
 } lsm6ds3tr_c_func_cfg_access_t;
 
 #define LSM6DS3TR_C_SENSOR_SYNC_TIME_FRAME       0x04U
@@ -270,7 +273,8 @@ typedef struct {
   uint8_t not_used_01              : 1;
   uint8_t usr_off_w                : 1;
   uint8_t xl_hm_mode               : 1;
-  uint8_t den_mode                 : 3;  /* trig_en + lvl_en + lvl2_en */
+uint8_t den_mode                 :
+  3;  /* trig_en + lvl_en + lvl2_en */
 } lsm6ds3tr_c_ctrl6_c_t;
 
 #define LSM6DS3TR_C_CTRL7_G                      0x16U
@@ -547,12 +551,14 @@ typedef struct {
 
 #define LSM6DS3TR_C_FIFO_STATUS3                 0x3CU
 typedef struct {
-  uint8_t fifo_pattern             : 8;  /* + FIFO_STATUS4(fifo_pattern) */
+uint8_t fifo_pattern             :
+  8;  /* + FIFO_STATUS4(fifo_pattern) */
 } lsm6ds3tr_c_fifo_status3_t;
 
 #define LSM6DS3TR_C_FIFO_STATUS4                 0x3DU
 typedef struct {
-  uint8_t fifo_pattern             : 2;  /* + FIFO_STATUS3(fifo_pattern) */
+uint8_t fifo_pattern             :
+  2;  /* + FIFO_STATUS3(fifo_pattern) */
   uint8_t not_used_01              : 6;
 } lsm6ds3tr_c_fifo_status4_t;
 
@@ -895,7 +901,7 @@ typedef struct {
   * @{
   *
   */
-typedef union{
+typedef union {
   lsm6ds3tr_c_func_cfg_access_t                  func_cfg_access;
   lsm6ds3tr_c_sensor_sync_time_frame_t           sensor_sync_time_frame;
   lsm6ds3tr_c_sensor_sync_res_ratio_t            sensor_sync_res_ratio;
@@ -956,7 +962,8 @@ typedef union{
   lsm6ds3tr_c_md1_cfg_t                          md1_cfg;
   lsm6ds3tr_c_md2_cfg_t                          md2_cfg;
   lsm6ds3tr_c_master_cmd_code_t                  master_cmd_code;
-  lsm6ds3tr_c_sens_sync_spi_error_code_t         sens_sync_spi_error_code;
+  lsm6ds3tr_c_sens_sync_spi_error_code_t
+  sens_sync_spi_error_code;
   lsm6ds3tr_c_slv0_add_t                         slv0_add;
   lsm6ds3tr_c_slv0_subadd_t                      slv0_subadd;
   lsm6ds3tr_c_slave0_config_t                    slave0_config;
@@ -969,7 +976,8 @@ typedef union{
   lsm6ds3tr_c_slv3_add_t                         slv3_add;
   lsm6ds3tr_c_slv3_subadd_t                      slv3_subadd;
   lsm6ds3tr_c_slave3_config_t                    slave3_config;
-  lsm6ds3tr_c_datawrite_src_mode_sub_slv0_t      datawrite_src_mode_sub_slv0;
+  lsm6ds3tr_c_datawrite_src_mode_sub_slv0_t
+  datawrite_src_mode_sub_slv0;
   lsm6ds3tr_c_config_pedo_ths_min_t              config_pedo_ths_min;
   lsm6ds3tr_c_pedo_deb_reg_t                     pedo_deb_reg;
   lsm6ds3tr_c_a_wrist_tilt_mask_t                a_wrist_tilt_mask;
@@ -982,10 +990,12 @@ typedef union{
   *
   */
 
-int32_t lsm6ds3tr_c_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
-                         uint16_t len);
-int32_t lsm6ds3tr_c_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
-                          uint16_t len);
+int32_t lsm6ds3tr_c_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                             uint8_t *data,
+                             uint16_t len);
+int32_t lsm6ds3tr_c_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                              uint8_t *data,
+                              uint16_t len);
 
 extern float_t lsm6ds3tr_c_from_fs2g_to_mg(int16_t lsb);
 extern float_t lsm6ds3tr_c_from_fs4g_to_mg(int16_t lsb);
@@ -1007,8 +1017,10 @@ typedef enum {
   LSM6DS3TR_C_8g       = 3,
   LSM6DS3TR_C_XL_FS_ND = 4,  /* ERROR CODE */
 } lsm6ds3tr_c_fs_xl_t;
-int32_t lsm6ds3tr_c_xl_full_scale_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_fs_xl_t val);
-int32_t lsm6ds3tr_c_xl_full_scale_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_fs_xl_t *val);
+int32_t lsm6ds3tr_c_xl_full_scale_set(stmdev_ctx_t *ctx,
+                                      lsm6ds3tr_c_fs_xl_t val);
+int32_t lsm6ds3tr_c_xl_full_scale_get(stmdev_ctx_t *ctx,
+                                      lsm6ds3tr_c_fs_xl_t *val);
 
 typedef enum {
   LSM6DS3TR_C_XL_ODR_OFF      =  0,
@@ -1025,8 +1037,10 @@ typedef enum {
   LSM6DS3TR_C_XL_ODR_1Hz6     = 11,
   LSM6DS3TR_C_XL_ODR_ND       = 12,  /* ERROR CODE */
 } lsm6ds3tr_c_odr_xl_t;
-int32_t lsm6ds3tr_c_xl_data_rate_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_odr_xl_t val);
-int32_t lsm6ds3tr_c_xl_data_rate_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_odr_xl_t *val);
+int32_t lsm6ds3tr_c_xl_data_rate_set(stmdev_ctx_t *ctx,
+                                     lsm6ds3tr_c_odr_xl_t val);
+int32_t lsm6ds3tr_c_xl_data_rate_get(stmdev_ctx_t *ctx,
+                                     lsm6ds3tr_c_odr_xl_t *val);
 
 typedef enum {
   LSM6DS3TR_C_250dps     = 0,
@@ -1036,8 +1050,10 @@ typedef enum {
   LSM6DS3TR_C_2000dps    = 6,
   LSM6DS3TR_C_GY_FS_ND   = 7,    /* ERROR CODE */
 } lsm6ds3tr_c_fs_g_t;
-int32_t lsm6ds3tr_c_gy_full_scale_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_fs_g_t val);
-int32_t lsm6ds3tr_c_gy_full_scale_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_fs_g_t *val);
+int32_t lsm6ds3tr_c_gy_full_scale_set(stmdev_ctx_t *ctx,
+                                      lsm6ds3tr_c_fs_g_t val);
+int32_t lsm6ds3tr_c_gy_full_scale_get(stmdev_ctx_t *ctx,
+                                      lsm6ds3tr_c_fs_g_t *val);
 
 typedef enum {
   LSM6DS3TR_C_GY_ODR_OFF    =  0,
@@ -1053,11 +1069,15 @@ typedef enum {
   LSM6DS3TR_C_GY_ODR_6k66Hz = 10,
   LSM6DS3TR_C_GY_ODR_ND     = 11,    /* ERROR CODE */
 } lsm6ds3tr_c_odr_g_t;
-int32_t lsm6ds3tr_c_gy_data_rate_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_odr_g_t val);
-int32_t lsm6ds3tr_c_gy_data_rate_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_odr_g_t *val);
+int32_t lsm6ds3tr_c_gy_data_rate_set(stmdev_ctx_t *ctx,
+                                     lsm6ds3tr_c_odr_g_t val);
+int32_t lsm6ds3tr_c_gy_data_rate_get(stmdev_ctx_t *ctx,
+                                     lsm6ds3tr_c_odr_g_t *val);
 
-int32_t lsm6ds3tr_c_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_block_data_update_set(stmdev_ctx_t *ctx,
+                                          uint8_t val);
+int32_t lsm6ds3tr_c_block_data_update_get(stmdev_ctx_t *ctx,
+                                          uint8_t *val);
 
 typedef enum {
   LSM6DS3TR_C_LSb_1mg   = 0,
@@ -1065,9 +1085,9 @@ typedef enum {
   LSM6DS3TR_C_WEIGHT_ND = 2,
 } lsm6ds3tr_c_usr_off_w_t;
 int32_t lsm6ds3tr_c_xl_offset_weight_set(stmdev_ctx_t *ctx,
-                                     lsm6ds3tr_c_usr_off_w_t val);
+                                         lsm6ds3tr_c_usr_off_w_t val);
 int32_t lsm6ds3tr_c_xl_offset_weight_get(stmdev_ctx_t *ctx,
-                                     lsm6ds3tr_c_usr_off_w_t *val);
+                                         lsm6ds3tr_c_usr_off_w_t *val);
 
 typedef enum {
   LSM6DS3TR_C_XL_HIGH_PERFORMANCE  = 0,
@@ -1075,9 +1095,9 @@ typedef enum {
   LSM6DS3TR_C_XL_PW_MODE_ND        = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_xl_hm_mode_t;
 int32_t lsm6ds3tr_c_xl_power_mode_set(stmdev_ctx_t *ctx,
-                                  lsm6ds3tr_c_xl_hm_mode_t val);
+                                      lsm6ds3tr_c_xl_hm_mode_t val);
 int32_t lsm6ds3tr_c_xl_power_mode_get(stmdev_ctx_t *ctx,
-                                  lsm6ds3tr_c_xl_hm_mode_t *val);
+                                      lsm6ds3tr_c_xl_hm_mode_t *val);
 
 typedef enum {
   LSM6DS3TR_C_STAT_RND_DISABLE  = 0,
@@ -1085,9 +1105,9 @@ typedef enum {
   LSM6DS3TR_C_STAT_RND_ND       = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_rounding_status_t;
 int32_t lsm6ds3tr_c_rounding_on_status_set(stmdev_ctx_t *ctx,
-                                       lsm6ds3tr_c_rounding_status_t val);
+                                           lsm6ds3tr_c_rounding_status_t val);
 int32_t lsm6ds3tr_c_rounding_on_status_get(stmdev_ctx_t *ctx,
-                                       lsm6ds3tr_c_rounding_status_t *val);
+                                           lsm6ds3tr_c_rounding_status_t *val);
 
 typedef enum {
   LSM6DS3TR_C_GY_HIGH_PERFORMANCE  = 0,
@@ -1095,9 +1115,9 @@ typedef enum {
   LSM6DS3TR_C_GY_PW_MODE_ND        = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_g_hm_mode_t;
 int32_t lsm6ds3tr_c_gy_power_mode_set(stmdev_ctx_t *ctx,
-                                  lsm6ds3tr_c_g_hm_mode_t val);
+                                      lsm6ds3tr_c_g_hm_mode_t val);
 int32_t lsm6ds3tr_c_gy_power_mode_get(stmdev_ctx_t *ctx,
-                                  lsm6ds3tr_c_g_hm_mode_t *val);
+                                      lsm6ds3tr_c_g_hm_mode_t *val);
 
 typedef struct {
   lsm6ds3tr_c_wake_up_src_t        wake_up_src;
@@ -1110,18 +1130,24 @@ typedef struct {
   lsm6ds3tr_c_a_wrist_tilt_mask_t  a_wrist_tilt_mask;
 } lsm6ds3tr_c_all_sources_t;
 int32_t lsm6ds3tr_c_all_sources_get(stmdev_ctx_t *ctx,
-                                lsm6ds3tr_c_all_sources_t *val);
+                                    lsm6ds3tr_c_all_sources_t *val);
 
-int32_t lsm6ds3tr_c_status_reg_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_status_reg_t *val);
+int32_t lsm6ds3tr_c_status_reg_get(stmdev_ctx_t *ctx,
+                                   lsm6ds3tr_c_status_reg_t *val);
 
-int32_t lsm6ds3tr_c_xl_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_xl_flag_data_ready_get(stmdev_ctx_t *ctx,
+                                           uint8_t *val);
 
-int32_t lsm6ds3tr_c_gy_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_gy_flag_data_ready_get(stmdev_ctx_t *ctx,
+                                           uint8_t *val);
 
-int32_t lsm6ds3tr_c_temp_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_temp_flag_data_ready_get(stmdev_ctx_t *ctx,
+                                             uint8_t *val);
 
-int32_t lsm6ds3tr_c_xl_usr_offset_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6ds3tr_c_xl_usr_offset_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6ds3tr_c_xl_usr_offset_set(stmdev_ctx_t *ctx,
+                                      uint8_t *buff);
+int32_t lsm6ds3tr_c_xl_usr_offset_get(stmdev_ctx_t *ctx,
+                                      uint8_t *buff);
 int32_t lsm6ds3tr_c_timestamp_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6ds3tr_c_timestamp_get(stmdev_ctx_t *ctx, uint8_t *val);
 
@@ -1130,8 +1156,10 @@ typedef enum {
   LSM6DS3TR_C_LSB_25us    = 1,
   LSM6DS3TR_C_TS_RES_ND   = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_timer_hr_t;
-int32_t lsm6ds3tr_c_timestamp_res_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_timer_hr_t val);
-int32_t lsm6ds3tr_c_timestamp_res_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_timer_hr_t *val);
+int32_t lsm6ds3tr_c_timestamp_res_set(stmdev_ctx_t *ctx,
+                                      lsm6ds3tr_c_timer_hr_t val);
+int32_t lsm6ds3tr_c_timestamp_res_get(stmdev_ctx_t *ctx,
+                                      lsm6ds3tr_c_timer_hr_t *val);
 
 typedef enum {
   LSM6DS3TR_C_ROUND_DISABLE            = 0,
@@ -1144,17 +1172,24 @@ typedef enum {
   LSM6DS3TR_C_ROUND_GY_XL_SH1_TO_SH6   = 7,
   LSM6DS3TR_C_ROUND_OUT_ND             = 8,    /* ERROR CODE */
 } lsm6ds3tr_c_rounding_t;
-int32_t lsm6ds3tr_c_rounding_mode_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_rounding_t val);
-int32_t lsm6ds3tr_c_rounding_mode_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_rounding_t *val);
+int32_t lsm6ds3tr_c_rounding_mode_set(stmdev_ctx_t *ctx,
+                                      lsm6ds3tr_c_rounding_t val);
+int32_t lsm6ds3tr_c_rounding_mode_get(stmdev_ctx_t *ctx,
+                                      lsm6ds3tr_c_rounding_t *val);
 
-int32_t lsm6ds3tr_c_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6ds3tr_c_angular_rate_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6ds3tr_c_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6ds3tr_c_temperature_raw_get(stmdev_ctx_t *ctx,
+                                        uint8_t *buff);
+int32_t lsm6ds3tr_c_angular_rate_raw_get(stmdev_ctx_t *ctx,
+                                         uint8_t *buff);
+int32_t lsm6ds3tr_c_acceleration_raw_get(stmdev_ctx_t *ctx,
+                                         uint8_t *buff);
 
-int32_t lsm6ds3tr_c_mag_calibrated_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6ds3tr_c_mag_calibrated_raw_get(stmdev_ctx_t *ctx,
+                                           uint8_t *buff);
 
-int32_t lsm6ds3tr_c_fifo_raw_data_get(stmdev_ctx_t *ctx, uint8_t *buffer,
-                                  uint8_t len);
+int32_t lsm6ds3tr_c_fifo_raw_data_get(stmdev_ctx_t *ctx,
+                                      uint8_t *buffer,
+                                      uint8_t len);
 
 typedef enum {
   LSM6DS3TR_C_USER_BANK   = 0,
@@ -1162,8 +1197,10 @@ typedef enum {
   LSM6DS3TR_C_BANK_B      = 5,
   LSM6DS3TR_C_BANK_ND     = 6,    /* ERROR CODE */
 } lsm6ds3tr_c_func_cfg_en_t;
-int32_t lsm6ds3tr_c_mem_bank_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_func_cfg_en_t val);
-int32_t lsm6ds3tr_c_mem_bank_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_func_cfg_en_t *val);
+int32_t lsm6ds3tr_c_mem_bank_set(stmdev_ctx_t *ctx,
+                                 lsm6ds3tr_c_func_cfg_en_t val);
+int32_t lsm6ds3tr_c_mem_bank_get(stmdev_ctx_t *ctx,
+                                 lsm6ds3tr_c_func_cfg_en_t *val);
 
 typedef enum {
   LSM6DS3TR_C_DRDY_LATCHED    = 0,
@@ -1171,9 +1208,9 @@ typedef enum {
   LSM6DS3TR_C_DRDY_ND         = 2,  /* ERROR CODE */
 } lsm6ds3tr_c_drdy_pulsed_g_t;
 int32_t lsm6ds3tr_c_data_ready_mode_set(stmdev_ctx_t *ctx,
-                                    lsm6ds3tr_c_drdy_pulsed_g_t val);
+                                        lsm6ds3tr_c_drdy_pulsed_g_t val);
 int32_t lsm6ds3tr_c_data_ready_mode_get(stmdev_ctx_t *ctx,
-                                    lsm6ds3tr_c_drdy_pulsed_g_t *val);
+                                        lsm6ds3tr_c_drdy_pulsed_g_t *val);
 
 int32_t lsm6ds3tr_c_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 int32_t lsm6ds3tr_c_reset_set(stmdev_ctx_t *ctx, uint8_t val);
@@ -1184,11 +1221,15 @@ typedef enum {
   LSM6DS3TR_C_MSB_AT_LOW_ADD  = 1,
   LSM6DS3TR_C_DATA_FMT_ND     = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_ble_t;
-int32_t lsm6ds3tr_c_data_format_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_ble_t val);
-int32_t lsm6ds3tr_c_data_format_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_ble_t *val);
+int32_t lsm6ds3tr_c_data_format_set(stmdev_ctx_t *ctx,
+                                    lsm6ds3tr_c_ble_t val);
+int32_t lsm6ds3tr_c_data_format_get(stmdev_ctx_t *ctx,
+                                    lsm6ds3tr_c_ble_t *val);
 
-int32_t lsm6ds3tr_c_auto_increment_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_auto_increment_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_auto_increment_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t lsm6ds3tr_c_auto_increment_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 int32_t lsm6ds3tr_c_boot_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6ds3tr_c_boot_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -1199,8 +1240,10 @@ typedef enum {
   LSM6DS3TR_C_XL_ST_NEGATIVE   = 2,
   LSM6DS3TR_C_XL_ST_ND         = 3,    /* ERROR CODE */
 } lsm6ds3tr_c_st_xl_t;
-int32_t lsm6ds3tr_c_xl_self_test_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_st_xl_t val);
-int32_t lsm6ds3tr_c_xl_self_test_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_st_xl_t *val);
+int32_t lsm6ds3tr_c_xl_self_test_set(stmdev_ctx_t *ctx,
+                                     lsm6ds3tr_c_st_xl_t val);
+int32_t lsm6ds3tr_c_xl_self_test_get(stmdev_ctx_t *ctx,
+                                     lsm6ds3tr_c_st_xl_t *val);
 
 typedef enum {
   LSM6DS3TR_C_GY_ST_DISABLE    = 0,
@@ -1208,11 +1251,15 @@ typedef enum {
   LSM6DS3TR_C_GY_ST_NEGATIVE   = 3,
   LSM6DS3TR_C_GY_ST_ND         = 4,    /* ERROR CODE */
 } lsm6ds3tr_c_st_g_t;
-int32_t lsm6ds3tr_c_gy_self_test_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_st_g_t val);
-int32_t lsm6ds3tr_c_gy_self_test_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_st_g_t *val);
+int32_t lsm6ds3tr_c_gy_self_test_set(stmdev_ctx_t *ctx,
+                                     lsm6ds3tr_c_st_g_t val);
+int32_t lsm6ds3tr_c_gy_self_test_get(stmdev_ctx_t *ctx,
+                                     lsm6ds3tr_c_st_g_t *val);
 
-int32_t lsm6ds3tr_c_filter_settling_mask_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_filter_settling_mask_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_filter_settling_mask_set(stmdev_ctx_t *ctx,
+                                             uint8_t val);
+int32_t lsm6ds3tr_c_filter_settling_mask_get(stmdev_ctx_t *ctx,
+                                             uint8_t *val);
 
 typedef enum {
   LSM6DS3TR_C_USE_SLOPE    = 0,
@@ -1220,9 +1267,9 @@ typedef enum {
   LSM6DS3TR_C_HP_PATH_ND   = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_slope_fds_t;
 int32_t lsm6ds3tr_c_xl_hp_path_internal_set(stmdev_ctx_t *ctx,
-                                        lsm6ds3tr_c_slope_fds_t val);
+                                            lsm6ds3tr_c_slope_fds_t val);
 int32_t lsm6ds3tr_c_xl_hp_path_internal_get(stmdev_ctx_t *ctx,
-                                        lsm6ds3tr_c_slope_fds_t *val);
+                                            lsm6ds3tr_c_slope_fds_t *val);
 
 typedef enum {
   LSM6DS3TR_C_XL_ANA_BW_1k5Hz = 0,
@@ -1230,9 +1277,9 @@ typedef enum {
   LSM6DS3TR_C_XL_ANA_BW_ND    = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_bw0_xl_t;
 int32_t lsm6ds3tr_c_xl_filter_analog_set(stmdev_ctx_t *ctx,
-                                     lsm6ds3tr_c_bw0_xl_t val);
+                                         lsm6ds3tr_c_bw0_xl_t val);
 int32_t lsm6ds3tr_c_xl_filter_analog_get(stmdev_ctx_t *ctx,
-                                     lsm6ds3tr_c_bw0_xl_t *val);
+                                         lsm6ds3tr_c_bw0_xl_t *val);
 
 typedef enum {
   LSM6DS3TR_C_XL_LP1_ODR_DIV_2 = 0,
@@ -1240,9 +1287,9 @@ typedef enum {
   LSM6DS3TR_C_XL_LP1_NA        = 2,  /* ERROR CODE */
 } lsm6ds3tr_c_lpf1_bw_sel_t;
 int32_t lsm6ds3tr_c_xl_lp1_bandwidth_set(stmdev_ctx_t *ctx,
-                                     lsm6ds3tr_c_lpf1_bw_sel_t val);
+                                         lsm6ds3tr_c_lpf1_bw_sel_t val);
 int32_t lsm6ds3tr_c_xl_lp1_bandwidth_get(stmdev_ctx_t *ctx,
-                                     lsm6ds3tr_c_lpf1_bw_sel_t *val);
+                                         lsm6ds3tr_c_lpf1_bw_sel_t *val);
 
 typedef enum {
   LSM6DS3TR_C_XL_LOW_LAT_LP_ODR_DIV_50     = 0x00,
@@ -1256,12 +1303,14 @@ typedef enum {
   LSM6DS3TR_C_XL_LP_NA                     = 0x20, /* ERROR CODE */
 } lsm6ds3tr_c_input_composite_t;
 int32_t lsm6ds3tr_c_xl_lp2_bandwidth_set(stmdev_ctx_t *ctx,
-                                     lsm6ds3tr_c_input_composite_t val);
+                                         lsm6ds3tr_c_input_composite_t val);
 int32_t lsm6ds3tr_c_xl_lp2_bandwidth_get(stmdev_ctx_t *ctx,
-                                     lsm6ds3tr_c_input_composite_t *val);
+                                         lsm6ds3tr_c_input_composite_t *val);
 
-int32_t lsm6ds3tr_c_xl_reference_mode_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_xl_reference_mode_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_xl_reference_mode_set(stmdev_ctx_t *ctx,
+                                          uint8_t val);
+int32_t lsm6ds3tr_c_xl_reference_mode_get(stmdev_ctx_t *ctx,
+                                          uint8_t *val);
 
 typedef enum {
   LSM6DS3TR_C_XL_HP_ODR_DIV_4      = 0x00, /* Slope filter */
@@ -1271,9 +1320,9 @@ typedef enum {
   LSM6DS3TR_C_XL_HP_NA             = 0x10, /* ERROR CODE */
 } lsm6ds3tr_c_hpcf_xl_t;
 int32_t lsm6ds3tr_c_xl_hp_bandwidth_set(stmdev_ctx_t *ctx,
-                                    lsm6ds3tr_c_hpcf_xl_t val);
+                                        lsm6ds3tr_c_hpcf_xl_t val);
 int32_t lsm6ds3tr_c_xl_hp_bandwidth_get(stmdev_ctx_t *ctx,
-                                    lsm6ds3tr_c_hpcf_xl_t *val);
+                                        lsm6ds3tr_c_hpcf_xl_t *val);
 
 typedef enum {
   LSM6DS3TR_C_LP2_ONLY                    = 0x00,
@@ -1296,17 +1345,19 @@ typedef enum {
   LSM6DS3TR_C_HP_GY_BAND_NA               = 0xFF,    /* ERROR CODE */
 } lsm6ds3tr_c_lpf1_sel_g_t;
 int32_t lsm6ds3tr_c_gy_band_pass_set(stmdev_ctx_t *ctx,
-                                    lsm6ds3tr_c_lpf1_sel_g_t val);
+                                     lsm6ds3tr_c_lpf1_sel_g_t val);
 int32_t lsm6ds3tr_c_gy_band_pass_get(stmdev_ctx_t *ctx,
-                                    lsm6ds3tr_c_lpf1_sel_g_t *val);
+                                     lsm6ds3tr_c_lpf1_sel_g_t *val);
 
 typedef enum {
   LSM6DS3TR_C_SPI_4_WIRE  = 0,
   LSM6DS3TR_C_SPI_3_WIRE  = 1,
   LSM6DS3TR_C_SPI_MODE_ND = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_sim_t;
-int32_t lsm6ds3tr_c_spi_mode_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_sim_t val);
-int32_t lsm6ds3tr_c_spi_mode_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_sim_t *val);
+int32_t lsm6ds3tr_c_spi_mode_set(stmdev_ctx_t *ctx,
+                                 lsm6ds3tr_c_sim_t val);
+int32_t lsm6ds3tr_c_spi_mode_get(stmdev_ctx_t *ctx,
+                                 lsm6ds3tr_c_sim_t *val);
 
 typedef enum {
   LSM6DS3TR_C_I2C_ENABLE   = 0,
@@ -1314,9 +1365,9 @@ typedef enum {
   LSM6DS3TR_C_I2C_MODE_ND  = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_i2c_disable_t;
 int32_t lsm6ds3tr_c_i2c_interface_set(stmdev_ctx_t *ctx,
-                                  lsm6ds3tr_c_i2c_disable_t val);
+                                      lsm6ds3tr_c_i2c_disable_t val);
 int32_t lsm6ds3tr_c_i2c_interface_get(stmdev_ctx_t *ctx,
-                                  lsm6ds3tr_c_i2c_disable_t *val);
+                                      lsm6ds3tr_c_i2c_disable_t *val);
 
 typedef struct {
   uint8_t int1_drdy_xl             : 1;
@@ -1339,11 +1390,11 @@ typedef struct {
   uint8_t drdy_on_int1             : 1;
 } lsm6ds3tr_c_int1_route_t;
 int32_t lsm6ds3tr_c_pin_int1_route_set(stmdev_ctx_t *ctx,
-                                   lsm6ds3tr_c_int1_route_t val);
+                                       lsm6ds3tr_c_int1_route_t val);
 int32_t lsm6ds3tr_c_pin_int1_route_get(stmdev_ctx_t *ctx,
-                                   lsm6ds3tr_c_int1_route_t *val);
+                                       lsm6ds3tr_c_int1_route_t *val);
 
-typedef struct{
+typedef struct {
   uint8_t int2_drdy_xl             : 1;
   uint8_t int2_drdy_g              : 1;
   uint8_t int2_drdy_temp           : 1;
@@ -1363,25 +1414,29 @@ typedef struct{
   uint8_t int2_wrist_tilt          : 1;
 } lsm6ds3tr_c_int2_route_t;
 int32_t lsm6ds3tr_c_pin_int2_route_set(stmdev_ctx_t *ctx,
-                                   lsm6ds3tr_c_int2_route_t val);
+                                       lsm6ds3tr_c_int2_route_t val);
 int32_t lsm6ds3tr_c_pin_int2_route_get(stmdev_ctx_t *ctx,
-                                   lsm6ds3tr_c_int2_route_t *val);
+                                       lsm6ds3tr_c_int2_route_t *val);
 
 typedef enum {
   LSM6DS3TR_C_PUSH_PULL   = 0,
   LSM6DS3TR_C_OPEN_DRAIN  = 1,
   LSM6DS3TR_C_PIN_MODE_ND = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_pp_od_t;
-int32_t lsm6ds3tr_c_pin_mode_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_pp_od_t val);
-int32_t lsm6ds3tr_c_pin_mode_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_pp_od_t *val);
+int32_t lsm6ds3tr_c_pin_mode_set(stmdev_ctx_t *ctx,
+                                 lsm6ds3tr_c_pp_od_t val);
+int32_t lsm6ds3tr_c_pin_mode_get(stmdev_ctx_t *ctx,
+                                 lsm6ds3tr_c_pp_od_t *val);
 
 typedef enum {
   LSM6DS3TR_C_ACTIVE_HIGH   = 0,
   LSM6DS3TR_C_ACTIVE_LOW    = 1,
   LSM6DS3TR_C_POLARITY_ND   = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_h_lactive_t;
-int32_t lsm6ds3tr_c_pin_polarity_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_h_lactive_t val);
-int32_t lsm6ds3tr_c_pin_polarity_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_h_lactive_t *val);
+int32_t lsm6ds3tr_c_pin_polarity_set(stmdev_ctx_t *ctx,
+                                     lsm6ds3tr_c_h_lactive_t val);
+int32_t lsm6ds3tr_c_pin_polarity_get(stmdev_ctx_t *ctx,
+                                     lsm6ds3tr_c_h_lactive_t *val);
 
 int32_t lsm6ds3tr_c_all_on_int1_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6ds3tr_c_all_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -1391,17 +1446,22 @@ typedef enum {
   LSM6DS3TR_C_INT_LATCHED  = 1,
   LSM6DS3TR_C_INT_MODE     = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_lir_t;
-int32_t lsm6ds3tr_c_int_notification_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_lir_t val);
-int32_t lsm6ds3tr_c_int_notification_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_lir_t *val);
+int32_t lsm6ds3tr_c_int_notification_set(stmdev_ctx_t *ctx,
+                                         lsm6ds3tr_c_lir_t val);
+int32_t lsm6ds3tr_c_int_notification_get(stmdev_ctx_t *ctx,
+                                         lsm6ds3tr_c_lir_t *val);
 
-int32_t lsm6ds3tr_c_wkup_threshold_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_wkup_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_wkup_threshold_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t lsm6ds3tr_c_wkup_threshold_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 int32_t lsm6ds3tr_c_wkup_dur_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6ds3tr_c_wkup_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm6ds3tr_c_gy_sleep_mode_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_gy_sleep_mode_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_gy_sleep_mode_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 typedef enum {
   LSM6DS3TR_C_PROPERTY_DISABLE          = 0,
@@ -1410,25 +1470,37 @@ typedef enum {
   LSM6DS3TR_C_XL_12Hz5_GY_PD            = 3,
   LSM6DS3TR_C_ACT_MODE_ND               = 4,    /* ERROR CODE */
 } lsm6ds3tr_c_inact_en_t;
-int32_t lsm6ds3tr_c_act_mode_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_inact_en_t val);
-int32_t lsm6ds3tr_c_act_mode_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_inact_en_t *val);
+int32_t lsm6ds3tr_c_act_mode_set(stmdev_ctx_t *ctx,
+                                 lsm6ds3tr_c_inact_en_t val);
+int32_t lsm6ds3tr_c_act_mode_get(stmdev_ctx_t *ctx,
+                                 lsm6ds3tr_c_inact_en_t *val);
 
 int32_t lsm6ds3tr_c_act_sleep_dur_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_act_sleep_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_act_sleep_dur_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
-int32_t lsm6ds3tr_c_tap_src_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_tap_src_t *val);
+int32_t lsm6ds3tr_c_tap_src_get(stmdev_ctx_t *ctx,
+                                lsm6ds3tr_c_tap_src_t *val);
 
-int32_t lsm6ds3tr_c_tap_detection_on_z_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_tap_detection_on_z_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_tap_detection_on_z_set(stmdev_ctx_t *ctx,
+                                           uint8_t val);
+int32_t lsm6ds3tr_c_tap_detection_on_z_get(stmdev_ctx_t *ctx,
+                                           uint8_t *val);
 
-int32_t lsm6ds3tr_c_tap_detection_on_y_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_tap_detection_on_y_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_tap_detection_on_y_set(stmdev_ctx_t *ctx,
+                                           uint8_t val);
+int32_t lsm6ds3tr_c_tap_detection_on_y_get(stmdev_ctx_t *ctx,
+                                           uint8_t *val);
 
-int32_t lsm6ds3tr_c_tap_detection_on_x_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_tap_detection_on_x_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_tap_detection_on_x_set(stmdev_ctx_t *ctx,
+                                           uint8_t val);
+int32_t lsm6ds3tr_c_tap_detection_on_x_get(stmdev_ctx_t *ctx,
+                                           uint8_t *val);
 
-int32_t lsm6ds3tr_c_tap_threshold_x_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_tap_threshold_x_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_tap_threshold_x_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t lsm6ds3tr_c_tap_threshold_x_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 int32_t lsm6ds3tr_c_tap_shock_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6ds3tr_c_tap_shock_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -1445,9 +1517,9 @@ typedef enum {
   LSM6DS3TR_C_TAP_MODE_ND          = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_single_double_tap_t;
 int32_t lsm6ds3tr_c_tap_mode_set(stmdev_ctx_t *ctx,
-                             lsm6ds3tr_c_single_double_tap_t val);
+                                 lsm6ds3tr_c_single_double_tap_t val);
 int32_t lsm6ds3tr_c_tap_mode_get(stmdev_ctx_t *ctx,
-                             lsm6ds3tr_c_single_double_tap_t *val);
+                                 lsm6ds3tr_c_single_double_tap_t *val);
 
 typedef enum {
   LSM6DS3TR_C_ODR_DIV_2_FEED      = 0,
@@ -1455,9 +1527,9 @@ typedef enum {
   LSM6DS3TR_C_6D_FEED_ND          = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_low_pass_on_6d_t;
 int32_t lsm6ds3tr_c_6d_feed_data_set(stmdev_ctx_t *ctx,
-                                 lsm6ds3tr_c_low_pass_on_6d_t val);
+                                     lsm6ds3tr_c_low_pass_on_6d_t val);
 int32_t lsm6ds3tr_c_6d_feed_data_get(stmdev_ctx_t *ctx,
-                                 lsm6ds3tr_c_low_pass_on_6d_t *val);
+                                     lsm6ds3tr_c_low_pass_on_6d_t *val);
 
 typedef enum {
   LSM6DS3TR_C_DEG_80      = 0,
@@ -1466,8 +1538,10 @@ typedef enum {
   LSM6DS3TR_C_DEG_50      = 3,
   LSM6DS3TR_C_6D_TH_ND    = 4,    /* ERROR CODE */
 } lsm6ds3tr_c_sixd_ths_t;
-int32_t lsm6ds3tr_c_6d_threshold_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_sixd_ths_t val);
-int32_t lsm6ds3tr_c_6d_threshold_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_sixd_ths_t *val);
+int32_t lsm6ds3tr_c_6d_threshold_set(stmdev_ctx_t *ctx,
+                                     lsm6ds3tr_c_sixd_ths_t val);
+int32_t lsm6ds3tr_c_6d_threshold_get(stmdev_ctx_t *ctx,
+                                     lsm6ds3tr_c_sixd_ths_t *val);
 
 int32_t lsm6ds3tr_c_4d_mode_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6ds3tr_c_4d_mode_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -1486,20 +1560,29 @@ typedef enum {
   LSM6DS3TR_C_FF_TSH_500mg = 7,
   LSM6DS3TR_C_FF_TSH_ND    = 8,    /* ERROR CODE */
 } lsm6ds3tr_c_ff_ths_t;
-int32_t lsm6ds3tr_c_ff_threshold_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_ff_ths_t val);
-int32_t lsm6ds3tr_c_ff_threshold_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_ff_ths_t *val);
+int32_t lsm6ds3tr_c_ff_threshold_set(stmdev_ctx_t *ctx,
+                                     lsm6ds3tr_c_ff_ths_t val);
+int32_t lsm6ds3tr_c_ff_threshold_get(stmdev_ctx_t *ctx,
+                                     lsm6ds3tr_c_ff_ths_t *val);
 
-int32_t lsm6ds3tr_c_fifo_watermark_set(stmdev_ctx_t *ctx, uint16_t val);
-int32_t lsm6ds3tr_c_fifo_watermark_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t lsm6ds3tr_c_fifo_watermark_set(stmdev_ctx_t *ctx,
+                                       uint16_t val);
+int32_t lsm6ds3tr_c_fifo_watermark_get(stmdev_ctx_t *ctx,
+                                       uint16_t *val);
 
-int32_t lsm6ds3tr_c_fifo_data_level_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t lsm6ds3tr_c_fifo_data_level_get(stmdev_ctx_t *ctx,
+                                        uint16_t *val);
 
-int32_t lsm6ds3tr_c_fifo_wtm_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_fifo_wtm_flag_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
-int32_t lsm6ds3tr_c_fifo_pattern_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t lsm6ds3tr_c_fifo_pattern_get(stmdev_ctx_t *ctx,
+                                     uint16_t *val);
 
-int32_t lsm6ds3tr_c_fifo_temp_batch_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_fifo_temp_batch_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_fifo_temp_batch_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t lsm6ds3tr_c_fifo_temp_batch_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 typedef enum {
   LSM6DS3TR_C_TRG_XL_GY_DRDY     = 0,
@@ -1508,14 +1591,16 @@ typedef enum {
   LSM6DS3TR_C_TRG_SH_ND          = 3,    /* ERROR CODE */
 } lsm6ds3tr_c_trigger_fifo_t;
 int32_t lsm6ds3tr_c_fifo_write_trigger_set(stmdev_ctx_t *ctx,
-                                       lsm6ds3tr_c_trigger_fifo_t val);
+                                           lsm6ds3tr_c_trigger_fifo_t val);
 int32_t lsm6ds3tr_c_fifo_write_trigger_get(stmdev_ctx_t *ctx,
-                                       lsm6ds3tr_c_trigger_fifo_t *val);
+                                           lsm6ds3tr_c_trigger_fifo_t *val);
 
-int32_t lsm6ds3tr_c_fifo_pedo_and_timestamp_batch_set(stmdev_ctx_t *ctx,
-                                                  uint8_t val);
-int32_t lsm6ds3tr_c_fifo_pedo_and_timestamp_batch_get(stmdev_ctx_t *ctx,
-                                                  uint8_t *val);
+int32_t lsm6ds3tr_c_fifo_pedo_and_timestamp_batch_set(
+  stmdev_ctx_t *ctx,
+  uint8_t val);
+int32_t lsm6ds3tr_c_fifo_pedo_and_timestamp_batch_get(
+  stmdev_ctx_t *ctx,
+  uint8_t *val);
 
 typedef enum {
   LSM6DS3TR_C_FIFO_XL_DISABLE  = 0,
@@ -1529,9 +1614,9 @@ typedef enum {
   LSM6DS3TR_C_FIFO_XL_DEC_ND   = 8,    /* ERROR CODE */
 } lsm6ds3tr_c_dec_fifo_xl_t;
 int32_t lsm6ds3tr_c_fifo_xl_batch_set(stmdev_ctx_t *ctx,
-                                  lsm6ds3tr_c_dec_fifo_xl_t val);
+                                      lsm6ds3tr_c_dec_fifo_xl_t val);
 int32_t lsm6ds3tr_c_fifo_xl_batch_get(stmdev_ctx_t *ctx,
-                                  lsm6ds3tr_c_dec_fifo_xl_t *val);
+                                      lsm6ds3tr_c_dec_fifo_xl_t *val);
 
 typedef enum {
   LSM6DS3TR_C_FIFO_GY_DISABLE = 0,
@@ -1545,9 +1630,9 @@ typedef enum {
   LSM6DS3TR_C_FIFO_GY_DEC_ND  = 8,    /* ERROR CODE */
 } lsm6ds3tr_c_dec_fifo_gyro_t;
 int32_t lsm6ds3tr_c_fifo_gy_batch_set(stmdev_ctx_t *ctx,
-                                  lsm6ds3tr_c_dec_fifo_gyro_t val);
+                                      lsm6ds3tr_c_dec_fifo_gyro_t val);
 int32_t lsm6ds3tr_c_fifo_gy_batch_get(stmdev_ctx_t *ctx,
-                                  lsm6ds3tr_c_dec_fifo_gyro_t *val);
+                                      lsm6ds3tr_c_dec_fifo_gyro_t *val);
 
 typedef enum {
   LSM6DS3TR_C_FIFO_DS3_DISABLE   = 0,
@@ -1561,9 +1646,9 @@ typedef enum {
   LSM6DS3TR_C_FIFO_DS3_DEC_ND    = 8,    /* ERROR CODE */
 } lsm6ds3tr_c_dec_ds3_fifo_t;
 int32_t lsm6ds3tr_c_fifo_dataset_3_batch_set(stmdev_ctx_t *ctx,
-                                         lsm6ds3tr_c_dec_ds3_fifo_t val);
+                                             lsm6ds3tr_c_dec_ds3_fifo_t val);
 int32_t lsm6ds3tr_c_fifo_dataset_3_batch_get(stmdev_ctx_t *ctx,
-                                         lsm6ds3tr_c_dec_ds3_fifo_t *val);
+                                             lsm6ds3tr_c_dec_ds3_fifo_t *val);
 
 typedef enum {
   LSM6DS3TR_C_FIFO_DS4_DISABLE  = 0,
@@ -1577,15 +1662,19 @@ typedef enum {
   LSM6DS3TR_C_FIFO_DS4_DEC_ND   = 8,    /* ERROR CODE */
 } lsm6ds3tr_c_dec_ds4_fifo_t;
 int32_t lsm6ds3tr_c_fifo_dataset_4_batch_set(stmdev_ctx_t *ctx,
-                                         lsm6ds3tr_c_dec_ds4_fifo_t val);
+                                             lsm6ds3tr_c_dec_ds4_fifo_t val);
 int32_t lsm6ds3tr_c_fifo_dataset_4_batch_get(stmdev_ctx_t *ctx,
-                                         lsm6ds3tr_c_dec_ds4_fifo_t *val);
+                                             lsm6ds3tr_c_dec_ds4_fifo_t *val);
 
-int32_t lsm6ds3tr_c_fifo_xl_gy_8bit_format_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_fifo_xl_gy_8bit_format_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_fifo_xl_gy_8bit_format_set(stmdev_ctx_t *ctx,
+                                               uint8_t val);
+int32_t lsm6ds3tr_c_fifo_xl_gy_8bit_format_get(stmdev_ctx_t *ctx,
+                                               uint8_t *val);
 
-int32_t lsm6ds3tr_c_fifo_stop_on_wtm_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_fifo_stop_on_wtm_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_fifo_stop_on_wtm_set(stmdev_ctx_t *ctx,
+                                         uint8_t val);
+int32_t lsm6ds3tr_c_fifo_stop_on_wtm_get(stmdev_ctx_t *ctx,
+                                         uint8_t *val);
 
 typedef enum {
   LSM6DS3TR_C_BYPASS_MODE           = 0,
@@ -1595,8 +1684,10 @@ typedef enum {
   LSM6DS3TR_C_STREAM_MODE           = 6,
   LSM6DS3TR_C_FIFO_MODE_ND          = 8,    /* ERROR CODE */
 } lsm6ds3tr_c_fifo_mode_t;
-int32_t lsm6ds3tr_c_fifo_mode_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_fifo_mode_t val);
-int32_t lsm6ds3tr_c_fifo_mode_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_fifo_mode_t *val);
+int32_t lsm6ds3tr_c_fifo_mode_set(stmdev_ctx_t *ctx,
+                                  lsm6ds3tr_c_fifo_mode_t val);
+int32_t lsm6ds3tr_c_fifo_mode_get(stmdev_ctx_t *ctx,
+                                  lsm6ds3tr_c_fifo_mode_t *val);
 
 typedef enum {
   LSM6DS3TR_C_FIFO_DISABLE   =  0,
@@ -1613,17 +1704,19 @@ typedef enum {
   LSM6DS3TR_C_FIFO_RATE_ND   = 11,    /* ERROR CODE */
 } lsm6ds3tr_c_odr_fifo_t;
 int32_t lsm6ds3tr_c_fifo_data_rate_set(stmdev_ctx_t *ctx,
-                                   lsm6ds3tr_c_odr_fifo_t val);
+                                       lsm6ds3tr_c_odr_fifo_t val);
 int32_t lsm6ds3tr_c_fifo_data_rate_get(stmdev_ctx_t *ctx,
-                                   lsm6ds3tr_c_odr_fifo_t *val);
+                                       lsm6ds3tr_c_odr_fifo_t *val);
 
 typedef enum {
   LSM6DS3TR_C_DEN_ACT_LOW    = 0,
   LSM6DS3TR_C_DEN_ACT_HIGH   = 1,
   LSM6DS3TR_C_DEN_POL_ND     = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_den_lh_t;
-int32_t lsm6ds3tr_c_den_polarity_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_den_lh_t val);
-int32_t lsm6ds3tr_c_den_polarity_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_den_lh_t *val);
+int32_t lsm6ds3tr_c_den_polarity_set(stmdev_ctx_t *ctx,
+                                     lsm6ds3tr_c_den_lh_t val);
+int32_t lsm6ds3tr_c_den_polarity_get(stmdev_ctx_t *ctx,
+                                     lsm6ds3tr_c_den_lh_t *val);
 
 typedef enum {
   LSM6DS3TR_C_DEN_DISABLE    = 0,
@@ -1633,8 +1726,10 @@ typedef enum {
   LSM6DS3TR_C_EDGE_TRIGGER   = 4,
   LSM6DS3TR_C_DEN_MODE_ND    = 5,    /* ERROR CODE */
 } lsm6ds3tr_c_den_mode_t;
-int32_t lsm6ds3tr_c_den_mode_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_den_mode_t val);
-int32_t lsm6ds3tr_c_den_mode_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_den_mode_t *val);
+int32_t lsm6ds3tr_c_den_mode_set(stmdev_ctx_t *ctx,
+                                 lsm6ds3tr_c_den_mode_t val);
+int32_t lsm6ds3tr_c_den_mode_get(stmdev_ctx_t *ctx,
+                                 lsm6ds3tr_c_den_mode_t *val);
 
 typedef enum {
   LSM6DS3TR_C_STAMP_IN_GY_DATA     = 0,
@@ -1642,26 +1737,38 @@ typedef enum {
   LSM6DS3TR_C_STAMP_IN_GY_XL_DATA  = 2,
   LSM6DS3TR_C_DEN_STAMP_ND         = 3,    /* ERROR CODE */
 } lsm6ds3tr_c_den_xl_en_t;
-int32_t lsm6ds3tr_c_den_enable_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_den_xl_en_t val);
-int32_t lsm6ds3tr_c_den_enable_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_den_xl_en_t *val);
+int32_t lsm6ds3tr_c_den_enable_set(stmdev_ctx_t *ctx,
+                                   lsm6ds3tr_c_den_xl_en_t val);
+int32_t lsm6ds3tr_c_den_enable_get(stmdev_ctx_t *ctx,
+                                   lsm6ds3tr_c_den_xl_en_t *val);
 
-int32_t lsm6ds3tr_c_den_mark_axis_z_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_den_mark_axis_z_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_den_mark_axis_z_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t lsm6ds3tr_c_den_mark_axis_z_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
-int32_t lsm6ds3tr_c_den_mark_axis_y_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_den_mark_axis_y_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_den_mark_axis_y_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t lsm6ds3tr_c_den_mark_axis_y_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
-int32_t lsm6ds3tr_c_den_mark_axis_x_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_den_mark_axis_x_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_den_mark_axis_x_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t lsm6ds3tr_c_den_mark_axis_x_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
-int32_t lsm6ds3tr_c_pedo_step_reset_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_pedo_step_reset_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_pedo_step_reset_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t lsm6ds3tr_c_pedo_step_reset_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 int32_t lsm6ds3tr_c_pedo_sens_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6ds3tr_c_pedo_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6ds3tr_c_pedo_threshold_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_pedo_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_pedo_threshold_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t lsm6ds3tr_c_pedo_threshold_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 typedef enum {
   LSM6DS3TR_C_PEDO_AT_2g = 0,
@@ -1669,58 +1776,76 @@ typedef enum {
   LSM6DS3TR_C_PEDO_FS_ND = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_pedo_fs_t;
 int32_t lsm6ds3tr_c_pedo_full_scale_set(stmdev_ctx_t *ctx,
-                                    lsm6ds3tr_c_pedo_fs_t val);
+                                        lsm6ds3tr_c_pedo_fs_t val);
 int32_t lsm6ds3tr_c_pedo_full_scale_get(stmdev_ctx_t *ctx,
-                                    lsm6ds3tr_c_pedo_fs_t *val);
+                                        lsm6ds3tr_c_pedo_fs_t *val);
 
-int32_t lsm6ds3tr_c_pedo_debounce_steps_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_pedo_debounce_steps_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_pedo_debounce_steps_set(stmdev_ctx_t *ctx,
+                                            uint8_t val);
+int32_t lsm6ds3tr_c_pedo_debounce_steps_get(stmdev_ctx_t *ctx,
+                                            uint8_t *val);
 
 int32_t lsm6ds3tr_c_pedo_timeout_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6ds3tr_c_pedo_timeout_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6ds3tr_c_pedo_steps_period_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6ds3tr_c_pedo_steps_period_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6ds3tr_c_pedo_steps_period_set(stmdev_ctx_t *ctx,
+                                          uint8_t *buff);
+int32_t lsm6ds3tr_c_pedo_steps_period_get(stmdev_ctx_t *ctx,
+                                          uint8_t *buff);
 
 int32_t lsm6ds3tr_c_motion_sens_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6ds3tr_c_motion_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6ds3tr_c_motion_threshold_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6ds3tr_c_motion_threshold_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6ds3tr_c_motion_threshold_set(stmdev_ctx_t *ctx,
+                                         uint8_t *buff);
+int32_t lsm6ds3tr_c_motion_threshold_get(stmdev_ctx_t *ctx,
+                                         uint8_t *buff);
 
 int32_t lsm6ds3tr_c_tilt_sens_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6ds3tr_c_tilt_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6ds3tr_c_wrist_tilt_sens_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_wrist_tilt_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_wrist_tilt_sens_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t lsm6ds3tr_c_wrist_tilt_sens_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
-int32_t lsm6ds3tr_c_tilt_latency_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6ds3tr_c_tilt_latency_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6ds3tr_c_tilt_latency_set(stmdev_ctx_t *ctx,
+                                     uint8_t *buff);
+int32_t lsm6ds3tr_c_tilt_latency_get(stmdev_ctx_t *ctx,
+                                     uint8_t *buff);
 
-int32_t lsm6ds3tr_c_tilt_threshold_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6ds3tr_c_tilt_threshold_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6ds3tr_c_tilt_threshold_set(stmdev_ctx_t *ctx,
+                                       uint8_t *buff);
+int32_t lsm6ds3tr_c_tilt_threshold_get(stmdev_ctx_t *ctx,
+                                       uint8_t *buff);
 
 int32_t lsm6ds3tr_c_tilt_src_set(stmdev_ctx_t *ctx,
-                             lsm6ds3tr_c_a_wrist_tilt_mask_t *val);
+                                 lsm6ds3tr_c_a_wrist_tilt_mask_t *val);
 int32_t lsm6ds3tr_c_tilt_src_get(stmdev_ctx_t *ctx,
-                             lsm6ds3tr_c_a_wrist_tilt_mask_t *val);
+                                 lsm6ds3tr_c_a_wrist_tilt_mask_t *val);
 
 int32_t lsm6ds3tr_c_mag_soft_iron_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_mag_soft_iron_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_mag_soft_iron_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lsm6ds3tr_c_mag_hard_iron_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_mag_hard_iron_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_mag_hard_iron_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
-int32_t lsm6ds3tr_c_mag_soft_iron_mat_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t lsm6ds3tr_c_mag_soft_iron_mat_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm6ds3tr_c_mag_soft_iron_mat_set(stmdev_ctx_t *ctx,
+                                          uint8_t *buff);
+int32_t lsm6ds3tr_c_mag_soft_iron_mat_get(stmdev_ctx_t *ctx,
+                                          uint8_t *buff);
 
 int32_t lsm6ds3tr_c_mag_offset_set(stmdev_ctx_t *ctx, uint8_t *buff);
 int32_t lsm6ds3tr_c_mag_offset_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
 int32_t lsm6ds3tr_c_func_en_set(stmdev_ctx_t *ctx, uint8_t val);
 
-int32_t lsm6ds3tr_c_sh_sync_sens_frame_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_sh_sync_sens_frame_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_sh_sync_sens_frame_set(stmdev_ctx_t *ctx,
+                                           uint8_t val);
+int32_t lsm6ds3tr_c_sh_sync_sens_frame_get(stmdev_ctx_t *ctx,
+                                           uint8_t *val);
 
 typedef enum {
   LSM6DS3TR_C_RES_RATIO_2_11  = 0,
@@ -1729,22 +1854,28 @@ typedef enum {
   LSM6DS3TR_C_RES_RATIO_2_14  = 3,
   LSM6DS3TR_C_RES_RATIO_ND    = 4,    /* ERROR CODE */
 } lsm6ds3tr_c_rr_t;
-int32_t lsm6ds3tr_c_sh_sync_sens_ratio_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_rr_t val);
-int32_t lsm6ds3tr_c_sh_sync_sens_ratio_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_rr_t *val);
+int32_t lsm6ds3tr_c_sh_sync_sens_ratio_set(stmdev_ctx_t *ctx,
+                                           lsm6ds3tr_c_rr_t val);
+int32_t lsm6ds3tr_c_sh_sync_sens_ratio_get(stmdev_ctx_t *ctx,
+                                           lsm6ds3tr_c_rr_t *val);
 
 int32_t lsm6ds3tr_c_sh_master_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm6ds3tr_c_sh_master_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm6ds3tr_c_sh_pass_through_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_sh_pass_through_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_sh_pass_through_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t lsm6ds3tr_c_sh_pass_through_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 typedef enum {
   LSM6DS3TR_C_EXT_PULL_UP       = 0,
   LSM6DS3TR_C_INTERNAL_PULL_UP  = 1,
   LSM6DS3TR_C_SH_PIN_MODE       = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_pull_up_en_t;
-int32_t lsm6ds3tr_c_sh_pin_mode_set(stmdev_ctx_t *ctx, lsm6ds3tr_c_pull_up_en_t val);
-int32_t lsm6ds3tr_c_sh_pin_mode_get(stmdev_ctx_t *ctx, lsm6ds3tr_c_pull_up_en_t *val);
+int32_t lsm6ds3tr_c_sh_pin_mode_set(stmdev_ctx_t *ctx,
+                                    lsm6ds3tr_c_pull_up_en_t val);
+int32_t lsm6ds3tr_c_sh_pin_mode_get(stmdev_ctx_t *ctx,
+                                    lsm6ds3tr_c_pull_up_en_t *val);
 
 typedef enum {
   LSM6DS3TR_C_XL_GY_DRDY        = 0,
@@ -1752,41 +1883,47 @@ typedef enum {
   LSM6DS3TR_C_SH_SYNCRO_ND      = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_start_config_t;
 int32_t lsm6ds3tr_c_sh_syncro_mode_set(stmdev_ctx_t *ctx,
-                                   lsm6ds3tr_c_start_config_t val);
+                                       lsm6ds3tr_c_start_config_t val);
 int32_t lsm6ds3tr_c_sh_syncro_mode_get(stmdev_ctx_t *ctx,
-                                   lsm6ds3tr_c_start_config_t *val);
+                                       lsm6ds3tr_c_start_config_t *val);
 
-int32_t lsm6ds3tr_c_sh_drdy_on_int1_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_sh_drdy_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_sh_drdy_on_int1_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t lsm6ds3tr_c_sh_drdy_on_int1_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 typedef struct {
-    lsm6ds3tr_c_sensorhub1_reg_t   sh_byte_1;
-    lsm6ds3tr_c_sensorhub2_reg_t   sh_byte_2;
-    lsm6ds3tr_c_sensorhub3_reg_t   sh_byte_3;
-    lsm6ds3tr_c_sensorhub4_reg_t   sh_byte_4;
-    lsm6ds3tr_c_sensorhub5_reg_t   sh_byte_5;
-    lsm6ds3tr_c_sensorhub6_reg_t   sh_byte_6;
-    lsm6ds3tr_c_sensorhub7_reg_t   sh_byte_7;
-    lsm6ds3tr_c_sensorhub8_reg_t   sh_byte_8;
-    lsm6ds3tr_c_sensorhub9_reg_t   sh_byte_9;
-    lsm6ds3tr_c_sensorhub10_reg_t  sh_byte_10;
-    lsm6ds3tr_c_sensorhub11_reg_t  sh_byte_11;
-    lsm6ds3tr_c_sensorhub12_reg_t  sh_byte_12;
-    lsm6ds3tr_c_sensorhub13_reg_t  sh_byte_13;
-    lsm6ds3tr_c_sensorhub14_reg_t  sh_byte_14;
-    lsm6ds3tr_c_sensorhub15_reg_t  sh_byte_15;
-    lsm6ds3tr_c_sensorhub16_reg_t  sh_byte_16;
-    lsm6ds3tr_c_sensorhub17_reg_t  sh_byte_17;
-    lsm6ds3tr_c_sensorhub18_reg_t  sh_byte_18;
+  lsm6ds3tr_c_sensorhub1_reg_t   sh_byte_1;
+  lsm6ds3tr_c_sensorhub2_reg_t   sh_byte_2;
+  lsm6ds3tr_c_sensorhub3_reg_t   sh_byte_3;
+  lsm6ds3tr_c_sensorhub4_reg_t   sh_byte_4;
+  lsm6ds3tr_c_sensorhub5_reg_t   sh_byte_5;
+  lsm6ds3tr_c_sensorhub6_reg_t   sh_byte_6;
+  lsm6ds3tr_c_sensorhub7_reg_t   sh_byte_7;
+  lsm6ds3tr_c_sensorhub8_reg_t   sh_byte_8;
+  lsm6ds3tr_c_sensorhub9_reg_t   sh_byte_9;
+  lsm6ds3tr_c_sensorhub10_reg_t  sh_byte_10;
+  lsm6ds3tr_c_sensorhub11_reg_t  sh_byte_11;
+  lsm6ds3tr_c_sensorhub12_reg_t  sh_byte_12;
+  lsm6ds3tr_c_sensorhub13_reg_t  sh_byte_13;
+  lsm6ds3tr_c_sensorhub14_reg_t  sh_byte_14;
+  lsm6ds3tr_c_sensorhub15_reg_t  sh_byte_15;
+  lsm6ds3tr_c_sensorhub16_reg_t  sh_byte_16;
+  lsm6ds3tr_c_sensorhub17_reg_t  sh_byte_17;
+  lsm6ds3tr_c_sensorhub18_reg_t  sh_byte_18;
 } lsm6ds3tr_c_emb_sh_read_t;
 int32_t lsm6ds3tr_c_sh_read_data_raw_get(stmdev_ctx_t *ctx,
-                                     lsm6ds3tr_c_emb_sh_read_t *val);
+                                         lsm6ds3tr_c_emb_sh_read_t *val);
 
-int32_t lsm6ds3tr_c_sh_cmd_sens_sync_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_sh_cmd_sens_sync_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_sh_cmd_sens_sync_set(stmdev_ctx_t *ctx,
+                                         uint8_t val);
+int32_t lsm6ds3tr_c_sh_cmd_sens_sync_get(stmdev_ctx_t *ctx,
+                                         uint8_t *val);
 
-int32_t lsm6ds3tr_c_sh_spi_sync_error_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm6ds3tr_c_sh_spi_sync_error_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm6ds3tr_c_sh_spi_sync_error_set(stmdev_ctx_t *ctx,
+                                          uint8_t val);
+int32_t lsm6ds3tr_c_sh_spi_sync_error_get(stmdev_ctx_t *ctx,
+                                          uint8_t *val);
 
 typedef enum {
   LSM6DS3TR_C_SLV_0        = 0,
@@ -1796,30 +1933,31 @@ typedef enum {
   LSM6DS3TR_C_SLV_EN_ND    = 4,    /* ERROR CODE */
 } lsm6ds3tr_c_aux_sens_on_t;
 int32_t lsm6ds3tr_c_sh_num_of_dev_connected_set(stmdev_ctx_t *ctx,
-                                            lsm6ds3tr_c_aux_sens_on_t val);
+                                                lsm6ds3tr_c_aux_sens_on_t val);
 int32_t lsm6ds3tr_c_sh_num_of_dev_connected_get(stmdev_ctx_t *ctx,
-                                            lsm6ds3tr_c_aux_sens_on_t *val);
+                                                lsm6ds3tr_c_aux_sens_on_t *val);
 
-typedef struct{
+typedef struct {
   uint8_t   slv0_add;
   uint8_t   slv0_subadd;
   uint8_t   slv0_data;
 } lsm6ds3tr_c_sh_cfg_write_t;
-int32_t lsm6ds3tr_c_sh_cfg_write(stmdev_ctx_t *ctx, lsm6ds3tr_c_sh_cfg_write_t *val);
+int32_t lsm6ds3tr_c_sh_cfg_write(stmdev_ctx_t *ctx,
+                                 lsm6ds3tr_c_sh_cfg_write_t *val);
 
-typedef struct{
+typedef struct {
   uint8_t   slv_add;
   uint8_t   slv_subadd;
   uint8_t   slv_len;
 } lsm6ds3tr_c_sh_cfg_read_t;
 int32_t lsm6ds3tr_c_sh_slv0_cfg_read(stmdev_ctx_t *ctx,
-                                 lsm6ds3tr_c_sh_cfg_read_t *val);
+                                     lsm6ds3tr_c_sh_cfg_read_t *val);
 int32_t lsm6ds3tr_c_sh_slv1_cfg_read(stmdev_ctx_t *ctx,
-                                 lsm6ds3tr_c_sh_cfg_read_t *val);
+                                     lsm6ds3tr_c_sh_cfg_read_t *val);
 int32_t lsm6ds3tr_c_sh_slv2_cfg_read(stmdev_ctx_t *ctx,
-                                 lsm6ds3tr_c_sh_cfg_read_t *val);
+                                     lsm6ds3tr_c_sh_cfg_read_t *val);
 int32_t lsm6ds3tr_c_sh_slv3_cfg_read(stmdev_ctx_t *ctx,
-                                 lsm6ds3tr_c_sh_cfg_read_t *val);
+                                     lsm6ds3tr_c_sh_cfg_read_t *val);
 
 typedef enum {
   LSM6DS3TR_C_SL0_NO_DEC   = 0,
@@ -1829,9 +1967,9 @@ typedef enum {
   LSM6DS3TR_C_SL0_DEC_ND   = 4,    /* ERROR CODE */
 } lsm6ds3tr_c_slave0_rate_t;
 int32_t lsm6ds3tr_c_sh_slave_0_dec_set(stmdev_ctx_t *ctx,
-                                   lsm6ds3tr_c_slave0_rate_t val);
+                                       lsm6ds3tr_c_slave0_rate_t val);
 int32_t lsm6ds3tr_c_sh_slave_0_dec_get(stmdev_ctx_t *ctx,
-                                   lsm6ds3tr_c_slave0_rate_t *val);
+                                       lsm6ds3tr_c_slave0_rate_t *val);
 
 typedef enum {
   LSM6DS3TR_C_EACH_SH_CYCLE     = 0,
@@ -1839,9 +1977,9 @@ typedef enum {
   LSM6DS3TR_C_SH_WR_MODE_ND     = 2,    /* ERROR CODE */
 } lsm6ds3tr_c_write_once_t;
 int32_t lsm6ds3tr_c_sh_write_mode_set(stmdev_ctx_t *ctx,
-                                  lsm6ds3tr_c_write_once_t val);
+                                      lsm6ds3tr_c_write_once_t val);
 int32_t lsm6ds3tr_c_sh_write_mode_get(stmdev_ctx_t *ctx,
-                                  lsm6ds3tr_c_write_once_t *val);
+                                      lsm6ds3tr_c_write_once_t *val);
 
 typedef enum {
   LSM6DS3TR_C_SL1_NO_DEC   = 0,
@@ -1851,9 +1989,9 @@ typedef enum {
   LSM6DS3TR_C_SL1_DEC_ND   = 4,    /* ERROR CODE */
 } lsm6ds3tr_c_slave1_rate_t;
 int32_t lsm6ds3tr_c_sh_slave_1_dec_set(stmdev_ctx_t *ctx,
-                                   lsm6ds3tr_c_slave1_rate_t val);
+                                       lsm6ds3tr_c_slave1_rate_t val);
 int32_t lsm6ds3tr_c_sh_slave_1_dec_get(stmdev_ctx_t *ctx,
-                                   lsm6ds3tr_c_slave1_rate_t *val);
+                                       lsm6ds3tr_c_slave1_rate_t *val);
 
 typedef enum {
   LSM6DS3TR_C_SL2_NO_DEC  = 0,
@@ -1863,9 +2001,9 @@ typedef enum {
   LSM6DS3TR_C_SL2_DEC_ND  = 4,    /* ERROR CODE */
 } lsm6ds3tr_c_slave2_rate_t;
 int32_t lsm6ds3tr_c_sh_slave_2_dec_set(stmdev_ctx_t *ctx,
-                                   lsm6ds3tr_c_slave2_rate_t val);
+                                       lsm6ds3tr_c_slave2_rate_t val);
 int32_t lsm6ds3tr_c_sh_slave_2_dec_get(stmdev_ctx_t *ctx,
-                                   lsm6ds3tr_c_slave2_rate_t *val);
+                                       lsm6ds3tr_c_slave2_rate_t *val);
 
 typedef enum {
   LSM6DS3TR_C_SL3_NO_DEC  = 0,
@@ -1875,9 +2013,9 @@ typedef enum {
   LSM6DS3TR_C_SL3_DEC_ND  = 4,    /* ERROR CODE */
 } lsm6ds3tr_c_slave3_rate_t;
 int32_t lsm6ds3tr_c_sh_slave_3_dec_set(stmdev_ctx_t *ctx,
-                                   lsm6ds3tr_c_slave3_rate_t val);
+                                       lsm6ds3tr_c_slave3_rate_t val);
 int32_t lsm6ds3tr_c_sh_slave_3_dec_get(stmdev_ctx_t *ctx,
-                                   lsm6ds3tr_c_slave3_rate_t *val);
+                                       lsm6ds3tr_c_slave3_rate_t *val);
 
 /**
   * @}
