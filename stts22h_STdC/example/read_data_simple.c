@@ -82,7 +82,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 
-typedef union{
+typedef union {
   int16_t i16bit;
   uint8_t u8bit[2];
 } axis1bit16_t;
@@ -101,7 +101,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -115,17 +116,17 @@ void example_main_stts22h(void)
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Check device ID */
   stts22h_dev_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != STTS22H_ID)
-    while(1); /* manage here device not found */
-  
-  /*  
-   * Set Output Data Rate 
+    while (1); /* manage here device not found */
+
+  /*
+   * Set Output Data Rate
    * WARNING: this function can reset the device configuration.
    */
-  stts22h_temp_data_rate_set(&dev_ctx, STTS22H_1Hz);  
+  stts22h_temp_data_rate_set(&dev_ctx, STTS22H_1Hz);
 
   /* Enable interrupt on high(=49.5 degC)/low(=2.5 degC) temperature. */
   //float temperature_high_limit = 49.5f;
@@ -135,8 +136,7 @@ void example_main_stts22h(void)
   //stts22h_temp_trshld_low_set(&dev_ctx, (int8_t)(temperature_low_limit / 64.0f) + 64 );
 
   /* Read samples in polling mode */
-  while(1)
-  {
+  while (1) {
     /*
      * Read output only if not busy
      * WARNING: _flag_data_ready_get works only when the device is in single
@@ -145,15 +145,16 @@ void example_main_stts22h(void)
      */
     uint8_t flag;
     stts22h_temp_flag_data_ready_get(&dev_ctx, &flag);
-    if (flag)
-    {
+
+    if (flag) {
       /* Read temperature data */
       memset(data_raw_temperature.u8bit, 0, sizeof(int16_t));
       stts22h_temperature_raw_get(&dev_ctx, &data_raw_temperature.i16bit);
-      temperature_degC = stts22h_from_lsb_to_celsius(data_raw_temperature.i16bit);
-
-      sprintf((char*)tx_buffer, "Temperature [degC]:%3.2f\r\n", temperature_degC);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      temperature_degC = stts22h_from_lsb_to_celsius(
+                           data_raw_temperature.i16bit);
+      sprintf((char *)tx_buffer, "Temperature [degC]:%3.2f\r\n",
+              temperature_degC);
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -168,7 +169,8 @@ void example_main_stts22h(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
@@ -203,14 +205,14 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Send buffer to console (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
+#endif
 }
 
