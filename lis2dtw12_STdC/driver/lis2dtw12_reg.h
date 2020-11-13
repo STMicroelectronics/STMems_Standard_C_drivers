@@ -23,7 +23,7 @@
 #define LIS2DTW12_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -74,7 +74,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
@@ -107,8 +107,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -131,9 +133,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -215,7 +217,8 @@ typedef struct {
 #define LIS2DTW12_CTRL3                       0x22U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-  uint8_t slp_mode                   : 2;  /* slp_mode_sel + slp_mode_1 */
+uint8_t slp_mode                   :
+  2;  /* slp_mode_sel + slp_mode_1 */
   uint8_t not_used_01                : 1;
   uint8_t h_lactive                  : 1;
   uint8_t lir                        : 1;
@@ -227,7 +230,8 @@ typedef struct {
   uint8_t lir                        : 1;
   uint8_t h_lactive                  : 1;
   uint8_t not_used_01                : 1;
-  uint8_t slp_mode                   : 2;  /* slp_mode_sel + slp_mode_1 */
+uint8_t slp_mode                   :
+  2;  /* slp_mode_sel + slp_mode_1 */
 #endif /* DRV_BYTE_ORDER */
 } lis2dtw12_ctrl3_t;
 
@@ -590,7 +594,7 @@ typedef struct {
   * @{
   *
   */
-typedef union{
+typedef union {
   lis2dtw12_ctrl1_t                   ctrl1;
   lis2dtw12_ctrl2_t                   ctrl2;
   lis2dtw12_ctrl3_t                   ctrl3;
@@ -622,10 +626,12 @@ typedef union{
   *
   */
 
-int32_t lis2dtw12_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
-                          uint16_t len);
-int32_t lis2dtw12_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lis2dtw12_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                           uint8_t *data,
                            uint16_t len);
+int32_t lis2dtw12_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                            uint8_t *data,
+                            uint16_t len);
 
 extern float_t lis2dtw12_from_fs2_to_mg(int16_t lsb);
 extern float_t lis2dtw12_from_fs4_to_mg(int16_t lsb);
@@ -657,8 +663,10 @@ typedef enum {
   LIS2DTW12_SINGLE_LOW_PWR_LOW_NOISE_2          = 0x19,
   LIS2DTW12_SINGLE_LOW_LOW_NOISE_PWR_12bit      = 0x18,
 } lis2dtw12_mode_t;
-int32_t lis2dtw12_power_mode_set(stmdev_ctx_t *ctx, lis2dtw12_mode_t val);
-int32_t lis2dtw12_power_mode_get(stmdev_ctx_t *ctx, lis2dtw12_mode_t *val);
+int32_t lis2dtw12_power_mode_set(stmdev_ctx_t *ctx,
+                                 lis2dtw12_mode_t val);
+int32_t lis2dtw12_power_mode_get(stmdev_ctx_t *ctx,
+                                 lis2dtw12_mode_t *val);
 
 typedef enum {
   LIS2DTW12_XL_ODR_OFF            = 0x00,
@@ -674,11 +682,15 @@ typedef enum {
   LIS2DTW12_XL_SET_SW_TRIG        = 0x12,  /* Use this only in SINGLE mode */
   LIS2DTW12_XL_SET_PIN_TRIG       = 0x22,  /* Use this only in SINGLE mode */
 } lis2dtw12_odr_t;
-int32_t lis2dtw12_data_rate_set(stmdev_ctx_t *ctx, lis2dtw12_odr_t val);
-int32_t lis2dtw12_data_rate_get(stmdev_ctx_t *ctx, lis2dtw12_odr_t *val);
+int32_t lis2dtw12_data_rate_set(stmdev_ctx_t *ctx,
+                                lis2dtw12_odr_t val);
+int32_t lis2dtw12_data_rate_get(stmdev_ctx_t *ctx,
+                                lis2dtw12_odr_t *val);
 
-int32_t lis2dtw12_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis2dtw12_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis2dtw12_block_data_update_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t lis2dtw12_block_data_update_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 typedef enum {
   LIS2DTW12_2g     = 0,
@@ -686,14 +698,18 @@ typedef enum {
   LIS2DTW12_8g     = 2,
   LIS2DTW12_16g    = 3,
 } lis2dtw12_fs_t;
-int32_t lis2dtw12_full_scale_set(stmdev_ctx_t *ctx, lis2dtw12_fs_t val);
-int32_t lis2dtw12_full_scale_get(stmdev_ctx_t *ctx, lis2dtw12_fs_t *val);
+int32_t lis2dtw12_full_scale_set(stmdev_ctx_t *ctx,
+                                 lis2dtw12_fs_t val);
+int32_t lis2dtw12_full_scale_get(stmdev_ctx_t *ctx,
+                                 lis2dtw12_fs_t *val);
 
-int32_t lis2dtw12_status_reg_get(stmdev_ctx_t *ctx, lis2dtw12_status_t *val);
+int32_t lis2dtw12_status_reg_get(stmdev_ctx_t *ctx,
+                                 lis2dtw12_status_t *val);
 
-int32_t lis2dtw12_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis2dtw12_flag_data_ready_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
-typedef struct{
+typedef struct {
   lis2dtw12_status_dup_t   status_dup;
   lis2dtw12_wake_up_src_t  wake_up_src;
   lis2dtw12_tap_src_t      tap_src;
@@ -701,7 +717,7 @@ typedef struct{
   lis2dtw12_all_int_src_t  all_int_src;
 } lis2dtw12_all_sources_t;
 int32_t lis2dtw12_all_sources_get(stmdev_ctx_t *ctx,
-                                 lis2dtw12_all_sources_t *val);
+                                  lis2dtw12_all_sources_t *val);
 
 int32_t lis2dtw12_usr_offset_x_set(stmdev_ctx_t *ctx, uint8_t *buff);
 int32_t lis2dtw12_usr_offset_x_get(stmdev_ctx_t *ctx, uint8_t *buff);
@@ -717,13 +733,15 @@ typedef enum {
   LIS2DTW12_LSb_15mg6    = 1,
 } lis2dtw12_usr_off_w_t;
 int32_t lis2dtw12_offset_weight_set(stmdev_ctx_t *ctx,
-                                      lis2dtw12_usr_off_w_t val);
+                                    lis2dtw12_usr_off_w_t val);
 int32_t lis2dtw12_offset_weight_get(stmdev_ctx_t *ctx,
-                                      lis2dtw12_usr_off_w_t *val);
+                                    lis2dtw12_usr_off_w_t *val);
 
-int32_t lis2dtw12_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val);
+int32_t lis2dtw12_temperature_raw_get(stmdev_ctx_t *ctx,
+                                      int16_t *val);
 
-int32_t lis2dtw12_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val);
+int32_t lis2dtw12_acceleration_raw_get(stmdev_ctx_t *ctx,
+                                       int16_t *val);
 
 int32_t lis2dtw12_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
@@ -741,25 +759,29 @@ typedef enum {
   LIS2DTW12_XL_ST_POSITIVE     = 1,
   LIS2DTW12_XL_ST_NEGATIVE     = 2,
 } lis2dtw12_st_t;
-int32_t lis2dtw12_self_test_set(stmdev_ctx_t *ctx, lis2dtw12_st_t val);
-int32_t lis2dtw12_self_test_get(stmdev_ctx_t *ctx, lis2dtw12_st_t *val);
+int32_t lis2dtw12_self_test_set(stmdev_ctx_t *ctx,
+                                lis2dtw12_st_t val);
+int32_t lis2dtw12_self_test_get(stmdev_ctx_t *ctx,
+                                lis2dtw12_st_t *val);
 
 typedef enum {
   LIS2DTW12_DRDY_LATCHED   = 0,
   LIS2DTW12_DRDY_PULSED    = 1,
 } lis2dtw12_drdy_pulsed_t;
 int32_t lis2dtw12_data_ready_mode_set(stmdev_ctx_t *ctx,
-                                     lis2dtw12_drdy_pulsed_t val);
+                                      lis2dtw12_drdy_pulsed_t val);
 int32_t lis2dtw12_data_ready_mode_get(stmdev_ctx_t *ctx,
-                                     lis2dtw12_drdy_pulsed_t *val);
+                                      lis2dtw12_drdy_pulsed_t *val);
 
 typedef enum {
   LIS2DTW12_LPF_ON_OUT         = 0x00,
   LIS2DTW12_USER_OFFSET_ON_OUT  = 0x01,
   LIS2DTW12_HIGH_PASS_ON_OUT    = 0x10,
 } lis2dtw12_fds_t;
-int32_t lis2dtw12_filter_path_set(stmdev_ctx_t *ctx, lis2dtw12_fds_t val);
-int32_t lis2dtw12_filter_path_get(stmdev_ctx_t *ctx, lis2dtw12_fds_t *val);
+int32_t lis2dtw12_filter_path_set(stmdev_ctx_t *ctx,
+                                  lis2dtw12_fds_t val);
+int32_t lis2dtw12_filter_path_get(stmdev_ctx_t *ctx,
+                                  lis2dtw12_fds_t *val);
 
 typedef enum {
   LIS2DTW12_ODR_DIV_2     = 0,
@@ -768,9 +790,9 @@ typedef enum {
   LIS2DTW12_ODR_DIV_20    = 3,
 } lis2dtw12_bw_filt_t;
 int32_t lis2dtw12_filter_bandwidth_set(stmdev_ctx_t *ctx,
-                                         lis2dtw12_bw_filt_t val);
+                                       lis2dtw12_bw_filt_t val);
 int32_t lis2dtw12_filter_bandwidth_get(stmdev_ctx_t *ctx,
-                                         lis2dtw12_bw_filt_t *val);
+                                       lis2dtw12_bw_filt_t *val);
 
 int32_t lis2dtw12_reference_mode_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis2dtw12_reference_mode_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -779,59 +801,65 @@ typedef enum {
   LIS2DTW12_SPI_4_WIRE   = 0,
   LIS2DTW12_SPI_3_WIRE   = 1,
 } lis2dtw12_sim_t;
-int32_t lis2dtw12_spi_mode_set(stmdev_ctx_t *ctx, lis2dtw12_sim_t val);
-int32_t lis2dtw12_spi_mode_get(stmdev_ctx_t *ctx, lis2dtw12_sim_t *val);
+int32_t lis2dtw12_spi_mode_set(stmdev_ctx_t *ctx,
+                               lis2dtw12_sim_t val);
+int32_t lis2dtw12_spi_mode_get(stmdev_ctx_t *ctx,
+                               lis2dtw12_sim_t *val);
 
 typedef enum {
   LIS2DTW12_I2C_ENABLE    = 0,
   LIS2DTW12_I2C_DISABLE   = 1,
 } lis2dtw12_i2c_disable_t;
 int32_t lis2dtw12_i2c_interface_set(stmdev_ctx_t *ctx,
-                                   lis2dtw12_i2c_disable_t val);
+                                    lis2dtw12_i2c_disable_t val);
 int32_t lis2dtw12_i2c_interface_get(stmdev_ctx_t *ctx,
-                                   lis2dtw12_i2c_disable_t *val);
+                                    lis2dtw12_i2c_disable_t *val);
 
 typedef enum {
   LIS2DTW12_PULL_UP_CONNECT     = 0,
   LIS2DTW12_PULL_UP_DISCONNECT  = 1,
 } lis2dtw12_cs_pu_disc_t;
-int32_t lis2dtw12_cs_mode_set(stmdev_ctx_t *ctx, lis2dtw12_cs_pu_disc_t val);
-int32_t lis2dtw12_cs_mode_get(stmdev_ctx_t *ctx, lis2dtw12_cs_pu_disc_t *val);
+int32_t lis2dtw12_cs_mode_set(stmdev_ctx_t *ctx,
+                              lis2dtw12_cs_pu_disc_t val);
+int32_t lis2dtw12_cs_mode_get(stmdev_ctx_t *ctx,
+                              lis2dtw12_cs_pu_disc_t *val);
 
 typedef enum {
   LIS2DTW12_ACTIVE_HIGH  = 0,
   LIS2DTW12_ACTIVE_LOW   = 1,
 } lis2dtw12_h_lactive_t;
 int32_t lis2dtw12_pin_polarity_set(stmdev_ctx_t *ctx,
-                                  lis2dtw12_h_lactive_t val);
+                                   lis2dtw12_h_lactive_t val);
 int32_t lis2dtw12_pin_polarity_get(stmdev_ctx_t *ctx,
-                                  lis2dtw12_h_lactive_t *val);
+                                   lis2dtw12_h_lactive_t *val);
 
 typedef enum {
   LIS2DTW12_INT_PULSED   = 0,
   LIS2DTW12_INT_LATCHED  = 1,
 } lis2dtw12_lir_t;
 int32_t lis2dtw12_int_notification_set(stmdev_ctx_t *ctx,
-                                      lis2dtw12_lir_t val);
+                                       lis2dtw12_lir_t val);
 int32_t lis2dtw12_int_notification_get(stmdev_ctx_t *ctx,
-                                      lis2dtw12_lir_t *val);
+                                       lis2dtw12_lir_t *val);
 
 typedef enum {
   LIS2DTW12_PUSH_PULL   = 0,
   LIS2DTW12_OPEN_DRAIN  = 1,
 } lis2dtw12_pp_od_t;
-int32_t lis2dtw12_pin_mode_set(stmdev_ctx_t *ctx, lis2dtw12_pp_od_t val);
-int32_t lis2dtw12_pin_mode_get(stmdev_ctx_t *ctx, lis2dtw12_pp_od_t *val);
+int32_t lis2dtw12_pin_mode_set(stmdev_ctx_t *ctx,
+                               lis2dtw12_pp_od_t val);
+int32_t lis2dtw12_pin_mode_get(stmdev_ctx_t *ctx,
+                               lis2dtw12_pp_od_t *val);
 
 int32_t lis2dtw12_pin_int1_route_set(stmdev_ctx_t *ctx,
-                                    lis2dtw12_ctrl4_int1_pad_ctrl_t *val);
+                                     lis2dtw12_ctrl4_int1_pad_ctrl_t *val);
 int32_t lis2dtw12_pin_int1_route_get(stmdev_ctx_t *ctx,
-                                    lis2dtw12_ctrl4_int1_pad_ctrl_t *val);
+                                     lis2dtw12_ctrl4_int1_pad_ctrl_t *val);
 
 int32_t lis2dtw12_pin_int2_route_set(stmdev_ctx_t *ctx,
-                                    lis2dtw12_ctrl5_int2_pad_ctrl_t *val);
+                                     lis2dtw12_ctrl5_int2_pad_ctrl_t *val);
 int32_t lis2dtw12_pin_int2_route_get(stmdev_ctx_t *ctx,
-                                    lis2dtw12_ctrl5_int2_pad_ctrl_t *val);
+                                     lis2dtw12_ctrl5_int2_pad_ctrl_t *val);
 
 int32_t lis2dtw12_all_on_int1_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis2dtw12_all_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -847,26 +875,30 @@ typedef enum {
   LIS2DTW12_USER_OFFSET_FEED  = 1,
 } lis2dtw12_usr_off_on_wu_t;
 int32_t lis2dtw12_wkup_feed_data_set(stmdev_ctx_t *ctx,
-                                    lis2dtw12_usr_off_on_wu_t val);
+                                     lis2dtw12_usr_off_on_wu_t val);
 int32_t lis2dtw12_wkup_feed_data_get(stmdev_ctx_t *ctx,
-                                    lis2dtw12_usr_off_on_wu_t *val);
+                                     lis2dtw12_usr_off_on_wu_t *val);
 
 typedef enum {
   LIS2DTW12_NO_DETECTION        = 0,
   LIS2DTW12_DETECT_ACT_INACT    = 1,
   LIS2DTW12_DETECT_STAT_MOTION  = 3,
 } lis2dtw12_sleep_on_t;
-int32_t lis2dtw12_act_mode_set(stmdev_ctx_t *ctx, lis2dtw12_sleep_on_t val);
-int32_t lis2dtw12_act_mode_get(stmdev_ctx_t *ctx, lis2dtw12_sleep_on_t *val);
+int32_t lis2dtw12_act_mode_set(stmdev_ctx_t *ctx,
+                               lis2dtw12_sleep_on_t val);
+int32_t lis2dtw12_act_mode_get(stmdev_ctx_t *ctx,
+                               lis2dtw12_sleep_on_t *val);
 
 int32_t lis2dtw12_act_sleep_dur_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis2dtw12_act_sleep_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lis2dtw12_tap_threshold_x_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis2dtw12_tap_threshold_x_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis2dtw12_tap_threshold_x_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lis2dtw12_tap_threshold_y_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis2dtw12_tap_threshold_y_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis2dtw12_tap_threshold_y_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 typedef enum {
   LIS2DTW12_XYZ    = 0,
@@ -877,21 +909,28 @@ typedef enum {
   LIS2DTW12_ZXY    = 6,
 } lis2dtw12_tap_prior_t;
 int32_t lis2dtw12_tap_axis_priority_set(stmdev_ctx_t *ctx,
-                                       lis2dtw12_tap_prior_t val);
+                                        lis2dtw12_tap_prior_t val);
 int32_t lis2dtw12_tap_axis_priority_get(stmdev_ctx_t *ctx,
-                                       lis2dtw12_tap_prior_t *val);
+                                        lis2dtw12_tap_prior_t *val);
 
 int32_t lis2dtw12_tap_threshold_z_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis2dtw12_tap_threshold_z_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis2dtw12_tap_threshold_z_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
-int32_t lis2dtw12_tap_detection_on_z_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis2dtw12_tap_detection_on_z_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis2dtw12_tap_detection_on_z_set(stmdev_ctx_t *ctx,
+                                         uint8_t val);
+int32_t lis2dtw12_tap_detection_on_z_get(stmdev_ctx_t *ctx,
+                                         uint8_t *val);
 
-int32_t lis2dtw12_tap_detection_on_y_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis2dtw12_tap_detection_on_y_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis2dtw12_tap_detection_on_y_set(stmdev_ctx_t *ctx,
+                                         uint8_t val);
+int32_t lis2dtw12_tap_detection_on_y_get(stmdev_ctx_t *ctx,
+                                         uint8_t *val);
 
-int32_t lis2dtw12_tap_detection_on_x_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis2dtw12_tap_detection_on_x_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis2dtw12_tap_detection_on_x_set(stmdev_ctx_t *ctx,
+                                         uint8_t val);
+int32_t lis2dtw12_tap_detection_on_x_get(stmdev_ctx_t *ctx,
+                                         uint8_t *val);
 
 int32_t lis2dtw12_tap_shock_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis2dtw12_tap_shock_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -907,11 +946,12 @@ typedef enum {
   LIS2DTW12_BOTH_SINGLE_DOUBLE   = 1,
 } lis2dtw12_single_double_tap_t;
 int32_t lis2dtw12_tap_mode_set(stmdev_ctx_t *ctx,
-                              lis2dtw12_single_double_tap_t val);
+                               lis2dtw12_single_double_tap_t val);
 int32_t lis2dtw12_tap_mode_get(stmdev_ctx_t *ctx,
-                              lis2dtw12_single_double_tap_t *val);
+                               lis2dtw12_single_double_tap_t *val);
 
-int32_t lis2dtw12_tap_src_get(stmdev_ctx_t *ctx, lis2dtw12_tap_src_t *val);
+int32_t lis2dtw12_tap_src_get(stmdev_ctx_t *ctx,
+                              lis2dtw12_tap_src_t *val);
 
 int32_t lis2dtw12_6d_threshold_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis2dtw12_6d_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -919,16 +959,17 @@ int32_t lis2dtw12_6d_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t lis2dtw12_4d_mode_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis2dtw12_4d_mode_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis2dtw12_6d_src_get(stmdev_ctx_t *ctx, lis2dtw12_sixd_src_t *val);
+int32_t lis2dtw12_6d_src_get(stmdev_ctx_t *ctx,
+                             lis2dtw12_sixd_src_t *val);
 
 typedef enum {
   LIS2DTW12_ODR_DIV_2_FEED   = 0,
   LIS2DTW12_LPF2_FEED        = 1,
 } lis2dtw12_lpass_on6d_t;
 int32_t lis2dtw12_6d_feed_data_set(stmdev_ctx_t *ctx,
-                                  lis2dtw12_lpass_on6d_t val);
+                                   lis2dtw12_lpass_on6d_t val);
 int32_t lis2dtw12_6d_feed_data_get(stmdev_ctx_t *ctx,
-                                  lis2dtw12_lpass_on6d_t *val);
+                                   lis2dtw12_lpass_on6d_t *val);
 
 int32_t lis2dtw12_ff_dur_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis2dtw12_ff_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -944,9 +985,9 @@ typedef enum {
   LIS2DTW12_FF_TSH_16LSb_FS2g = 7,
 } lis2dtw12_ff_ths_t;
 int32_t lis2dtw12_ff_threshold_set(stmdev_ctx_t *ctx,
-                                  lis2dtw12_ff_ths_t val);
+                                   lis2dtw12_ff_ths_t val);
 int32_t lis2dtw12_ff_threshold_get(stmdev_ctx_t *ctx,
-                                  lis2dtw12_ff_ths_t *val);
+                                   lis2dtw12_ff_ths_t *val);
 
 int32_t lis2dtw12_fifo_watermark_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis2dtw12_fifo_watermark_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -958,10 +999,13 @@ typedef enum {
   LIS2DTW12_BYPASS_TO_STREAM_MODE   = 4,
   LIS2DTW12_STREAM_MODE             = 6,
 } lis2dtw12_fmode_t;
-int32_t lis2dtw12_fifo_mode_set(stmdev_ctx_t *ctx, lis2dtw12_fmode_t val);
-int32_t lis2dtw12_fifo_mode_get(stmdev_ctx_t *ctx, lis2dtw12_fmode_t *val);
+int32_t lis2dtw12_fifo_mode_set(stmdev_ctx_t *ctx,
+                                lis2dtw12_fmode_t val);
+int32_t lis2dtw12_fifo_mode_get(stmdev_ctx_t *ctx,
+                                lis2dtw12_fmode_t *val);
 
-int32_t lis2dtw12_fifo_data_level_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis2dtw12_fifo_data_level_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lis2dtw12_fifo_ovr_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 

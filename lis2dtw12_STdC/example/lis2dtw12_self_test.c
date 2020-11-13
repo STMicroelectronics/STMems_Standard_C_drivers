@@ -99,7 +99,7 @@
 #include "components.h"
 #endif
 
-typedef struct{
+typedef struct {
   int16_t i16bit[3];
 } axis3bit16_t;
 
@@ -128,7 +128,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -147,11 +148,10 @@ static int flush_samples(stmdev_ctx_t *dev_ctx)
   lis2dtw12_reg_t reg;
   axis3bit16_t dummy;
   int samples = 0;
-
   /* Discard old samples */
   lis2dtw12_status_reg_get(dev_ctx, &reg.status);
-  if (reg.status.drdy)
-  {
+
+  if (reg.status.drdy) {
     lis2dtw12_acceleration_raw_get(dev_ctx, dummy.i16bit);
     samples++;
   }
@@ -169,11 +169,10 @@ static void self_test(stmdev_ctx_t *dev_ctx)
   uint16_t i = 0;
   uint8_t k = 0;
   uint8_t axis;
-
   /* Restore default configuration */
   lis2dtw12_reset_set(dev_ctx, PROPERTY_ENABLE);
-  do
-  {
+
+  do {
     lis2dtw12_reset_get(dev_ctx, &rst);
   } while (rst);
 
@@ -182,32 +181,31 @@ static void self_test(stmdev_ctx_t *dev_ctx)
   lis2dtw12_power_mode_set(dev_ctx, LIS2DTW12_HIGH_PERFORMANCE);
   lis2dtw12_data_rate_set(dev_ctx, LIS2DTW12_XL_ODR_50Hz);
   HAL_Delay(100);
-
   /* Flush old samples */
   flush_samples(dev_ctx);
 
-  do
-  {
+  do {
     lis2dtw12_status_reg_get(dev_ctx, &reg.status);
-    if (reg.status.drdy)
-    {
+
+    if (reg.status.drdy) {
       /*
        * Read accelerometer data
        */
       memset(data_raw_acceleration[i].i16bit, 0x00, 3 * sizeof(int16_t));
-      lis2dtw12_acceleration_raw_get(dev_ctx, data_raw_acceleration[i].i16bit);
+      lis2dtw12_acceleration_raw_get(dev_ctx,
+                                     data_raw_acceleration[i].i16bit);
+
       for (axis = 0; axis < 3; axis++) {
         acceleration_mg[i][axis] =
           lis2dtw12_from_fs4_to_mg(data_raw_acceleration[i].i16bit[axis]);
       }
+
       i++;
-      }
+    }
   } while (i < SELF_TEST_SAMPLES);
 
-  for (k = 0; k < 3; k++)
-  {
-    for (j = 0; j < SELF_TEST_SAMPLES; j++)
-    {
+  for (k = 0; k < 3; k++) {
+    for (j = 0; j < SELF_TEST_SAMPLES; j++) {
       media[k] += acceleration_mg[j][k];
     }
 
@@ -218,20 +216,20 @@ static void self_test(stmdev_ctx_t *dev_ctx)
   lis2dtw12_self_test_set(dev_ctx, LIS2DTW12_XL_ST_POSITIVE);
   HAL_Delay(100);
   i = 0;
-
   /* Flush old samples */
   flush_samples(dev_ctx);
 
-  do
-  {
+  do {
     lis2dtw12_status_reg_get(dev_ctx, &reg.status);
-    if (reg.status.drdy)
-    {
+
+    if (reg.status.drdy) {
       /*
        * Read accelerometer data
        */
       memset(data_raw_acceleration[i].i16bit, 0x00, 3 * sizeof(int16_t));
-      lis2dtw12_acceleration_raw_get(dev_ctx, data_raw_acceleration[i].i16bit);
+      lis2dtw12_acceleration_raw_get(dev_ctx,
+                                     data_raw_acceleration[i].i16bit);
+
       for (axis = 0; axis < 3; axis++)
         acceleration_mg[i][axis] =
           lis2dtw12_from_fs4_to_mg(data_raw_acceleration[i].i16bit[axis]);
@@ -240,29 +238,25 @@ static void self_test(stmdev_ctx_t *dev_ctx)
     }
   } while (i < SELF_TEST_SAMPLES);
 
-  for (k = 0; k < 3; k++)
-  {
-      for (j = 0; j < SELF_TEST_SAMPLES; j++)
-      {
-        mediast[k] += acceleration_mg[j][k];
-      }
+  for (k = 0; k < 3; k++) {
+    for (j = 0; j < SELF_TEST_SAMPLES; j++) {
+      mediast[k] += acceleration_mg[j][k];
+    }
 
     mediast[k] = (mediast[k] / j);
   }
 
   /* Check for all axis self test value range */
-  for (k = 0; k < 3; k++)
-  {
+  for (k = 0; k < 3; k++) {
     if ((ABSF(mediast[k] - media[k]) >= ST_MIN_POS) &&
-        (ABSF(mediast[k] - media[k]) <= ST_MAX_POS))
-    {
+        (ABSF(mediast[k] - media[k]) <= ST_MAX_POS)) {
       match[k] = 1;
     }
 
-    sprintf((char*)tx_buffer, "%d: |%f| <= |%f| <= |%f| %s\r\n", k,
+    sprintf((char *)tx_buffer, "%d: |%f| <= |%f| <= |%f| %s\r\n", k,
             ST_MIN_POS, ABSF(mediast[k] - media[k]), ST_MAX_POS,
             match[k] == 1 ? "PASSED" : "FAILED");
-    tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    tx_com(tx_buffer, strlen((char const *)tx_buffer));
   }
 
   /* Disable self test mode */
@@ -276,28 +270,23 @@ void lis2dtw12_self_test(void)
   /* Initialize mems driver interface
   */
   stmdev_ctx_t dev_ctx;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lis2dtw12_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LIS2DTW12_ID)
-  while(1)
-  {
-    /* manage here device not found */
-  }
+    while (1) {
+      /* manage here device not found */
+    }
 
   /* Start self test */
-  while(1)
-  {
+  while (1) {
     self_test(&dev_ctx);
   }
 }
@@ -312,17 +301,18 @@ void lis2dtw12_self_test(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-    HAL_I2C_Mem_Write(handle, LIS2DTW12_I2C_ADD_H, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  HAL_I2C_Mem_Write(handle, LIS2DTW12_I2C_ADD_H, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_write(handle,  LIS2DTW12_I2C_ADD_H & 0xFE, reg, bufp, len);
 #endif
@@ -346,11 +336,11 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   HAL_I2C_Mem_Read(handle, LIS2DTW12_I2C_ADD_H, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Receive(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_read(handle, LIS2DTW12_I2C_ADD_H & 0xFE, reg, bufp, len);
 #endif
@@ -360,7 +350,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
