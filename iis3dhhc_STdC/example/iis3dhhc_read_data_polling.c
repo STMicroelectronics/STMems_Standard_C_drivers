@@ -95,7 +95,8 @@ static uint8_t tx_buffer[TX_BUF_DIM];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -112,61 +113,59 @@ void iis3dhhc_read_data_polling(void)
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   whoamI = 0;
   iis3dhhc_device_id_get(&dev_ctx, &whoamI);
+
   if ( whoamI != IIS3DHHC_ID )
-    while(1); /*manage here device not found */
+    while (1); /*manage here device not found */
 
   /* Restore default configuration */
   iis3dhhc_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     iis3dhhc_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Enable Block Data Update */
   iis3dhhc_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set Output Data Rate */
   iis3dhhc_data_rate_set(&dev_ctx, IIS3DHHC_1kHz1);
-
-  /* Enable temperature compensation */ 
+  /* Enable temperature compensation */
   iis3dhhc_offset_temp_comp_set(&dev_ctx, PROPERTY_ENABLE);
- 
+
   /* Read samples in polling mode (no int) */
-  while(1)
-  {
+  while (1) {
     /*  Read output only if new value is available */
     iis3dhhc_reg_t reg;
     iis3dhhc_status_get(&dev_ctx, &reg.status);
 
-    if (reg.status.zyxda)
-    {
+    if (reg.status.zyxda) {
       /* Read magnetic field data */
-      memset(data_raw_acceleration, 0x00, 3*sizeof(int16_t));
+      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
       iis3dhhc_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-      acceleration_mg[0] = iis3dhhc_from_lsb_to_mg( data_raw_acceleration[0]);
-      acceleration_mg[1] = iis3dhhc_from_lsb_to_mg( data_raw_acceleration[1]);
-      acceleration_mg[2] = iis3dhhc_from_lsb_to_mg( data_raw_acceleration[2]);
-     
-      sprintf((char*)tx_buffer, "Magnetic field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
+      acceleration_mg[0] = iis3dhhc_from_lsb_to_mg(
+                             data_raw_acceleration[0]);
+      acceleration_mg[1] = iis3dhhc_from_lsb_to_mg(
+                             data_raw_acceleration[1]);
+      acceleration_mg[2] = iis3dhhc_from_lsb_to_mg(
+                             data_raw_acceleration[2]);
+      sprintf((char *)tx_buffer,
+              "Magnetic field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
-     
+      tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
       /* Read temperature data */
       memset(&data_raw_temperature, 0x00, sizeof(int16_t));
       iis3dhhc_temperature_raw_get(&dev_ctx, &data_raw_temperature);
-      temperature_degC = iis3dhhc_from_lsb_to_celsius( &data_raw_temperature );
-      
-      sprintf((char*)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC );
-      tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
+      temperature_degC = iis3dhhc_from_lsb_to_celsius(
+                           &data_raw_temperature );
+      sprintf((char *)tx_buffer, "Temperature [degC]:%6.2f\r\n",
+              temperature_degC );
+      tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
     }
   }
 }
@@ -181,7 +180,8 @@ void iis3dhhc_read_data_polling(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #ifdef STEVAL_MKI109V3
@@ -220,15 +220,15 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef STEVAL_MKI109V3
+#ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#endif
 }
 
 /*
@@ -239,9 +239,9 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
-  #ifdef STEVAL_MKI109V3
+#ifdef STEVAL_MKI109V3
   HAL_Delay(ms);
-  #endif
+#endif
 }
 
 /*

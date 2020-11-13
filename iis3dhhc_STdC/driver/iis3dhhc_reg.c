@@ -46,8 +46,9 @@
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t iis3dhhc_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
-                         uint16_t len)
+int32_t iis3dhhc_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
+                          uint16_t len)
 {
   int32_t ret;
   ret = ctx->read_reg(ctx->handle, reg, data, len);
@@ -64,8 +65,9 @@ int32_t iis3dhhc_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t iis3dhhc_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
-                          uint16_t len)
+int32_t iis3dhhc_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                           uint8_t *data,
+                           uint16_t len)
 {
   int32_t ret;
   ret = ctx->write_reg(ctx->handle, reg, data, len);
@@ -77,16 +79,16 @@ int32_t iis3dhhc_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-  /**
-  * @defgroup    IIS3DHHC_Sensitivity
-  * @brief       These functions convert raw-data into engineering units.
-  * @{
-  *
-  */
+/**
+* @defgroup    IIS3DHHC_Sensitivity
+* @brief       These functions convert raw-data into engineering units.
+* @{
+*
+*/
 
 float_t iis3dhhc_from_lsb_to_mg(int16_t lsb)
 {
-  return ((float_t)lsb *0.076f);
+  return ((float_t)lsb * 0.076f);
 }
 
 float_t iis3dhhc_from_lsb_to_celsius(int16_t lsb)
@@ -119,11 +121,13 @@ int32_t iis3dhhc_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dhhc_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1,
+                          (uint8_t *)&ctrl_reg1, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg1.bdu = val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1,
+                             (uint8_t *)&ctrl_reg1, 1);
   }
 
   return ret;
@@ -137,14 +141,14 @@ int32_t iis3dhhc_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t iis3dhhc_block_data_update_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val)
 {
   iis3dhhc_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1,
+                          (uint8_t *)&ctrl_reg1, 1);
   *val = ctrl_reg1.bdu;
-
   return ret;
 }
 
@@ -156,15 +160,18 @@ int32_t iis3dhhc_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_data_rate_set(stmdev_ctx_t *ctx, iis3dhhc_norm_mod_en_t val)
+int32_t iis3dhhc_data_rate_set(stmdev_ctx_t *ctx,
+                               iis3dhhc_norm_mod_en_t val)
 {
   iis3dhhc_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1,
+                          (uint8_t *)&ctrl_reg1, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg1.norm_mod_en = (uint8_t)val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1,
+                             (uint8_t *)&ctrl_reg1, 1);
   }
 
   return ret;
@@ -178,20 +185,23 @@ int32_t iis3dhhc_data_rate_set(stmdev_ctx_t *ctx, iis3dhhc_norm_mod_en_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_data_rate_get(stmdev_ctx_t *ctx, iis3dhhc_norm_mod_en_t *val)
+int32_t iis3dhhc_data_rate_get(stmdev_ctx_t *ctx,
+                               iis3dhhc_norm_mod_en_t *val)
 {
   iis3dhhc_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1,
+                          (uint8_t *)&ctrl_reg1, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-
-  switch (ctrl_reg1.norm_mod_en){
+  switch (ctrl_reg1.norm_mod_en) {
     case IIS3DHHC_POWER_DOWN:
       *val = IIS3DHHC_POWER_DOWN;
       break;
+
     case IIS3DHHC_1kHz1:
       *val = IIS3DHHC_1kHz1;
       break;
+
     default:
       *val = IIS3DHHC_POWER_DOWN;
       break;
@@ -212,11 +222,13 @@ int32_t iis3dhhc_offset_temp_comp_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dhhc_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg4.off_tcomp_en = val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4,
+                             (uint8_t *)&ctrl_reg4, 1);
   }
 
   return ret;
@@ -234,10 +246,9 @@ int32_t iis3dhhc_offset_temp_comp_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dhhc_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
   *val = ctrl_reg4.off_tcomp_en;
-
   return ret;
 }
 
@@ -253,7 +264,6 @@ int32_t iis3dhhc_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
   uint8_t buff[2];
   int32_t ret;
-
   ret = iis3dhhc_read_reg(ctx, IIS3DHHC_OUT_TEMP_L, buff, 2);
   *val = (int16_t)buff[1];
   *val = (*val * 256) +  (int16_t)buff[0];
@@ -272,7 +282,6 @@ int32_t iis3dhhc_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
   uint8_t buff[6];
   int32_t ret;
-
   ret = iis3dhhc_read_reg(ctx, IIS3DHHC_OUT_X_L_XL, buff, 6);
   val[0] = (int16_t)buff[1];
   val[0] = (val[0] * 256) +  (int16_t)buff[0];
@@ -280,7 +289,6 @@ int32_t iis3dhhc_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val)
   val[1] = (val[1] * 256) +  (int16_t)buff[2];
   val[2] = (int16_t)buff[5];
   val[2] = (val[2] * 256) +  (int16_t)buff[4];
-
   return ret;
 }
 
@@ -296,10 +304,8 @@ int32_t iis3dhhc_xl_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dhhc_status_t status;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_STATUS, (uint8_t*)&status, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_STATUS, (uint8_t *)&status, 1);
   *val = status.zyxda;
-
   return ret;
 }
 
@@ -315,10 +321,8 @@ int32_t iis3dhhc_xl_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dhhc_status_t status;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_STATUS, (uint8_t*)&status, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_STATUS, (uint8_t *)&status, 1);
   *val = status.zyxor;
-
   return ret;
 }
 
@@ -361,11 +365,13 @@ int32_t iis3dhhc_reset_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dhhc_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1,
+                          (uint8_t *)&ctrl_reg1, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg1.sw_reset = val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1,
+                             (uint8_t *)&ctrl_reg1, 1);
   }
 
   return ret;
@@ -383,10 +389,9 @@ int32_t iis3dhhc_reset_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dhhc_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1,
+                          (uint8_t *)&ctrl_reg1, 1);
   *val = ctrl_reg1.sw_reset;
-
   return ret;
 }
 
@@ -402,11 +407,13 @@ int32_t iis3dhhc_boot_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dhhc_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1,
+                          (uint8_t *)&ctrl_reg1, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg1.boot = val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1,
+                             (uint8_t *)&ctrl_reg1, 1);
   }
 
   return ret;
@@ -424,10 +431,9 @@ int32_t iis3dhhc_boot_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dhhc_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1,
+                          (uint8_t *)&ctrl_reg1, 1);
   *val = ctrl_reg1.boot;
-
   return ret;
 }
 
@@ -443,11 +449,13 @@ int32_t iis3dhhc_self_test_set(stmdev_ctx_t *ctx, iis3dhhc_st_t val)
 {
   iis3dhhc_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg4.st = (uint8_t)val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4,
+                             (uint8_t *)&ctrl_reg4, 1);
   }
 
   return ret;
@@ -465,19 +473,22 @@ int32_t iis3dhhc_self_test_get(stmdev_ctx_t *ctx, iis3dhhc_st_t *val)
 {
   iis3dhhc_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
-
-  switch (ctrl_reg4.st){
+  switch (ctrl_reg4.st) {
     case IIS3DHHC_ST_DISABLE:
       *val = IIS3DHHC_ST_DISABLE;
       break;
+
     case IIS3DHHC_ST_POSITIVE:
       *val = IIS3DHHC_ST_POSITIVE;
       break;
+
     case IIS3DHHC_ST_NEGATIVE:
       *val = IIS3DHHC_ST_NEGATIVE;
       break;
+
     default:
       *val = IIS3DHHC_ST_DISABLE;
       break;
@@ -494,15 +505,18 @@ int32_t iis3dhhc_self_test_get(stmdev_ctx_t *ctx, iis3dhhc_st_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_filter_config_set(stmdev_ctx_t *ctx, iis3dhhc_dsp_t val)
+int32_t iis3dhhc_filter_config_set(stmdev_ctx_t *ctx,
+                                   iis3dhhc_dsp_t val)
 {
   iis3dhhc_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg4.dsp = (uint8_t)val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4,
+                             (uint8_t *)&ctrl_reg4, 1);
   }
 
   return ret;
@@ -516,26 +530,31 @@ int32_t iis3dhhc_filter_config_set(stmdev_ctx_t *ctx, iis3dhhc_dsp_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_filter_config_get(stmdev_ctx_t *ctx, iis3dhhc_dsp_t *val)
+int32_t iis3dhhc_filter_config_get(stmdev_ctx_t *ctx,
+                                   iis3dhhc_dsp_t *val)
 {
   iis3dhhc_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
-
-  switch (ctrl_reg4.dsp){
+  switch (ctrl_reg4.dsp) {
     case IIS3DHHC_LINEAR_PHASE_440Hz:
       *val = IIS3DHHC_LINEAR_PHASE_440Hz;
       break;
+
     case IIS3DHHC_LINEAR_PHASE_235Hz:
       *val = IIS3DHHC_LINEAR_PHASE_235Hz;
       break;
+
     case IIS3DHHC_NO_LINEAR_PHASE_440Hz:
       *val = IIS3DHHC_NO_LINEAR_PHASE_440Hz;
       break;
+
     case IIS3DHHC_NO_LINEAR_PHASE_235Hz:
       *val = IIS3DHHC_NO_LINEAR_PHASE_235Hz;
       break;
+
     default:
       *val = IIS3DHHC_LINEAR_PHASE_440Hz;
       break;
@@ -555,7 +574,7 @@ int32_t iis3dhhc_filter_config_get(stmdev_ctx_t *ctx, iis3dhhc_dsp_t *val)
 int32_t iis3dhhc_status_get(stmdev_ctx_t *ctx, iis3dhhc_status_t *val)
 {
   int32_t ret;
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_STATUS, (uint8_t*) val, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_STATUS, (uint8_t *) val, 1);
   return ret;
 }
 
@@ -584,11 +603,13 @@ int32_t iis3dhhc_drdy_notification_mode_set(stmdev_ctx_t *ctx,
 {
   iis3dhhc_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1,
+                          (uint8_t *)&ctrl_reg1, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg1.drdy_pulse = (uint8_t)val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1,
+                             (uint8_t *)&ctrl_reg1, 1);
   }
 
   return ret;
@@ -607,16 +628,18 @@ int32_t iis3dhhc_drdy_notification_mode_get(stmdev_ctx_t *ctx,
 {
   iis3dhhc_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1,
+                          (uint8_t *)&ctrl_reg1, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-
-  switch (ctrl_reg1.drdy_pulse){
+  switch (ctrl_reg1.drdy_pulse) {
     case IIS3DHHC_LATCHED:
       *val = IIS3DHHC_LATCHED;
       break;
+
     case IIS3DHHC_PULSED:
       *val = IIS3DHHC_PULSED;
       break;
+
     default:
       *val = IIS3DHHC_LATCHED;
       break;
@@ -634,15 +657,18 @@ int32_t iis3dhhc_drdy_notification_mode_get(stmdev_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_int1_mode_set(stmdev_ctx_t *ctx, iis3dhhc_int1_ext_t val)
+int32_t iis3dhhc_int1_mode_set(stmdev_ctx_t *ctx,
+                               iis3dhhc_int1_ext_t val)
 {
   iis3dhhc_int1_ctrl_t int1_ctrl;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL,
+                          (uint8_t *)&int1_ctrl, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
-  if(ret == 0){
+  if (ret == 0) {
     int1_ctrl.int1_ext = (uint8_t)val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL,
+                             (uint8_t *)&int1_ctrl, 1);
   }
 
   return ret;
@@ -657,20 +683,23 @@ int32_t iis3dhhc_int1_mode_set(stmdev_ctx_t *ctx, iis3dhhc_int1_ext_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_int1_mode_get(stmdev_ctx_t *ctx, iis3dhhc_int1_ext_t *val)
+int32_t iis3dhhc_int1_mode_get(stmdev_ctx_t *ctx,
+                               iis3dhhc_int1_ext_t *val)
 {
   iis3dhhc_int1_ctrl_t int1_ctrl;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL,
+                          (uint8_t *)&int1_ctrl, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
-
-  switch (int1_ctrl.int1_ext){
+  switch (int1_ctrl.int1_ext) {
     case IIS3DHHC_PIN_AS_INTERRUPT:
       *val = IIS3DHHC_PIN_AS_INTERRUPT;
       break;
+
     case IIS3DHHC_PIN_AS_TRIGGER:
       *val = IIS3DHHC_PIN_AS_TRIGGER;
       break;
+
     default:
       *val = IIS3DHHC_PIN_AS_INTERRUPT;
       break;
@@ -688,15 +717,17 @@ int32_t iis3dhhc_int1_mode_get(stmdev_ctx_t *ctx, iis3dhhc_int1_ext_t *val)
   *
   */
 int32_t iis3dhhc_fifo_threshold_on_int1_set(stmdev_ctx_t *ctx,
-                                           uint8_t val)
+                                            uint8_t val)
 {
   iis3dhhc_int1_ctrl_t int1_ctrl;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL,
+                          (uint8_t *)&int1_ctrl, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
-  if(ret == 0){
+  if (ret == 0) {
     int1_ctrl.int1_fth = val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL,
+                             (uint8_t *)&int1_ctrl, 1);
   }
 
   return ret;
@@ -710,14 +741,14 @@ int32_t iis3dhhc_fifo_threshold_on_int1_set(stmdev_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_fifo_threshold_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t iis3dhhc_fifo_threshold_on_int1_get(stmdev_ctx_t *ctx,
+                                            uint8_t *val)
 {
   iis3dhhc_int1_ctrl_t int1_ctrl;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL,
+                          (uint8_t *)&int1_ctrl, 1);
   *val = int1_ctrl.int1_fth;
-
   return ret;
 }
 
@@ -733,11 +764,13 @@ int32_t iis3dhhc_fifo_full_on_int1_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dhhc_int1_ctrl_t int1_ctrl;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL,
+                          (uint8_t *)&int1_ctrl, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
-  if(ret == 0){
+  if (ret == 0) {
     int1_ctrl.int1_fss5 = val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL,
+                             (uint8_t *)&int1_ctrl, 1);
   }
 
   return ret;
@@ -751,14 +784,14 @@ int32_t iis3dhhc_fifo_full_on_int1_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_fifo_full_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t iis3dhhc_fifo_full_on_int1_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val)
 {
   iis3dhhc_int1_ctrl_t int1_ctrl;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL,
+                          (uint8_t *)&int1_ctrl, 1);
   *val = int1_ctrl.int1_fss5;
-
   return ret;
 }
 
@@ -774,11 +807,13 @@ int32_t iis3dhhc_fifo_ovr_on_int1_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dhhc_int1_ctrl_t int1_ctrl;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL,
+                          (uint8_t *)&int1_ctrl, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
-  if(ret == 0){
+  if (ret == 0) {
     int1_ctrl.int1_ovr = val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL,
+                             (uint8_t *)&int1_ctrl, 1);
   }
 
   return ret;
@@ -796,10 +831,9 @@ int32_t iis3dhhc_fifo_ovr_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dhhc_int1_ctrl_t int1_ctrl;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL,
+                          (uint8_t *)&int1_ctrl, 1);
   *val = int1_ctrl.int1_ovr;
-
   return ret;
 }
 
@@ -815,11 +849,13 @@ int32_t iis3dhhc_boot_on_int1_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dhhc_int1_ctrl_t int1_ctrl;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL,
+                          (uint8_t *)&int1_ctrl, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
-  if(ret == 0){
+  if (ret == 0) {
     int1_ctrl.int1_boot = val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL,
+                             (uint8_t *)&int1_ctrl, 1);
   }
 
   return ret;
@@ -837,10 +873,9 @@ int32_t iis3dhhc_boot_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dhhc_int1_ctrl_t int1_ctrl;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL,
+                          (uint8_t *)&int1_ctrl, 1);
   *val = int1_ctrl.int1_boot;
-
   return ret;
 }
 
@@ -856,11 +891,13 @@ int32_t iis3dhhc_drdy_on_int1_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dhhc_int1_ctrl_t int1_ctrl;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL,
+                          (uint8_t *)&int1_ctrl, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
-  if(ret == 0){
+  if (ret == 0) {
     int1_ctrl.int1_drdy = val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT1_CTRL,
+                             (uint8_t *)&int1_ctrl, 1);
   }
 
   return ret;
@@ -878,10 +915,9 @@ int32_t iis3dhhc_drdy_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dhhc_int1_ctrl_t int1_ctrl;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL, (uint8_t*)&int1_ctrl, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT1_CTRL,
+                          (uint8_t *)&int1_ctrl, 1);
   *val = int1_ctrl.int1_drdy;
-
   return ret;
 }
 
@@ -893,15 +929,18 @@ int32_t iis3dhhc_drdy_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_fifo_threshold_on_int2_set(stmdev_ctx_t *ctx, uint8_t val)
+int32_t iis3dhhc_fifo_threshold_on_int2_set(stmdev_ctx_t *ctx,
+                                            uint8_t val)
 {
   iis3dhhc_int2_ctrl_t int2_ctrl;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL,
+                          (uint8_t *)&int2_ctrl, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
-  if(ret == 0){
+  if (ret == 0) {
     int2_ctrl.int2_fth = val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL,
+                             (uint8_t *)&int2_ctrl, 1);
   }
 
   return ret;
@@ -915,14 +954,14 @@ int32_t iis3dhhc_fifo_threshold_on_int2_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_fifo_threshold_on_int2_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t iis3dhhc_fifo_threshold_on_int2_get(stmdev_ctx_t *ctx,
+                                            uint8_t *val)
 {
   iis3dhhc_int2_ctrl_t int2_ctrl;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL,
+                          (uint8_t *)&int2_ctrl, 1);
   *val = int2_ctrl.int2_fth;
-
   return ret;
 }
 
@@ -938,11 +977,13 @@ int32_t iis3dhhc_fifo_full_on_int2_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dhhc_int2_ctrl_t int2_ctrl;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL,
+                          (uint8_t *)&int2_ctrl, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
-  if(ret == 0){
+  if (ret == 0) {
     int2_ctrl.int2_fss5 = val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL,
+                             (uint8_t *)&int2_ctrl, 1);
   }
 
   return ret;
@@ -956,14 +997,14 @@ int32_t iis3dhhc_fifo_full_on_int2_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_fifo_full_on_int2_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t iis3dhhc_fifo_full_on_int2_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val)
 {
   iis3dhhc_int2_ctrl_t int2_ctrl;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL,
+                          (uint8_t *)&int2_ctrl, 1);
   *val = int2_ctrl.int2_fss5;
-
   return ret;
 }
 
@@ -979,11 +1020,13 @@ int32_t iis3dhhc_fifo_ovr_on_int2_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dhhc_int2_ctrl_t int2_ctrl;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL,
+                          (uint8_t *)&int2_ctrl, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
-  if(ret == 0){
+  if (ret == 0) {
     int2_ctrl.int2_ovr = val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL,
+                             (uint8_t *)&int2_ctrl, 1);
   }
 
   return ret;
@@ -1001,10 +1044,9 @@ int32_t iis3dhhc_fifo_ovr_on_int2_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dhhc_int2_ctrl_t int2_ctrl;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL,
+                          (uint8_t *)&int2_ctrl, 1);
   *val = int2_ctrl.int2_ovr;
-
   return ret;
 }
 
@@ -1020,11 +1062,13 @@ int32_t iis3dhhc_boot_on_int2_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dhhc_int2_ctrl_t int2_ctrl;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL,
+                          (uint8_t *)&int2_ctrl, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
-  if(ret == 0){
+  if (ret == 0) {
     int2_ctrl.int2_boot = val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL,
+                             (uint8_t *)&int2_ctrl, 1);
   }
 
   return ret;
@@ -1042,10 +1086,9 @@ int32_t iis3dhhc_boot_on_int2_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dhhc_int2_ctrl_t int2_ctrl;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL,
+                          (uint8_t *)&int2_ctrl, 1);
   *val = int2_ctrl.int2_boot;
-
   return ret;
 }
 
@@ -1061,11 +1104,13 @@ int32_t iis3dhhc_drdy_on_int2_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dhhc_int2_ctrl_t int2_ctrl;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL,
+                          (uint8_t *)&int2_ctrl, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
-  if(ret == 0){
+  if (ret == 0) {
     int2_ctrl.int2_drdy = val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_INT2_CTRL,
+                             (uint8_t *)&int2_ctrl, 1);
   }
 
   return ret;
@@ -1083,10 +1128,9 @@ int32_t iis3dhhc_drdy_on_int2_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dhhc_int2_ctrl_t int2_ctrl;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL, (uint8_t*)&int2_ctrl, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_INT2_CTRL,
+                          (uint8_t *)&int2_ctrl, 1);
   *val = int2_ctrl.int2_drdy;
-
   return ret;
 }
 
@@ -1102,11 +1146,13 @@ int32_t iis3dhhc_pin_mode_set(stmdev_ctx_t *ctx, iis3dhhc_pp_od_t val)
 {
   iis3dhhc_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg4.pp_od = (uint8_t)val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4,
+                             (uint8_t *)&ctrl_reg4, 1);
   }
 
   return ret;
@@ -1120,26 +1166,31 @@ int32_t iis3dhhc_pin_mode_set(stmdev_ctx_t *ctx, iis3dhhc_pp_od_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_pin_mode_get(stmdev_ctx_t *ctx, iis3dhhc_pp_od_t *val)
+int32_t iis3dhhc_pin_mode_get(stmdev_ctx_t *ctx,
+                              iis3dhhc_pp_od_t *val)
 {
   iis3dhhc_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
-
-  switch (ctrl_reg4.pp_od){
+  switch (ctrl_reg4.pp_od) {
     case IIS3DHHC_ALL_PUSH_PULL:
       *val = IIS3DHHC_ALL_PUSH_PULL;
       break;
+
     case IIS3DHHC_INT1_OD_INT2_PP:
       *val = IIS3DHHC_INT1_OD_INT2_PP;
       break;
+
     case IIS3DHHC_INT1_PP_INT2_OD:
       *val = IIS3DHHC_INT1_PP_INT2_OD;
       break;
+
     case IIS3DHHC_ALL_OPEN_DRAIN:
       *val = IIS3DHHC_ALL_OPEN_DRAIN;
       break;
+
     default:
       *val = IIS3DHHC_ALL_PUSH_PULL;
       break;
@@ -1173,11 +1224,13 @@ int32_t iis3dhhc_fifo_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dhhc_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg4.fifo_en = val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG4,
+                             (uint8_t *)&ctrl_reg4, 1);
   }
 
   return ret;
@@ -1195,10 +1248,9 @@ int32_t iis3dhhc_fifo_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dhhc_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
   *val = ctrl_reg4.fifo_en;
-
   return ret;
 }
 
@@ -1217,11 +1269,13 @@ int32_t iis3dhhc_fifo_block_spi_hs_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dhhc_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG5,
+                          (uint8_t *)&ctrl_reg5, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg5.fifo_spi_hs_on = val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG5,
+                             (uint8_t *)&ctrl_reg5, 1);
   }
 
   return ret;
@@ -1238,14 +1292,14 @@ int32_t iis3dhhc_fifo_block_spi_hs_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_fifo_block_spi_hs_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t iis3dhhc_fifo_block_spi_hs_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val)
 {
   iis3dhhc_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG5,
+                          (uint8_t *)&ctrl_reg5, 1);
   *val = ctrl_reg5.fifo_spi_hs_on;
-
   return ret;
 }
 
@@ -1261,11 +1315,13 @@ int32_t iis3dhhc_fifo_watermark_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dhhc_fifo_ctrl_t fifo_ctrl;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_CTRL,
+                          (uint8_t *)&fifo_ctrl, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
-  if(ret == 0){
+  if (ret == 0) {
     fifo_ctrl.fth = val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_FIFO_CTRL,
+                             (uint8_t *)&fifo_ctrl, 1);
   }
 
   return ret;
@@ -1283,10 +1339,9 @@ int32_t iis3dhhc_fifo_watermark_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dhhc_fifo_ctrl_t fifo_ctrl;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_CTRL,
+                          (uint8_t *)&fifo_ctrl, 1);
   *val = fifo_ctrl.fth;
-
   return ret;
 }
 
@@ -1298,15 +1353,18 @@ int32_t iis3dhhc_fifo_watermark_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_fifo_mode_set(stmdev_ctx_t *ctx, iis3dhhc_fmode_t val)
+int32_t iis3dhhc_fifo_mode_set(stmdev_ctx_t *ctx,
+                               iis3dhhc_fmode_t val)
 {
   iis3dhhc_fifo_ctrl_t fifo_ctrl;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_CTRL,
+                          (uint8_t *)&fifo_ctrl, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
-  if(ret == 0){
+  if (ret == 0) {
     fifo_ctrl.fmode = (uint8_t)val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_FIFO_CTRL,
+                             (uint8_t *)&fifo_ctrl, 1);
   }
 
   return ret;
@@ -1320,29 +1378,35 @@ int32_t iis3dhhc_fifo_mode_set(stmdev_ctx_t *ctx, iis3dhhc_fmode_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_fifo_mode_get(stmdev_ctx_t *ctx, iis3dhhc_fmode_t *val)
+int32_t iis3dhhc_fifo_mode_get(stmdev_ctx_t *ctx,
+                               iis3dhhc_fmode_t *val)
 {
   iis3dhhc_fifo_ctrl_t fifo_ctrl;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_CTRL,
+                          (uint8_t *)&fifo_ctrl, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
-
-  switch (fifo_ctrl.fmode){
+  switch (fifo_ctrl.fmode) {
     case IIS3DHHC_BYPASS_MODE:
       *val = IIS3DHHC_BYPASS_MODE;
       break;
+
     case IIS3DHHC_FIFO_MODE:
       *val = IIS3DHHC_FIFO_MODE;
       break;
+
     case IIS3DHHC_STREAM_TO_FIFO_MODE:
       *val = IIS3DHHC_STREAM_TO_FIFO_MODE;
       break;
+
     case IIS3DHHC_BYPASS_TO_STREAM_MODE:
       *val = IIS3DHHC_BYPASS_TO_STREAM_MODE;
       break;
+
     case IIS3DHHC_DYNAMIC_STREAM_MODE:
       *val = IIS3DHHC_DYNAMIC_STREAM_MODE;
       break;
+
     default:
       *val = IIS3DHHC_BYPASS_MODE;
       break;
@@ -1359,10 +1423,11 @@ int32_t iis3dhhc_fifo_mode_get(stmdev_ctx_t *ctx, iis3dhhc_fmode_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dhhc_fifo_status_get(stmdev_ctx_t *ctx, iis3dhhc_fifo_src_t *val)
+int32_t iis3dhhc_fifo_status_get(stmdev_ctx_t *ctx,
+                                 iis3dhhc_fifo_src_t *val)
 {
   int32_t ret;
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_SRC, (uint8_t*) val, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_SRC, (uint8_t *) val, 1);
   return ret;
 }
 
@@ -1378,10 +1443,9 @@ int32_t iis3dhhc_fifo_full_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dhhc_fifo_src_t fifo_src;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_SRC, (uint8_t*)&fifo_src, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_SRC, (uint8_t *)&fifo_src,
+                          1);
   *val = fifo_src.fss;
-
   return ret;
 }
 
@@ -1397,10 +1461,9 @@ int32_t iis3dhhc_fifo_ovr_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dhhc_fifo_src_t fifo_src;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_SRC, (uint8_t*)&fifo_src, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_SRC, (uint8_t *)&fifo_src,
+                          1);
   *val = fifo_src.ovrn;
-
   return ret;
 }
 
@@ -1416,10 +1479,9 @@ int32_t iis3dhhc_fifo_fth_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dhhc_fifo_src_t fifo_src;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_SRC, (uint8_t*)&fifo_src, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_FIFO_SRC, (uint8_t *)&fifo_src,
+                          1);
   *val = fifo_src.fth;
-
   return ret;
 }
 
@@ -1449,11 +1511,13 @@ int32_t iis3dhhc_auto_add_inc_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   iis3dhhc_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1,
+                          (uint8_t *)&ctrl_reg1, 1);
 
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg1.if_add_inc = val;
-    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+    ret = iis3dhhc_write_reg(ctx, IIS3DHHC_CTRL_REG1,
+                             (uint8_t *)&ctrl_reg1, 1);
   }
 
   return ret;
@@ -1472,10 +1536,9 @@ int32_t iis3dhhc_auto_add_inc_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   iis3dhhc_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
-
-  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  ret = iis3dhhc_read_reg(ctx, IIS3DHHC_CTRL_REG1,
+                          (uint8_t *)&ctrl_reg1, 1);
   *val = ctrl_reg1.if_add_inc;
-
   return ret;
 }
 

@@ -23,7 +23,7 @@
 #define IIS3DHHC_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -75,7 +75,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
@@ -108,8 +108,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -132,7 +134,7 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-  *              You can create a sensor configuration by your own or using 
+  *              You can create a sensor configuration by your own or using
   *              Unico / Unicleo tools available on STMicroelectronics
   *              web site.
   *
@@ -337,7 +339,7 @@ typedef struct {
   * @{
   *
   */
-typedef union{
+typedef union {
   iis3dhhc_id_reg_t       id_reg;
   iis3dhhc_ctrl_reg1_t    ctrl_reg1;
   iis3dhhc_int1_ctrl_t    int1_ctrl;
@@ -356,16 +358,20 @@ typedef union{
   *
   */
 
-int32_t iis3dhhc_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t iis3dhhc_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
                           uint16_t len);
-int32_t iis3dhhc_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t iis3dhhc_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                           uint8_t *data,
                            uint16_t len);
 
 float_t iis3dhhc_from_lsb_to_mg(int16_t lsb);
 float_t iis3dhhc_from_lsb_to_celsius(int16_t lsb);
 
-int32_t iis3dhhc_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t iis3dhhc_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t iis3dhhc_block_data_update_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t iis3dhhc_block_data_update_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 typedef enum {
   IIS3DHHC_POWER_DOWN  = 0,
@@ -377,11 +383,13 @@ int32_t iis3dhhc_data_rate_get(stmdev_ctx_t *ctx,
                                iis3dhhc_norm_mod_en_t *val);
 
 int32_t iis3dhhc_offset_temp_comp_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t iis3dhhc_offset_temp_comp_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t iis3dhhc_offset_temp_comp_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t iis3dhhc_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
-int32_t iis3dhhc_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val);
+int32_t iis3dhhc_acceleration_raw_get(stmdev_ctx_t *ctx,
+                                      int16_t *val);
 
 int32_t iis3dhhc_xl_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
@@ -409,10 +417,13 @@ typedef enum {
   IIS3DHHC_NO_LINEAR_PHASE_440Hz   = 2,
   IIS3DHHC_NO_LINEAR_PHASE_235Hz   = 3,
 } iis3dhhc_dsp_t;
-int32_t iis3dhhc_filter_config_set(stmdev_ctx_t *ctx, iis3dhhc_dsp_t val);
-int32_t iis3dhhc_filter_config_get(stmdev_ctx_t *ctx, iis3dhhc_dsp_t *val);
+int32_t iis3dhhc_filter_config_set(stmdev_ctx_t *ctx,
+                                   iis3dhhc_dsp_t val);
+int32_t iis3dhhc_filter_config_get(stmdev_ctx_t *ctx,
+                                   iis3dhhc_dsp_t *val);
 
-int32_t iis3dhhc_status_get(stmdev_ctx_t *ctx, iis3dhhc_status_t *val);
+int32_t iis3dhhc_status_get(stmdev_ctx_t *ctx,
+                            iis3dhhc_status_t *val);
 
 typedef enum {
   IIS3DHHC_LATCHED  = 0,
@@ -427,19 +438,24 @@ typedef enum {
   IIS3DHHC_PIN_AS_INTERRUPT   = 0,
   IIS3DHHC_PIN_AS_TRIGGER     = 1,
 } iis3dhhc_int1_ext_t;
-int32_t iis3dhhc_int1_mode_set(stmdev_ctx_t *ctx, iis3dhhc_int1_ext_t val);
-int32_t iis3dhhc_int1_mode_get(stmdev_ctx_t *ctx, iis3dhhc_int1_ext_t *val);
+int32_t iis3dhhc_int1_mode_set(stmdev_ctx_t *ctx,
+                               iis3dhhc_int1_ext_t val);
+int32_t iis3dhhc_int1_mode_get(stmdev_ctx_t *ctx,
+                               iis3dhhc_int1_ext_t *val);
 
 int32_t iis3dhhc_fifo_threshold_on_int1_set(stmdev_ctx_t *ctx,
                                             uint8_t val);
 int32_t iis3dhhc_fifo_threshold_on_int1_get(stmdev_ctx_t *ctx,
                                             uint8_t *val);
 
-int32_t iis3dhhc_fifo_full_on_int1_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t iis3dhhc_fifo_full_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t iis3dhhc_fifo_full_on_int1_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t iis3dhhc_fifo_full_on_int1_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 int32_t iis3dhhc_fifo_ovr_on_int1_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t iis3dhhc_fifo_ovr_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t iis3dhhc_fifo_ovr_on_int1_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t iis3dhhc_boot_on_int1_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t iis3dhhc_boot_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -452,11 +468,14 @@ int32_t iis3dhhc_fifo_threshold_on_int2_set(stmdev_ctx_t *ctx,
 int32_t iis3dhhc_fifo_threshold_on_int2_get(stmdev_ctx_t *ctx,
                                             uint8_t *val);
 
-int32_t iis3dhhc_fifo_full_on_int2_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t iis3dhhc_fifo_full_on_int2_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t iis3dhhc_fifo_full_on_int2_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t iis3dhhc_fifo_full_on_int2_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 int32_t iis3dhhc_fifo_ovr_on_int2_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t iis3dhhc_fifo_ovr_on_int2_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t iis3dhhc_fifo_ovr_on_int2_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t iis3dhhc_boot_on_int2_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t iis3dhhc_boot_on_int2_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -470,14 +489,18 @@ typedef enum {
   IIS3DHHC_INT1_PP_INT2_OD  = 2,
   IIS3DHHC_ALL_OPEN_DRAIN   = 3,
 } iis3dhhc_pp_od_t;
-int32_t iis3dhhc_pin_mode_set(stmdev_ctx_t *ctx, iis3dhhc_pp_od_t val);
-int32_t iis3dhhc_pin_mode_get(stmdev_ctx_t *ctx, iis3dhhc_pp_od_t *val);
+int32_t iis3dhhc_pin_mode_set(stmdev_ctx_t *ctx,
+                              iis3dhhc_pp_od_t val);
+int32_t iis3dhhc_pin_mode_get(stmdev_ctx_t *ctx,
+                              iis3dhhc_pp_od_t *val);
 
 int32_t iis3dhhc_fifo_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t iis3dhhc_fifo_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t iis3dhhc_fifo_block_spi_hs_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t iis3dhhc_fifo_block_spi_hs_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t iis3dhhc_fifo_block_spi_hs_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t iis3dhhc_fifo_block_spi_hs_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 int32_t iis3dhhc_fifo_watermark_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t iis3dhhc_fifo_watermark_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -489,8 +512,10 @@ typedef enum {
   IIS3DHHC_BYPASS_TO_STREAM_MODE   = 4,
   IIS3DHHC_DYNAMIC_STREAM_MODE     = 6,
 } iis3dhhc_fmode_t;
-int32_t iis3dhhc_fifo_mode_set(stmdev_ctx_t *ctx, iis3dhhc_fmode_t val);
-int32_t iis3dhhc_fifo_mode_get(stmdev_ctx_t *ctx, iis3dhhc_fmode_t *val);
+int32_t iis3dhhc_fifo_mode_set(stmdev_ctx_t *ctx,
+                               iis3dhhc_fmode_t val);
+int32_t iis3dhhc_fifo_mode_get(stmdev_ctx_t *ctx,
+                               iis3dhhc_fmode_t *val);
 
 int32_t iis3dhhc_fifo_status_get(stmdev_ctx_t *ctx,
                                  iis3dhhc_fifo_src_t *val);
