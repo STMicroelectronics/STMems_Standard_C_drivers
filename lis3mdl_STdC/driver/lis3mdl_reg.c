@@ -932,7 +932,7 @@ int32_t lis3mdl_status_get(stmdev_ctx_t *ctx,
 int32_t lis3mdl_int_config_set(stmdev_ctx_t *ctx,
                                lis3mdl_int_cfg_t *val)
 {
-  return lis3mdl_read_reg(ctx, LIS3MDL_INT_CFG, (uint8_t *) val, 1);
+  return lis3mdl_write_reg(ctx, LIS3MDL_INT_CFG, (uint8_t *) val, 1);
 }
 
 /**
