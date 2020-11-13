@@ -110,7 +110,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -122,38 +123,33 @@ static void platform_init(void);
 void iis3dwb_read_data_polling(void)
 {
   stmdev_ctx_t dev_ctx;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   //dev_ctx.handle = &SENSOR_BUS;
-
   /* Init test platform */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   iis3dwb_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != IIS3DWB_ID)
-    while(1);
+    while (1);
 
   /* Restore default configuration */
   iis3dwb_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     iis3dwb_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Enable Block Data Update */
   iis3dwb_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set Output Data Rate */
   iis3dwb_xl_data_rate_set(&dev_ctx, IIS3DWB_XL_ODR_26k7Hz);
-
   /* Set full scale */
   iis3dwb_xl_full_scale_set(&dev_ctx, IIS3DWB_2g);
-
   /* Configure filtering chain(No aux interface)
    * Accelerometer - LPF1 + LPF2 path
    */
@@ -161,14 +157,12 @@ void iis3dwb_read_data_polling(void)
   iis3dwb_xl_filter_lp2_set(&dev_ctx, PROPERTY_ENABLE);
 
   /* Read samples in polling mode (no int) */
-  while(1)
-  {
+  while (1) {
     uint8_t reg;
-
     /* Read output only if new xl value is available */
     iis3dwb_xl_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
+
+    if (reg) {
       /* Read acceleration field data */
       memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
       iis3dwb_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
@@ -178,23 +172,22 @@ void iis3dwb_read_data_polling(void)
         iis3dwb_from_fs2g_to_mg(data_raw_acceleration[1]);
       acceleration_mg[2] =
         iis3dwb_from_fs2g_to_mg(data_raw_acceleration[2]);
-
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+      sprintf((char *)tx_buffer,
+              "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     iis3dwb_temp_flag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
+
+    if (reg) {
       /* Read temperature data */
       memset(&data_raw_temperature, 0x00, sizeof(int16_t));
       iis3dwb_temperature_raw_get(&dev_ctx, &data_raw_temperature);
       temperature_degC = iis3dwb_from_lsb_to_celsius(data_raw_temperature);
-
-      sprintf((char*)tx_buffer,
+      sprintf((char *)tx_buffer,
               "Temperature [degC]:%6.2f\r\n", temperature_degC);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -209,17 +202,19 @@ void iis3dwb_read_data_polling(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #ifdef STEVAL_MKI109V3
-  if (handle == &hspi2)
-  {
+
+  if (handle == &hspi2) {
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Transmit(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+
 #elif defined(SPC584B_DIS)
   /* Add here the SPC5 write SPI interface */
 #endif
@@ -240,8 +235,8 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
 #ifdef STEVAL_MKI109V3
-  if (handle == &hspi2)
-  {
+
+  if (handle == &hspi2) {
     /* Read command */
     reg |= 0x80;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
@@ -249,6 +244,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
     HAL_SPI_Receive(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+
 #elif defined(SPC584B_DIS)
   /* Add here the SPC5 read SPI interface */
 #endif
@@ -258,7 +254,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Send buffer to console (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
