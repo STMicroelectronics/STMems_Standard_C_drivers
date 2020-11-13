@@ -91,7 +91,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -105,47 +106,39 @@ void example_main_free_fall_lsm6ds3(void)
   /* Initialize mems driver interface. */
   stmdev_ctx_t dev_ctx;
   lsm6ds3_int1_route_t int_1_reg;
-
   /* Uncomment if interrupt generation on Free Fall INT2 pin. */
   //lsm6ds3_int2_route_t int_2_reg;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Init test platform */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lsm6ds3_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LSM6DS3_ID)
-    while(1)
-    {
+    while (1) {
       /* manage here device not found */
     }
 
   /* Restore default configuration */
   lsm6ds3_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lsm6ds3_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Set XL Output Data Rate. */
   lsm6ds3_xl_data_rate_set(&dev_ctx, LSM6DS3_XL_ODR_416Hz);
-
   /* Set 2g full XL scale. */
   lsm6ds3_xl_full_scale_set(&dev_ctx, LSM6DS3_2g);
-
   /* Enable LIR. */
   lsm6ds3_int_notification_set(&dev_ctx, LSM6DS3_INT_LATCHED);
-
   /* Set Free Fall duration to 3 and 6 samples event duration. */
   lsm6ds3_ff_dur_set(&dev_ctx, 0x06);
   lsm6ds3_ff_threshold_set(&dev_ctx, LSM6DS3_312_mg);
-
   /* Enable interrupt generation on Free Fall INT1 pin. */
   lsm6ds3_pin_int1_route_get(&dev_ctx, &int_1_reg);
   int_1_reg.int1_ff = PROPERTY_ENABLE;
@@ -157,16 +150,14 @@ void example_main_free_fall_lsm6ds3(void)
   //lsm6ds3_pin_int2_route_set(&dev_ctx, &int_2_reg);
 
   /* Wait Events. */
-  while(1)
-  {
+  while (1) {
     lsm6ds3_all_src_t all_source;
-
     /* Check if Free Fall events. */
     lsm6ds3_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.wake_up_src.ff_ia)
-    {
-      sprintf((char*)tx_buffer, "Free Fall Detected\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+    if (all_source.wake_up_src.ff_ia) {
+      sprintf((char *)tx_buffer, "Free Fall Detected\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -180,22 +171,24 @@ void example_main_free_fall_lsm6ds3(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     HAL_I2C_Mem_Write(handle, LSM6DS3_I2C_ADD_L, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
+
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
+
+  else if (handle == &hspi2) {
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Transmit(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+
 #endif
   return 0;
 }
@@ -212,14 +205,14 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     HAL_I2C_Mem_Read(handle, LSM6DS3_I2C_ADD_L, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
+
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
+
+  else if (handle == &hspi2) {
     /* Read command */
     reg |= 0x80;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
@@ -227,24 +220,25 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
     HAL_SPI_Receive(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+
 #endif
   return 0;
 }
 
 /* @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
-  #ifdef STEVAL_MKI109V3
+#endif
+#ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#endif
 }
 
 /*
