@@ -113,7 +113,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -127,19 +128,16 @@ void example_main_wake_up_h3lis100dl(void)
   /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
   int1_on_th_conf_t int_route;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Check device ID */
   h3lis100dl_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != H3LIS100DL_ID)
-    while(1)
-    {
+    while (1) {
       /* manage here device not found */
     }
 
@@ -152,62 +150,52 @@ void example_main_wake_up_h3lis100dl(void)
   h3lis100dl_hp_path_set(&dev_ctx, H3LIS100DL_HP_ON_INT1_OUT);
   h3lis100dl_hp_bandwidth_set(&dev_ctx, H3LIS100DL_CUT_OFF_16Hz);
   h3lis100dl_reference_mode_set(&dev_ctx, H3LIS100DL_NORMAL_MODE);
-
   /* Apply high-pass digital filter on Wake-Up function
    * Duration time is set to zero so Wake-Up interrupt signal
    * is generated for each X,Y,Z filtered data exceeding the
    * configured threshold
    */
   h3lis100dl_int1_dur_set(&dev_ctx, 0);
-
   /* Set wake-up threshold
    * Threshold = 250 mg
    */
   h3lis100dl_int1_treshold_set(&dev_ctx, 16);
-
   /* Dummy read to force the HP filter to
    * actual acceleration value
    * (i.e. set reference acceleration/tilt value
    */
   h3lis100dl_hp_reset_get(&dev_ctx);
-
   /* Enable interrupt generation on Wake-Up INT1 pin */
   h3lis100dl_int1_on_threshold_conf_get(&dev_ctx, &int_route);
   int_route.int1_xhie = PROPERTY_ENABLE;
   int_route.int1_yhie = PROPERTY_ENABLE;
-
   /* If HP filter is off take in account of 1g related to
    * gravity
    */
   int_route.int1_zhie = PROPERTY_ENABLE;
   h3lis100dl_int1_on_threshold_conf_set(&dev_ctx, int_route);
-
   /* Set Output Data Rate */
   h3lis100dl_data_rate_set(&dev_ctx, H3LIS100DL_ODR_100Hz);
 
   /* Wait Events */
-  while(1)
-  {
+  while (1) {
     h3lis100dl_int1_src_t all_source;
-
     /* Check Wake-Up events */
     h3lis100dl_int1_src_get(&dev_ctx, &all_source);
-    if (all_source.xh)
-    {
-      sprintf((char*)tx_buffer, "Wake-Up event on X\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+    if (all_source.xh) {
+      sprintf((char *)tx_buffer, "Wake-Up event on X\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
-    if (all_source.yh)
-    {
-      sprintf((char*)tx_buffer, "Wake-Up event on Y\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    if (all_source.yh) {
+      sprintf((char *)tx_buffer, "Wake-Up event on Y\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
-    if (all_source.zh)
-    {
-      sprintf((char*)tx_buffer, "Wake-Up event on Z\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    if (all_source.zh) {
+      sprintf((char *)tx_buffer, "Wake-Up event on Z\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     h3lis100dl_hp_reset_get(&dev_ctx);
@@ -224,7 +212,8 @@ void example_main_wake_up_h3lis100dl(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)

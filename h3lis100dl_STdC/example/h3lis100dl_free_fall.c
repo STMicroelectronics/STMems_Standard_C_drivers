@@ -114,7 +114,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -129,33 +130,28 @@ void h3lis100dl_free_fall(void)
   /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
   int1_on_th_conf_t int_route;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Check device ID */
   h3lis100dl_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != H3LIS100DL_ID) {
-    while(1) {
+    while (1) {
       /* manage here device not found */
     }
   }
 
   /* Disable HP filter */
   h3lis100dl_hp_path_set(&dev_ctx, H3LIS100DL_HP_DISABLE);
-
   /* Set minimum event duration for free fall */
   h3lis100dl_int1_dur_set(&dev_ctx, 3);
-
   /* Apply free-fall axis threshold
    * Set threshold to 350mg
    */
   h3lis100dl_int1_treshold_set(&dev_ctx, 22);
-
   /* Enable interrupt generation on free fall INT1 pin */
   h3lis100dl_int1_on_threshold_mode_set(&dev_ctx,
                                         H3LIS100DL_INT1_ON_THRESHOLD_AND);
@@ -164,24 +160,21 @@ void h3lis100dl_free_fall(void)
   int_route.int1_ylie = PROPERTY_ENABLE;
   int_route.int1_zlie = PROPERTY_ENABLE;
   h3lis100dl_int1_on_threshold_conf_set(&dev_ctx, int_route);
-
   /* Set Output Data Rate */
   h3lis100dl_data_rate_set(&dev_ctx, H3LIS100DL_ODR_100Hz);
 
   /* Wait Events */
-  while(1)
-  {
+  while (1) {
     h3lis100dl_int1_src_t all_source;
-
     /* Check free fall events
      * You can test the event of zl && yl &&xl or check
      * the interrupt int1 pin
      */
     h3lis100dl_int1_src_get(&dev_ctx, &all_source);
-    if (all_source.xl && all_source.yl && all_source.zl)
-    {
-      sprintf((char*)tx_buffer, "Free fall\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+    if (all_source.xl && all_source.yl && all_source.zl) {
+      sprintf((char *)tx_buffer, "Free fall\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -196,7 +189,8 @@ void h3lis100dl_free_fall(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
