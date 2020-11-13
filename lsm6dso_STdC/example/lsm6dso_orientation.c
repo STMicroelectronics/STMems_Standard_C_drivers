@@ -3,7 +3,7 @@
  * @file    orientation_6d_4d.c
  * @author  Sensors Software Solution Team
  * @brief   This file show the simplest way to detect orientation 6D/4D event
- * 			from sensor.
+ *      from sensor.
  *
  ******************************************************************************
  * @attention
@@ -95,7 +95,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -107,87 +108,88 @@ static void platform_init(void);
 void example_main_orientation_lsm6dso(void)
 {
   stmdev_ctx_t dev_ctx;
-
   /* Uncomment to configure INT 1 */
   //lsm6dso_pin_int1_route_t int1_route;
-
   lsm6dso_pin_int2_route_t int2_route;
-
   /* Initialize mems driver interface. */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Init test platform. */
   platform_init();
   /* Wait sensor boot time */
   platform_delay(10);
-
   /* Check device ID. */
   lsm6dso_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LSM6DSO_ID)
-    while(1);
+    while (1);
 
   /* Restore default configuration. */
   lsm6dso_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lsm6dso_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Disable I3C interface. */
   lsm6dso_i3c_disable_set(&dev_ctx, LSM6DSO_I3C_DISABLE);
-
   /* Set XL Output Data Rate to 417 Hz. */
   lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_417Hz);
-
   /* Set 2g full XL scale. */
   lsm6dso_xl_full_scale_set(&dev_ctx, LSM6DSO_2g);
-
   /* Set threshold to 60 degrees. */
   lsm6dso_6d_threshold_set(&dev_ctx, LSM6DSO_DEG_60);
-
   /* LPF2 on 6D/4D function selection. */
   lsm6dso_xl_lp2_on_6d_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* To enable 4D mode uncomment next line.
    * 4D orientation detection disable Z-axis events.
    */
   lsm6dso_4d_mode_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Uncomment if interrupt generation on Free Fall INT1 pin */
   //lsm6dso_pin_int1_route_get(&dev_ctx, &int1_route);
   //int1_route.reg.md1_cfg.int1_ff = PROPERTY_ENABLE;
   //lsm6dso_pin_int1_route_set(&dev_ctx, &int1_route);
-
   /* Uncomment if interrupt generation on Free Fall INT2 pin */
   lsm6dso_pin_int2_route_get(&dev_ctx, NULL, &int2_route);
   int2_route.free_fall = PROPERTY_ENABLE;
   lsm6dso_pin_int2_route_set(&dev_ctx, NULL, int2_route);
 
   /* Wait Events. */
-  while(1)
-  {
+  while (1) {
     lsm6dso_all_sources_t all_source;
-
     /* Check if 6D/4D Orientation events. */
     lsm6dso_all_sources_get(&dev_ctx, &all_source);
-    if (all_source.six_d)
-    {
-      sprintf((char*)tx_buffer, "6D Or. switched to ");
-      if (all_source.six_d_xh)
-          strcat((char*)tx_buffer, "XH");
-      if (all_source.six_d_xl)
-          strcat((char*)tx_buffer, "XL");
-      if (all_source.six_d_yh)
-          strcat((char*)tx_buffer, "YH");
-      if (all_source.six_d_yl)
-          strcat((char*)tx_buffer, "YL");
-      if (all_source.six_d_zh)
-          strcat((char*)tx_buffer, "ZH");
-      if (all_source.six_d_zl)
-          strcat((char*)tx_buffer, "ZL");
-      strcat((char*)tx_buffer, "\r\n");
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+    if (all_source.six_d) {
+      sprintf((char *)tx_buffer, "6D Or. switched to ");
+
+      if (all_source.six_d_xh) {
+        strcat((char *)tx_buffer, "XH");
+      }
+
+      if (all_source.six_d_xl) {
+        strcat((char *)tx_buffer, "XL");
+      }
+
+      if (all_source.six_d_yh) {
+        strcat((char *)tx_buffer, "YH");
+      }
+
+      if (all_source.six_d_yl) {
+        strcat((char *)tx_buffer, "YL");
+      }
+
+      if (all_source.six_d_zh) {
+        strcat((char *)tx_buffer, "ZH");
+      }
+
+      if (all_source.six_d_zl) {
+        strcat((char *)tx_buffer, "ZL");
+      }
+
+      strcat((char *)tx_buffer, "\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -202,22 +204,24 @@ void example_main_orientation_lsm6dso(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     HAL_I2C_Mem_Write(handle, LSM6DSO_I2C_ADD_L, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
+
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
+
+  else if (handle == &hspi2) {
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Transmit(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+
 #endif
   return 0;
 }
@@ -235,14 +239,14 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     HAL_I2C_Mem_Read(handle, LSM6DSO_I2C_ADD_L, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
+
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
+
+  else if (handle == &hspi2) {
     /* Read command */
     reg |= 0x80;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
@@ -250,6 +254,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
     HAL_SPI_Receive(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+
 #endif
   return 0;
 }
@@ -257,18 +262,18 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE
+#ifdef NUCLEO_F411RE
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
-  #ifdef STEVAL_MKI109V3
+#endif
+#ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#endif
 }
 
 /*

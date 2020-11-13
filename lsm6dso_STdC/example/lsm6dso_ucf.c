@@ -75,7 +75,7 @@
 
 /*
  * Below an ".ucf" file generated with Unico / Unicleo software tool (with
- * some comments) where a wake-up program is configued on FSM.
+ * some comments) where a wake-up program is configured on FSM.
  * The purpose of this example is to show how extract the device
  * configuration from this file and integrate it with platform independent
  * driver API:
@@ -263,16 +263,16 @@
 
 /* Program: wakeup [ array created from ".ucf" file]*/
 static const uint8_t lsm6so_prg_wakeup[] = {
-      0x50, 0x40, 0x12, 0x00, 0x0C, 0x00, 0x00, 0x3C, 0x66, 0x2A, 0x02, 0x00,
-      0x41, 0x75, 0x10, 0x10, 0x22, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
-      0x00, 0x00, 0x06, 0x00, 0x06, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
-      0x00, 0x00, 0x06, 0x00, 0x06, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
-      0x00, 0x00, 0x06, 0x00, 0x06, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
-      0x00, 0x00, 0x06, 0x00, 0x06, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
-      0x00, 0x00, 0x06, 0x00, 0x06, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
-      0x00, 0x00, 0x06, 0x00, 0x06, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
-      0x00, 0x00, 0x06, 0x00, 0x06, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
-    };
+  0x50, 0x40, 0x12, 0x00, 0x0C, 0x00, 0x00, 0x3C, 0x66, 0x2A, 0x02, 0x00,
+  0x41, 0x75, 0x10, 0x10, 0x22, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
+  0x00, 0x00, 0x06, 0x00, 0x06, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
+  0x00, 0x00, 0x06, 0x00, 0x06, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
+  0x00, 0x00, 0x06, 0x00, 0x06, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
+  0x00, 0x00, 0x06, 0x00, 0x06, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
+  0x00, 0x00, 0x06, 0x00, 0x06, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
+  0x00, 0x00, 0x06, 0x00, 0x06, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
+  0x00, 0x00, 0x06, 0x00, 0x06, 0x00, 0x00, 0x00, 0x06, 0x00, 0x06, 0x00,
+};
 
 
 /* Private macro -------------------------------------------------------------*/
@@ -291,7 +291,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -308,96 +309,82 @@ void lsm6dso_fsm_ucf(void)
   lsm6dso_all_sources_t status;
   stmdev_ctx_t dev_ctx;
   uint16_t fsm_addr;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg  = platform_read;
   dev_ctx.handle    = &SENSOR_BUS;
-
   /* Init test platform */
   platform_init();
   /* Wait sensor boot time */
   platform_delay(10);
-
   /* Check device ID */
   lsm6dso_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LSM6DSO_ID)
-    while(1);
+    while (1);
 
   /* Restore default configuration (not FSM) */
   lsm6dso_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lsm6dso_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Disable I3C interface */
   lsm6dso_i3c_disable_set(&dev_ctx, LSM6DSO_I3C_DISABLE);
-
   /* Enable Block Data Update */
   lsm6dso_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set full scale */
   lsm6dso_xl_full_scale_set(&dev_ctx, LSM6DSO_2g);
   //lsm6dso_gy_full_scale_set(&dev_ctx, LSM6DSO_2000dps); /*gyro not used*/
-
   /* Route signals on interrupt pin 1 */
   lsm6dso_pin_int1_route_get(&dev_ctx, &pin_int1_route);
   pin_int1_route.fsm1               = PROPERTY_ENABLE;
   lsm6dso_pin_int1_route_set(&dev_ctx, pin_int1_route);
-
   /* Configure interrupt pin mode notification */
-  lsm6dso_int_notification_set(&dev_ctx, LSM6DSO_BASE_PULSED_EMB_LATCHED);
-
+  lsm6dso_int_notification_set(&dev_ctx,
+                               LSM6DSO_BASE_PULSED_EMB_LATCHED);
   /*
    * Start Finite State Machine configuration
    */
-
   /* Reset/Init Long Counter from FSM_LC_TIMEOUT_L / H */
   lsm6dso_long_cnt_int_value_set(&dev_ctx, 0x0000U);
-
   /*
    * Set the first address where the programs are written
    * from FSM_START_ADD_L / H.
    */
   lsm6dso_fsm_start_address_set(&dev_ctx, 0x0400);
-
   /* Set the number of the programs from FSM_PROGRAMS*/
   lsm6dso_fsm_number_of_programs_set(&dev_ctx, 1 );
-
   /* Enable final state machine */
   lsm6dso_fsm_enable_get(&dev_ctx, &fsm_enable);
   fsm_enable.fsm_enable_a.fsm1_en    = PROPERTY_ENABLE ;
   lsm6dso_fsm_enable_set(&dev_ctx, &fsm_enable);
-
   /* Set Finite State Machine data rate */
   lsm6dso_fsm_data_rate_set(&dev_ctx, LSM6DSO_ODR_FSM_26Hz);
-
   /* Write Programs from FSM_START_ADD_L / H */
   fsm_addr = 0x0400;
-
   /* wakeup */
-  lsm6dso_ln_pg_write(&dev_ctx, fsm_addr, (uint8_t*)lsm6so_prg_wakeup,
+  lsm6dso_ln_pg_write(&dev_ctx, fsm_addr, (uint8_t *)lsm6so_prg_wakeup,
                       sizeof(lsm6so_prg_wakeup));
   fsm_addr += sizeof(lsm6so_prg_wakeup);
-
- /*
-  * End Finite State Machine configuration
-  */
-
+  /*
+   * End Finite State Machine configuration
+   */
   /* Set Output Data Rate */
   lsm6dso_xl_data_rate_set(&dev_ctx, LSM6DSO_XL_ODR_104Hz);
   lsm6dso_gy_data_rate_set(&dev_ctx, LSM6DSO_GY_ODR_OFF);
 
   /* Main loop */
-  while(1)
-  {
+  while (1) {
     /* Read interrupt source registers in polling mode (no int) */
     lsm6dso_all_sources_get(&dev_ctx, &status);
 
-    if(status.fsm1){
-        sprintf((char*)tx_buffer, "wakeup detected\r\n");
-        tx_com(tx_buffer, strlen((char const*)tx_buffer));
+    if (status.fsm1) {
+      sprintf((char *)tx_buffer, "wakeup detected\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
+
     HAL_Delay(20);
   }
 }
@@ -412,11 +399,12 @@ void lsm6dso_fsm_ucf(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
-    HAL_I2C_Mem_Write(handle, LSM6DSO_I2C_ADD_H, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  HAL_I2C_Mem_Write(handle, LSM6DSO_I2C_ADD_H, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   return 0;
 }
 
@@ -433,15 +421,15 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-    HAL_I2C_Mem_Read(handle, LSM6DSO_I2C_ADD_H, reg,
-                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  HAL_I2C_Mem_Read(handle, LSM6DSO_I2C_ADD_H, reg,
+                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   return 0;
 }
 
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
