@@ -121,7 +121,8 @@ static uint16_t threshold = 192 * 1.5f;
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -133,57 +134,47 @@ static void platform_init(void);
 void lis2mdl_int_conf(void)
 {
   lis2mdl_int_crtl_reg_t int_ctrl;
-
   /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
-
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
 #if defined(STEVAL_MKI109V3)
   /* Default SPI mode is 3 wire, so enable 4 wire mode */
   lis2mdl_spi_mode_set(&dev_ctx, LIS2MDL_SPI_4_WIRE);
 #endif
-
   /* Check device ID */
   lis2mdl_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LIS2MDL_ID) {
-    while(1){
+    while (1) {
       /* manage here device not found */
     }
   }
 
   /* Restore default configuration */
   lis2mdl_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lis2mdl_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Enable Block Data Update */
   lis2mdl_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set Output Data Rate to 10 Hz */
   lis2mdl_data_rate_set(&dev_ctx, LIS2MDL_ODR_10Hz);
-
   /* Set / Reset sensor mode */
   lis2mdl_set_rst_mode_set(&dev_ctx, LIS2MDL_SENS_OFF_CANC_EVERY_ODR);
-
   /* Enable temperature compensation */
   lis2mdl_offset_temp_comp_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set device in continuous mode */
   lis2mdl_operating_mode_set(&dev_ctx, LIS2MDL_CONTINUOUS_MODE);
-
   /* Enable interrupt generation on interrupt */
   lis2mdl_int_on_pin_set(&dev_ctx, PROPERTY_ENABLE);
-
   /*
    * Set interrupt threshold:
    * The sample code exploits a threshold set to 192 mG
@@ -191,7 +182,6 @@ void lis2mdl_int_conf(void)
    * INT/DRDY pin
    */
   lis2mdl_int_gen_treshold_set(&dev_ctx, threshold);
-
   int_ctrl.iea = PROPERTY_ENABLE;
   int_ctrl.ien = PROPERTY_ENABLE;
   int_ctrl.iel = PROPERTY_ENABLE;
@@ -201,19 +191,17 @@ void lis2mdl_int_conf(void)
   lis2mdl_int_gen_conf_set(&dev_ctx, &int_ctrl);
 
   /* Read samples in polling mode */
-  while(1)
-  {
+  while (1) {
     uint8_t reg;
     lis2mdl_reg_t source;
     char *exceeds_info;
-
     /*
      * Read output only if new value is available
      * It's also possible to use interrupt pin for trigger
      */
     lis2mdl_mag_data_ready_get(&dev_ctx, &reg);
-    if (reg)
-    {
+
+    if (reg) {
       /* Read magnetic field data */
       memset(data_raw_magnetic, 0x00, 3 * sizeof(int16_t));
       lis2mdl_magnetic_raw_get(&dev_ctx, data_raw_magnetic);
@@ -221,27 +209,38 @@ void lis2mdl_int_conf(void)
       magnetic_mG[1] = lis2mdl_from_lsb_to_mgauss(data_raw_magnetic[1]);
       magnetic_mG[2] = lis2mdl_from_lsb_to_mgauss(data_raw_magnetic[2]);
       exceeds_info = NULL;
-
       /* Read LIS2MDL INT register */
       lis2mdl_int_gen_source_get(&dev_ctx, &source.int_source_reg);
-      if (source.int_source_reg.n_th_s_x)
-        exceeds_info = "X-axis neg";
-      else if (source.int_source_reg.n_th_s_y)
-        exceeds_info = "Y-axis neg";
-      else if (source.int_source_reg.n_th_s_z)
-        exceeds_info = "Z-axis neg";
-      else if (source.int_source_reg.p_th_s_x)
-        exceeds_info = "X-axis pos";
-      else if (source.int_source_reg.p_th_s_y)
-        exceeds_info = "Y-axis pos";
-      else if (source.int_source_reg.p_th_s_z)
-        exceeds_info = "Z-axis pos";
 
-      sprintf((char*)tx_buffer,
+      if (source.int_source_reg.n_th_s_x) {
+        exceeds_info = "X-axis neg";
+      }
+
+      else if (source.int_source_reg.n_th_s_y) {
+        exceeds_info = "Y-axis neg";
+      }
+
+      else if (source.int_source_reg.n_th_s_z) {
+        exceeds_info = "Z-axis neg";
+      }
+
+      else if (source.int_source_reg.p_th_s_x) {
+        exceeds_info = "X-axis pos";
+      }
+
+      else if (source.int_source_reg.p_th_s_y) {
+        exceeds_info = "Y-axis pos";
+      }
+
+      else if (source.int_source_reg.p_th_s_z) {
+        exceeds_info = "Z-axis pos";
+      }
+
+      sprintf((char *)tx_buffer,
               "Magnetic [mG]:%4.2f\t%4.2f\t%4.2f (%s)\r\n",
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2],
               exceeds_info != NULL ? exceeds_info : "");
-              tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -256,7 +255,8 @@ void lis2mdl_int_conf(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
@@ -315,7 +315,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Send buffer to console (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */

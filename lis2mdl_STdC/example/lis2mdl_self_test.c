@@ -126,7 +126,8 @@
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -149,30 +150,27 @@ void lis2mdl_self_test(void)
   uint8_t rst;
   uint8_t i;
   uint8_t j;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Init test platform */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
 #if defined(STEVAL_MKI109V3)
   /* Default SPI mode is 3 wire, so enable 4 wire mode */
   lis2mdl_spi_mode_set(&dev_ctx, LIS2MDL_SPI_4_WIRE);
 #endif
-
   /* Check device ID */
   lis2mdl_device_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != LIS2MDL_ID)
-    while(1);
+    while (1);
 
   /* Restore default configuration */
   lis2mdl_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lis2mdl_reset_get(&dev_ctx, &rst);
   } while (rst);
@@ -189,69 +187,75 @@ void lis2mdl_self_test(void)
   lis2mdl_data_rate_set(&dev_ctx, LIS2MDL_ODR_100Hz);
   /* Set Operating mode */
   lis2mdl_operating_mode_set(&dev_ctx, LIS2MDL_CONTINUOUS_MODE);
-
   /* Wait stable output */
   platform_delay(WAIT_TIME_01);
 
   /* Check if new value available */
   do {
     lis2mdl_mag_data_ready_get(&dev_ctx, &drdy);
-  } while(!drdy);
+  } while (!drdy);
+
   /* Read dummy data and discard it */
   lis2mdl_magnetic_raw_get(&dev_ctx, data_raw);
-
   /* Read samples and get the average vale for each axis */
-  memset(val_st_off, 0x00, 3*sizeof(float));
-  for (i = 0; i < SAMPLES; i++){
+  memset(val_st_off, 0x00, 3 * sizeof(float));
+
+  for (i = 0; i < SAMPLES; i++) {
     /* Check if new value available */
     do {
       lis2mdl_mag_data_ready_get(&dev_ctx, &drdy);
-    } while(!drdy);
+    } while (!drdy);
+
     /* Read data and accumulate the mg value */
     lis2mdl_magnetic_raw_get(&dev_ctx, data_raw);
-    for (j = 0; j < 3; j++){
+
+    for (j = 0; j < 3; j++) {
       val_st_off[j] += lis2mdl_from_lsb_to_mgauss(data_raw[j]);
     }
   }
+
   /* Calculate the mg average values */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     val_st_off[i] /= SAMPLES;
   }
 
   /* Enable Self Test */
   lis2mdl_self_test_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Wait stable output */
   platform_delay(WAIT_TIME_02);
-
   /* Read samples and get the average vale for each axis */
-  memset(val_st_on, 0x00, 3*sizeof(float));
-  for (i = 0; i < SAMPLES; i++){
+  memset(val_st_on, 0x00, 3 * sizeof(float));
+
+  for (i = 0; i < SAMPLES; i++) {
     /* Check if new value available */
     do {
       lis2mdl_mag_data_ready_get(&dev_ctx, &drdy);
-    } while(!drdy);
+    } while (!drdy);
+
     /* Read data and accumulate the mg value */
     lis2mdl_magnetic_raw_get(&dev_ctx, data_raw);
-    for (j = 0; j < 3; j++){
+
+    for (j = 0; j < 3; j++) {
       val_st_on[j] += lis2mdl_from_lsb_to_mgauss(data_raw[j]);
     }
   }
 
   /* Calculate the mg average values */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     val_st_on[i] /= SAMPLES;
   }
 
   st_result = ST_PASS;
+
   /* Calculate the mg values for self test */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
   }
+
   /* Check self test limit */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     if (( MIN_ST_LIMIT_mG > test_val[i] ) ||
-        ( test_val[i] > MAX_ST_LIMIT_mG)){
+        ( test_val[i] > MAX_ST_LIMIT_mG)) {
       st_result = ST_FAIL;
     }
   }
@@ -262,12 +266,14 @@ void lis2mdl_self_test(void)
   lis2mdl_operating_mode_set(&dev_ctx, LIS2MDL_POWER_DOWN);
 
   if (st_result == ST_PASS) {
-    sprintf((char*)tx_buffer, "Self Test - PASS\r\n" );
+    sprintf((char *)tx_buffer, "Self Test - PASS\r\n" );
   }
+
   else {
-    sprintf((char*)tx_buffer, "Self Test - FAIL\r\n" );
+    sprintf((char *)tx_buffer, "Self Test - FAIL\r\n" );
   }
-  tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+  tx_com(tx_buffer, strlen((char const *)tx_buffer));
 }
 
 /*
@@ -280,7 +286,8 @@ void lis2mdl_self_test(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
@@ -339,7 +346,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Send buffer to console (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
