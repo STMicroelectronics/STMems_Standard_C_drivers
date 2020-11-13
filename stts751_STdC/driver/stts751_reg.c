@@ -46,8 +46,9 @@
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
-                          uint16_t len)
+int32_t stts751_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                         uint8_t *data,
+                         uint16_t len)
 {
   int32_t ret;
   ret = ctx->read_reg(ctx->handle, reg, data, len);
@@ -64,8 +65,9 @@ int32_t stts751_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
-                           uint16_t len)
+int32_t stts751_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
+                          uint16_t len)
 {
   int32_t ret;
   ret = ctx->write_reg(ctx->handle, reg, data, len);
@@ -133,32 +135,37 @@ int16_t stts751_from_celsius_to_lsb(float celsius)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_temp_data_rate_set(stmdev_ctx_t *ctx, stts751_odr_t val)
+int32_t stts751_temp_data_rate_set(stmdev_ctx_t *ctx,
+                                   stts751_odr_t val)
 {
   stts751_configuration_t configuration;
   stts751_conversion_rate_t conversion_rate;
   uint8_t dummy_value = 0xAA;
   int32_t ret;
-
   ret = stts751_read_reg(ctx, STTS751_CONVERSION_RATE,
-                         (uint8_t*)&conversion_rate, 1);
+                         (uint8_t *)&conversion_rate, 1);
+
   if (ret == 0) {
     conversion_rate.conv = (uint8_t)val & 0x0FU;
     ret = stts751_write_reg(ctx, STTS751_CONVERSION_RATE,
-                            (uint8_t*)&conversion_rate, 1);
+                            (uint8_t *)&conversion_rate, 1);
   }
+
   if (ret == 0) {
     ret = stts751_read_reg(ctx, STTS751_CONFIGURATION,
-                           (uint8_t*)&configuration, 1);
+                           (uint8_t *)&configuration, 1);
   }
+
   if (ret == 0) {
     configuration.stop = ((uint8_t)val & 0x80U) >> 7;
     ret = stts751_write_reg(ctx, STTS751_CONFIGURATION,
-                            (uint8_t*)&configuration, 1);
+                            (uint8_t *)&configuration, 1);
   }
+
   if ((ret == 0) && (val == STTS751_TEMP_ODR_ONE_SHOT)) {
     ret = stts751_write_reg(ctx, STTS751_ONE_SHOT, &dummy_value, 1);
   }
+
   return ret;
 }
 
@@ -170,59 +177,74 @@ int32_t stts751_temp_data_rate_set(stmdev_ctx_t *ctx, stts751_odr_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_temp_data_rate_get(stmdev_ctx_t *ctx, stts751_odr_t *val)
+int32_t stts751_temp_data_rate_get(stmdev_ctx_t *ctx,
+                                   stts751_odr_t *val)
 {
   stts751_conversion_rate_t conversion_rate;
   stts751_configuration_t configuration;
   int32_t ret;
-
   ret = stts751_read_reg(ctx, STTS751_CONVERSION_RATE,
-                         (uint8_t*)&conversion_rate, 1);
+                         (uint8_t *)&conversion_rate, 1);
+
   if (ret == 0) {
     ret = stts751_read_reg(ctx, STTS751_CONFIGURATION,
-                           (uint8_t*)&configuration, 1);
+                           (uint8_t *)&configuration, 1);
   }
+
   switch ( (configuration.stop << 7) + conversion_rate.conv) {
     case STTS751_TEMP_ODR_OFF:
       *val = STTS751_TEMP_ODR_OFF;
       break;
+
     case STTS751_TEMP_ODR_ONE_SHOT:
       *val = STTS751_TEMP_ODR_ONE_SHOT;
       break;
+
     case STTS751_TEMP_ODR_62mHz5:
       *val = STTS751_TEMP_ODR_62mHz5;
       break;
+
     case STTS751_TEMP_ODR_125mHz:
       *val = STTS751_TEMP_ODR_125mHz;
       break;
-     case STTS751_TEMP_ODR_250mHz:
+
+    case STTS751_TEMP_ODR_250mHz:
       *val = STTS751_TEMP_ODR_250mHz;
       break;
+
     case STTS751_TEMP_ODR_500mHz:
       *val = STTS751_TEMP_ODR_500mHz;
       break;
+
     case STTS751_TEMP_ODR_1Hz:
       *val = STTS751_TEMP_ODR_1Hz;
       break;
+
     case STTS751_TEMP_ODR_2Hz:
       *val = STTS751_TEMP_ODR_2Hz;
       break;
-     case STTS751_TEMP_ODR_4Hz:
+
+    case STTS751_TEMP_ODR_4Hz:
       *val = STTS751_TEMP_ODR_4Hz;
       break;
+
     case STTS751_TEMP_ODR_8Hz:
       *val = STTS751_TEMP_ODR_8Hz;
       break;
+
     case STTS751_TEMP_ODR_16Hz:
       *val = STTS751_TEMP_ODR_16Hz;
       break;
+
     case STTS751_TEMP_ODR_32Hz:
       *val = STTS751_TEMP_ODR_32Hz;
       break;
+
     default:
       *val = STTS751_TEMP_ODR_OFF;
       break;
   }
+
   return ret;
 }
 
@@ -238,12 +260,15 @@ int32_t stts751_resolution_set(stmdev_ctx_t *ctx, stts751_tres_t val)
 {
   stts751_configuration_t reg;
   int32_t ret;
+  ret = stts751_read_reg(ctx, STTS751_CONFIGURATION, (uint8_t *) &reg,
+                         1);
 
-  ret = stts751_read_reg(ctx, STTS751_CONFIGURATION,(uint8_t*) &reg, 1);
   if (ret == 0) {
     reg.tres = (uint8_t) val;
-    ret = stts751_write_reg(ctx, STTS751_CONFIGURATION,(uint8_t*) &reg, 1);
+    ret = stts751_write_reg(ctx, STTS751_CONFIGURATION, (uint8_t *) &reg,
+                            1);
   }
+
   return ret;
 }
 
@@ -259,26 +284,31 @@ int32_t stts751_resolution_get(stmdev_ctx_t *ctx, stts751_tres_t *val)
 {
   stts751_configuration_t reg;
   int32_t ret;
-
-  ret = stts751_read_reg(ctx, STTS751_CONFIGURATION,(uint8_t*) &reg, 1);
+  ret = stts751_read_reg(ctx, STTS751_CONFIGURATION, (uint8_t *) &reg,
+                         1);
 
   switch (reg.tres) {
     case STTS751_9bit:
       *val = STTS751_9bit;
       break;
+
     case STTS751_10bit:
       *val = STTS751_10bit;
       break;
+
     case STTS751_11bit:
       *val = STTS751_11bit;
       break;
+
     case STTS751_12bit:
       *val = STTS751_12bit;
       break;
+
     default:
       *val = STTS751_9bit;
       break;
   }
+
   return ret;
 }
 
@@ -290,10 +320,11 @@ int32_t stts751_resolution_get(stmdev_ctx_t *ctx, stts751_tres_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t stts751_status_reg_get(stmdev_ctx_t *ctx, stts751_status_t *val)
+int32_t stts751_status_reg_get(stmdev_ctx_t *ctx,
+                               stts751_status_t *val)
 {
   int32_t ret;
-  ret = stts751_read_reg(ctx, STTS751_STATUS, (uint8_t*) val, 1);
+  ret = stts751_read_reg(ctx, STTS751_STATUS, (uint8_t *) val, 1);
   return ret;
 }
 
@@ -309,10 +340,8 @@ int32_t stts751_flag_busy_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   stts751_status_t reg;
   int32_t ret;
-
-  ret = stts751_read_reg(ctx, STTS751_STATUS, (uint8_t*)&reg, 1);
+  ret = stts751_read_reg(ctx, STTS751_STATUS, (uint8_t *)&reg, 1);
   *val = reg.busy;
-
   return ret;
 }
 
@@ -342,16 +371,16 @@ int32_t stts751_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff)
   uint16_t temperature;
   uint8_t temperature_low;
   int32_t ret;
-
   ret = stts751_read_reg(ctx, STTS751_TEMPERATURE_HIGH,
-                         (uint8_t*)&temperature, 1);
+                         (uint8_t *)&temperature, 1);
+
   if (ret == 0) {
     ret = stts751_read_reg(ctx, STTS751_TEMPERATURE_LOW,
                            &temperature_low, 1);
-
     temperature  = (temperature << 8) + temperature_low;
     *buff = (int16_t)temperature;
   }
+
   return ret;
 }
 
@@ -379,12 +408,15 @@ int32_t stts751_pin_event_route_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   stts751_configuration_t reg;
   int32_t ret;
+  ret = stts751_read_reg(ctx, STTS751_CONFIGURATION, (uint8_t *)&reg,
+                         1);
 
-  ret = stts751_read_reg(ctx, STTS751_CONFIGURATION,(uint8_t*)&reg, 1);
   if (ret == 0) {
     reg.mask1 = val;
-    ret = stts751_write_reg(ctx, STTS751_CONFIGURATION, (uint8_t*)&reg, 1);
+    ret = stts751_write_reg(ctx, STTS751_CONFIGURATION, (uint8_t *)&reg,
+                            1);
   }
+
   return ret;
 }
 
@@ -400,7 +432,8 @@ int32_t stts751_pin_event_route_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   stts751_configuration_t reg;
   int32_t ret;
-  ret = stts751_read_reg(ctx, STTS751_CONFIGURATION, (uint8_t*)&reg, 1);
+  ret = stts751_read_reg(ctx, STTS751_CONFIGURATION, (uint8_t *)&reg,
+                         1);
   *val = reg.mask1;
   return ret;
 }
@@ -419,7 +452,7 @@ int32_t stts751_pin_event_route_get(stmdev_ctx_t *ctx, uint8_t *val)
   */
 
 /**
-  * @brief  high temperature theshold.[set]
+  * @brief  high temperature threshold.[set]
   *
   * @param  ctx      read / write interface definitions
   * @param  buff     buffer that contains data to write
@@ -431,22 +464,21 @@ int32_t stts751_high_temperature_threshold_set(stmdev_ctx_t *ctx,
 {
   uint8_t *temperature_ptr;
   int32_t ret;
-
-  temperature_ptr = (uint8_t*)&buff;
+  temperature_ptr = (uint8_t *)&buff;
   ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_HIGH_LIMIT_LOW,
-                          (uint8_t*)temperature_ptr, 1);
+                          (uint8_t *)temperature_ptr, 1);
 
   if (ret == 0) {
     temperature_ptr++;
     ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_HIGH_LIMIT_HIGH,
-                            (uint8_t*)temperature_ptr, 1);
+                            (uint8_t *)temperature_ptr, 1);
   }
 
   return ret;
 }
 
 /**
-  * @brief  high temperature theshold.[get]
+  * @brief  high temperature threshold.[get]
   *
   * @param  ctx      read / write interface definitions
   * @param  buff     buffer that stores data read
@@ -459,21 +491,21 @@ int32_t stts751_high_temperature_threshold_get(stmdev_ctx_t *ctx,
   uint16_t temperature;
   uint8_t temperature_low;
   int32_t ret;
-
   ret = stts751_read_reg(ctx, STTS751_TEMPERATURE_HIGH_LIMIT_HIGH,
-                         (uint8_t*)&temperature, 1);
+                         (uint8_t *)&temperature, 1);
+
   if (ret == 0) {
     ret = stts751_read_reg(ctx, STTS751_TEMPERATURE_HIGH_LIMIT_LOW,
                            &temperature_low, 1);
-
     temperature  = (temperature << 8) + temperature_low;
     *buff = (int16_t)temperature;
   }
+
   return ret;
 }
 
 /**
-  * @brief  low temperature theshold.[set]
+  * @brief  low temperature threshold.[set]
   *
   * @param  ctx      read / write interface definitions
   * @param  buff     buffer that contains data to write
@@ -483,25 +515,23 @@ int32_t stts751_high_temperature_threshold_get(stmdev_ctx_t *ctx,
 int32_t stts751_low_temperature_threshold_set(stmdev_ctx_t *ctx,
                                               int16_t buff)
 {
-
   uint8_t *temperature_ptr;
   int32_t ret;
-
-  temperature_ptr = (uint8_t*)&buff;
+  temperature_ptr = (uint8_t *)&buff;
   ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_LOW_LIMIT_LOW,
-                          (uint8_t*)temperature_ptr, 1);
+                          (uint8_t *)temperature_ptr, 1);
 
   if (ret == 0) {
     temperature_ptr++;
     ret = stts751_write_reg(ctx, STTS751_TEMPERATURE_LOW_LIMIT_HIGH,
-                            (uint8_t*)temperature_ptr, 1);
+                            (uint8_t *)temperature_ptr, 1);
   }
 
   return ret;
 }
 
 /**
-  * @brief  low temperature theshold.[get]
+  * @brief  low temperature threshold.[get]
   *
   * @param  ctx      read / write interface definitions
   * @param  buff     buffer that stores data read
@@ -514,13 +544,12 @@ int32_t stts751_low_temperature_threshold_get(stmdev_ctx_t *ctx,
   uint16_t temperature;
   uint8_t temperature_low;
   int32_t ret;
-
   ret = stts751_read_reg(ctx, STTS751_TEMPERATURE_LOW_LIMIT_HIGH,
-                         (uint8_t*)&temperature, 1);
+                         (uint8_t *)&temperature, 1);
+
   if (ret == 0) {
     ret = stts751_read_reg(ctx, STTS751_TEMPERATURE_LOW_LIMIT_LOW,
                            &temperature_low, 1);
-
     temperature  = (temperature << 8) + temperature_low;
     *buff = (int16_t)temperature;
   }
@@ -534,13 +563,13 @@ int32_t stts751_low_temperature_threshold_get(stmdev_ctx_t *ctx,
   */
 
 
-  /**
-  * @defgroup  STTS751 over temperature alarm
-  * @brief     This section groups all the functions that manage
-  *            over temperature alarm functionality.
-  * @{
-  *
-  */
+/**
+* @defgroup  STTS751 over temperature alarm
+* @brief     This section groups all the functions that manage
+*            over temperature alarm functionality.
+* @{
+*
+*/
 
 /**
   * @brief  Thermal Limit. 1 LSB = 1 degC (max 127 degC min -127 degC ).[set]
@@ -553,7 +582,7 @@ int32_t stts751_low_temperature_threshold_get(stmdev_ctx_t *ctx,
 int32_t stts751_ota_thermal_limit_set(stmdev_ctx_t *ctx, int8_t val)
 {
   int32_t ret;
-  ret = stts751_write_reg(ctx, STTS751_THERM_LIMIT, (uint8_t*)&val, 1);
+  ret = stts751_write_reg(ctx, STTS751_THERM_LIMIT, (uint8_t *)&val, 1);
   return ret;
 }
 
@@ -568,8 +597,7 @@ int32_t stts751_ota_thermal_limit_set(stmdev_ctx_t *ctx, int8_t val)
 int32_t stts751_ota_thermal_limit_get(stmdev_ctx_t *ctx, int8_t *val)
 {
   int32_t ret;
-
-  ret = stts751_read_reg(ctx, STTS751_THERM_LIMIT, (uint8_t*)val, 1);
+  ret = stts751_read_reg(ctx, STTS751_THERM_LIMIT, (uint8_t *)val, 1);
   return ret;
 }
 
@@ -585,8 +613,8 @@ int32_t stts751_ota_thermal_limit_get(stmdev_ctx_t *ctx, int8_t *val)
 int32_t stts751_ota_thermal_hyst_set(stmdev_ctx_t *ctx, int8_t val)
 {
   int32_t ret;
-
-  ret = stts751_write_reg(ctx, STTS751_THERM_HYSTERESIS, (uint8_t*)&val, 1);
+  ret = stts751_write_reg(ctx, STTS751_THERM_HYSTERESIS,
+                          (uint8_t *)&val, 1);
   return ret;
 }
 
@@ -602,8 +630,8 @@ int32_t stts751_ota_thermal_hyst_set(stmdev_ctx_t *ctx, int8_t val)
 int32_t stts751_ota_thermal_hyst_get(stmdev_ctx_t *ctx, int8_t *val)
 {
   int32_t ret;
-
-  ret = stts751_read_reg(ctx, STTS751_THERM_HYSTERESIS, (uint8_t*)val, 1);
+  ret = stts751_read_reg(ctx, STTS751_THERM_HYSTERESIS, (uint8_t *)val,
+                         1);
   return ret;
 }
 
@@ -632,12 +660,15 @@ int32_t stts751_smbus_timeout_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   stts751_smbus_timeout_t reg;
   int32_t ret;
+  ret = stts751_read_reg(ctx, STTS751_SMBUS_TIMEOUT, (uint8_t *)&reg,
+                         1);
 
-  ret = stts751_read_reg(ctx, STTS751_SMBUS_TIMEOUT,(uint8_t*)&reg, 1);
   if (ret == 0) {
     reg.timeout = val;
-    ret = stts751_write_reg(ctx, STTS751_SMBUS_TIMEOUT, (uint8_t*)&reg, 1);
+    ret = stts751_write_reg(ctx, STTS751_SMBUS_TIMEOUT, (uint8_t *)&reg,
+                            1);
   }
+
   return ret;
 }
 
@@ -654,7 +685,8 @@ int32_t stts751_smbus_timeout_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   stts751_smbus_timeout_t reg;
   int32_t ret;
-  ret = stts751_read_reg(ctx, STTS751_SMBUS_TIMEOUT, (uint8_t*)&reg, 1);
+  ret = stts751_read_reg(ctx, STTS751_SMBUS_TIMEOUT, (uint8_t *)&reg,
+                         1);
   *val = reg.timeout;
   return ret;
 }
@@ -671,15 +703,18 @@ int32_t stts751_device_id_get(stmdev_ctx_t *ctx, stts751_id_t *buff)
 {
   int32_t ret;
   ret = stts751_read_reg(ctx, STTS751_PRODUCT_ID,
-                         (uint8_t*)&buff->product_id, 1);
-  if (ret == 0){
-  ret = stts751_read_reg(ctx, STTS751_MANUFACTURER_ID,
-                         (uint8_t*)&buff->manufacturer_id, 1);
+                         (uint8_t *)&buff->product_id, 1);
+
+  if (ret == 0) {
+    ret = stts751_read_reg(ctx, STTS751_MANUFACTURER_ID,
+                           (uint8_t *)&buff->manufacturer_id, 1);
   }
-  if (ret == 0){
-  ret = stts751_read_reg(ctx, STTS751_REVISION_ID,
-                         (uint8_t*)&buff->revision_id, 1);
+
+  if (ret == 0) {
+    ret = stts751_read_reg(ctx, STTS751_REVISION_ID,
+                           (uint8_t *)&buff->revision_id, 1);
   }
+
   return ret;
 }
 

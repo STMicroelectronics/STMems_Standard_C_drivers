@@ -77,7 +77,7 @@
 #include "usart.h"
 #endif
 
-typedef union{
+typedef union {
   int16_t i16bit;
   uint8_t u8bit[2];
 } axis1bit16_t;
@@ -99,7 +99,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -114,48 +115,45 @@ void example_main_stts751(void)
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Check device ID */
   stts751_device_id_get(&dev_ctx, &whoamI);
+
   if ( (whoamI.product_id != STTS751_ID_0xxxx) ||
-     //(whoamI.product_id != STTS751_ID_1xxxx) ||
+       //(whoamI.product_id != STTS751_ID_1xxxx) ||
        (whoamI.manufacturer_id != STTS751_ID_MAN) ||
        (whoamI.revision_id != STTS751_REV) )
-    while(1); /* manage here device not found */
+    while (1); /* manage here device not found */
 
   /* Enable interrupt on high(=49.5 degC)/low(=-4.5 degC) temperature. */
   float temperature_high_limit = 49.5f;
-  stts751_high_temperature_threshold_set(&dev_ctx, stts751_from_celsius_to_lsb(temperature_high_limit));
-
+  stts751_high_temperature_threshold_set(&dev_ctx,
+                                         stts751_from_celsius_to_lsb(temperature_high_limit));
   float temperature_low_limit = -4.5f;
-  stts751_low_temperature_threshold_set(&dev_ctx, stts751_from_celsius_to_lsb(temperature_low_limit));
-
+  stts751_low_temperature_threshold_set(&dev_ctx,
+                                        stts751_from_celsius_to_lsb(temperature_low_limit));
   stts751_pin_event_route_set(&dev_ctx,  PROPERTY_ENABLE);
-
   /* Set Output Data Rate */
   stts751_temp_data_rate_set(&dev_ctx, STTS751_TEMP_ODR_1Hz);
-
   /* Set Resolution */
   stts751_resolution_set(&dev_ctx, STTS751_11bit);
 
   /* Read samples in polling mode */
-  while(1)
-  {
+  while (1) {
     /* Read output only if not busy */
     uint8_t flag;
     stts751_flag_busy_get(&dev_ctx, &flag);
-    if (flag)
-    {
+
+    if (flag) {
       /* Read temperature data */
       memset(data_raw_temperature.u8bit, 0, sizeof(int16_t));
       stts751_temperature_raw_get(&dev_ctx, &data_raw_temperature.i16bit);
-      temperature_degC = stts751_from_lsb_to_celsius(data_raw_temperature.i16bit);
-
-      sprintf((char*)tx_buffer, "Temperature [degC]:%3.2f\r\n", temperature_degC);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      temperature_degC = stts751_from_lsb_to_celsius(
+                           data_raw_temperature.i16bit);
+      sprintf((char *)tx_buffer, "Temperature [degC]:%3.2f\r\n",
+              temperature_degC);
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -170,22 +168,24 @@ void example_main_stts751(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     HAL_I2C_Mem_Write(handle, STTS751_0xxxx_ADD_7K5, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
+
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
+
+  else if (handle == &hspi2) {
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Transmit(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+
 #endif
   return 0;
 }
@@ -203,21 +203,22 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     HAL_I2C_Mem_Read(handle, STTS751_0xxxx_ADD_7K5, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
+
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
-	/* Read command */
-	reg |= 0x80;
+
+  else if (handle == &hspi2) {
+    /* Read command */
+    reg |= 0x80;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Receive(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+
 #endif
   return 0;
 }
@@ -225,18 +226,18 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
-  #ifdef STEVAL_MKI109V3
+#endif
+#ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#endif
 }
 
 /*

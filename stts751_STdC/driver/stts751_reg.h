@@ -23,7 +23,7 @@
 #define STTS751_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -43,7 +43,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -65,8 +65,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -89,9 +91,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using 
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -199,7 +201,7 @@ typedef struct {
   * @{
   *
   */
-typedef union{
+typedef union {
   stts751_status_t                       status;
   stts751_configuration_t                configuration;
   stts751_conversion_rate_t              conversion_rate;
@@ -213,10 +215,12 @@ typedef union{
   *
   */
 
-int32_t stts751_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t stts751_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                         uint8_t *data,
+                         uint16_t len);
+int32_t stts751_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
                           uint16_t len);
-int32_t stts751_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
-                           uint16_t len);
 
 extern float stts751_from_lsb_to_celsius(int16_t lsb);
 extern int16_t stts751_from_celsius_to_lsb(float celsius);
@@ -235,8 +239,10 @@ typedef enum {
   STTS751_TEMP_ODR_16Hz       = 0x08, /* 9, 10, or 11-bit resolutions only */
   STTS751_TEMP_ODR_32Hz       = 0x09, /* 9 or 10-bit resolutions only */
 } stts751_odr_t;
-int32_t stts751_temp_data_rate_set(stmdev_ctx_t *ctx, stts751_odr_t val);
-int32_t stts751_temp_data_rate_get(stmdev_ctx_t *ctx, stts751_odr_t *val);
+int32_t stts751_temp_data_rate_set(stmdev_ctx_t *ctx,
+                                   stts751_odr_t val);
+int32_t stts751_temp_data_rate_get(stmdev_ctx_t *ctx,
+                                   stts751_odr_t *val);
 
 typedef enum {
   STTS751_9bit      = 2,
@@ -245,9 +251,11 @@ typedef enum {
   STTS751_12bit     = 3,
 } stts751_tres_t;
 int32_t stts751_resolution_set(stmdev_ctx_t *ctx, stts751_tres_t val);
-int32_t stts751_resolution_get(stmdev_ctx_t *ctx, stts751_tres_t *val);
+int32_t stts751_resolution_get(stmdev_ctx_t *ctx,
+                               stts751_tres_t *val);
 
-int32_t stts751_status_reg_get(stmdev_ctx_t *ctx, stts751_status_t *val);
+int32_t stts751_status_reg_get(stmdev_ctx_t *ctx,
+                               stts751_status_t *val);
 
 int32_t stts751_flag_busy_get(stmdev_ctx_t *ctx, uint8_t *val);
 
