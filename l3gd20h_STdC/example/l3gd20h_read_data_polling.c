@@ -119,7 +119,8 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -132,60 +133,55 @@ void l3gd20h_read_data_polling(void)
 {
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Initialize magnetic sensors driver interface */
   uint8_t i2c_add = L3GD20H_I2C_ADD_H;
   stmdev_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = (void*)&i2c_add;
-
+  dev_ctx.handle = (void *)&i2c_add;
   /* Check device ID */
   l3gd20h_dev_id_get(&dev_ctx, &whoamI);
-  if (whoamI != L3GD20H_ID ){
-    while(1){
+
+  if (whoamI != L3GD20H_ID ) {
+    while (1) {
       /* manage here device not found */
     }
   }
 
   /* Restore default configuration */
   l3gd20h_dev_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     l3gd20h_dev_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Enable Block Data Update */
   l3gd20h_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set full scale */
   l3gd20h_gy_full_scale_set(&dev_ctx, L3GD20H_2000dps);
-
   /* Set Output Data Rate / Power mode */
   l3gd20h_gy_data_rate_set(&dev_ctx, L3GD20H_50Hz);
 
   /* Read samples in polling mode (no int) */
-  while(1)
-  {
+  while (1) {
     /* Read device status register */
     l3gd20h_dev_status_get(&dev_ctx, &status);
 
-    if ( status.zyxda )
-    {
+    if ( status.zyxda ) {
       /* Read imu data */
       memset(data_raw_angular_rate, 0x00, 3 * sizeof(int16_t));
-
       l3gd20h_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate);
-
-      angular_rate_mdps[0] = l3gd20h_from_fs2000_to_mdps(data_raw_angular_rate[0]);
-      angular_rate_mdps[1] = l3gd20h_from_fs2000_to_mdps(data_raw_angular_rate[1]);
-      angular_rate_mdps[2] = l3gd20h_from_fs2000_to_mdps(data_raw_angular_rate[2]);
-
-      sprintf((char*)tx_buffer, "[mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+      angular_rate_mdps[0] = l3gd20h_from_fs2000_to_mdps(
+                               data_raw_angular_rate[0]);
+      angular_rate_mdps[1] = l3gd20h_from_fs2000_to_mdps(
+                               data_raw_angular_rate[1]);
+      angular_rate_mdps[2] = l3gd20h_from_fs2000_to_mdps(
+                               data_raw_angular_rate[2]);
+      sprintf((char *)tx_buffer, "[mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
               angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -200,7 +196,8 @@ void l3gd20h_read_data_polling(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)

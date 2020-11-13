@@ -124,7 +124,8 @@
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -147,104 +148,104 @@ void l3gd20h_self_test(void)
   uint8_t rst;
   uint8_t i;
   uint8_t j;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Init test platform */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   l3gd20h_dev_id_get(&dev_ctx, &whoamI);
+
   if (whoamI != L3GD20H_ID)
-    while(1);
+    while (1);
 
   /* Restore default configuration */
   l3gd20h_dev_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     l3gd20h_dev_reset_get(&dev_ctx, &rst);
   } while (rst);
 
   /* Enable Block Data Update */
   l3gd20h_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /*
    * Gyroscope Self Test
    */
-
   /* Set Output Data Rate */
   l3gd20h_gy_data_rate_set(&dev_ctx, L3GD20H_200Hz);
   /* Set full scale */
   l3gd20h_gy_full_scale_set(&dev_ctx, L3GD20H_2000dps);
-
   /* Wait stable output */
   platform_delay(WAIT_TIME);
 
   /* Check if new value available */
   do {
     l3gd20h_gy_flag_data_ready_get(&dev_ctx, &drdy);
-  } while(!drdy);
+  } while (!drdy);
+
   /* Read dummy data and discard it */
   l3gd20h_angular_rate_raw_get(&dev_ctx, data_raw);
-
   /* Read 5 sample and get the average vale for each axis */
+  memset(val_st_off, 0x00, 3 * sizeof(float));
 
-  memset(val_st_off, 0x00, 3*sizeof(float));
-  for (i = 0; i < 5; i++){
+  for (i = 0; i < 5; i++) {
     /* Check if new value available */
     do {
       l3gd20h_gy_flag_data_ready_get(&dev_ctx, &drdy);
-    } while(!drdy);
+    } while (!drdy);
+
     /* Read data and accumulate the mg value */
     l3gd20h_angular_rate_raw_get(&dev_ctx, data_raw);
-    for (j = 0; j < 3; j++){
+
+    for (j = 0; j < 3; j++) {
       val_st_off[j] += l3gd20h_from_fs2000_to_mdps(data_raw[j]);
     }
   }
+
   /* Calculate the mg average values */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     val_st_off[i] /= 5.0f;
   }
 
   /* Enable Self Test positive (or negative) */
   l3gd20h_gy_self_test_set(&dev_ctx, L3GD20H_ST_POSITIVE);
   //l3gd20h_gy_self_test_set(&dev_ctx, LIS2DH12_ST_NEGATIVE);
-
   /* Wait stable output */
   platform_delay(WAIT_TIME);
-
   /* Read 5 sample and get the average vale for each axis */
-  memset(val_st_on, 0x00, 3*sizeof(float));
-  for (i = 0; i < 5; i++){
+  memset(val_st_on, 0x00, 3 * sizeof(float));
+
+  for (i = 0; i < 5; i++) {
     /* Check if new value available */
     do {
       l3gd20h_gy_flag_data_ready_get(&dev_ctx, &drdy);
-    } while(!drdy);
+    } while (!drdy);
+
     /* Read data and accumulate the mg value */
     l3gd20h_angular_rate_raw_get(&dev_ctx, data_raw);
-    for (j = 0; j < 3; j++){
+
+    for (j = 0; j < 3; j++) {
       val_st_on[j] += l3gd20h_from_fs2000_to_mdps(data_raw[j]);
     }
   }
 
   /* Calculate the mg average values */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     val_st_on[i] /= 5.0f;
   }
 
   /* Calculate the mg values for self test */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
   }
+
   /* Check self test limit */
-  for (i = 0; i < 3; i++){
+  for (i = 0; i < 3; i++) {
     if (( MIN_ST_LIMIT_mdps > test_val[i] ) ||
-        ( test_val[i] > MAX_ST_LIMIT_mdps)){
+        ( test_val[i] > MAX_ST_LIMIT_mdps)) {
       st_result = ST_FAIL;
     }
   }
@@ -255,12 +256,14 @@ void l3gd20h_self_test(void)
   l3gd20h_gy_data_rate_set(&dev_ctx, L3GD20H_POWER_DOWN);
 
   if (st_result == ST_PASS) {
-    sprintf((char*)tx_buffer, "Self Test - PASS\r\n" );
+    sprintf((char *)tx_buffer, "Self Test - PASS\r\n" );
   }
+
   else {
-    sprintf((char*)tx_buffer, "Self Test - FAIL\r\n" );
+    sprintf((char *)tx_buffer, "Self Test - FAIL\r\n" );
   }
-  tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+  tx_com(tx_buffer, strlen((char const *)tx_buffer));
 }
 
 /*
@@ -273,7 +276,8 @@ void l3gd20h_self_test(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
