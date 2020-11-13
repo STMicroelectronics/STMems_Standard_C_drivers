@@ -23,7 +23,7 @@
 #define LIS3DSH_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -75,7 +75,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
@@ -113,8 +113,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -667,7 +669,7 @@ typedef struct {
   * @{
   *
   */
-typedef union{
+typedef union {
   lis3dsh_stat_t                           stat;
   lis3dsh_ctrl_reg4_t                      ctrl_reg4;
   lis3dsh_ctrl_reg1_t                      ctrl_reg1;
@@ -697,9 +699,11 @@ typedef union{
   *
   */
 
-int32_t lis3dsh_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lis3dsh_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                         uint8_t *data,
                          uint16_t len);
-int32_t lis3dsh_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lis3dsh_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
                           uint16_t len);
 
 float_t lis3dsh_from_fs2_to_mg(int16_t lsb);
@@ -720,8 +724,10 @@ typedef enum {
   LIS3DSH_SEL_BY_HW   = 0x00, /* bus mode select by HW (SPI 3W disable) */
   LIS3DSH_SPI_3W      = 0x01, /* SDO / SDI share the same pin */
 } lis3dsh_bus_mode_t;
-int32_t lis3dsh_bus_mode_set(stmdev_ctx_t *ctx, lis3dsh_bus_mode_t *val);
-int32_t lis3dsh_bus_mode_get(stmdev_ctx_t *ctx, lis3dsh_bus_mode_t *val);
+int32_t lis3dsh_bus_mode_set(stmdev_ctx_t *ctx,
+                             lis3dsh_bus_mode_t *val);
+int32_t lis3dsh_bus_mode_get(stmdev_ctx_t *ctx,
+                             lis3dsh_bus_mode_t *val);
 
 typedef enum {
   LIS3DSH_DRV_RDY   = 0x00, /* Initialize the device for driver usage */
@@ -731,21 +737,23 @@ typedef enum {
 int32_t lis3dsh_init_set(stmdev_ctx_t *ctx, lis3dsh_init_t val);
 
 typedef struct {
-  uint8_t sw_reset           : 1; /* Restoring configuration registers */
+uint8_t sw_reset           :
+  1; /* Restoring configuration registers */
   uint8_t boot               : 1; /* Restoring calibration parameters */
   uint8_t drdy_xl            : 1; /* Accelerometer data ready */
   uint8_t ovrn_xl            : 1; /* Accelerometer data overrun */
 } lis3dsh_status_var_t;
-int32_t lis3dsh_status_get(stmdev_ctx_t *ctx, lis3dsh_status_var_t *val);
+int32_t lis3dsh_status_get(stmdev_ctx_t *ctx,
+                           lis3dsh_status_var_t *val);
 
 typedef struct {
   uint8_t active_low : 1; /* 1 = active low / 0 = active high */
   uint8_t latched    : 1; /* Signals 1 = latched / 0 = pulsed */
 } lis3dsh_int_mode_t;
 int32_t lis3dsh_interrupt_mode_set(stmdev_ctx_t *ctx,
-                                    lis3dsh_int_mode_t *val);
+                                   lis3dsh_int_mode_t *val);
 int32_t lis3dsh_interrupt_mode_get(stmdev_ctx_t *ctx,
-                                    lis3dsh_int_mode_t *val);
+                                   lis3dsh_int_mode_t *val);
 
 typedef struct {
   uint8_t drdy_xl       : 1; /* Accelerometer data ready. */
@@ -765,7 +773,7 @@ typedef struct {
   uint8_t fsm2          : 1; /* State machine 2 interrupt event */
   uint8_t boot          : 1; /* Restoring calibration parameters */
 } lis3dsh_pin_int2_route_t;
-int32_t lis3dsh_pin_int2_route_set(stmdev_ctx_t *ctx, 
+int32_t lis3dsh_pin_int2_route_set(stmdev_ctx_t *ctx,
                                    lis3dsh_pin_int2_route_t *val);
 int32_t lis3dsh_pin_int2_route_get(stmdev_ctx_t *ctx,
                                    lis3dsh_pin_int2_route_t *val);
@@ -774,7 +782,8 @@ typedef struct {
   uint8_t drdy_xl          : 1; /* Accelerometer data ready */
   uint8_t ovrn_xl          : 1; /* Accelerometer data overrun */
   uint8_t fsm_lc           : 1; /* long counter flag (for both SM) */
-  uint8_t fsm_ext_sync     : 1; /* Synchronization with ext-host requested */
+uint8_t fsm_ext_sync     :
+  1; /* Synchronization with ext-host requested */
   uint8_t fsm1_wait_fsm2   : 1; /* fsm1 wait fsm2 */
   uint8_t fsm2_wait_fsm1   : 1; /* fsm2 wait fsm1 */
   uint8_t fsm1             : 1; /* fsm 1 interrupt event */
@@ -815,11 +824,11 @@ typedef struct {
   struct {
     float mg[3];
     int16_t raw[3];
-  }xl;
+  } xl;
   struct {
     float deg_c;
     int8_t raw;
-  }heat;
+  } heat;
 } lis3dsh_data_t;
 int32_t lis3dsh_data_get(stmdev_ctx_t *ctx, lis3dsh_md_t *md,
                          lis3dsh_data_t *data);

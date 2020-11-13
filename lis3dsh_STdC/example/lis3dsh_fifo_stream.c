@@ -2,7 +2,7 @@
  ******************************************************************************
  * @file    fifo_stream.c
  * @author  Sensors Software Solution Team
- * @brief   This file shows how to extract data from the sensor in 
+ * @brief   This file shows how to extract data from the sensor in
  *          polling mode.
  *
  ******************************************************************************
@@ -123,7 +123,8 @@ static fifo_data_t fifo_data[32];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -144,52 +145,47 @@ void lis3dsh_fifo_stream(void)
   lis3dsh_id_t id;
   lis3dsh_md_t md;
   uint8_t i;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lis3dsh_id_get(&dev_ctx, &id);
+
   if (id.whoami != LIS3DSH_ID)
-    while(1);
+    while (1);
 
   /* Restore default configuration */
   lis3dsh_init_set(&dev_ctx, LIS3DSH_RESET);
+
   do {
     lis3dsh_status_get(&dev_ctx, &status);
   } while (status.sw_reset);
 
   /* Set bdu and if_inc recommended for driver usage */
   lis3dsh_init_set(&dev_ctx, LIS3DSH_DRV_RDY);
-  
   /* Select bus interface */
   bus_mode = LIS3DSH_SEL_BY_HW;
   lis3dsh_bus_mode_set(&dev_ctx, &bus_mode);
-
   /* FIFO configuration */
-  lis3dsh_read_reg(&dev_ctx, LIS3DSH_FIFO_CTRL, &reg.byte,1);
+  lis3dsh_read_reg(&dev_ctx, LIS3DSH_FIFO_CTRL, &reg.byte, 1);
   reg.fifo_ctrl.fmode = 0x02; /* FIFO stream mode */
-  lis3dsh_write_reg(&dev_ctx, LIS3DSH_FIFO_CTRL, &reg.byte,1);
-  lis3dsh_read_reg(&dev_ctx, LIS3DSH_CTRL_REG6, &reg.byte,1);
+  lis3dsh_write_reg(&dev_ctx, LIS3DSH_FIFO_CTRL, &reg.byte, 1);
+  lis3dsh_read_reg(&dev_ctx, LIS3DSH_CTRL_REG6, &reg.byte, 1);
   reg.ctrl_reg6.fifo_en = PROPERTY_ENABLE;
-  lis3dsh_write_reg(&dev_ctx, LIS3DSH_CTRL_REG6, &reg.byte,1);
-
+  lis3dsh_write_reg(&dev_ctx, LIS3DSH_CTRL_REG6, &reg.byte, 1);
   /* Configure interrupt pins */
   lis3dsh_interrupt_mode_get(&dev_ctx, &int_mode);
   int_mode.latched = PROPERTY_DISABLE;
   lis3dsh_interrupt_mode_set(&dev_ctx, &int_mode);
   lis3dsh_pin_int1_route_get(&dev_ctx, &int1_route);
-  int1_route.fifo_full   = PROPERTY_ENABLE; /* Enable hardware notification */
+  int1_route.fifo_full   =
+    PROPERTY_ENABLE; /* Enable hardware notification */
   lis3dsh_pin_int1_route_set(&dev_ctx, &int1_route);
-
   /* Set Output Data Rate */
   lis3dsh_mode_get(&dev_ctx, &md);
   md.fs =  LIS3DSH_4g;
@@ -197,25 +193,24 @@ void lis3dsh_fifo_stream(void)
   lis3dsh_mode_set(&dev_ctx, &md);
 
   /* Read samples in polling mode (no int). */
-  while(1)
-  {
+  while (1) {
     /* Read output only if new values are available */
     lis3dsh_all_sources_get(&dev_ctx, &all_sources);
-    if ( all_sources.fifo_full ) {
 
-      lis3dsh_read_reg(&dev_ctx, LIS3DSH_FIFO_SRC, &reg.byte,1);
+    if ( all_sources.fifo_full ) {
+      lis3dsh_read_reg(&dev_ctx, LIS3DSH_FIFO_SRC, &reg.byte, 1);
       lis3dsh_read_reg(&dev_ctx, LIS3DSH_OUT_X_L, &fifo_data[0].u8[0],
-                       reg.fifo_src.fss*6);
-      
+                       reg.fifo_src.fss * 6);
+
       /* print sensor data  */
       for (i = 0; i < reg.fifo_src.fss; i++) {
-        sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+        sprintf((char *)tx_buffer,
+                "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                 lis3dsh_from_fs4_to_mg(fifo_data[i].i16[0]),
                 lis3dsh_from_fs4_to_mg(fifo_data[i].i16[1]),
                 lis3dsh_from_fs4_to_mg(fifo_data[i].i16[2]));
-       tx_com(tx_buffer, strlen((char const*)tx_buffer));
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
       }
-      
     }
   }
 }
@@ -230,7 +225,8 @@ void lis3dsh_fifo_stream(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)

@@ -2,7 +2,7 @@
  ******************************************************************************
  * @file    read_data_polling.c
  * @author  Sensors Software Solution Team
- * @brief   This file shows how to extract data from the sensor in 
+ * @brief   This file shows how to extract data from the sensor in
  *          polling mode.
  *
  ******************************************************************************
@@ -119,7 +119,8 @@ static lis3dsh_data_t data;
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -137,61 +138,54 @@ void lis3dsh_read_data_polling(void)
   stmdev_ctx_t dev_ctx;
   lis3dsh_id_t id;
   lis3dsh_md_t md;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lis3dsh_id_get(&dev_ctx, &id);
+
   if (id.whoami != LIS3DSH_ID)
-    while(1);
+    while (1);
 
   /* Restore default configuration */
   lis3dsh_init_set(&dev_ctx, LIS3DSH_RESET);
+
   do {
     lis3dsh_status_get(&dev_ctx, &status);
   } while (status.sw_reset);
 
   /* Set bdu and if_inc recommended for driver usage */
   lis3dsh_init_set(&dev_ctx, LIS3DSH_DRV_RDY);
-  
   /* Select bus interface */
   bus_mode = LIS3DSH_SEL_BY_HW;
   lis3dsh_bus_mode_set(&dev_ctx, &bus_mode);
-  
   /* Set Output Data Rate */
   lis3dsh_mode_get(&dev_ctx, &md);
   md.fs =  LIS3DSH_4g;
   md.odr = LIS3DSH_25Hz;
   lis3dsh_mode_set(&dev_ctx, &md);
-
-  /* Configure inerrupt pins */
+  /* Configure interrupt pins */
   lis3dsh_pin_int1_route_get(&dev_ctx, &int1_route);
   int1_route.drdy_xl   = PROPERTY_DISABLE;
   lis3dsh_pin_int1_route_get(&dev_ctx, &int1_route);
 
   /* Read samples in polling mode (no int). */
-  while(1)
-  {
+  while (1) {
     /* Read output only if new values are available */
     lis3dsh_all_sources_get(&dev_ctx, &all_sources);
+
     if ( all_sources.drdy_xl ) {
-
       lis3dsh_data_get(&dev_ctx, &md, &data);
-
       /* print sensor data  */
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+      sprintf((char *)tx_buffer,
+              "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               data.xl.mg[0], data.xl.mg[1], data.xl.mg[2]);
-      tx_com(tx_buffer, strlen((char const*)tx_buffer));
-    
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -206,7 +200,8 @@ void lis3dsh_read_data_polling(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)

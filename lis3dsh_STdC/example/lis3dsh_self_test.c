@@ -125,7 +125,8 @@ static const float max_st_limit[] = {550.0f, 550.0f, 750.0f};
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -149,134 +150,134 @@ void lis3dsh_self_test(void)
   lis3dsh_id_t id;
   lis3dsh_md_t md;
   uint8_t i, j;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize self test results */
   st_result = ST_PASS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lis3dsh_id_get(&dev_ctx, &id);
+
   if (id.whoami != LIS3DSH_ID)
-    while(1);
+    while (1);
 
   /* Restore default configuration */
   lis3dsh_init_set(&dev_ctx, LIS3DSH_RESET);
+
   do {
     lis3dsh_status_get(&dev_ctx, &status);
   } while (status.sw_reset);
 
   /* Set bdu and if_inc recommended for driver usage */
   lis3dsh_init_set(&dev_ctx, LIS3DSH_DRV_RDY);
-  
   /* Select bus interface */
   bus_mode = LIS3DSH_SEL_BY_HW;
   lis3dsh_bus_mode_set(&dev_ctx, &bus_mode);
-
-
   /* Set Output Data Rate */
   lis3dsh_mode_get(&dev_ctx, &md);
   md.fs =  LIS3DSH_2g;
   md.odr = LIS3DSH_50Hz;
   lis3dsh_mode_set(&dev_ctx, &md);
-
   /* Wait stable output */
   platform_delay(WAIT_TIME);
 
   /* Check if new value available */
   do {
     lis3dsh_all_sources_get(&dev_ctx, &all_sources);
-  } while(!all_sources.drdy_xl);
+  } while (!all_sources.drdy_xl);
+
   /* Read dummy data and discard it */
   lis3dsh_data_get(&dev_ctx, &md, &data);
 
   /* Read samples and get the average vale for each axis */
-  for (i = 0; i < SAMPLES; i++){
+  for (i = 0; i < SAMPLES; i++) {
     /* Check if new value available */
     do {
       lis3dsh_all_sources_get(&dev_ctx, &all_sources);
-    } while(!all_sources.drdy_xl);
+    } while (!all_sources.drdy_xl);
+
     /* Read data and accumulate the mg value */
     lis3dsh_data_get(&dev_ctx, &md, &data);
-    for (j=0; j<3; j++){
+
+    for (j = 0; j < 3; j++) {
       maes_st_off[j] += data.xl.mg[j];
     }
   }
+
   /* Calculate the mg average values */
-  for (i=0; i<3; i++){
+  for (i = 0; i < 3; i++) {
     maes_st_off[i] /= SAMPLES;
   }
 
   /* Enable Self Test positive (or negative) */
   lis3dsh_self_test_set(&dev_ctx, LIS3DSH_ST_POSITIVE);
   //lis3dsh_self_test_set(&dev_ctx, LIS3DSH_ST_NEGATIVE);
-
   /* Wait stable output */
   platform_delay(WAIT_TIME);
 
   /* Check if new value available */
   do {
     lis3dsh_all_sources_get(&dev_ctx, &all_sources);
-  } while(!all_sources.drdy_xl);
+  } while (!all_sources.drdy_xl);
+
   /* Read dummy data and discard it */
   lis3dsh_data_get(&dev_ctx, &md, &data);
 
   /* Read samples and get the average vale for each axis */
-  for (i = 0; i < SAMPLES; i++){
+  for (i = 0; i < SAMPLES; i++) {
     /* Check if new value available */
     do {
       lis3dsh_all_sources_get(&dev_ctx, &all_sources);
-    } while(!all_sources.drdy_xl);
+    } while (!all_sources.drdy_xl);
+
     /* Read data and accumulate the mg value */
     lis3dsh_data_get(&dev_ctx, &md, &data);
-    for (j=0; j<3; j++){
+
+    for (j = 0; j < 3; j++) {
       maes_st_on[j] += data.xl.mg[j];
     }
   }
+
   /* Calculate the mg average values */
-  for (i=0; i<3; i++){
+  for (i = 0; i < 3; i++) {
     maes_st_on[i] /= SAMPLES;
   }
 
   /* Calculate the mg values for self test */
-  for (i=0; i<3; i++){
+  for (i = 0; i < 3; i++) {
     test_val[i] = fabs((maes_st_on[i] - maes_st_off[i]));
   }
 
-
   /* Check self test limit */
-  for (i=0; i<3; i++){
+  for (i = 0; i < 3; i++) {
     if (( min_st_limit[i] > test_val[i] ) ||
-        ( test_val[i] > max_st_limit[i])){
-        st_result = ST_FAIL;
+        ( test_val[i] > max_st_limit[i])) {
+      st_result = ST_FAIL;
     }
-    tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+    tx_com(tx_buffer, strlen((char const *)tx_buffer));
   }
 
   /* Disable Self Test */
   lis3dsh_self_test_set(&dev_ctx, LIS3DSH_ST_DISABLE);
-
   md.odr = LIS3DSH_OFF;
   lis3dsh_mode_set(&dev_ctx, &md);
 
   /* Print self test result */
   if (st_result == ST_PASS) {
-    sprintf((char*)tx_buffer, "Self Test - PASS\r\n" );
+    sprintf((char *)tx_buffer, "Self Test - PASS\r\n" );
   }
-  else {
-    sprintf((char*)tx_buffer, "Self Test - FAIL\r\n" );
-  }
-  tx_com(tx_buffer, strlen((char const*)tx_buffer));
 
+  else {
+    sprintf((char *)tx_buffer, "Self Test - FAIL\r\n" );
+  }
+
+  tx_com(tx_buffer, strlen((char const *)tx_buffer));
 }
 
 /*
@@ -289,7 +290,8 @@ void lis3dsh_self_test(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
