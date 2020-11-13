@@ -45,7 +45,7 @@
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t hts221_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t *data,
                         uint16_t len)
 {
   int32_t ret;
@@ -63,7 +63,8 @@ int32_t hts221_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t hts221_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                         uint8_t *data,
                          uint16_t len)
 {
   int32_t ret;
@@ -95,12 +96,11 @@ int32_t hts221_humidity_avg_set(stmdev_ctx_t *ctx, hts221_avgh_t val)
 {
   hts221_av_conf_t reg;
   int32_t ret;
+  ret = hts221_read_reg(ctx, HTS221_AV_CONF, (uint8_t *) &reg, 1);
 
-  ret = hts221_read_reg(ctx, HTS221_AV_CONF, (uint8_t*) &reg, 1);
-
-  if(ret == 0){
+  if (ret == 0) {
     reg.avgh = (uint8_t)val;
-    ret = hts221_write_reg(ctx, HTS221_AV_CONF, (uint8_t*) &reg, 1);
+    ret = hts221_write_reg(ctx, HTS221_AV_CONF, (uint8_t *) &reg, 1);
   }
 
   return ret;
@@ -118,34 +118,41 @@ int32_t hts221_humidity_avg_get(stmdev_ctx_t *ctx, hts221_avgh_t *val)
 {
   hts221_av_conf_t reg;
   int32_t ret;
-
-  ret = hts221_read_reg(ctx, HTS221_AV_CONF, (uint8_t*) &reg, 1);
+  ret = hts221_read_reg(ctx, HTS221_AV_CONF, (uint8_t *) &reg, 1);
 
   switch (reg.avgh) {
     case HTS221_H_AVG_4:
       *val = HTS221_H_AVG_4;
       break;
+
     case HTS221_H_AVG_8:
       *val = HTS221_H_AVG_8;
       break;
+
     case HTS221_H_AVG_16:
       *val = HTS221_H_AVG_16;
       break;
+
     case HTS221_H_AVG_32:
       *val = HTS221_H_AVG_32;
       break;
+
     case HTS221_H_AVG_64:
       *val = HTS221_H_AVG_64;
       break;
+
     case HTS221_H_AVG_128:
       *val = HTS221_H_AVG_128;
       break;
+
     case HTS221_H_AVG_256:
       *val = HTS221_H_AVG_256;
       break;
+
     case HTS221_H_AVG_512:
       *val = HTS221_H_AVG_512;
       break;
+
     default:
       *val = HTS221_H_AVG_ND;
       break;
@@ -162,16 +169,16 @@ int32_t hts221_humidity_avg_get(stmdev_ctx_t *ctx, hts221_avgh_t *val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_temperature_avg_set(stmdev_ctx_t *ctx, hts221_avgt_t val)
+int32_t hts221_temperature_avg_set(stmdev_ctx_t *ctx,
+                                   hts221_avgt_t val)
 {
   hts221_av_conf_t reg;
   int32_t ret;
+  ret = hts221_read_reg(ctx, HTS221_AV_CONF, (uint8_t *) &reg, 1);
 
-  ret = hts221_read_reg(ctx, HTS221_AV_CONF, (uint8_t*) &reg, 1);
-
-  if(ret == 0){
+  if (ret == 0) {
     reg.avgt = (uint8_t)val;
-    ret = hts221_write_reg(ctx, HTS221_AV_CONF, (uint8_t*) &reg, 1);
+    ret = hts221_write_reg(ctx, HTS221_AV_CONF, (uint8_t *) &reg, 1);
   }
 
   return ret;
@@ -185,38 +192,46 @@ int32_t hts221_temperature_avg_set(stmdev_ctx_t *ctx, hts221_avgt_t val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_temperature_avg_get(stmdev_ctx_t *ctx, hts221_avgt_t *val)
+int32_t hts221_temperature_avg_get(stmdev_ctx_t *ctx,
+                                   hts221_avgt_t *val)
 {
   hts221_av_conf_t reg;
   int32_t ret;
-
-  ret = hts221_read_reg(ctx, HTS221_AV_CONF, (uint8_t*) &reg, 1);
+  ret = hts221_read_reg(ctx, HTS221_AV_CONF, (uint8_t *) &reg, 1);
 
   switch (reg.avgh) {
     case HTS221_T_AVG_2:
       *val = HTS221_T_AVG_2;
       break;
+
     case HTS221_T_AVG_4:
       *val = HTS221_T_AVG_4;
       break;
+
     case HTS221_T_AVG_8:
       *val = HTS221_T_AVG_8;
       break;
+
     case HTS221_T_AVG_16:
       *val = HTS221_T_AVG_16;
       break;
+
     case HTS221_T_AVG_32:
       *val = HTS221_T_AVG_32;
       break;
+
     case HTS221_T_AVG_64:
       *val = HTS221_T_AVG_64;
       break;
+
     case HTS221_T_AVG_128:
       *val = HTS221_T_AVG_128;
       break;
+
     case HTS221_T_AVG_256:
       *val = HTS221_T_AVG_256;
       break;
+
     default:
       *val = HTS221_T_AVG_ND;
       break;
@@ -237,12 +252,11 @@ int32_t hts221_data_rate_set(stmdev_ctx_t *ctx, hts221_odr_t val)
 {
   hts221_ctrl_reg1_t reg;
   int32_t ret;
+  ret = hts221_read_reg(ctx, HTS221_CTRL_REG1, (uint8_t *) &reg, 1);
 
-  ret = hts221_read_reg(ctx, HTS221_CTRL_REG1, (uint8_t*) &reg, 1);
-
-  if(ret == 0){
+  if (ret == 0) {
     reg.odr = (uint8_t)val;
-    ret = hts221_write_reg(ctx, HTS221_CTRL_REG1, (uint8_t*) &reg, 1);
+    ret = hts221_write_reg(ctx, HTS221_CTRL_REG1, (uint8_t *) &reg, 1);
   }
 
   return ret;
@@ -260,22 +274,25 @@ int32_t hts221_data_rate_get(stmdev_ctx_t *ctx, hts221_odr_t *val)
 {
   hts221_ctrl_reg1_t reg;
   int32_t ret;
-
-  ret = hts221_read_reg(ctx, HTS221_CTRL_REG1, (uint8_t*) &reg, 1);
+  ret = hts221_read_reg(ctx, HTS221_CTRL_REG1, (uint8_t *) &reg, 1);
 
   switch (reg.odr) {
     case HTS221_ONE_SHOT:
       *val = HTS221_ONE_SHOT;
       break;
+
     case HTS221_ODR_1Hz:
       *val = HTS221_ODR_1Hz;
       break;
+
     case HTS221_ODR_7Hz:
       *val = HTS221_ODR_7Hz;
       break;
+
     case HTS221_ODR_12Hz5:
       *val = HTS221_ODR_12Hz5;
       break;
+
     default:
       *val = HTS221_ODR_ND;
       break;
@@ -296,12 +313,11 @@ int32_t hts221_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   hts221_ctrl_reg1_t reg;
   int32_t ret;
+  ret = hts221_read_reg(ctx, HTS221_CTRL_REG1, (uint8_t *) &reg, 1);
 
-  ret = hts221_read_reg(ctx, HTS221_CTRL_REG1, (uint8_t*) &reg, 1);
-
-  if(ret == 0){
+  if (ret == 0) {
     reg.bdu = val;
-    ret = hts221_write_reg(ctx, HTS221_CTRL_REG1, (uint8_t*) &reg, 1);
+    ret = hts221_write_reg(ctx, HTS221_CTRL_REG1, (uint8_t *) &reg, 1);
   }
 
   return ret;
@@ -319,10 +335,8 @@ int32_t hts221_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   hts221_ctrl_reg1_t reg;
   int32_t ret;
-
-  ret = hts221_read_reg(ctx, HTS221_CTRL_REG1, (uint8_t*) &reg, 1);
+  ret = hts221_read_reg(ctx, HTS221_CTRL_REG1, (uint8_t *) &reg, 1);
   *val = reg.bdu;
-
   return ret;
 }
 
@@ -338,12 +352,11 @@ int32_t hts221_one_shoot_trigger_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   hts221_ctrl_reg2_t reg;
   int32_t ret;
+  ret = hts221_read_reg(ctx, HTS221_CTRL_REG2, (uint8_t *) &reg, 1);
 
-  ret = hts221_read_reg(ctx, HTS221_CTRL_REG2, (uint8_t*) &reg, 1);
-
-  if(ret == 0){
+  if (ret == 0) {
     reg.one_shot = val;
-    ret = hts221_write_reg(ctx, HTS221_CTRL_REG2, (uint8_t*) &reg, 1);
+    ret = hts221_write_reg(ctx, HTS221_CTRL_REG2, (uint8_t *) &reg, 1);
   }
 
   return ret;
@@ -361,10 +374,8 @@ int32_t hts221_one_shoot_trigger_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   hts221_ctrl_reg2_t reg;
   int32_t ret;
-
-  ret = hts221_read_reg(ctx, HTS221_CTRL_REG2, (uint8_t*) &reg, 1);
+  ret = hts221_read_reg(ctx, HTS221_CTRL_REG2, (uint8_t *) &reg, 1);
   *val = reg.one_shot;
-
   return ret;
 }
 
@@ -380,10 +391,8 @@ int32_t hts221_temp_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   hts221_status_reg_t reg;
   int32_t ret;
-
-  ret = hts221_read_reg(ctx, HTS221_STATUS_REG, (uint8_t*) &reg, 1);
+  ret = hts221_read_reg(ctx, HTS221_STATUS_REG, (uint8_t *) &reg, 1);
   *val = reg.t_da;
-
   return ret;
 }
 
@@ -399,10 +408,8 @@ int32_t hts221_hum_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   hts221_status_reg_t reg;
   int32_t ret;
-
-  ret = hts221_read_reg(ctx, HTS221_STATUS_REG, (uint8_t*) &reg, 1);
+  ret = hts221_read_reg(ctx, HTS221_STATUS_REG, (uint8_t *) &reg, 1);
   *val = reg.h_da;
-
   return ret;
 }
 
@@ -418,11 +425,9 @@ int32_t hts221_humidity_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
   uint8_t buff[2];
   int32_t ret;
-
   ret = hts221_read_reg(ctx, HTS221_HUMIDITY_OUT_L, buff, 2);
   *val = (int16_t)buff[1];
   *val = (*val * 256) +  (int16_t)buff[0];
-
   return ret;
 }
 
@@ -438,11 +443,9 @@ int32_t hts221_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
   uint8_t buff[2];
   int32_t ret;
-
   ret = hts221_read_reg(ctx, HTS221_TEMP_OUT_L, buff, 2);
   *val = (int16_t)buff[1];
   *val = (*val * 256) +  (int16_t)buff[0];
-
   return ret;
 }
 
@@ -453,7 +456,7 @@ int32_t hts221_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 
 /**
   * @defgroup  HTS221_common
-  * @brief     This section group common usefull functions
+  * @brief     This section group common useful functions
   * @{
   *
   */
@@ -485,13 +488,13 @@ int32_t hts221_power_on_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   hts221_ctrl_reg1_t reg;
   int32_t ret;
+  ret = hts221_read_reg(ctx, HTS221_CTRL_REG1, (uint8_t *) &reg, 1);
 
-  ret = hts221_read_reg(ctx, HTS221_CTRL_REG1, (uint8_t*) &reg, 1);
-
-  if(ret == 0){
+  if (ret == 0) {
     reg.pd = val;
-    ret = hts221_write_reg(ctx, HTS221_CTRL_REG1, (uint8_t*) &reg, 1);
+    ret = hts221_write_reg(ctx, HTS221_CTRL_REG1, (uint8_t *) &reg, 1);
   }
+
   return ret;
 }
 
@@ -507,10 +510,9 @@ int32_t hts221_power_on_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   hts221_ctrl_reg1_t reg;
   int32_t mm_error;
-
-  mm_error = hts221_read_reg(ctx, HTS221_CTRL_REG1, (uint8_t*) &reg, 1);
+  mm_error = hts221_read_reg(ctx, HTS221_CTRL_REG1, (uint8_t *) &reg,
+                             1);
   *val = reg.pd;
-
   return mm_error;
 }
 
@@ -526,12 +528,11 @@ int32_t hts221_heater_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   hts221_ctrl_reg2_t reg;
   int32_t ret;
+  ret = hts221_read_reg(ctx, HTS221_CTRL_REG2, (uint8_t *) &reg, 1);
 
-  ret = hts221_read_reg(ctx, HTS221_CTRL_REG2, (uint8_t*) &reg, 1);
-
-  if(ret == 0){
+  if (ret == 0) {
     reg.heater = val;
-    ret = hts221_write_reg(ctx, HTS221_CTRL_REG2, (uint8_t*) &reg, 1);
+    ret = hts221_write_reg(ctx, HTS221_CTRL_REG2, (uint8_t *) &reg, 1);
   }
 
   return ret;
@@ -549,10 +550,8 @@ int32_t hts221_heater_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   hts221_ctrl_reg2_t reg;
   int32_t ret;
-
-  ret = hts221_read_reg(ctx, HTS221_CTRL_REG2, (uint8_t*) &reg, 1);
+  ret = hts221_read_reg(ctx, HTS221_CTRL_REG2, (uint8_t *) &reg, 1);
   *val = reg.heater;
-
   return ret;
 }
 
@@ -568,12 +567,11 @@ int32_t hts221_boot_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   hts221_ctrl_reg2_t reg;
   int32_t ret;
+  ret = hts221_read_reg(ctx, HTS221_CTRL_REG2, (uint8_t *) &reg, 1);
 
-  ret = hts221_read_reg(ctx, HTS221_CTRL_REG2, (uint8_t*) &reg, 1);
-
-  if(ret == 0){
+  if (ret == 0) {
     reg.boot = val;
-    ret = hts221_write_reg(ctx, HTS221_CTRL_REG2, (uint8_t*) &reg, 1);
+    ret = hts221_write_reg(ctx, HTS221_CTRL_REG2, (uint8_t *) &reg, 1);
   }
 
   return ret;
@@ -591,10 +589,8 @@ int32_t hts221_boot_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   hts221_ctrl_reg2_t reg;
   int32_t ret;
-
-  ret = hts221_read_reg(ctx, HTS221_CTRL_REG2, (uint8_t*) &reg, 1);
+  ret = hts221_read_reg(ctx, HTS221_CTRL_REG2, (uint8_t *) &reg, 1);
   *val = reg.boot;
-
   return ret;
 }
 
@@ -609,7 +605,7 @@ int32_t hts221_boot_get(stmdev_ctx_t *ctx, uint8_t *val)
 int32_t hts221_status_get(stmdev_ctx_t *ctx, hts221_status_reg_t *val)
 {
   int32_t ret;
-  ret = hts221_read_reg(ctx, HTS221_STATUS_REG, (uint8_t*) val, 1);
+  ret = hts221_read_reg(ctx, HTS221_STATUS_REG, (uint8_t *) val, 1);
   return ret;
 }
 
@@ -637,12 +633,11 @@ int32_t hts221_drdy_on_int_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   hts221_ctrl_reg3_t reg;
   int32_t ret;
+  ret = hts221_read_reg(ctx, HTS221_CTRL_REG3, (uint8_t *) &reg, 1);
 
-  ret = hts221_read_reg(ctx, HTS221_CTRL_REG3, (uint8_t*) &reg, 1);
-
-  if(ret == 0){
+  if (ret == 0) {
     reg.drdy = val;
-    ret = hts221_write_reg(ctx, HTS221_CTRL_REG3, (uint8_t*) &reg, 1);
+    ret = hts221_write_reg(ctx, HTS221_CTRL_REG3, (uint8_t *) &reg, 1);
   }
 
   return ret;
@@ -660,10 +655,8 @@ int32_t hts221_drdy_on_int_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   hts221_ctrl_reg3_t reg;
   int32_t ret;
-
-  ret = hts221_read_reg(ctx, HTS221_CTRL_REG3, (uint8_t*) &reg, 1);
+  ret = hts221_read_reg(ctx, HTS221_CTRL_REG3, (uint8_t *) &reg, 1);
   *val = reg.drdy;
-
   return ret;
 }
 
@@ -678,12 +671,11 @@ int32_t hts221_pin_mode_set(stmdev_ctx_t *ctx, hts221_pp_od_t val)
 {
   hts221_ctrl_reg3_t reg;
   int32_t ret;
+  ret = hts221_read_reg(ctx, HTS221_CTRL_REG3, (uint8_t *) &reg, 1);
 
-  ret = hts221_read_reg(ctx, HTS221_CTRL_REG3, (uint8_t*) &reg, 1);
-
-  if(ret == 0){
+  if (ret == 0) {
     reg.pp_od = (uint8_t)val;
-    ret = hts221_write_reg(ctx, HTS221_CTRL_REG3, (uint8_t*) &reg, 1);
+    ret = hts221_write_reg(ctx, HTS221_CTRL_REG3, (uint8_t *) &reg, 1);
   }
 
   return ret;
@@ -701,16 +693,17 @@ int32_t hts221_pin_mode_get(stmdev_ctx_t *ctx, hts221_pp_od_t *val)
 {
   hts221_ctrl_reg3_t reg;
   int32_t ret;
-
-  ret = hts221_read_reg(ctx, HTS221_CTRL_REG3, (uint8_t*) &reg, 1);
+  ret = hts221_read_reg(ctx, HTS221_CTRL_REG3, (uint8_t *) &reg, 1);
 
   switch (reg.pp_od) {
     case HTS221_PUSH_PULL:
       *val = HTS221_PUSH_PULL;
       break;
+
     case HTS221_OPEN_DRAIN:
       *val = HTS221_OPEN_DRAIN;
       break;
+
     default:
       *val = HTS221_PIN_MODE_ND;
       break;
@@ -727,16 +720,16 @@ int32_t hts221_pin_mode_get(stmdev_ctx_t *ctx, hts221_pp_od_t *val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_int_polarity_set(stmdev_ctx_t *ctx, hts221_drdy_h_l_t val)
+int32_t hts221_int_polarity_set(stmdev_ctx_t *ctx,
+                                hts221_drdy_h_l_t val)
 {
   hts221_ctrl_reg3_t reg;
   int32_t ret;
+  ret = hts221_read_reg(ctx, HTS221_CTRL_REG3, (uint8_t *) &reg, 1);
 
-  ret = hts221_read_reg(ctx, HTS221_CTRL_REG3, (uint8_t*) &reg, 1);
-
-  if(ret == 0){
+  if (ret == 0) {
     reg.drdy_h_l = (uint8_t)val;
-    ret = hts221_write_reg(ctx, HTS221_CTRL_REG3, (uint8_t*) &reg, 1);
+    ret = hts221_write_reg(ctx, HTS221_CTRL_REG3, (uint8_t *) &reg, 1);
   }
 
   return ret;
@@ -750,20 +743,22 @@ int32_t hts221_int_polarity_set(stmdev_ctx_t *ctx, hts221_drdy_h_l_t val)
   * @retval         interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t hts221_int_polarity_get(stmdev_ctx_t *ctx, hts221_drdy_h_l_t *val)
+int32_t hts221_int_polarity_get(stmdev_ctx_t *ctx,
+                                hts221_drdy_h_l_t *val)
 {
   hts221_ctrl_reg3_t reg;
   int32_t ret;
-
-  ret = hts221_read_reg(ctx, HTS221_CTRL_REG3, (uint8_t*) &reg, 1);
+  ret = hts221_read_reg(ctx, HTS221_CTRL_REG3, (uint8_t *) &reg, 1);
 
   switch (reg.drdy_h_l) {
     case HTS221_ACTIVE_HIGH:
       *val = HTS221_ACTIVE_HIGH;
       break;
+
     case HTS221_ACTIVE_LOW:
       *val = HTS221_ACTIVE_LOW;
       break;
+
     default:
       *val = HTS221_ACTIVE_ND;
       break;
@@ -797,10 +792,8 @@ int32_t hts221_hum_rh_point_0_get(stmdev_ctx_t *ctx, float_t *val)
 {
   uint8_t coeff;
   int32_t ret;
-
   ret = hts221_read_reg(ctx, HTS221_H0_RH_X2, &coeff, 1);
   *val = coeff / 2.0f;
-
   return ret;
 }
 
@@ -816,10 +809,8 @@ int32_t hts221_hum_rh_point_1_get(stmdev_ctx_t *ctx, float_t *val)
 {
   uint8_t coeff;
   int32_t ret;
-
   ret = hts221_read_reg(ctx, HTS221_H1_RH_X2, &coeff, 1);
   *val = coeff / 2.0f;
-
   return ret;
 }
 
@@ -836,11 +827,10 @@ int32_t hts221_temp_deg_point_0_get(stmdev_ctx_t *ctx, float_t *val)
   hts221_t1_t0_msb_t reg;
   uint8_t coeff_h, coeff_l;
   int32_t ret;
-
   ret = hts221_read_reg(ctx, HTS221_T0_DEGC_X8, &coeff_l, 1);
 
-  if(ret == 0){
-    ret = hts221_read_reg(ctx, HTS221_T1_T0_MSB, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    ret = hts221_read_reg(ctx, HTS221_T1_T0_MSB, (uint8_t *) &reg, 1);
     coeff_h = reg.t0_msb;
     *val = ((coeff_h * 256) + coeff_l) / 8.0f;
   }
@@ -861,11 +851,10 @@ int32_t hts221_temp_deg_point_1_get(stmdev_ctx_t *ctx, float_t *val)
   hts221_t1_t0_msb_t reg;
   uint8_t coeff_h, coeff_l;
   int32_t ret;
-
   ret = hts221_read_reg(ctx, HTS221_T1_DEGC_X8, &coeff_l, 1);
 
-  if(ret == 0){
-    ret = hts221_read_reg(ctx, HTS221_T1_T0_MSB, (uint8_t*) &reg, 1);
+  if (ret == 0) {
+    ret = hts221_read_reg(ctx, HTS221_T1_T0_MSB, (uint8_t *) &reg, 1);
     coeff_h = reg.t1_msb;
     *val = ((coeff_h * 256) + coeff_l) / 8.0f;
   }

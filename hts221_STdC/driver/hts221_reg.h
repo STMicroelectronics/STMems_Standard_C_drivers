@@ -23,7 +23,7 @@
 #define HTS221_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -74,7 +74,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
@@ -107,8 +107,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -131,7 +133,7 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-  *              You can create a sensor configuration by your own or using 
+  *              You can create a sensor configuration by your own or using
   *              Unico / Unicleo tools available on STMicroelectronics
   *              web site.
   *
@@ -288,7 +290,7 @@ typedef struct {
   * @{
   *
   */
-typedef union{
+typedef union {
   hts221_av_conf_t        av_conf;
   hts221_ctrl_reg1_t      ctrl_reg1;
   hts221_ctrl_reg2_t      ctrl_reg2;
@@ -304,9 +306,10 @@ typedef union{
   *
   */
 
-int32_t hts221_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t hts221_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t *data,
                         uint16_t len);
-int32_t hts221_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t hts221_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                         uint8_t *data,
                          uint16_t len);
 
 typedef enum {
@@ -321,7 +324,8 @@ typedef enum {
   HTS221_H_AVG_ND   = 8,
 } hts221_avgh_t;
 int32_t hts221_humidity_avg_set(stmdev_ctx_t *ctx, hts221_avgh_t val);
-int32_t hts221_humidity_avg_get(stmdev_ctx_t *ctx, hts221_avgh_t *val);
+int32_t hts221_humidity_avg_get(stmdev_ctx_t *ctx,
+                                hts221_avgh_t *val);
 
 typedef enum {
   HTS221_T_AVG_2   = 0,
@@ -334,8 +338,10 @@ typedef enum {
   HTS221_T_AVG_256 = 7,
   HTS221_T_AVG_ND  = 8,
 } hts221_avgt_t;
-int32_t hts221_temperature_avg_set(stmdev_ctx_t *ctx, hts221_avgt_t val);
-int32_t hts221_temperature_avg_get(stmdev_ctx_t *ctx, hts221_avgt_t *val);
+int32_t hts221_temperature_avg_set(stmdev_ctx_t *ctx,
+                                   hts221_avgt_t val);
+int32_t hts221_temperature_avg_get(stmdev_ctx_t *ctx,
+                                   hts221_avgt_t *val);
 
 typedef enum {
   HTS221_ONE_SHOT  = 0,
@@ -373,7 +379,8 @@ int32_t hts221_heater_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t hts221_boot_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t hts221_boot_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t hts221_status_get(stmdev_ctx_t *ctx, hts221_status_reg_t *val);
+int32_t hts221_status_get(stmdev_ctx_t *ctx,
+                          hts221_status_reg_t *val);
 
 int32_t hts221_drdy_on_int_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t hts221_drdy_on_int_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -391,8 +398,10 @@ typedef enum {
   HTS221_ACTIVE_LOW  = 1,
   HTS221_ACTIVE_ND   = 2,
 } hts221_drdy_h_l_t;
-int32_t hts221_int_polarity_set(stmdev_ctx_t *ctx, hts221_drdy_h_l_t val);
-int32_t hts221_int_polarity_get(stmdev_ctx_t *ctx, hts221_drdy_h_l_t *val);
+int32_t hts221_int_polarity_set(stmdev_ctx_t *ctx,
+                                hts221_drdy_h_l_t val);
+int32_t hts221_int_polarity_get(stmdev_ctx_t *ctx,
+                                hts221_drdy_h_l_t *val);
 
 int32_t hts221_hum_rh_point_0_get(stmdev_ctx_t *ctx, float_t *val);
 int32_t hts221_hum_rh_point_1_get(stmdev_ctx_t *ctx, float_t *val);
