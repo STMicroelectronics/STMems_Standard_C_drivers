@@ -23,7 +23,7 @@
 #define AIS328DQ_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -74,7 +74,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
@@ -107,8 +107,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -131,7 +133,7 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-  *              You can create a sensor configuration by your own or using 
+  *              You can create a sensor configuration by your own or using
   *              Unico / Unicleo tools available on STMicroelectronics
   *              web site.
   *
@@ -458,7 +460,7 @@ typedef struct {
   * @{
   *
   */
-typedef union{
+typedef union {
   ais328dq_ctrl_reg1_t                     ctrl_reg1;
   ais328dq_ctrl_reg2_t                     ctrl_reg2;
   ais328dq_ctrl_reg3_t                     ctrl_reg3;
@@ -482,10 +484,12 @@ typedef union{
   *
   */
 
-int32_t ais328dq_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t ais328dq_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
+                          uint16_t len);
+int32_t ais328dq_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                           uint8_t *data,
                            uint16_t len);
-int32_t ais328dq_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
-                            uint16_t len);
 
 float_t ais328dq_from_fs2_to_mg(int16_t lsb);
 float_t ais328dq_from_fs4_to_mg(int16_t lsb);
@@ -520,9 +524,9 @@ typedef enum {
   AIS328DQ_REF_MODE_ENABLE  = 1,
 } ais328dq_hpm_t;
 int32_t ais328dq_reference_mode_set(stmdev_ctx_t *ctx,
-                                     ais328dq_hpm_t val);
+                                    ais328dq_hpm_t val);
 int32_t ais328dq_reference_mode_get(stmdev_ctx_t *ctx,
-                                     ais328dq_hpm_t *val);
+                                    ais328dq_hpm_t *val);
 
 typedef enum {
   AIS328DQ_2g  = 0,
@@ -530,18 +534,22 @@ typedef enum {
   AIS328DQ_8g  = 3,
 } ais328dq_fs_t;
 int32_t ais328dq_full_scale_set(stmdev_ctx_t *ctx, ais328dq_fs_t val);
-int32_t ais328dq_full_scale_get(stmdev_ctx_t *ctx, ais328dq_fs_t *val);
+int32_t ais328dq_full_scale_get(stmdev_ctx_t *ctx,
+                                ais328dq_fs_t *val);
 
-int32_t ais328dq_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ais328dq_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ais328dq_block_data_update_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t ais328dq_block_data_update_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 int32_t ais328dq_status_reg_get(stmdev_ctx_t *ctx,
-                                 ais328dq_status_reg_t *val);
+                                ais328dq_status_reg_t *val);
 
 int32_t ais328dq_flag_data_ready_get(stmdev_ctx_t *ctx,
-                                      uint8_t *val);
+                                     uint8_t *val);
 
-int32_t ais328dq_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val);
+int32_t ais328dq_acceleration_raw_get(stmdev_ctx_t *ctx,
+                                      int16_t *val);
 
 int32_t ais328dq_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
@@ -560,8 +568,10 @@ typedef enum {
   AIS328DQ_LSB_AT_LOW_ADD  = 0,
   AIS328DQ_MSB_AT_LOW_ADD  = 1,
 } ais328dq_ble_t;
-int32_t ais328dq_data_format_set(stmdev_ctx_t *ctx, ais328dq_ble_t val);
-int32_t ais328dq_data_format_get(stmdev_ctx_t *ctx, ais328dq_ble_t *val);
+int32_t ais328dq_data_format_set(stmdev_ctx_t *ctx,
+                                 ais328dq_ble_t val);
+int32_t ais328dq_data_format_get(stmdev_ctx_t *ctx,
+                                 ais328dq_ble_t *val);
 
 typedef enum {
   AIS328DQ_CUT_OFF_8Hz   = 0,
@@ -570,9 +580,9 @@ typedef enum {
   AIS328DQ_CUT_OFF_64Hz  = 3,
 } ais328dq_hpcf_t;
 int32_t ais328dq_hp_bandwidth_set(stmdev_ctx_t *ctx,
-                                   ais328dq_hpcf_t val);
+                                  ais328dq_hpcf_t val);
 int32_t ais328dq_hp_bandwidth_get(stmdev_ctx_t *ctx,
-                                   ais328dq_hpcf_t *val);
+                                  ais328dq_hpcf_t *val);
 
 typedef enum {
   AIS328DQ_HP_DISABLE            = 0,
@@ -589,8 +599,10 @@ int32_t ais328dq_hp_path_get(stmdev_ctx_t *ctx, ais328dq_hpen_t *val);
 
 int32_t ais328dq_hp_reset_get(stmdev_ctx_t *ctx);
 
-int32_t ais328dq_hp_reference_value_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ais328dq_hp_reference_value_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ais328dq_hp_reference_value_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t ais328dq_hp_reference_value_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 typedef enum {
   AIS328DQ_SPI_4_WIRE  = 0,
@@ -606,18 +618,18 @@ typedef enum {
   AIS328DQ_PAD1_BOOT               = 3,
 } ais328dq_i1_cfg_t;
 int32_t ais328dq_pin_int1_route_set(stmdev_ctx_t *ctx,
-                                     ais328dq_i1_cfg_t val);
+                                    ais328dq_i1_cfg_t val);
 int32_t ais328dq_pin_int1_route_get(stmdev_ctx_t *ctx,
-                                     ais328dq_i1_cfg_t *val);
+                                    ais328dq_i1_cfg_t *val);
 
 typedef enum {
   AIS328DQ_INT1_PULSED   = 0,
   AIS328DQ_INT1_LATCHED  = 1,
 } ais328dq_lir1_t;
 int32_t ais328dq_int1_notification_set(stmdev_ctx_t *ctx,
-                                        ais328dq_lir1_t val);
+                                       ais328dq_lir1_t val);
 int32_t ais328dq_int1_notification_get(stmdev_ctx_t *ctx,
-                                        ais328dq_lir1_t *val);
+                                       ais328dq_lir1_t *val);
 
 typedef enum {
   AIS328DQ_PAD2_INT2_SRC           = 0,
@@ -626,34 +638,36 @@ typedef enum {
   AIS328DQ_PAD2_BOOT               = 3,
 } ais328dq_i2_cfg_t;
 int32_t ais328dq_pin_int2_route_set(stmdev_ctx_t *ctx,
-                                     ais328dq_i2_cfg_t val);
+                                    ais328dq_i2_cfg_t val);
 int32_t ais328dq_pin_int2_route_get(stmdev_ctx_t *ctx,
-                                     ais328dq_i2_cfg_t *val);
+                                    ais328dq_i2_cfg_t *val);
 
 typedef enum {
   AIS328DQ_INT2_PULSED   = 0,
   AIS328DQ_INT2_LATCHED  = 1,
 } ais328dq_lir2_t;
 int32_t ais328dq_int2_notification_set(stmdev_ctx_t *ctx,
-                                        ais328dq_lir2_t val);
+                                       ais328dq_lir2_t val);
 int32_t ais328dq_int2_notification_get(stmdev_ctx_t *ctx,
-                                        ais328dq_lir2_t *val);
+                                       ais328dq_lir2_t *val);
 
 typedef enum {
   AIS328DQ_PUSH_PULL   = 0,
   AIS328DQ_OPEN_DRAIN  = 1,
 } ais328dq_pp_od_t;
-int32_t ais328dq_pin_mode_set(stmdev_ctx_t *ctx, ais328dq_pp_od_t val);
-int32_t ais328dq_pin_mode_get(stmdev_ctx_t *ctx, ais328dq_pp_od_t *val);
+int32_t ais328dq_pin_mode_set(stmdev_ctx_t *ctx,
+                              ais328dq_pp_od_t val);
+int32_t ais328dq_pin_mode_get(stmdev_ctx_t *ctx,
+                              ais328dq_pp_od_t *val);
 
 typedef enum {
   AIS328DQ_ACTIVE_HIGH  = 0,
   AIS328DQ_ACTIVE_LOW   = 1,
 } ais328dq_ihl_t;
 int32_t ais328dq_pin_polarity_set(stmdev_ctx_t *ctx,
-                                   ais328dq_ihl_t val);
+                                  ais328dq_ihl_t val);
 int32_t ais328dq_pin_polarity_get(stmdev_ctx_t *ctx,
-                                   ais328dq_ihl_t *val);
+                                  ais328dq_ihl_t *val);
 
 typedef struct {
   uint8_t int1_xlie             : 1;
@@ -664,21 +678,21 @@ typedef struct {
   uint8_t int1_zhie             : 1;
 } ais328dq_int1_on_th_conf_t;
 int32_t ais328dq_int1_on_threshold_conf_set(stmdev_ctx_t *ctx,
-                                             ais328dq_int1_on_th_conf_t val);
+                                            ais328dq_int1_on_th_conf_t val);
 int32_t ais328dq_int1_on_threshold_conf_get(stmdev_ctx_t *ctx,
-                                             ais328dq_int1_on_th_conf_t *val);
+                                            ais328dq_int1_on_th_conf_t *val);
 
 typedef enum {
   AIS328DQ_INT1_ON_THRESHOLD_OR   = 0,
   AIS328DQ_INT1_ON_THRESHOLD_AND  = 1,
 } ais328dq_int1_aoi_t;
 int32_t ais328dq_int1_on_threshold_mode_set(stmdev_ctx_t *ctx,
-                                             ais328dq_int1_aoi_t val);
+                                            ais328dq_int1_aoi_t val);
 int32_t ais328dq_int1_on_threshold_mode_get(stmdev_ctx_t *ctx,
-                                             ais328dq_int1_aoi_t *val);
+                                            ais328dq_int1_aoi_t *val);
 
 int32_t ais328dq_int1_src_get(stmdev_ctx_t *ctx,
-                               ais328dq_int1_src_t *val);
+                              ais328dq_int1_src_t *val);
 
 int32_t ais328dq_int1_treshold_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ais328dq_int1_treshold_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -695,21 +709,21 @@ typedef struct {
   uint8_t int2_zhie             : 1;
 } ais328dq_int2_on_th_conf_t;
 int32_t ais328dq_int2_on_threshold_conf_set(stmdev_ctx_t *ctx,
-                                             ais328dq_int2_on_th_conf_t val);
+                                            ais328dq_int2_on_th_conf_t val);
 int32_t ais328dq_int2_on_threshold_conf_get(stmdev_ctx_t *ctx,
-                                             ais328dq_int2_on_th_conf_t *val);
+                                            ais328dq_int2_on_th_conf_t *val);
 
 typedef enum {
   AIS328DQ_INT2_ON_THRESHOLD_OR   = 0,
   AIS328DQ_INT2_ON_THRESHOLD_AND  = 1,
 } ais328dq_int2_aoi_t;
 int32_t ais328dq_int2_on_threshold_mode_set(stmdev_ctx_t *ctx,
-                                             ais328dq_int2_aoi_t val);
+                                            ais328dq_int2_aoi_t val);
 int32_t ais328dq_int2_on_threshold_mode_get(stmdev_ctx_t *ctx,
-                                             ais328dq_int2_aoi_t *val);
+                                            ais328dq_int2_aoi_t *val);
 
 int32_t ais328dq_int2_src_get(stmdev_ctx_t *ctx,
-                               ais328dq_int2_src_t *val);
+                              ais328dq_int2_src_t *val);
 
 int32_t ais328dq_int2_treshold_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ais328dq_int2_treshold_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -726,15 +740,16 @@ typedef enum {
   AIS328DQ_6D_INT1_POSITION  = 3,
 } ais328dq_int1_6d_t;
 int32_t ais328dq_int1_6d_mode_set(stmdev_ctx_t *ctx,
-                                   ais328dq_int1_6d_t val);
+                                  ais328dq_int1_6d_t val);
 int32_t ais328dq_int1_6d_mode_get(stmdev_ctx_t *ctx,
-                                   ais328dq_int1_6d_t *val);
+                                  ais328dq_int1_6d_t *val);
 
 int32_t ais328dq_int1_6d_src_get(stmdev_ctx_t *ctx,
-                                  ais328dq_int1_src_t *val);
+                                 ais328dq_int1_src_t *val);
 
 int32_t ais328dq_int1_6d_treshold_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ais328dq_int1_6d_treshold_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ais328dq_int1_6d_treshold_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 typedef enum {
   AIS328DQ_6D_INT2_DISABLE   = 0,
@@ -742,15 +757,16 @@ typedef enum {
   AIS328DQ_6D_INT2_POSITION  = 3,
 } ais328dq_int2_6d_t;
 int32_t ais328dq_int2_6d_mode_set(stmdev_ctx_t *ctx,
-                                   ais328dq_int2_6d_t val);
+                                  ais328dq_int2_6d_t val);
 int32_t ais328dq_int2_6d_mode_get(stmdev_ctx_t *ctx,
-                                   ais328dq_int2_6d_t *val);
+                                  ais328dq_int2_6d_t *val);
 
 int32_t ais328dq_int2_6d_src_get(stmdev_ctx_t *ctx,
-                                  ais328dq_int2_src_t *val);
+                                 ais328dq_int2_src_t *val);
 
 int32_t ais328dq_int2_6d_treshold_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ais328dq_int2_6d_treshold_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ais328dq_int2_6d_treshold_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 /**
   *@}

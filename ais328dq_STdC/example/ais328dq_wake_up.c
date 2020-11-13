@@ -111,7 +111,8 @@ static uint8_t whoamI;
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -126,60 +127,49 @@ void ais328dq_wake_up(void)
   stmdev_ctx_t dev_ctx;
   ais328dq_int1_on_th_conf_t int1_on_th_conf;
   ais328dq_int1_src_t  int1_src;
-
   /* Initialize SPI mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
 
   /* Start Main loop */
-  while(1)
-  {
+  while (1) {
     /* turn device on  */
     platform_init();
     /* Wait sensor boot time */
     platform_delay(BOOT_TIME);
-   
     /* Check device ID */
     ais328dq_device_id_get(&dev_ctx, &whoamI);
+
     if (whoamI != AIS328DQ_ID)
-      while(1); /* manage here device not found */   
-   
-   
+      while (1); /* manage here device not found */
+
     /* Set ODR (normal mode)*/
     ais328dq_data_rate_set(&dev_ctx, AIS328DQ_ODR_100Hz);
     /* Set Full scale */
-    ais328dq_full_scale_set(&dev_ctx, AIS328DQ_4g); 
-   
+    ais328dq_full_scale_set(&dev_ctx, AIS328DQ_4g);
     /* Enable axis: Default all axis are enabled so you can avoid this step */
     //ais328dq_axis_x_data_set(&dev_ctx, PROPERTY_ENABLE);
     //ais328dq_axis_y_data_set(&dev_ctx, PROPERTY_ENABLE);
     //ais328dq_axis_z_data_set(&dev_ctx, PROPERTY_ENABLE);
-   
     /* interrupt request latched */
     ais328dq_int1_notification_set(&dev_ctx, AIS328DQ_INT1_LATCHED);
-   
     /* interrupt polarity: Default is active high so you can avoid this step */
     ais328dq_pin_polarity_set(&dev_ctx, AIS328DQ_ACTIVE_HIGH);
-   
     /* interrupt pin routing */
     ais328dq_pin_int1_route_set(&dev_ctx, AIS328DQ_PAD1_INT1_SRC);
-   
     /* interrupt pin mode */
     ais328dq_pin_mode_set(&dev_ctx, AIS328DQ_PUSH_PULL);
-   
     /* set HP filter path on output and interrupt generator 1 */
     ais328dq_hp_path_set(&dev_ctx, AIS328DQ_HP_ON_INT1_OUT);
-   
     HAL_Delay(150);
-   
     /* set interrupt threshold */
     ais328dq_int1_treshold_set(&dev_ctx, 0x04);
     /* set interrupt duration */
     ais328dq_int1_dur_set(&dev_ctx, 0x01);
-   
     /* set interrupt on pin mode */
-    ais328dq_int1_on_threshold_mode_set(&dev_ctx, AIS328DQ_INT1_ON_THRESHOLD_OR);
+    ais328dq_int1_on_threshold_mode_set(&dev_ctx,
+                                        AIS328DQ_INT1_ON_THRESHOLD_OR);
     /* set interrupt on pin mode */
     int1_on_th_conf.int1_xlie = 0;
     int1_on_th_conf.int1_xhie = 1;
@@ -188,14 +178,13 @@ void ais328dq_wake_up(void)
     int1_on_th_conf.int1_zlie = 0;
     int1_on_th_conf.int1_zhie = 1;
     ais328dq_int1_on_threshold_conf_set(&dev_ctx, int1_on_th_conf);
-   
     ais328dq_hp_reset_get(&dev_ctx);
     ais328dq_int1_src_get(&dev_ctx, &int1_src);
-   
-    if (int1_src.xh | int1_src.yh | int1_src.zh){
-      while(1); //wake up detected
+
+    if (int1_src.xh | int1_src.yh | int1_src.zh) {
+      while (1); //wake up detected
     }
-   
+
     platform_delay(1000);
   }
 }
@@ -210,7 +199,8 @@ void ais328dq_wake_up(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
