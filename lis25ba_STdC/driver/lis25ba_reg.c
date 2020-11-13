@@ -46,7 +46,8 @@
   * @retval       interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lis25ba_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t lis25ba_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                         uint8_t *data,
                          uint16_t len)
 {
   int32_t ret;
@@ -64,7 +65,8 @@ int32_t lis25ba_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval       interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lis25ba_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t lis25ba_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
                           uint16_t len)
 {
   int32_t ret;
@@ -133,8 +135,9 @@ int32_t lis25ba_id_get(stmdev_ctx_t *ctx, lis25ba_id_t *val)
 {
   int32_t ret = 0;
 
-  if (ctx != NULL){
-      ret = lis25ba_read_reg(ctx, LIS25BA_WHO_AM_I, (uint8_t*)&(val->id), 1);
+  if (ctx != NULL) {
+    ret = lis25ba_read_reg(ctx, LIS25BA_WHO_AM_I, (uint8_t *) & (val->id),
+                           1);
   }
 
   return ret;
@@ -149,36 +152,38 @@ int32_t lis25ba_id_get(stmdev_ctx_t *ctx, lis25ba_id_t *val)
   * @retval       interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lis25ba_bus_mode_set(stmdev_ctx_t *ctx, lis25ba_bus_mode_t *val)
+int32_t lis25ba_bus_mode_set(stmdev_ctx_t *ctx,
+                             lis25ba_bus_mode_t *val)
 {
   lis25ba_tdm_ctrl_reg_t tdm_ctrl_reg;
   lis25ba_tdm_cmax_h_t tdm_cmax_h;
   lis25ba_tdm_cmax_l_t tdm_cmax_l;
   uint8_t reg[2];
   int32_t ret;
-
   ret = lis25ba_read_reg(ctx, LIS25BA_TDM_CTRL_REG,
-                         (uint8_t*)&tdm_ctrl_reg, 1);
+                         (uint8_t *)&tdm_ctrl_reg, 1);
+
   if (ret == 0) {
     ret = lis25ba_read_reg(ctx, LIS25BA_TDM_CMAX_H, reg, 2);
-    bytecpy( (uint8_t*)&tdm_cmax_h, &reg[0] );
-    bytecpy( (uint8_t*)&tdm_cmax_l, &reg[1] );
+    bytecpy( (uint8_t *)&tdm_cmax_h, &reg[0] );
+    bytecpy( (uint8_t *)&tdm_cmax_l, &reg[1] );
   }
 
   tdm_ctrl_reg.tdm_pd = ~val->tdm.en;
   tdm_ctrl_reg.data_valid = val->tdm.clk_pol;
   tdm_ctrl_reg.delayed = val->tdm.clk_edge;
   tdm_ctrl_reg.wclk_fq = val->tdm.mapping;
-
   tdm_cmax_h.tdm_cmax = (uint8_t)(val->tdm.cmax / 256U);
   tdm_cmax_l.tdm_cmax = (uint8_t)(val->tdm.cmax - tdm_cmax_h.tdm_cmax);
 
   if ( ret == 0 ) {
     ret = lis25ba_write_reg(ctx, LIS25BA_TDM_CTRL_REG,
-                            (uint8_t*)&tdm_ctrl_reg, 1);
+                            (uint8_t *)&tdm_ctrl_reg, 1);
   }
-  bytecpy(&reg[0], ( uint8_t*)&tdm_cmax_h);
-  bytecpy(&reg[1], ( uint8_t*)&tdm_cmax_l);
+
+  bytecpy(&reg[0], ( uint8_t *)&tdm_cmax_h);
+  bytecpy(&reg[1], ( uint8_t *)&tdm_cmax_l);
+
   if ( ret == 0 ) {
     ret = lis25ba_write_reg(ctx, LIS25BA_TDM_CMAX_H, reg, 2);
   }
@@ -195,30 +200,29 @@ int32_t lis25ba_bus_mode_set(stmdev_ctx_t *ctx, lis25ba_bus_mode_t *val)
   * @retval       interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lis25ba_bus_mode_get(stmdev_ctx_t *ctx, lis25ba_bus_mode_t *val)
+int32_t lis25ba_bus_mode_get(stmdev_ctx_t *ctx,
+                             lis25ba_bus_mode_t *val)
 {
   lis25ba_tdm_ctrl_reg_t tdm_ctrl_reg;
   lis25ba_tdm_cmax_h_t tdm_cmax_h;
   lis25ba_tdm_cmax_l_t tdm_cmax_l;
   uint8_t reg[2];
   int32_t ret;
-
   ret = lis25ba_read_reg(ctx, LIS25BA_TDM_CTRL_REG,
-                         (uint8_t*)&tdm_ctrl_reg, 1);
+                         (uint8_t *)&tdm_ctrl_reg, 1);
+
   if (ret == 0) {
     ret = lis25ba_read_reg(ctx, LIS25BA_TDM_CMAX_H, reg, 2);
-    bytecpy( (uint8_t*)&tdm_cmax_h, &reg[0] );
-    bytecpy( (uint8_t*)&tdm_cmax_l, &reg[1] );
+    bytecpy( (uint8_t *)&tdm_cmax_h, &reg[0] );
+    bytecpy( (uint8_t *)&tdm_cmax_l, &reg[1] );
   }
 
   val->tdm.en = ~tdm_ctrl_reg.tdm_pd;
   val->tdm.clk_pol = tdm_ctrl_reg.data_valid;
   val->tdm.clk_edge = tdm_ctrl_reg.delayed;
   val->tdm.mapping = tdm_ctrl_reg.wclk_fq;
-
   val->tdm.cmax = tdm_cmax_h.tdm_cmax * 256U;
   val->tdm.cmax += tdm_cmax_l.tdm_cmax;
-
   return ret;
 }
 
@@ -239,30 +243,34 @@ int32_t lis25ba_mode_set(stmdev_ctx_t *ctx, lis25ba_md_t *val)
   lis25ba_ctrl_reg_t ctrl_reg;
   uint8_t reg[2];
   int32_t ret;
+  ret = lis25ba_read_reg(ctx, LIS25BA_CTRL_REG, (uint8_t *)&ctrl_reg,
+                         1);
 
-  ret = lis25ba_read_reg(ctx, LIS25BA_CTRL_REG, (uint8_t*)&ctrl_reg, 1);
   if (ret == 0) {
     ret = lis25ba_read_reg(ctx, LIS25BA_TDM_CTRL_REG, reg, 2);
-    bytecpy( (uint8_t*)&tdm_ctrl_reg, &reg[0] );
-    bytecpy( (uint8_t*)&axes_ctrl_reg,  &reg[1] );
+    bytecpy( (uint8_t *)&tdm_ctrl_reg, &reg[0] );
+    bytecpy( (uint8_t *)&axes_ctrl_reg,  &reg[1] );
   }
 
   ctrl_reg.pd = (uint8_t)val->xl.odr & 0x01U;
   tdm_ctrl_reg.wclk_fq = ( (uint8_t)val->xl.odr & 0x06U ) >> 1;
   axes_ctrl_reg.odr_auto_en = ( (uint8_t)val->xl.odr & 0x10U ) >> 4;
-
   axes_ctrl_reg.axisx_en = val->xl.axis.x;
   axes_ctrl_reg.axisy_en = val->xl.axis.y;
   axes_ctrl_reg.axisz_en = val->xl.axis.z;
 
   if ( ret == 0 ) {
-    ret = lis25ba_write_reg(ctx, LIS25BA_CTRL_REG, (uint8_t*)&ctrl_reg, 1);
+    ret = lis25ba_write_reg(ctx, LIS25BA_CTRL_REG, (uint8_t *)&ctrl_reg,
+                            1);
   }
+
   /* writing checked configuration */
-  bytecpy(&reg[0], ( uint8_t*)&tdm_ctrl_reg);
-  bytecpy(&reg[1], ( uint8_t*)&axes_ctrl_reg);
+  bytecpy(&reg[0], ( uint8_t *)&tdm_ctrl_reg);
+  bytecpy(&reg[1], ( uint8_t *)&axes_ctrl_reg);
+
   if ( ret == 0 ) {
-    ret = lis25ba_write_reg(ctx, LIS25BA_TDM_CTRL_REG, (uint8_t*)&reg, 2);
+    ret = lis25ba_write_reg(ctx, LIS25BA_TDM_CTRL_REG, (uint8_t *)&reg,
+                            2);
   }
 
   return ret;
@@ -284,35 +292,42 @@ int32_t lis25ba_mode_get(stmdev_ctx_t *ctx, lis25ba_md_t *val)
   lis25ba_ctrl_reg_t ctrl_reg;
   uint8_t reg[2];
   int32_t ret;
+  ret = lis25ba_read_reg(ctx, LIS25BA_CTRL_REG, (uint8_t *)&ctrl_reg,
+                         1);
 
-  ret = lis25ba_read_reg(ctx, LIS25BA_CTRL_REG, (uint8_t*)&ctrl_reg, 1);
   if (ret == 0) {
     ret = lis25ba_read_reg(ctx, LIS25BA_TDM_CTRL_REG, reg, 2);
-    bytecpy( (uint8_t*)&tdm_ctrl_reg, &reg[0] );
-    bytecpy( (uint8_t*)&axes_ctrl_reg,  &reg[1] );
+    bytecpy( (uint8_t *)&tdm_ctrl_reg, &reg[0] );
+    bytecpy( (uint8_t *)&axes_ctrl_reg,  &reg[1] );
   }
 
   val->xl.axis.x = axes_ctrl_reg.axisx_en;
   val->xl.axis.y = axes_ctrl_reg.axisy_en;
   val->xl.axis.z = axes_ctrl_reg.axisz_en;
 
-  switch ( (axes_ctrl_reg.odr_auto_en << 4) | (tdm_ctrl_reg.wclk_fq << 1) |
+  switch ( (axes_ctrl_reg.odr_auto_en << 4) | (tdm_ctrl_reg.wclk_fq <<
+                                               1) |
            ctrl_reg.pd ) {
     case LIS25BA_XL_OFF:
       val->xl.odr = LIS25BA_XL_OFF;
       break;
+
     case LIS25BA_XL_8kHz:
       val->xl.odr = LIS25BA_XL_8kHz;
       break;
+
     case LIS25BA_XL_16kHz:
       val->xl.odr = LIS25BA_XL_16kHz;
       break;
+
     case LIS25BA_XL_24kHz:
       val->xl.odr = LIS25BA_XL_24kHz;
       break;
+
     case LIS25BA_XL_HW_SEL:
       val->xl.odr = LIS25BA_XL_HW_SEL;
       break;
+
     default:
       val->xl.odr = LIS25BA_XL_OFF;
       break;
@@ -337,9 +352,10 @@ int32_t lis25ba_data_get(uint16_t *tdm_stream, lis25ba_bus_mode_t *md,
   uint8_t offset;
   uint8_t i;
 
-  if (md->tdm.mapping == PROPERTY_DISABLE ){
+  if (md->tdm.mapping == PROPERTY_DISABLE ) {
     offset = 0; /* slot0-1-2 */
   }
+
   else {
     offset = 4; /* slot4-5-6 */
   }
@@ -365,12 +381,15 @@ int32_t lis25ba_self_test_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis25ba_test_reg_t test_reg;
   int32_t ret;
+  ret = lis25ba_read_reg(ctx, LIS25BA_TEST_REG, (uint8_t *)&test_reg,
+                         1);
 
-  ret = lis25ba_read_reg(ctx, LIS25BA_TEST_REG, (uint8_t*)&test_reg, 1);
   if (ret == 0) {
     test_reg.st = val;
-    ret = lis25ba_write_reg(ctx, LIS25BA_TEST_REG, (uint8_t*)&test_reg, 1);
+    ret = lis25ba_write_reg(ctx, LIS25BA_TEST_REG, (uint8_t *)&test_reg,
+                            1);
   }
+
   return ret;
 }
 
@@ -387,10 +406,9 @@ int32_t lis25ba_self_test_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis25ba_test_reg_t test_reg;
   int32_t ret;
-
-  ret = lis25ba_read_reg(ctx, LIS25BA_TEST_REG, (uint8_t*)&test_reg, 1);
+  ret = lis25ba_read_reg(ctx, LIS25BA_TEST_REG, (uint8_t *)&test_reg,
+                         1);
   *val = test_reg.st;
-
   return ret;
 }
 

@@ -23,7 +23,7 @@
 #define LIS25BA_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -75,7 +75,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
@@ -108,8 +108,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -268,7 +270,7 @@ typedef struct {
   * @{
   *
   */
-typedef union{
+typedef union {
   lis25ba_test_reg_t           test_reg;
   lis25ba_tdm_cmax_h_t         tdm_cmax_h;
   lis25ba_tdm_cmax_l_t         tdm_cmax_l;
@@ -284,9 +286,11 @@ typedef union{
   *
   */
 
-int32_t lis25ba_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lis25ba_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                         uint8_t *data,
                          uint16_t len);
-int32_t lis25ba_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lis25ba_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
                           uint16_t len);
 
 extern float_t lis25ba_from_raw_to_mg(int16_t lsb);
@@ -299,14 +303,18 @@ int32_t lis25ba_id_get(stmdev_ctx_t *ctx, lis25ba_id_t *val);
 typedef struct {
   struct {
     uint8_t en       : 1; /* TDM interface 1=on / 0=off) */
-    uint8_t clk_pol  : 1; /* data valid on 0=rise/1=falling edge of BCLK */
-    uint8_t clk_edge : 1; /* data on 0=first / 1=second valid edge of BCLK */
+  uint8_t clk_pol  :
+    1; /* data valid on 0=rise/1=falling edge of BCLK */
+  uint8_t clk_edge :
+    1; /* data on 0=first / 1=second valid edge of BCLK */
     uint8_t mapping  : 1; /* xl data in 0=slot0-1-2 / 1=slot4-5-6 */
     uint16_t cmax    : 1; /* BCLK in a WCLK (unused if odr=_XL_HW_SEL) */
   } tdm;
 } lis25ba_bus_mode_t;
-int32_t lis25ba_bus_mode_set(stmdev_ctx_t *ctx, lis25ba_bus_mode_t *val);
-int32_t lis25ba_bus_mode_get(stmdev_ctx_t *ctx, lis25ba_bus_mode_t *val);
+int32_t lis25ba_bus_mode_set(stmdev_ctx_t *ctx,
+                             lis25ba_bus_mode_t *val);
+int32_t lis25ba_bus_mode_get(stmdev_ctx_t *ctx,
+                             lis25ba_bus_mode_t *val);
 
 typedef struct {
   struct {
@@ -331,7 +339,7 @@ typedef struct {
   struct {
     float mg[3];
     int16_t raw[3];
-  }xl;
+  } xl;
 } lis25ba_data_t;
 int32_t lis25ba_data_get(uint16_t *tdm_stream, lis25ba_bus_mode_t *md,
                          lis25ba_data_t *data);
