@@ -46,7 +46,8 @@
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t lis2dh12_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
                           uint16_t len)
 {
   int32_t ret;
@@ -64,7 +65,8 @@ int32_t lis2dh12_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t lis2dh12_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                           uint8_t *data,
                            uint16_t len)
 {
   int32_t ret;
@@ -77,12 +79,12 @@ int32_t lis2dh12_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   *
   */
 
-  /**
-  * @defgroup    LIS2DH12_Sensitivity
-  * @brief       These functions convert raw-data into engineering units.
-  * @{
-  *
-  */
+/**
+* @defgroup    LIS2DH12_Sensitivity
+* @brief       These functions convert raw-data into engineering units.
+* @{
+*
+*/
 
 float_t lis2dh12_from_fs2_hr_to_mg(int16_t lsb)
 {
@@ -197,11 +199,9 @@ int32_t lis2dh12_temp_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis2dh12_status_reg_aux_t status_reg_aux;
   int32_t ret;
-
   ret = lis2dh12_read_reg(ctx, LIS2DH12_STATUS_REG_AUX,
-                          (uint8_t*)&status_reg_aux, 1);
+                          (uint8_t *)&status_reg_aux, 1);
   *val = status_reg_aux.tda;
-
   return ret;
 }
 /**
@@ -216,11 +216,9 @@ int32_t lis2dh12_temp_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis2dh12_status_reg_aux_t status_reg_aux;
   int32_t ret;
-
   ret = lis2dh12_read_reg(ctx, LIS2DH12_STATUS_REG_AUX,
-                          (uint8_t*)&status_reg_aux, 1);
+                          (uint8_t *)&status_reg_aux, 1);
   *val = status_reg_aux.tor;
-
   return ret;
 }
 /**
@@ -235,11 +233,9 @@ int32_t lis2dh12_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
   uint8_t buff[2];
   int32_t ret;
-
   ret = lis2dh12_read_reg(ctx, LIS2DH12_OUT_TEMP_L, buff, 2);
   *val = (int16_t)buff[1];
   *val = (*val * 256) +  (int16_t)buff[0];
-
   return ret;
 }
 /**
@@ -255,12 +251,15 @@ int32_t lis2dh12_temperature_meas_set(stmdev_ctx_t *ctx,
 {
   lis2dh12_temp_cfg_reg_t temp_cfg_reg;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_TEMP_CFG_REG,
+                          (uint8_t *)&temp_cfg_reg, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_TEMP_CFG_REG, (uint8_t*)&temp_cfg_reg, 1);
   if (ret == 0) {
     temp_cfg_reg.temp_en = (uint8_t) val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_TEMP_CFG_REG, (uint8_t*)&temp_cfg_reg, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_TEMP_CFG_REG,
+                             (uint8_t *)&temp_cfg_reg, 1);
   }
+
   return ret;
 }
 
@@ -277,19 +276,23 @@ int32_t lis2dh12_temperature_meas_get(stmdev_ctx_t *ctx,
 {
   lis2dh12_temp_cfg_reg_t temp_cfg_reg;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_TEMP_CFG_REG,
+                          (uint8_t *)&temp_cfg_reg, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_TEMP_CFG_REG, (uint8_t*)&temp_cfg_reg, 1);
   switch (temp_cfg_reg.temp_en) {
     case LIS2DH12_TEMP_DISABLE:
       *val = LIS2DH12_TEMP_DISABLE;
       break;
+
     case LIS2DH12_TEMP_ENABLE:
       *val = LIS2DH12_TEMP_ENABLE;
       break;
+
     default:
       *val = LIS2DH12_TEMP_DISABLE;
       break;
   }
+
   return ret;
 }
 
@@ -302,36 +305,45 @@ int32_t lis2dh12_temperature_meas_get(stmdev_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_operating_mode_set(stmdev_ctx_t *ctx, lis2dh12_op_md_t val)
+int32_t lis2dh12_operating_mode_set(stmdev_ctx_t *ctx,
+                                    lis2dh12_op_md_t val)
 {
   lis2dh12_ctrl_reg1_t ctrl_reg1;
   lis2dh12_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
-
   ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG1,
-                          (uint8_t*)&ctrl_reg1, 1);
+                          (uint8_t *)&ctrl_reg1, 1);
+
   if (ret == 0) {
     ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4,
-                            (uint8_t*)&ctrl_reg4, 1);
-  } 
+                            (uint8_t *)&ctrl_reg4, 1);
+  }
+
   if (ret == 0) {
     if ( val == LIS2DH12_HR_12bit ) {
       ctrl_reg1.lpen = 0;
       ctrl_reg4.hr   = 1;
     }
+
     if (val == LIS2DH12_NM_10bit) {
       ctrl_reg1.lpen = 0;
       ctrl_reg4.hr   = 0;
     }
+
     if (val == LIS2DH12_LP_8bit) {
       ctrl_reg1.lpen = 1;
       ctrl_reg4.hr   = 0;
     }
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  } 
-  if (ret == 0) {
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG1,
+                             (uint8_t *)&ctrl_reg1, 1);
   }
+
+  if (ret == 0) {
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG4,
+                             (uint8_t *)&ctrl_reg4, 1);
+  }
+
   return ret;
 }
 
@@ -343,23 +355,32 @@ int32_t lis2dh12_operating_mode_set(stmdev_ctx_t *ctx, lis2dh12_op_md_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_operating_mode_get(stmdev_ctx_t *ctx, lis2dh12_op_md_t *val)
+int32_t lis2dh12_operating_mode_get(stmdev_ctx_t *ctx,
+                                    lis2dh12_op_md_t *val)
 {
   lis2dh12_ctrl_reg1_t ctrl_reg1;
   lis2dh12_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG1,
+                          (uint8_t *)&ctrl_reg1, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
   if (ret == 0) {
-    ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+    ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4,
+                            (uint8_t *)&ctrl_reg4, 1);
+
     if ( ctrl_reg1.lpen == PROPERTY_ENABLE ) {
       *val = LIS2DH12_LP_8bit;
-    } else if (ctrl_reg4.hr == PROPERTY_ENABLE ) {
+    }
+
+    else if (ctrl_reg4.hr == PROPERTY_ENABLE ) {
       *val = LIS2DH12_HR_12bit;
-    } else {
+    }
+
+    else {
       *val = LIS2DH12_NM_10bit;
     }
   }
+
   return ret;
 }
 
@@ -375,12 +396,15 @@ int32_t lis2dh12_data_rate_set(stmdev_ctx_t *ctx, lis2dh12_odr_t val)
 {
   lis2dh12_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG1,
+                          (uint8_t *)&ctrl_reg1, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
   if (ret == 0) {
     ctrl_reg1.odr = (uint8_t)val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG1,
+                             (uint8_t *)&ctrl_reg1, 1);
   }
+
   return ret;
 }
 
@@ -396,43 +420,55 @@ int32_t lis2dh12_data_rate_get(stmdev_ctx_t *ctx, lis2dh12_odr_t *val)
 {
   lis2dh12_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG1,
+                          (uint8_t *)&ctrl_reg1, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
   switch (ctrl_reg1.odr) {
     case LIS2DH12_POWER_DOWN:
       *val = LIS2DH12_POWER_DOWN;
       break;
+
     case LIS2DH12_ODR_1Hz:
       *val = LIS2DH12_ODR_1Hz;
       break;
+
     case LIS2DH12_ODR_10Hz:
       *val = LIS2DH12_ODR_10Hz;
       break;
+
     case LIS2DH12_ODR_25Hz:
       *val = LIS2DH12_ODR_25Hz;
       break;
+
     case LIS2DH12_ODR_50Hz:
       *val = LIS2DH12_ODR_50Hz;
       break;
+
     case LIS2DH12_ODR_100Hz:
       *val = LIS2DH12_ODR_100Hz;
       break;
+
     case LIS2DH12_ODR_200Hz:
       *val = LIS2DH12_ODR_200Hz;
       break;
+
     case LIS2DH12_ODR_400Hz:
       *val = LIS2DH12_ODR_400Hz;
       break;
+
     case LIS2DH12_ODR_1kHz620_LP:
       *val = LIS2DH12_ODR_1kHz620_LP;
       break;
+
     case LIS2DH12_ODR_5kHz376_LP_1kHz344_NM_HP:
       *val = LIS2DH12_ODR_5kHz376_LP_1kHz344_NM_HP;
       break;
+
     default:
       *val = LIS2DH12_POWER_DOWN;
       break;
   }
+
   return ret;
 }
 
@@ -445,16 +481,20 @@ int32_t lis2dh12_data_rate_get(stmdev_ctx_t *ctx, lis2dh12_odr_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_high_pass_on_outputs_set(stmdev_ctx_t *ctx, uint8_t val)
+int32_t lis2dh12_high_pass_on_outputs_set(stmdev_ctx_t *ctx,
+                                          uint8_t val)
 {
   lis2dh12_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG2,
+                          (uint8_t *)&ctrl_reg2, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
   if (ret == 0) {
     ctrl_reg2.fds = val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG2,
+                             (uint8_t *)&ctrl_reg2, 1);
   }
+
   return ret;
 }
 
@@ -467,14 +507,14 @@ int32_t lis2dh12_high_pass_on_outputs_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_high_pass_on_outputs_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t lis2dh12_high_pass_on_outputs_get(stmdev_ctx_t *ctx,
+                                          uint8_t *val)
 {
   lis2dh12_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG2,
+                          (uint8_t *)&ctrl_reg2, 1);
   *val = (uint8_t)ctrl_reg2.fds;
-
   return ret;
 }
 
@@ -497,12 +537,15 @@ int32_t lis2dh12_high_pass_bandwidth_set(stmdev_ctx_t *ctx,
 {
   lis2dh12_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG2,
+                          (uint8_t *)&ctrl_reg2, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
   if (ret == 0) {
     ctrl_reg2.hpcf = (uint8_t)val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG2,
+                             (uint8_t *)&ctrl_reg2, 1);
   }
+
   return ret;
 }
 
@@ -525,25 +568,31 @@ int32_t lis2dh12_high_pass_bandwidth_get(stmdev_ctx_t *ctx,
 {
   lis2dh12_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG2,
+                          (uint8_t *)&ctrl_reg2, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
   switch (ctrl_reg2.hpcf) {
     case LIS2DH12_AGGRESSIVE:
       *val = LIS2DH12_AGGRESSIVE;
       break;
+
     case LIS2DH12_STRONG:
       *val = LIS2DH12_STRONG;
       break;
+
     case LIS2DH12_MEDIUM:
       *val = LIS2DH12_MEDIUM;
       break;
+
     case LIS2DH12_LIGHT:
       *val = LIS2DH12_LIGHT;
       break;
+
     default:
       *val = LIS2DH12_LIGHT;
       break;
   }
+
   return ret;
 }
 
@@ -555,16 +604,20 @@ int32_t lis2dh12_high_pass_bandwidth_get(stmdev_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_high_pass_mode_set(stmdev_ctx_t *ctx, lis2dh12_hpm_t val)
+int32_t lis2dh12_high_pass_mode_set(stmdev_ctx_t *ctx,
+                                    lis2dh12_hpm_t val)
 {
   lis2dh12_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG2,
+                          (uint8_t *)&ctrl_reg2, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
   if (ret == 0) {
     ctrl_reg2.hpm = (uint8_t)val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG2,
+                             (uint8_t *)&ctrl_reg2, 1);
   }
+
   return ret;
 }
 
@@ -576,29 +629,36 @@ int32_t lis2dh12_high_pass_mode_set(stmdev_ctx_t *ctx, lis2dh12_hpm_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_high_pass_mode_get(stmdev_ctx_t *ctx, lis2dh12_hpm_t *val)
+int32_t lis2dh12_high_pass_mode_get(stmdev_ctx_t *ctx,
+                                    lis2dh12_hpm_t *val)
 {
   lis2dh12_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG2,
+                          (uint8_t *)&ctrl_reg2, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
   switch (ctrl_reg2.hpm) {
     case LIS2DH12_NORMAL_WITH_RST:
       *val = LIS2DH12_NORMAL_WITH_RST;
       break;
+
     case LIS2DH12_REFERENCE_MODE:
       *val = LIS2DH12_REFERENCE_MODE;
       break;
+
     case LIS2DH12_NORMAL:
       *val = LIS2DH12_NORMAL;
       break;
+
     case LIS2DH12_AUTORST_ON_INT:
       *val = LIS2DH12_AUTORST_ON_INT;
       break;
+
     default:
       *val = LIS2DH12_NORMAL_WITH_RST;
       break;
   }
+
   return ret;
 }
 
@@ -614,12 +674,15 @@ int32_t lis2dh12_full_scale_set(stmdev_ctx_t *ctx, lis2dh12_fs_t val)
 {
   lis2dh12_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
   if (ret == 0) {
     ctrl_reg4.fs = (uint8_t)val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG4,
+                             (uint8_t *)&ctrl_reg4, 1);
   }
+
   return ret;
 }
 
@@ -635,25 +698,31 @@ int32_t lis2dh12_full_scale_get(stmdev_ctx_t *ctx, lis2dh12_fs_t *val)
 {
   lis2dh12_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
   switch (ctrl_reg4.fs) {
     case LIS2DH12_2g:
       *val = LIS2DH12_2g;
       break;
+
     case LIS2DH12_4g:
       *val = LIS2DH12_4g;
       break;
+
     case LIS2DH12_8g:
       *val = LIS2DH12_8g;
       break;
+
     case LIS2DH12_16g:
       *val = LIS2DH12_16g;
       break;
+
     default:
       *val = LIS2DH12_2g;
       break;
   }
+
   return ret;
 }
 
@@ -669,12 +738,15 @@ int32_t lis2dh12_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis2dh12_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
   if (ret == 0) {
     ctrl_reg4.bdu = val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG4,
+                             (uint8_t *)&ctrl_reg4, 1);
   }
+
   return ret;
 }
 
@@ -686,14 +758,14 @@ int32_t lis2dh12_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t lis2dh12_block_data_update_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val)
 {
   lis2dh12_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
   *val = (uint8_t)ctrl_reg4.bdu;
-
   return ret;
 }
 
@@ -706,7 +778,8 @@ int32_t lis2dh12_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_filter_reference_set(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lis2dh12_filter_reference_set(stmdev_ctx_t *ctx,
+                                      uint8_t *buff)
 {
   int32_t ret;
   ret = lis2dh12_write_reg(ctx, LIS2DH12_REFERENCE, buff, 1);
@@ -722,7 +795,8 @@ int32_t lis2dh12_filter_reference_set(stmdev_ctx_t *ctx, uint8_t *buff)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_filter_reference_get(stmdev_ctx_t *ctx, uint8_t *buff)
+int32_t lis2dh12_filter_reference_get(stmdev_ctx_t *ctx,
+                                      uint8_t *buff)
 {
   int32_t ret;
   ret = lis2dh12_read_reg(ctx, LIS2DH12_REFERENCE, buff, 1);
@@ -740,10 +814,9 @@ int32_t lis2dh12_xl_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis2dh12_status_reg_t status_reg;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_STATUS_REG, (uint8_t*)&status_reg, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_STATUS_REG,
+                          (uint8_t *)&status_reg, 1);
   *val = status_reg.zyxda;
-
   return ret;
 }
 /**
@@ -758,10 +831,9 @@ int32_t lis2dh12_xl_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis2dh12_status_reg_t status_reg;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_STATUS_REG, (uint8_t*)&status_reg, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_STATUS_REG,
+                          (uint8_t *)&status_reg, 1);
   *val = status_reg.zyxor;
-
   return ret;
 }
 /**
@@ -776,7 +848,6 @@ int32_t lis2dh12_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
   uint8_t buff[6];
   int32_t ret;
-
   ret = lis2dh12_read_reg(ctx, LIS2DH12_OUT_X_L, buff, 6);
   val[0] = (int16_t)buff[1];
   val[0] = (val[0] * 256) +  (int16_t)buff[0];
@@ -784,7 +855,6 @@ int32_t lis2dh12_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val)
   val[1] = (val[1] * 256) +  (int16_t)buff[2];
   val[2] = (int16_t)buff[5];
   val[2] = (val[2] * 256) +  (int16_t)buff[4];
-
   return ret;
 }
 /**
@@ -794,7 +864,7 @@ int32_t lis2dh12_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 
 /**
   * @defgroup  LIS2DH12_Common
-  * @brief     This section group common usefull functions
+  * @brief     This section group common useful functions
   * @{
   *
   */
@@ -825,12 +895,15 @@ int32_t lis2dh12_self_test_set(stmdev_ctx_t *ctx, lis2dh12_st_t val)
 {
   lis2dh12_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
   if (ret == 0) {
     ctrl_reg4.st = (uint8_t)val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG4,
+                             (uint8_t *)&ctrl_reg4, 1);
   }
+
   return ret;
 }
 
@@ -846,22 +919,27 @@ int32_t lis2dh12_self_test_get(stmdev_ctx_t *ctx, lis2dh12_st_t *val)
 {
   lis2dh12_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
   switch (ctrl_reg4.st) {
     case LIS2DH12_ST_DISABLE:
       *val = LIS2DH12_ST_DISABLE;
       break;
+
     case LIS2DH12_ST_POSITIVE:
       *val = LIS2DH12_ST_POSITIVE;
       break;
+
     case LIS2DH12_ST_NEGATIVE:
       *val = LIS2DH12_ST_NEGATIVE;
       break;
+
     default:
       *val = LIS2DH12_ST_DISABLE;
       break;
   }
+
   return ret;
 }
 
@@ -873,16 +951,20 @@ int32_t lis2dh12_self_test_get(stmdev_ctx_t *ctx, lis2dh12_st_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_data_format_set(stmdev_ctx_t *ctx, lis2dh12_ble_t val)
+int32_t lis2dh12_data_format_set(stmdev_ctx_t *ctx,
+                                 lis2dh12_ble_t val)
 {
   lis2dh12_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
   if (ret == 0) {
     ctrl_reg4.ble = (uint8_t)val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG4,
+                             (uint8_t *)&ctrl_reg4, 1);
   }
+
   return ret;
 }
 
@@ -894,23 +976,28 @@ int32_t lis2dh12_data_format_set(stmdev_ctx_t *ctx, lis2dh12_ble_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_data_format_get(stmdev_ctx_t *ctx, lis2dh12_ble_t *val)
+int32_t lis2dh12_data_format_get(stmdev_ctx_t *ctx,
+                                 lis2dh12_ble_t *val)
 {
   lis2dh12_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
   switch (ctrl_reg4.ble) {
     case LIS2DH12_LSB_AT_LOW_ADD:
       *val = LIS2DH12_LSB_AT_LOW_ADD;
       break;
+
     case LIS2DH12_MSB_AT_LOW_ADD:
       *val = LIS2DH12_MSB_AT_LOW_ADD;
       break;
+
     default:
       *val = LIS2DH12_LSB_AT_LOW_ADD;
       break;
   }
+
   return ret;
 }
 
@@ -926,12 +1013,15 @@ int32_t lis2dh12_boot_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis2dh12_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5,
+                          (uint8_t *)&ctrl_reg5, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
   if (ret == 0) {
     ctrl_reg5.boot = val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG5,
+                             (uint8_t *)&ctrl_reg5, 1);
   }
+
   return ret;
 }
 
@@ -947,10 +1037,9 @@ int32_t lis2dh12_boot_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis2dh12_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5,
+                          (uint8_t *)&ctrl_reg5, 1);
   *val = (uint8_t)ctrl_reg5.boot;
-
   return ret;
 }
 
@@ -962,10 +1051,11 @@ int32_t lis2dh12_boot_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_status_get(stmdev_ctx_t *ctx, lis2dh12_status_reg_t *val)
+int32_t lis2dh12_status_get(stmdev_ctx_t *ctx,
+                            lis2dh12_status_reg_t *val)
 {
   int32_t ret;
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_STATUS_REG, (uint8_t*) val, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_STATUS_REG, (uint8_t *) val, 1);
   return ret;
 }
 /**
@@ -993,7 +1083,7 @@ int32_t lis2dh12_int1_gen_conf_set(stmdev_ctx_t *ctx,
                                    lis2dh12_int1_cfg_t *val)
 {
   int32_t ret;
-  ret = lis2dh12_write_reg(ctx, LIS2DH12_INT1_CFG, (uint8_t*) val, 1);
+  ret = lis2dh12_write_reg(ctx, LIS2DH12_INT1_CFG, (uint8_t *) val, 1);
   return ret;
 }
 
@@ -1009,7 +1099,7 @@ int32_t lis2dh12_int1_gen_conf_get(stmdev_ctx_t *ctx,
                                    lis2dh12_int1_cfg_t *val)
 {
   int32_t ret;
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT1_CFG, (uint8_t*) val, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT1_CFG, (uint8_t *) val, 1);
   return ret;
 }
 
@@ -1025,7 +1115,7 @@ int32_t lis2dh12_int1_gen_source_get(stmdev_ctx_t *ctx,
                                      lis2dh12_int1_src_t *val)
 {
   int32_t ret;
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT1_SRC, (uint8_t*) val, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT1_SRC, (uint8_t *) val, 1);
   return ret;
 }
 /**
@@ -1038,16 +1128,20 @@ int32_t lis2dh12_int1_gen_source_get(stmdev_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_int1_gen_threshold_set(stmdev_ctx_t *ctx, uint8_t val)
+int32_t lis2dh12_int1_gen_threshold_set(stmdev_ctx_t *ctx,
+                                        uint8_t val)
 {
   lis2dh12_int1_ths_t int1_ths;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT1_THS, (uint8_t *)&int1_ths,
+                          1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT1_THS, (uint8_t*)&int1_ths, 1);
   if (ret == 0) {
     int1_ths.ths = val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_INT1_THS, (uint8_t*)&int1_ths, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_INT1_THS, (uint8_t *)&int1_ths,
+                             1);
   }
+
   return ret;
 }
 
@@ -1061,14 +1155,14 @@ int32_t lis2dh12_int1_gen_threshold_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_int1_gen_threshold_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t lis2dh12_int1_gen_threshold_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val)
 {
   lis2dh12_int1_ths_t int1_ths;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT1_THS, (uint8_t*)&int1_ths, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT1_THS, (uint8_t *)&int1_ths,
+                          1);
   *val = (uint8_t)int1_ths.ths;
-
   return ret;
 }
 
@@ -1085,12 +1179,15 @@ int32_t lis2dh12_int1_gen_duration_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis2dh12_int1_duration_t int1_duration;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT1_DURATION,
+                          (uint8_t *)&int1_duration, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT1_DURATION, (uint8_t*)&int1_duration, 1);
   if (ret == 0) {
     int1_duration.d = val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_INT1_DURATION, (uint8_t*)&int1_duration, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_INT1_DURATION,
+                             (uint8_t *)&int1_duration, 1);
   }
+
   return ret;
 }
 
@@ -1103,14 +1200,14 @@ int32_t lis2dh12_int1_gen_duration_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_int1_gen_duration_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t lis2dh12_int1_gen_duration_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val)
 {
   lis2dh12_int1_duration_t int1_duration;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT1_DURATION, (uint8_t*)&int1_duration, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT1_DURATION,
+                          (uint8_t *)&int1_duration, 1);
   *val = (uint8_t)int1_duration.d;
-
   return ret;
 }
 
@@ -1139,7 +1236,7 @@ int32_t lis2dh12_int2_gen_conf_set(stmdev_ctx_t *ctx,
                                    lis2dh12_int2_cfg_t *val)
 {
   int32_t ret;
-  ret = lis2dh12_write_reg(ctx, LIS2DH12_INT2_CFG, (uint8_t*) val, 1);
+  ret = lis2dh12_write_reg(ctx, LIS2DH12_INT2_CFG, (uint8_t *) val, 1);
   return ret;
 }
 
@@ -1155,7 +1252,7 @@ int32_t lis2dh12_int2_gen_conf_get(stmdev_ctx_t *ctx,
                                    lis2dh12_int2_cfg_t *val)
 {
   int32_t ret;
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT2_CFG, (uint8_t*) val, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT2_CFG, (uint8_t *) val, 1);
   return ret;
 }
 /**
@@ -1170,7 +1267,7 @@ int32_t lis2dh12_int2_gen_source_get(stmdev_ctx_t *ctx,
                                      lis2dh12_int2_src_t *val)
 {
   int32_t ret;
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT2_SRC, (uint8_t*) val, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT2_SRC, (uint8_t *) val, 1);
   return ret;
 }
 /**
@@ -1183,16 +1280,20 @@ int32_t lis2dh12_int2_gen_source_get(stmdev_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_int2_gen_threshold_set(stmdev_ctx_t *ctx, uint8_t val)
+int32_t lis2dh12_int2_gen_threshold_set(stmdev_ctx_t *ctx,
+                                        uint8_t val)
 {
   lis2dh12_int2_ths_t int2_ths;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT2_THS, (uint8_t *)&int2_ths,
+                          1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT2_THS, (uint8_t*)&int2_ths, 1);
   if (ret == 0) {
     int2_ths.ths = val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_INT2_THS, (uint8_t*)&int2_ths, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_INT2_THS, (uint8_t *)&int2_ths,
+                             1);
   }
+
   return ret;
 }
 
@@ -1206,14 +1307,14 @@ int32_t lis2dh12_int2_gen_threshold_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_int2_gen_threshold_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t lis2dh12_int2_gen_threshold_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val)
 {
   lis2dh12_int2_ths_t int2_ths;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT2_THS, (uint8_t*)&int2_ths, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT2_THS, (uint8_t *)&int2_ths,
+                          1);
   *val = (uint8_t)int2_ths.ths;
-
   return ret;
 }
 
@@ -1230,12 +1331,15 @@ int32_t lis2dh12_int2_gen_duration_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis2dh12_int2_duration_t int2_duration;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT2_DURATION,
+                          (uint8_t *)&int2_duration, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT2_DURATION, (uint8_t*)&int2_duration, 1);
   if (ret == 0) {
     int2_duration.d = val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_INT2_DURATION, (uint8_t*)&int2_duration, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_INT2_DURATION,
+                             (uint8_t *)&int2_duration, 1);
   }
+
   return ret;
 }
 
@@ -1248,14 +1352,14 @@ int32_t lis2dh12_int2_gen_duration_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_int2_gen_duration_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t lis2dh12_int2_gen_duration_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val)
 {
   lis2dh12_int2_duration_t int2_duration;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT2_DURATION, (uint8_t*)&int2_duration, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_INT2_DURATION,
+                          (uint8_t *)&int2_duration, 1);
   *val = (uint8_t)int2_duration.d;
-
   return ret;
 }
 
@@ -1266,7 +1370,7 @@ int32_t lis2dh12_int2_gen_duration_get(stmdev_ctx_t *ctx, uint8_t *val)
 
 /**
   * @defgroup  LIS2DH12_Interrupt_pins
-  * @brief     This section group all the functions that manage interrup pins
+  * @brief     This section group all the functions that manage interrupt pins
   * @{
   *
   */
@@ -1284,12 +1388,15 @@ int32_t lis2dh12_high_pass_int_conf_set(stmdev_ctx_t *ctx,
 {
   lis2dh12_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG2,
+                          (uint8_t *)&ctrl_reg2, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
   if (ret == 0) {
     ctrl_reg2.hp = (uint8_t)val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG2,
+                             (uint8_t *)&ctrl_reg2, 1);
   }
+
   return ret;
 }
 
@@ -1306,37 +1413,47 @@ int32_t lis2dh12_high_pass_int_conf_get(stmdev_ctx_t *ctx,
 {
   lis2dh12_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG2,
+                          (uint8_t *)&ctrl_reg2, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
   switch (ctrl_reg2.hp) {
     case LIS2DH12_DISC_FROM_INT_GENERATOR:
       *val = LIS2DH12_DISC_FROM_INT_GENERATOR;
       break;
+
     case LIS2DH12_ON_INT1_GEN:
       *val = LIS2DH12_ON_INT1_GEN;
       break;
+
     case LIS2DH12_ON_INT2_GEN:
       *val = LIS2DH12_ON_INT2_GEN;
       break;
+
     case LIS2DH12_ON_TAP_GEN:
       *val = LIS2DH12_ON_TAP_GEN;
       break;
+
     case LIS2DH12_ON_INT1_INT2_GEN:
       *val = LIS2DH12_ON_INT1_INT2_GEN;
       break;
+
     case LIS2DH12_ON_INT1_TAP_GEN:
       *val = LIS2DH12_ON_INT1_TAP_GEN;
       break;
+
     case LIS2DH12_ON_INT2_TAP_GEN:
       *val = LIS2DH12_ON_INT2_TAP_GEN;
       break;
+
     case LIS2DH12_ON_INT1_INT2_TAP_GEN:
       *val = LIS2DH12_ON_INT1_INT2_TAP_GEN;
       break;
+
     default:
       *val = LIS2DH12_DISC_FROM_INT_GENERATOR;
       break;
   }
+
   return ret;
 }
 
@@ -1352,7 +1469,7 @@ int32_t lis2dh12_pin_int1_config_set(stmdev_ctx_t *ctx,
                                      lis2dh12_ctrl_reg3_t *val)
 {
   int32_t ret;
-  ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG3, (uint8_t*) val, 1);
+  ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG3, (uint8_t *) val, 1);
   return ret;
 }
 
@@ -1368,7 +1485,7 @@ int32_t lis2dh12_pin_int1_config_get(stmdev_ctx_t *ctx,
                                      lis2dh12_ctrl_reg3_t *val)
 {
   int32_t ret;
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG3, (uint8_t*) val, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG3, (uint8_t *) val, 1);
   return ret;
 }
 /**
@@ -1381,16 +1498,20 @@ int32_t lis2dh12_pin_int1_config_get(stmdev_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_int2_pin_detect_4d_set(stmdev_ctx_t *ctx, uint8_t val)
+int32_t lis2dh12_int2_pin_detect_4d_set(stmdev_ctx_t *ctx,
+                                        uint8_t val)
 {
   lis2dh12_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5,
+                          (uint8_t *)&ctrl_reg5, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
   if (ret == 0) {
     ctrl_reg5.d4d_int2 = val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG5,
+                             (uint8_t *)&ctrl_reg5, 1);
   }
+
   return ret;
 }
 
@@ -1403,14 +1524,14 @@ int32_t lis2dh12_int2_pin_detect_4d_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_int2_pin_detect_4d_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t lis2dh12_int2_pin_detect_4d_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val)
 {
   lis2dh12_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5,
+                          (uint8_t *)&ctrl_reg5, 1);
   *val = (uint8_t)ctrl_reg5.d4d_int2;
-
   return ret;
 }
 
@@ -1429,12 +1550,15 @@ int32_t lis2dh12_int2_pin_notification_mode_set(stmdev_ctx_t *ctx,
 {
   lis2dh12_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5,
+                          (uint8_t *)&ctrl_reg5, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
   if (ret == 0) {
     ctrl_reg5.lir_int2 = (uint8_t)val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG5,
+                             (uint8_t *)&ctrl_reg5, 1);
   }
+
   return ret;
 }
 
@@ -1453,19 +1577,23 @@ int32_t lis2dh12_int2_pin_notification_mode_get(stmdev_ctx_t *ctx,
 {
   lis2dh12_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5,
+                          (uint8_t *)&ctrl_reg5, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
   switch (ctrl_reg5.lir_int2) {
     case LIS2DH12_INT2_PULSED:
       *val = LIS2DH12_INT2_PULSED;
       break;
+
     case LIS2DH12_INT2_LATCHED:
       *val = LIS2DH12_INT2_LATCHED;
       break;
+
     default:
       *val = LIS2DH12_INT2_PULSED;
       break;
   }
+
   return ret;
 }
 
@@ -1478,16 +1606,20 @@ int32_t lis2dh12_int2_pin_notification_mode_get(stmdev_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_int1_pin_detect_4d_set(stmdev_ctx_t *ctx, uint8_t val)
+int32_t lis2dh12_int1_pin_detect_4d_set(stmdev_ctx_t *ctx,
+                                        uint8_t val)
 {
   lis2dh12_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5,
+                          (uint8_t *)&ctrl_reg5, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
   if (ret == 0) {
     ctrl_reg5.d4d_int1 = val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG5,
+                             (uint8_t *)&ctrl_reg5, 1);
   }
+
   return ret;
 }
 
@@ -1500,14 +1632,14 @@ int32_t lis2dh12_int1_pin_detect_4d_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_int1_pin_detect_4d_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t lis2dh12_int1_pin_detect_4d_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val)
 {
   lis2dh12_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5,
+                          (uint8_t *)&ctrl_reg5, 1);
   *val = (uint8_t)ctrl_reg5.d4d_int1;
-
   return ret;
 }
 
@@ -1525,12 +1657,15 @@ int32_t lis2dh12_int1_pin_notification_mode_set(stmdev_ctx_t *ctx,
 {
   lis2dh12_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5,
+                          (uint8_t *)&ctrl_reg5, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
   if (ret == 0) {
     ctrl_reg5.lir_int1 = (uint8_t)val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG5,
+                             (uint8_t *)&ctrl_reg5, 1);
   }
+
   return ret;
 }
 
@@ -1548,19 +1683,23 @@ int32_t lis2dh12_int1_pin_notification_mode_get(stmdev_ctx_t *ctx,
 {
   lis2dh12_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5,
+                          (uint8_t *)&ctrl_reg5, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
   switch (ctrl_reg5.lir_int1) {
     case LIS2DH12_INT1_PULSED:
       *val = LIS2DH12_INT1_PULSED;
       break;
+
     case LIS2DH12_INT1_LATCHED:
       *val = LIS2DH12_INT1_LATCHED;
       break;
+
     default:
       *val = LIS2DH12_INT1_PULSED;
       break;
   }
+
   return ret;
 }
 
@@ -1576,7 +1715,7 @@ int32_t lis2dh12_pin_int2_config_set(stmdev_ctx_t *ctx,
                                      lis2dh12_ctrl_reg6_t *val)
 {
   int32_t ret;
-  ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG6, (uint8_t*) val, 1);
+  ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG6, (uint8_t *) val, 1);
   return ret;
 }
 
@@ -1592,7 +1731,7 @@ int32_t lis2dh12_pin_int2_config_get(stmdev_ctx_t *ctx,
                                      lis2dh12_ctrl_reg6_t *val)
 {
   int32_t ret;
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG6, (uint8_t*) val, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG6, (uint8_t *) val, 1);
   return ret;
 }
 /**
@@ -1619,12 +1758,15 @@ int32_t lis2dh12_fifo_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis2dh12_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5,
+                          (uint8_t *)&ctrl_reg5, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
   if (ret == 0) {
     ctrl_reg5.fifo_en = val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG5,
+                             (uint8_t *)&ctrl_reg5, 1);
   }
+
   return ret;
 }
 
@@ -1640,10 +1782,9 @@ int32_t lis2dh12_fifo_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis2dh12_ctrl_reg5_t ctrl_reg5;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5, (uint8_t*)&ctrl_reg5, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG5,
+                          (uint8_t *)&ctrl_reg5, 1);
   *val = (uint8_t)ctrl_reg5.fifo_en;
-
   return ret;
 }
 
@@ -1659,12 +1800,15 @@ int32_t lis2dh12_fifo_watermark_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis2dh12_fifo_ctrl_reg_t fifo_ctrl_reg;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_CTRL_REG,
+                          (uint8_t *)&fifo_ctrl_reg, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_CTRL_REG, (uint8_t*)&fifo_ctrl_reg, 1);
   if (ret == 0) {
     fifo_ctrl_reg.fth = val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_FIFO_CTRL_REG, (uint8_t*)&fifo_ctrl_reg, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_FIFO_CTRL_REG,
+                             (uint8_t *)&fifo_ctrl_reg, 1);
   }
+
   return ret;
 }
 
@@ -1680,10 +1824,9 @@ int32_t lis2dh12_fifo_watermark_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis2dh12_fifo_ctrl_reg_t fifo_ctrl_reg;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_CTRL_REG, (uint8_t*)&fifo_ctrl_reg, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_CTRL_REG,
+                          (uint8_t *)&fifo_ctrl_reg, 1);
   *val = (uint8_t)fifo_ctrl_reg.fth;
-
   return ret;
 }
 
@@ -1700,12 +1843,15 @@ int32_t lis2dh12_fifo_trigger_event_set(stmdev_ctx_t *ctx,
 {
   lis2dh12_fifo_ctrl_reg_t fifo_ctrl_reg;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_CTRL_REG,
+                          (uint8_t *)&fifo_ctrl_reg, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_CTRL_REG, (uint8_t*)&fifo_ctrl_reg, 1);
   if (ret == 0) {
     fifo_ctrl_reg.tr = (uint8_t)val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_FIFO_CTRL_REG, (uint8_t*)&fifo_ctrl_reg, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_FIFO_CTRL_REG,
+                             (uint8_t *)&fifo_ctrl_reg, 1);
   }
+
   return ret;
 }
 
@@ -1722,19 +1868,23 @@ int32_t lis2dh12_fifo_trigger_event_get(stmdev_ctx_t *ctx,
 {
   lis2dh12_fifo_ctrl_reg_t fifo_ctrl_reg;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_CTRL_REG,
+                          (uint8_t *)&fifo_ctrl_reg, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_CTRL_REG, (uint8_t*)&fifo_ctrl_reg, 1);
   switch (fifo_ctrl_reg.tr) {
     case LIS2DH12_INT1_GEN:
       *val = LIS2DH12_INT1_GEN;
       break;
+
     case LIS2DH12_INT2_GEN:
       *val = LIS2DH12_INT2_GEN;
       break;
+
     default:
       *val = LIS2DH12_INT1_GEN;
       break;
   }
+
   return ret;
 }
 
@@ -1750,12 +1900,15 @@ int32_t lis2dh12_fifo_mode_set(stmdev_ctx_t *ctx, lis2dh12_fm_t val)
 {
   lis2dh12_fifo_ctrl_reg_t fifo_ctrl_reg;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_CTRL_REG,
+                          (uint8_t *)&fifo_ctrl_reg, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_CTRL_REG, (uint8_t*)&fifo_ctrl_reg, 1);
   if (ret == 0) {
     fifo_ctrl_reg.fm = (uint8_t)val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_FIFO_CTRL_REG, (uint8_t*)&fifo_ctrl_reg, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_FIFO_CTRL_REG,
+                             (uint8_t *)&fifo_ctrl_reg, 1);
   }
+
   return ret;
 }
 
@@ -1771,25 +1924,31 @@ int32_t lis2dh12_fifo_mode_get(stmdev_ctx_t *ctx, lis2dh12_fm_t *val)
 {
   lis2dh12_fifo_ctrl_reg_t fifo_ctrl_reg;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_CTRL_REG,
+                          (uint8_t *)&fifo_ctrl_reg, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_CTRL_REG, (uint8_t*)&fifo_ctrl_reg, 1);
   switch (fifo_ctrl_reg.fm) {
     case LIS2DH12_BYPASS_MODE:
       *val = LIS2DH12_BYPASS_MODE;
       break;
+
     case LIS2DH12_FIFO_MODE:
       *val = LIS2DH12_FIFO_MODE;
       break;
+
     case LIS2DH12_DYNAMIC_STREAM_MODE:
       *val = LIS2DH12_DYNAMIC_STREAM_MODE;
       break;
+
     case LIS2DH12_STREAM_TO_FIFO_MODE:
       *val = LIS2DH12_STREAM_TO_FIFO_MODE;
       break;
+
     default:
       *val = LIS2DH12_BYPASS_MODE;
       break;
   }
+
   return ret;
 }
 
@@ -1805,7 +1964,8 @@ int32_t lis2dh12_fifo_status_get(stmdev_ctx_t *ctx,
                                  lis2dh12_fifo_src_reg_t *val)
 {
   int32_t ret;
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_SRC_REG, (uint8_t*) val, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_SRC_REG, (uint8_t *) val,
+                          1);
   return ret;
 }
 /**
@@ -1820,10 +1980,9 @@ int32_t lis2dh12_fifo_data_level_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis2dh12_fifo_src_reg_t fifo_src_reg;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_SRC_REG, (uint8_t*)&fifo_src_reg, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_SRC_REG,
+                          (uint8_t *)&fifo_src_reg, 1);
   *val = (uint8_t)fifo_src_reg.fss;
-
   return ret;
 }
 /**
@@ -1838,10 +1997,9 @@ int32_t lis2dh12_fifo_empty_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis2dh12_fifo_src_reg_t fifo_src_reg;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_SRC_REG, (uint8_t*)&fifo_src_reg, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_SRC_REG,
+                          (uint8_t *)&fifo_src_reg, 1);
   *val = (uint8_t)fifo_src_reg.empty;
-
   return ret;
 }
 /**
@@ -1856,10 +2014,9 @@ int32_t lis2dh12_fifo_ovr_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis2dh12_fifo_src_reg_t fifo_src_reg;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_SRC_REG, (uint8_t*)&fifo_src_reg, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_SRC_REG,
+                          (uint8_t *)&fifo_src_reg, 1);
   *val = (uint8_t)fifo_src_reg.ovrn_fifo;
-
   return ret;
 }
 /**
@@ -1874,10 +2031,9 @@ int32_t lis2dh12_fifo_fth_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis2dh12_fifo_src_reg_t fifo_src_reg;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_SRC_REG, (uint8_t*)&fifo_src_reg, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_FIFO_SRC_REG,
+                          (uint8_t *)&fifo_src_reg, 1);
   *val = (uint8_t)fifo_src_reg.wtm;
-
   return ret;
 }
 /**
@@ -1901,10 +2057,11 @@ int32_t lis2dh12_fifo_fth_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_tap_conf_set(stmdev_ctx_t *ctx, lis2dh12_click_cfg_t *val)
+int32_t lis2dh12_tap_conf_set(stmdev_ctx_t *ctx,
+                              lis2dh12_click_cfg_t *val)
 {
   int32_t ret;
-  ret = lis2dh12_write_reg(ctx, LIS2DH12_CLICK_CFG, (uint8_t*) val, 1);
+  ret = lis2dh12_write_reg(ctx, LIS2DH12_CLICK_CFG, (uint8_t *) val, 1);
   return ret;
 }
 
@@ -1916,10 +2073,11 @@ int32_t lis2dh12_tap_conf_set(stmdev_ctx_t *ctx, lis2dh12_click_cfg_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_tap_conf_get(stmdev_ctx_t *ctx, lis2dh12_click_cfg_t *val)
+int32_t lis2dh12_tap_conf_get(stmdev_ctx_t *ctx,
+                              lis2dh12_click_cfg_t *val)
 {
   int32_t ret;
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CLICK_CFG, (uint8_t*) val, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CLICK_CFG, (uint8_t *) val, 1);
   return ret;
 }
 /**
@@ -1930,10 +2088,11 @@ int32_t lis2dh12_tap_conf_get(stmdev_ctx_t *ctx, lis2dh12_click_cfg_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_tap_source_get(stmdev_ctx_t *ctx, lis2dh12_click_src_t *val)
+int32_t lis2dh12_tap_source_get(stmdev_ctx_t *ctx,
+                                lis2dh12_click_src_t *val)
 {
   int32_t ret;
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CLICK_SRC, (uint8_t*) val, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CLICK_SRC, (uint8_t *) val, 1);
   return ret;
 }
 /**
@@ -1949,12 +2108,15 @@ int32_t lis2dh12_tap_threshold_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis2dh12_click_ths_t click_ths;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CLICK_THS,
+                          (uint8_t *)&click_ths, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CLICK_THS, (uint8_t*)&click_ths, 1);
   if (ret == 0) {
     click_ths.ths = val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CLICK_THS, (uint8_t*)&click_ths, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CLICK_THS,
+                             (uint8_t *)&click_ths, 1);
   }
+
   return ret;
 }
 
@@ -1971,10 +2133,9 @@ int32_t lis2dh12_tap_threshold_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis2dh12_click_ths_t click_ths;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CLICK_THS, (uint8_t*)&click_ths, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CLICK_THS,
+                          (uint8_t *)&click_ths, 1);
   *val = (uint8_t)click_ths.ths;
-
   return ret;
 }
 
@@ -1994,12 +2155,15 @@ int32_t lis2dh12_tap_notification_mode_set(stmdev_ctx_t *ctx,
 {
   lis2dh12_click_ths_t click_ths;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CLICK_THS,
+                          (uint8_t *)&click_ths, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CLICK_THS, (uint8_t*)&click_ths, 1);
   if (ret == 0) {
     click_ths.lir_click = (uint8_t)val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CLICK_THS, (uint8_t*)&click_ths, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CLICK_THS,
+                             (uint8_t *)&click_ths, 1);
   }
+
   return ret;
 }
 
@@ -2019,19 +2183,23 @@ int32_t lis2dh12_tap_notification_mode_get(stmdev_ctx_t *ctx,
 {
   lis2dh12_click_ths_t click_ths;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CLICK_THS,
+                          (uint8_t *)&click_ths, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CLICK_THS, (uint8_t*)&click_ths, 1);
   switch (click_ths.lir_click) {
     case LIS2DH12_TAP_PULSED:
       *val = LIS2DH12_TAP_PULSED;
       break;
+
     case LIS2DH12_TAP_LATCHED:
       *val = LIS2DH12_TAP_LATCHED;
       break;
+
     default:
       *val = LIS2DH12_TAP_PULSED;
       break;
   }
+
   return ret;
 }
 
@@ -2049,12 +2217,15 @@ int32_t lis2dh12_shock_dur_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis2dh12_time_limit_t time_limit;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_TIME_LIMIT,
+                          (uint8_t *)&time_limit, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_TIME_LIMIT, (uint8_t*)&time_limit, 1);
   if (ret == 0) {
     time_limit.tli = val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_TIME_LIMIT, (uint8_t*)&time_limit, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_TIME_LIMIT,
+                             (uint8_t *)&time_limit, 1);
   }
+
   return ret;
 }
 
@@ -2072,10 +2243,9 @@ int32_t lis2dh12_shock_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis2dh12_time_limit_t time_limit;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_TIME_LIMIT, (uint8_t*)&time_limit, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_TIME_LIMIT,
+                          (uint8_t *)&time_limit, 1);
   *val = (uint8_t)time_limit.tli;
-
   return ret;
 }
 
@@ -2094,12 +2264,15 @@ int32_t lis2dh12_quiet_dur_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis2dh12_time_latency_t time_latency;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_TIME_LATENCY,
+                          (uint8_t *)&time_latency, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_TIME_LATENCY, (uint8_t*)&time_latency, 1);
   if (ret == 0) {
     time_latency.tla = val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_TIME_LATENCY, (uint8_t*)&time_latency, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_TIME_LATENCY,
+                             (uint8_t *)&time_latency, 1);
   }
+
   return ret;
 }
 
@@ -2118,10 +2291,9 @@ int32_t lis2dh12_quiet_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis2dh12_time_latency_t time_latency;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_TIME_LATENCY, (uint8_t*)&time_latency, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_TIME_LATENCY,
+                          (uint8_t *)&time_latency, 1);
   *val = (uint8_t)time_latency.tla;
-
   return ret;
 }
 
@@ -2136,16 +2308,20 @@ int32_t lis2dh12_quiet_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_double_tap_timeout_set(stmdev_ctx_t *ctx, uint8_t val)
+int32_t lis2dh12_double_tap_timeout_set(stmdev_ctx_t *ctx,
+                                        uint8_t val)
 {
   lis2dh12_time_window_t time_window;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_TIME_WINDOW,
+                          (uint8_t *)&time_window, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_TIME_WINDOW, (uint8_t*)&time_window, 1);
   if (ret == 0) {
     time_window.tw = val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_TIME_WINDOW, (uint8_t*)&time_window, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_TIME_WINDOW,
+                             (uint8_t *)&time_window, 1);
   }
+
   return ret;
 }
 
@@ -2160,14 +2336,14 @@ int32_t lis2dh12_double_tap_timeout_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lis2dh12_double_tap_timeout_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t lis2dh12_double_tap_timeout_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val)
 {
   lis2dh12_time_window_t time_window;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_TIME_WINDOW, (uint8_t*)&time_window, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_TIME_WINDOW,
+                          (uint8_t *)&time_window, 1);
   *val = (uint8_t)time_window.tw;
-
   return ret;
 }
 
@@ -2198,12 +2374,15 @@ int32_t lis2dh12_act_threshold_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis2dh12_act_ths_t act_ths;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_ACT_THS, (uint8_t *)&act_ths,
+                          1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_ACT_THS, (uint8_t*)&act_ths, 1);
   if (ret == 0) {
     act_ths.acth = val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_ACT_THS, (uint8_t*)&act_ths, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_ACT_THS, (uint8_t *)&act_ths,
+                             1);
   }
+
   return ret;
 }
 
@@ -2221,10 +2400,9 @@ int32_t lis2dh12_act_threshold_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis2dh12_act_ths_t act_ths;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_ACT_THS, (uint8_t*)&act_ths, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_ACT_THS, (uint8_t *)&act_ths,
+                          1);
   *val = (uint8_t)act_ths.acth;
-
   return ret;
 }
 
@@ -2241,12 +2419,15 @@ int32_t lis2dh12_act_timeout_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lis2dh12_act_dur_t act_dur;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_ACT_DUR, (uint8_t *)&act_dur,
+                          1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_ACT_DUR, (uint8_t*)&act_dur, 1);
   if (ret == 0) {
     act_dur.actd = val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_ACT_DUR, (uint8_t*)&act_dur, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_ACT_DUR, (uint8_t *)&act_dur,
+                             1);
   }
+
   return ret;
 }
 
@@ -2263,10 +2444,9 @@ int32_t lis2dh12_act_timeout_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lis2dh12_act_dur_t act_dur;
   int32_t ret;
-
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_ACT_DUR, (uint8_t*)&act_dur, 1);
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_ACT_DUR, (uint8_t *)&act_dur,
+                          1);
   *val = (uint8_t)act_dur.actd;
-
   return ret;
 }
 
@@ -2296,12 +2476,15 @@ int32_t lis2dh12_pin_sdo_sa0_mode_set(stmdev_ctx_t *ctx,
 {
   lis2dh12_ctrl_reg0_t ctrl_reg0;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG0,
+                          (uint8_t *)&ctrl_reg0, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG0, (uint8_t*)&ctrl_reg0, 1);
   if (ret == 0) {
     ctrl_reg0.sdo_pu_disc = (uint8_t)val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG0, (uint8_t*)&ctrl_reg0, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG0,
+                             (uint8_t *)&ctrl_reg0, 1);
   }
+
   return ret;
 }
 
@@ -2318,19 +2501,23 @@ int32_t lis2dh12_pin_sdo_sa0_mode_get(stmdev_ctx_t *ctx,
 {
   lis2dh12_ctrl_reg0_t ctrl_reg0;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG0,
+                          (uint8_t *)&ctrl_reg0, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG0, (uint8_t*)&ctrl_reg0, 1);
   switch (ctrl_reg0.sdo_pu_disc) {
     case LIS2DH12_PULL_UP_DISCONNECT:
       *val = LIS2DH12_PULL_UP_DISCONNECT;
       break;
+
     case LIS2DH12_PULL_UP_CONNECT:
       *val = LIS2DH12_PULL_UP_CONNECT;
       break;
+
     default:
       *val = LIS2DH12_PULL_UP_DISCONNECT;
       break;
   }
+
   return ret;
 }
 
@@ -2346,12 +2533,15 @@ int32_t lis2dh12_spi_mode_set(stmdev_ctx_t *ctx, lis2dh12_sim_t val)
 {
   lis2dh12_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
   if (ret == 0) {
     ctrl_reg4.sim = (uint8_t)val;
-    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
+    ret = lis2dh12_write_reg(ctx, LIS2DH12_CTRL_REG4,
+                             (uint8_t *)&ctrl_reg4, 1);
   }
+
   return ret;
 }
 
@@ -2367,19 +2557,23 @@ int32_t lis2dh12_spi_mode_get(stmdev_ctx_t *ctx, lis2dh12_sim_t *val)
 {
   lis2dh12_ctrl_reg4_t ctrl_reg4;
   int32_t ret;
+  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4,
+                          (uint8_t *)&ctrl_reg4, 1);
 
-  ret = lis2dh12_read_reg(ctx, LIS2DH12_CTRL_REG4, (uint8_t*)&ctrl_reg4, 1);
   switch (ctrl_reg4.sim) {
     case LIS2DH12_SPI_4_WIRE:
       *val = LIS2DH12_SPI_4_WIRE;
       break;
+
     case LIS2DH12_SPI_3_WIRE:
       *val = LIS2DH12_SPI_3_WIRE;
       break;
+
     default:
       *val = LIS2DH12_SPI_4_WIRE;
       break;
   }
+
   return ret;
 }
 

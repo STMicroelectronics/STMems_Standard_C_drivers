@@ -125,7 +125,8 @@ static float min_st_limit_mg;
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -136,128 +137,133 @@ static void platform_init(void);
 /* Main Example --------------------------------------------------------------*/
 void lis2dh12_self_test(void)
 {
-
   stmdev_ctx_t dev_ctx;
   lis2dh12_reg_t reg;
   uint8_t i, j;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &SENSOR_BUS; 
-
+  dev_ctx.handle = &SENSOR_BUS;
   /* Wait boot time and initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lis2dh12_device_id_get(&dev_ctx, &reg.byte);
-  if (reg.byte != LIS2DH12_ID){
-    while(1) {
+
+  if (reg.byte != LIS2DH12_ID) {
+    while (1) {
       /* manage here device not found */
     }
   }
 
   /* Enable Block Data Update. */
   lis2dh12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set full scale to 2g. */
   lis2dh12_full_scale_set(&dev_ctx, LIS2DH12_2g);
-
   /* Set device in normal mode. */
   lis2dh12_operating_mode_set(&dev_ctx, LIS2DH12_NM_10bit);
-
   /* Set Output Data Rate to 1Hz. */
   lis2dh12_data_rate_set(&dev_ctx, LIS2DH12_ODR_50Hz);
-
   /* Wait stable output */
   platform_delay(90);
 
   /* Check if new value available */
   do {
     lis2dh12_status_get(&dev_ctx, &reg.status_reg);
-  } while(!reg.status_reg.zyxda);
+  } while (!reg.status_reg.zyxda);
+
   /* Read dummy data and discard it */
   lis2dh12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-
   /* Read 5 sample and get the average vale for each axis */
-  memset(acceleration_mg, 0x00, 3*sizeof(float));
-  for (i = 0; i < 5; i++){
+  memset(acceleration_mg, 0x00, 3 * sizeof(float));
+
+  for (i = 0; i < 5; i++) {
     /* Check if new value available */
     do {
-        lis2dh12_status_get(&dev_ctx, &reg.status_reg);
-    } while(!reg.status_reg.zyxda);
+      lis2dh12_status_get(&dev_ctx, &reg.status_reg);
+    } while (!reg.status_reg.zyxda);
+
     /* Read data and accumulate the mg value */
     lis2dh12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-    for (j=0; j<3; j++){
-      acceleration_mg[j] += lis2dh12_from_fs2_nm_to_mg(data_raw_acceleration[j]);
+
+    for (j = 0; j < 3; j++) {
+      acceleration_mg[j] += lis2dh12_from_fs2_nm_to_mg(
+                              data_raw_acceleration[j]);
     }
   }
+
   /* Calculate the mg average values */
-  for (i=0; i<3; i++){
+  for (i = 0; i < 3; i++) {
     acceleration_mg[i] /= 5.0f;
   }
 
   /* Enable Self Test positive (or negative) */
   lis2dh12_self_test_set(&dev_ctx, LIS2DH12_ST_POSITIVE);
   //lis2dh12_self_test_set(&dev_ctx, LIS2DH12_ST_NEGATIVE);
-
   /* Wait stable output */
   platform_delay(90);
 
   /* Check if new value available */
   do {
     lis2dh12_status_get(&dev_ctx, &reg.status_reg);
-  } while(!reg.status_reg.zyxda);
+  } while (!reg.status_reg.zyxda);
+
   /* Read dummy data and discard it */
   lis2dh12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-
   /* Read 5 sample and get the average vale for each axis */
-  memset(acceleration_st_mg, 0x00, 3*sizeof(float));
-  for (i = 0; i < 5; i++){
+  memset(acceleration_st_mg, 0x00, 3 * sizeof(float));
+
+  for (i = 0; i < 5; i++) {
     /* Check if new value available */
     do {
-        lis2dh12_status_get(&dev_ctx, &reg.status_reg);
-    } while(!reg.status_reg.zyxda);
+      lis2dh12_status_get(&dev_ctx, &reg.status_reg);
+    } while (!reg.status_reg.zyxda);
+
     /* Read data and accumulate the mg value */
     lis2dh12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-    for (j=0; j<3; j++){
-      acceleration_st_mg[j] += lis2dh12_from_fs2_nm_to_mg(data_raw_acceleration[j]);
+
+    for (j = 0; j < 3; j++) {
+      acceleration_st_mg[j] += lis2dh12_from_fs2_nm_to_mg(
+                                 data_raw_acceleration[j]);
     }
   }
+
   /* Calculate the mg average values */
-  for (i=0; i<3; i++){
+  for (i = 0; i < 3; i++) {
     acceleration_st_mg[i] /= 5.0f;
   }
 
   /* Calculate the mg values for self test */
-  for (i=0; i<3; i++){
+  for (i = 0; i < 3; i++) {
     test_val_mg[i] = fabs((acceleration_st_mg[i] - acceleration_mg[i]));
   }
+
   min_st_limit_mg = lis2dh12_from_fs2_nm_to_mg(MIN_ST_LIMIT_LSb);
   max_st_limit_mg = lis2dh12_from_fs2_nm_to_mg(MAX_ST_LIMIT_LSb);
 
   /* Check self test limit */
-  for (i=0; i<3; i++){
-    if (( min_st_limit_mg < test_val_mg[i] ) && ( test_val_mg[i] < max_st_limit_mg)){
-      sprintf((char*)tx_buffer, "Axis[%d]: lmt min %4.2f mg - lmt max %4.2f mg - val %4.2f mg - PASS\r\n",
+  for (i = 0; i < 3; i++) {
+    if (( min_st_limit_mg < test_val_mg[i] ) &&
+        ( test_val_mg[i] < max_st_limit_mg)) {
+      sprintf((char *)tx_buffer,
+              "Axis[%d]: lmt min %4.2f mg - lmt max %4.2f mg - val %4.2f mg - PASS\r\n",
               i, min_st_limit_mg, max_st_limit_mg, test_val_mg[i]);
     }
+
     else {
-      sprintf((char*)tx_buffer, "Axis[%d]: lmt min %4.2f mg - lmt max %4.2f mg - val %4.2f mg - FAIL\r\n",
-          i, min_st_limit_mg, max_st_limit_mg, test_val_mg[i]);
+      sprintf((char *)tx_buffer,
+              "Axis[%d]: lmt min %4.2f mg - lmt max %4.2f mg - val %4.2f mg - FAIL\r\n",
+              i, min_st_limit_mg, max_st_limit_mg, test_val_mg[i]);
     }
-    tx_com(tx_buffer, strlen((char const*)tx_buffer));
+
+    tx_com(tx_buffer, strlen((char const *)tx_buffer));
   }
 
   /* Disable Self Test */
   lis2dh12_self_test_set(&dev_ctx, LIS2DH12_ST_DISABLE);
-
   /* Disable sensor. */
   lis2dh12_data_rate_set(&dev_ctx, LIS2DH12_POWER_DOWN);
-
 }
 
 /*
@@ -270,7 +276,8 @@ void lis2dh12_self_test(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
