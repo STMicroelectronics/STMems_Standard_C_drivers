@@ -18,7 +18,7 @@
  *
  ******************************************************************************
  */
- 
+
 /*
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
@@ -101,7 +101,7 @@
 #include "components.h"
 #endif
 
-typedef union{
+typedef union {
   int16_t i16bit[3];
   uint8_t u8bit[6];
 } axis3bit16_t;
@@ -134,11 +134,13 @@ static stmdev_ctx_t mag_ctx;
 
 /* Private functions ---------------------------------------------------------*/
 
-static int32_t ism330dhcx_write_iis2mdc_cx(void* ctx, uint8_t reg, uint8_t* data,
-                                         uint16_t len);
+static int32_t ism330dhcx_write_iis2mdc_cx(void *ctx, uint8_t reg,
+                                           uint8_t *data,
+                                           uint16_t len);
 
-static int32_t ism330dhcx_read_iis2mdc_cx(void* ctx, uint8_t reg, uint8_t* data,
-                                        uint16_t len);
+static int32_t ism330dhcx_read_iis2mdc_cx(void *ctx, uint8_t reg,
+                                          uint8_t *data,
+                                          uint16_t len);
 
 /*
  *   WARNING:
@@ -146,7 +148,8 @@ static int32_t ism330dhcx_read_iis2mdc_cx(void* ctx, uint8_t reg, uint8_t* data,
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -166,41 +169,39 @@ void ism330dhcx_sensor_hub_iis2mdc_fifo_timestamp(void)
   float acceleration_mg[3];
   float magnetic_mG[3];
   axis3bit16_t dummy;
-
   /* Initialize ism330dhcx driver interface */
   ag_ctx.write_reg = platform_write;
   ag_ctx.read_reg = platform_read;
   ag_ctx.handle = &SENSOR_BUS;
-
   /* Initialize iis2mdc driver interface */
   mag_ctx.read_reg = ism330dhcx_read_iis2mdc_cx;
   mag_ctx.write_reg = ism330dhcx_write_iis2mdc_cx;
   mag_ctx.handle = &SENSOR_BUS;
-
   /* Init test platform. */
   platform_init();
-
   /* Check device ID. */
   ism330dhcx_device_id_get(&ag_ctx, &whoamI);
+
   if (whoamI != ISM330DHCX_ID) {
     /* Sensor not detected. */
-    while(1);
+    while (1);
   }
 
   /* Restore default configuration. */
   ism330dhcx_reset_set(&ag_ctx, PROPERTY_ENABLE);
+
   do {
     ism330dhcx_reset_get(&ag_ctx, &rst);
   } while (rst);
 
   /* Some hardware require to enable pull up on master I2C interface. */
   //ism330dhcx_sh_pin_mode_set(&ag_ctx, ISM330DHCX_INTERNAL_PULL_UP);
-
   /* Check if IIS2MDC connected to Sensor Hub. */
   iis2mdc_device_id_get(&mag_ctx, &whoamI);
+
   if (whoamI != IIS2MDC_ID) {
     /* Magnetometer not detected. */
-    while(1);
+    while (1);
   }
 
   /* Configure IIS2MDC. */
@@ -208,7 +209,6 @@ void ism330dhcx_sensor_hub_iis2mdc_fifo_timestamp(void)
   iis2mdc_offset_temp_comp_set(&mag_ctx, PROPERTY_ENABLE);
   iis2mdc_operating_mode_set(&mag_ctx, IIS2MDC_CONTINUOUS_MODE);
   iis2mdc_data_rate_set(&mag_ctx, IIS2MDC_ODR_20Hz);
-
   /* Configure Sensor Hub to read one slave. */
   ism330dhcx_sh_data_rate_set(&ag_ctx, ISM330DHCX_SH_ODR_26Hz);
   sh_cfg_read.slv_add = IIS2MDC_I2C_ADD; /* 8bit I2C address */
@@ -219,45 +219,34 @@ void ism330dhcx_sensor_hub_iis2mdc_fifo_timestamp(void)
   ism330dhcx_sh_slave_connected_set(&ag_ctx, ISM330DHCX_SLV_0);
   /* Enable I2C Master. */
   ism330dhcx_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
-
   /* Set XL full scale and Gyro full scale. */
   ism330dhcx_xl_full_scale_set(&ag_ctx, ISM330DHCX_2g);
   ism330dhcx_gy_full_scale_set(&ag_ctx, ISM330DHCX_2000dps);
-
   /* Enable Block Data Update. */
   ism330dhcx_block_data_update_set(&ag_ctx, PROPERTY_ENABLE);
-
   /*
    * Set FIFO watermark (number of unread sensor data TAG + 6 bytes
    * stored in FIFO) to 15 samples. 5 * (Acc + Gyro + Mag)
    */
   ism330dhcx_fifo_watermark_set(&ag_ctx, 15);
-
   /* Set FIFO mode to Stream mode (aka Continuous Mode). */
   ism330dhcx_fifo_mode_set(&ag_ctx, ISM330DHCX_STREAM_MODE);
-
   /* Enable latched interrupt notification. */
   ism330dhcx_int_notification_set(&ag_ctx, ISM330DHCX_ALL_INT_LATCHED);
-
- /* Enable drdy 75 us pulse: uncomment if interrupt must be pulsed. */
- //ism330dhcx_data_ready_mode_set(&ag_ctx, ISM330DHCX_DRDY_PULSED);
-
-
+  /* Enable drdy 75 us pulse: uncomment if interrupt must be pulsed. */
+  //ism330dhcx_data_ready_mode_set(&ag_ctx, ISM330DHCX_DRDY_PULSED);
   /* FIFO watermark interrupt routed on INT1 pin.
    * Remember that INT1 pin is used by sensor to switch in I3C mode.
    */
   // ism330dhcx_pin_int1_route_get(&ag_ctx, &int1_route);
   // int1_route.fifo_th = PROPERTY_ENABLE;
   // ism330dhcx_pin_int1_route_set(&ag_ctx, int1_route);
-
   /* FIFO watermark interrupt routed on INT2 pin. */
   //ism330dhcx_pin_int2_route_get(&ag_ctx, NULL, &int2_route);
   //int2_route.fifo_th = PROPERTY_ENABLE;
   //ism330dhcx_pin_int2_route_set(&ag_ctx,  NULL, int2_route);
-
   /* Enable FIFO batching of Slave0. */
   ism330dhcx_sh_batch_slave_0_set(&ag_ctx, PROPERTY_ENABLE);
-
   /*Set FIFO batch XL/Gyro ODR to 26Hz.
    * Enable Timestamp batching with no decimation.
    */
@@ -265,96 +254,91 @@ void ism330dhcx_sensor_hub_iis2mdc_fifo_timestamp(void)
   ism330dhcx_fifo_gy_batch_set(&ag_ctx, ISM330DHCX_GY_BATCHED_AT_26Hz);
   ism330dhcx_fifo_timestamp_decimation_set(&ag_ctx, ISM330DHCX_DEC_1);
   ism330dhcx_timestamp_set(&ag_ctx, PROPERTY_ENABLE);
-
   /* Enable I2C Master. */
   //ism330dhcx_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
-
   /* Set Output Data Rate. */
   ism330dhcx_xl_data_rate_set(&ag_ctx, ISM330DHCX_XL_ODR_26Hz);
   ism330dhcx_gy_data_rate_set(&ag_ctx, ISM330DHCX_GY_ODR_26Hz);
 
-  while(1)
-  {
-  uint16_t num = 0;
+  while (1) {
+    uint16_t num = 0;
     ism330dhcx_fifo_tag_t reg_tag;
     timestamp_sample_t ts_tick;
     uint32_t timestamp = 0.0f;
-
     /* Read FIFO when threshold is reached. */
     ism330dhcx_fifo_wtm_flag_get(&ag_ctx, &fifo_wtm);
-    if (fifo_wtm)
-    {
+
+    if (fifo_wtm) {
       /* Read number of samples in FIFO. */
       ism330dhcx_fifo_data_level_get(&ag_ctx, &num);
 
-    while(num--)
-      {
-      /* Read FIFO tag. */
-      ism330dhcx_fifo_sensor_tag_get(&ag_ctx, &reg_tag);
+      while (num--) {
+        /* Read FIFO tag. */
+        ism330dhcx_fifo_sensor_tag_get(&ag_ctx, &reg_tag);
 
-      switch(reg_tag)
-      {
-      case ISM330DHCX_XL_NC_TAG:
-        memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-        ism330dhcx_fifo_out_raw_get(&ag_ctx, data_raw_acceleration.u8bit);
+        switch (reg_tag) {
+          case ISM330DHCX_XL_NC_TAG:
+            memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
+            ism330dhcx_fifo_out_raw_get(&ag_ctx, data_raw_acceleration.u8bit);
+            acceleration_mg[0] =
+              ism330dhcx_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
+            acceleration_mg[1] =
+              ism330dhcx_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
+            acceleration_mg[2] =
+              ism330dhcx_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
+            sprintf((char *)tx_buffer,
+                    "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f T %u.%u ms\r\n",
+                    acceleration_mg[0], acceleration_mg[1],
+                    acceleration_mg[2], (unsigned int)(timestamp / 1000ULL),
+                    (unsigned int)(timestamp % 1000ULL));
+            tx_com(tx_buffer, strlen((char const *)tx_buffer));
+            break;
 
-        acceleration_mg[0] =
-        ism330dhcx_from_fs2g_to_mg(data_raw_acceleration.i16bit[0]);
-        acceleration_mg[1] =
-        ism330dhcx_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
-        acceleration_mg[2] =
-        ism330dhcx_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
+          case ISM330DHCX_GYRO_NC_TAG:
+            memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
+            ism330dhcx_fifo_out_raw_get(&ag_ctx, data_raw_angular_rate.u8bit);
+            angular_rate_mdps[0] =
+              ism330dhcx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[0]);
+            angular_rate_mdps[1] =
+              ism330dhcx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[1]);
+            angular_rate_mdps[2] =
+              ism330dhcx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
+            sprintf((char *)tx_buffer,
+                    "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f T %u.%u ms\r\n",
+                    angular_rate_mdps[0], angular_rate_mdps[1],
+                    angular_rate_mdps[2], (unsigned int)(timestamp / 1000ULL),
+                    (unsigned int)(timestamp % 1000ULL));
+            tx_com(tx_buffer, strlen((char const *)tx_buffer));
+            break;
 
-        sprintf((char*)tx_buffer,
-            "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f T %u.%u ms\r\n",
-              acceleration_mg[0], acceleration_mg[1],
-            acceleration_mg[2], (unsigned int)(timestamp / 1000ULL),
-            (unsigned int)(timestamp % 1000ULL));
-        tx_com(tx_buffer, strlen((char const*)tx_buffer));
-        break;
-      case ISM330DHCX_GYRO_NC_TAG:
-        memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
-        ism330dhcx_fifo_out_raw_get(&ag_ctx, data_raw_angular_rate.u8bit);
-        angular_rate_mdps[0] =
-          ism330dhcx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[0]);
-        angular_rate_mdps[1] =
-          ism330dhcx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[1]);
-        angular_rate_mdps[2] =
-          ism330dhcx_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
-
-        sprintf((char*)tx_buffer,
-            "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f T %u.%u ms\r\n",
-            angular_rate_mdps[0], angular_rate_mdps[1],
-            angular_rate_mdps[2], (unsigned int)(timestamp / 1000ULL),
-            (unsigned int)(timestamp % 1000ULL));
-        tx_com(tx_buffer, strlen((char const*)tx_buffer));
-        break;
-      case ISM330DHCX_SENSORHUB_SLAVE0_TAG:
-        memset(data_raw_magnetic.u8bit, 0x00, 3 * sizeof(int16_t));
-        ism330dhcx_fifo_out_raw_get(&ag_ctx, data_raw_magnetic.u8bit);
-          magnetic_mG[0] =
+          case ISM330DHCX_SENSORHUB_SLAVE0_TAG:
+            memset(data_raw_magnetic.u8bit, 0x00, 3 * sizeof(int16_t));
+            ism330dhcx_fifo_out_raw_get(&ag_ctx, data_raw_magnetic.u8bit);
+            magnetic_mG[0] =
               iis2mdc_from_lsb_to_mgauss(data_raw_magnetic.i16bit[0]);
-          magnetic_mG[1] =
+            magnetic_mG[1] =
               iis2mdc_from_lsb_to_mgauss(data_raw_magnetic.i16bit[1]);
-          magnetic_mG[2] =
+            magnetic_mG[2] =
               iis2mdc_from_lsb_to_mgauss(data_raw_magnetic.i16bit[2]);
+            sprintf((char *)tx_buffer,
+                    "Mag [mG]:%4.2f\t%4.2f\t%4.2f T %u.%u ms\r\n",
+                    magnetic_mG[0], magnetic_mG[1], magnetic_mG[2],
+                    (unsigned int)(timestamp / 1000ULL),
+                    (unsigned int)(timestamp % 1000ULL));
+            tx_com(tx_buffer, strlen((char const *)tx_buffer));
+            break;
 
-          sprintf((char*)tx_buffer,
-              "Mag [mG]:%4.2f\t%4.2f\t%4.2f T %u.%u ms\r\n",
-                magnetic_mG[0], magnetic_mG[1], magnetic_mG[2],
-            (unsigned int)(timestamp / 1000ULL),
-            (unsigned int)(timestamp % 1000ULL));
-          tx_com(tx_buffer, strlen((char const*)tx_buffer));
-          break;
-      case ISM330DHCX_TIMESTAMP_TAG:
-        ism330dhcx_fifo_out_raw_get(&ag_ctx, ts_tick.byte);
-        timestamp = (unsigned int)ism330dhcx_from_lsb_to_nsec(ts_tick.reg.tick);
-        break;
-      default:
-        /* Flush unused samples. */
-        memset(dummy.u8bit, 0x00, 3 * sizeof(int16_t));
-        ism330dhcx_fifo_out_raw_get(&ag_ctx, dummy.u8bit);
-        break;
+          case ISM330DHCX_TIMESTAMP_TAG:
+            ism330dhcx_fifo_out_raw_get(&ag_ctx, ts_tick.byte);
+            timestamp = (unsigned int)ism330dhcx_from_lsb_to_nsec(
+                          ts_tick.reg.tick);
+            break;
+
+          default:
+            /* Flush unused samples. */
+            memset(dummy.u8bit, 0x00, 3 * sizeof(int16_t));
+            ism330dhcx_fifo_out_raw_get(&ag_ctx, dummy.u8bit);
+            break;
         }
       }
     }
@@ -371,32 +355,29 @@ void ism330dhcx_sensor_hub_iis2mdc_fifo_timestamp(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t ism330dhcx_write_iis2mdc_cx(void* ctx, uint8_t reg, uint8_t* data,
-        uint16_t len)
+static int32_t ism330dhcx_write_iis2mdc_cx(void *ctx, uint8_t reg,
+                                           uint8_t *data,
+                                           uint16_t len)
 {
   int16_t data_raw_acceleration[3];
   int32_t ret;
   uint8_t drdy;
   ism330dhcx_status_master_t master_status;
   ism330dhcx_sh_cfg_write_t sh_cfg_write;
-
   /* Configure Sensor Hub to read IIS2MDC. */
   sh_cfg_write.slv0_add = IIS2MDC_I2C_ADD; /* 8bit I2C address */
   sh_cfg_write.slv0_subadd = reg,
   sh_cfg_write.slv0_data = *data,
   ret = ism330dhcx_sh_cfg_write(&ag_ctx, &sh_cfg_write);
-
   /* Disable accelerometer. */
   ism330dhcx_xl_data_rate_set(&ag_ctx, ISM330DHCX_XL_ODR_OFF);
-
   /* Enable I2C Master. */
   ism330dhcx_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
-
   /* Enable accelerometer to trigger Sensor Hub operation. */
   ism330dhcx_xl_data_rate_set(&ag_ctx, ISM330DHCX_XL_ODR_104Hz);
-
   /* Wait Sensor Hub operation flag set. */
   ism330dhcx_acceleration_raw_get(&ag_ctx, data_raw_acceleration);
+
   do {
     HAL_Delay(20);
     ism330dhcx_xl_flag_data_ready_get(&ag_ctx, &drdy);
@@ -410,7 +391,6 @@ static int32_t ism330dhcx_write_iis2mdc_cx(void* ctx, uint8_t reg, uint8_t* data
   /* Disable I2C master and XL (trigger). */
   ism330dhcx_sh_master_set(&ag_ctx, PROPERTY_DISABLE);
   ism330dhcx_xl_data_rate_set(&ag_ctx, ISM330DHCX_XL_ODR_OFF);
-
   return ret;
 }
 
@@ -424,36 +404,33 @@ static int32_t ism330dhcx_write_iis2mdc_cx(void* ctx, uint8_t reg, uint8_t* data
  * @param  len       number of consecutive register to read
  *
  */
-static int32_t ism330dhcx_read_iis2mdc_cx(void* ctx, uint8_t reg, uint8_t* data,
-        uint16_t len)
+static int32_t ism330dhcx_read_iis2mdc_cx(void *ctx, uint8_t reg,
+                                          uint8_t *data,
+                                          uint16_t len)
 {
   ism330dhcx_sh_cfg_read_t sh_cfg_read;
   int16_t data_raw_acceleration[3];
   int32_t ret;
   uint8_t drdy;
   ism330dhcx_status_master_t master_status;
-
   /* Disable accelerometer. */
   ism330dhcx_xl_data_rate_set(&ag_ctx, ISM330DHCX_XL_ODR_OFF);
-
   /* Configure Sensor Hub to read IIS2MDC. */
   sh_cfg_read.slv_add = IIS2MDC_I2C_ADD; /* 8bit I2C address */
   sh_cfg_read.slv_subadd = reg;
   sh_cfg_read.slv_len = len;
   ret = ism330dhcx_sh_slv0_cfg_read(&ag_ctx, &sh_cfg_read);
   ism330dhcx_sh_slave_connected_set(&ag_ctx, ISM330DHCX_SLV_0);
-
   /* Enable I2C Master and I2C master. */
-   ism330dhcx_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
-
+  ism330dhcx_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
   /* Enable accelerometer to trigger Sensor Hub operation. */
   ism330dhcx_xl_data_rate_set(&ag_ctx, ISM330DHCX_XL_ODR_104Hz);
-
   /* Wait Sensor Hub operation flag set. */
   ism330dhcx_acceleration_raw_get(&ag_ctx, data_raw_acceleration);
+
   do {
     HAL_Delay(20);
-  ism330dhcx_xl_flag_data_ready_get(&ag_ctx, &drdy);
+    ism330dhcx_xl_flag_data_ready_get(&ag_ctx, &drdy);
   } while (!drdy);
 
   do {
@@ -464,10 +441,9 @@ static int32_t ism330dhcx_read_iis2mdc_cx(void* ctx, uint8_t reg, uint8_t* data,
   /* Disable I2C master and XL(trigger). */
   ism330dhcx_sh_master_set(&ag_ctx, PROPERTY_DISABLE);
   ism330dhcx_xl_data_rate_set(&ag_ctx, ISM330DHCX_XL_ODR_OFF);
-
   /* Read SensorHub registers. */
-  ism330dhcx_sh_read_data_raw_get(&ag_ctx,(ism330dhcx_emb_sh_read_t*)data, len);
-
+  ism330dhcx_sh_read_data_raw_get(&ag_ctx,
+                                  (ism330dhcx_emb_sh_read_t *)data, len);
   return ret;
 }
 
@@ -481,17 +457,18 @@ static int32_t ism330dhcx_read_iis2mdc_cx(void* ctx, uint8_t reg, uint8_t* data,
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-    HAL_I2C_Mem_Write(handle, ISM330DHCX_I2C_ADD_H, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+  HAL_I2C_Mem_Write(handle, ISM330DHCX_I2C_ADD_H, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_write(handle,  ISM330DHCX_I2C_ADD_H & 0xFE, reg, bufp, len);
 #endif
@@ -515,11 +492,11 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   HAL_I2C_Mem_Read(handle, ISM330DHCX_I2C_ADD_H, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
-    reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Receive(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_read(handle, ISM330DHCX_I2C_ADD_H & 0xFE, reg, bufp, len);
 #endif
@@ -529,7 +506,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */

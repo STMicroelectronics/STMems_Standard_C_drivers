@@ -23,7 +23,7 @@
 #define ISM330DHCX_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -74,7 +74,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
@@ -107,8 +107,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -131,9 +133,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -177,9 +179,11 @@ typedef struct {
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t not_used_01              : 6;
-  uint8_t reg_access               : 2; /* shub_reg_access + func_cfg_access */
+uint8_t reg_access               :
+  2; /* shub_reg_access + func_cfg_access */
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-  uint8_t reg_access               : 2; /* shub_reg_access + func_cfg_access */
+uint8_t reg_access               :
+  2; /* shub_reg_access + func_cfg_access */
   uint8_t not_used_01              : 6;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_func_cfg_access_t;
@@ -413,9 +417,11 @@ typedef struct {
   uint8_t ftype                    : 3;
   uint8_t usr_off_w                : 1;
   uint8_t xl_hm_mode               : 1;
-  uint8_t den_mode                 : 3;   /* trig_en + lvl1_en + lvl2_en */
+uint8_t den_mode                 :
+  3;   /* trig_en + lvl1_en + lvl2_en */
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-  uint8_t den_mode                 : 3;   /* trig_en + lvl1_en + lvl2_en */
+uint8_t den_mode                 :
+  3;   /* trig_en + lvl1_en + lvl2_en */
   uint8_t xl_hm_mode               : 1;
   uint8_t usr_off_w                : 1;
   uint8_t ftype                    : 3;
@@ -1422,11 +1428,13 @@ typedef struct {
 #define ISM330DHCX_FSM_LONG_COUNTER_CLEAR       0x4AU
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-  uint8_t fsm_lc_clr               : 2;  /* fsm_lc_cleared + fsm_lc_clear */
+uint8_t fsm_lc_clr               :
+  2;  /* fsm_lc_cleared + fsm_lc_clear */
   uint8_t not_used_01              : 6;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
   uint8_t not_used_01              : 6;
-  uint8_t fsm_lc_clr               : 2;  /* fsm_lc_cleared + fsm_lc_clear */
+uint8_t fsm_lc_clr               :
+  2;  /* fsm_lc_cleared + fsm_lc_clear */
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_fsm_long_counter_clear_t;
 
@@ -1961,414 +1969,414 @@ typedef struct {
 #define ISM330DHCX_SENSOR_HUB_1                 0x02U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_sensor_hub_1_t;
 
 #define ISM330DHCX_SENSOR_HUB_2                 0x03U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_sensor_hub_2_t;
 
 #define ISM330DHCX_SENSOR_HUB_3                 0x04U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_sensor_hub_3_t;
 
 #define ISM330DHCX_SENSOR_HUB_4                 0x05U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_sensor_hub_4_t;
 
 #define ISM330DHCX_SENSOR_HUB_5                 0x06U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_sensor_hub_5_t;
 
 #define ISM330DHCX_SENSOR_HUB_6                 0x07U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_sensor_hub_6_t;
 
 #define ISM330DHCX_SENSOR_HUB_7                 0x08U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_sensor_hub_7_t;
 
 #define ISM330DHCX_SENSOR_HUB_8                 0x09U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_sensor_hub_8_t;
 
 #define ISM330DHCX_SENSOR_HUB_9                 0x0AU
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_sensor_hub_9_t;
 
 #define ISM330DHCX_SENSOR_HUB_10                0x0BU
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_sensor_hub_10_t;
 
 #define ISM330DHCX_SENSOR_HUB_11                0x0CU
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_sensor_hub_11_t;
 
 #define ISM330DHCX_SENSOR_HUB_12                0x0DU
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_sensor_hub_12_t;
 
 #define ISM330DHCX_SENSOR_HUB_13                0x0EU
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_sensor_hub_13_t;
 
 #define ISM330DHCX_SENSOR_HUB_14                0x0FU
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_sensor_hub_14_t;
 
 #define ISM330DHCX_SENSOR_HUB_15                0x10U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_sensor_hub_15_t;
 
 #define ISM330DHCX_SENSOR_HUB_16                0x11U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_sensor_hub_16_t;
 
 #define ISM330DHCX_SENSOR_HUB_17                0x12U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_sensor_hub_17_t;
 
 #define ISM330DHCX_SENSOR_HUB_18                0x13U
 typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-   uint8_t bit0                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit7                    : 1;
+  uint8_t bit0                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit7                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-   uint8_t bit7                    : 1;
-   uint8_t bit6                    : 1;
-   uint8_t bit5                    : 1;
-   uint8_t bit4                    : 1;
-   uint8_t bit3                    : 1;
-   uint8_t bit2                    : 1;
-   uint8_t bit1                    : 1;
-   uint8_t bit0                    : 1;
+  uint8_t bit7                    : 1;
+  uint8_t bit6                    : 1;
+  uint8_t bit5                    : 1;
+  uint8_t bit4                    : 1;
+  uint8_t bit3                    : 1;
+  uint8_t bit2                    : 1;
+  uint8_t bit1                    : 1;
+  uint8_t bit0                    : 1;
 #endif /* DRV_BYTE_ORDER */
 } ism330dhcx_sensor_hub_18_t;
 
@@ -2552,7 +2560,7 @@ typedef struct {
   * @{
   *
   */
-typedef union{
+typedef union {
   ism330dhcx_func_cfg_access_t               func_cfg_access;
   ism330dhcx_pin_ctrl_t                      pin_ctrl;
   ism330dhcx_fifo_ctrl1_t                    fifo_ctrl1;
@@ -2612,7 +2620,7 @@ typedef union{
   ism330dhcx_fsm_status_a_t                  fsm_status_a;
   ism330dhcx_fsm_status_b_t                  fsm_status_b;
   ism330dhcx_page_rw_t                       page_rw;
-  ism330dhcx_emb_func_fifo_cfg_t	            emb_func_fifo_cfg;
+  ism330dhcx_emb_func_fifo_cfg_t              emb_func_fifo_cfg;
   ism330dhcx_fsm_enable_a_t                  fsm_enable_a;
   ism330dhcx_fsm_enable_b_t                  fsm_enable_b;
   ism330dhcx_fsm_long_counter_clear_t        fsm_long_counter_clear;
@@ -2682,10 +2690,12 @@ typedef union{
   *
   */
 
-int32_t ism330dhcx_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
-                           uint16_t len);
-int32_t ism330dhcx_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t ism330dhcx_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                            uint8_t *data,
                             uint16_t len);
+int32_t ism330dhcx_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                             uint8_t *data,
+                             uint16_t len);
 
 extern float_t ism330dhcx_from_fs2g_to_mg(int16_t lsb);
 extern float_t ism330dhcx_from_fs4g_to_mg(int16_t lsb);
@@ -2707,9 +2717,9 @@ typedef enum {
   ISM330DHCX_8g   = 3,
 } ism330dhcx_fs_xl_t;
 int32_t ism330dhcx_xl_full_scale_set(stmdev_ctx_t *ctx,
-                                    ism330dhcx_fs_xl_t val);
+                                     ism330dhcx_fs_xl_t val);
 int32_t ism330dhcx_xl_full_scale_get(stmdev_ctx_t *ctx,
-                                    ism330dhcx_fs_xl_t *val);
+                                     ism330dhcx_fs_xl_t *val);
 
 typedef enum {
   ISM330DHCX_XL_ODR_OFF    = 0,
@@ -2726,9 +2736,9 @@ typedef enum {
   ISM330DHCX_XL_ODR_6Hz5   = 11, /* (low power only) */
 } ism330dhcx_odr_xl_t;
 int32_t ism330dhcx_xl_data_rate_set(stmdev_ctx_t *ctx,
-                                   ism330dhcx_odr_xl_t val);
+                                    ism330dhcx_odr_xl_t val);
 int32_t ism330dhcx_xl_data_rate_get(stmdev_ctx_t *ctx,
-                                   ism330dhcx_odr_xl_t *val);
+                                    ism330dhcx_odr_xl_t *val);
 
 typedef enum {
   ISM330DHCX_125dps = 2,
@@ -2739,9 +2749,9 @@ typedef enum {
   ISM330DHCX_4000dps = 1,
 } ism330dhcx_fs_g_t;
 int32_t ism330dhcx_gy_full_scale_set(stmdev_ctx_t *ctx,
-                                    ism330dhcx_fs_g_t val);
+                                     ism330dhcx_fs_g_t val);
 int32_t ism330dhcx_gy_full_scale_get(stmdev_ctx_t *ctx,
-                                    ism330dhcx_fs_g_t *val);
+                                     ism330dhcx_fs_g_t *val);
 
 typedef enum {
   ISM330DHCX_GY_ODR_OFF    = 0,
@@ -2757,39 +2767,41 @@ typedef enum {
   ISM330DHCX_GY_ODR_6667Hz = 10,
 } ism330dhcx_odr_g_t;
 int32_t ism330dhcx_gy_data_rate_set(stmdev_ctx_t *ctx,
-                                   ism330dhcx_odr_g_t val);
+                                    ism330dhcx_odr_g_t val);
 int32_t ism330dhcx_gy_data_rate_get(stmdev_ctx_t *ctx,
-                                   ism330dhcx_odr_g_t *val);
+                                    ism330dhcx_odr_g_t *val);
 
-int32_t ism330dhcx_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_block_data_update_set(stmdev_ctx_t *ctx,
+                                         uint8_t val);
+int32_t ism330dhcx_block_data_update_get(stmdev_ctx_t *ctx,
+                                         uint8_t *val);
 
 typedef enum {
   ISM330DHCX_LSb_1mg  = 0,
   ISM330DHCX_LSb_16mg = 1,
 } ism330dhcx_usr_off_w_t;
 int32_t ism330dhcx_xl_offset_weight_set(stmdev_ctx_t *ctx,
-                                       ism330dhcx_usr_off_w_t val);
+                                        ism330dhcx_usr_off_w_t val);
 int32_t ism330dhcx_xl_offset_weight_get(stmdev_ctx_t *ctx,
-                                       ism330dhcx_usr_off_w_t *val);
+                                        ism330dhcx_usr_off_w_t *val);
 
 typedef enum {
   ISM330DHCX_HIGH_PERFORMANCE_MD  = 0,
   ISM330DHCX_LOW_NORMAL_POWER_MD  = 1,
 } ism330dhcx_xl_hm_mode_t;
 int32_t ism330dhcx_xl_power_mode_set(stmdev_ctx_t *ctx,
-                                    ism330dhcx_xl_hm_mode_t val);
+                                     ism330dhcx_xl_hm_mode_t val);
 int32_t ism330dhcx_xl_power_mode_get(stmdev_ctx_t *ctx,
-                                    ism330dhcx_xl_hm_mode_t *val);
+                                     ism330dhcx_xl_hm_mode_t *val);
 
 typedef enum {
   ISM330DHCX_GY_HIGH_PERFORMANCE  = 0,
   ISM330DHCX_GY_NORMAL            = 1,
 } ism330dhcx_g_hm_mode_t;
 int32_t ism330dhcx_gy_power_mode_set(stmdev_ctx_t *ctx,
-                                    ism330dhcx_g_hm_mode_t val);
+                                     ism330dhcx_g_hm_mode_t val);
 int32_t ism330dhcx_gy_power_mode_get(stmdev_ctx_t *ctx,
-                                    ism330dhcx_g_hm_mode_t *val);
+                                     ism330dhcx_g_hm_mode_t *val);
 
 typedef struct {
   ism330dhcx_all_int_src_t       all_int_src;
@@ -2800,12 +2812,12 @@ typedef struct {
   ism330dhcx_emb_func_status_t   emb_func_status;
   ism330dhcx_fsm_status_a_t      fsm_status_a;
   ism330dhcx_fsm_status_b_t      fsm_status_b;
-  } ism330dhcx_all_sources_t;
+} ism330dhcx_all_sources_t;
 int32_t ism330dhcx_all_sources_get(stmdev_ctx_t *ctx,
-                                  ism330dhcx_all_sources_t *val);
+                                   ism330dhcx_all_sources_t *val);
 
 int32_t ism330dhcx_status_reg_get(stmdev_ctx_t *ctx,
-                                 ism330dhcx_status_reg_t *val);
+                                  ism330dhcx_status_reg_t *val);
 
 int32_t ism330dhcx_xl_flag_data_ready_get(stmdev_ctx_t *ctx,
                                           uint8_t *val);
@@ -2816,14 +2828,20 @@ int32_t ism330dhcx_gy_flag_data_ready_get(stmdev_ctx_t *ctx,
 int32_t ism330dhcx_temp_flag_data_ready_get(stmdev_ctx_t *ctx,
                                             uint8_t *val);
 
-int32_t ism330dhcx_xl_usr_offset_x_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t ism330dhcx_xl_usr_offset_x_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t ism330dhcx_xl_usr_offset_x_set(stmdev_ctx_t *ctx,
+                                       uint8_t *buff);
+int32_t ism330dhcx_xl_usr_offset_x_get(stmdev_ctx_t *ctx,
+                                       uint8_t *buff);
 
-int32_t ism330dhcx_xl_usr_offset_y_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t ism330dhcx_xl_usr_offset_y_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t ism330dhcx_xl_usr_offset_y_set(stmdev_ctx_t *ctx,
+                                       uint8_t *buff);
+int32_t ism330dhcx_xl_usr_offset_y_get(stmdev_ctx_t *ctx,
+                                       uint8_t *buff);
 
-int32_t ism330dhcx_xl_usr_offset_z_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t ism330dhcx_xl_usr_offset_z_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t ism330dhcx_xl_usr_offset_z_set(stmdev_ctx_t *ctx,
+                                       uint8_t *buff);
+int32_t ism330dhcx_xl_usr_offset_z_get(stmdev_ctx_t *ctx,
+                                       uint8_t *buff);
 
 int32_t ism330dhcx_xl_usr_offset_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_xl_usr_offset_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -2833,7 +2851,8 @@ int32_t ism330dhcx_timestamp_rst(stmdev_ctx_t *ctx);
 int32_t ism330dhcx_timestamp_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_timestamp_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t ism330dhcx_timestamp_raw_get(stmdev_ctx_t *ctx, uint32_t *val);
+int32_t ism330dhcx_timestamp_raw_get(stmdev_ctx_t *ctx,
+                                     uint32_t *val);
 
 typedef enum {
   ISM330DHCX_NO_ROUND      = 0,
@@ -2842,15 +2861,18 @@ typedef enum {
   ISM330DHCX_ROUND_GY_XL   = 3,
 } ism330dhcx_rounding_t;
 int32_t ism330dhcx_rounding_mode_set(stmdev_ctx_t *ctx,
-                                    ism330dhcx_rounding_t val);
+                                     ism330dhcx_rounding_t val);
 int32_t ism330dhcx_rounding_mode_get(stmdev_ctx_t *ctx,
-                                    ism330dhcx_rounding_t *val);
+                                     ism330dhcx_rounding_t *val);
 
-int32_t ism330dhcx_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val);
+int32_t ism330dhcx_temperature_raw_get(stmdev_ctx_t *ctx,
+                                       int16_t *val);
 
-int32_t ism330dhcx_angular_rate_raw_get(stmdev_ctx_t *ctx, int16_t *val);
+int32_t ism330dhcx_angular_rate_raw_get(stmdev_ctx_t *ctx,
+                                        int16_t *val);
 
-int32_t ism330dhcx_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val);
+int32_t ism330dhcx_acceleration_raw_get(stmdev_ctx_t *ctx,
+                                        int16_t *val);
 
 int32_t ism330dhcx_fifo_out_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
@@ -2859,7 +2881,8 @@ int32_t ism330dhcx_mlc_out_get(stmdev_ctx_t *ctx, uint8_t *buff);
 int32_t ism330dhcx_odr_cal_reg_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_odr_cal_reg_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t ism330dhcx_number_of_steps_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t ism330dhcx_number_of_steps_get(stmdev_ctx_t *ctx,
+                                       uint16_t *val);
 
 int32_t ism330dhcx_steps_reset(stmdev_ctx_t *ctx);
 
@@ -2873,23 +2896,24 @@ int32_t ism330dhcx_mem_bank_set(stmdev_ctx_t *ctx,
 int32_t ism330dhcx_mem_bank_get(stmdev_ctx_t *ctx,
                                 ism330dhcx_reg_access_t *val);
 
-int32_t ism330dhcx_ln_pg_write_byte(stmdev_ctx_t *ctx, uint16_t address,
-                                   uint8_t *val);
+int32_t ism330dhcx_ln_pg_write_byte(stmdev_ctx_t *ctx,
+                                    uint16_t address,
+                                    uint8_t *val);
 int32_t ism330dhcx_ln_pg_write(stmdev_ctx_t *ctx, uint16_t address,
-                              uint8_t *buf, uint8_t len);
+                               uint8_t *buf, uint8_t len);
 int32_t ism330dhcx_ln_pg_read_byte(stmdev_ctx_t *ctx, uint16_t add,
-                                  uint8_t *val);
+                                   uint8_t *val);
 int32_t ism330dhcx_ln_pg_read(stmdev_ctx_t *ctx, uint16_t address,
-                             uint8_t *val);
+                              uint8_t *val);
 
 typedef enum {
   ISM330DHCX_DRDY_LATCHED = 0,
   ISM330DHCX_DRDY_PULSED  = 1,
 } ism330dhcx_dataready_pulsed_t;
 int32_t ism330dhcx_data_ready_mode_set(stmdev_ctx_t *ctx,
-                                      ism330dhcx_dataready_pulsed_t val);
+                                       ism330dhcx_dataready_pulsed_t val);
 int32_t ism330dhcx_data_ready_mode_get(stmdev_ctx_t *ctx,
-                                      ism330dhcx_dataready_pulsed_t *val);
+                                       ism330dhcx_dataready_pulsed_t *val);
 
 int32_t ism330dhcx_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
@@ -2897,7 +2921,8 @@ int32_t ism330dhcx_reset_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_reset_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t ism330dhcx_auto_increment_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_auto_increment_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_auto_increment_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t ism330dhcx_boot_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_boot_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -2908,9 +2933,9 @@ typedef enum {
   ISM330DHCX_XL_ST_NEGATIVE = 2,
 } ism330dhcx_st_xl_t;
 int32_t ism330dhcx_xl_self_test_set(stmdev_ctx_t *ctx,
-                                   ism330dhcx_st_xl_t val);
+                                    ism330dhcx_st_xl_t val);
 int32_t ism330dhcx_xl_self_test_get(stmdev_ctx_t *ctx,
-                                   ism330dhcx_st_xl_t *val);
+                                    ism330dhcx_st_xl_t *val);
 
 typedef enum {
   ISM330DHCX_GY_ST_DISABLE  = 0,
@@ -2918,9 +2943,9 @@ typedef enum {
   ISM330DHCX_GY_ST_NEGATIVE = 3,
 } ism330dhcx_st_g_t;
 int32_t ism330dhcx_gy_self_test_set(stmdev_ctx_t *ctx,
-                                   ism330dhcx_st_g_t val);
+                                    ism330dhcx_st_g_t val);
 int32_t ism330dhcx_gy_self_test_get(stmdev_ctx_t *ctx,
-                                   ism330dhcx_st_g_t *val);
+                                    ism330dhcx_st_g_t *val);
 
 int32_t ism330dhcx_xl_filter_lp2_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_xl_filter_lp2_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -2929,9 +2954,9 @@ int32_t ism330dhcx_gy_filter_lp1_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_gy_filter_lp1_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t ism330dhcx_filter_settling_mask_set(stmdev_ctx_t *ctx,
-                                           uint8_t val);
+                                            uint8_t val);
 int32_t ism330dhcx_filter_settling_mask_get(stmdev_ctx_t *ctx,
-                                           uint8_t *val);
+                                            uint8_t *val);
 
 typedef enum {
   ISM330DHCX_ULTRA_LIGHT  = 0,
@@ -2944,9 +2969,9 @@ typedef enum {
   ISM330DHCX_XTREME       = 7,
 } ism330dhcx_ftype_t;
 int32_t ism330dhcx_gy_lp1_bandwidth_set(stmdev_ctx_t *ctx,
-                                       ism330dhcx_ftype_t val);
+                                        ism330dhcx_ftype_t val);
 int32_t ism330dhcx_gy_lp1_bandwidth_get(stmdev_ctx_t *ctx,
-                                       ism330dhcx_ftype_t *val);
+                                        ism330dhcx_ftype_t *val);
 
 int32_t ism330dhcx_xl_lp2_on_6d_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_xl_lp2_on_6d_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -2977,21 +3002,23 @@ typedef enum {
   ISM330DHCX_LP_ODR_DIV_800            = 0x07,
 } ism330dhcx_hp_slope_xl_en_t;
 int32_t ism330dhcx_xl_hp_path_on_out_set(stmdev_ctx_t *ctx,
-                                        ism330dhcx_hp_slope_xl_en_t val);
+                                         ism330dhcx_hp_slope_xl_en_t val);
 int32_t ism330dhcx_xl_hp_path_on_out_get(stmdev_ctx_t *ctx,
-                                        ism330dhcx_hp_slope_xl_en_t *val);
+                                         ism330dhcx_hp_slope_xl_en_t *val);
 
-int32_t ism330dhcx_xl_fast_settling_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_xl_fast_settling_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_xl_fast_settling_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t ism330dhcx_xl_fast_settling_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 typedef enum {
   ISM330DHCX_USE_SLOPE = 0,
   ISM330DHCX_USE_HPF   = 1,
 } ism330dhcx_slope_fds_t;
 int32_t ism330dhcx_xl_hp_path_internal_set(stmdev_ctx_t *ctx,
-                                          ism330dhcx_slope_fds_t val);
+                                           ism330dhcx_slope_fds_t val);
 int32_t ism330dhcx_xl_hp_path_internal_get(stmdev_ctx_t *ctx,
-                                          ism330dhcx_slope_fds_t *val);
+                                           ism330dhcx_slope_fds_t *val);
 
 typedef enum {
   ISM330DHCX_HP_FILTER_NONE     = 0x00,
@@ -3001,36 +3028,36 @@ typedef enum {
   ISM330DHCX_HP_FILTER_1Hz04    = 0x83,
 } ism330dhcx_hpm_g_t;
 int32_t ism330dhcx_gy_hp_path_internal_set(stmdev_ctx_t *ctx,
-                                          ism330dhcx_hpm_g_t val);
+                                           ism330dhcx_hpm_g_t val);
 int32_t ism330dhcx_gy_hp_path_internal_get(stmdev_ctx_t *ctx,
-                                          ism330dhcx_hpm_g_t *val);
+                                           ism330dhcx_hpm_g_t *val);
 
 typedef enum {
   ISM330DHCX_AUX_PULL_UP_DISC       = 0,
   ISM330DHCX_AUX_PULL_UP_CONNECT    = 1,
 } ism330dhcx_ois_pu_dis_t;
 int32_t ism330dhcx_aux_sdo_ocs_mode_set(stmdev_ctx_t *ctx,
-                                       ism330dhcx_ois_pu_dis_t val);
+                                        ism330dhcx_ois_pu_dis_t val);
 int32_t ism330dhcx_aux_sdo_ocs_mode_get(stmdev_ctx_t *ctx,
-                                       ism330dhcx_ois_pu_dis_t *val);
+                                        ism330dhcx_ois_pu_dis_t *val);
 
 typedef enum {
   ISM330DHCX_AUX_ON                    = 1,
   ISM330DHCX_AUX_ON_BY_AUX_INTERFACE   = 0,
 } ism330dhcx_ois_on_t;
 int32_t ism330dhcx_aux_pw_on_ctrl_set(stmdev_ctx_t *ctx,
-                                     ism330dhcx_ois_on_t val);
+                                      ism330dhcx_ois_on_t val);
 int32_t ism330dhcx_aux_pw_on_ctrl_get(stmdev_ctx_t *ctx,
-                                     ism330dhcx_ois_on_t *val);
+                                      ism330dhcx_ois_on_t *val);
 
 int32_t ism330dhcx_aux_status_reg_get(stmdev_ctx_t *ctx,
-                                   ism330dhcx_status_spiaux_t *val);
+                                      ism330dhcx_status_spiaux_t *val);
 
 int32_t ism330dhcx_aux_xl_flag_data_ready_get(stmdev_ctx_t *ctx,
-                                             uint8_t *val);
+                                              uint8_t *val);
 
 int32_t ism330dhcx_aux_gy_flag_data_ready_get(stmdev_ctx_t *ctx,
-                                             uint8_t *val);
+                                              uint8_t *val);
 
 int32_t ism330dhcx_aux_gy_flag_settling_get(stmdev_ctx_t *ctx,
                                             uint8_t *val);
@@ -3041,18 +3068,18 @@ typedef enum {
   ISM330DHCX_AUX_XL_NEG     = 2,
 } ism330dhcx_st_xl_ois_t;
 int32_t ism330dhcx_aux_xl_self_test_set(stmdev_ctx_t *ctx,
-                                     ism330dhcx_st_xl_ois_t val);
+                                        ism330dhcx_st_xl_ois_t val);
 int32_t ism330dhcx_aux_xl_self_test_get(stmdev_ctx_t *ctx,
-                                     ism330dhcx_st_xl_ois_t *val);
+                                        ism330dhcx_st_xl_ois_t *val);
 
 typedef enum {
   ISM330DHCX_AUX_DEN_ACTIVE_LOW     = 0,
   ISM330DHCX_AUX_DEN_ACTIVE_HIGH    = 1,
 } ism330dhcx_den_lh_ois_t;
 int32_t ism330dhcx_aux_den_polarity_set(stmdev_ctx_t *ctx,
-                                     ism330dhcx_den_lh_ois_t val);
+                                        ism330dhcx_den_lh_ois_t val);
 int32_t ism330dhcx_aux_den_polarity_get(stmdev_ctx_t *ctx,
-                                     ism330dhcx_den_lh_ois_t *val);
+                                        ism330dhcx_den_lh_ois_t *val);
 
 typedef enum {
   ISM330DHCX_AUX_DEN_DISABLE         = 0,
@@ -3060,12 +3087,14 @@ typedef enum {
   ISM330DHCX_AUX_DEN_LEVEL_TRIG      = 2,
 } ism330dhcx_lvl2_ois_t;
 int32_t ism330dhcx_aux_den_mode_set(stmdev_ctx_t *ctx,
-                                   ism330dhcx_lvl2_ois_t val);
+                                    ism330dhcx_lvl2_ois_t val);
 int32_t ism330dhcx_aux_den_mode_get(stmdev_ctx_t *ctx,
-                                   ism330dhcx_lvl2_ois_t *val);
+                                    ism330dhcx_lvl2_ois_t *val);
 
-int32_t ism330dhcx_aux_drdy_on_int2_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_aux_drdy_on_int2_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_aux_drdy_on_int2_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t ism330dhcx_aux_drdy_on_int2_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 typedef enum {
   ISM330DHCX_AUX_DISABLE  = 0,
@@ -3073,9 +3102,9 @@ typedef enum {
   ISM330DHCX_MODE_4_GY_XL = 3,
 } ism330dhcx_ois_en_spi2_t;
 int32_t ism330dhcx_aux_mode_set(stmdev_ctx_t *ctx,
-                               ism330dhcx_ois_en_spi2_t val);
+                                ism330dhcx_ois_en_spi2_t val);
 int32_t ism330dhcx_aux_mode_get(stmdev_ctx_t *ctx,
-                               ism330dhcx_ois_en_spi2_t *val);
+                                ism330dhcx_ois_en_spi2_t *val);
 
 typedef enum {
   ISM330DHCX_125dps_AUX  =  0x04,
@@ -3085,18 +3114,18 @@ typedef enum {
   ISM330DHCX_2000dps_AUX =  0x03,
 } ism330dhcx_fs_g_ois_t;
 int32_t ism330dhcx_aux_gy_full_scale_set(stmdev_ctx_t *ctx,
-                                        ism330dhcx_fs_g_ois_t val);
+                                         ism330dhcx_fs_g_ois_t val);
 int32_t ism330dhcx_aux_gy_full_scale_get(stmdev_ctx_t *ctx,
-                                        ism330dhcx_fs_g_ois_t *val);
+                                         ism330dhcx_fs_g_ois_t *val);
 
 typedef enum {
   ISM330DHCX_AUX_SPI_4_WIRE = 0,
   ISM330DHCX_AUX_SPI_3_WIRE = 1,
 } ism330dhcx_sim_ois_t;
 int32_t ism330dhcx_aux_spi_mode_set(stmdev_ctx_t *ctx,
-                                   ism330dhcx_sim_ois_t val);
+                                    ism330dhcx_sim_ois_t val);
 int32_t ism330dhcx_aux_spi_mode_get(stmdev_ctx_t *ctx,
-                                   ism330dhcx_sim_ois_t *val);
+                                    ism330dhcx_sim_ois_t *val);
 
 typedef enum {
   ISM330DHCX_351Hz39 = 0,
@@ -3105,9 +3134,9 @@ typedef enum {
   ISM330DHCX_937Hz91 = 3,
 } ism330dhcx_ftype_ois_t;
 int32_t ism330dhcx_aux_gy_lp1_bandwidth_set(stmdev_ctx_t *ctx,
-                                           ism330dhcx_ftype_ois_t val);
+                                            ism330dhcx_ftype_ois_t val);
 int32_t ism330dhcx_aux_gy_lp1_bandwidth_get(stmdev_ctx_t *ctx,
-                                           ism330dhcx_ftype_ois_t *val);
+                                            ism330dhcx_ftype_ois_t *val);
 
 typedef enum {
   ISM330DHCX_AUX_HP_DISABLE = 0x00,
@@ -3117,18 +3146,18 @@ typedef enum {
   ISM330DHCX_AUX_HP_1Hz040  = 0x13,
 } ism330dhcx_hpm_ois_t;
 int32_t ism330dhcx_aux_gy_hp_bandwidth_set(stmdev_ctx_t *ctx,
-                                          ism330dhcx_hpm_ois_t val);
+                                           ism330dhcx_hpm_ois_t val);
 int32_t ism330dhcx_aux_gy_hp_bandwidth_get(stmdev_ctx_t *ctx,
-                                          ism330dhcx_hpm_ois_t *val);
+                                           ism330dhcx_hpm_ois_t *val);
 
 typedef enum {
   ISM330DHCX_ENABLE_CLAMP  = 0,
   ISM330DHCX_DISABLE_CLAMP = 1,
 } ism330dhcx_st_ois_clampdis_t;
 int32_t ism330dhcx_aux_gy_clamp_set(stmdev_ctx_t *ctx,
-                                   ism330dhcx_st_ois_clampdis_t val);
+                                    ism330dhcx_st_ois_clampdis_t val);
 int32_t ism330dhcx_aux_gy_clamp_get(stmdev_ctx_t *ctx,
-                                   ism330dhcx_st_ois_clampdis_t *val);
+                                    ism330dhcx_st_ois_clampdis_t *val);
 
 typedef enum {
   ISM330DHCX_AUX_GY_DISABLE = 0,
@@ -3136,9 +3165,9 @@ typedef enum {
   ISM330DHCX_AUX_GY_NEG     = 3,
 } ism330dhcx_st_ois_t;
 int32_t ism330dhcx_aux_gy_self_test_set(stmdev_ctx_t *ctx,
-                                       ism330dhcx_st_ois_t val);
+                                        ism330dhcx_st_ois_t val);
 int32_t ism330dhcx_aux_gy_self_test_get(stmdev_ctx_t *ctx,
-                                       ism330dhcx_st_ois_t *val);
+                                        ism330dhcx_st_ois_t *val);
 
 typedef enum {
   ISM330DHCX_631Hz = 0,
@@ -3151,9 +3180,9 @@ typedef enum {
   ISM330DHCX_4Hz11 = 7,
 } ism330dhcx_filter_xl_conf_ois_t;
 int32_t ism330dhcx_aux_xl_bandwidth_set(stmdev_ctx_t *ctx,
-                                       ism330dhcx_filter_xl_conf_ois_t val);
+                                        ism330dhcx_filter_xl_conf_ois_t val);
 int32_t ism330dhcx_aux_xl_bandwidth_get(stmdev_ctx_t *ctx,
-                                       ism330dhcx_filter_xl_conf_ois_t *val);
+                                        ism330dhcx_filter_xl_conf_ois_t *val);
 
 typedef enum {
   ISM330DHCX_AUX_2g  = 0,
@@ -3162,47 +3191,49 @@ typedef enum {
   ISM330DHCX_AUX_8g  = 3,
 } ism330dhcx_fs_xl_ois_t;
 int32_t ism330dhcx_aux_xl_full_scale_set(stmdev_ctx_t *ctx,
-                                        ism330dhcx_fs_xl_ois_t val);
+                                         ism330dhcx_fs_xl_ois_t val);
 int32_t ism330dhcx_aux_xl_full_scale_get(stmdev_ctx_t *ctx,
-                                        ism330dhcx_fs_xl_ois_t *val);
+                                         ism330dhcx_fs_xl_ois_t *val);
 
 typedef enum {
   ISM330DHCX_PULL_UP_DISC       = 0,
   ISM330DHCX_PULL_UP_CONNECT    = 1,
 } ism330dhcx_sdo_pu_en_t;
 int32_t ism330dhcx_sdo_sa0_mode_set(stmdev_ctx_t *ctx,
-                                   ism330dhcx_sdo_pu_en_t val);
+                                    ism330dhcx_sdo_pu_en_t val);
 int32_t ism330dhcx_sdo_sa0_mode_get(stmdev_ctx_t *ctx,
-                                   ism330dhcx_sdo_pu_en_t *val);
+                                    ism330dhcx_sdo_pu_en_t *val);
 
 typedef enum {
   ISM330DHCX_SPI_4_WIRE = 0,
   ISM330DHCX_SPI_3_WIRE = 1,
 } ism330dhcx_sim_t;
-int32_t ism330dhcx_spi_mode_set(stmdev_ctx_t *ctx, ism330dhcx_sim_t val);
-int32_t ism330dhcx_spi_mode_get(stmdev_ctx_t *ctx, ism330dhcx_sim_t *val);
+int32_t ism330dhcx_spi_mode_set(stmdev_ctx_t *ctx,
+                                ism330dhcx_sim_t val);
+int32_t ism330dhcx_spi_mode_get(stmdev_ctx_t *ctx,
+                                ism330dhcx_sim_t *val);
 
 typedef enum {
   ISM330DHCX_I2C_ENABLE  = 0,
   ISM330DHCX_I2C_DISABLE = 1,
 } ism330dhcx_i2c_disable_t;
 int32_t ism330dhcx_i2c_interface_set(stmdev_ctx_t *ctx,
-                                    ism330dhcx_i2c_disable_t val);
+                                     ism330dhcx_i2c_disable_t val);
 int32_t ism330dhcx_i2c_interface_get(stmdev_ctx_t *ctx,
-                                    ism330dhcx_i2c_disable_t *val);
+                                     ism330dhcx_i2c_disable_t *val);
 
 typedef struct {
-    ism330dhcx_int1_ctrl_t          int1_ctrl;
-    ism330dhcx_md1_cfg_t            md1_cfg;
-    ism330dhcx_emb_func_int1_t      emb_func_int1;
-    ism330dhcx_fsm_int1_a_t         fsm_int1_a;
-    ism330dhcx_fsm_int1_b_t         fsm_int1_b;
-    ism330dhcx_mlc_int1_t           mlc_int1;
+  ism330dhcx_int1_ctrl_t          int1_ctrl;
+  ism330dhcx_md1_cfg_t            md1_cfg;
+  ism330dhcx_emb_func_int1_t      emb_func_int1;
+  ism330dhcx_fsm_int1_a_t         fsm_int1_a;
+  ism330dhcx_fsm_int1_b_t         fsm_int1_b;
+  ism330dhcx_mlc_int1_t           mlc_int1;
 } ism330dhcx_pin_int1_route_t;
 int32_t ism330dhcx_pin_int1_route_set(stmdev_ctx_t *ctx,
-                                     ism330dhcx_pin_int1_route_t *val);
+                                      ism330dhcx_pin_int1_route_t *val);
 int32_t ism330dhcx_pin_int1_route_get(stmdev_ctx_t *ctx,
-                                     ism330dhcx_pin_int1_route_t *val);
+                                      ism330dhcx_pin_int1_route_t *val);
 
 typedef struct {
   ism330dhcx_int2_ctrl_t          int2_ctrl;
@@ -3213,9 +3244,9 @@ typedef struct {
   ism330dhcx_mlc_int2_t           mlc_int2;
 } ism330dhcx_pin_int2_route_t;
 int32_t ism330dhcx_pin_int2_route_set(stmdev_ctx_t *ctx,
-                                     ism330dhcx_pin_int2_route_t *val);
+                                      ism330dhcx_pin_int2_route_t *val);
 int32_t ism330dhcx_pin_int2_route_get(stmdev_ctx_t *ctx,
-                                     ism330dhcx_pin_int2_route_t *val);
+                                      ism330dhcx_pin_int2_route_t *val);
 
 typedef enum {
   ISM330DHCX_PUSH_PULL   = 0,
@@ -3231,9 +3262,9 @@ typedef enum {
   ISM330DHCX_ACTIVE_LOW  = 1,
 } ism330dhcx_h_lactive_t;
 int32_t ism330dhcx_pin_polarity_set(stmdev_ctx_t *ctx,
-                                   ism330dhcx_h_lactive_t val);
+                                    ism330dhcx_h_lactive_t val);
 int32_t ism330dhcx_pin_polarity_get(stmdev_ctx_t *ctx,
-                                   ism330dhcx_h_lactive_t *val);
+                                    ism330dhcx_h_lactive_t *val);
 
 int32_t ism330dhcx_all_on_int1_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_all_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3245,26 +3276,27 @@ typedef enum {
   ISM330DHCX_ALL_INT_LATCHED           = 3,
 } ism330dhcx_lir_t;
 int32_t ism330dhcx_int_notification_set(stmdev_ctx_t *ctx,
-                                       ism330dhcx_lir_t val);
+                                        ism330dhcx_lir_t val);
 int32_t ism330dhcx_int_notification_get(stmdev_ctx_t *ctx,
-                                       ism330dhcx_lir_t *val);
+                                        ism330dhcx_lir_t *val);
 
 typedef enum {
   ISM330DHCX_LSb_FS_DIV_64       = 0,
   ISM330DHCX_LSb_FS_DIV_256      = 1,
 } ism330dhcx_wake_ths_w_t;
 int32_t ism330dhcx_wkup_ths_weight_set(stmdev_ctx_t *ctx,
-                                      ism330dhcx_wake_ths_w_t val);
+                                       ism330dhcx_wake_ths_w_t val);
 int32_t ism330dhcx_wkup_ths_weight_get(stmdev_ctx_t *ctx,
-                                      ism330dhcx_wake_ths_w_t *val);
+                                       ism330dhcx_wake_ths_w_t *val);
 
 int32_t ism330dhcx_wkup_threshold_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_wkup_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_wkup_threshold_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t ism330dhcx_xl_usr_offset_on_wkup_set(stmdev_ctx_t *ctx,
-                                            uint8_t val);
+                                             uint8_t val);
 int32_t ism330dhcx_xl_usr_offset_on_wkup_get(stmdev_ctx_t *ctx,
-                                            uint8_t *val);
+                                             uint8_t *val);
 
 int32_t ism330dhcx_wkup_dur_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_wkup_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3277,9 +3309,9 @@ typedef enum {
   ISM330DHCX_DRIVE_SLEEP_STATUS    = 1,
 } ism330dhcx_sleep_status_on_int_t;
 int32_t ism330dhcx_act_pin_notification_set(stmdev_ctx_t *ctx,
-                                        ism330dhcx_sleep_status_on_int_t val);
+                                            ism330dhcx_sleep_status_on_int_t val);
 int32_t ism330dhcx_act_pin_notification_get(stmdev_ctx_t *ctx,
-                                        ism330dhcx_sleep_status_on_int_t *val);
+                                            ism330dhcx_sleep_status_on_int_t *val);
 
 typedef enum {
   ISM330DHCX_XL_AND_GY_NOT_AFFECTED      = 0,
@@ -3288,24 +3320,32 @@ typedef enum {
   ISM330DHCX_XL_12Hz5_GY_PD              = 3,
 } ism330dhcx_inact_en_t;
 int32_t ism330dhcx_act_mode_set(stmdev_ctx_t *ctx,
-                               ism330dhcx_inact_en_t val);
+                                ism330dhcx_inact_en_t val);
 int32_t ism330dhcx_act_mode_get(stmdev_ctx_t *ctx,
-                               ism330dhcx_inact_en_t *val);
+                                ism330dhcx_inact_en_t *val);
 
 int32_t ism330dhcx_act_sleep_dur_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_act_sleep_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t ism330dhcx_tap_detection_on_z_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_tap_detection_on_z_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_tap_detection_on_z_set(stmdev_ctx_t *ctx,
+                                          uint8_t val);
+int32_t ism330dhcx_tap_detection_on_z_get(stmdev_ctx_t *ctx,
+                                          uint8_t *val);
 
-int32_t ism330dhcx_tap_detection_on_y_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_tap_detection_on_y_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_tap_detection_on_y_set(stmdev_ctx_t *ctx,
+                                          uint8_t val);
+int32_t ism330dhcx_tap_detection_on_y_get(stmdev_ctx_t *ctx,
+                                          uint8_t *val);
 
-int32_t ism330dhcx_tap_detection_on_x_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_tap_detection_on_x_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_tap_detection_on_x_set(stmdev_ctx_t *ctx,
+                                          uint8_t val);
+int32_t ism330dhcx_tap_detection_on_x_get(stmdev_ctx_t *ctx,
+                                          uint8_t *val);
 
-int32_t ism330dhcx_tap_threshold_x_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_tap_threshold_x_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_tap_threshold_x_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t ism330dhcx_tap_threshold_x_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 typedef enum {
   ISM330DHCX_XYZ = 0,
@@ -3316,15 +3356,19 @@ typedef enum {
   ISM330DHCX_ZXY = 6,
 } ism330dhcx_tap_priority_t;
 int32_t ism330dhcx_tap_axis_priority_set(stmdev_ctx_t *ctx,
-                                        ism330dhcx_tap_priority_t val);
+                                         ism330dhcx_tap_priority_t val);
 int32_t ism330dhcx_tap_axis_priority_get(stmdev_ctx_t *ctx,
-                                        ism330dhcx_tap_priority_t *val);
+                                         ism330dhcx_tap_priority_t *val);
 
-int32_t ism330dhcx_tap_threshold_y_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_tap_threshold_y_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_tap_threshold_y_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t ism330dhcx_tap_threshold_y_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
-int32_t ism330dhcx_tap_threshold_z_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_tap_threshold_z_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_tap_threshold_z_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t ism330dhcx_tap_threshold_z_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 int32_t ism330dhcx_tap_shock_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_tap_shock_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3340,9 +3384,9 @@ typedef enum {
   ISM330DHCX_BOTH_SINGLE_DOUBLE = 1,
 } ism330dhcx_single_double_tap_t;
 int32_t ism330dhcx_tap_mode_set(stmdev_ctx_t *ctx,
-                               ism330dhcx_single_double_tap_t val);
+                                ism330dhcx_single_double_tap_t val);
 int32_t ism330dhcx_tap_mode_get(stmdev_ctx_t *ctx,
-                               ism330dhcx_single_double_tap_t *val);
+                                ism330dhcx_single_double_tap_t *val);
 
 typedef enum {
   ISM330DHCX_DEG_80  = 0,
@@ -3351,9 +3395,9 @@ typedef enum {
   ISM330DHCX_DEG_50  = 3,
 } ism330dhcx_sixd_ths_t;
 int32_t ism330dhcx_6d_threshold_set(stmdev_ctx_t *ctx,
-                                   ism330dhcx_sixd_ths_t val);
+                                    ism330dhcx_sixd_ths_t val);
 int32_t ism330dhcx_6d_threshold_get(stmdev_ctx_t *ctx,
-                                   ism330dhcx_sixd_ths_t *val);
+                                    ism330dhcx_sixd_ths_t *val);
 
 int32_t ism330dhcx_4d_mode_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_4d_mode_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3369,18 +3413,22 @@ typedef enum {
   ISM330DHCX_FF_TSH_500mg = 7,
 } ism330dhcx_ff_ths_t;
 int32_t ism330dhcx_ff_threshold_set(stmdev_ctx_t *ctx,
-                                   ism330dhcx_ff_ths_t val);
+                                    ism330dhcx_ff_ths_t val);
 int32_t ism330dhcx_ff_threshold_get(stmdev_ctx_t *ctx,
-                                   ism330dhcx_ff_ths_t *val);
+                                    ism330dhcx_ff_ths_t *val);
 
 int32_t ism330dhcx_ff_dur_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_ff_dur_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t ism330dhcx_fifo_watermark_set(stmdev_ctx_t *ctx, uint16_t val);
-int32_t ism330dhcx_fifo_watermark_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t ism330dhcx_fifo_watermark_set(stmdev_ctx_t *ctx,
+                                      uint16_t val);
+int32_t ism330dhcx_fifo_watermark_get(stmdev_ctx_t *ctx,
+                                      uint16_t *val);
 
-int32_t ism330dhcx_compression_algo_init_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_compression_algo_init_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_compression_algo_init_set(stmdev_ctx_t *ctx,
+                                             uint8_t val);
+int32_t ism330dhcx_compression_algo_init_get(stmdev_ctx_t *ctx,
+                                             uint8_t *val);
 
 typedef enum {
   ISM330DHCX_CMP_DISABLE  = 0x00,
@@ -3390,25 +3438,27 @@ typedef enum {
   ISM330DHCX_CMP_32_TO_1  = 0x07,
 } ism330dhcx_uncoptr_rate_t;
 int32_t ism330dhcx_compression_algo_set(stmdev_ctx_t *ctx,
-                                       ism330dhcx_uncoptr_rate_t val);
+                                        ism330dhcx_uncoptr_rate_t val);
 int32_t ism330dhcx_compression_algo_get(stmdev_ctx_t *ctx,
-                                       ism330dhcx_uncoptr_rate_t *val);
+                                        ism330dhcx_uncoptr_rate_t *val);
 
 int32_t ism330dhcx_fifo_virtual_sens_odr_chg_set(stmdev_ctx_t *ctx,
-                                                uint8_t val);
-int32_t ism330dhcx_fifo_virtual_sens_odr_chg_get(stmdev_ctx_t *ctx,
-                                                uint8_t *val);
-
-int32_t ism330dhcx_compression_algo_real_time_set(stmdev_ctx_t *ctx,
                                                  uint8_t val);
-int32_t ism330dhcx_compression_algo_real_time_get(stmdev_ctx_t *ctx,
+int32_t ism330dhcx_fifo_virtual_sens_odr_chg_get(stmdev_ctx_t *ctx,
                                                  uint8_t *val);
 
-int32_t ism330dhcx_fifo_stop_on_wtm_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_fifo_stop_on_wtm_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_compression_algo_real_time_set(stmdev_ctx_t *ctx,
+                                                  uint8_t val);
+int32_t ism330dhcx_compression_algo_real_time_get(stmdev_ctx_t *ctx,
+                                                  uint8_t *val);
+
+int32_t ism330dhcx_fifo_stop_on_wtm_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t ism330dhcx_fifo_stop_on_wtm_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 typedef enum {
-  ISM330DHCX_XL_NOT_BATCHED     	=  0,
+  ISM330DHCX_XL_NOT_BATCHED       =  0,
   ISM330DHCX_XL_BATCHED_AT_12Hz5   =  1,
   ISM330DHCX_XL_BATCHED_AT_26Hz    =  2,
   ISM330DHCX_XL_BATCHED_AT_52Hz    =  3,
@@ -3465,9 +3515,9 @@ typedef enum {
   ISM330DHCX_TEMP_BATCHED_AT_1Hz6    = 3,
 } ism330dhcx_odr_t_batch_t;
 int32_t ism330dhcx_fifo_temp_batch_set(stmdev_ctx_t *ctx,
-                                      ism330dhcx_odr_t_batch_t val);
+                                       ism330dhcx_odr_t_batch_t val);
 int32_t ism330dhcx_fifo_temp_batch_get(stmdev_ctx_t *ctx,
-                                      ism330dhcx_odr_t_batch_t *val);
+                                       ism330dhcx_odr_t_batch_t *val);
 
 typedef enum {
   ISM330DHCX_NO_DECIMATION = 0,
@@ -3476,33 +3526,37 @@ typedef enum {
   ISM330DHCX_DEC_32        = 3,
 } ism330dhcx_odr_ts_batch_t;
 int32_t ism330dhcx_fifo_timestamp_decimation_set(stmdev_ctx_t *ctx,
-                                                ism330dhcx_odr_ts_batch_t val);
+                                                 ism330dhcx_odr_ts_batch_t val);
 int32_t ism330dhcx_fifo_timestamp_decimation_get(stmdev_ctx_t *ctx,
-                                                ism330dhcx_odr_ts_batch_t *val);
+                                                 ism330dhcx_odr_ts_batch_t *val);
 
 typedef enum {
   ISM330DHCX_XL_BATCH_EVENT   = 0,
   ISM330DHCX_GYRO_BATCH_EVENT = 1,
 } ism330dhcx_trig_counter_bdr_t;
 int32_t ism330dhcx_fifo_cnt_event_batch_set(stmdev_ctx_t *ctx,
-                                           ism330dhcx_trig_counter_bdr_t val);
+                                            ism330dhcx_trig_counter_bdr_t val);
 int32_t ism330dhcx_fifo_cnt_event_batch_get(stmdev_ctx_t *ctx,
-                                           ism330dhcx_trig_counter_bdr_t *val);
+                                            ism330dhcx_trig_counter_bdr_t *val);
 
-int32_t ism330dhcx_rst_batch_counter_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_rst_batch_counter_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_rst_batch_counter_set(stmdev_ctx_t *ctx,
+                                         uint8_t val);
+int32_t ism330dhcx_rst_batch_counter_get(stmdev_ctx_t *ctx,
+                                         uint8_t *val);
 
 int32_t ism330dhcx_batch_counter_threshold_set(stmdev_ctx_t *ctx,
-                                              uint16_t val);
+                                               uint16_t val);
 int32_t ism330dhcx_batch_counter_threshold_get(stmdev_ctx_t *ctx,
-                                              uint16_t *val);
+                                               uint16_t *val);
 
-int32_t ism330dhcx_fifo_data_level_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t ism330dhcx_fifo_data_level_get(stmdev_ctx_t *ctx,
+                                       uint16_t *val);
 
 int32_t ism330dhcx_fifo_status_get(stmdev_ctx_t *ctx,
-                                  ism330dhcx_fifo_status2_t *val);
+                                   ism330dhcx_fifo_status2_t *val);
 
-int32_t ism330dhcx_fifo_full_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_fifo_full_flag_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t ism330dhcx_fifo_ovr_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
@@ -3530,25 +3584,35 @@ typedef enum {
   ISM330DHCX_GAME_ROTATION_TAG,
   ISM330DHCX_GEOMAG_ROTATION_TAG,
   ISM330DHCX_ROTATION_TAG,
-  ISM330DHCX_SENSORHUB_NACK_TAG	= 0x19,
+  ISM330DHCX_SENSORHUB_NACK_TAG = 0x19,
 } ism330dhcx_fifo_tag_t;
 int32_t ism330dhcx_fifo_sensor_tag_get(stmdev_ctx_t *ctx,
-                                      ism330dhcx_fifo_tag_t *val);
+                                       ism330dhcx_fifo_tag_t *val);
 
-int32_t ism330dhcx_fifo_pedo_batch_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_fifo_pedo_batch_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_fifo_pedo_batch_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t ism330dhcx_fifo_pedo_batch_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
-int32_t ism330dhcx_sh_batch_slave_0_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_sh_batch_slave_0_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_sh_batch_slave_0_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t ism330dhcx_sh_batch_slave_0_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
-int32_t ism330dhcx_sh_batch_slave_1_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_sh_batch_slave_1_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_sh_batch_slave_1_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t ism330dhcx_sh_batch_slave_1_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
-int32_t ism330dhcx_sh_batch_slave_2_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_sh_batch_slave_2_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_sh_batch_slave_2_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t ism330dhcx_sh_batch_slave_2_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
-int32_t ism330dhcx_sh_batch_slave_3_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_sh_batch_slave_3_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_sh_batch_slave_3_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t ism330dhcx_sh_batch_slave_3_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 typedef enum {
   ISM330DHCX_DEN_DISABLE    = 0,
@@ -3558,18 +3622,18 @@ typedef enum {
   ISM330DHCX_EDGE_TRIGGER   = 4,
 } ism330dhcx_den_mode_t;
 int32_t ism330dhcx_den_mode_set(stmdev_ctx_t *ctx,
-                               ism330dhcx_den_mode_t val);
+                                ism330dhcx_den_mode_t val);
 int32_t ism330dhcx_den_mode_get(stmdev_ctx_t *ctx,
-                               ism330dhcx_den_mode_t *val);
+                                ism330dhcx_den_mode_t *val);
 
 typedef enum {
   ISM330DHCX_DEN_ACT_LOW  = 0,
   ISM330DHCX_DEN_ACT_HIGH = 1,
 } ism330dhcx_den_lh_t;
 int32_t ism330dhcx_den_polarity_set(stmdev_ctx_t *ctx,
-                                   ism330dhcx_den_lh_t val);
+                                    ism330dhcx_den_lh_t val);
 int32_t ism330dhcx_den_polarity_get(stmdev_ctx_t *ctx,
-                                   ism330dhcx_den_lh_t *val);
+                                    ism330dhcx_den_lh_t *val);
 
 typedef enum {
   ISM330DHCX_STAMP_IN_GY_DATA     = 0,
@@ -3577,44 +3641,55 @@ typedef enum {
   ISM330DHCX_STAMP_IN_GY_XL_DATA  = 2,
 } ism330dhcx_den_xl_g_t;
 int32_t ism330dhcx_den_enable_set(stmdev_ctx_t *ctx,
-                                 ism330dhcx_den_xl_g_t val);
+                                  ism330dhcx_den_xl_g_t val);
 int32_t ism330dhcx_den_enable_get(stmdev_ctx_t *ctx,
-                                 ism330dhcx_den_xl_g_t *val);
+                                  ism330dhcx_den_xl_g_t *val);
 
-int32_t ism330dhcx_den_mark_axis_x_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_den_mark_axis_x_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_den_mark_axis_x_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t ism330dhcx_den_mark_axis_x_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
-int32_t ism330dhcx_den_mark_axis_y_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_den_mark_axis_y_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_den_mark_axis_y_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t ism330dhcx_den_mark_axis_y_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
-int32_t ism330dhcx_den_mark_axis_z_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_den_mark_axis_z_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_den_mark_axis_z_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t ism330dhcx_den_mark_axis_z_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 int32_t ism330dhcx_pedo_sens_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_pedo_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t ism330dhcx_pedo_step_detect_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_pedo_step_detect_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
-int32_t ism330dhcx_pedo_debounce_steps_set(stmdev_ctx_t *ctx, uint8_t *buff);
-int32_t ism330dhcx_pedo_debounce_steps_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t ism330dhcx_pedo_debounce_steps_set(stmdev_ctx_t *ctx,
+                                           uint8_t *buff);
+int32_t ism330dhcx_pedo_debounce_steps_get(stmdev_ctx_t *ctx,
+                                           uint8_t *buff);
 
-int32_t ism330dhcx_pedo_steps_period_set(stmdev_ctx_t *ctx, uint16_t val);
-int32_t ism330dhcx_pedo_steps_period_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t ism330dhcx_pedo_steps_period_set(stmdev_ctx_t *ctx,
+                                         uint16_t val);
+int32_t ism330dhcx_pedo_steps_period_get(stmdev_ctx_t *ctx,
+                                         uint16_t *val);
 
 typedef enum {
   ISM330DHCX_EVERY_STEP     = 0,
   ISM330DHCX_COUNT_OVERFLOW = 1,
 } ism330dhcx_carry_count_en_t;
 int32_t ism330dhcx_pedo_int_mode_set(stmdev_ctx_t *ctx,
-                                    ism330dhcx_carry_count_en_t val);
+                                     ism330dhcx_carry_count_en_t val);
 int32_t ism330dhcx_pedo_int_mode_get(stmdev_ctx_t *ctx,
-                                    ism330dhcx_carry_count_en_t *val);
+                                     ism330dhcx_carry_count_en_t *val);
 
 int32_t ism330dhcx_motion_sens_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_motion_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t ism330dhcx_motion_flag_data_ready_get(stmdev_ctx_t *ctx,
-                                             uint8_t *val);
+                                              uint8_t *val);
 
 int32_t ism330dhcx_tilt_sens_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_tilt_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3622,14 +3697,18 @@ int32_t ism330dhcx_tilt_sens_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t ism330dhcx_tilt_flag_data_ready_get(stmdev_ctx_t *ctx,
                                             uint8_t *val);
 
-int32_t ism330dhcx_mag_sensitivity_set(stmdev_ctx_t *ctx, uint16_t val);
-int32_t ism330dhcx_mag_sensitivity_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t ism330dhcx_mag_sensitivity_set(stmdev_ctx_t *ctx,
+                                       uint16_t val);
+int32_t ism330dhcx_mag_sensitivity_get(stmdev_ctx_t *ctx,
+                                       uint16_t *val);
 
 int32_t ism330dhcx_mag_offset_set(stmdev_ctx_t *ctx, int16_t *val);
 int32_t ism330dhcx_mag_offset_get(stmdev_ctx_t *ctx, int16_t *val);
 
-int32_t ism330dhcx_mag_soft_iron_set(stmdev_ctx_t *ctx, uint16_t *val);
-int32_t ism330dhcx_mag_soft_iron_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t ism330dhcx_mag_soft_iron_set(stmdev_ctx_t *ctx,
+                                     uint16_t *val);
+int32_t ism330dhcx_mag_soft_iron_get(stmdev_ctx_t *ctx,
+                                     uint16_t *val);
 
 typedef enum {
   ISM330DHCX_Z_EQ_Y     = 0,
@@ -3640,9 +3719,9 @@ typedef enum {
   ISM330DHCX_Z_EQ_Z     = 5,
 } ism330dhcx_mag_z_axis_t;
 int32_t ism330dhcx_mag_z_orient_set(stmdev_ctx_t *ctx,
-                                   ism330dhcx_mag_z_axis_t val);
+                                    ism330dhcx_mag_z_axis_t val);
 int32_t ism330dhcx_mag_z_orient_get(stmdev_ctx_t *ctx,
-                                   ism330dhcx_mag_z_axis_t *val);
+                                    ism330dhcx_mag_z_axis_t *val);
 
 typedef enum {
   ISM330DHCX_Y_EQ_Y     = 0,
@@ -3653,9 +3732,9 @@ typedef enum {
   ISM330DHCX_Y_EQ_Z     = 5,
 } ism330dhcx_mag_y_axis_t;
 int32_t ism330dhcx_mag_y_orient_set(stmdev_ctx_t *ctx,
-                                   ism330dhcx_mag_y_axis_t val);
+                                    ism330dhcx_mag_y_axis_t val);
 int32_t ism330dhcx_mag_y_orient_get(stmdev_ctx_t *ctx,
-                                   ism330dhcx_mag_y_axis_t *val);
+                                    ism330dhcx_mag_y_axis_t *val);
 
 typedef enum {
   ISM330DHCX_X_EQ_Y     = 0,
@@ -3666,24 +3745,24 @@ typedef enum {
   ISM330DHCX_X_EQ_Z     = 5,
 } ism330dhcx_mag_x_axis_t;
 int32_t ism330dhcx_mag_x_orient_set(stmdev_ctx_t *ctx,
-                                   ism330dhcx_mag_x_axis_t val);
+                                    ism330dhcx_mag_x_axis_t val);
 int32_t ism330dhcx_mag_x_orient_get(stmdev_ctx_t *ctx,
-                                   ism330dhcx_mag_x_axis_t *val);
+                                    ism330dhcx_mag_x_axis_t *val);
 
 int32_t ism330dhcx_long_cnt_flag_data_ready_get(stmdev_ctx_t *ctx,
-                                               uint8_t *val);
+                                                uint8_t *val);
 
 int32_t ism330dhcx_emb_fsm_en_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_emb_fsm_en_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef struct {
-    ism330dhcx_fsm_enable_a_t          fsm_enable_a;
-    ism330dhcx_fsm_enable_b_t          fsm_enable_b;
+  ism330dhcx_fsm_enable_a_t          fsm_enable_a;
+  ism330dhcx_fsm_enable_b_t          fsm_enable_b;
 } ism330dhcx_emb_fsm_enable_t;
 int32_t ism330dhcx_fsm_enable_set(stmdev_ctx_t *ctx,
-                                 ism330dhcx_emb_fsm_enable_t *val);
+                                  ism330dhcx_emb_fsm_enable_t *val);
 int32_t ism330dhcx_fsm_enable_get(stmdev_ctx_t *ctx,
-                                 ism330dhcx_emb_fsm_enable_t *val);
+                                  ism330dhcx_emb_fsm_enable_t *val);
 
 int32_t ism330dhcx_long_cnt_set(stmdev_ctx_t *ctx, uint16_t val);
 int32_t ism330dhcx_long_cnt_get(stmdev_ctx_t *ctx, uint16_t *val);
@@ -3694,27 +3773,27 @@ typedef enum {
   ISM330DHCX_LC_CLEAR_DONE = 2,
 } ism330dhcx_fsm_lc_clr_t;
 int32_t ism330dhcx_long_clr_set(stmdev_ctx_t *ctx,
-                               ism330dhcx_fsm_lc_clr_t val);
+                                ism330dhcx_fsm_lc_clr_t val);
 int32_t ism330dhcx_long_clr_get(stmdev_ctx_t *ctx,
-                               ism330dhcx_fsm_lc_clr_t *val);
+                                ism330dhcx_fsm_lc_clr_t *val);
 
 typedef struct {
-    ism330dhcx_fsm_outs1_t    fsm_outs1;
-    ism330dhcx_fsm_outs2_t    fsm_outs2;
-    ism330dhcx_fsm_outs3_t    fsm_outs3;
-    ism330dhcx_fsm_outs4_t    fsm_outs4;
-    ism330dhcx_fsm_outs5_t    fsm_outs5;
-    ism330dhcx_fsm_outs6_t    fsm_outs6;
-    ism330dhcx_fsm_outs7_t    fsm_outs7;
-    ism330dhcx_fsm_outs8_t    fsm_outs8;
-    ism330dhcx_fsm_outs9_t    fsm_outs9;
-    ism330dhcx_fsm_outs10_t    fsm_outs10;
-    ism330dhcx_fsm_outs11_t    fsm_outs11;
-    ism330dhcx_fsm_outs12_t    fsm_outs12;
-    ism330dhcx_fsm_outs13_t    fsm_outs13;
-    ism330dhcx_fsm_outs14_t    fsm_outs14;
-    ism330dhcx_fsm_outs15_t    fsm_outs15;
-    ism330dhcx_fsm_outs16_t    fsm_outs16;
+  ism330dhcx_fsm_outs1_t    fsm_outs1;
+  ism330dhcx_fsm_outs2_t    fsm_outs2;
+  ism330dhcx_fsm_outs3_t    fsm_outs3;
+  ism330dhcx_fsm_outs4_t    fsm_outs4;
+  ism330dhcx_fsm_outs5_t    fsm_outs5;
+  ism330dhcx_fsm_outs6_t    fsm_outs6;
+  ism330dhcx_fsm_outs7_t    fsm_outs7;
+  ism330dhcx_fsm_outs8_t    fsm_outs8;
+  ism330dhcx_fsm_outs9_t    fsm_outs9;
+  ism330dhcx_fsm_outs10_t    fsm_outs10;
+  ism330dhcx_fsm_outs11_t    fsm_outs11;
+  ism330dhcx_fsm_outs12_t    fsm_outs12;
+  ism330dhcx_fsm_outs13_t    fsm_outs13;
+  ism330dhcx_fsm_outs14_t    fsm_outs14;
+  ism330dhcx_fsm_outs15_t    fsm_outs15;
+  ism330dhcx_fsm_outs16_t    fsm_outs16;
 } ism330dhcx_fsm_out_t;
 int32_t ism330dhcx_fsm_out_get(stmdev_ctx_t *ctx,
                                ism330dhcx_fsm_out_t *val);
@@ -3726,23 +3805,27 @@ typedef enum {
   ISM330DHCX_ODR_FSM_104Hz = 3,
 } ism330dhcx_fsm_odr_t;
 int32_t ism330dhcx_fsm_data_rate_set(stmdev_ctx_t *ctx,
-                                    ism330dhcx_fsm_odr_t val);
+                                     ism330dhcx_fsm_odr_t val);
 int32_t ism330dhcx_fsm_data_rate_get(stmdev_ctx_t *ctx,
-                                    ism330dhcx_fsm_odr_t *val);
+                                     ism330dhcx_fsm_odr_t *val);
 
 int32_t ism330dhcx_fsm_init_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_fsm_init_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t ism330dhcx_long_cnt_int_value_set(stmdev_ctx_t *ctx, uint16_t val);
-int32_t ism330dhcx_long_cnt_int_value_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t ism330dhcx_long_cnt_int_value_set(stmdev_ctx_t *ctx,
+                                          uint16_t val);
+int32_t ism330dhcx_long_cnt_int_value_get(stmdev_ctx_t *ctx,
+                                          uint16_t *val);
 
 int32_t ism330dhcx_fsm_number_of_programs_set(stmdev_ctx_t *ctx,
                                               uint8_t *buff);
 int32_t ism330dhcx_fsm_number_of_programs_get(stmdev_ctx_t *ctx,
                                               uint8_t *buff);
 
-int32_t ism330dhcx_fsm_start_address_set(stmdev_ctx_t *ctx, uint16_t val);
-int32_t ism330dhcx_fsm_start_address_get(stmdev_ctx_t *ctx, uint16_t *val);
+int32_t ism330dhcx_fsm_start_address_set(stmdev_ctx_t *ctx,
+                                         uint16_t val);
+int32_t ism330dhcx_fsm_start_address_get(stmdev_ctx_t *ctx,
+                                         uint16_t *val);
 
 int32_t ism330dhcx_mlc_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_mlc_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3762,28 +3845,28 @@ int32_t ism330dhcx_mlc_data_rate_get(stmdev_ctx_t *ctx,
                                      ism330dhcx_mlc_odr_t *val);
 
 typedef struct {
-    ism330dhcx_sensor_hub_1_t   sh_byte_1;
-    ism330dhcx_sensor_hub_2_t   sh_byte_2;
-    ism330dhcx_sensor_hub_3_t   sh_byte_3;
-    ism330dhcx_sensor_hub_4_t   sh_byte_4;
-    ism330dhcx_sensor_hub_5_t   sh_byte_5;
-    ism330dhcx_sensor_hub_6_t   sh_byte_6;
-    ism330dhcx_sensor_hub_7_t   sh_byte_7;
-    ism330dhcx_sensor_hub_8_t   sh_byte_8;
-    ism330dhcx_sensor_hub_9_t   sh_byte_9;
-    ism330dhcx_sensor_hub_10_t  sh_byte_10;
-    ism330dhcx_sensor_hub_11_t  sh_byte_11;
-    ism330dhcx_sensor_hub_12_t  sh_byte_12;
-    ism330dhcx_sensor_hub_13_t  sh_byte_13;
-    ism330dhcx_sensor_hub_14_t  sh_byte_14;
-    ism330dhcx_sensor_hub_15_t  sh_byte_15;
-    ism330dhcx_sensor_hub_16_t  sh_byte_16;
-    ism330dhcx_sensor_hub_17_t  sh_byte_17;
-    ism330dhcx_sensor_hub_18_t  sh_byte_18;
+  ism330dhcx_sensor_hub_1_t   sh_byte_1;
+  ism330dhcx_sensor_hub_2_t   sh_byte_2;
+  ism330dhcx_sensor_hub_3_t   sh_byte_3;
+  ism330dhcx_sensor_hub_4_t   sh_byte_4;
+  ism330dhcx_sensor_hub_5_t   sh_byte_5;
+  ism330dhcx_sensor_hub_6_t   sh_byte_6;
+  ism330dhcx_sensor_hub_7_t   sh_byte_7;
+  ism330dhcx_sensor_hub_8_t   sh_byte_8;
+  ism330dhcx_sensor_hub_9_t   sh_byte_9;
+  ism330dhcx_sensor_hub_10_t  sh_byte_10;
+  ism330dhcx_sensor_hub_11_t  sh_byte_11;
+  ism330dhcx_sensor_hub_12_t  sh_byte_12;
+  ism330dhcx_sensor_hub_13_t  sh_byte_13;
+  ism330dhcx_sensor_hub_14_t  sh_byte_14;
+  ism330dhcx_sensor_hub_15_t  sh_byte_15;
+  ism330dhcx_sensor_hub_16_t  sh_byte_16;
+  ism330dhcx_sensor_hub_17_t  sh_byte_17;
+  ism330dhcx_sensor_hub_18_t  sh_byte_18;
 } ism330dhcx_emb_sh_read_t;
 int32_t ism330dhcx_sh_read_data_raw_get(stmdev_ctx_t *ctx,
-                                       ism330dhcx_emb_sh_read_t *val,
-									   uint8_t len);
+                                        ism330dhcx_emb_sh_read_t *val,
+                                        uint8_t len);
 
 typedef enum {
   ISM330DHCX_SLV_0       = 0,
@@ -3792,9 +3875,9 @@ typedef enum {
   ISM330DHCX_SLV_0_1_2_3 = 3,
 } ism330dhcx_aux_sens_on_t;
 int32_t ism330dhcx_sh_slave_connected_set(stmdev_ctx_t *ctx,
-                                         ism330dhcx_aux_sens_on_t val);
+                                          ism330dhcx_aux_sens_on_t val);
 int32_t ism330dhcx_sh_slave_connected_get(stmdev_ctx_t *ctx,
-                                         ism330dhcx_aux_sens_on_t *val);
+                                          ism330dhcx_aux_sens_on_t *val);
 
 int32_t ism330dhcx_sh_master_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t ism330dhcx_sh_master_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3804,30 +3887,32 @@ typedef enum {
   ISM330DHCX_INTERNAL_PULL_UP = 1,
 } ism330dhcx_shub_pu_en_t;
 int32_t ism330dhcx_sh_pin_mode_set(stmdev_ctx_t *ctx,
-                                  ism330dhcx_shub_pu_en_t val);
+                                   ism330dhcx_shub_pu_en_t val);
 int32_t ism330dhcx_sh_pin_mode_get(stmdev_ctx_t *ctx,
-                                  ism330dhcx_shub_pu_en_t *val);
+                                   ism330dhcx_shub_pu_en_t *val);
 
-int32_t ism330dhcx_sh_pass_through_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t ism330dhcx_sh_pass_through_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t ism330dhcx_sh_pass_through_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t ism330dhcx_sh_pass_through_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 typedef enum {
   ISM330DHCX_EXT_ON_INT2_PIN = 0,
   ISM330DHCX_XL_GY_DRDY      = 1,
 } ism330dhcx_start_config_t;
 int32_t ism330dhcx_sh_syncro_mode_set(stmdev_ctx_t *ctx,
-                                     ism330dhcx_start_config_t val);
+                                      ism330dhcx_start_config_t val);
 int32_t ism330dhcx_sh_syncro_mode_get(stmdev_ctx_t *ctx,
-                                     ism330dhcx_start_config_t *val);
+                                      ism330dhcx_start_config_t *val);
 
 typedef enum {
   ISM330DHCX_EACH_SH_CYCLE    = 0,
   ISM330DHCX_ONLY_FIRST_CYCLE = 1,
 } ism330dhcx_write_once_t;
 int32_t ism330dhcx_sh_write_mode_set(stmdev_ctx_t *ctx,
-                                    ism330dhcx_write_once_t val);
+                                     ism330dhcx_write_once_t val);
 int32_t ism330dhcx_sh_write_mode_get(stmdev_ctx_t *ctx,
-                                    ism330dhcx_write_once_t *val);
+                                     ism330dhcx_write_once_t *val);
 
 int32_t ism330dhcx_sh_reset_set(stmdev_ctx_t *ctx);
 int32_t ism330dhcx_sh_reset_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -3839,34 +3924,34 @@ typedef enum {
   ISM330DHCX_SH_ODR_13Hz  = 3,
 } ism330dhcx_shub_odr_t;
 int32_t ism330dhcx_sh_data_rate_set(stmdev_ctx_t *ctx,
-                                   ism330dhcx_shub_odr_t val);
+                                    ism330dhcx_shub_odr_t val);
 int32_t ism330dhcx_sh_data_rate_get(stmdev_ctx_t *ctx,
-                                   ism330dhcx_shub_odr_t *val);
+                                    ism330dhcx_shub_odr_t *val);
 
-typedef struct{
+typedef struct {
   uint8_t   slv0_add;
   uint8_t   slv0_subadd;
   uint8_t   slv0_data;
 } ism330dhcx_sh_cfg_write_t;
 int32_t ism330dhcx_sh_cfg_write(stmdev_ctx_t *ctx,
-                               ism330dhcx_sh_cfg_write_t *val);
+                                ism330dhcx_sh_cfg_write_t *val);
 
-typedef struct{
+typedef struct {
   uint8_t   slv_add;
   uint8_t   slv_subadd;
   uint8_t   slv_len;
 } ism330dhcx_sh_cfg_read_t;
 int32_t ism330dhcx_sh_slv0_cfg_read(stmdev_ctx_t *ctx,
-                                   ism330dhcx_sh_cfg_read_t *val);
+                                    ism330dhcx_sh_cfg_read_t *val);
 int32_t ism330dhcx_sh_slv1_cfg_read(stmdev_ctx_t *ctx,
-                                   ism330dhcx_sh_cfg_read_t *val);
+                                    ism330dhcx_sh_cfg_read_t *val);
 int32_t ism330dhcx_sh_slv2_cfg_read(stmdev_ctx_t *ctx,
-                                   ism330dhcx_sh_cfg_read_t *val);
+                                    ism330dhcx_sh_cfg_read_t *val);
 int32_t ism330dhcx_sh_slv3_cfg_read(stmdev_ctx_t *ctx,
-                                   ism330dhcx_sh_cfg_read_t *val);
+                                    ism330dhcx_sh_cfg_read_t *val);
 
 int32_t ism330dhcx_sh_status_get(stmdev_ctx_t *ctx,
-                                ism330dhcx_status_master_t *val);
+                                 ism330dhcx_status_master_t *val);
 
 /**
   *@}
