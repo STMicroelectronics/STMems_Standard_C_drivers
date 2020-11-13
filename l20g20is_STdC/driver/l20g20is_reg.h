@@ -23,7 +23,7 @@
 #define L20G20IS_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -74,7 +74,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
@@ -107,8 +107,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -131,7 +133,7 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-  *              You can create a sensor configuration by your own or using 
+  *              You can create a sensor configuration by your own or using
   *              Unico / Unicleo tools available on STMicroelectronics
   *              web site.
   *
@@ -329,7 +331,7 @@ typedef struct {
   *
   */
 
-typedef union{
+typedef union {
   l20g20is_data_status_ois_t            data_status_ois;
   l20g20is_ctrl1_ois_t                  ctrl1_ois;
   l20g20is_ctrl2_ois_t                  ctrl2_ois;
@@ -347,9 +349,11 @@ typedef union{
   *
   */
 
-int32_t l20g20is_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t l20g20is_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
                           uint16_t len);
-int32_t l20g20is_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t l20g20is_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                           uint8_t *data,
                            uint16_t len);
 
 float_t l20g20is_from_fs100dps_to_mdps(int16_t lsb);
@@ -357,7 +361,8 @@ float_t l20g20is_from_fs200dps_to_mdps(int16_t lsb);
 
 float_t l20g20is_from_lsb_to_celsius(int16_t lsb);
 
-int32_t l20g20is_gy_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t l20g20is_gy_flag_data_ready_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 typedef enum {
   L20G20IS_GY_OFF    = 0,
@@ -379,8 +384,10 @@ int32_t l20g20is_gy_orient_set(stmdev_ctx_t *ctx,
 int32_t l20g20is_gy_orient_get(stmdev_ctx_t *ctx,
                                l20g20is_gy_orient_t *val);
 
-int32_t l20g20is_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t l20g20is_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t l20g20is_block_data_update_set(stmdev_ctx_t *ctx,
+                                       uint8_t val);
+int32_t l20g20is_block_data_update_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 typedef struct {
   uint8_t offx             : 7;
@@ -402,7 +409,8 @@ int32_t l20g20is_gy_full_scale_get(stmdev_ctx_t *ctx,
 
 int32_t l20g20is_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 
-int32_t l20g20is_angular_rate_raw_get(stmdev_ctx_t *ctx, int16_t *val);
+int32_t l20g20is_angular_rate_raw_get(stmdev_ctx_t *ctx,
+                                      int16_t *val);
 
 int32_t l20g20is_dev_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
@@ -439,8 +447,10 @@ int32_t l20g20is_gy_filter_hp_bandwidth_set(stmdev_ctx_t *ctx,
 int32_t l20g20is_gy_filter_hp_bandwidth_get(stmdev_ctx_t *ctx,
                                             l20g20is_gy_hp_bw_t *val);
 
-int32_t l20g20is_gy_filter_hp_reset_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t l20g20is_gy_filter_hp_reset_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t l20g20is_gy_filter_hp_reset_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t l20g20is_gy_filter_hp_reset_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 typedef enum {
   L20G20IS_LPF_BW_290Hz  = 0x00,
@@ -483,8 +493,10 @@ typedef enum {
   L20G20IS_PUSH_PULL = 0,
   L20G20IS_OPEN_DRAIN = 1,
 } l20g20is_pp_od_t;
-int32_t l20g20is_pin_mode_set(stmdev_ctx_t *ctx, l20g20is_pp_od_t val);
-int32_t l20g20is_pin_mode_get(stmdev_ctx_t *ctx, l20g20is_pp_od_t *val);
+int32_t l20g20is_pin_mode_set(stmdev_ctx_t *ctx,
+                              l20g20is_pp_od_t val);
+int32_t l20g20is_pin_mode_get(stmdev_ctx_t *ctx,
+                              l20g20is_pp_od_t *val);
 
 typedef struct {
   uint8_t temp_data_on_drdy             : 1;

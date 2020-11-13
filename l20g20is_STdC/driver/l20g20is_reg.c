@@ -45,7 +45,8 @@
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t l20g20is_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t l20g20is_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
                           uint16_t len)
 {
   int32_t ret;
@@ -63,7 +64,8 @@ int32_t l20g20is_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t l20g20is_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t l20g20is_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                           uint8_t *data,
                            uint16_t len)
 {
   int32_t ret;
@@ -85,17 +87,17 @@ int32_t l20g20is_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
 
 float_t l20g20is_from_fs100dps_to_mdps(int16_t lsb)
 {
-  return (((float_t)lsb *1000.0f)/262.0f);
+  return (((float_t)lsb * 1000.0f) / 262.0f);
 }
 
 float_t l20g20is_from_fs200dps_to_mdps(int16_t lsb)
 {
-  return (((float_t)lsb *1000.0f)/131.0f);
+  return (((float_t)lsb * 1000.0f) / 131.0f);
 }
 
 float_t l20g20is_from_lsb_to_celsius(int16_t lsb)
 {
-  return (((float_t)lsb *0.0625f)+25.0f);
+  return (((float_t)lsb * 0.0625f) + 25.0f);
 }
 
 /**
@@ -119,15 +121,14 @@ float_t l20g20is_from_lsb_to_celsius(int16_t lsb)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l20g20is_gy_flag_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t l20g20is_gy_flag_data_ready_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val)
 {
   l20g20is_data_status_ois_t data_status_ois;
   int32_t ret;
-
   ret = l20g20is_read_reg(ctx, L20G20IS_DATA_STATUS_OIS,
-                          (uint8_t*)&data_status_ois, 1);
+                          (uint8_t *)&data_status_ois, 1);
   *val = data_status_ois.xyda_ois;
-
   return ret;
 }
 
@@ -144,13 +145,15 @@ int32_t l20g20is_gy_data_rate_set(stmdev_ctx_t *ctx,
 {
   l20g20is_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS,
+                          (uint8_t *)&ctrl1_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl1_ois.pw = (uint8_t)val;
     ret = l20g20is_write_reg(ctx, L20G20IS_CTRL1_OIS,
-                             (uint8_t*)&ctrl1_ois, 1);
+                             (uint8_t *)&ctrl1_ois, 1);
   }
+
   return ret;
 }
 
@@ -167,22 +170,27 @@ int32_t l20g20is_gy_data_rate_get(stmdev_ctx_t *ctx,
 {
   l20g20is_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS,
+                          (uint8_t *)&ctrl1_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
-  switch (ctrl1_ois.pw){
+  switch (ctrl1_ois.pw) {
     case L20G20IS_GY_OFF:
       *val = L20G20IS_GY_OFF;
       break;
+
     case L20G20IS_GY_SLEEP:
       *val = L20G20IS_GY_SLEEP;
       break;
+
     case L20G20IS_GY_9k33Hz:
       *val = L20G20IS_GY_9k33Hz;
       break;
+
     default:
       *val = L20G20IS_GY_OFF;
       break;
   }
+
   return ret;
 }
 
@@ -202,19 +210,25 @@ int32_t l20g20is_gy_orient_set(stmdev_ctx_t *ctx,
   l20g20is_ctrl1_ois_t ctrl1_ois;
   l20g20is_ctrl2_ois_t ctrl2_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS,
+                          (uint8_t *)&ctrl1_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
-  if(ret == 0) {
+  if (ret == 0) {
     ctrl1_ois.orient  = val.orient;
-    ret = l20g20is_write_reg(ctx, L20G20IS_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
+    ret = l20g20is_write_reg(ctx, L20G20IS_CTRL1_OIS,
+                             (uint8_t *)&ctrl1_ois, 1);
   }
-  if(ret == 0) {
-    ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
+
+  if (ret == 0) {
+    ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS,
+                            (uint8_t *)&ctrl2_ois, 1);
   }
-  if(ret == 0) {
+
+  if (ret == 0) {
     ctrl2_ois.signx  = val.signx;
     ctrl2_ois.signy  = val.signy;
-    ret = l20g20is_write_reg(ctx, L20G20IS_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
+    ret = l20g20is_write_reg(ctx, L20G20IS_CTRL2_OIS,
+                             (uint8_t *)&ctrl2_ois, 1);
   }
 
   return ret;
@@ -231,19 +245,22 @@ int32_t l20g20is_gy_orient_set(stmdev_ctx_t *ctx,
   *
   */
 int32_t l20g20is_gy_orient_get(stmdev_ctx_t *ctx,
-                                         l20g20is_gy_orient_t *val)
+                               l20g20is_gy_orient_t *val)
 {
   l20g20is_ctrl1_ois_t ctrl1_ois;
   l20g20is_ctrl2_ois_t ctrl2_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS,
+                          (uint8_t *)&ctrl1_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
-  if(ret == 0) {
-    ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
+  if (ret == 0) {
+    ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS,
+                            (uint8_t *)&ctrl2_ois, 1);
     val->orient = ctrl1_ois.orient;
     val->signy = ctrl2_ois.signy;
     val->signy = ctrl2_ois.signy;
   }
+
   return ret;
 }
 
@@ -259,13 +276,15 @@ int32_t l20g20is_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   l20g20is_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS,
+                          (uint8_t *)&ctrl1_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl1_ois.odu = (uint8_t)val;
     ret = l20g20is_write_reg(ctx, L20G20IS_CTRL1_OIS,
-                             (uint8_t*)&ctrl1_ois, 1);
+                             (uint8_t *)&ctrl1_ois, 1);
   }
+
   return ret;
 }
 
@@ -277,14 +296,14 @@ int32_t l20g20is_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l20g20is_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t l20g20is_block_data_update_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val)
 {
   l20g20is_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
-
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS,
+                          (uint8_t *)&ctrl1_ois, 1);
   *val = (uint8_t)ctrl1_ois.odu;
-
   return ret;
 }
 
@@ -303,18 +322,20 @@ int32_t l20g20is_angular_rate_offset_set(stmdev_ctx_t *ctx,
   l20g20is_off_x_t off_x;
   l20g20is_off_y_t off_y;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_OFF_X, (uint8_t *)&off_x, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_OFF_X, (uint8_t*)&off_x, 1);
-  if(ret == 0) {
+  if (ret == 0) {
     off_x.offx  = val.offx;
-    ret = l20g20is_write_reg(ctx, L20G20IS_OFF_X, (uint8_t*)&off_x, 1);
+    ret = l20g20is_write_reg(ctx, L20G20IS_OFF_X, (uint8_t *)&off_x, 1);
   }
-  if(ret == 0) {
-    ret = l20g20is_read_reg(ctx, L20G20IS_OFF_Y, (uint8_t*)&off_y, 1);
+
+  if (ret == 0) {
+    ret = l20g20is_read_reg(ctx, L20G20IS_OFF_Y, (uint8_t *)&off_y, 1);
   }
-  if(ret == 0) {
+
+  if (ret == 0) {
     off_y.offy  = val.offy;
-    ret = l20g20is_write_reg(ctx, L20G20IS_OFF_Y, (uint8_t*)&off_y, 1);
+    ret = l20g20is_write_reg(ctx, L20G20IS_OFF_Y, (uint8_t *)&off_y, 1);
   }
 
   return ret;
@@ -330,19 +351,18 @@ int32_t l20g20is_angular_rate_offset_set(stmdev_ctx_t *ctx,
   *
   */
 int32_t l20g20is_angular_rate_offset_get(stmdev_ctx_t *ctx,
-                                          l20g20is_off_t *val)
+                                         l20g20is_off_t *val)
 {
   l20g20is_off_x_t off_x;
   l20g20is_off_y_t off_y;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_OFF_X, (uint8_t *)&off_x, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_OFF_X, (uint8_t*)&off_x, 1);
-  if(ret == 0) {
-    ret = l20g20is_read_reg(ctx, L20G20IS_OFF_Y, (uint8_t*)&off_y, 1);
+  if (ret == 0) {
+    ret = l20g20is_read_reg(ctx, L20G20IS_OFF_Y, (uint8_t *)&off_y, 1);
     val->offx = off_x.offx;
     val->offy = off_y.offy;
   }
-
 
   return ret;
 }
@@ -360,14 +380,15 @@ int32_t l20g20is_gy_full_scale_set(stmdev_ctx_t *ctx,
 {
   l20g20is_ois_cfg_reg_t ois_cfg_reg;
   int32_t ret;
-
   ret = l20g20is_read_reg(ctx, L20G20IS_OIS_CFG_REG,
-                          (uint8_t*)&ois_cfg_reg, 1);
-  if(ret == 0){
+                          (uint8_t *)&ois_cfg_reg, 1);
+
+  if (ret == 0) {
     ois_cfg_reg.fs_sel = (uint8_t)val;
     ret = l20g20is_write_reg(ctx, L20G20IS_OIS_CFG_REG,
-                             (uint8_t*)&ois_cfg_reg, 1);
+                             (uint8_t *)&ois_cfg_reg, 1);
   }
+
   return ret;
 }
 
@@ -384,20 +405,23 @@ int32_t l20g20is_gy_full_scale_get(stmdev_ctx_t *ctx,
 {
   l20g20is_ois_cfg_reg_t ois_cfg_reg;
   int32_t ret;
-
   ret = l20g20is_read_reg(ctx, L20G20IS_OIS_CFG_REG,
-                          (uint8_t*)&ois_cfg_reg, 1);
-  switch (ois_cfg_reg.fs_sel){
+                          (uint8_t *)&ois_cfg_reg, 1);
+
+  switch (ois_cfg_reg.fs_sel) {
     case L20G20IS_100dps:
       *val = L20G20IS_100dps;
       break;
+
     case L20G20IS_200dps:
       *val = L20G20IS_200dps;
       break;
+
     default:
       *val = L20G20IS_100dps;
       break;
   }
+
   return ret;
 }
 
@@ -426,11 +450,9 @@ int32_t l20g20is_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
   uint8_t buff[2];
   int32_t ret;
-
   ret = l20g20is_read_reg(ctx, L20G20IS_TEMP_OUT_L, buff, 2);
   *val = (int16_t)buff[1];
   *val = (*val * 256) +  (int16_t)buff[0];
-
   return ret;
 }
 
@@ -447,13 +469,11 @@ int32_t l20g20is_angular_rate_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 {
   uint8_t buff[4];
   int32_t ret;
-
   ret = l20g20is_read_reg(ctx, L20G20IS_OUT_X_L, buff, 4);
   val[0] = (int16_t)buff[1];
   val[0] = (val[0] * 256) +  (int16_t)buff[0];
   val[1] = (int16_t)buff[3];
   val[1] = (val[1] * 256) +  (int16_t)buff[2];
-
   return ret;
 }
 
@@ -464,7 +484,7 @@ int32_t l20g20is_angular_rate_raw_get(stmdev_ctx_t *ctx, int16_t *val)
 
 /**
   * @defgroup    L20G20IS_Common
-  * @brief       This section groups common usefull functions.
+  * @brief       This section groups common useful functions.
   * @{
   *
   */
@@ -497,11 +517,9 @@ int32_t l20g20is_dev_status_get(stmdev_ctx_t *ctx,
 {
   l20g20is_data_status_ois_t data_status_ois;
   int32_t ret;
-
   ret = l20g20is_read_reg(ctx, L20G20IS_DATA_STATUS_OIS,
-                          (uint8_t*)&data_status_ois, 1);
+                          (uint8_t *)&data_status_ois, 1);
   val->xyda_ois = data_status_ois.xyda_ois;
-
   return ret;
 }
 
@@ -518,13 +536,15 @@ int32_t l20g20is_dev_data_format_set(stmdev_ctx_t *ctx,
 {
   l20g20is_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS,
+                          (uint8_t *)&ctrl1_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl1_ois.ble = (uint8_t)val;
     ret = l20g20is_write_reg(ctx, L20G20IS_CTRL1_OIS,
-                             (uint8_t*)&ctrl1_ois, 1);
+                             (uint8_t *)&ctrl1_ois, 1);
   }
+
   return ret;
 }
 
@@ -541,19 +561,23 @@ int32_t l20g20is_dev_data_format_get(stmdev_ctx_t *ctx,
 {
   l20g20is_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS,
+                          (uint8_t *)&ctrl1_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
-  switch (ctrl1_ois.ble){
+  switch (ctrl1_ois.ble) {
     case L20G20IS_LSB_LOW_ADDRESS:
       *val = L20G20IS_LSB_LOW_ADDRESS;
       break;
+
     case L20G20IS_MSB_LOW_ADDRESS:
       *val = L20G20IS_MSB_LOW_ADDRESS;
       break;
+
     default:
       *val = L20G20IS_LSB_LOW_ADDRESS;
       break;
   }
+
   return ret;
 }
 
@@ -569,12 +593,15 @@ int32_t l20g20is_dev_boot_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   l20g20is_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS,
+                          (uint8_t *)&ctrl1_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl1_ois.boot = (uint8_t)val;
-    ret = l20g20is_write_reg(ctx, L20G20IS_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
+    ret = l20g20is_write_reg(ctx, L20G20IS_CTRL1_OIS,
+                             (uint8_t *)&ctrl1_ois, 1);
   }
+
   return ret;
 }
 
@@ -590,10 +617,9 @@ int32_t l20g20is_dev_boot_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   l20g20is_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
-
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS,
+                          (uint8_t *)&ctrl1_ois, 1);
   *val = (uint8_t)ctrl1_ois.boot;
-
   return ret;
 }
 
@@ -609,12 +635,15 @@ int32_t l20g20is_dev_reset_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   l20g20is_ctrl2_ois_t ctrl2_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS,
+                          (uint8_t *)&ctrl2_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl2_ois.sw_rst = (uint8_t)val;
-    ret = l20g20is_write_reg(ctx, L20G20IS_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
+    ret = l20g20is_write_reg(ctx, L20G20IS_CTRL2_OIS,
+                             (uint8_t *)&ctrl2_ois, 1);
   }
+
   return ret;
 }
 
@@ -631,10 +660,9 @@ int32_t l20g20is_dev_reset_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   l20g20is_ctrl2_ois_t ctrl2_ois;
   int32_t ret;
-
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS,
+                          (uint8_t *)&ctrl2_ois, 1);
   *val = (uint8_t)ctrl2_ois.sw_rst;
-
   return ret;
 }
 
@@ -665,21 +693,24 @@ int32_t l20g20is_gy_filter_hp_bandwidth_set(stmdev_ctx_t *ctx,
   l20g20is_ctrl2_ois_t ctrl2_ois;
   l20g20is_ois_cfg_reg_t ois_cfg_reg;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS,
+                          (uint8_t *)&ctrl2_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl2_ois.hpf = ((uint8_t)val & 0x80U) >> 4;
     ret = l20g20is_write_reg(ctx, L20G20IS_CTRL2_OIS,
-                             (uint8_t*)&ctrl2_ois, 1);
+                             (uint8_t *)&ctrl2_ois, 1);
   }
-  if(ret == 0){
+
+  if (ret == 0) {
     ret = l20g20is_read_reg(ctx, L20G20IS_OIS_CFG_REG,
-                            (uint8_t*)&ois_cfg_reg, 1);
+                            (uint8_t *)&ois_cfg_reg, 1);
   }
-  if(ret == 0){
+
+  if (ret == 0) {
     ois_cfg_reg.hpf_bw = (uint8_t)val & 0x03U;
     ret = l20g20is_write_reg(ctx, L20G20IS_OIS_CFG_REG,
-                             (uint8_t*)&ois_cfg_reg, 1);
+                             (uint8_t *)&ois_cfg_reg, 1);
   }
 
   return ret;
@@ -699,33 +730,40 @@ int32_t l20g20is_gy_filter_hp_bandwidth_get(stmdev_ctx_t *ctx,
   l20g20is_ctrl2_ois_t ctrl2_ois;
   l20g20is_ois_cfg_reg_t ois_cfg_reg;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS,
+                          (uint8_t *)&ctrl2_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ret = l20g20is_read_reg(ctx, L20G20IS_OIS_CFG_REG,
-                            (uint8_t*)&ois_cfg_reg, 1);
+                            (uint8_t *)&ois_cfg_reg, 1);
 
-    switch ( ( ctrl2_ois.hpf << 4 ) + ois_cfg_reg.hpf_bw){
+    switch ( ( ctrl2_ois.hpf << 4 ) + ois_cfg_reg.hpf_bw) {
       case L20G20IS_HPF_BYPASS:
         *val = L20G20IS_HPF_BYPASS;
         break;
+
       case L20G20IS_HPF_BW_23mHz:
         *val = L20G20IS_HPF_BW_23mHz;
         break;
+
       case L20G20IS_HPF_BW_91mHz:
         *val = L20G20IS_HPF_BW_91mHz;
         break;
+
       case L20G20IS_HPF_BW_324mHz:
         *val = L20G20IS_HPF_BW_324mHz;
         break;
+
       case L20G20IS_HPF_BW_1Hz457:
         *val = L20G20IS_HPF_BW_1Hz457;
         break;
+
       default:
         *val = L20G20IS_HPF_BYPASS;
         break;
     }
   }
+
   return ret;
 }
 
@@ -737,16 +775,20 @@ int32_t l20g20is_gy_filter_hp_bandwidth_get(stmdev_ctx_t *ctx,
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l20g20is_gy_filter_hp_reset_set(stmdev_ctx_t *ctx, uint8_t val)
+int32_t l20g20is_gy_filter_hp_reset_set(stmdev_ctx_t *ctx,
+                                        uint8_t val)
 {
   l20g20is_ctrl2_ois_t ctrl2_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS,
+                          (uint8_t *)&ctrl2_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl2_ois.hp_rst = (uint8_t)val;
-    ret = l20g20is_write_reg(ctx, L20G20IS_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
+    ret = l20g20is_write_reg(ctx, L20G20IS_CTRL2_OIS,
+                             (uint8_t *)&ctrl2_ois, 1);
   }
+
   return ret;
 }
 
@@ -758,14 +800,14 @@ int32_t l20g20is_gy_filter_hp_reset_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l20g20is_gy_filter_hp_reset_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t l20g20is_gy_filter_hp_reset_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val)
 {
   l20g20is_ctrl2_ois_t ctrl2_ois;
   int32_t ret;
-
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS,
+                          (uint8_t *)&ctrl2_ois, 1);
   *val = (uint8_t)ctrl2_ois.hp_rst;
-
   return ret;
 }
 
@@ -783,21 +825,26 @@ int32_t l20g20is_gy_filter_lp_bandwidth_set(stmdev_ctx_t *ctx,
   l20g20is_ctrl2_ois_t ctrl2_ois;
   l20g20is_ctrl3_ois_t ctrl3_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS,
+                          (uint8_t *)&ctrl2_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl2_ois.lpf_bw = (uint8_t)val & 0x03U;
-    ret = l20g20is_write_reg(ctx, L20G20IS_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
+    ret = l20g20is_write_reg(ctx, L20G20IS_CTRL2_OIS,
+                             (uint8_t *)&ctrl2_ois, 1);
   }
-  if(ret == 0){
+
+  if (ret == 0) {
     ret = l20g20is_read_reg(ctx, L20G20IS_CTRL3_OIS,
-                              (uint8_t*)&ctrl3_ois, 1);
+                            (uint8_t *)&ctrl3_ois, 1);
   }
-  if(ret == 0){
+
+  if (ret == 0) {
     ctrl3_ois.lpf_bw = ((uint8_t)val & 0x04U) >> 2;
     ret = l20g20is_write_reg(ctx, L20G20IS_CTRL3_OIS,
-                               (uint8_t*)&ctrl3_ois, 1);
+                             (uint8_t *)&ctrl3_ois, 1);
   }
+
   return ret;
 }
 
@@ -815,31 +862,40 @@ int32_t l20g20is_gy_filter_lp_bandwidth_get(stmdev_ctx_t *ctx,
   l20g20is_ctrl2_ois_t ctrl2_ois;
   l20g20is_ctrl3_ois_t ctrl3_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL3_OIS,
+                          (uint8_t *)&ctrl3_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL3_OIS,(uint8_t*)&ctrl3_ois, 1);
-  if(ret == 0){
-    ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS, (uint8_t*)&ctrl2_ois, 1);
-    switch ( (ctrl3_ois.lpf_bw << 2) + ctrl2_ois.lpf_bw){
+  if (ret == 0) {
+    ret = l20g20is_read_reg(ctx, L20G20IS_CTRL2_OIS,
+                            (uint8_t *)&ctrl2_ois, 1);
+
+    switch ( (ctrl3_ois.lpf_bw << 2) + ctrl2_ois.lpf_bw) {
       case L20G20IS_LPF_BW_1150Hz:
         *val = L20G20IS_LPF_BW_1150Hz;
         break;
+
       case L20G20IS_LPF_BW_290Hz:
         *val = L20G20IS_LPF_BW_290Hz;
         break;
+
       case L20G20IS_LPF_BW_210Hz:
         *val = L20G20IS_LPF_BW_210Hz;
         break;
+
       case L20G20IS_LPF_BW_160Hz:
         *val = L20G20IS_LPF_BW_160Hz;
         break;
+
       case L20G20IS_LPF_BW_450Hz:
         *val = L20G20IS_LPF_BW_450Hz;
         break;
+
       default:
         *val = L20G20IS_LPF_BW_290Hz;
         break;
     }
   }
+
   return ret;
 }
 
@@ -868,12 +924,15 @@ int32_t l20g20is_spi_mode_set(stmdev_ctx_t *ctx, l20g20is_sim_t val)
 {
   l20g20is_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS,
+                          (uint8_t *)&ctrl1_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl1_ois.sim = (uint8_t)val;
-    ret = l20g20is_write_reg(ctx, L20G20IS_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
+    ret = l20g20is_write_reg(ctx, L20G20IS_CTRL1_OIS,
+                             (uint8_t *)&ctrl1_ois, 1);
   }
+
   return ret;
 }
 
@@ -889,19 +948,23 @@ int32_t l20g20is_spi_mode_get(stmdev_ctx_t *ctx, l20g20is_sim_t *val)
 {
   l20g20is_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS,
+                          (uint8_t *)&ctrl1_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
-  switch (ctrl1_ois.sim){
+  switch (ctrl1_ois.sim) {
     case L20G20IS_SPI_4_WIRE:
       *val = L20G20IS_SPI_4_WIRE;
       break;
+
     case L20G20IS_SPI_3_WIRE:
       *val = L20G20IS_SPI_3_WIRE;
       break;
+
     default:
       *val = L20G20IS_SPI_4_WIRE;
       break;
   }
+
   return ret;
 }
 
@@ -931,13 +994,15 @@ int32_t l20g20is_pin_notification_set(stmdev_ctx_t *ctx,
 {
   l20g20is_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS,
+                          (uint8_t *)&ctrl1_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl1_ois.dr_pulsed = (uint8_t)val;
     ret = l20g20is_write_reg(ctx, L20G20IS_CTRL1_OIS,
-                             (uint8_t*)&ctrl1_ois, 1);
+                             (uint8_t *)&ctrl1_ois, 1);
   }
+
   return ret;
 }
 
@@ -954,19 +1019,23 @@ int32_t l20g20is_pin_notification_get(stmdev_ctx_t *ctx,
 {
   l20g20is_ctrl1_ois_t ctrl1_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS,
+                          (uint8_t *)&ctrl1_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL1_OIS, (uint8_t*)&ctrl1_ois, 1);
-  switch (ctrl1_ois.dr_pulsed){
+  switch (ctrl1_ois.dr_pulsed) {
     case L20G20IS_INT_LATCHED:
       *val = L20G20IS_INT_LATCHED;
       break;
+
     case L20G20IS_INT_PULSED:
       *val = L20G20IS_INT_PULSED;
       break;
+
     default:
       *val = L20G20IS_INT_LATCHED;
       break;
   }
+
   return ret;
 }
 
@@ -983,13 +1052,15 @@ int32_t l20g20is_pin_polarity_set(stmdev_ctx_t *ctx,
 {
   l20g20is_ctrl3_ois_t ctrl3_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL3_OIS,
+                          (uint8_t *)&ctrl3_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL3_OIS, (uint8_t*)&ctrl3_ois, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl3_ois.h_l_active = (uint8_t)val;
     ret = l20g20is_write_reg(ctx, L20G20IS_CTRL3_OIS,
-                             (uint8_t*)&ctrl3_ois, 1);
+                             (uint8_t *)&ctrl3_ois, 1);
   }
+
   return ret;
 }
 
@@ -1006,19 +1077,23 @@ int32_t l20g20is_pin_polarity_get(stmdev_ctx_t *ctx,
 {
   l20g20is_ctrl3_ois_t ctrl3_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL3_OIS,
+                          (uint8_t *)&ctrl3_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL3_OIS, (uint8_t*)&ctrl3_ois, 1);
-  switch (ctrl3_ois.h_l_active){
+  switch (ctrl3_ois.h_l_active) {
     case L20G20IS_ACTIVE_HIGH:
       *val = L20G20IS_ACTIVE_HIGH;
       break;
+
     case L20G20IS_ACTIVE_LOW:
       *val = L20G20IS_ACTIVE_LOW;
       break;
+
     default:
       *val = L20G20IS_ACTIVE_HIGH;
       break;
   }
+
   return ret;
 }
 
@@ -1034,12 +1109,15 @@ int32_t l20g20is_pin_mode_set(stmdev_ctx_t *ctx, l20g20is_pp_od_t val)
 {
   l20g20is_ctrl4_ois_t ctrl4_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL4_OIS,
+                          (uint8_t *)&ctrl4_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL4_OIS, (uint8_t*)&ctrl4_ois, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl4_ois.drdy_od = (uint8_t)val;
-    ret = l20g20is_write_reg(ctx, L20G20IS_CTRL4_OIS, (uint8_t*)&ctrl4_ois, 1);
+    ret = l20g20is_write_reg(ctx, L20G20IS_CTRL4_OIS,
+                             (uint8_t *)&ctrl4_ois, 1);
   }
+
   return ret;
 }
 
@@ -1051,23 +1129,28 @@ int32_t l20g20is_pin_mode_set(stmdev_ctx_t *ctx, l20g20is_pp_od_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t l20g20is_pin_mode_get(stmdev_ctx_t *ctx, l20g20is_pp_od_t *val)
+int32_t l20g20is_pin_mode_get(stmdev_ctx_t *ctx,
+                              l20g20is_pp_od_t *val)
 {
   l20g20is_ctrl4_ois_t ctrl4_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL4_OIS,
+                          (uint8_t *)&ctrl4_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL4_OIS, (uint8_t*)&ctrl4_ois, 1);
-  switch (ctrl4_ois.drdy_od){
+  switch (ctrl4_ois.drdy_od) {
     case L20G20IS_PUSH_PULL:
       *val = L20G20IS_PUSH_PULL;
       break;
+
     case L20G20IS_OPEN_DRAIN:
       *val = L20G20IS_OPEN_DRAIN;
       break;
+
     default:
       *val = L20G20IS_PUSH_PULL;
       break;
   }
+
   return ret;
 }
 
@@ -1085,13 +1168,16 @@ int32_t l20g20is_pin_drdy_route_set(stmdev_ctx_t *ctx,
 {
   l20g20is_ctrl4_ois_t ctrl4_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL4_OIS,
+                          (uint8_t *)&ctrl4_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL4_OIS, (uint8_t*)&ctrl4_ois, 1);
-  if(ret == 0) {
+  if (ret == 0) {
     ctrl4_ois.drdy_en  = val.drdy_en;
     ctrl4_ois.temp_data_on_drdy  = val.temp_data_on_drdy;
-    ret = l20g20is_write_reg(ctx, L20G20IS_CTRL4_OIS, (uint8_t*)&ctrl4_ois, 1);
+    ret = l20g20is_write_reg(ctx, L20G20IS_CTRL4_OIS,
+                             (uint8_t *)&ctrl4_ois, 1);
   }
+
   return ret;
 }
 
@@ -1109,11 +1195,10 @@ int32_t l20g20is_pin_drdy_route_get(stmdev_ctx_t *ctx,
 {
   l20g20is_ctrl4_ois_t ctrl4_ois;
   int32_t ret;
-
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL4_OIS, (uint8_t*)&ctrl4_ois, 1);
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL4_OIS,
+                          (uint8_t *)&ctrl4_ois, 1);
   val->temp_data_on_drdy = ctrl4_ois.temp_data_on_drdy;
   val->drdy_en = ctrl4_ois.drdy_en;
-
   return ret;
 }
 
@@ -1143,14 +1228,16 @@ int32_t l20g20is_gy_self_test_set(stmdev_ctx_t *ctx,
 {
   l20g20is_ctrl3_ois_t ctrl3_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL3_OIS,
+                          (uint8_t *)&ctrl3_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL3_OIS, (uint8_t*)&ctrl3_ois, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl3_ois.st_en = ((uint8_t)val & 0x02U) >> 1;
     ctrl3_ois.st_sign = (uint8_t)val & 0x01U;
     ret = l20g20is_write_reg(ctx, L20G20IS_CTRL3_OIS,
-                             (uint8_t*)&ctrl3_ois, 1);
+                             (uint8_t *)&ctrl3_ois, 1);
   }
+
   return ret;
 }
 
@@ -1167,22 +1254,27 @@ int32_t l20g20is_gy_self_test_get(stmdev_ctx_t *ctx,
 {
   l20g20is_ctrl3_ois_t ctrl3_ois;
   int32_t ret;
+  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL3_OIS,
+                          (uint8_t *)&ctrl3_ois, 1);
 
-  ret = l20g20is_read_reg(ctx, L20G20IS_CTRL3_OIS, (uint8_t*)&ctrl3_ois, 1);
-  switch ((ctrl3_ois.st_en << 1) + ctrl3_ois.st_sign){
+  switch ((ctrl3_ois.st_en << 1) + ctrl3_ois.st_sign) {
     case L20G20IS_ST_DISABLE:
       *val = L20G20IS_ST_DISABLE;
       break;
+
     case L20G20IS_ST_POSITIVE:
       *val = L20G20IS_ST_POSITIVE;
       break;
+
     case L20G20IS_ST_NEGATIVE:
       *val = L20G20IS_ST_NEGATIVE;
       break;
+
     default:
       *val = L20G20IS_ST_DISABLE;
       break;
   }
+
   return ret;
 }
 
