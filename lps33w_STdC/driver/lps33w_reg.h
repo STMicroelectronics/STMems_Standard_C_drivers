@@ -23,7 +23,7 @@
 #define LPS33W_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -43,7 +43,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -65,8 +65,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -89,9 +91,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using 
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -120,7 +122,7 @@ typedef struct {
   *
   */
 
-  /** I2C Device Address 8 bit format: if SA0=0 -> 0xB9 if SA0=1 -> 0xBB **/
+/** I2C Device Address 8 bit format: if SA0=0 -> 0xB9 if SA0=1 -> 0xBB **/
 #define LPS33W_I2C_ADD_H   0xBBU
 #define LPS33W_I2C_ADD_L   0xB9U
 
@@ -243,7 +245,7 @@ typedef struct {
   *
   */
 
-typedef union{
+typedef union {
   lps33w_interrupt_cfg_t      interrupt_cfg;
   lps33w_ctrl_reg1_t          ctrl_reg1;
   lps33w_ctrl_reg2_t          ctrl_reg2;
@@ -262,10 +264,11 @@ typedef union{
   *
   */
 
-int32_t lps33w_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lps33w_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t *data,
+                        uint16_t len);
+int32_t lps33w_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                         uint8_t *data,
                          uint16_t len);
-int32_t lps33w_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
-                          uint16_t len);
 
 extern float_t lps33w_from_lsb_to_hpa(uint32_t lsb);
 extern float_t lps33w_from_lsb_to_degc(int16_t lsb);
@@ -290,8 +293,10 @@ typedef enum {
   LPS33W_LPF_ODR_DIV_9  = 2,
   LPS33W_LPF_ODR_DIV_20 = 3,
 } lps33w_lpfp_t;
-int32_t lps33w_low_pass_filter_mode_set(stmdev_ctx_t *ctx, lps33w_lpfp_t val);
-int32_t lps33w_low_pass_filter_mode_get(stmdev_ctx_t *ctx, lps33w_lpfp_t *val);
+int32_t lps33w_low_pass_filter_mode_set(stmdev_ctx_t *ctx,
+                                        lps33w_lpfp_t val);
+int32_t lps33w_low_pass_filter_mode_get(stmdev_ctx_t *ctx,
+                                        lps33w_lpfp_t *val);
 
 typedef enum {
   LPS33W_POWER_DOWN  = 0,
@@ -340,11 +345,12 @@ int32_t lps33w_low_power_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lps33w_boot_status_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-typedef struct{
+typedef struct {
   lps33w_fifo_status_t  fifo_status;
   lps33w_status_t       status;
 } lps33w_dev_stat_t;
-int32_t lps33w_dev_status_get(stmdev_ctx_t *ctx, lps33w_dev_stat_t *val);
+int32_t lps33w_dev_status_get(stmdev_ctx_t *ctx,
+                              lps33w_dev_stat_t *val);
 
 typedef enum {
   LPS33W_NO_THRESHOLD = 0,
@@ -352,15 +358,19 @@ typedef enum {
   LPS33W_NEGATIVE     = 2,
   LPS33W_BOTH         = 3,
 } lps33w_pe_t;
-int32_t lps33w_sign_of_int_threshold_set(stmdev_ctx_t *ctx, lps33w_pe_t val);
-int32_t lps33w_sign_of_int_threshold_get(stmdev_ctx_t *ctx, lps33w_pe_t *val);
+int32_t lps33w_sign_of_int_threshold_set(stmdev_ctx_t *ctx,
+                                         lps33w_pe_t val);
+int32_t lps33w_sign_of_int_threshold_get(stmdev_ctx_t *ctx,
+                                         lps33w_pe_t *val);
 
 typedef enum {
   LPS33W_INT_PULSED  = 0,
   LPS33W_INT_LATCHED = 1,
 } lps33w_lir_t;
-int32_t lps33w_int_notification_mode_set(stmdev_ctx_t *ctx, lps33w_lir_t val);
-int32_t lps33w_int_notification_mode_get(stmdev_ctx_t *ctx, lps33w_lir_t *val);
+int32_t lps33w_int_notification_mode_set(stmdev_ctx_t *ctx,
+                                         lps33w_lir_t val);
+int32_t lps33w_int_notification_mode_get(stmdev_ctx_t *ctx,
+                                         lps33w_lir_t *val);
 
 int32_t lps33w_int_generation_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps33w_int_generation_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -374,8 +384,10 @@ typedef enum {
   LPS33W_LOW_PRES_INT       = 2,
   LPS33W_EVERY_PRES_INT     = 3,
 } lps33w_int_s_t;
-int32_t lps33w_int_pin_mode_set(stmdev_ctx_t *ctx, lps33w_int_s_t val);
-int32_t lps33w_int_pin_mode_get(stmdev_ctx_t *ctx, lps33w_int_s_t *val);
+int32_t lps33w_int_pin_mode_set(stmdev_ctx_t *ctx,
+                                lps33w_int_s_t val);
+int32_t lps33w_int_pin_mode_get(stmdev_ctx_t *ctx,
+                                lps33w_int_s_t *val);
 
 int32_t lps33w_drdy_on_int_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps33w_drdy_on_int_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -383,8 +395,10 @@ int32_t lps33w_drdy_on_int_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t lps33w_fifo_ovr_on_int_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps33w_fifo_ovr_on_int_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lps33w_fifo_threshold_on_int_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps33w_fifo_threshold_on_int_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lps33w_fifo_threshold_on_int_set(stmdev_ctx_t *ctx,
+                                         uint8_t val);
+int32_t lps33w_fifo_threshold_on_int_get(stmdev_ctx_t *ctx,
+                                         uint8_t *val);
 
 int32_t lps33w_fifo_full_on_int_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps33w_fifo_full_on_int_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -400,10 +414,13 @@ typedef enum {
   LPS33W_ACTIVE_HIGH = 0,
   LPS33W_ACTIVE_LOW = 1,
 } lps33w_int_h_l_t;
-int32_t lps33w_int_polarity_set(stmdev_ctx_t *ctx, lps33w_int_h_l_t val);
-int32_t lps33w_int_polarity_get(stmdev_ctx_t *ctx, lps33w_int_h_l_t *val);
+int32_t lps33w_int_polarity_set(stmdev_ctx_t *ctx,
+                                lps33w_int_h_l_t val);
+int32_t lps33w_int_polarity_get(stmdev_ctx_t *ctx,
+                                lps33w_int_h_l_t *val);
 
-int32_t lps33w_int_source_get(stmdev_ctx_t *ctx, lps33w_int_source_t *val);
+int32_t lps33w_int_source_get(stmdev_ctx_t *ctx,
+                              lps33w_int_source_t *val);
 
 int32_t lps33w_int_on_press_high_get(stmdev_ctx_t *ctx, uint8_t *val);
 
@@ -411,8 +428,10 @@ int32_t lps33w_int_on_press_low_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lps33w_interrupt_event_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lps33w_stop_on_fifo_threshold_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps33w_stop_on_fifo_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lps33w_stop_on_fifo_threshold_set(stmdev_ctx_t *ctx,
+                                          uint8_t val);
+int32_t lps33w_stop_on_fifo_threshold_get(stmdev_ctx_t *ctx,
+                                          uint8_t *val);
 
 int32_t lps33w_fifo_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps33w_fifo_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -449,8 +468,10 @@ typedef enum {
   LPS33W_I2C_ENABLE = 0,
   LPS33W_I2C_DISABLE = 1,
 } lps33w_i2c_dis_t;
-int32_t lps33w_i2c_interface_set(stmdev_ctx_t *ctx, lps33w_i2c_dis_t val);
-int32_t lps33w_i2c_interface_get(stmdev_ctx_t *ctx, lps33w_i2c_dis_t *val);
+int32_t lps33w_i2c_interface_set(stmdev_ctx_t *ctx,
+                                 lps33w_i2c_dis_t val);
+int32_t lps33w_i2c_interface_get(stmdev_ctx_t *ctx,
+                                 lps33w_i2c_dis_t *val);
 
 int32_t lps33w_auto_add_inc_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps33w_auto_add_inc_get(stmdev_ctx_t *ctx, uint8_t *val);

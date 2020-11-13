@@ -77,12 +77,12 @@
 #include "usart.h"
 #endif
 
-typedef union{
+typedef union {
   int16_t i16bit;
   uint8_t u8bit[2];
 } axis1bit16_t;
 
-typedef union{
+typedef union {
   int32_t i32bit;
   uint8_t u8bit[4];
 } axis1bit32_t;
@@ -107,7 +107,8 @@ static stmdev_ctx_t dev_ctx;
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -123,20 +124,17 @@ void example_main_multi_read_fifo_lps33w(void)
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &hi2c1;
-
   /*
    * Initialize platform specific hardware
    */
   platform_init();
-
   /*
    *  Check device ID
    */
   lps33w_device_id_get(&dev_ctx, &whoamI);
-  if (whoamI != LPS33W_ID)
-  {
-    while(1)
-    {
+
+  if (whoamI != LPS33W_ID) {
+    while (1) {
       /* manage here device not found */
     }
   }
@@ -145,6 +143,7 @@ void example_main_multi_read_fifo_lps33w(void)
    *  Restore default configuration
    */
   lps33w_reset_set(&dev_ctx, PROPERTY_ENABLE);
+
   do {
     lps33w_reset_get(&dev_ctx, &rst);
   } while (rst);
@@ -153,27 +152,22 @@ void example_main_multi_read_fifo_lps33w(void)
    *  Enable Block Data Update
    */
   lps33w_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /*
    * Set FIFO watermark to 16 samples
    */
   lps33w_fifo_watermark_set(&dev_ctx, 16);
-
   /*
    * Set FIFO mode
    */
   lps33w_fifo_mode_set(&dev_ctx, LPS33W_FIFO_MODE);
-
   /*
    * Enable FIFO
    */
   lps33w_fifo_set(&dev_ctx, PROPERTY_ENABLE);
-
   /*
    * Can be set FIFO watermark status on INT_DRDY pin
    */
   //lps33w_fifo_threshold_on_int_set(&dev_ctx, PROPERTY_ENABLE);
-
   /*
    * Set Output Data Rate
    */
@@ -182,35 +176,32 @@ void example_main_multi_read_fifo_lps33w(void)
   /*
    * Read samples in polling mode (no int)
    */
-  while(1)
-  {
+  while (1) {
     uint8_t reg;
-
     /*
      * Read output only if fifo watermark set
      */
     lps33w_fifo_fth_flag_get(&dev_ctx, &reg);
-    if (reg)
-    {
+
+    if (reg) {
       /*
        * Read FIFO watermark
        */
       lps33w_fifo_data_level_get(&dev_ctx, &reg);
-      while(reg--)
-      {
+
+      while (reg--) {
         memset(data_raw_pressure.u8bit, 0x00, sizeof(int32_t));
         lps33w_pressure_raw_get(&dev_ctx, data_raw_pressure.u8bit);
         pressure_hPa = lps33w_from_lsb_to_hpa(data_raw_pressure.i32bit);
-
-        sprintf((char*)tx_buffer, "pressure [hPa]:%6.2f\r\n", pressure_hPa);
-        tx_com(tx_buffer, strlen((char const*)tx_buffer));
-
+        sprintf((char *)tx_buffer, "pressure [hPa]:%6.2f\r\n", pressure_hPa);
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
         memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
         lps33w_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
-        temperature_degC = lps33w_from_lsb_to_degc(data_raw_temperature.i16bit);
-
-        sprintf((char*)tx_buffer, "temperature [degC]:%6.2f\r\n", temperature_degC);
-        tx_com(tx_buffer, strlen((char const*)tx_buffer));
+        temperature_degC = lps33w_from_lsb_to_degc(
+                             data_raw_temperature.i16bit);
+        sprintf((char *)tx_buffer, "temperature [degC]:%6.2f\r\n",
+                temperature_degC);
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
       }
     }
   }
@@ -226,22 +217,24 @@ void example_main_multi_read_fifo_lps33w(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     HAL_I2C_Mem_Write(handle, LPS33W_I2C_ADD_H, reg,
                       I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
+
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
+
+  else if (handle == &hspi2) {
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
     HAL_SPI_Transmit(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+
 #endif
   return 0;
 }
@@ -259,14 +252,14 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1)
-  {
+  if (handle == &hi2c1) {
     HAL_I2C_Mem_Read(handle, LPS33W_I2C_ADD_H, reg,
                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
   }
+
 #ifdef STEVAL_MKI109V3
-  else if (handle == &hspi2)
-  {
+
+  else if (handle == &hspi2) {
     /* Read command */
     reg |= 0x80;
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
@@ -274,6 +267,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
     HAL_SPI_Receive(handle, bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
+
 #endif
   return 0;
 }
@@ -281,18 +275,18 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Write generic device register (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
-  #ifdef STEVAL_MKI109V3
+#endif
+#ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#endif
 }
 
 /*
