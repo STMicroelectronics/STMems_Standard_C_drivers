@@ -27,7 +27,7 @@
   *
   */
 
-/** 
+/**
   * @defgroup    LPS22HB_Interfaces_functions
   * @brief       This section provide a set of functions used to read and
   *              write a generic register of the device.
@@ -45,7 +45,8 @@
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps22hb_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t lps22hb_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                         uint8_t *data,
                          uint16_t len)
 {
   int32_t ret;
@@ -63,7 +64,8 @@ int32_t lps22hb_read_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t lps22hb_write_reg(stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t lps22hb_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
                           uint16_t len)
 {
   int32_t ret;
@@ -120,19 +122,20 @@ int32_t lps22hb_autozero_rst_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps22hb_interrupt_cfg_t interrupt_cfg;
   int32_t ret;
-
   ret = lps22hb_read_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                         (uint8_t*)&interrupt_cfg, 1);
-  if(ret == 0){
+                         (uint8_t *)&interrupt_cfg, 1);
+
+  if (ret == 0) {
     interrupt_cfg.reset_az = val;
     ret = lps22hb_write_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                            (uint8_t*)&interrupt_cfg, 1);
+                            (uint8_t *)&interrupt_cfg, 1);
   }
+
   return ret;
 }
 
 /**
-  * @brief  Reset Autozero function.[get] 
+  * @brief  Reset Autozero function.[get]
   *
   * @param  ctx    Read / write interface definitions
   * @param  val    Change the values of reset_az in reg INTERRUPT_CFG
@@ -143,11 +146,9 @@ int32_t lps22hb_autozero_rst_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_interrupt_cfg_t interrupt_cfg;
   int32_t ret;
-
   ret = lps22hb_read_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                         (uint8_t*)&interrupt_cfg, 1);
+                         (uint8_t *)&interrupt_cfg, 1);
   *val = interrupt_cfg.reset_az;
-
   return ret;
 }
 
@@ -163,14 +164,15 @@ int32_t lps22hb_autozero_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps22hb_interrupt_cfg_t interrupt_cfg;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_INTERRUPT_CFG,
+                         (uint8_t *)&interrupt_cfg, 1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_INTERRUPT_CFG, 
-                         (uint8_t*)&interrupt_cfg, 1);
-  if(ret == 0){
+  if (ret == 0) {
     interrupt_cfg.autozero = val;
     ret = lps22hb_write_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                            (uint8_t*)&interrupt_cfg, 1);
+                            (uint8_t *)&interrupt_cfg, 1);
   }
+
   return ret;
 }
 
@@ -186,16 +188,14 @@ int32_t lps22hb_autozero_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_interrupt_cfg_t interrupt_cfg;
   int32_t ret;
-
   ret = lps22hb_read_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                         (uint8_t*)&interrupt_cfg, 1);
+                         (uint8_t *)&interrupt_cfg, 1);
   *val = interrupt_cfg.autozero;
-
   return ret;
 }
 
 /**
-  * @brief  Reset AutoRifP function.[set] 
+  * @brief  Reset AutoRifP function.[set]
   *
   * @param  ctx    Read / write interface definitions
   * @param  val    Change the values of reset_arp in reg INTERRUPT_CFG
@@ -206,14 +206,15 @@ int32_t lps22hb_pressure_snap_rst_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps22hb_interrupt_cfg_t interrupt_cfg;
   int32_t ret;
-
   ret = lps22hb_read_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                         (uint8_t*)&interrupt_cfg, 1);
-  if(ret == 0){
+                         (uint8_t *)&interrupt_cfg, 1);
+
+  if (ret == 0) {
     interrupt_cfg.reset_arp = val;
     ret = lps22hb_write_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                            (uint8_t*)&interrupt_cfg, 1);
+                            (uint8_t *)&interrupt_cfg, 1);
   }
+
   return ret;
 }
 
@@ -229,11 +230,9 @@ int32_t lps22hb_pressure_snap_rst_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_interrupt_cfg_t interrupt_cfg;
   int32_t ret;
-
   ret = lps22hb_read_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                         (uint8_t*)&interrupt_cfg, 1);
+                         (uint8_t *)&interrupt_cfg, 1);
   *val = interrupt_cfg.reset_arp;
-
   return ret;
 }
 
@@ -249,14 +248,15 @@ int32_t lps22hb_pressure_snap_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps22hb_interrupt_cfg_t interrupt_cfg;
   int32_t ret;
-
   ret = lps22hb_read_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                         (uint8_t*)&interrupt_cfg, 1);
-  if(ret == 0){
+                         (uint8_t *)&interrupt_cfg, 1);
+
+  if (ret == 0) {
     interrupt_cfg.autorifp = val;
     ret = lps22hb_write_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                            (uint8_t*)&interrupt_cfg, 1);
+                            (uint8_t *)&interrupt_cfg, 1);
   }
+
   return ret;
 }
 
@@ -272,11 +272,9 @@ int32_t lps22hb_pressure_snap_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_interrupt_cfg_t interrupt_cfg;
   int32_t ret;
-
   ret = lps22hb_read_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                         (uint8_t*)&interrupt_cfg, 1);
+                         (uint8_t *)&interrupt_cfg, 1);
   *val = interrupt_cfg.autorifp;
-
   return ret;
 }
 
@@ -292,12 +290,15 @@ int32_t lps22hb_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps22hb_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg1.bdu = val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                            1);
   }
+
   return ret;
 }
 
@@ -313,10 +314,9 @@ int32_t lps22hb_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                         1);
   *val = ctrl_reg1.bdu;
-
   return ret;
 }
 
@@ -329,21 +329,24 @@ int32_t lps22hb_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val)
   *
   */
 int32_t lps22hb_low_pass_filter_mode_set(stmdev_ctx_t *ctx,
-                                          lps22hb_lpfp_t val)
+                                         lps22hb_lpfp_t val)
 {
   lps22hb_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg1.lpfp = (uint8_t)val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                            1);
   }
+
   return ret;
 }
 
 /**
-  * @brief   Low-pass bandwidth selection.[get] 
+  * @brief   Low-pass bandwidth selection.[get]
   *
   * @param  ctx    Read / write interface definitions
   * @param  val    Get the values of lpfp in reg CTRL_REG1
@@ -355,22 +358,27 @@ int32_t lps22hb_low_pass_filter_mode_get(stmdev_ctx_t *ctx,
 {
   lps22hb_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  switch (ctrl_reg1.lpfp){
+  switch (ctrl_reg1.lpfp) {
     case LPS22HB_LPF_ODR_DIV_2:
       *val = LPS22HB_LPF_ODR_DIV_2;
       break;
+
     case LPS22HB_LPF_ODR_DIV_9:
       *val = LPS22HB_LPF_ODR_DIV_9;
       break;
+
     case LPS22HB_LPF_ODR_DIV_20:
       *val = LPS22HB_LPF_ODR_DIV_20;
       break;
+
     default:
       *val = LPS22HB_LPF_ODR_DIV_2;
       break;
   }
+
   return ret;
 }
 
@@ -386,12 +394,15 @@ int32_t lps22hb_data_rate_set(stmdev_ctx_t *ctx, lps22hb_odr_t val)
 {
   lps22hb_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg1.odr = (uint8_t)val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                            1);
   }
+
   return ret;
 }
 
@@ -407,27 +418,34 @@ int32_t lps22hb_data_rate_get(stmdev_ctx_t *ctx, lps22hb_odr_t *val)
 {
   lps22hb_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  switch (ctrl_reg1.odr){
+  switch (ctrl_reg1.odr) {
     case LPS22HB_POWER_DOWN:
       *val = LPS22HB_POWER_DOWN;
       break;
+
     case LPS22HB_ODR_1_Hz:
       *val = LPS22HB_ODR_1_Hz;
       break;
+
     case LPS22HB_ODR_10_Hz:
       *val = LPS22HB_ODR_10_Hz;
       break;
+
     case LPS22HB_ODR_25_Hz:
       *val = LPS22HB_ODR_25_Hz;
       break;
+
     case LPS22HB_ODR_50_Hz:
       *val = LPS22HB_ODR_50_Hz;
       break;
+
     case LPS22HB_ODR_75_Hz:
       *val = LPS22HB_ODR_75_Hz;
       break;
+
     default:
       *val = LPS22HB_ODR_1_Hz;
       break;
@@ -437,7 +455,7 @@ int32_t lps22hb_data_rate_get(stmdev_ctx_t *ctx, lps22hb_odr_t *val)
 }
 
 /**
-  * @brief  One-shot mode. Device perform a single measure.[set] 
+  * @brief  One-shot mode. Device perform a single measure.[set]
   *
   * @param  ctx    Read / write interface definitions
   * @param  val    Change the values of one_shot in reg CTRL_REG2
@@ -448,12 +466,15 @@ int32_t lps22hb_one_shoot_trigger_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps22hb_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg2.one_shot = val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                            1);
   }
+
   return ret;
 }
 
@@ -469,10 +490,9 @@ int32_t lps22hb_one_shoot_trigger_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                         1);
   *val = ctrl_reg2.one_shot;
-
   return ret;
 }
 
@@ -490,10 +510,10 @@ int32_t lps22hb_pressure_ref_set(stmdev_ctx_t *ctx, int32_t val)
 {
   uint8_t buff[3];
   int32_t ret;
-
   buff[2] = (uint8_t) ((uint32_t)val / 65536U);
   buff[1] = (uint8_t) ((uint32_t)val - (buff[2] * 65536U)) / 256U;
-  buff[0] = (uint8_t) ((uint32_t)val - (buff[2] * 65536U) - (buff[1] * 256U) );
+  buff[0] = (uint8_t) ((uint32_t)val - (buff[2] * 65536U) -
+                       (buff[1] * 256U) );
   ret =  lps22hb_write_reg(ctx, LPS22HB_REF_P_XL, buff, 3);
   return ret;
 }
@@ -512,13 +532,10 @@ int32_t lps22hb_pressure_ref_get(stmdev_ctx_t *ctx, int32_t *val)
 {
   uint8_t buff[3];
   int32_t ret;
-
   ret =  lps22hb_read_reg(ctx, LPS22HB_REF_P_XL, buff, 3);
-
   *val = (int32_t)buff[2];
   *val = (*val * 256) + (int32_t)buff[1];
   *val = (*val * 256) + (int32_t)buff[0];
-
   return ret;
 }
 
@@ -535,11 +552,9 @@ int32_t lps22hb_pressure_offset_set(stmdev_ctx_t *ctx, int16_t val)
 {
   uint8_t buff[2];
   int32_t ret;
-
   buff[1] = (uint8_t) ((uint16_t)val / 256U);
   buff[0] = (uint8_t) ((uint16_t)val - (buff[1] * 256U));
   ret =  lps22hb_write_reg(ctx, LPS22HB_RPDS_L, buff, 2);
-
   return ret;
 }
 
@@ -556,11 +571,9 @@ int32_t lps22hb_pressure_offset_get(stmdev_ctx_t *ctx, int16_t *val)
 {
   uint8_t buff[2];
   int32_t ret;
-
   ret =  lps22hb_read_reg(ctx, LPS22HB_RPDS_L, buff, 2);
   *val = (int16_t)buff[1];
   *val = (*val * 256) + (int16_t)buff[0];
-
   return ret;
 }
 
@@ -576,10 +589,8 @@ int32_t lps22hb_press_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_status_t status;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_STATUS, (uint8_t*)&status, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_STATUS, (uint8_t *)&status, 1);
   *val = status.p_da;
-
   return ret;
 }
 
@@ -595,10 +606,8 @@ int32_t lps22hb_temp_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_status_t status;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_STATUS, (uint8_t*)&status, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_STATUS, (uint8_t *)&status, 1);
   *val = status.t_da;
-
   return ret;
 }
 
@@ -614,10 +623,8 @@ int32_t lps22hb_press_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_status_t status;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_STATUS, (uint8_t*)&status, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_STATUS, (uint8_t *)&status, 1);
   *val = status.p_or;
-
   return ret;
 }
 
@@ -633,10 +640,8 @@ int32_t lps22hb_temp_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_status_t status;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_STATUS, (uint8_t*)&status, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_STATUS, (uint8_t *)&status, 1);
   *val = status.t_or;
-
   return ret;
 }
 
@@ -652,13 +657,11 @@ int32_t lps22hb_pressure_raw_get(stmdev_ctx_t *ctx, uint32_t *buff)
 {
   uint8_t reg[3];
   int32_t ret;
-
   ret =  lps22hb_read_reg(ctx, LPS22HB_PRESS_OUT_XL, reg, 3);
   *buff = reg[2];
   *buff = (*buff * 256) + reg[1];
   *buff = (*buff * 256) + reg[0];
   *buff *= 256;
-
   return ret;
 }
 
@@ -674,11 +677,9 @@ int32_t lps22hb_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff)
 {
   uint8_t reg[2];
   int32_t ret;
-
-  ret =  lps22hb_read_reg(ctx, LPS22HB_TEMP_OUT_L, (uint8_t*) reg, 2);
+  ret =  lps22hb_read_reg(ctx, LPS22HB_TEMP_OUT_L, (uint8_t *) reg, 2);
   *buff = reg[1];
   *buff = (*buff * 256) + reg[0];
-
   return ret;
 }
 
@@ -696,7 +697,7 @@ int32_t lps22hb_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *buff)
 int32_t lps22hb_low_pass_rst_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
-  ret =  lps22hb_read_reg(ctx, LPS22HB_LPFP_RES, (uint8_t*) buff, 1);
+  ret =  lps22hb_read_reg(ctx, LPS22HB_LPFP_RES, (uint8_t *) buff, 1);
   return ret;
 }
 
@@ -707,7 +708,7 @@ int32_t lps22hb_low_pass_rst_get(stmdev_ctx_t *ctx, uint8_t *buff)
 
 /**
   * @defgroup    LPS22HB_common
-  * @brief       This section group common usefull functions
+  * @brief       This section group common useful functions
   * @{
   *
   */
@@ -723,7 +724,7 @@ int32_t lps22hb_low_pass_rst_get(stmdev_ctx_t *ctx, uint8_t *buff)
 int32_t lps22hb_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff)
 {
   int32_t ret;
-  ret =  lps22hb_read_reg(ctx, LPS22HB_WHO_AM_I, (uint8_t*) buff, 1);
+  ret =  lps22hb_read_reg(ctx, LPS22HB_WHO_AM_I, (uint8_t *) buff, 1);
   return ret;
 }
 
@@ -739,12 +740,15 @@ int32_t lps22hb_reset_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps22hb_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg2.swreset = val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                            1);
   }
+
   return ret;
 }
 
@@ -760,10 +764,9 @@ int32_t lps22hb_reset_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                         1);
   *val = ctrl_reg2.swreset;
-
   return ret;
 }
 
@@ -779,12 +782,15 @@ int32_t lps22hb_boot_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps22hb_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg2.boot = val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                            1);
   }
+
   return ret;
 }
 
@@ -800,10 +806,9 @@ int32_t lps22hb_boot_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                         1);
   *val = ctrl_reg2.boot;
-
   return ret;
 }
 
@@ -819,12 +824,15 @@ int32_t lps22hb_low_power_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps22hb_res_conf_t res_conf;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_RES_CONF, (uint8_t *)&res_conf,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_RES_CONF, (uint8_t*)&res_conf, 1);
-  if(ret == 0){
+  if (ret == 0) {
     res_conf.lc_en = val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_RES_CONF, (uint8_t*)&res_conf, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_RES_CONF, (uint8_t *)&res_conf,
+                            1);
   }
+
   return ret;
 }
 
@@ -840,10 +848,9 @@ int32_t lps22hb_low_power_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_res_conf_t res_conf;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_RES_CONF, (uint8_t*)&res_conf, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_RES_CONF, (uint8_t *)&res_conf,
+                         1);
   *val = res_conf.lc_en;
-
   return ret;
 }
 
@@ -859,10 +866,9 @@ int32_t lps22hb_boot_status_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_int_source_t int_source;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_INT_SOURCE, (uint8_t*)&int_source, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_INT_SOURCE,
+                         (uint8_t *)&int_source, 1);
   *val = int_source.boot_status;
-
   return ret;
 }
 
@@ -874,10 +880,11 @@ int32_t lps22hb_boot_status_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps22hb_dev_status_get(stmdev_ctx_t *ctx, lps22hb_dev_stat_t *val)
+int32_t lps22hb_dev_status_get(stmdev_ctx_t *ctx,
+                               lps22hb_dev_stat_t *val)
 {
   int32_t ret;
-  ret =  lps22hb_read_reg(ctx, LPS22HB_FIFO_STATUS, (uint8_t*) val, 2);
+  ret =  lps22hb_read_reg(ctx, LPS22HB_FIFO_STATUS, (uint8_t *) val, 2);
   return ret;
 }
 
@@ -902,18 +909,19 @@ int32_t lps22hb_dev_status_get(stmdev_ctx_t *ctx, lps22hb_dev_stat_t *val)
   *
   */
 int32_t lps22hb_sign_of_int_threshold_set(stmdev_ctx_t *ctx,
-                                           lps22hb_pe_t val)
+                                          lps22hb_pe_t val)
 {
   lps22hb_interrupt_cfg_t interrupt_cfg;
   int32_t ret;
-
   ret = lps22hb_read_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                         (uint8_t*)&interrupt_cfg, 1);
-  if(ret == 0){
+                         (uint8_t *)&interrupt_cfg, 1);
+
+  if (ret == 0) {
     interrupt_cfg.pe = (uint8_t)val;
     ret = lps22hb_write_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                            (uint8_t*)&interrupt_cfg, 1);
+                            (uint8_t *)&interrupt_cfg, 1);
   }
+
   return ret;
 }
 
@@ -926,30 +934,35 @@ int32_t lps22hb_sign_of_int_threshold_set(stmdev_ctx_t *ctx,
   *
   */
 int32_t lps22hb_sign_of_int_threshold_get(stmdev_ctx_t *ctx,
-                                           lps22hb_pe_t *val)
+                                          lps22hb_pe_t *val)
 {
   lps22hb_interrupt_cfg_t interrupt_cfg;
   int32_t ret;
-
   ret = lps22hb_read_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                         (uint8_t*)&interrupt_cfg, 1);
-  switch (interrupt_cfg.pe){
+                         (uint8_t *)&interrupt_cfg, 1);
+
+  switch (interrupt_cfg.pe) {
     case LPS22HB_NO_THRESHOLD:
       *val = LPS22HB_NO_THRESHOLD;
       break;
+
     case LPS22HB_POSITIVE:
       *val = LPS22HB_POSITIVE;
       break;
+
     case LPS22HB_NEGATIVE:
       *val = LPS22HB_NEGATIVE;
       break;
+
     case LPS22HB_BOTH:
       *val = LPS22HB_BOTH;
       break;
+
     default:
       *val = LPS22HB_NO_THRESHOLD;
       break;
   }
+
   return ret;
 }
 
@@ -963,18 +976,19 @@ int32_t lps22hb_sign_of_int_threshold_get(stmdev_ctx_t *ctx,
   *
   */
 int32_t lps22hb_int_notification_mode_set(stmdev_ctx_t *ctx,
-                                           lps22hb_lir_t val)
+                                          lps22hb_lir_t val)
 {
   lps22hb_interrupt_cfg_t interrupt_cfg;
   int32_t ret;
-
   ret = lps22hb_read_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                         (uint8_t*)&interrupt_cfg, 1);
-  if(ret == 0){
+                         (uint8_t *)&interrupt_cfg, 1);
+
+  if (ret == 0) {
     interrupt_cfg.lir = (uint8_t)val;
     ret = lps22hb_write_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                            (uint8_t*)&interrupt_cfg, 1);
+                            (uint8_t *)&interrupt_cfg, 1);
   }
+
   return ret;
 }
 
@@ -992,20 +1006,23 @@ int32_t lps22hb_int_notification_mode_get(stmdev_ctx_t *ctx,
 {
   lps22hb_interrupt_cfg_t interrupt_cfg;
   int32_t ret;
-
   ret = lps22hb_read_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                         (uint8_t*)&interrupt_cfg, 1);
-  switch (interrupt_cfg.lir){
+                         (uint8_t *)&interrupt_cfg, 1);
+
+  switch (interrupt_cfg.lir) {
     case LPS22HB_INT_PULSED:
       *val = LPS22HB_INT_PULSED;
       break;
+
     case LPS22HB_INT_LATCHED:
       *val = LPS22HB_INT_LATCHED;
       break;
+
     default:
       *val = LPS22HB_INT_PULSED;
       break;
   }
+
   return ret;
 }
 
@@ -1021,14 +1038,15 @@ int32_t lps22hb_int_generation_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps22hb_interrupt_cfg_t interrupt_cfg;
   int32_t ret;
-
   ret = lps22hb_read_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                         (uint8_t*)&interrupt_cfg, 1);
-  if(ret == 0){
+                         (uint8_t *)&interrupt_cfg, 1);
+
+  if (ret == 0) {
     interrupt_cfg.diff_en = val;
     ret = lps22hb_write_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                            (uint8_t*)&interrupt_cfg, 1);
+                            (uint8_t *)&interrupt_cfg, 1);
   }
+
   return ret;
 }
 
@@ -1044,11 +1062,9 @@ int32_t lps22hb_int_generation_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_interrupt_cfg_t interrupt_cfg;
   int32_t ret;
-
   ret = lps22hb_read_reg(ctx, LPS22HB_INTERRUPT_CFG,
-                         (uint8_t*)&interrupt_cfg, 1);
+                         (uint8_t *)&interrupt_cfg, 1);
   *val = interrupt_cfg.diff_en;
-
   return ret;
 }
 
@@ -1064,11 +1080,9 @@ int32_t lps22hb_int_threshold_set(stmdev_ctx_t *ctx, uint16_t val)
 {
   uint8_t buff[2];
   int32_t ret;
-
   buff[1] = (uint8_t) (val / 256U);
   buff[0] = (uint8_t) (val - (buff[1] * 256U));
-  ret =  lps22hb_write_reg(ctx, LPS22HB_THS_P_L, (uint8_t*) buff, 2);
-
+  ret =  lps22hb_write_reg(ctx, LPS22HB_THS_P_L, (uint8_t *) buff, 2);
   return ret;
 }
 
@@ -1084,11 +1098,9 @@ int32_t lps22hb_int_threshold_get(stmdev_ctx_t *ctx, uint16_t *val)
 {
   uint8_t buff[2];
   int32_t ret;
-
-  ret =  lps22hb_read_reg(ctx, LPS22HB_THS_P_L, (uint8_t*) buff, 2);
+  ret =  lps22hb_read_reg(ctx, LPS22HB_THS_P_L, (uint8_t *) buff, 2);
   *val = buff[1];
   *val = (*val * 256) + buff[0];
-
   return ret;
 }
 
@@ -1100,16 +1112,20 @@ int32_t lps22hb_int_threshold_get(stmdev_ctx_t *ctx, uint16_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps22hb_int_pin_mode_set(stmdev_ctx_t *ctx, lps22hb_int_s_t val)
+int32_t lps22hb_int_pin_mode_set(stmdev_ctx_t *ctx,
+                                 lps22hb_int_s_t val)
 {
   lps22hb_ctrl_reg3_t ctrl_reg3;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg3.int_s = (uint8_t)val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                            1);
   }
+
   return ret;
 }
 
@@ -1121,29 +1137,36 @@ int32_t lps22hb_int_pin_mode_set(stmdev_ctx_t *ctx, lps22hb_int_s_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps22hb_int_pin_mode_get(stmdev_ctx_t *ctx, lps22hb_int_s_t *val)
+int32_t lps22hb_int_pin_mode_get(stmdev_ctx_t *ctx,
+                                 lps22hb_int_s_t *val)
 {
   lps22hb_ctrl_reg3_t ctrl_reg3;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
-  switch (ctrl_reg3.int_s){
+  switch (ctrl_reg3.int_s) {
     case LPS22HB_DRDY_OR_FIFO_FLAGS:
       *val = LPS22HB_DRDY_OR_FIFO_FLAGS;
       break;
+
     case LPS22HB_HIGH_PRES_INT:
       *val = LPS22HB_HIGH_PRES_INT;
       break;
+
     case LPS22HB_LOW_PRES_INT:
       *val = LPS22HB_LOW_PRES_INT;
       break;
+
     case LPS22HB_EVERY_PRES_INT:
       *val = LPS22HB_EVERY_PRES_INT;
       break;
+
     default:
       *val = LPS22HB_DRDY_OR_FIFO_FLAGS;
       break;
   }
+
   return ret;
 }
 
@@ -1159,12 +1182,15 @@ int32_t lps22hb_drdy_on_int_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps22hb_ctrl_reg3_t ctrl_reg3;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg3.drdy = val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                            1);
   }
+
   return ret;
 }
 
@@ -1180,10 +1206,9 @@ int32_t lps22hb_drdy_on_int_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_ctrl_reg3_t ctrl_reg3;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                         1);
   *val = ctrl_reg3.drdy;
-
   return ret;
 }
 
@@ -1199,12 +1224,15 @@ int32_t lps22hb_fifo_ovr_on_int_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps22hb_ctrl_reg3_t ctrl_reg3;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg3.f_ovr = val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                            1);
   }
+
   return ret;
 }
 
@@ -1220,10 +1248,9 @@ int32_t lps22hb_fifo_ovr_on_int_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_ctrl_reg3_t ctrl_reg3;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                         1);
   *val = ctrl_reg3.f_ovr;
-
   return ret;
 }
 
@@ -1235,16 +1262,20 @@ int32_t lps22hb_fifo_ovr_on_int_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps22hb_fifo_threshold_on_int_set(stmdev_ctx_t *ctx, uint8_t val)
+int32_t lps22hb_fifo_threshold_on_int_set(stmdev_ctx_t *ctx,
+                                          uint8_t val)
 {
   lps22hb_ctrl_reg3_t ctrl_reg3;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg3.f_fth = val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                            1);
   }
+
   return ret;
 }
 
@@ -1256,14 +1287,14 @@ int32_t lps22hb_fifo_threshold_on_int_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps22hb_fifo_threshold_on_int_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t lps22hb_fifo_threshold_on_int_get(stmdev_ctx_t *ctx,
+                                          uint8_t *val)
 {
   lps22hb_ctrl_reg3_t ctrl_reg3;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                         1);
   *val = ctrl_reg3.f_fth;
-
   return ret;
 }
 
@@ -1279,12 +1310,15 @@ int32_t lps22hb_fifo_full_on_int_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps22hb_ctrl_reg3_t ctrl_reg3;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg3.f_fss5 = val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                            1);
   }
+
   return ret;
 }
 
@@ -1300,10 +1334,9 @@ int32_t lps22hb_fifo_full_on_int_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_ctrl_reg3_t ctrl_reg3;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                         1);
   *val = ctrl_reg3.f_fss5;
-
   return ret;
 }
 
@@ -1319,12 +1352,15 @@ int32_t lps22hb_pin_mode_set(stmdev_ctx_t *ctx, lps22hb_pp_od_t val)
 {
   lps22hb_ctrl_reg3_t ctrl_reg3;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg3.pp_od = (uint8_t)val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                            1);
   }
+
   return ret;
 }
 
@@ -1340,19 +1376,23 @@ int32_t lps22hb_pin_mode_get(stmdev_ctx_t *ctx, lps22hb_pp_od_t *val)
 {
   lps22hb_ctrl_reg3_t ctrl_reg3;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
-  switch (ctrl_reg3.pp_od){
+  switch (ctrl_reg3.pp_od) {
     case LPS22HB_PUSH_PULL:
       *val = LPS22HB_PUSH_PULL;
       break;
+
     case LPS22HB_OPEN_DRAIN:
       *val = LPS22HB_OPEN_DRAIN;
       break;
+
     default:
       *val = LPS22HB_PUSH_PULL;
       break;
   }
+
   return ret;
 }
 
@@ -1364,16 +1404,20 @@ int32_t lps22hb_pin_mode_get(stmdev_ctx_t *ctx, lps22hb_pp_od_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps22hb_int_polarity_set(stmdev_ctx_t *ctx, lps22hb_int_h_l_t val)
+int32_t lps22hb_int_polarity_set(stmdev_ctx_t *ctx,
+                                 lps22hb_int_h_l_t val)
 {
   lps22hb_ctrl_reg3_t ctrl_reg3;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg3.int_h_l = (uint8_t)val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                            1);
   }
+
   return ret;
 }
 
@@ -1385,23 +1429,28 @@ int32_t lps22hb_int_polarity_set(stmdev_ctx_t *ctx, lps22hb_int_h_l_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps22hb_int_polarity_get(stmdev_ctx_t *ctx, lps22hb_int_h_l_t *val)
+int32_t lps22hb_int_polarity_get(stmdev_ctx_t *ctx,
+                                 lps22hb_int_h_l_t *val)
 {
   lps22hb_ctrl_reg3_t ctrl_reg3;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t *)&ctrl_reg3,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG3, (uint8_t*)&ctrl_reg3, 1);
-  switch (ctrl_reg3.int_h_l){
+  switch (ctrl_reg3.int_h_l) {
     case LPS22HB_ACTIVE_HIGH:
       *val = LPS22HB_ACTIVE_HIGH;
       break;
+
     case LPS22HB_ACTIVE_LOW:
       *val = LPS22HB_ACTIVE_LOW;
       break;
+
     default:
       *val = LPS22HB_ACTIVE_HIGH;
       break;
   }
+
   return ret;
 }
 
@@ -1413,10 +1462,11 @@ int32_t lps22hb_int_polarity_get(stmdev_ctx_t *ctx, lps22hb_int_h_l_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps22hb_int_source_get(stmdev_ctx_t *ctx, lps22hb_int_source_t *val)
+int32_t lps22hb_int_source_get(stmdev_ctx_t *ctx,
+                               lps22hb_int_source_t *val)
 {
   int32_t ret;
-  ret =  lps22hb_read_reg(ctx, LPS22HB_INT_SOURCE, (uint8_t*) val, 1);
+  ret =  lps22hb_read_reg(ctx, LPS22HB_INT_SOURCE, (uint8_t *) val, 1);
   return ret;
 }
 
@@ -1432,10 +1482,9 @@ int32_t lps22hb_int_on_press_high_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_int_source_t int_source;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_INT_SOURCE, (uint8_t*)&int_source, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_INT_SOURCE,
+                         (uint8_t *)&int_source, 1);
   *val = int_source.ph;
-
   return ret;
 }
 
@@ -1451,10 +1500,9 @@ int32_t lps22hb_int_on_press_low_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_int_source_t int_source;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_INT_SOURCE, (uint8_t*)&int_source, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_INT_SOURCE,
+                         (uint8_t *)&int_source, 1);
   *val = int_source.pl;
-
   return ret;
 }
 
@@ -1470,10 +1518,9 @@ int32_t lps22hb_interrupt_event_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_int_source_t int_source;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_INT_SOURCE, (uint8_t*)&int_source, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_INT_SOURCE,
+                         (uint8_t *)&int_source, 1);
   *val = int_source.ia;
-
   return ret;
 }
 
@@ -1498,16 +1545,20 @@ int32_t lps22hb_interrupt_event_get(stmdev_ctx_t *ctx, uint8_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps22hb_stop_on_fifo_threshold_set(stmdev_ctx_t *ctx, uint8_t val)
+int32_t lps22hb_stop_on_fifo_threshold_set(stmdev_ctx_t *ctx,
+                                           uint8_t val)
 {
   lps22hb_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg2.stop_on_fth = val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                            1);
   }
+
   return ret;
 }
 
@@ -1519,14 +1570,14 @@ int32_t lps22hb_stop_on_fifo_threshold_set(stmdev_ctx_t *ctx, uint8_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps22hb_stop_on_fifo_threshold_get(stmdev_ctx_t *ctx, uint8_t *val)
+int32_t lps22hb_stop_on_fifo_threshold_get(stmdev_ctx_t *ctx,
+                                           uint8_t *val)
 {
   lps22hb_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                         1);
   *val = ctrl_reg2.stop_on_fth;
-
   return ret;
 }
 
@@ -1542,12 +1593,15 @@ int32_t lps22hb_fifo_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps22hb_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg2.fifo_en = val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                            1);
   }
+
   return ret;
 }
 
@@ -1563,10 +1617,9 @@ int32_t lps22hb_fifo_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                         1);
   *val = ctrl_reg2.fifo_en;
-
   return ret;
 }
 
@@ -1582,12 +1635,15 @@ int32_t lps22hb_fifo_watermark_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps22hb_fifo_ctrl_t fifo_ctrl;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_FIFO_CTRL, (uint8_t *)&fifo_ctrl,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
-  if(ret == 0){
+  if (ret == 0) {
     fifo_ctrl.wtm = val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_FIFO_CTRL, (uint8_t *)&fifo_ctrl,
+                            1);
   }
+
   return ret;
 }
 
@@ -1603,10 +1659,9 @@ int32_t lps22hb_fifo_watermark_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_fifo_ctrl_t fifo_ctrl;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_FIFO_CTRL, (uint8_t *)&fifo_ctrl,
+                         1);
   *val = fifo_ctrl.wtm;
-
   return ret;
 }
 
@@ -1622,12 +1677,15 @@ int32_t lps22hb_fifo_mode_set(stmdev_ctx_t *ctx, lps22hb_f_mode_t val)
 {
   lps22hb_fifo_ctrl_t fifo_ctrl;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_FIFO_CTRL, (uint8_t *)&fifo_ctrl,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
-  if(ret == 0){
+  if (ret == 0) {
     fifo_ctrl.f_mode = (uint8_t)val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_FIFO_CTRL, (uint8_t *)&fifo_ctrl,
+                            1);
   }
+
   return ret;
 }
 
@@ -1639,38 +1697,48 @@ int32_t lps22hb_fifo_mode_set(stmdev_ctx_t *ctx, lps22hb_f_mode_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps22hb_fifo_mode_get(stmdev_ctx_t *ctx, lps22hb_f_mode_t *val)
+int32_t lps22hb_fifo_mode_get(stmdev_ctx_t *ctx,
+                              lps22hb_f_mode_t *val)
 {
   lps22hb_fifo_ctrl_t fifo_ctrl;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_FIFO_CTRL, (uint8_t *)&fifo_ctrl,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_FIFO_CTRL, (uint8_t*)&fifo_ctrl, 1);
-  switch (fifo_ctrl.f_mode){
+  switch (fifo_ctrl.f_mode) {
     case LPS22HB_BYPASS_MODE:
       *val = LPS22HB_BYPASS_MODE;
       break;
+
     case LPS22HB_FIFO_MODE:
       *val = LPS22HB_FIFO_MODE;
       break;
+
     case LPS22HB_STREAM_MODE:
       *val = LPS22HB_STREAM_MODE;
       break;
+
     case LPS22HB_STREAM_TO_FIFO_MODE:
       *val = LPS22HB_STREAM_TO_FIFO_MODE;
       break;
+
     case LPS22HB_BYPASS_TO_STREAM_MODE:
       *val = LPS22HB_BYPASS_TO_STREAM_MODE;
       break;
+
     case LPS22HB_DYNAMIC_STREAM_MODE:
       *val = LPS22HB_DYNAMIC_STREAM_MODE;
       break;
+
     case LPS22HB_BYPASS_TO_FIFO_MODE:
       *val = LPS22HB_BYPASS_TO_FIFO_MODE;
       break;
+
     default:
       *val = LPS22HB_BYPASS_MODE;
       break;
   }
+
   return ret;
 }
 
@@ -1686,10 +1754,9 @@ int32_t lps22hb_fifo_data_level_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_fifo_status_t fifo_status;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_FIFO_STATUS, (uint8_t*)&fifo_status, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_FIFO_STATUS,
+                         (uint8_t *)&fifo_status, 1);
   *val = fifo_status.fss;
-
   return ret;
 }
 
@@ -1705,10 +1772,9 @@ int32_t lps22hb_fifo_ovr_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_fifo_status_t fifo_status;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_FIFO_STATUS, (uint8_t*)&fifo_status, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_FIFO_STATUS,
+                         (uint8_t *)&fifo_status, 1);
   *val = fifo_status.ovr;
-
   return ret;
 }
 
@@ -1724,10 +1790,9 @@ int32_t lps22hb_fifo_fth_flag_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_fifo_status_t fifo_status;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_FIFO_STATUS, (uint8_t*)&fifo_status, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_FIFO_STATUS,
+                         (uint8_t *)&fifo_status, 1);
   *val = fifo_status.fth_fifo;
-
   return ret;
 }
 
@@ -1756,12 +1821,15 @@ int32_t lps22hb_spi_mode_set(stmdev_ctx_t *ctx, lps22hb_sim_t val)
 {
   lps22hb_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg1.sim = (uint8_t)val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                            1);
   }
+
   return ret;
 }
 
@@ -1777,19 +1845,23 @@ int32_t lps22hb_spi_mode_get(stmdev_ctx_t *ctx, lps22hb_sim_t *val)
 {
   lps22hb_ctrl_reg1_t ctrl_reg1;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t *)&ctrl_reg1,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG1, (uint8_t*)&ctrl_reg1, 1);
-  switch (ctrl_reg1.sim){
+  switch (ctrl_reg1.sim) {
     case LPS22HB_SPI_4_WIRE:
       *val = LPS22HB_SPI_4_WIRE;
       break;
+
     case LPS22HB_SPI_3_WIRE:
       *val = LPS22HB_SPI_3_WIRE;
       break;
+
     default:
       *val = LPS22HB_SPI_4_WIRE;
       break;
   }
+
   return ret;
 }
 
@@ -1801,16 +1873,20 @@ int32_t lps22hb_spi_mode_get(stmdev_ctx_t *ctx, lps22hb_sim_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps22hb_i2c_interface_set(stmdev_ctx_t *ctx, lps22hb_i2c_dis_t val)
+int32_t lps22hb_i2c_interface_set(stmdev_ctx_t *ctx,
+                                  lps22hb_i2c_dis_t val)
 {
   lps22hb_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg2.i2c_dis = (uint8_t)val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                            1);
   }
+
   return ret;
 }
 
@@ -1822,23 +1898,28 @@ int32_t lps22hb_i2c_interface_set(stmdev_ctx_t *ctx, lps22hb_i2c_dis_t val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t lps22hb_i2c_interface_get(stmdev_ctx_t *ctx, lps22hb_i2c_dis_t *val)
+int32_t lps22hb_i2c_interface_get(stmdev_ctx_t *ctx,
+                                  lps22hb_i2c_dis_t *val)
 {
   lps22hb_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
-  switch (ctrl_reg2.i2c_dis){
+  switch (ctrl_reg2.i2c_dis) {
     case LPS22HB_I2C_ENABLE:
       *val = LPS22HB_I2C_ENABLE;
       break;
+
     case LPS22HB_I2C_DISABLE:
       *val = LPS22HB_I2C_DISABLE;
       break;
+
     default:
       *val = LPS22HB_I2C_ENABLE;
       break;
   }
+
   return ret;
 }
 
@@ -1855,12 +1936,15 @@ int32_t lps22hb_auto_add_inc_set(stmdev_ctx_t *ctx, uint8_t val)
 {
   lps22hb_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                         1);
 
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
-  if(ret == 0){
+  if (ret == 0) {
     ctrl_reg2.if_add_inc = val;
-    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+    ret = lps22hb_write_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                            1);
   }
+
   return ret;
 }
 
@@ -1877,10 +1961,9 @@ int32_t lps22hb_auto_add_inc_get(stmdev_ctx_t *ctx, uint8_t *val)
 {
   lps22hb_ctrl_reg2_t ctrl_reg2;
   int32_t ret;
-
-  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t*)&ctrl_reg2, 1);
+  ret = lps22hb_read_reg(ctx, LPS22HB_CTRL_REG2, (uint8_t *)&ctrl_reg2,
+                         1);
   *val = ctrl_reg2.if_add_inc;
-
   return ret;
 }
 

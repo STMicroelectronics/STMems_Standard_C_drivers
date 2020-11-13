@@ -23,7 +23,7 @@
 #define LPS22HB_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -74,7 +74,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
@@ -107,8 +107,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -162,7 +164,7 @@ typedef struct {
   *
   */
 
-  /** I2C Device Address 8 bit format: if SA0=0 -> 0xB9 if SA0=1 -> 0xBB **/
+/** I2C Device Address 8 bit format: if SA0=0 -> 0xB9 if SA0=1 -> 0xBB **/
 #define LPS22HB_I2C_ADD_H   0xBBU
 #define LPS22HB_I2C_ADD_L   0xB9U
 
@@ -360,7 +362,7 @@ typedef struct {
   *
   */
 
-typedef union{
+typedef union {
   lps22hb_interrupt_cfg_t      interrupt_cfg;
   lps22hb_ctrl_reg1_t          ctrl_reg1;
   lps22hb_ctrl_reg2_t          ctrl_reg2;
@@ -379,9 +381,11 @@ typedef union{
   *
   */
 
-int32_t lps22hb_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lps22hb_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                         uint8_t *data,
                          uint16_t len);
-int32_t lps22hb_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lps22hb_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
                           uint16_t len);
 
 extern float_t lps22hb_from_lsb_to_hpa(int32_t lsb);
@@ -394,13 +398,15 @@ int32_t lps22hb_autozero_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps22hb_autozero_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lps22hb_pressure_snap_rst_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps22hb_pressure_snap_rst_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lps22hb_pressure_snap_rst_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lps22hb_pressure_snap_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps22hb_pressure_snap_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lps22hb_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps22hb_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lps22hb_block_data_update_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 typedef enum {
   LPS22HB_LPF_ODR_DIV_2  = 0,
@@ -424,7 +430,8 @@ int32_t lps22hb_data_rate_set(stmdev_ctx_t *ctx, lps22hb_odr_t val);
 int32_t lps22hb_data_rate_get(stmdev_ctx_t *ctx, lps22hb_odr_t *val);
 
 int32_t lps22hb_one_shoot_trigger_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps22hb_one_shoot_trigger_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lps22hb_one_shoot_trigger_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lps22hb_pressure_ref_set(stmdev_ctx_t *ctx, int32_t val);
 int32_t lps22hb_pressure_ref_get(stmdev_ctx_t *ctx, int32_t *val);
@@ -459,11 +466,12 @@ int32_t lps22hb_low_power_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lps22hb_boot_status_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-typedef struct{
+typedef struct {
   lps22hb_fifo_status_t  fifo_status;
   lps22hb_status_t       status;
 } lps22hb_dev_stat_t;
-int32_t lps22hb_dev_status_get(stmdev_ctx_t *ctx, lps22hb_dev_stat_t *val);
+int32_t lps22hb_dev_status_get(stmdev_ctx_t *ctx,
+                               lps22hb_dev_stat_t *val);
 
 typedef enum {
   LPS22HB_NO_THRESHOLD = 0,
@@ -497,8 +505,10 @@ typedef enum {
   LPS22HB_LOW_PRES_INT       = 2,
   LPS22HB_EVERY_PRES_INT     = 3,
 } lps22hb_int_s_t;
-int32_t lps22hb_int_pin_mode_set(stmdev_ctx_t *ctx, lps22hb_int_s_t val);
-int32_t lps22hb_int_pin_mode_get(stmdev_ctx_t *ctx, lps22hb_int_s_t *val);
+int32_t lps22hb_int_pin_mode_set(stmdev_ctx_t *ctx,
+                                 lps22hb_int_s_t val);
+int32_t lps22hb_int_pin_mode_get(stmdev_ctx_t *ctx,
+                                 lps22hb_int_s_t *val);
 
 int32_t lps22hb_drdy_on_int_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps22hb_drdy_on_int_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -506,8 +516,10 @@ int32_t lps22hb_drdy_on_int_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t lps22hb_fifo_ovr_on_int_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps22hb_fifo_ovr_on_int_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lps22hb_fifo_threshold_on_int_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps22hb_fifo_threshold_on_int_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lps22hb_fifo_threshold_on_int_set(stmdev_ctx_t *ctx,
+                                          uint8_t val);
+int32_t lps22hb_fifo_threshold_on_int_get(stmdev_ctx_t *ctx,
+                                          uint8_t *val);
 
 int32_t lps22hb_fifo_full_on_int_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps22hb_fifo_full_on_int_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -523,19 +535,25 @@ typedef enum {
   LPS22HB_ACTIVE_HIGH = 0,
   LPS22HB_ACTIVE_LOW = 1,
 } lps22hb_int_h_l_t;
-int32_t lps22hb_int_polarity_set(stmdev_ctx_t *ctx, lps22hb_int_h_l_t val);
-int32_t lps22hb_int_polarity_get(stmdev_ctx_t *ctx, lps22hb_int_h_l_t *val);
+int32_t lps22hb_int_polarity_set(stmdev_ctx_t *ctx,
+                                 lps22hb_int_h_l_t val);
+int32_t lps22hb_int_polarity_get(stmdev_ctx_t *ctx,
+                                 lps22hb_int_h_l_t *val);
 
-int32_t lps22hb_int_source_get(stmdev_ctx_t *ctx, lps22hb_int_source_t *val);
+int32_t lps22hb_int_source_get(stmdev_ctx_t *ctx,
+                               lps22hb_int_source_t *val);
 
-int32_t lps22hb_int_on_press_high_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lps22hb_int_on_press_high_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lps22hb_int_on_press_low_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lps22hb_interrupt_event_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lps22hb_stop_on_fifo_threshold_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lps22hb_stop_on_fifo_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lps22hb_stop_on_fifo_threshold_set(stmdev_ctx_t *ctx,
+                                           uint8_t val);
+int32_t lps22hb_stop_on_fifo_threshold_get(stmdev_ctx_t *ctx,
+                                           uint8_t *val);
 
 int32_t lps22hb_fifo_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps22hb_fifo_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -552,8 +570,10 @@ typedef enum {
   LPS22HB_DYNAMIC_STREAM_MODE   = 6,
   LPS22HB_BYPASS_TO_FIFO_MODE   = 7,
 } lps22hb_f_mode_t;
-int32_t lps22hb_fifo_mode_set(stmdev_ctx_t *ctx, lps22hb_f_mode_t val);
-int32_t lps22hb_fifo_mode_get(stmdev_ctx_t *ctx, lps22hb_f_mode_t *val);
+int32_t lps22hb_fifo_mode_set(stmdev_ctx_t *ctx,
+                              lps22hb_f_mode_t val);
+int32_t lps22hb_fifo_mode_get(stmdev_ctx_t *ctx,
+                              lps22hb_f_mode_t *val);
 
 int32_t lps22hb_fifo_data_level_get(stmdev_ctx_t *ctx, uint8_t *val);
 
@@ -572,8 +592,10 @@ typedef enum {
   LPS22HB_I2C_ENABLE = 0,
   LPS22HB_I2C_DISABLE = 1,
 } lps22hb_i2c_dis_t;
-int32_t lps22hb_i2c_interface_set(stmdev_ctx_t *ctx, lps22hb_i2c_dis_t val);
-int32_t lps22hb_i2c_interface_get(stmdev_ctx_t *ctx, lps22hb_i2c_dis_t *val);
+int32_t lps22hb_i2c_interface_set(stmdev_ctx_t *ctx,
+                                  lps22hb_i2c_dis_t val);
+int32_t lps22hb_i2c_interface_get(stmdev_ctx_t *ctx,
+                                  lps22hb_i2c_dis_t *val);
 
 int32_t lps22hb_auto_add_inc_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps22hb_auto_add_inc_get(stmdev_ctx_t *ctx, uint8_t *val);
