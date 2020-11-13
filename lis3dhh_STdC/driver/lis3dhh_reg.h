@@ -23,7 +23,7 @@
 #define LIS3DHH_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -75,7 +75,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
@@ -108,8 +108,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -132,7 +134,7 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-  *              You can create a sensor configuration by your own or using 
+  *              You can create a sensor configuration by your own or using
   *              Unico / Unicleo tools available on STMicroelectronics
   *              web site.
   *
@@ -327,7 +329,7 @@ typedef struct {
   * @{
   *
   */
-typedef union{
+typedef union {
   lis3dhh_ctrl_reg1_t    ctrl_reg1;
   lis3dhh_int1_ctrl_t    int1_ctrl;
   lis3dhh_int2_ctrl_t    int2_ctrl;
@@ -345,23 +347,28 @@ typedef union{
   *
   */
 
-int32_t lis3dhh_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lis3dhh_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                         uint8_t *data,
                          uint16_t len);
-int32_t lis3dhh_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lis3dhh_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                          uint8_t *data,
                           uint16_t len);
 
 float_t lis3dhh_from_lsb_to_mg(int16_t lsb);
 float_t lis3dhh_from_lsb_to_celsius(int16_t lsb);
 
 int32_t lis3dhh_block_data_update_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis3dhh_block_data_update_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis3dhh_block_data_update_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 typedef enum {
   LIS3DHH_POWER_DOWN  = 0,
   LIS3DHH_1kHz1       = 1,
 } lis3dhh_norm_mod_en_t;
-int32_t lis3dhh_data_rate_set(stmdev_ctx_t *ctx, lis3dhh_norm_mod_en_t val);
-int32_t lis3dhh_data_rate_get(stmdev_ctx_t *ctx, lis3dhh_norm_mod_en_t *val);
+int32_t lis3dhh_data_rate_set(stmdev_ctx_t *ctx,
+                              lis3dhh_norm_mod_en_t val);
+int32_t lis3dhh_data_rate_get(stmdev_ctx_t *ctx,
+                              lis3dhh_norm_mod_en_t *val);
 
 int32_t lis3dhh_temperature_raw_get(stmdev_ctx_t *ctx, int16_t *val);
 int32_t lis3dhh_acceleration_raw_get(stmdev_ctx_t *ctx, int16_t *val);
@@ -392,8 +399,10 @@ typedef enum {
   LIS3DHH_NO_LINEAR_PHASE_440Hz   = 2,
   LIS3DHH_NO_LINEAR_PHASE_235Hz   = 3,
 } lis3dhh_dsp_t;
-int32_t lis3dhh_filter_config_set(stmdev_ctx_t *ctx, lis3dhh_dsp_t val);
-int32_t lis3dhh_filter_config_get(stmdev_ctx_t *ctx, lis3dhh_dsp_t *val);
+int32_t lis3dhh_filter_config_set(stmdev_ctx_t *ctx,
+                                  lis3dhh_dsp_t val);
+int32_t lis3dhh_filter_config_get(stmdev_ctx_t *ctx,
+                                  lis3dhh_dsp_t *val);
 
 int32_t lis3dhh_status_get(stmdev_ctx_t *ctx, lis3dhh_status_t *val);
 
@@ -411,15 +420,20 @@ typedef enum {
   LIS3DHH_PIN_AS_INTERRUPT   = 0,
   LIS3DHH_PIN_AS_TRIGGER     = 1,
 } lis3dhh_int1_ext_t;
-int32_t lis3dhh_int1_mode_set(stmdev_ctx_t *ctx, lis3dhh_int1_ext_t val);
-int32_t lis3dhh_int1_mode_get(stmdev_ctx_t *ctx, lis3dhh_int1_ext_t *val);
+int32_t lis3dhh_int1_mode_set(stmdev_ctx_t *ctx,
+                              lis3dhh_int1_ext_t val);
+int32_t lis3dhh_int1_mode_get(stmdev_ctx_t *ctx,
+                              lis3dhh_int1_ext_t *val);
 
 
-int32_t lis3dhh_fifo_threshold_on_int1_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis3dhh_fifo_threshold_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis3dhh_fifo_threshold_on_int1_set(stmdev_ctx_t *ctx,
+                                           uint8_t val);
+int32_t lis3dhh_fifo_threshold_on_int1_get(stmdev_ctx_t *ctx,
+                                           uint8_t *val);
 
 int32_t lis3dhh_fifo_full_on_int1_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis3dhh_fifo_full_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis3dhh_fifo_full_on_int1_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lis3dhh_fifo_ovr_on_int1_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis3dhh_fifo_ovr_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -430,11 +444,14 @@ int32_t lis3dhh_boot_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val);
 int32_t lis3dhh_drdy_on_int1_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis3dhh_drdy_on_int1_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lis3dhh_fifo_threshold_on_int2_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis3dhh_fifo_threshold_on_int2_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis3dhh_fifo_threshold_on_int2_set(stmdev_ctx_t *ctx,
+                                           uint8_t val);
+int32_t lis3dhh_fifo_threshold_on_int2_get(stmdev_ctx_t *ctx,
+                                           uint8_t *val);
 
 int32_t lis3dhh_fifo_full_on_int2_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis3dhh_fifo_full_on_int2_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis3dhh_fifo_full_on_int2_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lis3dhh_fifo_ovr_on_int2_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis3dhh_fifo_ovr_on_int2_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -458,7 +475,8 @@ int32_t lis3dhh_fifo_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis3dhh_fifo_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lis3dhh_fifo_block_spi_hs_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lis3dhh_fifo_block_spi_hs_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lis3dhh_fifo_block_spi_hs_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lis3dhh_fifo_watermark_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lis3dhh_fifo_watermark_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -471,9 +489,11 @@ typedef enum {
   LIS3DHH_DYNAMIC_STREAM_MODE     = 6,
 } lis3dhh_fmode_t;
 int32_t lis3dhh_fifo_mode_set(stmdev_ctx_t *ctx, lis3dhh_fmode_t val);
-int32_t lis3dhh_fifo_mode_get(stmdev_ctx_t *ctx, lis3dhh_fmode_t *val);
+int32_t lis3dhh_fifo_mode_get(stmdev_ctx_t *ctx,
+                              lis3dhh_fmode_t *val);
 
-int32_t lis3dhh_fifo_status_get(stmdev_ctx_t *ctx, lis3dhh_fifo_src_t *val);
+int32_t lis3dhh_fifo_status_get(stmdev_ctx_t *ctx,
+                                lis3dhh_fifo_src_t *val);
 
 int32_t lis3dhh_fifo_full_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
 
