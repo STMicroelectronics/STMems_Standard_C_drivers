@@ -116,7 +116,8 @@ static uint8_t tx_buffer[1000];
  * and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -128,59 +129,54 @@ static void platform_init(void);
 void example_main_h3lis331dl(void)
 {
   stmdev_ctx_t dev_ctx;
-
   /* Uncomment to use interrupts on drdy */
   //a3g4250d_int2_route_t int2_reg;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-
   /* Initialize platform specific hardware */
   platform_init();
-
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   whoamI = 0;
   h3lis331dl_device_id_get(&dev_ctx, &whoamI);
+
   if ( whoamI != H3LIS331DL_ID )
-    while(1); /*manage here device not found */
+    while (1); /*manage here device not found */
 
   /* Enable Block Data Update */
   h3lis331dl_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-
   /* Set full scale */
   h3lis331dl_full_scale_set(&dev_ctx, H3LIS331DL_200g);
-
   /* Configure filtering chain */
   h3lis331dl_hp_path_set(&dev_ctx, H3LIS331DL_HP_DISABLE);
   //h3lis331dl_hp_path_set(&dev_ctx, H3LIS331DL_HP_ON_OUT);
   //h3lis331dl_hp_reset_get(&dev_ctx);
-
   /* Set Output Data Rate */
   h3lis331dl_data_rate_set(&dev_ctx, H3LIS331DL_ODR_5Hz);
 
   /* Read samples in polling mode (no int) */
-  while(1)
-  {
+  while (1) {
     /* Read output only if new value is available */
     h3lis331dl_reg_t reg;
     h3lis331dl_status_reg_get(&dev_ctx, &reg.status_reg);
 
-    if (reg.status_reg.zyxda){
+    if (reg.status_reg.zyxda) {
       /* Read acceleration data */
-      memset(data_raw_acceleration, 0x00, 3*sizeof(int16_t));
+      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
       h3lis331dl_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-      acceleration_mg[0] = h3lis331dl_from_fs200_to_mg(data_raw_acceleration[0]);
-      acceleration_mg[1] = h3lis331dl_from_fs200_to_mg(data_raw_acceleration[1]);
-      acceleration_mg[2] = h3lis331dl_from_fs200_to_mg(data_raw_acceleration[2]);
-
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+      acceleration_mg[0] = h3lis331dl_from_fs200_to_mg(
+                             data_raw_acceleration[0]);
+      acceleration_mg[1] = h3lis331dl_from_fs200_to_mg(
+                             data_raw_acceleration[1]);
+      acceleration_mg[2] = h3lis331dl_from_fs200_to_mg(
+                             data_raw_acceleration[2]);
+      sprintf((char *)tx_buffer,
+              "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com( tx_buffer, strlen( (char const*)tx_buffer ) );
+      tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
     }
   }
 }
@@ -195,10 +191,10 @@ void example_main_h3lis331dl(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
-
 #if defined(NUCLEO_F411RE)
   /* Write multiple command */
   reg |= 0x80;
@@ -255,18 +251,18 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 /*
  * @brief  Send buffer to console (platform dependent)
  *
- * @param  tx_buffer     buffer to trasmit
+ * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
  *
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  #ifdef NUCLEO_F411RE
+#ifdef NUCLEO_F411RE
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-  #endif
-  #ifdef STEVAL_MKI109V3
+#endif
+#ifdef STEVAL_MKI109V3
   CDC_Transmit_FS(tx_buffer, len);
-  #endif
+#endif
 }
 
 /*
