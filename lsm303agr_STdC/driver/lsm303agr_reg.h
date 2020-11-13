@@ -23,7 +23,7 @@
 #define LSM303AGR_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -43,7 +43,7 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct {
   uint8_t bit0       : 1;
   uint8_t bit1       : 1;
   uint8_t bit2       : 1;
@@ -65,8 +65,10 @@ typedef struct{
   *
   */
 
-typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t*, uint16_t);
-typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t*, uint16_t);
+typedef int32_t (*stmdev_write_ptr)(void *, uint8_t, uint8_t *,
+                                    uint16_t);
+typedef int32_t (*stmdev_read_ptr) (void *, uint8_t, uint8_t *,
+                                    uint16_t);
 
 typedef struct {
   /** Component mandatory fields **/
@@ -89,9 +91,9 @@ typedef struct {
 /** @defgroup    Generic address-data structure definition
   * @brief       This structure is useful to load a predefined configuration
   *              of a sensor.
-	*              You can create a sensor configuration by your own or using 
-	*              Unico / Unicleo tools available on STMicroelectronics
-	*              web site.
+  *              You can create a sensor configuration by your own or using
+  *              Unico / Unicleo tools available on STMicroelectronics
+  *              web site.
   *
   * @{
   *
@@ -119,7 +121,7 @@ typedef struct {
   *
   */
 
-  /** I2C Device Address 8 bit format**/
+/** I2C Device Address 8 bit format**/
 #define LSM303AGR_I2C_ADD_XL       0x33U
 #define LSM303AGR_I2C_ADD_MG       0x3DU
 
@@ -163,7 +165,8 @@ typedef struct {
 
 #define LSM303AGR_CTRL_REG2_A                0x21U
 typedef struct {
-  uint8_t hp                     : 3; /* HPCLICK + HPIS2 + HPIS1 -> HP */
+uint8_t hp                     :
+  3; /* HPCLICK + HPIS2 + HPIS1 -> HP */
   uint8_t fds                    : 1;
   uint8_t hpcf                   : 2;
   uint8_t hpm                    : 2;
@@ -470,7 +473,7 @@ typedef struct {
   * @{
   *
   */
-typedef union{
+typedef union {
   lsm303agr_status_reg_aux_a_t       status_reg_aux_a;
   lsm303agr_temp_cfg_reg_a_t         temp_cfg_reg_a;
   lsm303agr_ctrl_reg1_a_t            ctrl_reg1_a;
@@ -513,10 +516,12 @@ typedef union{
   *
   */
 
-int32_t lsm303agr_read_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
+int32_t lsm303agr_read_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                           uint8_t *data,
                            uint16_t len);
-int32_t lsm303agr_write_reg(stmdev_ctx_t *ctx, uint8_t reg, uint8_t* data,
-                           uint16_t len);
+int32_t lsm303agr_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
+                            uint8_t *data,
+                            uint16_t len);
 
 extern float_t lsm303agr_from_fs_2g_hr_to_mg(int16_t lsb);
 extern float_t lsm303agr_from_fs_4g_hr_to_mg(int16_t lsb);
@@ -538,13 +543,16 @@ extern float_t lsm303agr_from_lsb_lp_to_celsius(int16_t lsb);
 
 extern float_t lsm303agr_from_lsb_to_mgauss(int16_t lsb);
 
-int32_t lsm303agr_temp_status_reg_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm303agr_temp_status_reg_get(stmdev_ctx_t *ctx,
+                                      uint8_t *buff);
 
-int32_t lsm303agr_temp_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303agr_temp_data_ready_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lsm303agr_temp_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm303agr_temperature_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm303agr_temperature_raw_get(stmdev_ctx_t *ctx,
+                                      uint8_t *buff);
 
 typedef enum {
   LSM303AGR_TEMP_DISABLE  = 0,
@@ -634,7 +642,8 @@ int32_t lsm303agr_xl_data_ready_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 int32_t lsm303agr_xl_data_ovr_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm303agr_acceleration_raw_get(stmdev_ctx_t *ctx, uint8_t *buff);
+int32_t lsm303agr_acceleration_raw_get(stmdev_ctx_t *ctx,
+                                       uint8_t *buff);
 
 int32_t lsm303agr_xl_device_id_get(stmdev_ctx_t *ctx, uint8_t *buff);
 
@@ -755,8 +764,10 @@ int32_t lsm303agr_xl_pin_int2_config_get(stmdev_ctx_t *ctx,
 int32_t lsm303agr_xl_fifo_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm303agr_xl_fifo_get(stmdev_ctx_t *ctx, uint8_t *val);
 
-int32_t lsm303agr_xl_fifo_watermark_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm303agr_xl_fifo_watermark_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303agr_xl_fifo_watermark_set(stmdev_ctx_t *ctx,
+                                        uint8_t val);
+int32_t lsm303agr_xl_fifo_watermark_get(stmdev_ctx_t *ctx,
+                                        uint8_t *val);
 
 typedef enum {
   LSM303AGR_INT1_GEN = 0,
@@ -781,13 +792,17 @@ int32_t lsm303agr_xl_fifo_mode_get(stmdev_ctx_t *ctx,
 int32_t lsm303agr_xl_fifo_status_get(stmdev_ctx_t *ctx,
                                      lsm303agr_fifo_src_reg_a_t *val);
 
-int32_t lsm303agr_xl_fifo_data_level_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303agr_xl_fifo_data_level_get(stmdev_ctx_t *ctx,
+                                         uint8_t *val);
 
-int32_t lsm303agr_xl_fifo_empty_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303agr_xl_fifo_empty_flag_get(stmdev_ctx_t *ctx,
+                                         uint8_t *val);
 
-int32_t lsm303agr_xl_fifo_ovr_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303agr_xl_fifo_ovr_flag_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
-int32_t lsm303agr_xl_fifo_fth_flag_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303agr_xl_fifo_fth_flag_get(stmdev_ctx_t *ctx,
+                                       uint8_t *val);
 
 int32_t lsm303agr_tap_conf_set(stmdev_ctx_t *ctx,
                                lsm303agr_click_cfg_a_t *val);
@@ -795,7 +810,7 @@ int32_t lsm303agr_tap_conf_get(stmdev_ctx_t *ctx,
                                lsm303agr_click_cfg_a_t *val);
 
 int32_t lsm303agr_tap_source_get(stmdev_ctx_t *ctx,
-                                lsm303agr_click_src_a_t *val);
+                                 lsm303agr_click_src_a_t *val);
 
 int32_t lsm303agr_tap_threshold_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm303agr_tap_threshold_get(stmdev_ctx_t *ctx, uint8_t *val);
@@ -936,7 +951,8 @@ int32_t lsm303agr_mag_offset_int_conf_get(stmdev_ctx_t *ctx,
                                           lsm303agr_int_on_dataoff_m_t *val);
 
 int32_t lsm303agr_mag_drdy_on_pin_set(stmdev_ctx_t *ctx, uint8_t val);
-int32_t lsm303agr_mag_drdy_on_pin_get(stmdev_ctx_t *ctx, uint8_t *val);
+int32_t lsm303agr_mag_drdy_on_pin_get(stmdev_ctx_t *ctx,
+                                      uint8_t *val);
 
 int32_t lsm303agr_mag_int_on_pin_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lsm303agr_mag_int_on_pin_get(stmdev_ctx_t *ctx, uint8_t *val);
