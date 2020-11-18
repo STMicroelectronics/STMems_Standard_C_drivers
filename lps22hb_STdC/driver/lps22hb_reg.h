@@ -159,7 +159,7 @@ typedef struct {
   */
 
 
-/** @defgroup LSM9DS1_Infos
+/** @defgroup LPS22HB_Infos
   * @{
   *
   */
@@ -388,8 +388,8 @@ int32_t lps22hb_write_reg(stmdev_ctx_t *ctx, uint8_t reg,
                           uint8_t *data,
                           uint16_t len);
 
-extern float_t lps22hb_from_lsb_to_hpa(int32_t lsb);
-extern float_t lps22hb_from_lsb_to_degc(int16_t lsb);
+float_t lps22hb_from_lsb_to_hpa(int32_t lsb);
+float_t lps22hb_from_lsb_to_degc(int16_t lsb);
 
 int32_t lps22hb_autozero_rst_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t lps22hb_autozero_rst_get(stmdev_ctx_t *ctx, uint8_t *val);
