@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    read_data_polling.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show how to get data from sensor.
  *
  ******************************************************************************
  * @attention
@@ -127,7 +127,7 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_lps22hb(void)
+void lps22hb_read_data_polling(void)
 {
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;

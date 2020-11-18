@@ -2,7 +2,7 @@
  ******************************************************************************
  * @file    multi_read_fifo.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor FIFO
+ * @brief   This file show how to get data from sensor FIFO
  *
  ******************************************************************************
  * @attention
@@ -127,7 +127,7 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_multi_read_fifo_lps22hb(void)
+void lps22hb_multi_read_fifo(void)
 {
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
