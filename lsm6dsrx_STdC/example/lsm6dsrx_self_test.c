@@ -103,7 +103,7 @@
 #define    BOOT_TIME            10 //ms
 
 /* Self test limits. */
-#define    MIN_ST_LIMIT_mg        90.0f
+#define    MIN_ST_LIMIT_mg        40.0f
 #define    MAX_ST_LIMIT_mg      1700.0f
 #define    MIN_ST_LIMIT_mdps   150000.0f
 #define    MAX_ST_LIMIT_mdps   700000.0f
