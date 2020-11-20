@@ -104,16 +104,19 @@ typedef union {
   *
   */
 
-st_fifo_status st_fifo_init(float_t bdr_xl, float_t bdr_gy, float_t bdr_vsens);
+st_fifo_status st_fifo_init(float_t bdr_xl, float_t bdr_gy,
+                            float_t bdr_vsens);
 
 st_fifo_status st_fifo_decompress(st_fifo_out_slot *fifo_out_slot,
                                   st_fifo_raw_slot *fifo_raw_slot,
                                   uint16_t *out_slot_size,
                                   uint16_t stream_size);
 
-void st_fifo_sort(st_fifo_out_slot *fifo_out_slot, uint16_t out_slot_size);
+void st_fifo_sort(st_fifo_out_slot *fifo_out_slot,
+                  uint16_t out_slot_size);
 
-uint16_t st_fifo_get_sensor_occurrence(st_fifo_out_slot *fifo_out_slot,
+uint16_t st_fifo_get_sensor_occurrence(st_fifo_out_slot
+                                       *fifo_out_slot,
                                        uint16_t out_slot_size,
                                        st_fifo_sensor_type sensor_type);
 
