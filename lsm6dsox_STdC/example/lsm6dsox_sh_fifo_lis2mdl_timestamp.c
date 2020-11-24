@@ -1,9 +1,9 @@
 /*
  ******************************************************************************
- * @file    sensor_hub_fifo_lps22hh.c
+ * @file    sh_fifo_lis2mdl_timestamp.c
  * @author  Sensor Solutions Software Team
- * @brief   This file shows how to read LPS22HH mag connected to LSM6DSOX
- *          I2C master interface (with FIFO support).
+ * @brief   This file shows how to to read LIS2MDL mag connected to LSM6DSOX
+ *          I2C sensor hub with FIFO and Timestamp support.
  *
  ******************************************************************************
  * @attention
@@ -23,14 +23,20 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A3 + STEVAL-MKI197V1
- *
- * and STM32CubeMX tool with STM32CubeF4 MCU Package
+ * - STEVAL_MKI109V3 + STEVAL-MKI217V1
+ * - NUCLEO_F411RE + STEVAL-MKI217V1
+ * - DISCOVERY_SPC584B + STEVAL-MKI217V1
  *
  * Used interfaces:
  *
+ * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
+ *                    - Sensor side: SPI(Default) / I2C(supported)
+ *
  * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
- *                    - I2C(Default) / SPI(supported)
+ *                    - Sensor side: I2C(Default) / SPI(supported)
+ *
+ * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -38,56 +44,94 @@
  *
  */
 
+/* STMicroelectronics evaluation boards definition
+ *
+ * Please uncomment ONLY the evaluation boards in use.
+ * If a different hardware is used please comment all
+ * following target board and redefine yours.
+ */
+
+//#define STEVAL_MKI109V3  /* little endian */
+//#define NUCLEO_F411RE    /* little endian */
+//#define SPC584B_DIS      /* big endian */
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
+
+#if defined(STEVAL_MKI109V3)
+/* MKI109V3: Define communication interface */
+#define SENSOR_BUS hspi2
+/* MKI109V3: Vdd and Vddio power supply values */
+#define PWM_3V3 915
+
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
+#define SENSOR_BUS hi2c1
+
+#elif defined(SPC584B_DIS)
+/* DISCOVERY_SPC584B: Define communication interface */
+#define SENSOR_BUS I2CD1
+
+#endif
+
 /* Includes ------------------------------------------------------------------*/
-#include <lsm6dsox_reg.h>
-#include <lps22hh_reg.h>
 #include <string.h>
 #include <stdio.h>
+#include "lsm6dsox_reg.h"
+#include "lis2mdl_reg.h"
 
+#if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
-#include "i2c.h"
 #include "usart.h"
 #include "gpio.h"
+#include "i2c.h"
 
-/* useful union to manage IMU data */
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
+#include "usbd_cdc_if.h"
+#include "gpio.h"
+#include "spi.h"
+#include "tim.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
+#endif
+
+/* Private macro -------------------------------------------------------------*/
+#define TX_BUF_DIM          1000
+#define    BOOT_TIME          10 //ms
+
+/* Define number of byte for each sensor sample. */
+#define OUT_XYZ_SIZE    6
+
 typedef union {
   int16_t i16bit[3];
   uint8_t u8bit[6];
 } axis3bit16_t;
 
-/* useful union to manage LPS22HH data */
 typedef union {
   struct {
-    uint32_t u32bit; /* pressure plus status register */
-    int16_t  i16bit; /* temperature */
-  } p_and_t;
-  uint8_t u8bit[6];
-} p_and_t_byte_t;
-
-/* Private macro -------------------------------------------------------------*/
-#define TX_BUF_DIM                       1000
+    uint32_t tick;
+    uint16_t unused;
+  } reg;
+  uint8_t byte[6];
+} timestamp_sample_t;
 
 /* Private variables ---------------------------------------------------------*/
-static uint8_t tx_buffer[TX_BUF_DIM];
-
-static stmdev_ctx_t press_ctx;
+static stmdev_ctx_t mag_ctx;
 static stmdev_ctx_t ag_ctx;
-
-static float angular_rate_mdps[3];
-static float acceleration_mg[3];
-static float temperature_degC;
-static float pressure_hPa;
-
 
 /* Extern variables ----------------------------------------------------------*/
 
-/* Private functions ---------------------------------------------------------*/
+/* Platform Functions --------------------------------------------------------*/
 
-static int32_t lsm6dsox_write_lps22hh_cx(void *ctx, uint8_t reg,
+static int32_t lsm6dsox_write_lis2mdl_cx(void *ctx, uint8_t reg,
                                          uint8_t *data,
                                          uint16_t len);
 
-static int32_t lsm6dsox_read_lps22hh_cx(void *ctx, uint8_t reg,
+static int32_t lsm6dsox_read_lis2mdl_cx(void *ctx, uint8_t reg,
                                         uint8_t *data,
                                         uint16_t len);
 
@@ -104,41 +148,48 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void platform_delay(uint32_t ms);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
-
-/* Main Example --------------------------------------------------------------*/
+static void platform_delay(uint32_t ms);
+static void platform_init(void);
 
 /*
- * Main Example
+ * example_main - Main Example
  *
  * Configure low level function to access to external device
- * Check if LPS22HH connected to Sensor Hub
- * Configure lps22hh for data acquisition
+ * Check if LIS2MDL connected to Sensor Hub
+ * Configure lis2mdl in CONTINUOUS_MODE with 20 ODR
  * Configure Sensor Hub to read one slave with XL trigger
  * Set FIFO watermark
  * Set FIFO mode to Stream mode
  * Enable FIFO batching of Slave0 + ACC + Gyro samples
+ * Enable batch FIFO of hw timestamp (LSB 25 us)
  * Poll for FIFO watermark interrupt and read samples
  */
-void lsm6dsox_hub_fifo_lps22hh(void)
+void lsm6dsox_sh_fifo_lis2mdl_timestamp(void)
 {
-  uint8_t whoamI, rst, wtm_flag;
   lsm6dsox_pin_int1_route_t int1_route;
   lsm6dsox_sh_cfg_read_t sh_cfg_read;
-  p_and_t_byte_t data_raw_press_temp;
+  uint8_t tx_buffer[TX_BUF_DIM];
+  float angular_rate_mdps[3];
+  float acceleration_mg[3];
+  float magnetic_mG[3];
+  axis3bit16_t data_raw_magnetic;
   axis3bit16_t data_raw_acceleration;
   axis3bit16_t data_raw_angular_rate;
   axis3bit16_t dummy;
+  uint8_t whoamI, rst, wtm_flag;
   /* Initialize lsm6dsox driver interface */
   ag_ctx.write_reg = platform_write;
   ag_ctx.read_reg = platform_read;
-  ag_ctx.handle = &hi2c1;
-  /* Initialize lps22hh driver interface */
-  press_ctx.read_reg = lsm6dsox_read_lps22hh_cx;
-  press_ctx.write_reg = lsm6dsox_write_lps22hh_cx;
-  press_ctx.handle = &hi2c1;
+  ag_ctx.handle = &SENSOR_BUS;
+  /* Initialize lis2mdl driver interface */
+  mag_ctx.read_reg = lsm6dsox_read_lis2mdl_cx;
+  mag_ctx.write_reg = lsm6dsox_write_lis2mdl_cx;
+  mag_ctx.handle = &SENSOR_BUS;
+  /* Init test platform. */
+  platform_init();
   /* Wait sensor boot time */
-  platform_delay(10);
-  /* Check lsm6dsox ID. */
+  platform_delay(BOOT_TIME);
+  /* Check device ID. */
   lsm6dsox_device_id_get(&ag_ctx, &whoamI);
 
   if (whoamI != LSM6DSOX_ID)
@@ -151,25 +202,25 @@ void lsm6dsox_hub_fifo_lps22hh(void)
     lsm6dsox_reset_get(&ag_ctx, &rst);
   } while (rst);
 
-  /* Disable I3C interface.*/
+  /* Disable I3C interface. */
   lsm6dsox_i3c_disable_set(&ag_ctx, LSM6DSOX_I3C_DISABLE);
   /* Some hardware require to enable pull up on master I2C interface. */
   //lsm6dsox_sh_pin_mode_set(&ag_ctx, LSM6DSOX_INTERNAL_PULL_UP);
-  /* Check if LPS22HH connected to Sensor Hub. */
-  lps22hh_device_id_get(&press_ctx, &whoamI);
+  /* Check if LIS2MDL connected to Sensor Hub. */
+  lis2mdl_device_id_get(&mag_ctx, &whoamI);
 
-  if ( whoamI != LPS22HH_ID )
-    while (1); /*manage here device not found */
+  if (whoamI != LIS2MDL_ID)
+    while (1);
 
-  /* Configure LPS22HH. */
-  lps22hh_block_data_update_set(&press_ctx, PROPERTY_ENABLE);
-  lps22hh_data_rate_set(&press_ctx, LPS22HH_10_Hz_LOW_NOISE);
-  /*
-   * Configure LSM6DSOX FIFO.
-   *
+  /* Configure LIS2MDL. */
+  lis2mdl_block_data_update_set(&mag_ctx, PROPERTY_ENABLE);
+  lis2mdl_offset_temp_comp_set(&mag_ctx, PROPERTY_ENABLE);
+  lis2mdl_operating_mode_set(&mag_ctx, LIS2MDL_CONTINUOUS_MODE);
+  lis2mdl_data_rate_set(&mag_ctx, LIS2MDL_ODR_20Hz);
+  /* Configure LSM6DSOX FIFO.
    *
    * Set FIFO watermark (number of unread sensor data TAG + 6 bytes
-   * stored in FIFO) to 15 samples. 5 * (Acc + Gyro + Pressure)
+   * stored in FIFO) to 15 samples. 5 * (Acc + Gyro + Mag)
    */
   lsm6dsox_fifo_watermark_set(&ag_ctx, 15);
   /* Set FIFO mode to Stream mode (aka Continuous Mode). */
@@ -194,13 +245,16 @@ void lsm6dsox_hub_fifo_lps22hh(void)
   /* Set FIFO batch XL/Gyro ODR to 12.5Hz. */
   lsm6dsox_fifo_xl_batch_set(&ag_ctx, LSM6DSOX_XL_BATCHED_AT_12Hz5);
   lsm6dsox_fifo_gy_batch_set(&ag_ctx, LSM6DSOX_GY_BATCHED_AT_12Hz5);
+  /* Enable time-stamp batching. */
+  lsm6dsox_fifo_timestamp_decimation_set(&ag_ctx, LSM6DSOX_DEC_1);
+  lsm6dsox_timestamp_set(&ag_ctx, PROPERTY_ENABLE);
   /*
    * Prepare sensor hub to read data from external Slave0 continuously
    * in order to store data in FIFO.
    */
-  sh_cfg_read.slv_add = (LPS22HH_I2C_ADD_H & 0xFEU) >>
+  sh_cfg_read.slv_add = (LIS2MDL_I2C_ADD & 0xFEU) >>
                         1; /* 7bit I2C address */
-  sh_cfg_read.slv_subadd = LPS22HH_STATUS;
+  sh_cfg_read.slv_subadd = LIS2MDL_OUTX_L_REG;
   sh_cfg_read.slv_len = 6;
   lsm6dsox_sh_slv0_cfg_read(&ag_ctx, &sh_cfg_read);
   /* Configure Sensor Hub to read one slave. */
@@ -217,6 +271,8 @@ void lsm6dsox_hub_fifo_lps22hh(void)
   while (1) {
     uint16_t num = 0;
     lsm6dsox_fifo_tag_t reg_tag;
+    timestamp_sample_t ts_tick;
+    uint32_t timestamp = 0.0f;
     /* Read watermark flag. */
     lsm6dsox_fifo_wtm_flag_get(&ag_ctx, &wtm_flag);
 
@@ -232,49 +288,57 @@ void lsm6dsox_hub_fifo_lps22hh(void)
           case LSM6DSOX_XL_NC_TAG:
             memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
             lsm6dsox_fifo_out_raw_get(&ag_ctx, data_raw_acceleration.u8bit);
-            acceleration_mg[0] = lsm6dsox_from_fs2_to_mg(
-                                   data_raw_acceleration.i16bit[0]);
-            acceleration_mg[1] = lsm6dsox_from_fs2_to_mg(
-                                   data_raw_acceleration.i16bit[1]);
-            acceleration_mg[2] = lsm6dsox_from_fs2_to_mg(
-                                   data_raw_acceleration.i16bit[2]);
-            sprintf( (char *)tx_buffer,
-                     "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-                     acceleration_mg[0],
-                     acceleration_mg[1],
-                     acceleration_mg[2] );
+            acceleration_mg[0] =
+              lsm6dsox_from_fs2_to_mg(data_raw_acceleration.i16bit[0]);
+            acceleration_mg[1] =
+              lsm6dsox_from_fs2_to_mg(data_raw_acceleration.i16bit[1]);
+            acceleration_mg[2] =
+              lsm6dsox_from_fs2_to_mg(data_raw_acceleration.i16bit[2]);
+            sprintf((char *)tx_buffer,
+                    "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f T %u.%u ms\r\n",
+                    acceleration_mg[0], acceleration_mg[1],
+                    acceleration_mg[2], (unsigned int)(timestamp / 1000ULL),
+                    (unsigned int)(timestamp % 1000ULL));
             tx_com(tx_buffer, strlen((char const *)tx_buffer));
             break;
 
           case LSM6DSOX_GYRO_NC_TAG:
             memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
             lsm6dsox_fifo_out_raw_get(&ag_ctx, data_raw_angular_rate.u8bit);
-            angular_rate_mdps[0] = lsm6dsox_from_fs2000_to_mdps(
-                                     data_raw_angular_rate.i16bit[0]);
-            angular_rate_mdps[1] = lsm6dsox_from_fs2000_to_mdps(
-                                     data_raw_angular_rate.i16bit[1]);
-            angular_rate_mdps[2] = lsm6dsox_from_fs2000_to_mdps(
-                                     data_raw_angular_rate.i16bit[2]);
-            sprintf( (char *)tx_buffer,
-                     "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-                     angular_rate_mdps[0],
-                     angular_rate_mdps[1],
-                     angular_rate_mdps[2]);
+            angular_rate_mdps[0] =
+              lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[0]);
+            angular_rate_mdps[1] =
+              lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[1]);
+            angular_rate_mdps[2] =
+              lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[2]);
+            sprintf((char *)tx_buffer,
+                    "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f T %u.%u ms\r\n",
+                    angular_rate_mdps[0], angular_rate_mdps[1],
+                    angular_rate_mdps[2], (unsigned int)(timestamp / 1000ULL),
+                    (unsigned int)(timestamp % 1000ULL));
             tx_com(tx_buffer, strlen((char const *)tx_buffer));
             break;
 
           case LSM6DSOX_SENSORHUB_SLAVE0_TAG:
-            memset(data_raw_press_temp.u8bit, 0x00, sizeof(p_and_t_byte_t));
-            lsm6dsox_fifo_out_raw_get(&ag_ctx, data_raw_press_temp.u8bit);
-            data_raw_press_temp.u8bit[0] = 0x00; /* remove status register */
-            pressure_hPa = lps22hh_from_lsb_to_hpa(
-                             data_raw_press_temp.p_and_t.u32bit);
-            temperature_degC = lps22hh_from_lsb_to_celsius(
-                                 data_raw_press_temp.p_and_t.i16bit );
-            sprintf( (char *)tx_buffer,
-                     "Press [hPa]:%4.2f\r\nTemp [degC]:%4.2f\r\n",
-                     pressure_hPa, temperature_degC);
+            memset(data_raw_magnetic.u8bit, 0x00, 3 * sizeof(int16_t));
+            lsm6dsox_fifo_out_raw_get(&ag_ctx, data_raw_magnetic.u8bit);
+            magnetic_mG[0] =
+              lis2mdl_from_lsb_to_mgauss(data_raw_magnetic.i16bit[0]);
+            magnetic_mG[1] =
+              lis2mdl_from_lsb_to_mgauss(data_raw_magnetic.i16bit[1]);
+            magnetic_mG[2] =
+              lis2mdl_from_lsb_to_mgauss(data_raw_magnetic.i16bit[2]);
+            sprintf((char *)tx_buffer,
+                    "Mag [mG]:%4.2f\t%4.2f\t%4.2f T %u.%u ms\r\n",
+                    magnetic_mG[0], magnetic_mG[1], magnetic_mG[2],
+                    (unsigned int)(timestamp / 1000ULL),
+                    (unsigned int)(timestamp % 1000ULL));
             tx_com(tx_buffer, strlen((char const *)tx_buffer));
+            break;
+
+          case LSM6DSOX_TIMESTAMP_TAG:
+            lsm6dsox_fifo_out_raw_get(&ag_ctx, ts_tick.byte);
+            timestamp = (unsigned int)lsm6dsox_from_lsb_to_nsec(ts_tick.reg.tick);
             break;
 
           default:
@@ -298,15 +362,21 @@ void lsm6dsox_hub_fifo_lps22hh(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t Reg,
-                              uint8_t *Bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1) {
-    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_H, Reg,
-                      I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
-  }
-
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_L, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_write(handle,  LSM6DSOX_I2C_ADD_L & 0xFE, reg, bufp, len);
+#endif
   return 0;
 }
 
@@ -320,26 +390,22 @@ static int32_t platform_write(void *handle, uint8_t Reg,
  * @param  len       number of consecutive register to read
  *
  */
-static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1) {
-    HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_H, Reg,
-                     I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
-  }
-
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_L, reg,
+                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_read(handle, LSM6DSOX_I2C_ADD_L & 0xFE, reg, bufp, len);
+#endif
   return 0;
-}
-
-/*
- * @brief  platform specific delay (platform dependent)
- *
- * @param  ms        delay in ms
- *
- */
-static void platform_delay(uint32_t ms)
-{
-  HAL_Delay(ms);
 }
 
 /*
@@ -351,11 +417,46 @@ static void platform_delay(uint32_t ms)
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  HAL_UART_Transmit( &huart2, tx_buffer, len, 1000 );
+#if defined(NUCLEO_F411RE)
+  HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  CDC_Transmit_FS(tx_buffer, len);
+#elif defined(SPC584B_DIS)
+  sd_lld_write(&SD2, tx_buffer, len);
+#endif
 }
 
 /*
- * @brief  Write lps22hh device register (used by configuration functions)
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
+  HAL_Delay(ms);
+#elif defined(SPC584B_DIS)
+  osalThreadDelayMilliseconds(ms);
+#endif
+}
+
+/*
+ * @brief  platform specific initialization (platform dependent)
+ */
+static void platform_init(void)
+{
+#if defined(STEVAL_MKI109V3)
+  TIM3->CCR1 = PWM_3V3;
+  TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  HAL_Delay(1000);
+#endif
+}
+
+/*
+ * @brief  Write lsm2mdl device register (used by configuration functions)
  *
  * @param  handle    customizable argument. In this examples is used in
  *                   order to select the correct sensor bus handler.
@@ -364,17 +465,17 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t lsm6dsox_write_lps22hh_cx(void *ctx, uint8_t reg,
+static int32_t lsm6dsox_write_lis2mdl_cx(void *ctx, uint8_t reg,
                                          uint8_t *data,
                                          uint16_t len)
 {
-  axis3bit16_t data_raw_acceleration;
+  int16_t data_raw_acceleration[3];
   int32_t ret;
   uint8_t drdy;
   lsm6dsox_status_master_t master_status;
   lsm6dsox_sh_cfg_write_t sh_cfg_write;
-  /* Configure Sensor Hub to read LPS22HH. */
-  sh_cfg_write.slv0_add = (LPS22HH_I2C_ADD_H & 0xFEU) >>
+  /* Configure Sensor Hub to read LIS2MDL. */
+  sh_cfg_write.slv0_add = (LIS2MDL_I2C_ADD & 0xFEU) >>
                           1; /* 7bit I2C address */
   sh_cfg_write.slv0_subadd = reg,
   sh_cfg_write.slv0_data = *data,
@@ -386,15 +487,15 @@ static int32_t lsm6dsox_write_lps22hh_cx(void *ctx, uint8_t reg,
   /* Enable accelerometer to trigger Sensor Hub operation. */
   lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_104Hz);
   /* Wait Sensor Hub operation flag set. */
-  lsm6dsox_acceleration_raw_get(&ag_ctx, data_raw_acceleration.u8bit);
+  lsm6dsox_acceleration_raw_get(&ag_ctx, data_raw_acceleration);
 
   do {
-    HAL_Delay(20);
+    platform_delay(20);
     lsm6dsox_xl_flag_data_ready_get(&ag_ctx, &drdy);
   } while (!drdy);
 
   do {
-    HAL_Delay(20);
+    platform_delay(20);
     lsm6dsox_sh_status_get(&ag_ctx, &master_status);
   } while (!master_status.sens_hub_endop);
 
@@ -405,7 +506,7 @@ static int32_t lsm6dsox_write_lps22hh_cx(void *ctx, uint8_t reg,
 }
 
 /*
- * @brief  Read lps22hh device register (used by configuration functions)
+ * @brief  Read lsm2mdl device register (used by configuration functions)
  *
  * @param  handle    customizable argument. In this examples is used in
  *                   order to select the correct sensor bus handler.
@@ -414,19 +515,19 @@ static int32_t lsm6dsox_write_lps22hh_cx(void *ctx, uint8_t reg,
  * @param  len       number of consecutive register to read
  *
  */
-static int32_t lsm6dsox_read_lps22hh_cx(void *ctx, uint8_t reg,
+static int32_t lsm6dsox_read_lis2mdl_cx(void *ctx, uint8_t reg,
                                         uint8_t *data,
                                         uint16_t len)
 {
   lsm6dsox_sh_cfg_read_t sh_cfg_read;
-  axis3bit16_t data_raw_acceleration;
+  int16_t data_raw_acceleration[3];
   int32_t ret;
   uint8_t drdy;
   lsm6dsox_status_master_t master_status;
   /* Disable accelerometer. */
   lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_OFF);
-  /* Configure Sensor Hub to read LPS22HH. */
-  sh_cfg_read.slv_add = (LPS22HH_I2C_ADD_H & 0xFEU) >>
+  /* Configure Sensor Hub to read LIS2MDL. */
+  sh_cfg_read.slv_add = (LIS2MDL_I2C_ADD & 0xFEU) >>
                         1; /* 7bit I2C address */
   sh_cfg_read.slv_subadd = reg;
   sh_cfg_read.slv_len = len;
@@ -437,15 +538,15 @@ static int32_t lsm6dsox_read_lps22hh_cx(void *ctx, uint8_t reg,
   /* Enable accelerometer to trigger Sensor Hub operation. */
   lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_104Hz);
   /* Wait Sensor Hub operation flag set. */
-  lsm6dsox_acceleration_raw_get(&ag_ctx, data_raw_acceleration.u8bit);
+  lsm6dsox_acceleration_raw_get(&ag_ctx, data_raw_acceleration);
 
   do {
-    HAL_Delay(20);
+    platform_delay(20);
     lsm6dsox_xl_flag_data_ready_get(&ag_ctx, &drdy);
   } while (!drdy);
 
   do {
-    //HAL_Delay(20);
+    //platform_delay(20);
     lsm6dsox_sh_status_get(&ag_ctx, &master_status);
   } while (!master_status.sens_hub_endop);
 

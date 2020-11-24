@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * @file    sensor_hub_fifo_lis2mdl.c
+ * @file    sh_fifo_lis2mdl.c
  * @author  Sensor Solutions Software Team
  * @brief   This file shows how to read LIS2MDL mag connected to LSM6DSOX I2C
  *          master interface (with FIFO support).
@@ -23,14 +23,20 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - NUCLEO_F411RE + X_NUCLEO_IKS01A3 + STEVAL-MKI197V1
- *
- * and STM32CubeMX tool with STM32CubeF4 MCU Package
+ * - NUCLEO_F411RE + STEVAL-MKI217V1
+ * - STEVAL_MKI109V3 + STEVAL-MKI217V1
+ * - DISCOVERY_SPC584B + STEVAL-MKI217V1
  *
  * Used interfaces:
  *
+ * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
+ *                    - Sensor side: SPI(Default) / I2C(supported)
+ *
  * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
- *                    - I2C(Default) / SPI(supported)
+ *                    - Sensor side: I2C(Default) / SPI(supported)
+ *
+ * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -38,16 +44,60 @@
  *
  */
 
+/* STMicroelectronics evaluation boards definition
+ *
+ * Please uncomment ONLY the evaluation boards in use.
+ * If a different hardware is used please comment all
+ * following target board and redefine yours.
+ */
+
+//#define STEVAL_MKI109V3  /* little endian */
+//#define NUCLEO_F411RE    /* little endian */
+//#define SPC584B_DIS      /* big endian */
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
+
+#if defined(STEVAL_MKI109V3)
+/* MKI109V3: Define communication interface */
+#define SENSOR_BUS hspi2
+/* MKI109V3: Vdd and Vddio power supply values */
+#define PWM_3V3 915
+
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
+#define SENSOR_BUS hi2c1
+
+#elif defined(SPC584B_DIS)
+/* DISCOVERY_SPC584B: Define communication interface */
+#define SENSOR_BUS I2CD1
+
+#endif
+
 /* Includes ------------------------------------------------------------------*/
-#include <lsm6dsox_reg.h>
-#include <lis2mdl_reg.h>
 #include <string.h>
 #include <stdio.h>
+#include "lsm6dsox_reg.h"
+#include "lis2mdl_reg.h"
 
+#if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
-#include "i2c.h"
 #include "usart.h"
 #include "gpio.h"
+#include "i2c.h"
+
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
+#include "usbd_cdc_if.h"
+#include "gpio.h"
+#include "spi.h"
+#include "tim.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
+#endif
 
 typedef union {
   int16_t i16bit[3];
@@ -55,17 +105,12 @@ typedef union {
 } axis3bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
-#define TX_BUF_DIM                       1000
+#define    BOOT_TIME            10 //ms
+#define    TX_BUF_DIM         1000
 
 /* Private variables ---------------------------------------------------------*/
-static uint8_t tx_buffer[TX_BUF_DIM];
-
 static stmdev_ctx_t ag_ctx;
 static stmdev_ctx_t mag_ctx;
-
-static float acceleration_mg[3];
-static float angular_rate_mdps[3];
-static float magnetic_mG[3];
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -90,8 +135,9 @@ static int32_t platform_write(void *handle, uint8_t reg,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
-static void platform_delay(uint32_t ms);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
+static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
 
@@ -107,46 +153,51 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
  * Enable FIFO batching of Slave0 + ACC + Gyro samples
  * Poll for FIFO watermark interrupt and read samples
  */
-void lsm6dsox_hub_fifo_lis2mdl(void)
+void lsm6dsox_sh_fifo_lis2mdl(void)
 {
-  uint8_t whoamI, rst, wtm_flag;
-  lsm6dsox_sh_cfg_read_t sh_cfg_read;
   lsm6dsox_pin_int1_route_t int1_route;
-  axis3bit16_t data_raw_magnetic;
-  axis3bit16_t data_raw_acceleration;
-  axis3bit16_t data_raw_angular_rate;
-  axis3bit16_t dummy;
+  lsm6dsox_sh_cfg_read_t sh_cfg_read;
+  lsm6dsox_fifo_tag_t reg_tag;
+  uint8_t tx_buffer[TX_BUF_DIM];
+  axis3bit16_t raw_data;
+  uint16_t num;
+  float angular_rate_mdps[3];
+  float acceleration_mg[3];
+  float magnetic_mG[3];
+  uint8_t dummy;
   /* Initialize lsm6dsox driver interface */
   ag_ctx.write_reg = platform_write;
   ag_ctx.read_reg = platform_read;
-  ag_ctx.handle = &hi2c1;
+  ag_ctx.handle = &SENSOR_BUS;
   /* Initialize lis2mdl driver interface */
   mag_ctx.read_reg = lsm6dsox_read_lis2mdl_cx;
   mag_ctx.write_reg = lsm6dsox_write_lis2mdl_cx;
-  mag_ctx.handle = &hi2c1;
+  mag_ctx.handle = &SENSOR_BUS;
+  /* Init test platform */
+  platform_init();
   /* Wait sensor boot time */
-  platform_delay(10);
+  platform_delay(BOOT_TIME);
   /* Check lsm6dsox ID. */
-  lsm6dsox_device_id_get(&ag_ctx, &whoamI);
+  lsm6dsox_device_id_get(&ag_ctx, &dummy);
 
-  if (whoamI != LSM6DSOX_ID)
+  if (dummy != LSM6DSOX_ID)
     while (1);
 
   /* Restore default configuration. */
   lsm6dsox_reset_set(&ag_ctx, PROPERTY_ENABLE);
 
   do {
-    lsm6dsox_reset_get(&ag_ctx, &rst);
-  } while (rst);
+    lsm6dsox_reset_get(&ag_ctx, &dummy);
+  } while (dummy);
 
   /* Disable I3C interface.*/
   lsm6dsox_i3c_disable_set(&ag_ctx, LSM6DSOX_I3C_DISABLE);
   /* Some hardware require to enable pull up on master I2C interface. */
   //lsm6dsox_sh_pin_mode_set(&ag_ctx, LSM6DSOX_INTERNAL_PULL_UP);
   /* Check if LIS2MDL connected to Sensor Hub. */
-  lis2mdl_device_id_get(&mag_ctx, &whoamI);
+  lis2mdl_device_id_get(&mag_ctx, &dummy);
 
-  if (whoamI != LIS2MDL_ID)
+  if (dummy != LIS2MDL_ID)
     while (1);
 
   /* Configure LIS2MDL. */
@@ -205,12 +256,11 @@ void lsm6dsox_hub_fifo_lis2mdl(void)
   lsm6dsox_gy_data_rate_set(&ag_ctx, LSM6DSOX_GY_ODR_12Hz5);
 
   while (1) {
-    uint16_t num = 0;
-    lsm6dsox_fifo_tag_t reg_tag;
+    num = 0;
     /* Read watermark flag. */
-    lsm6dsox_fifo_wtm_flag_get(&ag_ctx, &wtm_flag);
+    lsm6dsox_fifo_wtm_flag_get(&ag_ctx, &dummy);
 
-    if ( wtm_flag ) {
+    if ( dummy ) {
       /* Read number of samples in FIFO. */
       lsm6dsox_fifo_data_level_get(&ag_ctx, &num);
 
@@ -220,14 +270,14 @@ void lsm6dsox_hub_fifo_lis2mdl(void)
 
         switch (reg_tag) {
           case LSM6DSOX_XL_NC_TAG:
-            memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-            lsm6dsox_fifo_out_raw_get(&ag_ctx, data_raw_acceleration.u8bit);
+            memset(raw_data.u8bit, 0x00, 3 * sizeof(int16_t));
+            lsm6dsox_fifo_out_raw_get(&ag_ctx, raw_data.u8bit);
             acceleration_mg[0] = lsm6dsox_from_fs2_to_mg(
-                                   data_raw_acceleration.i16bit[0]);
+                                   raw_data.i16bit[0]);
             acceleration_mg[1] = lsm6dsox_from_fs2_to_mg(
-                                   data_raw_acceleration.i16bit[1]);
+                                   raw_data.i16bit[1]);
             acceleration_mg[2] = lsm6dsox_from_fs2_to_mg(
-                                   data_raw_acceleration.i16bit[2]);
+                                   raw_data.i16bit[2]);
             sprintf( (char *)tx_buffer,
                      "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                      acceleration_mg[0],
@@ -237,14 +287,14 @@ void lsm6dsox_hub_fifo_lis2mdl(void)
             break;
 
           case LSM6DSOX_GYRO_NC_TAG:
-            memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
-            lsm6dsox_fifo_out_raw_get(&ag_ctx, data_raw_angular_rate.u8bit);
+            memset(raw_data.u8bit, 0x00, 3 * sizeof(int16_t));
+            lsm6dsox_fifo_out_raw_get(&ag_ctx, raw_data.u8bit);
             angular_rate_mdps[0] = lsm6dsox_from_fs2000_to_mdps(
-                                     data_raw_angular_rate.i16bit[0]);
+                                     raw_data.i16bit[0]);
             angular_rate_mdps[1] = lsm6dsox_from_fs2000_to_mdps(
-                                     data_raw_angular_rate.i16bit[1]);
+                                     raw_data.i16bit[1]);
             angular_rate_mdps[2] = lsm6dsox_from_fs2000_to_mdps(
-                                     data_raw_angular_rate.i16bit[2]);
+                                     raw_data.i16bit[2]);
             sprintf( (char *)tx_buffer,
                      "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
                      angular_rate_mdps[0],
@@ -254,14 +304,14 @@ void lsm6dsox_hub_fifo_lis2mdl(void)
             break;
 
           case LSM6DSOX_SENSORHUB_SLAVE0_TAG:
-            memset(data_raw_magnetic.u8bit, 0x00, 3 * sizeof(int16_t));
-            lsm6dsox_fifo_out_raw_get(&ag_ctx, data_raw_magnetic.u8bit);
+            memset(raw_data.u8bit, 0x00, 3 * sizeof(int16_t));
+            lsm6dsox_fifo_out_raw_get(&ag_ctx, raw_data.u8bit);
             magnetic_mG[0] = lis2mdl_from_lsb_to_mgauss(
-                               data_raw_magnetic.i16bit[0]);
+                               raw_data.i16bit[0]);
             magnetic_mG[1] = lis2mdl_from_lsb_to_mgauss(
-                               data_raw_magnetic.i16bit[1]);
+                               raw_data.i16bit[1]);
             magnetic_mG[2] = lis2mdl_from_lsb_to_mgauss(
-                               data_raw_magnetic.i16bit[2]);
+                               raw_data.i16bit[2]);
             sprintf( (char *)tx_buffer, "Mag [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
                      magnetic_mG[0],
                      magnetic_mG[1],
@@ -271,8 +321,8 @@ void lsm6dsox_hub_fifo_lis2mdl(void)
 
           default:
             /* Flush unused samples. */
-            memset(dummy.u8bit, 0x00, 3 * sizeof(int16_t));
-            lsm6dsox_fifo_out_raw_get(&ag_ctx, dummy.u8bit);
+            memset(raw_data.u8bit, 0x00, 3 * sizeof(int16_t));
+            lsm6dsox_fifo_out_raw_get(&ag_ctx, raw_data.u8bit);
             break;
         }
       }
@@ -290,15 +340,21 @@ void lsm6dsox_hub_fifo_lis2mdl(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t Reg,
-                              uint8_t *Bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1) {
-    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_L, Reg,
-                      I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
-  }
-
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_L, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_write(handle,  LSM6DSOX_I2C_ADD_L & 0xFE, reg, bufp, len);
+#endif
   return 0;
 }
 
@@ -312,26 +368,22 @@ static int32_t platform_write(void *handle, uint8_t Reg,
  * @param  len       number of consecutive register to read
  *
  */
-static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1) {
-    HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_L, Reg,
-                     I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
-  }
-
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_L, reg,
+                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_read(handle, LSM6DSOX_I2C_ADD_L & 0xFE, reg, bufp, len);
+#endif
   return 0;
-}
-
-/*
- * @brief  platform specific delay (platform dependent)
- *
- * @param  ms        delay in ms
- *
- */
-static void platform_delay(uint32_t ms)
-{
-  HAL_Delay(ms);
 }
 
 /*
@@ -343,7 +395,42 @@ static void platform_delay(uint32_t ms)
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  HAL_UART_Transmit( &huart2, tx_buffer, len, 1000 );
+#if defined(NUCLEO_F411RE)
+  HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  CDC_Transmit_FS(tx_buffer, len);
+#elif defined(SPC584B_DIS)
+  sd_lld_write(&SD2, tx_buffer, len);
+#endif
+}
+
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
+  HAL_Delay(ms);
+#elif defined(SPC584B_DIS)
+  osalThreadDelayMilliseconds(ms);
+#endif
+}
+
+/*
+ * @brief  platform specific initialization (platform dependent)
+ */
+static void platform_init(void)
+{
+#if defined(STEVAL_MKI109V3)
+  TIM3->CCR1 = PWM_3V3;
+  TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  HAL_Delay(1000);
+#endif
 }
 
 /*
@@ -360,7 +447,7 @@ static int32_t lsm6dsox_write_lis2mdl_cx(void *ctx, uint8_t reg,
                                          uint8_t *data,
                                          uint16_t len)
 {
-  axis3bit16_t data_raw_acceleration;
+  int16_t data_raw_acceleration[3];
   int32_t ret;
   uint8_t drdy;
   lsm6dsox_status_master_t master_status;
@@ -378,15 +465,15 @@ static int32_t lsm6dsox_write_lis2mdl_cx(void *ctx, uint8_t reg,
   /* Enable accelerometer to trigger Sensor Hub operation. */
   lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_104Hz);
   /* Wait Sensor Hub operation flag set. */
-  lsm6dsox_acceleration_raw_get(&ag_ctx, data_raw_acceleration.u8bit);
+  lsm6dsox_acceleration_raw_get(&ag_ctx, data_raw_acceleration);
 
   do {
-    HAL_Delay(20);
+    platform_delay(20);
     lsm6dsox_xl_flag_data_ready_get(&ag_ctx, &drdy);
   } while (!drdy);
 
   do {
-    HAL_Delay(20);
+    platform_delay(20);
     lsm6dsox_sh_status_get(&ag_ctx, &master_status);
   } while (!master_status.sens_hub_endop);
 
@@ -411,7 +498,7 @@ static int32_t lsm6dsox_read_lis2mdl_cx(void *ctx, uint8_t reg,
                                         uint16_t len)
 {
   lsm6dsox_sh_cfg_read_t sh_cfg_read;
-  axis3bit16_t data_raw_acceleration;
+  int16_t data_raw_acceleration[3];
   int32_t ret;
   uint8_t drdy;
   lsm6dsox_status_master_t master_status;
@@ -429,15 +516,15 @@ static int32_t lsm6dsox_read_lis2mdl_cx(void *ctx, uint8_t reg,
   /* Enable accelerometer to trigger Sensor Hub operation. */
   lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_104Hz);
   /* Wait Sensor Hub operation flag set. */
-  lsm6dsox_acceleration_raw_get(&ag_ctx, data_raw_acceleration.u8bit);
+  lsm6dsox_acceleration_raw_get(&ag_ctx, data_raw_acceleration);
 
   do {
-    HAL_Delay(20);
+    platform_delay(20);
     lsm6dsox_xl_flag_data_ready_get(&ag_ctx, &drdy);
   } while (!drdy);
 
   do {
-    //HAL_Delay(20);
+    //platform_delay(20);
     lsm6dsox_sh_status_get(&ag_ctx, &master_status);
   } while (!master_status.sens_hub_endop);
 
@@ -449,12 +536,3 @@ static int32_t lsm6dsox_read_lis2mdl_cx(void *ctx, uint8_t reg,
                                 len);
   return ret;
 }
-
-
-
-
-
-
-
-
-

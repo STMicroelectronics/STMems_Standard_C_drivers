@@ -1,11 +1,9 @@
 /*
  ******************************************************************************
- * @file    mlc.c
- * @author  Sensors Software Solution Team
- * @brief   The purpose of this example is to show how use the device
- *          Machine Learning Core (MLC) starting from an ".h" file
- *          generated through with the tool "Machine Learning Core"
- *          of Unico GUI.
+ * @file    sensor_mlc_lis2mdl.c
+ * @author  Sensor Solutions Software Team
+ * @brief   This file shows how to use MLC with LIS2MDL magnetometer
+ *          master interface (with FIFO support).
  *
  ******************************************************************************
  * @attention
@@ -32,9 +30,9 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3 + STEVAL-MKI197V1
- * - NUCLEO_F411RE + STEVAL-MKI197V1
- * - DISCOVERY_SPC584B + STEVAL-MKI197V1
+ * - STEVAL_MKI109V3 + STEVAL-MKI217V1
+ * - NUCLEO_F411RE + STEVAL-MKI217V1
+ * - DISCOVERY_SPC584B + STEVAL-MKI217V1
  *
  * Used interfaces:
  *
@@ -89,8 +87,9 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "lsm6dsox_vibration_monitoring.h"
+#include "MLC_configuration.h"
 #include "lsm6dsox_reg.h"
+#include "lis2mdl_reg.h"
 
 #if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
@@ -110,15 +109,26 @@
 #endif
 
 /* Private macro -------------------------------------------------------------*/
+#define TX_BUF_DIM            1000
 #define    BOOT_TIME            10 //ms
 
 /* Private variables ---------------------------------------------------------*/
-static uint8_t whoamI, rst;
-static uint8_t tx_buffer[1000];
+static uint8_t tx_buffer[TX_BUF_DIM];
+
+static stmdev_ctx_t ag_ctx;
+static stmdev_ctx_t mag_ctx;
 
 /* Extern variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
+
+static int32_t lsm6dsox_write_lis2mdl_cx(void *ctx, uint8_t reg,
+                                         uint8_t *data,
+                                         uint16_t len);
+
+static int32_t lsm6dsox_read_lis2mdl_cx(void *ctx, uint8_t reg,
+                                        uint8_t *data,
+                                        uint16_t len);
 
 /*
  *   WARNING:
@@ -136,87 +146,88 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void lsm6dsox_mlc(void)
+void lsm6dsox_sh_lis2mdl_mlc(void)
 {
-  /* Variable declaration */
   lsm6dsox_pin_int1_route_t pin_int1_route;
+  lsm6dsox_sh_cfg_read_t sh_cfg_read;
   lsm6dsox_all_sources_t status;
-  lsm6dsox_emb_sens_t emb_sens;
-  stmdev_ctx_t dev_ctx;
+  uint8_t whoamI, rst, i;
   uint8_t mlc_out[8];
-  uint32_t i;
-  /* Initialize mems driver interface */
-  dev_ctx.write_reg = platform_write;
-  dev_ctx.read_reg  = platform_read;
-  dev_ctx.handle    = &SENSOR_BUS;
+  /* Initialize lsm6dsox driver interface */
+  ag_ctx.write_reg = platform_write;
+  ag_ctx.read_reg = platform_read;
+  ag_ctx.handle = &SENSOR_BUS;
+  /* Initialize lis2mdl driver interface */
+  mag_ctx.read_reg = lsm6dsox_read_lis2mdl_cx;
+  mag_ctx.write_reg = lsm6dsox_write_lis2mdl_cx;
+  mag_ctx.handle = &SENSOR_BUS;
   /* Init test platform */
   platform_init();
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-  /* Check device ID */
-  lsm6dsox_device_id_get(&dev_ctx, &whoamI);
+  /* Check lsm6dsox ID. */
+  lsm6dsox_device_id_get(&ag_ctx, &whoamI);
 
   if (whoamI != LSM6DSOX_ID)
     while (1);
 
-  /* Restore default configuration */
-  lsm6dsox_reset_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Restore default configuration. */
+  lsm6dsox_reset_set(&ag_ctx, PROPERTY_ENABLE);
 
   do {
-    lsm6dsox_reset_get(&dev_ctx, &rst);
+    lsm6dsox_reset_get(&ag_ctx, &rst);
   } while (rst);
 
+  /* Disable I3C interface.*/
+  lsm6dsox_i3c_disable_set(&ag_ctx, LSM6DSOX_I3C_DISABLE);
+  /* Turn off Sensors */
+  lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_OFF);
+  lsm6dsox_gy_data_rate_set(&ag_ctx, LSM6DSOX_GY_ODR_OFF);
+  /* Some hardware require to enable pull up on master I2C interface. */
+  //lsm6dsox_sh_pin_mode_set(&ag_ctx, LSM6DSOX_INTERNAL_PULL_UP);
+  /* Check if LIS2MDL connected to Sensor Hub. */
+  lis2mdl_device_id_get(&mag_ctx, &whoamI);
+
+  if (whoamI != LIS2MDL_ID)
+    while (1);
+
+  /* Configure LIS2MDL. */
+  lis2mdl_block_data_update_set(&mag_ctx, PROPERTY_ENABLE);
+  lis2mdl_offset_temp_comp_set(&mag_ctx, PROPERTY_ENABLE);
+  lis2mdl_operating_mode_set(&mag_ctx, LIS2MDL_CONTINUOUS_MODE);
+  lis2mdl_data_rate_set(&mag_ctx, LIS2MDL_ODR_20Hz);
+  /*
+   * Prepare sensor hub to read data from external Slave0 continuously
+   */
+  lsm6dsox_sh_data_rate_set(&ag_ctx, LSM6DSOX_SH_ODR_26Hz);
+  sh_cfg_read.slv_add = (LIS2MDL_I2C_ADD & 0xFEU) >>
+                        1; /* 7bit I2C address */
+  sh_cfg_read.slv_subadd = LIS2MDL_OUTX_L_REG;
+  sh_cfg_read.slv_len = 6;
+  lsm6dsox_sh_slv0_cfg_read(&ag_ctx, &sh_cfg_read);
+  /* Configure Sensor Hub to read one slave. */
+  lsm6dsox_sh_slave_connected_set(&ag_ctx, LSM6DSOX_SLV_0);
+  /* Enable I2C Master. */
+  lsm6dsox_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
+  /* Route signals on interrupt pin 1 */
+  lsm6dsox_pin_int1_route_get(&ag_ctx, &pin_int1_route);
+  pin_int1_route.mlc1 = PROPERTY_ENABLE;
+  lsm6dsox_pin_int1_route_set(&ag_ctx, pin_int1_route);
+
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(lsm6dsox_vibration_monitoring) /
+  for ( i = 0; i < (sizeof(MLC_configuration) /
                     sizeof(ucf_line_t) ); i++ ) {
-    lsm6dsox_write_reg(&dev_ctx, lsm6dsox_vibration_monitoring[i].address,
-                       (uint8_t *)&lsm6dsox_vibration_monitoring[i].data, 1);
+    lsm6dsox_write_reg(&ag_ctx, MLC_configuration[i].address,
+                       (uint8_t *)&MLC_configuration[i].data, 1);
   }
 
   /* End Machine Learning Core configuration */
-  /* At this point the device is ready to run but if you need you can also
-   * interact with the device but taking in account the MLC configuration.
-   *
-   * For more information about Machine Learning Core tool please refer
-   * to AN5259 "LSM6DSOX: Machine Learning Core".
-   */
-  /* Turn off embedded features */
-  lsm6dsox_embedded_sens_get(&dev_ctx, &emb_sens);
-  lsm6dsox_embedded_sens_off(&dev_ctx);
-  platform_delay(10);
-  /* Turn off Sensors */
-  lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_OFF);
-  lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_OFF);
-  /* Disable I3C interface */
-  lsm6dsox_i3c_disable_set(&dev_ctx, LSM6DSOX_I3C_DISABLE);
-  /* Enable Block Data Update */
-  lsm6dsox_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-  /* Set full scale */
-  lsm6dsox_xl_full_scale_set(&dev_ctx, LSM6DSOX_4g);
-  lsm6dsox_gy_full_scale_set(&dev_ctx, LSM6DSOX_2000dps);
-  /* Route signals on interrupt pin 1 */
-  lsm6dsox_pin_int1_route_get(&dev_ctx, &pin_int1_route);
-  pin_int1_route.mlc1 = PROPERTY_ENABLE;
-  lsm6dsox_pin_int1_route_set(&dev_ctx, pin_int1_route);
-  /* Configure interrupt pin mode notification */
-  lsm6dsox_int_notification_set(&dev_ctx,
-                                LSM6DSOX_BASE_PULSED_EMB_LATCHED);
-  /* Enable embedded features */
-  lsm6dsox_embedded_sens_set(&dev_ctx, &emb_sens);
-  /* Set Output Data Rate.
-   * Selected data rate have to be equal or greater with respect
-   * with MLC data rate.
-   */
-  lsm6dsox_xl_data_rate_set(&dev_ctx, LSM6DSOX_XL_ODR_26Hz);
-  lsm6dsox_gy_data_rate_set(&dev_ctx, LSM6DSOX_GY_ODR_OFF);
 
-  /* Main loop */
   while (1) {
-    /* Read interrupt source registers in polling mode (no int) */
-    lsm6dsox_all_sources_get(&dev_ctx, &status);
+    lsm6dsox_all_sources_get(&ag_ctx, &status);
 
     if (status.mlc1) {
-      lsm6dsox_mlc_out_get(&dev_ctx, mlc_out);
+      lsm6dsox_mlc_out_get(&ag_ctx, mlc_out);
       sprintf((char *)tx_buffer, "Detect MLC interrupt code: %02X\r\n",
               mlc_out[0]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
@@ -326,3 +337,116 @@ static void platform_init(void)
   HAL_Delay(1000);
 #endif
 }
+
+/*
+ * @brief  Write lsm2mdl device register (used by configuration functions)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to write
+ * @param  bufp      pointer to data to write in register reg
+ * @param  len       number of consecutive register to write
+ *
+ */
+static int32_t lsm6dsox_write_lis2mdl_cx(void *ctx, uint8_t reg,
+                                         uint8_t *data,
+                                         uint16_t len)
+{
+  int16_t data_raw_acceleration[3];
+  int32_t ret;
+  uint8_t drdy;
+  lsm6dsox_status_master_t master_status;
+  lsm6dsox_sh_cfg_write_t sh_cfg_write;
+  /* Configure Sensor Hub to read LIS2MDL. */
+  sh_cfg_write.slv0_add = (LIS2MDL_I2C_ADD & 0xFEU) >>
+                          1; /* 7bit I2C address */
+  sh_cfg_write.slv0_subadd = reg,
+  sh_cfg_write.slv0_data = *data,
+  ret = lsm6dsox_sh_cfg_write(&ag_ctx, &sh_cfg_write);
+  /* Disable accelerometer. */
+  lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_OFF);
+  /* Enable I2C Master. */
+  lsm6dsox_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
+  /* Enable accelerometer to trigger Sensor Hub operation. */
+  lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_104Hz);
+  /* Wait Sensor Hub operation flag set. */
+  lsm6dsox_acceleration_raw_get(&ag_ctx, data_raw_acceleration);
+
+  do {
+    HAL_Delay(20);
+    lsm6dsox_xl_flag_data_ready_get(&ag_ctx, &drdy);
+  } while (!drdy);
+
+  do {
+    HAL_Delay(20);
+    lsm6dsox_sh_status_get(&ag_ctx, &master_status);
+  } while (!master_status.sens_hub_endop);
+
+  /* Disable I2C master and XL (trigger). */
+  lsm6dsox_sh_master_set(&ag_ctx, PROPERTY_DISABLE);
+  lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_OFF);
+  return ret;
+}
+
+/*
+ * @brief  Read lsm2mdl device register (used by configuration functions)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to read
+ * @param  bufp      pointer to buffer that store the data read
+ * @param  len       number of consecutive register to read
+ *
+ */
+static int32_t lsm6dsox_read_lis2mdl_cx(void *ctx, uint8_t reg,
+                                        uint8_t *data,
+                                        uint16_t len)
+{
+  lsm6dsox_sh_cfg_read_t sh_cfg_read;
+  int16_t data_raw_acceleration[3];
+  int32_t ret;
+  uint8_t drdy;
+  lsm6dsox_status_master_t master_status;
+  /* Disable accelerometer. */
+  lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_OFF);
+  /* Configure Sensor Hub to read LIS2MDL. */
+  sh_cfg_read.slv_add = (LIS2MDL_I2C_ADD & 0xFEU) >>
+                        1; /* 7bit I2C address */
+  sh_cfg_read.slv_subadd = reg;
+  sh_cfg_read.slv_len = len;
+  ret = lsm6dsox_sh_slv0_cfg_read(&ag_ctx, &sh_cfg_read);
+  lsm6dsox_sh_slave_connected_set(&ag_ctx, LSM6DSOX_SLV_0);
+  /* Enable I2C Master and I2C master. */
+  lsm6dsox_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
+  /* Enable accelerometer to trigger Sensor Hub operation. */
+  lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_104Hz);
+  /* Wait Sensor Hub operation flag set. */
+  lsm6dsox_acceleration_raw_get(&ag_ctx, data_raw_acceleration);
+
+  do {
+    HAL_Delay(20);
+    lsm6dsox_xl_flag_data_ready_get(&ag_ctx, &drdy);
+  } while (!drdy);
+
+  do {
+    //HAL_Delay(20);
+    lsm6dsox_sh_status_get(&ag_ctx, &master_status);
+  } while (!master_status.sens_hub_endop);
+
+  /* Disable I2C master and XL(trigger). */
+  lsm6dsox_sh_master_set(&ag_ctx, PROPERTY_DISABLE);
+  lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_OFF);
+  /* Read SensorHub registers. */
+  lsm6dsox_sh_read_data_raw_get(&ag_ctx, (lsm6dsox_emb_sh_read_t *)data,
+                                len);
+  return ret;
+}
+
+
+
+
+
+
+
+
+

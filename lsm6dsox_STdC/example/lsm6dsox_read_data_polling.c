@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * @file    read_data_simple.c
+ * @file    read_data_polling.c
  * @author  Sensors Software Solution Team
  * @brief   This file shows how to get data from sensor.
  *
@@ -24,8 +24,7 @@
  *
  * - STEVAL_MKI109V3 + STEVAL-MKI197V1
  * - NUCLEO_F411RE + STEVAL-MKI197V1
- *
- * and STM32CubeMX tool with STM32CubeF4 MCU Package
+ * - DISCOVERY_SPC584B + STEVAL-MKI197V1
  *
  * Used interfaces:
  *
@@ -33,7 +32,10 @@
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
  * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
- *                    - I2C(Default) / SPI(supported)
+ *                    - Sensor side: I2C(Default) / SPI(supported)
+ *
+ * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -47,53 +49,61 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-//#define STEVAL_MKI109V3
-#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+
+//#define STEVAL_MKI109V3  /* little endian */
+//#define NUCLEO_F411RE    /* little endian */
+//#define SPC584B_DIS      /* big endian */
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
-
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
+
+#elif defined(SPC584B_DIS)
+/* DISCOVERY_SPC584B: Define communication interface */
+#define SENSOR_BUS I2CD1
 
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
+#include "lsm6dsox_reg.h"
 
+#if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
-#include <lsm6dsox_reg.h>
+#include "usart.h"
 #include "gpio.h"
 #include "i2c.h"
-#if defined(STEVAL_MKI109V3)
+
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
 #include "usbd_cdc_if.h"
+#include "gpio.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-#include "usart.h"
+#include "tim.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
 #endif
 
-typedef union {
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
-typedef union {
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
-
 /* Private macro -------------------------------------------------------------*/
+#define    BOOT_TIME            10 //ms
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static axis3bit16_t data_raw_angular_rate;
-static axis1bit16_t data_raw_temperature;
+static int16_t data_raw_acceleration[3];
+static int16_t data_raw_angular_rate[3];
+static int16_t data_raw_temperature;
 static float acceleration_mg[3];
 static float angular_rate_mdps[3];
 static float temperature_degC;
@@ -120,17 +130,17 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void lsm6dsox_read_data_simple(void)
+void lsm6dsox_read_data_polling(void)
 {
   stmdev_ctx_t dev_ctx;
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
   /* Init test platform */
   platform_init();
   /* Wait sensor boot time */
-  platform_delay(10);
+  platform_delay(BOOT_TIME);
   /* Check device ID */
   lsm6dsox_device_id_get(&dev_ctx, &whoamI);
 
@@ -154,9 +164,7 @@ void lsm6dsox_read_data_simple(void)
   /* Set full scale */
   lsm6dsox_xl_full_scale_set(&dev_ctx, LSM6DSOX_2g);
   lsm6dsox_gy_full_scale_set(&dev_ctx, LSM6DSOX_2000dps);
-  /*
-   * Configure filtering chain(No aux interface)
-   *
+  /* Configure filtering chain(No aux interface)
    * Accelerometer - LPF1 + LPF2 path
    */
   lsm6dsox_xl_hp_path_on_out_set(&dev_ctx, LSM6DSOX_LP_ODR_DIV_100);
@@ -170,14 +178,14 @@ void lsm6dsox_read_data_simple(void)
 
     if (reg) {
       /* Read acceleration field data */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dsox_acceleration_raw_get(&dev_ctx, data_raw_acceleration.u8bit);
+      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
+      lsm6dsox_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
       acceleration_mg[0] =
-        lsm6dsox_from_fs2_to_mg(data_raw_acceleration.i16bit[0]);
+        lsm6dsox_from_fs2_to_mg(data_raw_acceleration[0]);
       acceleration_mg[1] =
-        lsm6dsox_from_fs2_to_mg(data_raw_acceleration.i16bit[1]);
+        lsm6dsox_from_fs2_to_mg(data_raw_acceleration[1]);
       acceleration_mg[2] =
-        lsm6dsox_from_fs2_to_mg(data_raw_acceleration.i16bit[2]);
+        lsm6dsox_from_fs2_to_mg(data_raw_acceleration[2]);
       sprintf((char *)tx_buffer,
               "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
@@ -188,14 +196,14 @@ void lsm6dsox_read_data_simple(void)
 
     if (reg) {
       /* Read angular rate field data */
-      memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm6dsox_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate.u8bit);
+      memset(data_raw_angular_rate, 0x00, 3 * sizeof(int16_t));
+      lsm6dsox_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate);
       angular_rate_mdps[0] =
-        lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[0]);
+        lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate[0]);
       angular_rate_mdps[1] =
-        lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[1]);
+        lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate[1]);
       angular_rate_mdps[2] =
-        lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[2]);
+        lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate[2]);
       sprintf((char *)tx_buffer,
               "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
               angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
@@ -206,10 +214,10 @@ void lsm6dsox_read_data_simple(void)
 
     if (reg) {
       /* Read temperature data */
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
-      lsm6dsox_temperature_raw_get(&dev_ctx, data_raw_temperature.u8bit);
+      memset(&data_raw_temperature, 0x00, sizeof(int16_t));
+      lsm6dsox_temperature_raw_get(&dev_ctx, &data_raw_temperature);
       temperature_degC = lsm6dsox_from_lsb_to_celsius(
-                           data_raw_temperature.i16bit);
+                           data_raw_temperature);
       sprintf((char *)tx_buffer,
               "Temperature [degC]:%6.2f\r\n", temperature_degC);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
@@ -231,20 +239,16 @@ static int32_t platform_write(void *handle, uint8_t reg,
                               uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1) {
-    HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_L, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-
-#ifdef STEVAL_MKI109V3
-
-  else if (handle == &hspi2) {
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
-
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Write(handle, LSM6DSOX_I2C_ADD_L, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_write(handle,  LSM6DSOX_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
@@ -262,28 +266,23 @@ static int32_t platform_write(void *handle, uint8_t reg,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1) {
-    HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_L, reg,
-                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-
-#ifdef STEVAL_MKI109V3
-
-  else if (handle == &hspi2) {
-    /* Read command */
-    reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Receive(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
-
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Read(handle, LSM6DSOX_I2C_ADD_L, reg,
+                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_read(handle, LSM6DSOX_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
 
 /*
- * @brief  Write generic device register (platform dependent)
+ * @brief  platform specific outputs on terminal (platform dependent)
  *
  * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
@@ -291,11 +290,12 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-#ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#if defined(NUCLEO_F411RE)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-#endif
-#ifdef STEVAL_MKI109V3
+#elif defined(STEVAL_MKI109V3)
   CDC_Transmit_FS(tx_buffer, len);
+#elif defined(SPC584B_DIS)
+  sd_lld_write(&SD2, tx_buffer, len);
 #endif
 }
 
@@ -307,7 +307,11 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
+#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
   HAL_Delay(ms);
+#elif defined(SPC584B_DIS)
+  osalThreadDelayMilliseconds(ms);
+#endif
 }
 
 /*
@@ -315,7 +319,7 @@ static void platform_delay(uint32_t ms)
  */
 static void platform_init(void)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
