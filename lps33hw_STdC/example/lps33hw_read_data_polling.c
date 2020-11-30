@@ -26,8 +26,6 @@
  * - NUCLEO_F411RE + X_STEVAL-MKI183V1
  * - DISCOVERY_SPC584B + STEVAL-MKI183V1
  *
- * and STM32CubeMX tool with STM32CubeF4 MCU Package
- *
  * Used interfaces:
  *
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
@@ -53,7 +51,7 @@
  */
 
 //#define STEVAL_MKI109V3  /* little endian */
-#define NUCLEO_F411RE    /* little endian */
+//#define NUCLEO_F411RE    /* little endian */
 //#define SPC584B_DIS      /* big endian */
 
 /* ATTENTION: By default the driver is little endian. If you need switch
@@ -93,6 +91,7 @@
 #include "usbd_cdc_if.h"
 #include "gpio.h"
 #include "spi.h"
+#include "tim.h"
 
 #elif defined(SPC584B_DIS)
 #include "components.h"
@@ -124,17 +123,20 @@ static int32_t platform_write(void *handle, uint8_t reg,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
 
-void example_main(void)
+void lps33hw_read_data_polling(void)
 {
   /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
+  /* Initialize platform specific hardware */
+  platform_init();
   /* Check device ID */
   whoamI = 0;
   lps33hw_device_id_get(&dev_ctx, &whoamI);
