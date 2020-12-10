@@ -7019,8 +7019,8 @@ int32_t lsm6dsm_tilt_src_set(stmdev_ctx_t *ctx,
   ret = lsm6dsm_mem_bank_set(ctx, LSM6DSM_BANK_B);
 
   if (ret == 0) {
-    ret = lsm6dsm_read_reg(ctx, LSM6DSM_A_WRIST_TILT_MASK,
-                           (uint8_t *) val, 1);
+    ret = lsm6dsm_write_reg(ctx, LSM6DSM_A_WRIST_TILT_MASK,
+                            (uint8_t *) val, 1);
 
     if (ret == 0) {
       ret = lsm6dsm_mem_bank_set(ctx, LSM6DSM_USER_BANK);
