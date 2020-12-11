@@ -1648,6 +1648,8 @@ int32_t lsm6dsrx_number_of_steps_get(stmdev_ctx_t *ctx, uint16_t *val)
 
   if (ret == 0) {
     ret = lsm6dsrx_read_reg(ctx, LSM6DSRX_STEP_COUNTER_L, buff, 2);
+    *val = buff[1];
+    *val = (*val * 256U) +  buff[0];
   }
 
   if (ret == 0) {
