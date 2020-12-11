@@ -27,8 +27,6 @@
  * - NUCLEO_F411RE + STEVAL-MKI195V1
  * - DISCOVERY_SPC584B + STEVAL-MKI195V1
  *
- * and STM32CubeMX tool with STM32CubeF4 MCU Package
- *
  * Used interfaces:
  *
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)

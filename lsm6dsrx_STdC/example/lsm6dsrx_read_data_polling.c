@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    lsm6dsrx_read_data_polling.c
+ * @file    _read_data_polling.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show how to get data from sensor.
  *
  ******************************************************************************
  * @attention
@@ -25,8 +25,6 @@
  * - STEVAL_MKI109V3 + STEVAL-MKI195V1
  * - NUCLEO_F411RE + STEVAL-MKI195V1
  * - DISCOVERY_SPC584B + STEVAL-MKI195V1
- *
- * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
  * Used interfaces:
  *
@@ -80,7 +78,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include <lsm6dsrx_reg.h>
+#include "lsm6dsrx_reg.h"
 
 #if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
