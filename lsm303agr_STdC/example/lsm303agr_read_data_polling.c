@@ -1,7 +1,7 @@
 /*
  ******************************************************************************
  * @file    read_data_polling.c
- * @author  MEMS Software Solution Team
+ * @author  Sensors Software Solution Team
  * @brief   This file shows how to extract data from the sensor in
  *          polling mode.
  *
@@ -24,9 +24,8 @@
  * evaluation boards:
  *
  * - STEVAL_MKI109V3 + STEVAL-MKI172V1
- * - NUCLEO_F411RE + STEVAL-MKI172V1
- *
- * and STM32CubeMX tool with STM32CubeF4 MCU Package
+ * - NUCLEO_F411RE + X-NUCLEO-IKS01A2
+ * - DISCOVERY_SPC584B + STEVAL-MKI173V1
  *
  * Used interfaces:
  *
@@ -34,6 +33,9 @@
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
  * NUCLEO_F411RE      - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
+ *
+ * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
  *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
@@ -48,68 +50,93 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-//#define STEVAL_MKI109V3
-#define NUCLEO_F411RE
+
+//#define STEVAL_MKI109V3  /* little endian */
+//#define NUCLEO_F411RE    /* little endian */
+//#define SPC584B_DIS      /* big endian */
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
+
+#if defined(STEVAL_MKI109V3)
+/* MKI109V3: Define communication interface */
+#define SENSOR_BUS hspi2
+/* MKI109V3: Vdd and Vddio power supply values */
+#define PWM_3V3 915
+
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
+#define SENSOR_BUS hi2c1
+
+#elif defined(SPC584B_DIS)
+/* DISCOVERY_SPC584B: Define communication interface */
+#define SENSOR_BUS I2CD1
+
+#endif
 
 /* Includes ------------------------------------------------------------------*/
 #include "lsm303agr_reg.h"
 #include <string.h>
 #include <stdio.h>
 
-//#define MKI109V2
-#define NUCLEO_F411RE
-
-#ifdef MKI109V2
-#include "stm32f1xx_hal.h"
-#include "usbd_cdc_if.h"
-#include "spi.h"
-#include "i2c.h"
-#endif
-
-#ifdef NUCLEO_F411RE
+#if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
-#include "i2c.h"
 #include "usart.h"
 #include "gpio.h"
+#include "i2c.h"
+
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
+#include "usbd_cdc_if.h"
+#include "gpio.h"
+#include "spi.h"
+#include "tim.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
 #endif
 
-typedef union {
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
-
-typedef union {
-  int16_t i16bit;
-  uint8_t u8bit[2];
-} axis1bit16_t;
-
-typedef union {
-  int32_t i32bit[3];
-  uint8_t u8bit[12];
-} axis3bit32_t;
+typedef struct {
+  void   *hbus;
+  uint8_t i2c_address;
+  GPIO_TypeDef *cs_port;
+  uint16_t cs_pin;
+} sensbus_t;
 
 /* Private macro -------------------------------------------------------------*/
-#ifdef MKI109V2
-#define CS_SPI2_GPIO_Port   CS_DEV_GPIO_Port
-#define CS_SPI2_Pin         CS_DEV_Pin
-#define CS_SPI1_GPIO_Port   CS_RF_GPIO_Port
-#define CS_SPI1_Pin         CS_RF_Pin
-#endif
-
-#ifdef NUCLEO_F411RE
-/* Add here the used pins */
-#define CS_SPI2_GPIO_Port   0
-#define CS_SPI2_Pin         0
-#define CS_SPI1_GPIO_Port   0
-#define CS_SPI1_Pin         0
-#endif
-
+#define BOOT_TIME              5 //ms
 #define TX_BUF_DIM          1000
 
 /* Private variables ---------------------------------------------------------*/
-static axis3bit16_t data_raw_acceleration;
-static axis3bit16_t data_raw_magnetic;
-static axis1bit16_t data_raw_temperature;
+#if defined(STEVAL_MKI109V3)
+static sensbus_t xl_bus  = {&SENSOR_BUS,
+                            0,
+                            CS_up_GPIO_Port,
+                            CS_up_Pin
+                           };
+static sensbus_t mag_bus = {&SENSOR_BUS,
+                            0,
+                            CS_A_up_GPIO_Port,
+                            CS_A_up_Pin
+                           };
+#elif defined(NUCLEO_F411RE) || defined(SPC584B_DIS)
+static sensbus_t xl_bus  = {&SENSOR_BUS,
+                            LSM303AGR_I2C_ADD_XL,
+                            0,
+                            0
+                           };
+static sensbus_t mag_bus = {&SENSOR_BUS,
+                            LSM303AGR_I2C_ADD_MG,
+                            0,
+                            0
+                           };
+#endif
+
+static int16_t data_raw_acceleration[3];
+static int16_t data_raw_magnetic[3];
+static int16_t data_raw_temperature;
 static float acceleration_mg[3];
 static float magnetic_mG[3];
 static float temperature_degC;
@@ -119,58 +146,20 @@ static uint8_t tx_buffer[TX_BUF_DIM];
 /* Extern variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
-
 /*
- *   Replace the functions "platform_write" and "platform_read" with your
- *   platform specific read and write function.
- *   This example use an STM32 evaluation board and CubeMX tool.
- *   In this case the "*handle" variable is useful in order to select the
- *   correct interface but the usage of "*handle" is not mandatory.
+ *   WARNING:
+ *   Functions declare in this section are defined at the end of this file
+ *   and are strictly related to the hardware platform used.
+ *
  */
-
-static int32_t platform_write(void *handle, uint8_t Reg,
-                              uint8_t *Bufp,
-                              uint16_t len)
-{
-  uint32_t i2c_add = (uint32_t)handle;
-
-  if (i2c_add == LSM303AGR_I2C_ADD_XL) {
-    /* enable auto incremented in multiple read/write commands */
-    Reg |= 0x80;
-  }
-
-  HAL_I2C_Mem_Write(&hi2c1, i2c_add, Reg,
-                    I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
-  return 0;
-}
-
-static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
-                             uint16_t len)
-{
-  uint32_t i2c_add = (uint32_t)handle;
-
-  if (i2c_add == LSM303AGR_I2C_ADD_XL) {
-    /* enable auto incremented in multiple read/write commands */
-    Reg |= 0x80;
-  }
-
-  HAL_I2C_Mem_Read(&hi2c1, (uint8_t) i2c_add, Reg,
-                   I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
-  return 0;
-}
-
-/*
- *  Function to print messages
- */
-static void tx_com( uint8_t *tx_buffer, uint16_t len )
-{
-#ifdef NUCLEO_F411RE
-  HAL_UART_Transmit( &huart2, tx_buffer, len, 1000 );
-#endif
-#ifdef MKI109V2
-  CDC_Transmit_FS( tx_buffer, len );
-#endif
-}
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
+                              uint16_t len);
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
+                             uint16_t len);
+static void tx_com(uint8_t *tx_buffer, uint16_t len);
+static void platform_delay(uint32_t ms);
+static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
 
@@ -180,11 +169,15 @@ void lsm303agr_read_data_polling(void)
   stmdev_ctx_t dev_ctx_xl;
   dev_ctx_xl.write_reg = platform_write;
   dev_ctx_xl.read_reg = platform_read;
-  dev_ctx_xl.handle = (void *)LSM303AGR_I2C_ADD_XL;
+  dev_ctx_xl.handle = (void *)&xl_bus;
   stmdev_ctx_t dev_ctx_mg;
   dev_ctx_mg.write_reg = platform_write;
   dev_ctx_mg.read_reg = platform_read;
-  dev_ctx_mg.handle = (void *)LSM303AGR_I2C_ADD_MG;
+  dev_ctx_mg.handle = (void *)&mag_bus;
+  /* Wait boot time and initialize platform specific hardware */
+  platform_init();
+  /* Wait sensor boot time */
+  platform_delay(BOOT_TIME);
   /* Check device ID */
   whoamI = 0;
   lsm303agr_xl_device_id_get(&dev_ctx_xl, &whoamI);
@@ -234,15 +227,15 @@ void lsm303agr_read_data_polling(void)
 
     if (reg.status_reg_a.zyxda) {
       /* Read accelerometer data */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
+      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
       lsm303agr_acceleration_raw_get(&dev_ctx_xl,
-                                     data_raw_acceleration.u8bit);
+                                     data_raw_acceleration);
       acceleration_mg[0] = lsm303agr_from_fs_2g_hr_to_mg(
-                             data_raw_acceleration.i16bit[0] );
+                             data_raw_acceleration[0] );
       acceleration_mg[1] = lsm303agr_from_fs_2g_hr_to_mg(
-                             data_raw_acceleration.i16bit[1] );
+                             data_raw_acceleration[1] );
       acceleration_mg[2] = lsm303agr_from_fs_2g_hr_to_mg(
-                             data_raw_acceleration.i16bit[2] );
+                             data_raw_acceleration[2] );
       sprintf((char *)tx_buffer,
               "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
@@ -253,14 +246,14 @@ void lsm303agr_read_data_polling(void)
 
     if (reg.status_reg_m.zyxda) {
       /* Read magnetic field data */
-      memset(data_raw_magnetic.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm303agr_magnetic_raw_get(&dev_ctx_mg, data_raw_magnetic.u8bit);
+      memset(data_raw_magnetic, 0x00, 3 * sizeof(int16_t));
+      lsm303agr_magnetic_raw_get(&dev_ctx_mg, data_raw_magnetic);
       magnetic_mG[0] = lsm303agr_from_lsb_to_mgauss(
-                         data_raw_magnetic.i16bit[0]);
+                         data_raw_magnetic[0]);
       magnetic_mG[1] = lsm303agr_from_lsb_to_mgauss(
-                         data_raw_magnetic.i16bit[1]);
+                         data_raw_magnetic[1]);
       magnetic_mG[2] = lsm303agr_from_lsb_to_mgauss(
-                         data_raw_magnetic.i16bit[2]);
+                         data_raw_magnetic[2]);
       sprintf((char *)tx_buffer,
               "Magnetic field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
@@ -271,15 +264,158 @@ void lsm303agr_read_data_polling(void)
 
     if (reg.byte) {
       /* Read temperature data */
-      memset(data_raw_temperature.u8bit, 0x00, sizeof(int16_t));
+      memset(&data_raw_temperature, 0x00, sizeof(int16_t));
       lsm303agr_temperature_raw_get(&dev_ctx_xl,
-                                    data_raw_temperature.u8bit);
+                                    &data_raw_temperature);
       temperature_degC = lsm303agr_from_lsb_hr_to_celsius(
-                           data_raw_temperature.i16bit );
+                           data_raw_temperature );
       sprintf((char *)tx_buffer, "Temperature [degC]:%6.2f\r\n",
               temperature_degC );
       tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
     }
   }
+}
+
+/*
+ * @brief  Write generic device register (platform dependent)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to write
+ * @param  bufp      pointer to data to write in register reg
+ * @param  len       number of consecutive register to write
+ *
+ */
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
+                              uint16_t len)
+{
+  sensbus_t *sensbus = (sensbus_t *)handle;
+#if defined(NUCLEO_F411RE)
+
+  if (sensbus->i2c_address == LSM303AGR_I2C_ADD_XL) {
+    /* enable auto incremented in multiple read/write commands */
+    reg |= 0x80;
+  }
+
+  HAL_I2C_Mem_Write(sensbus->hbus, sensbus->i2c_address, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+
+  if (sensbus->cs_pin == CS_up_Pin) {
+    /* enable auto incremented in multiple read/write commands */
+    reg |= 0x40;
+  }
+
+  HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
+  HAL_SPI_Transmit(sensbus->hbus, bufp, len, 1000);
+  HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+
+  if (sensbus->i2c_address == LSM303AGR_I2C_ADD_XL) {
+    /* enable auto incremented in multiple read/write commands */
+    reg |= 0x80;
+  }
+
+  i2c_lld_write(sensbus->hbus, sensbus->i2c_address & 0xFE, reg, bufp,
+                len);
+#endif
+  return 0;
+}
+
+/*
+ * @brief  Read generic device register (platform dependent)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to read
+ * @param  bufp      pointer to buffer that store the data read
+ * @param  len       number of consecutive register to read
+ *
+ */
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
+                             uint16_t len)
+{
+  sensbus_t *sensbus = (sensbus_t *)handle;
+#if defined(NUCLEO_F411RE)
+
+  if (sensbus->i2c_address == LSM303AGR_I2C_ADD_XL) {
+    /* enable auto incremented in multiple read/write commands */
+    reg |= 0x80;
+  }
+
+  HAL_I2C_Mem_Read(sensbus->hbus, sensbus->i2c_address, reg,
+                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  reg |= 0x80;
+
+  if (sensbus->cs_pin == CS_up_Pin) {
+    /* enable auto incremented in multiple read/write commands */
+    reg |= 0x40;
+  }
+
+  HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
+  HAL_SPI_Receive(sensbus->hbus, bufp, len, 1000);
+  HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+
+  if (sensbus->i2c_address == LSM303AGR_I2C_ADD_XL) {
+    /* enable auto incremented in multiple read/write commands */
+    reg |= 0x80;
+  }
+
+  i2c_lld_read(sensbus->hbus, sensbus->i2c_address & 0xFE, reg, bufp,
+               len);
+#endif
+  return 0;
+}
+
+/*
+ * @brief  Write generic device register (platform dependent)
+ *
+ * @param  tx_buffer     buffer to transmit
+ * @param  len           number of byte to send
+ *
+ */
+static void tx_com(uint8_t *tx_buffer, uint16_t len)
+{
+#if defined(NUCLEO_F411RE)
+  HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  CDC_Transmit_FS(tx_buffer, len);
+#elif defined(SPC584B_DIS)
+  sd_lld_write(&SD2, tx_buffer, len);
+#endif
+}
+
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
+  HAL_Delay(ms);
+#elif defined(SPC584B_DIS)
+  osalThreadDelayMilliseconds(ms);
+#endif
+}
+
+/*
+ * @brief  platform specific initialization (platform dependent)
+ */
+static void platform_init(void)
+{
+#if defined(STEVAL_MKI109V3)
+  TIM3->CCR1 = PWM_3V3;
+  TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  HAL_Delay(1000);
+#endif
 }
 
