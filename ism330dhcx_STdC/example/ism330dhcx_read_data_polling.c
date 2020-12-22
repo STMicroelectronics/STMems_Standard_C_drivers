@@ -2,7 +2,7 @@
  ******************************************************************************
  * @file    read_data_polling.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show how to get data from sensor.
  *
  ******************************************************************************
  * @attention
@@ -25,8 +25,6 @@
  * - STEVAL_MKI109V3 + STEVAL-MKI207V1
  * - NUCLEO_F411RE + STEVAL-MKI207V1
  * - DISCOVERY_SPC584B + STEVAL-MKI207V1
- *
- * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
  * Used interfaces:
  *
@@ -53,7 +51,7 @@
  */
 
 //#define STEVAL_MKI109V3  /* little endian */
-#define NUCLEO_F411RE    /* little endian */
+//#define NUCLEO_F411RE    /* little endian */
 //#define SPC584B_DIS      /* big endian */
 
 /* ATTENTION: By default the driver is little endian. If you need switch
@@ -80,7 +78,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include <ism330dhcx_reg.h>
+#include "ism330dhcx_reg.h"
 
 #if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
@@ -93,12 +91,14 @@
 #include "usbd_cdc_if.h"
 #include "gpio.h"
 #include "spi.h"
+#include "tim.h"
 
 #elif defined(SPC584B_DIS)
 #include "components.h"
 #endif
 
 /* Private macro -------------------------------------------------------------*/
+#define    BOOT_TIME          10 //ms
 
 /* Private variables ---------------------------------------------------------*/
 static int16_t data_raw_acceleration[3];
@@ -129,9 +129,8 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
-
 /* Main Example --------------------------------------------------------------*/
-void example_main_ism330dhcx(void)
+void ism330dhcx_read_data_polling(void)
 {
   stmdev_ctx_t dev_ctx;
   /* Initialize mems driver interface */
@@ -141,7 +140,7 @@ void example_main_ism330dhcx(void)
   /* Init test platform */
   platform_init();
   /* Wait sensor boot time */
-  platform_delay(10);
+  platform_delay(BOOT_TIME);
   /* Check device ID */
   ism330dhcx_device_id_get(&dev_ctx, &whoamI);
 
@@ -282,7 +281,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 }
 
 /*
- * @brief  Write generic device register (platform dependent)
+ * @brief  Send buffer to console (platform dependent)
  *
  * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
