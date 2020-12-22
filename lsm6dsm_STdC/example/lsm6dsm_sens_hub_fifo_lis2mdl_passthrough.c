@@ -69,16 +69,24 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
+#include "lsm6dsm_reg.h"
+#include "lis2mdl_reg.h"
+
+#if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
-#include <lsm6dsm_reg.h>
-#include <lis2mdl_reg.h>
+#include "usart.h"
 #include "gpio.h"
 #include "i2c.h"
-#if defined(STEVAL_MKI109V3)
+
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
 #include "usbd_cdc_if.h"
+#include "gpio.h"
 #include "spi.h"
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-#include "usart.h"
+#include "tim.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
 #endif
 
 typedef union {
@@ -129,7 +137,6 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void);
-static int32_t platform_read_int_pin(void);
 
 /*
  * Configure LIS2MDL magnetometer sensor over I2C master line (Slave0)
@@ -254,9 +261,11 @@ void example_sensor_hub_fifo_lis2mdl_passthrough_lsm6dsm(void)
   while (1) {
     uint16_t num = 0;
     uint16_t num_pattern = 0;
+    uint8_t waterm = 0;
+    /* Read LSM6DSM watermark flag */
+    lsm6dsm_fifo_wtm_flag_get(&dev_ctx, &waterm);
 
-    /* Read LSM6DSM INT pin value */
-    if (platform_read_int_pin()) {
+    if (waterm) {
       /* Read number of word in FIFO */
       lsm6dsm_fifo_data_level_get(&dev_ctx, &num);
       num_pattern = num / pattern_len;
@@ -322,20 +331,16 @@ static int32_t platform_write(void *handle, uint8_t reg,
                               uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1) {
-    HAL_I2C_Mem_Write(handle, slave_address, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-
-#ifdef STEVAL_MKI109V3
-
-  else if (handle == &hspi2) {
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
-
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Write(handle, LSM6DSM_I2C_ADD_H, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_write(handle,  LSM6DSM_I2C_ADD_H & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
@@ -353,28 +358,23 @@ static int32_t platform_write(void *handle, uint8_t reg,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1) {
-    HAL_I2C_Mem_Read(handle, slave_address, reg,
-                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-
-#ifdef STEVAL_MKI109V3
-
-  else if (handle == &hspi2) {
-    /* Read command */
-    reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Receive(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
-
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Read(handle, LSM6DSM_I2C_ADD_H, reg,
+                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_read(handle, LSM6DSM_I2C_ADD_H & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
 
 /*
- * @brief  Write generic device register (platform dependent)
+ * @brief  Send buffer to console (platform dependent)
  *
  * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
@@ -382,11 +382,12 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-#ifdef NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#if defined(NUCLEO_F411RE)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-#endif
-#ifdef STEVAL_MKI109V3
+#elif defined(STEVAL_MKI109V3)
   CDC_Transmit_FS(tx_buffer, len);
+#elif defined(SPC584B_DIS)
+  sd_lld_write(&SD2, tx_buffer, len);
 #endif
 }
 
@@ -398,7 +399,11 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
+#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
   HAL_Delay(ms);
+#elif defined(SPC584B_DIS)
+  osalThreadDelayMilliseconds(ms);
+#endif
 }
 
 /*
@@ -414,14 +419,3 @@ static void platform_init(void)
   HAL_Delay(1000);
 #endif
 }
-
-/*
- * Function to read external interrupt pin connected to LSM6DSM
- */
-static int32_t platform_read_int_pin(void)
-{
-  return HAL_GPIO_ReadPin(LSM6DSM_INT1_GPIO_PORT, LSM6DSM_INT1_PIN);
-  /* Please uncomment next line if interrupt configured on INT2 pin */
-  //return HAL_GPIO_ReadPin(LSM6DSM_INT2_GPIO_PORT, LSM6DSM_INT2_PIN);
-}
-
