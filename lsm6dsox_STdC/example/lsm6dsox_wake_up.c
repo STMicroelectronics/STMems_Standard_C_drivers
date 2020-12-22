@@ -165,7 +165,7 @@ void lsm6dsox_wake_up(void)
   /* Uncomment interrupt generation on Wake-Up INT1 pin */
   //lsm6dsox_pin_int1_route_get(&dev_ctx, &int1_route);
   //int1_route.reg.md1_cfg.int1_wu = PROPERTY_ENABLE;
-  //lsm6dsox_pin_int1_route_set(&dev_ctx, &int1_route);
+  //lsm6dsox_pin_int1_route_set(&dev_ctx, int1_route);
   /* Enable if interrupt generation on Wake-Up INT2 pin */
   lsm6dsox_pin_int2_route_get(&dev_ctx, NULL, &int2_route);
   int2_route.wake_up = PROPERTY_ENABLE;
