@@ -24,8 +24,7 @@
  *
  * - STEVAL_MKI109V3 + STEVAL-MKI196V1
  * - NUCLEO_F411RE + X_NUCLEO_IKS01A3
- *
- * and STM32CubeMX tool with STM32CubeF4 MCU Package
+ * - DISCOVERY_SPC584B + STEVAL-MKI196V1
  *
  * Used interfaces:
  *
@@ -34,6 +33,9 @@
  *
  * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
  *                    - I2C(Default) / SPI(supported)
+ *
+ * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -47,13 +49,19 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-//#define STEVAL_MKI109V3
-#define NUCLEO_F411RE
+
+//#define STEVAL_MKI109V3  /* little endian */
+//#define NUCLEO_F411RE    /* little endian */
+//#define SPC584B_DIS      /* big endian */
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
-
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
@@ -61,18 +69,36 @@
 /* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
+#elif defined(SPC584B_DIS)
+/* DISCOVERY_SPC584B: Define communication interface */
+#define SENSOR_BUS I2CD1
+
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
+#include "lsm6dso_reg.h"
+
+#if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
-#include <lsm6dso_reg.h>
+#include "usart.h"
 #include "gpio.h"
 #include "i2c.h"
-#include "usart.h"
+
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
+#include "usbd_cdc_if.h"
+#include "gpio.h"
+#include "spi.h"
+#include "tim.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
+#endif
 
 /* Private macro -------------------------------------------------------------*/
+#define    BOOT_TIME      10
 
 /* Private variables ---------------------------------------------------------*/
 static uint16_t steps;
@@ -113,7 +139,7 @@ void lsm6dso_pedometer(void)
   /* Init test platform. */
   platform_init();
   /* Wait sensor boot time */
-  platform_delay(10);
+  platform_delay(BOOT_TIME);
   /* Check device ID */
   lsm6dso_device_id_get(&ag_ctx, &whoamI);
 
@@ -160,7 +186,7 @@ void lsm6dso_pedometer(void)
 
   while (1) {
     /* Read steps */
-    lsm6dso_number_of_steps_get(&ag_ctx, (uint8_t *)&steps);
+    lsm6dso_number_of_steps_get(&ag_ctx, &steps);
     sprintf((char *)tx_buffer, "steps :%d\r\n", steps);
     tx_com(tx_buffer, strlen((char const *)tx_buffer));
     HAL_Delay(1000);
@@ -181,20 +207,16 @@ static int32_t platform_write(void *handle, uint8_t reg,
                               uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1) {
-    HAL_I2C_Mem_Write(handle, LSM6DSO_I2C_ADD_L, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-
-#ifdef STEVAL_MKI109V3
-
-  else if (handle == &hspi2) {
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
-
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Write(handle, LSM6DSO_I2C_ADD_L, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_write(handle,  LSM6DSO_I2C_ADD_H & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
@@ -212,28 +234,23 @@ static int32_t platform_write(void *handle, uint8_t reg,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1) {
-    HAL_I2C_Mem_Read(handle, LSM6DSO_I2C_ADD_L, reg,
-                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
-  }
-
-#ifdef STEVAL_MKI109V3
-
-  else if (handle == &hspi2) {
-    /* Read command */
-    reg |= 0x80;
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Receive(handle, bufp, len, 1000);
-    HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-  }
-
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Read(handle, LSM6DSO_I2C_ADD_L, reg,
+                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_read(handle, LSM6DSO_I2C_ADD_H & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
 
 /*
- * @brief  Write generic device register (platform dependent)
+ * @brief  Send buffer to console (platform dependent)
  *
  * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
@@ -241,11 +258,12 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-#ifdef NUCLEO_F411RE
+#if defined(NUCLEO_F411RE)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-#endif
-#ifdef STEVAL_MKI109V3
+#elif defined(STEVAL_MKI109V3)
   CDC_Transmit_FS(tx_buffer, len);
+#elif defined(SPC584B_DIS)
+  sd_lld_write(&SD2, tx_buffer, len);
 #endif
 }
 
@@ -257,7 +275,11 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
+#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
   HAL_Delay(ms);
+#elif defined(SPC584B_DIS)
+  osalThreadDelayMilliseconds(ms);
+#endif
 }
 
 /*

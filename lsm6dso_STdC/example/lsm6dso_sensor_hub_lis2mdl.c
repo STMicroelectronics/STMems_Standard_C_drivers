@@ -23,14 +23,20 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
+ * - STEVAL_MKI109V3 + STEVAL-MKI196V1 + STEVAL-MKI181V1
  * - NUCLEO_F411RE + X_NUCLEO_IKS01A3
- *
- * and STM32CubeMX tool with STM32CubeF4 MCU Package
+ * - DISCOVERY_SPC584B + STEVAL-MKI196V1 + STEVAL-MKI181V1
  *
  * Used interfaces:
  *
+ * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
+ *                    - Sensor side: SPI(Default) / I2C(supported)
+ *
  * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
  *                    - I2C(Default) / SPI(supported)
+ *
+ * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -38,16 +44,60 @@
  *
  */
 
+/* STMicroelectronics evaluation boards definition
+ *
+ * Please uncomment ONLY the evaluation boards in use.
+ * If a different hardware is used please comment all
+ * following target board and redefine yours.
+ */
+
+//#define STEVAL_MKI109V3  /* little endian */
+//#define NUCLEO_F411RE    /* little endian */
+//#define SPC584B_DIS      /* big endian */
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
+
+#if defined(STEVAL_MKI109V3)
+/* MKI109V3: Define communication interface */
+#define SENSOR_BUS hspi2
+/* MKI109V3: Vdd and Vddio power supply values */
+#define PWM_3V3 915
+
+#elif defined(NUCLEO_F411RE)
+/* NUCLEO_F411RE: Define communication interface */
+#define SENSOR_BUS hi2c1
+
+#elif defined(SPC584B_DIS)
+/* DISCOVERY_SPC584B: Define communication interface */
+#define SENSOR_BUS I2CD1
+
+#endif
+
 /* Includes ------------------------------------------------------------------*/
-#include <lsm6dso_reg.h>
-#include <lis2mdl_reg.h>
 #include <string.h>
 #include <stdio.h>
+#include "lsm6dso_reg.h"
+#include "lis2mdl_reg.h"
 
+#if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
-#include "i2c.h"
 #include "usart.h"
 #include "gpio.h"
+#include "i2c.h"
+
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
+#include "usbd_cdc_if.h"
+#include "gpio.h"
+#include "spi.h"
+#include "tim.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
+#endif
 
 typedef union {
   int16_t i16bit[3];
@@ -55,7 +105,8 @@ typedef union {
 } axis3bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
-#define TX_BUF_DIM                       1000
+#define    BOOT_TIME      10
+#define TX_BUF_DIM      1000
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t tx_buffer[TX_BUF_DIM];
@@ -107,7 +158,7 @@ static void platform_init(void);
  * Enable FIFO batching of Slave0 + ACC + Gyro samples
  * Poll for FIFO watermark interrupt and read samples
  */
-void lsm6dso_hub_fifo_lis2mdl(void)
+void lsm6dso_sensor_hub_fifo_lis2mdl(void)
 {
   uint8_t whoamI, rst, wtm_flag;
   lsm6dso_sh_cfg_read_t sh_cfg_read;
@@ -119,15 +170,15 @@ void lsm6dso_hub_fifo_lis2mdl(void)
   /* Initialize lsm6dso driver interface */
   ag_ctx.write_reg = platform_write;
   ag_ctx.read_reg = platform_read;
-  ag_ctx.handle = &hi2c1;
+  ag_ctx.handle = &SENSOR_BUS;
   /* Initialize lis2mdl driver interface */
   mag_ctx.read_reg = lsm6dso_read_lis2mdl_cx;
   mag_ctx.write_reg = lsm6dso_write_lis2mdl_cx;
-  mag_ctx.handle = &hi2c1;
+  mag_ctx.handle = &SENSOR_BUS;
   /* Init test platform */
   platform_init();
   /* Wait sensor boot time */
-  platform_delay(10);
+  platform_delay(BOOT_TIME);
   /* Check Connected devices. */
   /* Check lsm6dso ID. */
   lsm6dso_device_id_get(&ag_ctx, &whoamI);
@@ -288,15 +339,21 @@ void lsm6dso_hub_fifo_lis2mdl(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t Reg,
-                              uint8_t *Bufp,
+static int32_t platform_write(void *handle, uint8_t reg,
+                              uint8_t *bufp,
                               uint16_t len)
 {
-  if (handle == &hi2c1) {
-    HAL_I2C_Mem_Write(handle, LSM6DSO_I2C_ADD_H, Reg,
-                      I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
-  }
-
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Write(handle, LSM6DSO_I2C_ADD_L, reg,
+                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_write(handle,  LSM6DSO_I2C_ADD_H & 0xFE, reg, bufp, len);
+#endif
   return 0;
 }
 
@@ -310,19 +367,26 @@ static int32_t platform_write(void *handle, uint8_t Reg,
  * @param  len       number of consecutive register to read
  *
  */
-static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-  if (handle == &hi2c1) {
-    HAL_I2C_Mem_Read(handle, LSM6DSO_I2C_ADD_H, Reg,
-                     I2C_MEMADD_SIZE_8BIT, Bufp, len, 1000);
-  }
-
+#if defined(NUCLEO_F411RE)
+  HAL_I2C_Mem_Read(handle, LSM6DSO_I2C_ADD_L, reg,
+                   I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  reg |= 0x80;
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, 1000);
+  HAL_SPI_Receive(handle, bufp, len, 1000);
+  HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_read(handle, LSM6DSO_I2C_ADD_H & 0xFE, reg, bufp, len);
+#endif
   return 0;
 }
 
 /*
- * @brief  Write generic device register (platform dependent)
+ * @brief  Send buffer to console (platform dependent)
  *
  * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
@@ -330,7 +394,13 @@ static int32_t platform_read(void *handle, uint8_t Reg, uint8_t *Bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-  HAL_UART_Transmit( &huart2, tx_buffer, len, 1000 );
+#if defined(NUCLEO_F411RE)
+  HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
+#elif defined(STEVAL_MKI109V3)
+  CDC_Transmit_FS(tx_buffer, len);
+#elif defined(SPC584B_DIS)
+  sd_lld_write(&SD2, tx_buffer, len);
+#endif
 }
 
 /*
@@ -341,7 +411,11 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
+#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
   HAL_Delay(ms);
+#elif defined(SPC584B_DIS)
+  osalThreadDelayMilliseconds(ms);
+#endif
 }
 
 /*
@@ -349,6 +423,13 @@ static void platform_delay(uint32_t ms)
  */
 static void platform_init(void)
 {
+#if defined(STEVAL_MKI109V3)
+  TIM3->CCR1 = PWM_3V3;
+  TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  HAL_Delay(1000);
+#endif
 }
 
 /*
@@ -383,7 +464,7 @@ static int32_t lsm6dso_write_lis2mdl_cx(void *ctx, uint8_t reg,
   /* Enable accelerometer to trigger Sensor Hub operation. */
   lsm6dso_xl_data_rate_set(&ag_ctx, LSM6DSO_XL_ODR_104Hz);
   /* Wait Sensor Hub operation flag set. */
-  lsm6dso_acceleration_raw_get(&ag_ctx, data_raw_acceleration.u8bit);
+  lsm6dso_acceleration_raw_get(&ag_ctx, data_raw_acceleration.i16bit);
 
   do {
     HAL_Delay(20);
@@ -434,7 +515,7 @@ static int32_t lsm6dso_read_lis2mdl_cx(void *ctx, uint8_t reg,
   /* Enable accelerometer to trigger Sensor Hub operation. */
   lsm6dso_xl_data_rate_set(&ag_ctx, LSM6DSO_XL_ODR_104Hz);
   /* Wait Sensor Hub operation flag set. */
-  lsm6dso_acceleration_raw_get(&ag_ctx, data_raw_acceleration.u8bit);
+  lsm6dso_acceleration_raw_get(&ag_ctx, data_raw_acceleration.i16bit);
 
   do {
     HAL_Delay(20);
