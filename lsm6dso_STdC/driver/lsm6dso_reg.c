@@ -6,7 +6,7 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -8347,15 +8347,16 @@ int32_t lsm6dso_fsm_init_get(stmdev_ctx_t *ctx, uint8_t *val)
 int32_t lsm6dso_long_cnt_int_value_set(stmdev_ctx_t *ctx,
                                        uint16_t val)
 {
+  uint8_t buff[2];
   int32_t ret;
-  uint8_t add_l;
-  uint8_t add_h;
-  add_h = (uint8_t)( ( val & 0xFF00U ) >> 8 );
-  add_l = (uint8_t)( val & 0x00FFU );
-  ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_FSM_LC_TIMEOUT_L, &add_l);
+  buff[1] = (uint8_t) (val / 256U);
+  buff[0] = (uint8_t) (val - (buff[1] * 256U));
+  ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_FSM_LC_TIMEOUT_L,
+                                 &buff[0]);
 
   if (ret == 0) {
-    ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_FSM_LC_TIMEOUT_H, &add_h);
+    ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_FSM_LC_TIMEOUT_H,
+                                   &buff[1]);
   }
 
   return ret;
@@ -8374,16 +8375,16 @@ int32_t lsm6dso_long_cnt_int_value_set(stmdev_ctx_t *ctx,
 int32_t lsm6dso_long_cnt_int_value_get(stmdev_ctx_t *ctx,
                                        uint16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
-  uint8_t add_l;
-  uint8_t add_h;
-  ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_FSM_LC_TIMEOUT_L, &add_l);
+  ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_FSM_LC_TIMEOUT_L,
+                                &buff[0]);
 
   if (ret == 0) {
-    ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_FSM_LC_TIMEOUT_H, &add_h);
-    *val = add_h;
-    *val = *val << 8;
-    *val += add_l;
+    ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_FSM_LC_TIMEOUT_H,
+                                  &buff[1]);
+    *val = buff[1];
+    *val = (*val * 256U) +  buff[0];
   }
 
   return ret;
@@ -8429,15 +8430,16 @@ int32_t lsm6dso_fsm_number_of_programs_get(stmdev_ctx_t *ctx,
   */
 int32_t lsm6dso_fsm_start_address_set(stmdev_ctx_t *ctx, uint16_t val)
 {
+  uint8_t buff[2];
   int32_t ret;
-  uint8_t add_l;
-  uint8_t add_h;
-  add_h = (uint8_t)( ( val & 0xFF00U ) >> 8 );
-  add_l = (uint8_t)( val & 0x00FFU );
-  ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_FSM_START_ADD_L, &add_l);
+  buff[1] = (uint8_t) (val / 256U);
+  buff[0] = (uint8_t) (val - (buff[1] * 256U));
+  ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_FSM_START_ADD_L,
+                                 &buff[0]);
 
   if (ret == 0) {
-    ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_FSM_START_ADD_H, &add_h);
+    ret = lsm6dso_ln_pg_write_byte(ctx, LSM6DSO_FSM_START_ADD_H,
+                                   &buff[1]);
   }
 
   return ret;
@@ -8454,16 +8456,14 @@ int32_t lsm6dso_fsm_start_address_set(stmdev_ctx_t *ctx, uint16_t val)
 int32_t lsm6dso_fsm_start_address_get(stmdev_ctx_t *ctx,
                                       uint16_t *val)
 {
+  uint8_t buff[2];
   int32_t ret;
-  uint8_t add_l;
-  uint8_t add_h;
-  ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_FSM_START_ADD_L, &add_l);
+  ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_FSM_START_ADD_L, &buff[0]);
 
   if (ret == 0) {
-    ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_FSM_START_ADD_H, &add_h);
-    *val = add_h;
-    *val = *val << 8;
-    *val += add_l;
+    ret = lsm6dso_ln_pg_read_byte(ctx, LSM6DSO_FSM_START_ADD_H, &buff[1]);
+    *val = buff[1];
+    *val = (*val * 256U) +  buff[0];
   }
 
   return ret;
