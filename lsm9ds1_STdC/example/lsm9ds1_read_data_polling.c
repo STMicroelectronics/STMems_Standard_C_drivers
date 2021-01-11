@@ -2,12 +2,12 @@
  ******************************************************************************
  * @file    read_data_polling.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show how to get data from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -24,8 +24,7 @@
  *
  * - STEVAL_MKI109V3 + STEVAL-MKI159V1
  * - NUCLEO_F411RE + STEVAL-MKI159V11
- *
- * and STM32CubeMX tool with STM32CubeF4 MCU Package
+ * - DISCOVERY_SPC584B + STEVAL-MKI159V11
  *
  * Used interfaces:
  *
@@ -34,6 +33,9 @@
  *
  * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
  *                    - I2C(Default) / SPI(supported)
+ *
+ * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -47,13 +49,19 @@
  * If a different hardware is used please comment all
  * following target board and redefine yours.
  */
-//#define STEVAL_MKI109V3
-#define NUCLEO_F411RE
+
+//#define STEVAL_MKI109V3  /* little endian */
+//#define NUCLEO_F411RE    /* little endian */
+//#define SPC584B_DIS      /* big endian */
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
-
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
@@ -61,32 +69,39 @@
 /* NUCLEO_F411RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
+#elif defined(SPC584B_DIS)
+/* DISCOVERY_SPC584B: Define communication interface */
+#define SENSOR_BUS I2CD1
+
 #endif
 
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "stm32f4xx_hal.h"
 #include "lsm9ds1_reg.h"
+
+#if defined(NUCLEO_F411RE)
+#include "stm32f4xx_hal.h"
+#include "usart.h"
 #include "gpio.h"
 #include "i2c.h"
-#if defined(STEVAL_MKI109V3)
-#include "usbd_cdc_if.h"
-#include "spi.h"
-#elif defined(NUCLEO_F411RE)
-#include "usart.h"
-#endif
 
-typedef union {
-  int16_t i16bit[3];
-  uint8_t u8bit[6];
-} axis3bit16_t;
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
+#include "usbd_cdc_if.h"
+#include "gpio.h"
+#include "spi.h"
+#include "tim.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
+#endif
 
 typedef struct {
   void   *hbus;
   uint8_t i2c_address;
-  uint8_t cs_port;
-  uint8_t cs_pin;
+  GPIO_TypeDef *cs_port;
+  uint16_t cs_pin;
 } sensbus_t;
 
 /* Private macro -------------------------------------------------------------*/
@@ -96,15 +111,15 @@ typedef struct {
 #if defined(STEVAL_MKI109V3)
 static sensbus_t imu_bus = {&SENSOR_BUS,
                             0,
-                            CS_DEV_GPIO_Port,
-                            CS_DEV_Pin
+                            CS_up_GPIO_Port,
+                            CS_up_Pin
                            };
 static sensbus_t mag_bus = {&SENSOR_BUS,
                             0,
-                            CS_RF_GPIO_Port,
-                            CS_RF_Pin
+                            CS_A_up_GPIO_Port,
+                            CS_A_up_Pin
                            };
-#elif defined(NUCLEO_F411RE)
+#elif defined(SPC584B_DIS) | defined(NUCLEO_F411RE)
 static sensbus_t mag_bus = {&SENSOR_BUS,
                             LSM9DS1_MAG_I2C_ADD_H,
                             0,
@@ -117,9 +132,9 @@ static sensbus_t imu_bus = {&SENSOR_BUS,
                            };
 #endif
 
-static axis3bit16_t data_raw_acceleration;
-static axis3bit16_t data_raw_angular_rate;
-static axis3bit16_t data_raw_magnetic_field;
+static int16_t data_raw_acceleration[3];
+static int16_t data_raw_angular_rate[3];
+static int16_t data_raw_magnetic_field[3];
 static float acceleration_mg[3];
 static float angular_rate_mdps[3];
 static float magnetic_field_mgauss[3];
@@ -216,24 +231,24 @@ void lsm9ds1_read_data_polling(void)
 
     if ( reg.status_imu.xlda && reg.status_imu.gda ) {
       /* Read imu data */
-      memset(data_raw_acceleration.u8bit, 0x00, 3 * sizeof(int16_t));
-      memset(data_raw_angular_rate.u8bit, 0x00, 3 * sizeof(int16_t));
+      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
+      memset(data_raw_angular_rate, 0x00, 3 * sizeof(int16_t));
       lsm9ds1_acceleration_raw_get(&dev_ctx_imu,
-                                   data_raw_acceleration.u8bit);
+                                   data_raw_acceleration);
       lsm9ds1_angular_rate_raw_get(&dev_ctx_imu,
-                                   data_raw_angular_rate.u8bit);
+                                   data_raw_angular_rate);
       acceleration_mg[0] = lsm9ds1_from_fs4g_to_mg(
-                             data_raw_acceleration.i16bit[0]);
+                             data_raw_acceleration[0]);
       acceleration_mg[1] = lsm9ds1_from_fs4g_to_mg(
-                             data_raw_acceleration.i16bit[1]);
+                             data_raw_acceleration[1]);
       acceleration_mg[2] = lsm9ds1_from_fs4g_to_mg(
-                             data_raw_acceleration.i16bit[2]);
+                             data_raw_acceleration[2]);
       angular_rate_mdps[0] = lsm9ds1_from_fs2000dps_to_mdps(
-                               data_raw_angular_rate.i16bit[0]);
+                               data_raw_angular_rate[0]);
       angular_rate_mdps[1] = lsm9ds1_from_fs2000dps_to_mdps(
-                               data_raw_angular_rate.i16bit[1]);
+                               data_raw_angular_rate[1]);
       angular_rate_mdps[2] = lsm9ds1_from_fs2000dps_to_mdps(
-                               data_raw_angular_rate.i16bit[2]);
+                               data_raw_angular_rate[2]);
       sprintf((char *)tx_buffer,
               "IMU - [mg]:%4.2f\t%4.2f\t%4.2f\t[mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2],
@@ -243,14 +258,14 @@ void lsm9ds1_read_data_polling(void)
 
     if ( reg.status_mag.zyxda ) {
       /* Read magnetometer data */
-      memset(data_raw_magnetic_field.u8bit, 0x00, 3 * sizeof(int16_t));
-      lsm9ds1_magnetic_raw_get(&dev_ctx_mag, data_raw_magnetic_field.u8bit);
+      memset(data_raw_magnetic_field, 0x00, 3 * sizeof(int16_t));
+      lsm9ds1_magnetic_raw_get(&dev_ctx_mag, data_raw_magnetic_field);
       magnetic_field_mgauss[0] = lsm9ds1_from_fs16gauss_to_mG(
-                                   data_raw_magnetic_field.i16bit[0]);
+                                   data_raw_magnetic_field[0]);
       magnetic_field_mgauss[1] = lsm9ds1_from_fs16gauss_to_mG(
-                                   data_raw_magnetic_field.i16bit[1]);
+                                   data_raw_magnetic_field[1]);
       magnetic_field_mgauss[2] = lsm9ds1_from_fs16gauss_to_mG(
-                                   data_raw_magnetic_field.i16bit[2]);
+                                   data_raw_magnetic_field[2]);
       sprintf((char *)tx_buffer, "MAG - [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               magnetic_field_mgauss[0], magnetic_field_mgauss[1],
               magnetic_field_mgauss[2]);
@@ -282,6 +297,9 @@ static int32_t platform_write_imu(void *handle, uint8_t reg,
   HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
   HAL_SPI_Transmit(sensbus->hbus, bufp, len, 1000);
   HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_write(sensbus->hbus,  sensbus->i2c_address & 0xFE, reg, bufp,
+                len);
 #endif
   return 0;
 }
@@ -313,6 +331,11 @@ static int32_t platform_write_mag(void *handle, uint8_t reg,
   HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
   HAL_SPI_Transmit(sensbus->hbus, bufp, len, 1000);
   HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  /* Write multiple command */
+  reg |= 0x80;
+  i2c_lld_write(sensbus->hbus, sensbus->i2c_address & 0xFE, reg, bufp,
+                len);
 #endif
   return 0;
 }
@@ -342,6 +365,9 @@ static int32_t platform_read_imu(void *handle, uint8_t reg,
   HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
   HAL_SPI_Receive(sensbus->hbus, bufp, len, 1000);
   HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  i2c_lld_read(sensbus->hbus, sensbus->i2c_address & 0xFE, reg, bufp,
+               len);
 #endif
   return 0;
 }
@@ -373,12 +399,17 @@ static int32_t platform_read_mag(void *handle, uint8_t reg,
   HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
   HAL_SPI_Receive(sensbus->hbus, bufp, len, 1000);
   HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
+#elif defined(SPC584B_DIS)
+  /* Read multiple command */
+  reg |= 0x80;
+  i2c_lld_read(sensbus->hbus, sensbus->i2c_address & 0xFE, reg, bufp,
+               len);
 #endif
   return 0;
 }
 
 /*
- * @brief  Write generic device register (platform dependent)
+ * @brief  Send buffer to console (platform dependent)
  *
  * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
@@ -386,11 +417,12 @@ static int32_t platform_read_mag(void *handle, uint8_t reg,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-#ifdef NUCLEO_F411RE
+#if defined(NUCLEO_F411RE)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
-#endif
-#ifdef STEVAL_MKI109V3
+#elif defined(STEVAL_MKI109V3)
   CDC_Transmit_FS(tx_buffer, len);
+#elif defined(SPC584B_DIS)
+  sd_lld_write(&SD2, tx_buffer, len);
 #endif
 }
 
@@ -402,7 +434,11 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
+#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
   HAL_Delay(ms);
+#elif defined(SPC584B_DIS)
+  osalThreadDelayMilliseconds(ms);
+#endif
 }
 
 /*
