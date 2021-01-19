@@ -10516,32 +10516,16 @@ int32_t lsm6dso_all_sources_get(stmdev_ctx_t *ctx,
   lsm6dso_status_reg_t               status_reg;
   lsm6dso_tap_src_t                  tap_src;
   lsm6dso_d6d_src_t                  d6d_src;
-  lsm6dso_ctrl5_c_t                  ctrl5_c;
-  uint8_t                            reg[12];
+  uint8_t                            reg[5];
   int32_t                            ret;
-  ret = lsm6dso_read_reg(ctx, LSM6DSO_CTRL5_C, (uint8_t *)&ctrl5_c, 1);
+  ret = lsm6dso_read_reg(ctx, LSM6DSO_ALL_INT_SRC, reg, 5);
 
   if (ret == 0) {
-    ctrl5_c.not_used_01 = PROPERTY_ENABLE;
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_CTRL5_C, (uint8_t *)&ctrl5_c, 1);
-  }
-
-  if (ret == 0) {
-    ret = lsm6dso_read_reg(ctx, LSM6DSO_ALL_INT_SRC, reg, 12);
-  }
-
-  if (ret == 0) {
-    bytecpy(( uint8_t *)&all_int_src, &reg[0]);
-    bytecpy(( uint8_t *)&wake_up_src, &reg[1]);
-    bytecpy(( uint8_t *)&tap_src, &reg[2]);
-    bytecpy(( uint8_t *)&d6d_src, &reg[3]);
-    bytecpy(( uint8_t *)&status_reg, &reg[4]);
-    bytecpy(( uint8_t *)&emb_func_status_mainpage, &reg[5]);
-    bytecpy(( uint8_t *)&fsm_status_a_mainpage, &reg[6]);
-    bytecpy(( uint8_t *)&fsm_status_b_mainpage, &reg[7]);
-    bytecpy(( uint8_t *)&status_master_mainpage, &reg[9]);
-    bytecpy(( uint8_t *)&fifo_status1, &reg[10]);
-    bytecpy(( uint8_t *)&fifo_status2, &reg[11]);
+    bytecpy((uint8_t *)&all_int_src, &reg[0]);
+    bytecpy((uint8_t *)&wake_up_src, &reg[1]);
+    bytecpy((uint8_t *)&tap_src, &reg[2]);
+    bytecpy((uint8_t *)&d6d_src, &reg[3]);
+    bytecpy((uint8_t *)&status_reg, &reg[4]);
     val->timestamp = all_int_src.timestamp_endcount;
     val->wake_up_z    = wake_up_src.z_wu;
     val->wake_up_y    = wake_up_src.y_wu;
@@ -10567,6 +10551,16 @@ int32_t lsm6dso_all_sources_get(stmdev_ctx_t *ctx,
     val->drdy_xl   = status_reg.xlda;
     val->drdy_g    = status_reg.gda;
     val->drdy_temp = status_reg.tda;
+  }
+
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_EMB_FUNC_STATUS_MAINPAGE, reg, 3);
+  }
+
+  if (ret == 0) {
+    bytecpy((uint8_t *)&emb_func_status_mainpage, &reg[0]);
+    bytecpy((uint8_t *)&fsm_status_a_mainpage, &reg[1]);
+    bytecpy((uint8_t *)&fsm_status_b_mainpage, &reg[2]);
     val->step_detector = emb_func_status_mainpage.is_step_det;
     val->tilt          = emb_func_status_mainpage.is_tilt;
     val->sig_mot       = emb_func_status_mainpage.is_sigmot;
@@ -10587,6 +10581,16 @@ int32_t lsm6dso_all_sources_get(stmdev_ctx_t *ctx,
     val->fsm14 = fsm_status_b_mainpage.is_fsm14;
     val->fsm15 = fsm_status_b_mainpage.is_fsm15;
     val->fsm16 = fsm_status_b_mainpage.is_fsm16;
+  }
+
+  if (ret == 0) {
+    ret = lsm6dso_read_reg(ctx, LSM6DSO_STATUS_MASTER_MAINPAGE, reg, 3);
+  }
+
+  if (ret == 0) {
+    bytecpy((uint8_t *)&status_master_mainpage, &reg[0]);
+    bytecpy((uint8_t *)&fifo_status1, &reg[1]);
+    bytecpy((uint8_t *)&fifo_status2, &reg[2]);
     val->sh_endop       = status_master_mainpage.sens_hub_endop;
     val->sh_slave0_nack = status_master_mainpage.slave0_nack;
     val->sh_slave1_nack = status_master_mainpage.slave1_nack;
@@ -10600,8 +10604,6 @@ int32_t lsm6dso_all_sources_get(stmdev_ctx_t *ctx,
     val->fifo_full        = fifo_status2.fifo_full_ia;
     val->fifo_ovr         = fifo_status2.fifo_ovr_ia;
     val->fifo_th          = fifo_status2.fifo_wtm_ia;
-    ctrl5_c.not_used_01 = PROPERTY_DISABLE;
-    ret = lsm6dso_write_reg(ctx, LSM6DSO_CTRL5_C, (uint8_t *)&ctrl5_c, 1);
   }
 
   return ret;
