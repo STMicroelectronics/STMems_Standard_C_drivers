@@ -154,6 +154,8 @@ void ism330dhcx_read_data_polling(void)
     ism330dhcx_reset_get(&dev_ctx, &rst);
   } while (rst);
 
+  /* Start device configuration. */
+  ism330dhcx_device_conf_set(&dev_ctx, PROPERTY_ENABLE);
   /* Enable Block Data Update */
   ism330dhcx_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
   /* Set Output Data Rate */
