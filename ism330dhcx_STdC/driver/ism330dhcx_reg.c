@@ -1733,6 +1733,48 @@ int32_t ism330dhcx_mlc_out_get(stmdev_ctx_t *ctx, uint8_t *buff)
   */
 
 /**
+  * @brief  DEVICE_CONF bit configuration[set]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Change the values of device_conf in reg CTRL9_XL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t ism330dhcx_device_conf_set(stmdev_ctx_t *ctx, uint8_t val)
+{
+  ism330dhcx_ctrl9_xl_t ctrl9_xl;
+  int32_t ret;
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL9_XL,
+                            (uint8_t *)&ctrl9_xl, 1);
+
+  if (ret == 0) {
+    ctrl9_xl.device_conf = (uint8_t)val;
+    ret = ism330dhcx_write_reg(ctx, ISM330DHCX_CTRL9_XL,
+                               (uint8_t *)&ctrl9_xl, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  DEVICE_CONF bit configuration[get]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Get the values of device_conf in reg CTRL9_XL
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t ism330dhcx_device_conf_get(stmdev_ctx_t *ctx, uint8_t *val)
+{
+  ism330dhcx_ctrl9_xl_t ctrl9_xl;
+  int32_t ret;
+  ret = ism330dhcx_read_reg(ctx, ISM330DHCX_CTRL9_XL,
+                            (uint8_t *)&ctrl9_xl, 1);
+  *val = ctrl9_xl.device_conf;
+  return ret;
+}
+
+/**
   * @brief  Difference in percentage of the effective ODR (and timestamp rate)
   *         with respect to the typical.[set]
   *         Step:  0.15%. 8-bit format, 2's complement.
