@@ -27,8 +27,6 @@
  * - NUCLEO_F411RE + X-NUCLEO-IKS02A1
  * - DISCOVERY_SPC584B + X-NUCLEO-IKS02A1
  *
- * and STM32CubeMX tool with STM32CubeF4 MCU Package
- *
  * Used interfaces:
  *
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
@@ -54,7 +52,7 @@
  */
 
 //#define STEVAL_MKI109V3  /* little endian */
-#define NUCLEO_F411RE    /* little endian */
+//#define NUCLEO_F411RE    /* little endian */
 //#define SPC584B_DIS      /* big endian */
 
 /* ATTENTION: By default the driver is little endian. If you need switch
@@ -96,6 +94,7 @@
 #include "usbd_cdc_if.h"
 #include "gpio.h"
 #include "spi.h"
+#include "tim.h"
 
 #elif defined(SPC584B_DIS)
 #include "components.h"
@@ -107,7 +106,9 @@ typedef union {
 } axis3bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
-#define TX_BUF_DIM          1000
+/* Wait sensor boot time */
+#define BOOT_TIME        10 //ms
+#define TX_BUF_DIM     1000
 #define TIME_OPS      10000
 
 /*
@@ -179,6 +180,8 @@ void ism330dhcx_sensor_hub_iis2mdc_fifo_timestamp(void)
   mag_ctx.handle = &SENSOR_BUS;
   /* Init test platform. */
   platform_init();
+  /* Wait sensor boot time */
+  platform_delay(BOOT_TIME);
   /* Check device ID. */
   ism330dhcx_device_id_get(&ag_ctx, &whoamI);
 
@@ -194,6 +197,8 @@ void ism330dhcx_sensor_hub_iis2mdc_fifo_timestamp(void)
     ism330dhcx_reset_get(&ag_ctx, &rst);
   } while (rst);
 
+  /* Start device configuration. */
+  ism330dhcx_device_conf_set(&ag_ctx, PROPERTY_ENABLE);
   /* Some hardware require to enable pull up on master I2C interface. */
   //ism330dhcx_sh_pin_mode_set(&ag_ctx, ISM330DHCX_INTERNAL_PULL_UP);
   /* Check if IIS2MDC connected to Sensor Hub. */

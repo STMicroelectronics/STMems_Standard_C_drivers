@@ -27,8 +27,6 @@
  * - NUCLEO_F411RE + X-NUCLEO-IKS02A1
  * - DISCOVERY_SPC584B + X-NUCLEO-IKS02A1
  *
- * and STM32CubeMX tool with STM32CubeF4 MCU Package
- *
  * Used interfaces:
  *
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
@@ -54,7 +52,7 @@
  */
 
 //#define STEVAL_MKI109V3  /* little endian */
-#define NUCLEO_F411RE    /* little endian */
+//#define NUCLEO_F411RE    /* little endian */
 //#define SPC584B_DIS      /* big endian */
 
 /* ATTENTION: By default the driver is little endian. If you need switch
@@ -96,6 +94,7 @@
 #include "usbd_cdc_if.h"
 #include "gpio.h"
 #include "spi.h"
+#include "tim.h"
 
 #elif defined(SPC584B_DIS)
 #include "components.h"
@@ -180,6 +179,8 @@ void ism330dhcx_mlc_iis2mdc(void)
     ism330dhcx_reset_get(&ag_ctx, &rst);
   } while (rst);
 
+  /* Start device configuration. */
+  ism330dhcx_device_conf_set(&ag_ctx, PROPERTY_ENABLE);
   /* Disable I3C interface.*/
   //ism330dhcx_i3c_disable_set(&ag_ctx, ISM330DHCX_I3C_DISABLE);
   /* Turn off Sensors */
