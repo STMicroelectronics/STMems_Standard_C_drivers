@@ -1,13 +1,13 @@
 /*
  ******************************************************************************
- * @file    self_test.c
+ * @file    read_fifo.c
  * @author  Sensors Software Solution Team
- * @brief   This file implement the self test procedure.
+ * @brief   This file show how to get data from sensor FIFO.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -59,6 +59,7 @@
  *            header file of the driver (_reg.h).
  */
 
+
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
@@ -98,25 +99,22 @@
 #endif
 
 /* Private macro -------------------------------------------------------------*/
-#define    BOOT_TIME            5 //ms
+#define    BOOT_TIME         5 //ms
 
-/* Self test limits converted from 8bit right-aligned to 16bit left-aligned. */
-#define    MIN_ST_LIMIT_LSb     4*256
-#define    MAX_ST_LIMIT_LSb    90*256
+/* Define FIFO watermark to 10 samples */
+#define FIFO_WATERMARK     10
 
 /* Private variables ---------------------------------------------------------*/
 static int16_t data_raw_acceleration[3];
-static float acceleration_st_mg[3];
 static float acceleration_mg[3];
 static uint8_t tx_buffer[1000];
-static float test_val_mg[3];
-static float max_st_limit_mg;
-static float min_st_limit_mg;
+static uint8_t whoamI;
 
 
 /* Extern variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
+
 /*
  *   WARNING:
  *   Functions declare in this section are defined at the end of this file
@@ -128,138 +126,70 @@ static int32_t platform_write(void *handle, uint8_t reg,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
-static void tx_com(uint8_t *tx_buffer, uint16_t len);
+static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void lis2de12_self_test(void)
+void lis2de12_read_fifo(void)
 {
   stmdev_ctx_t dev_ctx;
-  lis2de12_reg_t reg;
-  uint8_t i, j;
+  uint8_t dummy;
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
-  /* Wait boot time and initialize platform specific hardware */
+  /* Initialize platform specific hardware */
   platform_init();
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
   /* Check device ID */
-  lis2de12_device_id_get(&dev_ctx, &reg.byte);
+  lis2de12_device_id_get(&dev_ctx, &whoamI);
 
-  if (reg.byte != LIS2DE12_ID) {
-    while (1) {
-      /* manage here device not found */
-    }
+  if (whoamI != LIS2DE12_ID) {
+    while (1);/* manage here device not found */
   }
 
+  /* Set FIFO watermark to FIFO_WATERMARK */
+  lis2de12_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK - 1);
+  /* Set FIFO mode to Stream mode (aka Continuous Mode) */
+  lis2de12_fifo_mode_set(&dev_ctx, LIS2DE12_DYNAMIC_STREAM_MODE);
+  /* Enable FIFO */
+  lis2de12_fifo_set(&dev_ctx, PROPERTY_ENABLE);
   /* Enable Block Data Update. */
   lis2de12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  /* Set Output Data Rate to 1Hz. */
+  lis2de12_data_rate_set(&dev_ctx, LIS2DE12_ODR_25Hz);
   /* Set full scale to 2g. */
   lis2de12_full_scale_set(&dev_ctx, LIS2DE12_2g);
-  /* Set Output Data Rate to 1Hz. */
-  lis2de12_data_rate_set(&dev_ctx, LIS2DE12_ODR_50Hz);
-  /* Wait stable output */
-  platform_delay(90);
 
-  /* Check if new value available */
-  do {
-    lis2de12_status_get(&dev_ctx, &reg.status_reg);
-  } while (!reg.status_reg.zyxda);
+  /* Wait Events */
+  while (1) {
+    /* Check if FIFO level over threshold */
+    lis2de12_fifo_fth_flag_get(&dev_ctx, &dummy);
 
-  /* Read dummy data and discard it */
-  lis2de12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-  /* Read 5 sample and get the average vale for each axis */
-  memset(acceleration_mg, 0x00, 3 * sizeof(float));
+    if (dummy) {
+      /* Read number of sample in FIFO */
+      lis2de12_fifo_data_level_get(&dev_ctx, &dummy);
 
-  for (i = 0; i < 5; i++) {
-    /* Check if new value available */
-    do {
-      lis2de12_status_get(&dev_ctx, &reg.status_reg);
-    } while (!reg.status_reg.zyxda);
-
-    /* Read data and accumulate the mg value */
-    lis2de12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-
-    for (j = 0; j < 3; j++) {
-      acceleration_mg[j] += lis2de12_from_fs2_to_mg(
-                              data_raw_acceleration[j]);
+      while ( dummy > 0) {
+        /* Read XL samples */
+        lis2de12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
+        acceleration_mg[0] =
+          lis2de12_from_fs2_to_mg(data_raw_acceleration[0]);
+        acceleration_mg[1] =
+          lis2de12_from_fs2_to_mg(data_raw_acceleration[1]);
+        acceleration_mg[2] =
+          lis2de12_from_fs2_to_mg(data_raw_acceleration[2]);
+        sprintf((char *)tx_buffer,
+                "%d - Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+                FIFO_WATERMARK - dummy,
+                acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
+        dummy--;
+      }
     }
   }
-
-  /* Calculate the mg average values */
-  for (i = 0; i < 3; i++) {
-    acceleration_mg[i] /= 5.0f;
-  }
-
-  /* Enable Self Test positive (or negative) */
-  lis2de12_self_test_set(&dev_ctx, LIS2DE12_ST_POSITIVE);
-  //lis2de12_self_test_set(&dev_ctx, LIS2DE12_ST_NEGATIVE);
-  /* Wait stable output */
-  platform_delay(90);
-
-  /* Check if new value available */
-  do {
-    lis2de12_status_get(&dev_ctx, &reg.status_reg);
-  } while (!reg.status_reg.zyxda);
-
-  /* Read dummy data and discard it */
-  lis2de12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-  /* Read 5 sample and get the average vale for each axis */
-  memset(acceleration_st_mg, 0x00, 3 * sizeof(float));
-
-  for (i = 0; i < 5; i++) {
-    /* Check if new value available */
-    do {
-      lis2de12_status_get(&dev_ctx, &reg.status_reg);
-    } while (!reg.status_reg.zyxda);
-
-    /* Read data and accumulate the mg value */
-    lis2de12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-
-    for (j = 0; j < 3; j++) {
-      acceleration_st_mg[j] += lis2de12_from_fs2_to_mg(
-                                 data_raw_acceleration[j]);
-    }
-  }
-
-  /* Calculate the mg average values */
-  for (i = 0; i < 3; i++) {
-    acceleration_st_mg[i] /= 5.0f;
-  }
-
-  /* Calculate the mg values for self test */
-  for (i = 0; i < 3; i++) {
-    test_val_mg[i] = fabs((acceleration_st_mg[i] - acceleration_mg[i]));
-  }
-
-  min_st_limit_mg = lis2de12_from_fs2_to_mg(MIN_ST_LIMIT_LSb);
-  max_st_limit_mg = lis2de12_from_fs2_to_mg(MAX_ST_LIMIT_LSb);
-
-  /* Check self test limit */
-  for (i = 0; i < 3; i++) {
-    if (( min_st_limit_mg < test_val_mg[i] ) &&
-        ( test_val_mg[i] < max_st_limit_mg)) {
-      sprintf((char *)tx_buffer,
-              "Axis[%d]: lmt min %4.2f mg - lmt max %4.2f mg - val %4.2f mg - PASS\r\n",
-              i, min_st_limit_mg, max_st_limit_mg, test_val_mg[i]);
-    }
-
-    else {
-      sprintf((char *)tx_buffer,
-              "Axis[%d]: lmt min %4.2f mg - lmt max %4.2f mg - val %4.2f mg - FAIL\r\n",
-              i, min_st_limit_mg, max_st_limit_mg, test_val_mg[i]);
-    }
-
-    tx_com(tx_buffer, strlen((char const *)tx_buffer));
-  }
-
-  /* Disable Self Test */
-  lis2de12_self_test_set(&dev_ctx, LIS2DE12_ST_DISABLE);
-  /* Disable sensor. */
-  lis2de12_data_rate_set(&dev_ctx, LIS2DE12_POWER_DOWN);
 }
 
 /*
