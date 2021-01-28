@@ -280,6 +280,6 @@ static void platform_init(void)
   TIM3->CCR2 = PWM_3V3;
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
-  HAL_Delay(1000);
+  platform_delay(1000);
 #endif
 }
