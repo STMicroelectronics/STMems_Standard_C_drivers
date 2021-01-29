@@ -131,7 +131,7 @@ float_t lis3dsh_from_fs16_to_mg(int16_t lsb)
 
 float_t lis3dsh_from_lsb_to_celsius(int8_t lsb)
 {
-  return (((float_t)lsb / 256.0f) + 25.0f);
+  return ((float_t)lsb + 25.0f);
 }
 
 /**
