@@ -110,9 +110,9 @@
 #define    ST_PASS     1U
 #define    ST_FAIL     0U
 
-/* Self test limits in mgauss*/
-static const float min_st_limit[] = {1000.0f, 1000.0f,  100.0f};
-static const float max_st_limit[] = {3000.0f, 3000.0f, 1000.0f};
+/* Self test limits in gauss*/
+static const float min_st_limit[] = {1.0f, 1.0f, 0.1f};
+static const float max_st_limit[] = {3.0f, 3.0f, 1.0f};
 
 /* Private variables ---------------------------------------------------------*/
 
