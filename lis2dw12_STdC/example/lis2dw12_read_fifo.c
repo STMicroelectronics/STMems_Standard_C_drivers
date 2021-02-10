@@ -1,13 +1,13 @@
 /*
  ******************************************************************************
- * @file    lis2dw12_wake_up.c
+ * @file    read_fifo.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect wake_up from sensor.
+ * @brief   This file show how to get data from sensor FIFO.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -104,6 +104,8 @@
 #define    BOOT_TIME            20 //ms
 
 /* Private variables ---------------------------------------------------------*/
+static int16_t data_raw_acceleration[3];
+static float acceleration_mg[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -126,11 +128,10 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void lis2dw12_wake_up(void)
+void lis2dw12_read_data_fifo(void)
 {
   /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
-  lis2dw12_reg_t int_route;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
@@ -153,53 +154,50 @@ void lis2dw12_wake_up(void)
     lis2dw12_reset_get(&dev_ctx, &rst);
   } while (rst);
 
+  /* Enable Block Data Update */
+  lis2dw12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
   /* Set full scale */
+  //lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_8g);
   lis2dw12_full_scale_set(&dev_ctx, LIS2DW12_2g);
+  /* Configure filtering chain
+   * Accelerometer - filter path / bandwidth
+   */
+  lis2dw12_filter_path_set(&dev_ctx, LIS2DW12_LPF_ON_OUT);
+  lis2dw12_filter_bandwidth_set(&dev_ctx, LIS2DW12_ODR_DIV_4);
+  /* Configure FIFO */
+  lis2dw12_fifo_watermark_set(&dev_ctx, 10);
+  lis2dw12_fifo_mode_set(&dev_ctx, LIS2DW12_STREAM_MODE);
   /* Configure power mode */
-  lis2dw12_power_mode_set(&dev_ctx,
-                          LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
+  lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_HIGH_PERFORMANCE);
+  //lis2dw12_power_mode_set(&dev_ctx, LIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
   /* Set Output Data Rate */
-  lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_200Hz);
-  /* Apply high-pass digital filter on Wake-Up function */
-  lis2dw12_filter_path_set(&dev_ctx, LIS2DW12_HIGH_PASS_ON_OUT);
-  /* Apply high-pass digital filter on Wake-Up function
-   * Duration time is set to zero so Wake-Up interrupt signal
-   * is generated for each X,Y,Z filtered data exceeding the
-   * configured threshold
-   */
-  lis2dw12_wkup_dur_set(&dev_ctx, 0);
-  /* Set wake-up threshold
-   * Set Wake-Up threshold: 1 LSb corresponds to FS_XL/2^6
-   */
-  lis2dw12_wkup_threshold_set(&dev_ctx, 2);
-  /* Enable interrupt generation on Wake-Up INT1 pin */
-  lis2dw12_pin_int1_route_get(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
-  int_route.ctrl4_int1_pad_ctrl.int1_wu = PROPERTY_ENABLE;
-  lis2dw12_pin_int1_route_set(&dev_ctx, &int_route.ctrl4_int1_pad_ctrl);
+  lis2dw12_data_rate_set(&dev_ctx, LIS2DW12_XL_ODR_25Hz);
 
-  /* Wait Events */
+  /* Read samples in polling mode (no int) */
   while (1) {
-    lis2dw12_all_sources_t all_source;
-    /* Check Wake-Up events */
-    lis2dw12_all_sources_get(&dev_ctx, &all_source);
-
-    if (all_source.wake_up_src.wu_ia) {
-      sprintf((char *)tx_buffer, "Wake-Up event on ");
-
-      if (all_source.wake_up_src.x_wu) {
-        strcat((char *)tx_buffer, "X");
+    uint8_t val, i;
+    /* Read output only if new value is available */
+    lis2dw12_fifo_wtm_flag_get(&dev_ctx, &val);
+    if (val) {
+      lis2dw12_fifo_data_level_get(&dev_ctx, &val);
+      for (i=0; i<val; i++) {
+        /* Read acceleration data */
+        memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
+        lis2dw12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
+        //acceleration_mg[0] = lis2dw12_from_fs8_lp1_to_mg(data_raw_acceleration[0]);
+        //acceleration_mg[1] = lis2dw12_from_fs8_lp1_to_mg(data_raw_acceleration[1]);
+        //acceleration_mg[2] = lis2dw12_from_fs8_lp1_to_mg(data_raw_acceleration[2]);
+        acceleration_mg[0] = lis2dw12_from_fs2_to_mg(
+                               data_raw_acceleration[0]);
+        acceleration_mg[1] = lis2dw12_from_fs2_to_mg(
+                               data_raw_acceleration[1]);
+        acceleration_mg[2] = lis2dw12_from_fs2_to_mg(
+                               data_raw_acceleration[2]);
+        sprintf((char *)tx_buffer,
+                "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+                acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
       }
-
-      if (all_source.wake_up_src.y_wu) {
-        strcat((char *)tx_buffer, "Y");
-      }
-
-      if (all_source.wake_up_src.z_wu) {
-        strcat((char *)tx_buffer, "Z");
-      }
-
-      strcat((char *)tx_buffer, " direction\r\n");
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
