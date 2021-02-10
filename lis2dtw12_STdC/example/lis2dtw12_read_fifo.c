@@ -1,13 +1,13 @@
 /*
  ******************************************************************************
- * @file    read_data_polling.c
+ * @file    read_fifo.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @brief   This file show how to get data from sensor FIFO.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -22,9 +22,9 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3 + STEVAL-MKI190V1
- * - NUCLEO_F411RE + STEVAL-MKI190V1
- * - DISCOVERY_SPC584B + STEVAL-MKI190V1
+ * - STEVAL_MKI109V3 +  STEVAL-MKI190V1
+ * - NUCLEO_F411RE +  STEVAL-MKI190V1
+ * - DISCOVERY_SPC584B +  STEVAL-MKI190V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -34,7 +34,7 @@
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
  * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
- *                    - Sensor side: I2C(Default) / SPI(supported)
+ *                    - I2C(Default) / SPI(supported)
  *
  * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
  *                    - Sensor side: I2C(Default) / SPI(supported)
@@ -105,11 +105,9 @@
 
 /* Private variables ---------------------------------------------------------*/
 static int16_t data_raw_acceleration[3];
-static int16_t data_raw_temperature;
 static float acceleration_mg[3];
-static uint8_t tx_buffer[1000];
 static uint8_t whoamI, rst;
-static float temperature;
+static uint8_t tx_buffer[1000];
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -130,9 +128,9 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void lis2dtw12_read_data_polling(void)
+void lis2dtw12_read_data_fifo(void)
 {
-  /*  Initialize mems driver interface */
+  /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
@@ -141,7 +139,7 @@ void lis2dtw12_read_data_polling(void)
   platform_init();
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-  /*  Check device ID */
+  /* Check device ID */
   lis2dtw12_device_id_get(&dev_ctx, &whoamI);
 
   if (whoamI != LIS2DTW12_ID)
@@ -156,46 +154,50 @@ void lis2dtw12_read_data_polling(void)
     lis2dtw12_reset_get(&dev_ctx, &rst);
   } while (rst);
 
-  /*  Enable Block Data Update */
+  /* Enable Block Data Update */
   lis2dtw12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
   /* Set full scale */
-  lis2dtw12_full_scale_set(&dev_ctx, LIS2DTW12_8g);
+  //lis2dtw12_full_scale_set(&dev_ctx, LIS2DTW12_8g);
+  lis2dtw12_full_scale_set(&dev_ctx, LIS2DTW12_2g);
   /* Configure filtering chain
-   *
-   * Accelerometer - filter path / bandwidth */
+   * Accelerometer - filter path / bandwidth
+   */
   lis2dtw12_filter_path_set(&dev_ctx, LIS2DTW12_LPF_ON_OUT);
   lis2dtw12_filter_bandwidth_set(&dev_ctx, LIS2DTW12_ODR_DIV_4);
+  /* Configure FIFO */
+  lis2dtw12_fifo_watermark_set(&dev_ctx, 10);
+  lis2dtw12_fifo_mode_set(&dev_ctx, LIS2DTW12_STREAM_MODE);
   /* Configure power mode */
-  //lis2dtw12_power_mode_set(&dev_ctx, LIS2DTW12_HIGH_PERFORMANCE);
-  lis2dtw12_power_mode_set(&dev_ctx,
-                           LIS2DTW12_CONT_LOW_PWR_LOW_NOISE_12bit);
+  lis2dtw12_power_mode_set(&dev_ctx, LIS2DTW12_HIGH_PERFORMANCE);
+  //lis2dtw12_power_mode_set(&dev_ctx, LIS2DTW12_CONT_LOW_PWR_LOW_NOISE_12bit);
   /* Set Output Data Rate */
   lis2dtw12_data_rate_set(&dev_ctx, LIS2DTW12_XL_ODR_25Hz);
 
   /* Read samples in polling mode (no int) */
   while (1) {
-    uint8_t reg;
+    uint8_t val, i;
     /* Read output only if new value is available */
-    lis2dtw12_flag_data_ready_get(&dev_ctx, &reg);
-
-    if (reg) {
-      /* Read acceleration data */
-      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
-      lis2dtw12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-      acceleration_mg[0] = lis2dtw12_from_fs8_lp1_to_mg(
-                             data_raw_acceleration[0]);
-      acceleration_mg[1] = lis2dtw12_from_fs8_lp1_to_mg(
-                             data_raw_acceleration[1]);
-      acceleration_mg[2] = lis2dtw12_from_fs8_lp1_to_mg(
-                             data_raw_acceleration[2]);
-      memset(&data_raw_temperature, 0x00, sizeof(int16_t));
-      lis2dtw12_temperature_raw_get(&dev_ctx, &data_raw_temperature);
-      temperature = lis2dtw12_from_lsb_to_celsius(data_raw_temperature);
-      sprintf((char *)tx_buffer,
-              "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\t Temperature[degC]: %3.1f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2],
-              temperature);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
+    lis2dtw12_fifo_wtm_flag_get(&dev_ctx, &val);
+    if (val) {
+      lis2dtw12_fifo_data_level_get(&dev_ctx, &val);
+      for (i=0; i<val; i++) {
+        /* Read acceleration data */
+        memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
+        lis2dtw12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
+        //acceleration_mg[0] = lis2dtw12_from_fs8_lp1_to_mg(data_raw_acceleration[0]);
+        //acceleration_mg[1] = lis2dtw12_from_fs8_lp1_to_mg(data_raw_acceleration[1]);
+        //acceleration_mg[2] = lis2dtw12_from_fs8_lp1_to_mg(data_raw_acceleration[2]);
+        acceleration_mg[0] = lis2dtw12_from_fs2_to_mg(
+                               data_raw_acceleration[0]);
+        acceleration_mg[1] = lis2dtw12_from_fs2_to_mg(
+                               data_raw_acceleration[1]);
+        acceleration_mg[2] = lis2dtw12_from_fs2_to_mg(
+                               data_raw_acceleration[2]);
+        sprintf((char *)tx_buffer,
+                "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+                acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
+      }
     }
   }
 }
