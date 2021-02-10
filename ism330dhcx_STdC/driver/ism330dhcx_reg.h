@@ -3900,8 +3900,8 @@ int32_t ism330dhcx_sh_pass_through_get(stmdev_ctx_t *ctx,
                                        uint8_t *val);
 
 typedef enum {
-  ISM330DHCX_EXT_ON_INT2_PIN = 0,
-  ISM330DHCX_XL_GY_DRDY      = 1,
+  ISM330DHCX_EXT_ON_INT2_PIN = 1,
+  ISM330DHCX_XL_GY_DRDY      = 0,
 } ism330dhcx_start_config_t;
 int32_t ism330dhcx_sh_syncro_mode_set(stmdev_ctx_t *ctx,
                                       ism330dhcx_start_config_t val);
