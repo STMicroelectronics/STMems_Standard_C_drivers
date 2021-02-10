@@ -2500,8 +2500,8 @@ int32_t ism330dlc_sh_pin_mode_get(stmdev_ctx_t *ctx,
                                   ism330dlc_pull_up_en_t *val);
 
 typedef enum {
-  ISM330DLC_XL_GY_DRDY        = 0,
-  ISM330DLC_EXT_ON_INT2_PIN   = 1,
+  ISM330DLC_XL_GY_DRDY        = 1,
+  ISM330DLC_EXT_ON_INT2_PIN   = 0,
 } ism330dlc_start_config_t;
 int32_t ism330dlc_sh_syncro_mode_set(stmdev_ctx_t *ctx,
                                      ism330dlc_start_config_t val);
