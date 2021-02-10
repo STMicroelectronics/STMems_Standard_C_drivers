@@ -3537,8 +3537,8 @@ int32_t lsm6dso32_sh_pass_through_get(stmdev_ctx_t *ctx,
                                       uint8_t *val);
 
 typedef enum {
-  LSM6DSO32_EXT_ON_INT2_PIN = 0,
-  LSM6DSO32_XL_GY_DRDY      = 1,
+  LSM6DSO32_EXT_ON_INT2_PIN = 1,
+  LSM6DSO32_XL_GY_DRDY      = 0,
 } lsm6dso32_start_config_t;
 int32_t lsm6dso32_sh_syncro_mode_set(stmdev_ctx_t *ctx,
                                      lsm6dso32_start_config_t val);
