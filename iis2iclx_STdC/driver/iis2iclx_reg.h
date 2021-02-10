@@ -3011,8 +3011,8 @@ int32_t iis2iclx_sh_pass_through_set(stmdev_ctx_t *ctx, uint8_t val);
 int32_t iis2iclx_sh_pass_through_get(stmdev_ctx_t *ctx, uint8_t *val);
 
 typedef enum {
-  IIS2ICLX_EXT_ON_INT2_PIN = 0,
-  IIS2ICLX_XL_GY_DRDY      = 1,
+  IIS2ICLX_EXT_ON_INT2_PIN = 1,
+  IIS2ICLX_XL_GY_DRDY      = 0,
 } iis2iclx_start_config_t;
 int32_t iis2iclx_sh_syncro_mode_set(stmdev_ctx_t *ctx,
                                     iis2iclx_start_config_t val);
