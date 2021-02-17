@@ -2,13 +2,12 @@
  ******************************************************************************
  * @file    activity.c
  * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to detect activity/inactivity
- *          from sensor.
+ * @brief   This file show how to detect activity/inactivity from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -26,8 +25,6 @@
  * - STEVAL_MKI109V3 + STEVAL-MKI206V1
  * - NUCLEO_F411RE + STEVAL-MKI206V1
  * - DISCOVERY_SPC584B + STEVAL-MKI206V1
- *
- * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
  * Used interfaces:
  *
@@ -54,7 +51,7 @@
  */
 
 //#define STEVAL_MKI109V3  /* little endian */
-#define NUCLEO_F411RE    /* little endian */
+//#define NUCLEO_F411RE    /* little endian */
 //#define SPC584B_DIS      /* big endian */
 
 /* ATTENTION: By default the driver is little endian. If you need switch
@@ -95,6 +92,7 @@
 #include "usbd_cdc_if.h"
 #include "gpio.h"
 #include "spi.h"
+#include "tim.h"
 
 #elif defined(SPC584B_DIS)
 #include "components.h"
