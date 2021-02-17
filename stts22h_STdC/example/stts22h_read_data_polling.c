@@ -127,10 +127,10 @@ void stts22h_read_data_polling(void)
 
   /* Enable interrupt on high(=49.5 degC)/low(=2.5 degC) temperature. */
   //float temperature_high_limit = 49.5f;
-  //stts22h_temp_trshld_high_set(&dev_ctx, (int8_t)(temperature_high_limit / 64.0f) + 64 );
+  //stts22h_temp_trshld_high_set(&dev_ctx, (int8_t)(temperature_high_limit / 0.64f) + 64 );
 
   //float temperature_low_limit = 2.5f;
-  //stts22h_temp_trshld_low_set(&dev_ctx, (int8_t)(temperature_low_limit / 64.0f) + 64 );
+  //stts22h_temp_trshld_low_set(&dev_ctx, (int8_t)(temperature_low_limit / 0.64f) + 64 );
 
   /* Read samples in polling mode */
   while (1) {
