@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_polling.c
+ * @file    read_fifo.c
  * @author  Sensors Software Solution Team
- * @brief   This file show how to get data from sensor.
+ * @brief   This file show how to get data from sensor FIFO.
  *
  ******************************************************************************
  * @attention
@@ -32,7 +32,7 @@
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
  * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
- *                    - Sensor side: I2C(Default) / SPI(supported)
+ *                    - I2C(Default) / SPI(supported)
  *
  * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
  *                    - Sensor side: I2C(Default) / SPI(supported)
@@ -126,7 +126,7 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void ais2dw12_read_data_polling(void)
+void ais2dw12_read_data_fifo(void)
 {
   /* Initialize mems driver interface */
   stmdev_ctx_t dev_ctx;
@@ -140,11 +140,10 @@ void ais2dw12_read_data_polling(void)
   /* Check device ID */
   ais2dw12_device_id_get(&dev_ctx, &whoamI);
 
-  if (whoamI != AIS2DW12_ID) {
+  if (whoamI != AIS2DW12_ID)
     while (1) {
       /* manage here device not found */
     }
-  }
 
   /* Restore default configuration */
   ais2dw12_reset_set(&dev_ctx, PROPERTY_ENABLE);
@@ -156,38 +155,49 @@ void ais2dw12_read_data_polling(void)
   /* Enable Block Data Update */
   ais2dw12_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
   /* Set full scale */
+  //ais2dw12_full_scale_set(&dev_ctx, AIS2DW12_8g);
   ais2dw12_full_scale_set(&dev_ctx, AIS2DW12_2g);
   /* Configure filtering chain
-   *
    * Accelerometer - filter path / bandwidth
    */
   ais2dw12_filter_path_set(&dev_ctx, AIS2DW12_LPF_ON_OUT);
   ais2dw12_filter_bandwidth_set(&dev_ctx, AIS2DW12_ODR_DIV_4);
+  /* Configure FIFO */
+  ais2dw12_fifo_watermark_set(&dev_ctx, 10);
+  ais2dw12_fifo_mode_set(&dev_ctx, AIS2DW12_STREAM_MODE);
   /* Configure power mode */
-  ais2dw12_power_mode_set(&dev_ctx, AIS2DW12_PWR_MD_12bit);
+  ais2dw12_power_mode_set(&dev_ctx, AIS2DW12_PWR_MD_4);
+  //ais2dw12_power_mode_set(&dev_ctx, AIS2DW12_CONT_LOW_PWR_LOW_NOISE_12bit);
   /* Set Output Data Rate */
   ais2dw12_data_rate_set(&dev_ctx, AIS2DW12_XL_ODR_25Hz);
 
   /* Read samples in polling mode (no int) */
   while (1) {
-    uint8_t reg;
+    uint8_t val, i;
     /* Read output only if new value is available */
-    ais2dw12_flag_data_ready_get(&dev_ctx, &reg);
+    ais2dw12_fifo_wtm_flag_get(&dev_ctx, &val);
 
-    if (reg) {
-      /* Read acceleration data */
-      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
-      ais2dw12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-      acceleration_mg[0] = ais2dw12_from_fs2_12bit_to_mg(
-                             data_raw_acceleration[0]);
-      acceleration_mg[1] = ais2dw12_from_fs2_12bit_to_mg(
-                             data_raw_acceleration[1]);
-      acceleration_mg[2] = ais2dw12_from_fs2_12bit_to_mg(
-                             data_raw_acceleration[2]);
-      sprintf((char *)tx_buffer,
-              "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
+    if (val) {
+      ais2dw12_fifo_data_level_get(&dev_ctx, &val);
+
+      for (i = 0; i < val; i++) {
+        /* Read acceleration data */
+        memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
+        ais2dw12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
+        //acceleration_mg[0] = ais2dw12_from_fs8_lp1_to_mg(data_raw_acceleration[0]);
+        //acceleration_mg[1] = ais2dw12_from_fs8_lp1_to_mg(data_raw_acceleration[1]);
+        //acceleration_mg[2] = ais2dw12_from_fs8_lp1_to_mg(data_raw_acceleration[2]);
+        acceleration_mg[0] = ais2dw12_from_fs2_to_mg(
+                               data_raw_acceleration[0]);
+        acceleration_mg[1] = ais2dw12_from_fs2_to_mg(
+                               data_raw_acceleration[1]);
+        acceleration_mg[2] = ais2dw12_from_fs2_to_mg(
+                               data_raw_acceleration[2]);
+        sprintf((char *)tx_buffer,
+                "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+                acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
+      }
     }
   }
 }
@@ -249,7 +259,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 }
 
 /*
- * @brief  Send buffer to console (platform dependent)
+ * @brief  Write generic device register (platform dependent)
  *
  * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send
