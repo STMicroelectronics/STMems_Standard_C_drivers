@@ -178,9 +178,11 @@ void lis2dw12_read_data_fifo(void)
     uint8_t val, i;
     /* Read output only if new value is available */
     lis2dw12_fifo_wtm_flag_get(&dev_ctx, &val);
+
     if (val) {
       lis2dw12_fifo_data_level_get(&dev_ctx, &val);
-      for (i=0; i<val; i++) {
+
+      for (i = 0; i < val; i++) {
         /* Read acceleration data */
         memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
         lis2dw12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
