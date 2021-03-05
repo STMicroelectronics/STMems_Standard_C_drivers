@@ -527,7 +527,6 @@ typedef struct {
   uint8_t zh                         : 1;
   uint8_t zl                         : 1;
   uint8_t yh                         : 1;
-  uint8_t xh                         : 1;
   uint8_t yl                         : 1;
   uint8_t xh                         : 1;
   uint8_t xl                         : 1;
