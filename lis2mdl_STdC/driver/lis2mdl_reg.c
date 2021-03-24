@@ -124,12 +124,12 @@ int32_t lis2mdl_mag_user_offset_set(stmdev_ctx_t *ctx, int16_t *val)
 {
   uint8_t buff[6];
   int32_t ret;
-  buff[1] = (uint8_t) ( (uint8_t)val[0] / 256U);
-  buff[0] = (uint8_t) ( (uint8_t)val[0] - (buff[1] * 256U));
-  buff[3] = (uint8_t) ( (uint8_t)val[1] / 256U);
-  buff[2] = (uint8_t) ( (uint8_t)val[1] - (buff[1] * 256U));
-  buff[5] = (uint8_t) ( (uint8_t)val[2] / 256U);
-  buff[4] = (uint8_t) ( (uint8_t)val[2] - (buff[1] * 256U));
+  buff[1] = (uint8_t) ( (uint16_t)val[0] / 256U);
+  buff[0] = (uint8_t) ( (uint16_t)val[0] - (buff[1] * 256U));
+  buff[3] = (uint8_t) ( (uint16_t)val[1] / 256U);
+  buff[2] = (uint8_t) ( (uint16_t)val[1] - (buff[1] * 256U));
+  buff[5] = (uint8_t) ( (uint16_t)val[2] / 256U);
+  buff[4] = (uint8_t) ( (uint16_t)val[2] - (buff[1] * 256U));
   ret = lis2mdl_write_reg(ctx, LIS2MDL_OFFSET_X_REG_L, buff, 6);
   return ret;
 }
