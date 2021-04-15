@@ -17,7 +17,7 @@ git clone --recursive https://github.com/STMicroelectronics/STMems_Standard_C_dr
 
 Every *sensor driver* folder contains:
 
-- `xxxxxxx_STdC\driver` : the C sensor driver (.h and .c) to be included in your project. Driver documentation can be generated using the [Doxigen](http://www.doxygen.org/) tool.
+- `xxxxxxx_STdC\driver` : the C sensor driver (.h and .c) to be included in your project. Driver documentation can be generated using the [Doxygen](http://www.doxygen.org/) tool.
 - `xxxxxxx_STdC\example`:  examples showing how to integrate the C driver in a project. They are written for [STM32 Microcontrollers](https://www.st.com/en/microcontrollers.html) using the [STM32CubeMX](https://www.st.com/en/development-tools/stm32cubemx.html) tool, but they can be used as a guideline for every platform.
 - README: additional info about the specific driver.
 
