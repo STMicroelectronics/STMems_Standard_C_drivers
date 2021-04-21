@@ -2774,7 +2774,7 @@ int32_t lsm9ds1_pin_notification_set(stmdev_ctx_t *ctx_mag,
   }
 
   if (ret == 0) {
-    int_cfg_m.iel = (uint8_t)val;
+    int_cfg_m.iel = ! (uint8_t)val;
     ret = lsm9ds1_write_reg(ctx_mag, LSM9DS1_INT_CFG_M,
                             (uint8_t *)&int_cfg_m, 1);
   }
