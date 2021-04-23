@@ -160,6 +160,7 @@ int32_t lis25ba_bus_mode_set(stmdev_ctx_t *ctx,
   lis25ba_tdm_cmax_l_t tdm_cmax_l;
   uint8_t reg[2];
   int32_t ret;
+
   ret = lis25ba_read_reg(ctx, LIS25BA_TDM_CTRL_REG,
                          (uint8_t *)&tdm_ctrl_reg, 1);
 
@@ -167,24 +168,22 @@ int32_t lis25ba_bus_mode_set(stmdev_ctx_t *ctx,
     ret = lis25ba_read_reg(ctx, LIS25BA_TDM_CMAX_H, reg, 2);
     bytecpy( (uint8_t *)&tdm_cmax_h, &reg[0] );
     bytecpy( (uint8_t *)&tdm_cmax_l, &reg[1] );
+    tdm_ctrl_reg.tdm_pd = ~val->tdm.en;
+    tdm_ctrl_reg.data_valid = val->tdm.clk_pol;
+    tdm_ctrl_reg.delayed = val->tdm.clk_edge;
+    tdm_ctrl_reg.wclk_fq = val->tdm.mapping;
+    tdm_cmax_h.tdm_cmax = (uint8_t)(val->tdm.cmax / 256U);
+    tdm_cmax_l.tdm_cmax = (uint8_t)(val->tdm.cmax - tdm_cmax_h.tdm_cmax);
   }
-
-  tdm_ctrl_reg.tdm_pd = ~val->tdm.en;
-  tdm_ctrl_reg.data_valid = val->tdm.clk_pol;
-  tdm_ctrl_reg.delayed = val->tdm.clk_edge;
-  tdm_ctrl_reg.wclk_fq = val->tdm.mapping;
-  tdm_cmax_h.tdm_cmax = (uint8_t)(val->tdm.cmax / 256U);
-  tdm_cmax_l.tdm_cmax = (uint8_t)(val->tdm.cmax - tdm_cmax_h.tdm_cmax);
 
   if ( ret == 0 ) {
     ret = lis25ba_write_reg(ctx, LIS25BA_TDM_CTRL_REG,
                             (uint8_t *)&tdm_ctrl_reg, 1);
   }
 
-  bytecpy(&reg[0], ( uint8_t *)&tdm_cmax_h);
-  bytecpy(&reg[1], ( uint8_t *)&tdm_cmax_l);
-
   if ( ret == 0 ) {
+    bytecpy(&reg[0], ( uint8_t *)&tdm_cmax_h);
+    bytecpy(&reg[1], ( uint8_t *)&tdm_cmax_l);
     ret = lis25ba_write_reg(ctx, LIS25BA_TDM_CMAX_H, reg, 2);
   }
 

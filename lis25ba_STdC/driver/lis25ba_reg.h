@@ -303,10 +303,8 @@ int32_t lis25ba_id_get(stmdev_ctx_t *ctx, lis25ba_id_t *val);
 typedef struct {
   struct {
     uint8_t en       : 1; /* TDM interface 1=on / 0=off) */
-  uint8_t clk_pol  :
-    1; /* data valid on 0=rise/1=falling edge of BCLK */
-  uint8_t clk_edge :
-    1; /* data on 0=first / 1=second valid edge of BCLK */
+    uint8_t clk_pol  : 1; /* data valid on 0=rise/1=falling edge of BCLK */
+    uint8_t clk_edge : 1; /* data on 0=first / 1=second valid edge of BCLK */
     uint8_t mapping  : 1; /* xl data in 0=slot0-1-2 / 1=slot4-5-6 */
     uint16_t cmax    : 1; /* BCLK in a WCLK (unused if odr=_XL_HW_SEL) */
   } tdm;
