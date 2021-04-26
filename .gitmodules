@@ -4,3 +4,180 @@
 [submodule "_resources/STMems_Finite_State_Machine"]
 	path = _resources/STMems_Finite_State_Machine
 	url = https://github.com/STMicroelectronics/STMems_Finite_State_Machine
+[submodule "a3g4250d_STdC/driver"]
+	path = a3g4250d_STdC/driver
+	url = https://github.com/STMicroelectronics/a3g4250d
+[submodule "ais2dw12_STdC/driver"]
+	path = ais2dw12_STdC/driver
+	url = https://github.com/STMicroelectronics/ais2dw12
+[submodule "ais2ih_STdC/driver"]
+	path = ais2ih_STdC/driver
+	url = https://github.com/STMicroelectronics/ais2ih
+[submodule "ais328dq_STdC/driver"]
+	path = ais328dq_STdC/driver
+	url = https://github.com/STMicroelectronics/ais328dq
+[submodule "ais3624dq_STdC/driver"]
+	path = ais3624dq_STdC/driver
+	url = https://github.com/STMicroelectronics/ais3624dq
+[submodule "asm330lhh_STdC/driver"]
+	path = asm330lhh_STdC/driver
+	url = https://github.com/STMicroelectronics/asm330lhh
+[submodule "h3lis100dl_STdC/driver"]
+	path = h3lis100dl_STdC/driver
+	url = https://github.com/STMicroelectronics/h3lis100dl
+[submodule "h3lis331dl_STdC/driver"]
+	path = h3lis331dl_STdC/driver
+	url = https://github.com/STMicroelectronics/h3lis331dl
+[submodule "hts221_STdC/driver"]
+	path = hts221_STdC/driver
+	url = https://github.com/STMicroelectronics/hts221
+[submodule "i3g4250d_STdC/driver"]
+	path = i3g4250d_STdC/driver
+	url = https://github.com/STMicroelectronics/i3g4250d
+[submodule "iis2dh_STdC/driver"]
+	path = iis2dh_STdC/driver
+	url = https://github.com/STMicroelectronics/iis2dh
+[submodule "iis2dlpc_STdC/driver"]
+	path = iis2dlpc_STdC/driver
+	url = https://github.com/STMicroelectronics/iis2dlpc
+[submodule "iis2iclx_STdC/driver"]
+	path = iis2iclx_STdC/driver
+	url = https://github.com/STMicroelectronics/iis2iclx
+[submodule "iis2mdc_STdC/driver"]
+	path = iis2mdc_STdC/driver
+	url = https://github.com/STMicroelectronics/iis2mdc
+[submodule "iis328dq_STdC/driver"]
+	path = iis328dq_STdC/driver
+	url = https://github.com/STMicroelectronics/iis328dq
+[submodule "iis3dhhc_STdC/driver"]
+	path = iis3dhhc_STdC/driver
+	url = https://github.com/STMicroelectronics/iis3dhhc
+[submodule "iis3dwb_STdC/driver"]
+	path = iis3dwb_STdC/driver
+	url = https://github.com/STMicroelectronics/iis3dwb
+[submodule "ism303dac_STdC/driver"]
+	path = ism303dac_STdC/driver
+	url = https://github.com/STMicroelectronics/ism303dac
+[submodule "ism330dhcx_STdC/driver"]
+	path = ism330dhcx_STdC/driver
+	url = https://github.com/STMicroelectronics/ism330dhcx
+[submodule "ism330dlc_STdC/driver"]
+	path = ism330dlc_STdC/driver
+	url = https://github.com/STMicroelectronics/ism330dlc
+[submodule "l20g20is_STdC/driver"]
+	path = l20g20is_STdC/driver
+	url = https://github.com/STMicroelectronics/l20g20is
+[submodule "l3gd20h_STdC/driver"]
+	path = l3gd20h_STdC/driver
+	url = https://github.com/STMicroelectronics/l3gd20h
+[submodule "lis25ba_STdC/driver"]
+	path = lis25ba_STdC/driver
+	url = https://github.com/STMicroelectronics/lis25ba
+[submodule "lis2de12_STdC/driver"]
+	path = lis2de12_STdC/driver
+	url = https://github.com/STMicroelectronics/lis2de12
+[submodule "lis2dh12_STdC/driver"]
+	path = lis2dh12_STdC/driver
+	url = https://github.com/STMicroelectronics/lis2dh12
+[submodule "lis2ds12_STdC/driver"]
+	path = lis2ds12_STdC/driver
+	url = https://github.com/STMicroelectronics/lis2ds12
+[submodule "lis2dtw12_STdC/driver"]
+	path = lis2dtw12_STdC/driver
+	url = https://github.com/STMicroelectronics/lis2dtw12
+[submodule "lis2dw12_STdC/driver"]
+	path = lis2dw12_STdC/driver
+	url = https://github.com/STMicroelectronics/lis2dw12
+[submodule "lis2hh12_STdC/driver"]
+	path = lis2hh12_STdC/driver
+	url = https://github.com/STMicroelectronics/lis2hh12
+[submodule "lis2mdl_STdC/driver"]
+	path = lis2mdl_STdC/driver
+	url = https://github.com/STMicroelectronics/lis2mdl
+[submodule "lis331dlh_STdC/driver"]
+	path = lis331dlh_STdC/driver
+	url = https://github.com/STMicroelectronics/lis331dlh
+[submodule "lis3de_STdC/driver"]
+	path = lis3de_STdC/driver
+	url = https://github.com/STMicroelectronics/lis3de
+[submodule "lis3dhh_STdC/driver"]
+	path = lis3dhh_STdC/driver
+	url = https://github.com/STMicroelectronics/lis3dhh
+[submodule "lis3dh_STdC/driver"]
+	path = lis3dh_STdC/driver
+	url = https://github.com/STMicroelectronics/lis3dh
+[submodule "lis3dsh_STdC/driver"]
+	path = lis3dsh_STdC/driver
+	url = https://github.com/STMicroelectronics/lis3dsh
+[submodule "lis3mdl_STdC/driver"]
+	path = lis3mdl_STdC/driver
+	url = https://github.com/STMicroelectronics/lis3mdl
+[submodule "lps22ch_STdC/driver"]
+	path = lps22ch_STdC/driver
+	url = https://github.com/STMicroelectronics/lps22ch
+[submodule "lps22hb_STdC/driver"]
+	path = lps22hb_STdC/driver
+	url = https://github.com/STMicroelectronics/lps22hb
+[submodule "lps22hh_STdC/driver"]
+	path = lps22hh_STdC/driver
+	url = https://github.com/STMicroelectronics/lps22hh
+[submodule "lps25hb_STdC/driver"]
+	path = lps25hb_STdC/driver
+	url = https://github.com/STMicroelectronics/lps25hb
+[submodule "lps27hhtw_STdC/driver"]
+	path = lps27hhtw_STdC/driver
+	url = https://github.com/STMicroelectronics/lps27hhtw
+[submodule "lps27hhw_STdC/driver"]
+	path = lps27hhw_STdC/driver
+	url = https://github.com/STMicroelectronics/lps27hhw
+[submodule "lps33hw_STdC/driver"]
+	path = lps33hw_STdC/driver
+	url = https://github.com/STMicroelectronics/lps33hw
+[submodule "lps33k_STdC/driver"]
+	path = lps33k_STdC/driver
+	url = https://github.com/STMicroelectronics/lps33k
+[submodule "lps33w_STdC/driver"]
+	path = lps33w_STdC/driver
+	url = https://github.com/STMicroelectronics/lps33w
+[submodule "lsm303agr_STdC/driver"]
+	path = lsm303agr_STdC/driver
+	url = https://github.com/STMicroelectronics/lsm303agr
+[submodule "lsm303ah_STdC/driver"]
+	path = lsm303ah_STdC/driver
+	url = https://github.com/STMicroelectronics/lsm303ah
+[submodule "lsm6ds3tr-c_STdC/driver"]
+	path = lsm6ds3tr-c_STdC/driver
+	url = https://github.com/STMicroelectronics/lsm6ds3tr-c
+[submodule "lsm6ds3_STdC/driver"]
+	path = lsm6ds3_STdC/driver
+	url = https://github.com/STMicroelectronics/lsm6ds3
+[submodule "lsm6dsl_STdC/driver"]
+	path = lsm6dsl_STdC/driver
+	url = https://github.com/STMicroelectronics/lsm6dsl
+[submodule "lsm6dsm_STdC/driver"]
+	path = lsm6dsm_STdC/driver
+	url = https://github.com/STMicroelectronics/lsm6dsm
+[submodule "lsm6dso32_STdC/driver"]
+	path = lsm6dso32_STdC/driver
+	url = https://github.com/STMicroelectronics/lsm6dso32
+[submodule "lsm6dsox_STdC/driver"]
+	path = lsm6dsox_STdC/driver
+	url = https://github.com/STMicroelectronics/lsm6dsox
+[submodule "lsm6dso_STdC/driver"]
+	path = lsm6dso_STdC/driver
+	url = https://github.com/STMicroelectronics/lsm6dso
+[submodule "lsm6dsrx_STdC/driver"]
+	path = lsm6dsrx_STdC/driver
+	url = https://github.com/STMicroelectronics/lsm6dsrx
+[submodule "lsm6dsr_STdC/driver"]
+	path = lsm6dsr_STdC/driver
+	url = https://github.com/STMicroelectronics/lsm6dsr
+[submodule "lsm9ds1_STdC/driver"]
+	path = lsm9ds1_STdC/driver
+	url = https://github.com/STMicroelectronics/lsm9ds1
+[submodule "stts22h_STdC/driver"]
+	path = stts22h_STdC/driver
+	url = https://github.com/STMicroelectronics/stts22h
+[submodule "stts751_STdC/driver"]
+	path = stts751_STdC/driver
+	url = https://github.com/STMicroelectronics/stts751
