@@ -93,6 +93,7 @@
 #include "usbd_cdc_if.h"
 #include "gpio.h"
 #include "spi.h"
+#include "tim.h"
 
 #elif defined(SPC584B_DIS)
 #include "components.h"
