@@ -244,3 +244,7 @@
 	path = lsm6dso32x_STdC/driver
 	url = https://github.com/STMicroelectronics/lsm6dso32x
 	branch = master
+[submodule "lis2dh_STdC/driver"]
+	path = lis2dh_STdC/driver
+	url = https://github.com/STMicroelectronics/lis2dh.git
+	branch = master
