@@ -96,8 +96,7 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg,
-                              uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -166,15 +165,15 @@ void stts751_read_data_polling(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg,
-                              uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
   HAL_I2C_Mem_Write(handle, STTS751_0xxxx_ADD_7K5, reg,
-                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+                    I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, len, 1000);
 #elif defined(SPC584B_DIS)
-  i2c_lld_write(handle,  STTS751_0xxxx_ADD_7K5 & 0xFE, reg, bufp, len);
+  i2c_lld_write(handle,  STTS751_0xxxx_ADD_7K5 & 0xFE, reg,
+               (uint8_t*) bufp, len);
 #endif
   return 0;
 }
