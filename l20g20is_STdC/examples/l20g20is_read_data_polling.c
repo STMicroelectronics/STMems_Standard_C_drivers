@@ -62,6 +62,8 @@
 #include "usbd_cdc_if.h"
 #include "gpio.h"
 #include "spi.h"
+#include "tim.h"
+
 #endif
 
 
@@ -83,8 +85,7 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg,
-                              uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -166,14 +167,13 @@ void l20g20is_read_data_polling(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg,
-                              uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len)
 {
 #ifdef STEVAL_MKI109V3
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
   HAL_SPI_Transmit(handle, &reg, 1, 1000);
-  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_SPI_Transmit(handle, (uint8_t*) bufp, len, 1000);
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #endif
   return 0;
@@ -240,6 +240,6 @@ static void platform_init(void)
   TIM3->CCR2 = PWM_3V3;
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
-  HAL_Delay(1000);
+  platform_delay(1000);
 #endif
 }
