@@ -44,7 +44,7 @@
  * following target board and redefine yours.
  */
 
-#define STEVAL_MKI109V3  /* little endian */
+//#define STEVAL_MKI109V3  /* little endian */
 
 
 /* ATTENTION: By default the driver is little endian. If you need switch
@@ -70,6 +70,7 @@
 #include "usbd_cdc_if.h"
 #include "gpio.h"
 #include "spi.h"
+#include "tim.h"
 
 #endif
 
@@ -91,8 +92,7 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg,
-                              uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -176,8 +176,7 @@ void lis3dhh_multi_read_fifo(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg,
-                              uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len)
 {
 #ifdef STEVAL_MKI109V3
@@ -185,7 +184,7 @@ static int32_t platform_write(void *handle, uint8_t reg,
   if (handle == &hspi2) {
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
+    HAL_SPI_Transmit(handle, (uint8_t*) bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
   }
 
