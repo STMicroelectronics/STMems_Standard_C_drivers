@@ -53,7 +53,7 @@
  */
 
 //#define STEVAL_MKI109V3  /* little endian */
-#define NUCLEO_F411RE    /* little endian */
+//#define NUCLEO_F411RE    /* little endian */
 //#define SPC584B_DIS      /* big endian */
 
 /* ATTENTION: By default the driver is little endian. If you need switch
@@ -93,6 +93,7 @@
 #include "usbd_cdc_if.h"
 #include "gpio.h"
 #include "spi.h"
+#include "tim.h"
 
 #elif defined(SPC584B_DIS)
 #include "components.h"
@@ -117,8 +118,7 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg,
-                              uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -151,7 +151,7 @@ void hts221_read_data_polling(void)
   stmdev_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
-  dev_ctx.handle = &hi2c1;
+  dev_ctx.handle = &SENSOR_BUS;
   /* Check device ID */
   whoamI = 0;
   hts221_device_id_get(&dev_ctx, &whoamI);
@@ -225,26 +225,26 @@ void hts221_read_data_polling(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg,
-                              uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
   /* Write multiple command */
   reg |= 0x80;
   HAL_I2C_Mem_Write(handle, HTS221_I2C_ADDRESS, reg,
-                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+                    I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
   /* Write multiple command */
   reg |= 0x40;
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
   HAL_SPI_Transmit(handle, &reg, 1, 1000);
-  HAL_SPI_Transmit(handle, bufp, len, 1000);
+  HAL_SPI_Transmit(handle, (uint8_t*) bufp, len, 1000);
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   /* Write multiple command */
   reg |= 0x80;
-  i2c_lld_write(handle,  HTS221_I2C_ADDRESS & 0xFE, reg, bufp, len);
+  i2c_lld_write(handle,  HTS221_I2C_ADDRESS & 0xFE, reg,
+               (uint8_t*) bufp, len);
 #endif
   return 0;
 }
@@ -325,6 +325,6 @@ static void platform_init(void)
   TIM3->CCR2 = PWM_3V3;
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
-  HAL_Delay(1000);
+  platform_delay(1000);
 #endif
 }
