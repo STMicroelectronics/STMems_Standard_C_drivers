@@ -153,17 +153,13 @@ static uint8_t tx_buffer[1000];
  *
  */
 static int32_t platform_write_imu(void *handle, uint8_t reg,
-                                  uint8_t *bufp,
-                                  uint16_t len);
+                                  const uint8_t *bufp, uint16_t len);
 static int32_t platform_read_imu(void *handle, uint8_t reg,
-                                 uint8_t *bufp,
-                                 uint16_t len);
+                                 uint8_t *bufp, uint16_t len);
 static int32_t platform_write_mag(void *handle, uint8_t reg,
-                                  uint8_t *bufp,
-                                  uint16_t len);
+                                  const uint8_t *bufp, uint16_t len);
 static int32_t platform_read_mag(void *handle, uint8_t reg,
-                                 uint8_t *bufp,
-                                 uint16_t len);
+                                 uint8_t *bufp, uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void);
@@ -285,21 +281,20 @@ void lsm9ds1_read_data_polling(void)
  *
  */
 static int32_t platform_write_imu(void *handle, uint8_t reg,
-                                  uint8_t *bufp,
-                                  uint16_t len)
+                                  const uint8_t *bufp, uint16_t len)
 {
   sensbus_t *sensbus = (sensbus_t *)handle;
 #if defined(NUCLEO_F411RE)
   HAL_I2C_Mem_Write(sensbus->hbus, sensbus->i2c_address, reg,
-                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+                    I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
   HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_RESET);
   HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
-  HAL_SPI_Transmit(sensbus->hbus, bufp, len, 1000);
+  HAL_SPI_Transmit(sensbus->hbus, (uint8_t*) bufp, len, 1000);
   HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
-  i2c_lld_write(sensbus->hbus,  sensbus->i2c_address & 0xFE, reg, bufp,
-                len);
+  i2c_lld_write(sensbus->hbus,  sensbus->i2c_address & 0xFE, reg,
+                (uint8_t*) bufp, len);
 #endif
   return 0;
 }
@@ -315,27 +310,26 @@ static int32_t platform_write_imu(void *handle, uint8_t reg,
  *
  */
 static int32_t platform_write_mag(void *handle, uint8_t reg,
-                                  uint8_t *bufp,
-                                  uint16_t len)
+                                  const uint8_t *bufp, uint16_t len)
 {
   sensbus_t *sensbus = (sensbus_t *)handle;
 #if defined(NUCLEO_F411RE)
   /* Write multiple command */
   reg |= 0x80;
   HAL_I2C_Mem_Write(sensbus->hbus, sensbus->i2c_address, reg,
-                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+                    I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
   /* Write multiple command */
   reg |= 0x40;
   HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_RESET);
   HAL_SPI_Transmit(sensbus->hbus, &reg, 1, 1000);
-  HAL_SPI_Transmit(sensbus->hbus, bufp, len, 1000);
+  HAL_SPI_Transmit(sensbus->hbus, (uint8_t*) bufp, len, 1000);
   HAL_GPIO_WritePin(sensbus->cs_port, sensbus->cs_pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   /* Write multiple command */
   reg |= 0x80;
-  i2c_lld_write(sensbus->hbus, sensbus->i2c_address & 0xFE, reg, bufp,
-                len);
+  i2c_lld_write(sensbus->hbus, sensbus->i2c_address & 0xFE, reg,
+                (uint8_t*) bufp, len);
 #endif
   return 0;
 }
@@ -351,8 +345,7 @@ static int32_t platform_write_mag(void *handle, uint8_t reg,
  *
  */
 static int32_t platform_read_imu(void *handle, uint8_t reg,
-                                 uint8_t *bufp,
-                                 uint16_t len)
+                                 uint8_t *bufp, uint16_t len)
 {
   sensbus_t *sensbus = (sensbus_t *)handle;
 #if defined(NUCLEO_F411RE)
@@ -383,8 +376,7 @@ static int32_t platform_read_imu(void *handle, uint8_t reg,
  *
  */
 static int32_t platform_read_mag(void *handle, uint8_t reg,
-                                 uint8_t *bufp,
-                                 uint16_t len)
+                                 uint8_t *bufp, uint16_t len)
 {
   sensbus_t *sensbus = (sensbus_t *)handle;
 #if defined(NUCLEO_F411RE)
