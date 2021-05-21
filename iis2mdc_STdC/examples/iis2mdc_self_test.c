@@ -109,8 +109,7 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg,
-                              uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -295,15 +294,14 @@ void iis2mdc_self_test(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg,
-                              uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
   HAL_I2C_Mem_Write(handle, IIS2MDC_I2C_ADD, reg,
-                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+                    I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, len, 1000);
 #elif defined(SPC584B_DIS)
-  i2c_lld_write(handle,  IIS2MDC_I2C_ADD & 0xFE, reg, bufp, len);
+  i2c_lld_write(handle,  IIS2MDC_I2C_ADD & 0xFE, reg, (uint8_t*) bufp, len);
 #endif
   return 0;
 }
