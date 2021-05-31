@@ -17,7 +17,7 @@ git clone --recursive https://github.com/STMicroelectronics/STMems_Standard_C_dr
 
 Every *sensor driver* folder contains:
 
-- `xxxxxxx_STdC\driver` : the C sensor driver (.h and .c) to be included in your project. Driver documentation can be generated using the [Doxygen](http://www.doxygen.org/) tool.
+- `xxxxxxx_STdC\driver` : this folder points to another repository which contains only the sensor driver files (.h and .c) to be included, or linked directly as a git submodule, in your project. Driver documentation can be generated using the [Doxygen](http://www.doxygen.org/) tool.
 - `xxxxxxx_STdC\example`:  examples showing how to integrate the C driver in a project. They are written for [STM32 Microcontrollers](https://www.st.com/en/microcontrollers.html) using the [STM32CubeMX](https://www.st.com/en/development-tools/stm32cubemx.html) tool, but they can be used as a guideline for every platform.
 - README: additional info about the specific driver.
 
@@ -30,7 +30,7 @@ Using the [STM32CubeMX](https://www.st.com/en/development-tools/stm32cubemx.html
 ------
 
 # 2 - Integration details
-The driver is platform-independent, you only need to define the two functions for read and write transactions from the sensor hardware bus (ie. SPI or I²C).
+The driver is platform-independent, you only need to define the two functions for read and write transactions from the sensor hardware bus (ie. SPI or I²C). **A few devices integrate an extra bit in the communication protocol in order to enable multi read/write access, this bit must be managed in read and write functions defined by the user.** Please refer to the read and write implementation in the reference examples.
 
 ### 2.a Source code integration
 
