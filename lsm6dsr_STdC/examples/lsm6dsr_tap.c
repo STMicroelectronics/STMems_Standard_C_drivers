@@ -155,7 +155,7 @@ void lsm6dsr_tap(void)
   /* Disable I3C interface */
   lsm6dsr_i3c_disable_set(&dev_ctx, LSM6DSR_I3C_DISABLE);
   /* Set XL Output Data Rate to 417 Hz */
-  lsm6dsr_xl_data_rate_set(&dev_ctx, LSM6DSR_XL_ODR_417Hz);
+  lsm6dsr_xl_data_rate_set(&dev_ctx, LSM6DSR_XL_ODR_416Hz);
   /* Set 2g full XL scale */
   lsm6dsr_xl_full_scale_set(&dev_ctx, LSM6DSR_2g);
   /* Enable Tap detection on X, Y, Z */

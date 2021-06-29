@@ -76,7 +76,7 @@
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include "lsm6ds3tr_c_reg.h"
+#include "lsm6ds3tr-c_reg.h"
 #include <string.h>
 #include <stdio.h>
 

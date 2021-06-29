@@ -155,7 +155,7 @@ void lsm6dsrx_wake_up(void)
   /* Disable I3C interface */
   lsm6dsrx_i3c_disable_set(&dev_ctx, LSM6DSRX_I3C_DISABLE);
   /* Set XL Output Data Rate to 416 Hz */
-  lsm6dsrx_xl_data_rate_set(&dev_ctx, LSM6DSRX_XL_ODR_417Hz);
+  lsm6dsrx_xl_data_rate_set(&dev_ctx, LSM6DSRX_XL_ODR_416Hz);
   /* Set 2g full XL scale */
   lsm6dsrx_xl_full_scale_set(&dev_ctx, LSM6DSRX_2g);
   /* Apply high-pass digital filter on Wake-Up function */

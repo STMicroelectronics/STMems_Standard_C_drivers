@@ -158,7 +158,7 @@ void asm330lhh_free_fall(void)
   /* Start device configuration. */
   asm330lhh_device_conf_set(&dev_ctx, PROPERTY_ENABLE);
   /* Set XL Output Data Rate */
-  asm330lhh_xl_data_rate_set(&dev_ctx, ASM330LHH_XL_ODR_417Hz);
+  asm330lhh_xl_data_rate_set(&dev_ctx, ASM330LHH_XL_ODR_416Hz);
   /* Set 2g full XL scale */
   asm330lhh_xl_full_scale_set(&dev_ctx, ASM330LHH_2g);
   /* Enable LIR */
