@@ -101,7 +101,16 @@ If a different MCU is used, please follow these steps:
 
 ------
 
+# 4 - Note
+
+A number of BSP **components** drivers (particularly of MEMS) come in **two forms**, each addressing a different purpose. For each one of such BSP components drivers, **two repositories** are available as explained below:
+
+* **PID:** Platform-Independent Drivers. Recognizable to their repositories' names *\<bspcomp\>* (**e.g.**, [hts221](https://github.com/STMicroelectronics/hts221)). Are these **low-level** drivers allowing direct access to components' registers. They are independent of any software platform, as the acronym PID suggests. The complete list can be found by referring the folders' list in the `<> Code` tab.
+
+* **STM32:** STM32Cube-compatible drivers. Recognizable to their repositories' names *stm32-\<bspcomp\>* (**e.g.**, [stm32-hts221](https://github.com/STMicroelectronics/stm32-hts221)). Are **hardware-abstracted** drivers, specially designed to be compatible with the STM32Cube software offer, as the `stm32-` prefix suggests. The complete list is provided [here](https://github.com/STMicroelectronics/STM32Cube_MCU_Overall_Offer/blob/master/README.md#stm32cube-bsp-components-drivers) (refer particularly to tables `MEMS` and `Temperature Sensor`).
+
+------
+
 **More Information: [http://www.st.com](http://st.com/MEMS)**
 
 **Copyright (C) 2018 STMicroelectronics**
-
