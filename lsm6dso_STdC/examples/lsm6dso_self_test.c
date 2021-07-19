@@ -286,7 +286,7 @@ void lsm6dso_self_test(void)
   for (i = 0; i < 5; i++) {
     /* Check if new value available */
     do {
-      lsm6dso_xl_flag_data_ready_get(&dev_ctx, &drdy);
+      lsm6dso_gy_flag_data_ready_get(&dev_ctx, &drdy);
     } while (!drdy);
 
     /* Read data and accumulate the mg value */
@@ -313,7 +313,7 @@ void lsm6dso_self_test(void)
   for (i = 0; i < 5; i++) {
     /* Check if new value available */
     do {
-      lsm6dso_xl_flag_data_ready_get(&dev_ctx, &drdy);
+      lsm6dso_gy_flag_data_ready_get(&dev_ctx, &drdy);
     } while (!drdy);
 
     /* Read data and accumulate the mg value */
