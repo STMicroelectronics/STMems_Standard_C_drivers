@@ -151,10 +151,10 @@ void iis3dwb_read_data_polling(void)
   /* Set full scale */
   iis3dwb_xl_full_scale_set(&dev_ctx, IIS3DWB_2g);
   /* Configure filtering chain(No aux interface)
-   * Accelerometer - LPF1 + LPF2 path
+   * Accelerometer low pass filter path
    */
-  iis3dwb_xl_hp_path_on_out_set(&dev_ctx, IIS3DWB_LP_ODR_DIV_100);
-  iis3dwb_xl_filter_lp2_set(&dev_ctx, PROPERTY_ENABLE);
+  iis3dwb_xl_filt_path_on_out_set(&dev_ctx, IIS3DWB_LP_ODR_DIV_100);
+
 
   /* Read samples in polling mode (no int) */
   while (1) {
