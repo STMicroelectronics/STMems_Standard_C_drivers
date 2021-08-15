@@ -1,7 +1,7 @@
 /******************************************************************************
- * @file    _read_data_polling.c
- * @author  Sensors Software Solution Team
- * @brief   This file show the simplest way to get data from sensor.
+ * @file    _pedometer.c
+ * @author  Talha KOÇAK
+ * @brief   This file show the simplest way to get step count from sensor.
  *
  ******************************************************************************
  * @attention
