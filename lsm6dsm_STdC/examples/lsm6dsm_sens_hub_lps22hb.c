@@ -118,7 +118,7 @@ typedef union {
 /* Private macro -------------------------------------------------------------*/
 #define    BOOT_TIME          15 //ms
 #define OUT_XYZ_SIZE           6
-#define PRESS_OUT_XYZ_SIZE     3
+#define PRESS_OUT_XYZ_SIZE     4
 #define TEMP_OUT_XYZ_SIZE      2
 
 /* Private variables ---------------------------------------------------------*/
@@ -254,7 +254,7 @@ void example_sensor_hub_lps22hb_no_fifo_lsm6dsm(void)
 {
   lsm6dsm_sh_cfg_read_t lps22hb_conf = {
     .slv_add = LPS22HB_I2C_ADD_H,
-    .slv_subadd = LPS22HB_PRESS_OUT_XL,
+    .slv_subadd = LPS22HB_STATUS,
     .slv_len = OUT_XYZ_SIZE,
   };
   dev_ctx.write_reg = platform_write;
@@ -339,12 +339,16 @@ void example_sensor_hub_lps22hb_no_fifo_lsm6dsm(void)
        */
       lsm6dsm_sh_read_data_raw_get(&dev_ctx,
                                    (lsm6dsm_emb_sh_read_t *)&emb_sh);
-      memcpy(data_raw_pressure.u8bit,
-             (uint8_t *)&emb_sh[0],
-             PRESS_OUT_XYZ_SIZE);
-      memcpy(&data_raw_temperature,
-             (uint8_t *)&emb_sh[3],
-             TEMP_OUT_XYZ_SIZE);
+      memcpy(data_raw_pressure.u8bit, (uint8_t *)&emb_sh[0], PRESS_OUT_XYZ_SIZE);
+      memcpy(&data_raw_temperature, (uint8_t *)&emb_sh[3], TEMP_OUT_XYZ_SIZE);
+      /* Please note: the conversion function lps22hb_from_lsb_to_hpa
+       * work on uint32_t format left-aligned (not 24 bit), so an
+       * additional 8-bit shift is required (4096.0f * 256 = 1048576.0f
+       * sensitivity apply by the function).
+       * In this case status register is in the lower position and
+       * is used to perform the 8 bit shift.
+       * */
+      data_raw_pressure.u8bit[0] = 0x00; // set to zero the status register
       pressure_hPa = lps22hb_from_lsb_to_hpa(data_raw_pressure.i32bit);
       temperature_degC = lps22hb_from_lsb_to_degc(data_raw_temperature);
       sprintf((char *)tx_buffer, "Press [hPa]:%4.2f\t\r\n", pressure_hPa);
