@@ -315,7 +315,14 @@ void lsm6dsox_sh_fifo_lps22hh(void)
           case LSM6DSOX_SENSORHUB_SLAVE0_TAG:
             memset(data_raw_press_temp.u8bit, 0x00, sizeof(p_and_t_byte_t));
             lsm6dsox_fifo_out_raw_get(&ag_ctx, data_raw_press_temp.u8bit);
-            data_raw_press_temp.u8bit[0] = 0x00; /* remove status register */
+            /* Please note: the conversion function lps22hh_from_lsb_to_hpa
+             * work on uint32_t format left-aligned (not 24 bit), so an
+             * additional 8-bit shift is required (4096.0f * 256 = 1048576.0f
+             * sensitivity apply by the function).
+             * In this case status register is in the lower position and
+             * is used to perform the 8 bit shift.
+             * */
+            data_raw_press_temp.u8bit[0] = 0x00; // set to zero the status register
             pressure_hPa = lps22hh_from_lsb_to_hpa(
                              data_raw_press_temp.p_and_t.u32bit);
             temperature_degC = lps22hh_from_lsb_to_celsius(
