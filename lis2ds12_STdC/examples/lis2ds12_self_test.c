@@ -137,11 +137,11 @@ void lis2ds12_self_test(void)
 {
   stmdev_ctx_t dev_ctx_xl;
   uint8_t tx_buffer[1000];
-  int16_t data_raw[3];
-  float maes_st_off[3];
-  float maes_st_on[3];
+  int16_t data_raw[3] = {0};
+  float maes_st_off[3] = {0};
+  float maes_st_on[3] = {0};
   lis2ds12_reg_t reg;
-  float test_val[3];
+  float test_val[3] = {0};
   uint8_t st_result;
   uint8_t i, j;
   /* Initialize mems driver interface */
