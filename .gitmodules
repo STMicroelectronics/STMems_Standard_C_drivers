@@ -248,3 +248,6 @@
 	path = lis2dh_STdC/driver
 	url = https://github.com/STMicroelectronics/lis2dh.git
 	branch = master
+[submodule "lps22df_STdC/driver"]
+	path = lps22df_STdC/driver
+	url = https://github.com/STMicroelectronics/lps22df
