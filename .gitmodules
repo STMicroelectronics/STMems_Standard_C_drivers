@@ -100,6 +100,10 @@
 	path = lis2de12_STdC/driver
 	url = https://github.com/STMicroelectronics/lis2de12
 	branch = master
+[submodule "lis2dh_STdC/driver"]
+	path = lis2dh_STdC/driver
+	url = https://github.com/STMicroelectronics/lis2dh.git
+	branch = master
 [submodule "lis2dh12_STdC/driver"]
 	path = lis2dh12_STdC/driver
 	url = https://github.com/STMicroelectronics/lis2dh12
@@ -151,6 +155,10 @@
 [submodule "lps22ch_STdC/driver"]
 	path = lps22ch_STdC/driver
 	url = https://github.com/STMicroelectronics/lps22ch
+	branch = master
+[submodule "lps22df_STdC/driver"]
+	path = lps22df_STdC/driver
+	url = https://github.com/STMicroelectronics/lps22df
 	branch = master
 [submodule "lps22hb_STdC/driver"]
 	path = lps22hb_STdC/driver
@@ -220,6 +228,10 @@
 	path = lsm6dso_STdC/driver
 	url = https://github.com/STMicroelectronics/lsm6dso
 	branch = master
+[submodule "lsm6dso32x_STdC/driver"]
+	path = lsm6dso32x_STdC/driver
+	url = https://github.com/STMicroelectronics/lsm6dso32x
+	branch = master
 [submodule "lsm6dsrx_STdC/driver"]
 	path = lsm6dsrx_STdC/driver
 	url = https://github.com/STMicroelectronics/lsm6dsrx
@@ -240,14 +252,3 @@
 	path = stts751_STdC/driver
 	url = https://github.com/STMicroelectronics/stts751
 	branch = master
-[submodule "lsm6dso32x_STdC/driver"]
-	path = lsm6dso32x_STdC/driver
-	url = https://github.com/STMicroelectronics/lsm6dso32x
-	branch = master
-[submodule "lis2dh_STdC/driver"]
-	path = lis2dh_STdC/driver
-	url = https://github.com/STMicroelectronics/lis2dh.git
-	branch = master
-[submodule "lps22df_STdC/driver"]
-	path = lps22df_STdC/driver
-	url = https://github.com/STMicroelectronics/lps22df
