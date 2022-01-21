@@ -180,6 +180,10 @@
 	path = lps27hhw_STdC/driver
 	url = https://github.com/STMicroelectronics/lps27hhw
 	branch = master
+[submodule "lps28dfw_STdC/driver"]
+	path = lps28dfw_STdC/driver
+	url = https://github.com/STMicroelectronics/lps28dfw
+	branch = master
 [submodule "lps33hw_STdC/driver"]
 	path = lps33hw_STdC/driver
 	url = https://github.com/STMicroelectronics/lps33hw
