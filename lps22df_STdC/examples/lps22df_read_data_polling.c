@@ -183,7 +183,7 @@ void lps22df_read_data_polling(void)
     /* Read output only if new values are available */
     lps22df_all_sources_get(&dev_ctx, &all_sources);
     if ( all_sources.drdy_pres | all_sources.drdy_temp ) {
-      lps22df_data_get(&dev_ctx, &md, &data);
+      lps22df_data_get(&dev_ctx, &data);
 
       sprintf((char*)tx_buffer,
               "pressure [hPa]:%6.2f temperature [degC]:%6.2f\r\n",
@@ -209,7 +209,7 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-  HAL_I2C_Mem_Write(handle, LPS22DF_I2C_ADD, reg,
+  HAL_I2C_Mem_Write(handle, LPS22DF_I2C_ADD_L, reg,
                     I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
@@ -217,7 +217,7 @@ static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
   HAL_SPI_Transmit(handle, bufp, len, 1000);
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
-  i2c_lld_write(handle,  LPS22DF_I2C_ADD & 0xFE, reg, bufp, len);
+  i2c_lld_write(handle,  LPS22DF_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
@@ -236,7 +236,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-  HAL_I2C_Mem_Read(handle, LPS22DF_I2C_ADD, reg,
+  HAL_I2C_Mem_Read(handle, LPS22DF_I2C_ADD_L, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
   reg |= 0x80;
@@ -245,7 +245,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   HAL_SPI_Receive(handle, bufp, len, 1000);
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
-  i2c_lld_read(handle, LPS22DF_I2C_ADD & 0xFE, reg, bufp, len);
+  i2c_lld_read(handle, LPS22DF_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
