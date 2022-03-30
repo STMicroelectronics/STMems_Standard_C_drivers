@@ -256,3 +256,6 @@
 	path = stts751_STdC/driver
 	url = https://github.com/STMicroelectronics/stts751
 	branch = master
+[submodule "asm330lhhx_STdC/driver"]
+	path = asm330lhhx_STdC/driver
+	url = https://github.com/STMicroelectronics/asm330lhhx.git
