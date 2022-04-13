@@ -113,5 +113,5 @@ If a different MCU is used, please follow these steps:
 
 **More information: [http://www.st.com](http://st.com/MEMS)**
 
-**Copyright (C) 2018-2021 STMicroelectronics**
+**Copyright (C) 2018-2022 STMicroelectronics**
 
