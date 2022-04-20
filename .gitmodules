@@ -262,3 +262,6 @@
 [submodule "ilps22qs_STdC/driver"]
 	path = ilps22qs_STdC/driver
 	url = https://github.com/STMicroelectronics/ilps22qs.git
+[submodule "_resources/FIFO_Utility_Tool"]
+	path = _resources/FIFO_Utility_Tool
+	url = https://github.com/STMicroelectronics/FIFO_Utility_Tool

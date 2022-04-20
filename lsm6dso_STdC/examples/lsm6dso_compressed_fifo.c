@@ -81,7 +81,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "lsm6dso_reg.h"
-#include "fifo_utility.h"
+#include "st_fifo.h"
 
 #if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
@@ -136,14 +136,14 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
-sensor_data_t sensor_data;
-
 /* Main Example --------------------------------------------------------------*/
 void example_compressed_fifo_simple_lsm6dso(void)
 {
   lsm6dso_emb_sens_t emb_sens;
   uint16_t out_slot_size;
   stmdev_ctx_t dev_ctx;
+  st_fifo_conf conf;
+
   /* Uncomment to configure INT 1 */
   //lsm6dso_pin_int1_route_t int1_route;
   /* Uncomment to configure INT 2 */
@@ -156,8 +156,7 @@ void example_compressed_fifo_simple_lsm6dso(void)
   platform_init();
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-  /* Init utility for FIFO decompression */
-  st_fifo_init(0, 0, 0);
+
   /* Check device ID */
   lsm6dso_device_id_get(&dev_ctx, &whoamI);
 
@@ -170,6 +169,14 @@ void example_compressed_fifo_simple_lsm6dso(void)
   do {
     lsm6dso_reset_get(&dev_ctx, &rst);
   } while (rst);
+
+  /* Init utility for FIFO decompression */
+  conf.device = ST_FIFO_LSM6DSO;
+  conf.bdr_xl = 13.0f;
+  conf.bdr_gy = 13.0f;
+  conf.bdr_vsens = 0;
+
+  st_fifo_init(&conf);
 
   /* Disable I3C interface */
   lsm6dso_i3c_disable_set(&dev_ctx, LSM6DSO_I3C_DISABLE);
@@ -240,7 +247,7 @@ void example_compressed_fifo_simple_lsm6dso(void)
       }
 
       /* Uncompress FIFO samples and filter based on sensor type */
-      st_fifo_decompress(out_slot, raw_slot, &out_slot_size, slots);
+      st_fifo_decode(out_slot, raw_slot, &out_slot_size, slots);
       st_fifo_sort(out_slot, out_slot_size);
       acc_samples = st_fifo_get_sensor_occurrence(out_slot,
                                                   out_slot_size,
@@ -255,26 +262,22 @@ void example_compressed_fifo_simple_lsm6dso(void)
                              ST_FIFO_GYROSCOPE);
 
       for (int i = 0; i < acc_samples; i++) {
-        memcpy( sensor_data.raw_data, acc_slot[i].raw_data,
-                sizeof(sensor_data) );
         sprintf((char *)tx_buffer, "ACC:\t%u\t%d\t%4.2f\t%4.2f\t%4.2f\r\n",
                 (unsigned int)acc_slot[i].timestamp,
                 acc_slot[i].sensor_tag,
-                lsm6dso_from_fs2_to_mg(sensor_data.data[0]),
-                lsm6dso_from_fs2_to_mg(sensor_data.data[1]),
-                lsm6dso_from_fs2_to_mg(sensor_data.data[2]));
+                lsm6dso_from_fs2_to_mg(acc_slot[i].sensor_data.x),
+                lsm6dso_from_fs2_to_mg(acc_slot[i].sensor_data.y),
+                lsm6dso_from_fs2_to_mg(acc_slot[i].sensor_data.z));
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
       }
 
       for (int i = 0; i < gyr_samples; i++) {
-        memcpy( sensor_data.raw_data, gyr_slot[i].raw_data,
-                sizeof(sensor_data) );
         sprintf((char *)tx_buffer, "GYR:\t%u\t%d\t%4.2f\t%4.2f\t%4.2f\r\n",
                 (unsigned int)gyr_slot[i].timestamp,
                 gyr_slot[i].sensor_tag,
-                lsm6dso_from_fs2000_to_mdps(sensor_data.data[0]),
-                lsm6dso_from_fs2000_to_mdps(sensor_data.data[1]),
-                lsm6dso_from_fs2000_to_mdps(sensor_data.data[2]));
+                lsm6dso_from_fs2000_to_mdps(gyr_slot[i].sensor_data.x),
+                lsm6dso_from_fs2000_to_mdps(gyr_slot[i].sensor_data.y),
+                lsm6dso_from_fs2000_to_mdps(gyr_slot[i].sensor_data.z));
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
       }
 
