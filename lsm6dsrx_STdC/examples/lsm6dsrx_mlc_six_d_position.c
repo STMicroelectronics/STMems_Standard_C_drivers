@@ -192,8 +192,6 @@ void lsm6dsrx_mlc_six_d_position(void)
       sprintf((char *)tx_buffer, "six_d_pos %d\r\n", six_d_pos[0]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
-
-    platform_delay(1);
   }
 }
 
