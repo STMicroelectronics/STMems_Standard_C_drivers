@@ -120,7 +120,7 @@ static uint8_t tx_buffer[1000];
  *   and are strictly related to the hardware platform used.
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
@@ -223,7 +223,7 @@ void asm330lhhx_read_fifo_simple(void)
         {
           case ASM330LHHX_XL_NC_TAG:
             memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
-            asm330lhhx_fifo_out_raw_get(&dev_ctx, data_raw_acceleration);
+            asm330lhhx_fifo_out_raw_get(&dev_ctx, (uint8_t *)data_raw_acceleration);
             acceleration_mg[0] =
               asm330lhhx_from_fs2g_to_mg(data_raw_acceleration[0]);
             acceleration_mg[1] =
@@ -237,7 +237,7 @@ void asm330lhhx_read_fifo_simple(void)
             break;
           case ASM330LHHX_GYRO_NC_TAG:
             memset(data_raw_angular_rate, 0x00, 3 * sizeof(int16_t));
-            asm330lhhx_fifo_out_raw_get(&dev_ctx, data_raw_angular_rate);
+            asm330lhhx_fifo_out_raw_get(&dev_ctx, (uint8_t *)data_raw_angular_rate);
             angular_rate_mdps[0] =
               asm330lhhx_from_fs2000dps_to_mdps(data_raw_angular_rate[0]);
             angular_rate_mdps[1] =
@@ -252,7 +252,7 @@ void asm330lhhx_read_fifo_simple(void)
           default:
             /* Flush unused samples */
             memset(dummy, 0x00, 3 * sizeof(int16_t));
-            asm330lhhx_fifo_out_raw_get(&dev_ctx, dummy);
+            asm330lhhx_fifo_out_raw_get(&dev_ctx, (uint8_t *)dummy);
             break;
         }
       }
@@ -270,19 +270,19 @@ void asm330lhhx_read_fifo_simple(void)
  * @param  len       number of consecutive register to write
  *
  */
-static int32_t platform_write(void *handle, uint8_t reg, uint8_t *bufp,
+static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
     HAL_I2C_Mem_Write(handle, ASM330LHHX_I2C_ADD_L, reg,
-                      I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+                      I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    HAL_SPI_Transmit(handle, bufp, len, 1000);
+    HAL_SPI_Transmit(handle, (uint8_t*) bufp, len, 1000);
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
-  i2c_lld_write(handle,  ASM330LHHX_I2C_ADD_L & 0xFE, reg, bufp, len);
+  i2c_lld_write(handle,  ASM330LHHX_I2C_ADD_L & 0xFE, reg, (uint8_t*) bufp, len);
 #endif
   return 0;
 }
