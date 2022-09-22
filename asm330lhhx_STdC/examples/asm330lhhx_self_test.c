@@ -53,7 +53,7 @@
  */
 
 //#define STEVAL_MKI109V3  /* little endian */
-#define NUCLEO_F411RE    /* little endian */
+//#define NUCLEO_F411RE    /* little endian */
 //#define SPC584B_DIS      /* big endian */
 
 /* ATTENTION: By default the driver is little endian. If you need switch
@@ -344,7 +344,7 @@ void asm330lhhx_self_test(void)
   /* Disable Self Test */
   asm330lhhx_gy_self_test_set(&dev_ctx, ASM330LHHX_GY_ST_DISABLE);
   /* Disable sensor. */
-  asm330lhhx_xl_data_rate_set(&dev_ctx, ASM330LHHX_GY_ODR_OFF);
+  asm330lhhx_xl_data_rate_set(&dev_ctx, ASM330LHHX_XL_ODR_OFF);
 
   if (st_result == ST_PASS) {
     sprintf((char*)tx_buffer, "Self Test - PASS\r\n" );

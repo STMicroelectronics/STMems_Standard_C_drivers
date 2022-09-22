@@ -54,7 +54,7 @@
  */
 
 //#define STEVAL_MKI109V3  /* little endian */
-#define NUCLEO_F411RE    /* little endian */
+//#define NUCLEO_F411RE    /* little endian */
 //#define SPC584B_DIS      /* big endian */
 
 /* ATTENTION: By default the driver is little endian. If you need switch
