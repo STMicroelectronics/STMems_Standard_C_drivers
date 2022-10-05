@@ -126,7 +126,7 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void example_main_h3lis331dl(void)
+void h3lis331dl_read_data_polling(void)
 {
   stmdev_ctx_t dev_ctx;
   /* Uncomment to use interrupts on drdy */
