@@ -276,3 +276,6 @@
 [submodule "lsm6dsv16bx_STdC/driver"]
 	path = lsm6dsv16bx_STdC/driver
 	url = https://github.com/STMicroelectronics/lsm6dsv16bx-pid
+[submodule "ism330is_STdC/driver"]
+	path = ism330is_STdC/driver
+	url = https://github.com/STMicroelectronics/ism330is-pid.git
