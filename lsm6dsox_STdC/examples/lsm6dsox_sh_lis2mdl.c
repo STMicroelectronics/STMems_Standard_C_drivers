@@ -111,6 +111,7 @@ typedef union {
 /* Private variables ---------------------------------------------------------*/
 static stmdev_ctx_t ag_ctx;
 static stmdev_ctx_t mag_ctx;
+static uint8_t tx_buffer[TX_BUF_DIM];
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -157,7 +158,6 @@ void lsm6dsox_sh_lis2mdl(void)
 {
 
   lsm6dsox_sh_cfg_read_t sh_cfg_read;
-  uint8_t tx_buffer[TX_BUF_DIM];
   float angular_rate_mdps[3];
   float acceleration_mg[3];
   axis3bit16_t raw_data;
