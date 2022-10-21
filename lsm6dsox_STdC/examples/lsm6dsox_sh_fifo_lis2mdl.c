@@ -111,13 +111,15 @@ typedef union {
 /* Private variables ---------------------------------------------------------*/
 static stmdev_ctx_t ag_ctx;
 static stmdev_ctx_t mag_ctx;
+static uint8_t tx_buffer[TX_BUF_DIM];
 
 /* Extern variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
 
 static int32_t lsm6dsox_write_lis2mdl_cx(void *ctx, uint8_t reg,
-                                         const uint8_t *data, uint16_t len);
+                                         const uint8_t *data,
+					 uint16_t len);
 
 static int32_t lsm6dsox_read_lis2mdl_cx(void *ctx, uint8_t reg,
                                         uint8_t *data,
@@ -137,6 +139,92 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
+void lsm6dsox_sh_fifo_lis2mdl_handler(void)
+{
+  lsm6dsox_fifo_tag_t reg_tag;
+  axis3bit16_t raw_data;
+  uint16_t num;
+  float angular_rate_mdps[3];
+  float acceleration_mg[3];
+  float magnetic_mG[3];
+  uint8_t dummy;
+
+  num = 0;
+  /* Read watermark flag. */
+  lsm6dsox_fifo_wtm_flag_get(&ag_ctx, &dummy);
+
+  if ( dummy ) {
+    /* Read number of samples in FIFO. */
+    lsm6dsox_fifo_data_level_get(&ag_ctx, &num);
+
+    sprintf( (char *)tx_buffer, "\r\nFIFO num %d\r\n", num);
+    tx_com(tx_buffer, strlen((char const *)tx_buffer));
+
+    while (num--) {
+      /* Read FIFO tag. */
+      lsm6dsox_fifo_sensor_tag_get(&ag_ctx, &reg_tag);
+
+      switch (reg_tag) {
+        case LSM6DSOX_XL_NC_TAG:
+          memset(raw_data.u8bit, 0x00, 3 * sizeof(int16_t));
+          lsm6dsox_fifo_out_raw_get(&ag_ctx, raw_data.u8bit);
+          acceleration_mg[0] = lsm6dsox_from_fs2_to_mg(
+                                 raw_data.i16bit[0]);
+          acceleration_mg[1] = lsm6dsox_from_fs2_to_mg(
+                                 raw_data.i16bit[1]);
+          acceleration_mg[2] = lsm6dsox_from_fs2_to_mg(
+                                 raw_data.i16bit[2]);
+          sprintf( (char *)tx_buffer,
+                   "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+                   acceleration_mg[0],
+                   acceleration_mg[1],
+                   acceleration_mg[2] );
+          tx_com(tx_buffer, strlen((char const *)tx_buffer));
+          break;
+
+        case LSM6DSOX_GYRO_NC_TAG:
+          memset(raw_data.u8bit, 0x00, 3 * sizeof(int16_t));
+          lsm6dsox_fifo_out_raw_get(&ag_ctx, raw_data.u8bit);
+          angular_rate_mdps[0] = lsm6dsox_from_fs2000_to_mdps(
+                                   raw_data.i16bit[0]);
+          angular_rate_mdps[1] = lsm6dsox_from_fs2000_to_mdps(
+                                   raw_data.i16bit[1]);
+          angular_rate_mdps[2] = lsm6dsox_from_fs2000_to_mdps(
+                                   raw_data.i16bit[2]);
+          sprintf( (char *)tx_buffer,
+                   "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+                   angular_rate_mdps[0],
+                   angular_rate_mdps[1],
+                   angular_rate_mdps[2]);
+          tx_com(tx_buffer, strlen((char const *)tx_buffer));
+          break;
+
+        case LSM6DSOX_SENSORHUB_SLAVE0_TAG:
+          memset(raw_data.u8bit, 0x00, 3 * sizeof(int16_t));
+          lsm6dsox_fifo_out_raw_get(&ag_ctx, raw_data.u8bit);
+          magnetic_mG[0] = lis2mdl_from_lsb_to_mgauss(
+                             raw_data.i16bit[0]);
+          magnetic_mG[1] = lis2mdl_from_lsb_to_mgauss(
+                             raw_data.i16bit[1]);
+          magnetic_mG[2] = lis2mdl_from_lsb_to_mgauss(
+                             raw_data.i16bit[2]);
+          sprintf( (char *)tx_buffer, "Mag [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
+                   magnetic_mG[0],
+                   magnetic_mG[1],
+                   magnetic_mG[2]);
+          tx_com(tx_buffer, strlen((char const *)tx_buffer));
+          break;
+
+        default:
+          /* Flush unused samples. */
+          memset(raw_data.u8bit, 0x00, 3 * sizeof(int16_t));
+          lsm6dsox_fifo_out_raw_get(&ag_ctx, raw_data.u8bit);
+          break;
+      }
+    }
+  }
+}
+
 /* Main Example --------------------------------------------------------------*/
 
 /*
@@ -153,16 +241,10 @@ static void platform_init(void);
  */
 void lsm6dsox_sh_fifo_lis2mdl(void)
 {
-  lsm6dsox_pin_int1_route_t int1_route;
   lsm6dsox_sh_cfg_read_t sh_cfg_read;
-  lsm6dsox_fifo_tag_t reg_tag;
-  uint8_t tx_buffer[TX_BUF_DIM];
-  axis3bit16_t raw_data;
-  uint16_t num;
-  float angular_rate_mdps[3];
-  float acceleration_mg[3];
-  float magnetic_mG[3];
-  uint8_t dummy;
+  lsm6dsox_reg_t reg;
+  lsm6dsox_pin_int2_route_t int2_route;
+
   /* Initialize lsm6dsox driver interface */
   ag_ctx.write_reg = platform_write;
   ag_ctx.read_reg = platform_read;
@@ -176,26 +258,26 @@ void lsm6dsox_sh_fifo_lis2mdl(void)
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
   /* Check lsm6dsox ID. */
-  lsm6dsox_device_id_get(&ag_ctx, &dummy);
+  lsm6dsox_device_id_get(&ag_ctx, &reg.byte);
 
-  if (dummy != LSM6DSOX_ID)
+  if (reg.byte != LSM6DSOX_ID)
     while (1);
 
   /* Restore default configuration. */
   lsm6dsox_reset_set(&ag_ctx, PROPERTY_ENABLE);
 
   do {
-    lsm6dsox_reset_get(&ag_ctx, &dummy);
-  } while (dummy);
+    lsm6dsox_reset_get(&ag_ctx, &reg.byte);
+  } while (reg.byte);
 
   /* Disable I3C interface.*/
   lsm6dsox_i3c_disable_set(&ag_ctx, LSM6DSOX_I3C_DISABLE);
   /* Some hardware require to enable pull up on master I2C interface. */
   //lsm6dsox_sh_pin_mode_set(&ag_ctx, LSM6DSOX_INTERNAL_PULL_UP);
   /* Check if LIS2MDL connected to Sensor Hub. */
-  lis2mdl_device_id_get(&mag_ctx, &dummy);
+  lis2mdl_device_id_get(&mag_ctx, &reg.byte);
 
-  if (dummy != LIS2MDL_ID)
+  if (reg.byte != LIS2MDL_ID)
     while (1);
 
   /* Configure LIS2MDL. */
@@ -217,13 +299,14 @@ void lsm6dsox_sh_fifo_lis2mdl(void)
   lsm6dsox_int_notification_set(&ag_ctx, LSM6DSOX_ALL_INT_LATCHED);
   /* Enable drdy 75 us pulse: uncomment if interrupt must be pulsed. */
   //lsm6dsox_data_ready_mode_set(&ag_ctx, LSM6DSOX_DRDY_PULSED);
+
   /*
-   * FIFO watermark interrupt routed on INT1 pin.
-   * Remember that INT1 pin is used by sensor to switch in I3C mode.
+   * FIFO watermark interrupt routed on INT2 pin.
    */
-  lsm6dsox_pin_int1_route_get(&ag_ctx, &int1_route);
-  int1_route.fifo_th = PROPERTY_ENABLE;
-  lsm6dsox_pin_int1_route_set(&ag_ctx, int1_route);
+  lsm6dsox_pin_int2_route_get(&ag_ctx, NULL, &int2_route);
+  int2_route.fifo_th = PROPERTY_ENABLE;
+  lsm6dsox_pin_int2_route_set(&ag_ctx, NULL, int2_route);
+
   /*
    * Enable FIFO batching of Slave0.
    * ODR batching is 13 Hz.
@@ -253,79 +336,8 @@ void lsm6dsox_sh_fifo_lis2mdl(void)
   lsm6dsox_xl_data_rate_set(&ag_ctx, LSM6DSOX_XL_ODR_12Hz5);
   lsm6dsox_gy_data_rate_set(&ag_ctx, LSM6DSOX_GY_ODR_12Hz5);
 
-  while (1) {
-    num = 0;
-    /* Read watermark flag. */
-    lsm6dsox_fifo_wtm_flag_get(&ag_ctx, &dummy);
-
-    if ( dummy ) {
-      /* Read number of samples in FIFO. */
-      lsm6dsox_fifo_data_level_get(&ag_ctx, &num);
-
-      while (num--) {
-        /* Read FIFO tag. */
-        lsm6dsox_fifo_sensor_tag_get(&ag_ctx, &reg_tag);
-
-        switch (reg_tag) {
-          case LSM6DSOX_XL_NC_TAG:
-            memset(raw_data.u8bit, 0x00, 3 * sizeof(int16_t));
-            lsm6dsox_fifo_out_raw_get(&ag_ctx, raw_data.u8bit);
-            acceleration_mg[0] = lsm6dsox_from_fs2_to_mg(
-                                   raw_data.i16bit[0]);
-            acceleration_mg[1] = lsm6dsox_from_fs2_to_mg(
-                                   raw_data.i16bit[1]);
-            acceleration_mg[2] = lsm6dsox_from_fs2_to_mg(
-                                   raw_data.i16bit[2]);
-            sprintf( (char *)tx_buffer,
-                     "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-                     acceleration_mg[0],
-                     acceleration_mg[1],
-                     acceleration_mg[2] );
-            tx_com(tx_buffer, strlen((char const *)tx_buffer));
-            break;
-
-          case LSM6DSOX_GYRO_NC_TAG:
-            memset(raw_data.u8bit, 0x00, 3 * sizeof(int16_t));
-            lsm6dsox_fifo_out_raw_get(&ag_ctx, raw_data.u8bit);
-            angular_rate_mdps[0] = lsm6dsox_from_fs2000_to_mdps(
-                                     raw_data.i16bit[0]);
-            angular_rate_mdps[1] = lsm6dsox_from_fs2000_to_mdps(
-                                     raw_data.i16bit[1]);
-            angular_rate_mdps[2] = lsm6dsox_from_fs2000_to_mdps(
-                                     raw_data.i16bit[2]);
-            sprintf( (char *)tx_buffer,
-                     "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-                     angular_rate_mdps[0],
-                     angular_rate_mdps[1],
-                     angular_rate_mdps[2]);
-            tx_com(tx_buffer, strlen((char const *)tx_buffer));
-            break;
-
-          case LSM6DSOX_SENSORHUB_SLAVE0_TAG:
-            memset(raw_data.u8bit, 0x00, 3 * sizeof(int16_t));
-            lsm6dsox_fifo_out_raw_get(&ag_ctx, raw_data.u8bit);
-            magnetic_mG[0] = lis2mdl_from_lsb_to_mgauss(
-                               raw_data.i16bit[0]);
-            magnetic_mG[1] = lis2mdl_from_lsb_to_mgauss(
-                               raw_data.i16bit[1]);
-            magnetic_mG[2] = lis2mdl_from_lsb_to_mgauss(
-                               raw_data.i16bit[2]);
-            sprintf( (char *)tx_buffer, "Mag [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
-                     magnetic_mG[0],
-                     magnetic_mG[1],
-                     magnetic_mG[2]);
-            tx_com(tx_buffer, strlen((char const *)tx_buffer));
-            break;
-
-          default:
-            /* Flush unused samples. */
-            memset(raw_data.u8bit, 0x00, 3 * sizeof(int16_t));
-            lsm6dsox_fifo_out_raw_get(&ag_ctx, raw_data.u8bit);
-            break;
-        }
-      }
-    }
-  }
+  /* FIFO threshold irq served in handler */
+  while (1);
 }
 
 /*
