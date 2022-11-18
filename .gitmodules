@@ -282,3 +282,9 @@
 [submodule "lsm6dso16is_STdC/driver"]
 	path = lsm6dso16is_STdC/driver
 	url = https://github.com/STMicroelectronics/lsm6dso16is-pid.git
+[submodule "lis2duxs12_STdC/driver"]
+	path = lis2duxs12_STdC/driver
+	url = https://github.com/STMicroelectronics/lis2duxs12-pid
+[submodule "lis2dux12_STdC/driver"]
+	path = lis2dux12_STdC/driver
+	url = https://github.com/STMicroelectronics/lis2dux12-pid
