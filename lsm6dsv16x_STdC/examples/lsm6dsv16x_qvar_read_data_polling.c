@@ -157,10 +157,10 @@ void lsm6dsv16x_qvar_read_data_polling(void)
 
   /* Enable Block Data Update */
   lsm6dsv16x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-  
-  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_XL_ODR_AT_15Hz);
+
+  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_AT_15Hz);
   lsm6dsv16x_xl_full_scale_set(&dev_ctx, LSM6DSV16X_2g);
-  
+
   /* Configure filtering chain */
   filt_settling_mask.drdy = PROPERTY_ENABLE;
   filt_settling_mask.irq_xl = PROPERTY_ENABLE;

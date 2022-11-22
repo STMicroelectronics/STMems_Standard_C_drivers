@@ -160,8 +160,8 @@ void lsm6dsv16x_read_data_polling(void)
    * Selected data rate have to be equal or greater with respect
    * with MLC data rate.
    */
-  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_XL_ODR_AT_7Hz5);
-  lsm6dsv16x_gy_data_rate_set(&dev_ctx, LSM6DSV16X_GY_ODR_AT_15Hz);
+  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_AT_7Hz5);
+  lsm6dsv16x_gy_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_AT_15Hz);
   /* Set full scale */
   lsm6dsv16x_xl_full_scale_set(&dev_ctx, LSM6DSV16X_2g);
   lsm6dsv16x_gy_full_scale_set(&dev_ctx, LSM6DSV16X_2000dps);

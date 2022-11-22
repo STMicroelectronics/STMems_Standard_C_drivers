@@ -185,7 +185,7 @@ void lsm6dsv16x_sixd(void)
   lsm6dsv16x_6d_threshold_set(&dev_ctx, LSM6DSV16X_DEG_60);
 
   /* Set Output Data Rate.*/
-  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_XL_ODR_AT_120Hz);
+  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_AT_120Hz);
   /* Set full scale */
   lsm6dsv16x_xl_full_scale_set(&dev_ctx, LSM6DSV16X_2g);
 

@@ -227,7 +227,7 @@ void lsm6dsv16x_fifo_irq(void)
   //lsm6dsv16x_pin_int2_route_set(&dev_ctx, &pin_int);
 
   /* Set Output Data Rate */
-  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_XL_ODR_AT_60Hz);
+  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_AT_60Hz);
   lsm6dsv16x_fifo_timestamp_batch_set(&dev_ctx, LSM6DSV16X_TMSTMP_DEC_32);
   lsm6dsv16x_timestamp_set(&dev_ctx, PROPERTY_ENABLE);
 

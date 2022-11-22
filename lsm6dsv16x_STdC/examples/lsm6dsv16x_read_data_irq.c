@@ -187,7 +187,7 @@ void lsm6dsv16x_read_data_irq(void)
    * Selected data rate have to be equal or greater with respect
    * with MLC data rate.
    */
-  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_XL_ODR_AT_120Hz);
+  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_AT_120Hz);
   /* Set full scale */
   lsm6dsv16x_xl_full_scale_set(&dev_ctx, LSM6DSV16X_2g);
 

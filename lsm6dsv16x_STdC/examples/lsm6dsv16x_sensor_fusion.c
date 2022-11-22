@@ -252,8 +252,8 @@ void lsm6dsv16x_sensor_fusion(void)
   lsm6dsv16x_fifo_mode_set(&dev_ctx, LSM6DSV16X_STREAM_MODE);
 
   /* Set Output Data Rate */
-  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_XL_ODR_AT_30Hz);
-  lsm6dsv16x_gy_data_rate_set(&dev_ctx, LSM6DSV16X_GY_ODR_AT_30Hz);
+  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_AT_30Hz);
+  lsm6dsv16x_gy_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_AT_30Hz);
   lsm6dsv16x_sflp_data_rate_set(&dev_ctx, LSM6DSV16X_SFLP_30Hz);
 
   lsm6dsv16x_sflp_game_rotation_set(&dev_ctx, PROPERTY_ENABLE);

@@ -189,7 +189,7 @@ void lsm6dsv16x_wakeup(void)
   lsm6dsv16x_act_thresholds_set(&dev_ctx, &wu);
 
   /* Set Output Data Rate.*/
-  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_XL_ODR_AT_480Hz);
+  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_AT_480Hz);
   /* Set full scale */
   lsm6dsv16x_xl_full_scale_set(&dev_ctx, LSM6DSV16X_2g);
 

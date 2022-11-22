@@ -197,7 +197,7 @@ void lsm6dsv16x_single_double_tap(void)
   lsm6dsv16x_tap_mode_set(&dev_ctx, LSM6DSV16X_BOTH_SINGLE_DOUBLE);
 
   /* Set Output Data Rate.*/
-  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_XL_ODR_AT_480Hz);
+  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_AT_480Hz);
   /* Set full scale */
   lsm6dsv16x_xl_full_scale_set(&dev_ctx, LSM6DSV16X_8g);
 

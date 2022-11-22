@@ -184,8 +184,8 @@ void lsm6dsv16x_fifo(void)
   lsm6dsv16x_fifo_mode_set(&dev_ctx, LSM6DSV16X_STREAM_MODE);
 
   /* Set Output Data Rate */
-  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_XL_ODR_AT_60Hz);
-  lsm6dsv16x_gy_data_rate_set(&dev_ctx, LSM6DSV16X_GY_ODR_AT_15Hz);
+  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_AT_60Hz);
+  lsm6dsv16x_gy_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_AT_15Hz);
   lsm6dsv16x_fifo_timestamp_batch_set(&dev_ctx, LSM6DSV16X_TMSTMP_DEC_8);
   lsm6dsv16x_timestamp_set(&dev_ctx, PROPERTY_ENABLE);
 
@@ -234,7 +234,7 @@ void lsm6dsv16x_fifo(void)
           break;
         }
       }
-      
+
       sprintf((char *)tx_buffer, "------ \r\n\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }

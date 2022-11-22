@@ -194,8 +194,8 @@ void lsm6dsv16x_compressed_fifo(void)
   lsm6dsv16x_fifo_compress_algo_real_time_set(&dev_ctx, 1);
 
   /* Set Output Data Rate */
-  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_XL_ODR_AT_15Hz);
-  lsm6dsv16x_gy_data_rate_set(&dev_ctx, LSM6DSV16X_GY_ODR_AT_15Hz);
+  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_AT_15Hz);
+  lsm6dsv16x_gy_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_AT_15Hz);
   lsm6dsv16x_fifo_timestamp_batch_set(&dev_ctx, LSM6DSV16X_TMSTMP_DEC_8);
   lsm6dsv16x_timestamp_set(&dev_ctx, PROPERTY_ENABLE);
 
@@ -220,7 +220,7 @@ void lsm6dsv16x_compressed_fifo(void)
         lsm6dsv16x_fifo_out_raw_get(&dev_ctx, &f_data);
         raw_slot[slots].fifo_data_out[0] = (f_data.tag << 3) | (f_data.cnt << 1);
         memcpy(&raw_slot[slots].fifo_data_out[1], f_data.data, 6);
-     
+
         slots++;
       }
 

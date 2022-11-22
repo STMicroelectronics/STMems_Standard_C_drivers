@@ -154,7 +154,7 @@ void lsm6dsv16x_self_test(void)
   platform_init();
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-  
+
   /* Check device ID */
   lsm6dsv16x_device_id_get(&dev_ctx, &whoamI);
 
@@ -173,7 +173,7 @@ void lsm6dsv16x_self_test(void)
    * Accelerometer Self Test
    */
   /* Set Output Data Rate */
-  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_XL_ODR_AT_60Hz);
+  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_AT_60Hz);
   /* Set full scale */
   lsm6dsv16x_xl_full_scale_set(&dev_ctx, LSM6DSV16X_4g);
   /* Wait stable output */
@@ -261,12 +261,12 @@ void lsm6dsv16x_self_test(void)
   /* Disable Self Test */
   lsm6dsv16x_xl_self_test_set(&dev_ctx, LSM6DSV16X_XL_ST_DISABLE);
   /* Disable sensor. */
-  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_XL_ODR_OFF);
+  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_OFF);
   /*
    * Gyroscope Self Test
    */
   /* Set Output Data Rate */
-  lsm6dsv16x_gy_data_rate_set(&dev_ctx, LSM6DSV16X_GY_ODR_AT_240Hz);
+  lsm6dsv16x_gy_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_AT_240Hz);
   /* Set full scale */
   lsm6dsv16x_gy_full_scale_set(&dev_ctx, LSM6DSV16X_2000dps);
   /* Wait stable output */
@@ -343,7 +343,7 @@ void lsm6dsv16x_self_test(void)
   /* Disable Self Test */
   lsm6dsv16x_gy_self_test_set(&dev_ctx, LSM6DSV16X_GY_ST_DISABLE);
   /* Disable sensor. */
-  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_XL_ODR_OFF);
+  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_OFF);
 
   if (st_result == ST_PASS) {
     sprintf((char *)tx_buffer, "Self Test - PASS\r\n" );
