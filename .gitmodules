@@ -291,3 +291,6 @@
 [submodule "lis2du12_STdC/driver"]
 	path = lis2du12_STdC/driver
 	url = https://github.com/STMicroelectronics/lis2du12-pid.git
+[submodule "lsm6dsv_STdC/driver"]
+	path = lsm6dsv_STdC/driver
+	url = https://github.com/STMicroelectronics/lsm6dsv-pid.git
