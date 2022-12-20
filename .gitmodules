@@ -1,9 +1,11 @@
 [submodule "_resources/STMems_Machine_Learning_Core"]
 	path = _resources/STMems_Machine_Learning_Core
 	url = https://github.com/STMicroelectronics/STMems_Machine_Learning_Core.git
+	branch = master
 [submodule "_resources/STMems_Finite_State_Machine"]
 	path = _resources/STMems_Finite_State_Machine
 	url = https://github.com/STMicroelectronics/STMems_Finite_State_Machine
+	branch = master
 [submodule "a3g4250d_STdC/driver"]
 	path = a3g4250d_STdC/driver
 	url = https://github.com/STMicroelectronics/a3g4250d-pid
@@ -267,30 +269,40 @@
 [submodule "_resources/FIFO_Utility_Tool"]
 	path = _resources/FIFO_Utility_Tool
 	url = https://github.com/STMicroelectronics/FIFO_Utility_Tool
+	branch = master
 [submodule "ais25ba_STdC/driver"]
 	path = ais25ba_STdC/driver
 	url = https://github.com/STMicroelectronics/ais25ba-pid.git
+	branch = main
 [submodule "lsm6dsv16x_STdC/driver"]
 	path = lsm6dsv16x_STdC/driver
 	url = https://github.com/STMicroelectronics/lsm6dsv16x-pid.git
+	branch = main
 [submodule "lsm6dsv16bx_STdC/driver"]
 	path = lsm6dsv16bx_STdC/driver
 	url = https://github.com/STMicroelectronics/lsm6dsv16bx-pid
+	branch = main
 [submodule "ism330is_STdC/driver"]
 	path = ism330is_STdC/driver
 	url = https://github.com/STMicroelectronics/ism330is-pid.git
+	branch = master
 [submodule "lsm6dso16is_STdC/driver"]
 	path = lsm6dso16is_STdC/driver
 	url = https://github.com/STMicroelectronics/lsm6dso16is-pid.git
+	branch = master
 [submodule "lis2duxs12_STdC/driver"]
 	path = lis2duxs12_STdC/driver
 	url = https://github.com/STMicroelectronics/lis2duxs12-pid
+	branch = master
 [submodule "lis2dux12_STdC/driver"]
 	path = lis2dux12_STdC/driver
 	url = https://github.com/STMicroelectronics/lis2dux12-pid
+	branch = master
 [submodule "lis2du12_STdC/driver"]
 	path = lis2du12_STdC/driver
 	url = https://github.com/STMicroelectronics/lis2du12-pid.git
+	branch = master
 [submodule "lsm6dsv_STdC/driver"]
 	path = lsm6dsv_STdC/driver
 	url = https://github.com/STMicroelectronics/lsm6dsv-pid.git
+	branch = master
