@@ -185,7 +185,7 @@ void ism330is_ispu_norm(void)
 
   /* Load ISPU configuration */
   for ( i = 0; i < (sizeof(ispu_conf) /
-                    sizeof(ucf_line_t) ); i++ ) {
+                    sizeof(ucf_line_ext_t) ); i++ ) {
     ism330is_write_reg(&dev_ctx, ispu_conf[i].address,
                        (uint8_t *)&ispu_conf[i].data, 1);
   }
