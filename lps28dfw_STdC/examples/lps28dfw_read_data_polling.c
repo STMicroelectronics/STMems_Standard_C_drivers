@@ -169,6 +169,7 @@ void lps28dfw_read_data_polling(void)
   md.odr = LPS28DFW_4Hz;
   md.avg = LPS28DFW_16_AVG;
   md.lpf = LPS28DFW_LPF_ODR_DIV_4;
+  md.fs = LPS28DFW_1260hPa;
   lps28dfw_mode_set(&dev_ctx, &md);
 
   /* Configure inerrupt pins */
