@@ -173,6 +173,7 @@ void ilps22qs_fifo(void)
   md.avg = ILPS22QS_16_AVG;
   md.lpf = ILPS22QS_LPF_ODR_DIV_4;
   md.fs = ILPS22QS_1260hPa;
+  md.interleaved_mode = 0;
   ilps22qs_mode_set(&dev_ctx, &md);
 
   /* Enable FIFO */
@@ -195,9 +196,14 @@ void ilps22qs_fifo(void)
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
 
       for (i = 0; i < level; i++) {
-        sprintf((char*)tx_buffer,
-                "%02d: pressure [hPa]:%6.2f\r\n", i, data[i].hpa);
-
+        /* check needed in case of interleaved mode ON */
+        if (data[i].lsb == 0) {
+          sprintf((char*)tx_buffer,
+                  "%02d: pressure [hPa]:%6.2f\r\n", i, data[i].hpa);
+        } else {
+          sprintf((char*)tx_buffer,
+                  "%02d: AH_QVAR lsb %d\r\n", i, data[i].lsb);
+        }
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
       }
 

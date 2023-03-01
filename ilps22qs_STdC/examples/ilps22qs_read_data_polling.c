@@ -172,6 +172,7 @@ void ilps22qs_read_data_polling(void)
   md.avg = ILPS22QS_16_AVG;
   md.lpf = ILPS22QS_LPF_ODR_DIV_4;
   md.fs = ILPS22QS_1260hPa;
+  md.interleaved_mode = 0;
   ilps22qs_mode_set(&dev_ctx, &md);
 
   /* Read samples in polling mode (no int) */
@@ -183,10 +184,16 @@ void ilps22qs_read_data_polling(void)
     if ( all_sources.drdy_pres | all_sources.drdy_temp ) {
       ilps22qs_data_get(&dev_ctx, &md, &data);
 
-      sprintf((char*)tx_buffer,
-              "pressure [hPa]:%6.2f temperature [degC]:%6.2f\r\n",
-              data.pressure.hpa, data.heat.deg_c);
-
+      /* check needed in case of interleaved mode ON */
+      if (data.ah_qvar.lsb == 0) {
+        sprintf((char*)tx_buffer,
+                "pressure [hPa]:%6.2f temperature [degC]:%6.2f\r\n",
+                data.pressure.hpa, data.heat.deg_c);
+      } else {
+        sprintf((char*)tx_buffer,
+                "AH_QVAR lsb %d temperature [degC]:%6.2f\r\n",
+                data.ah_qvar.lsb, data.heat.deg_c);
+      }
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
