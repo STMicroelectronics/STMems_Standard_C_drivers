@@ -102,7 +102,7 @@
 #define    BOOT_TIME            20 //ms
 
 /* Private variables ---------------------------------------------------------*/
-static int16_t data_raw_acceleration[3];
+static int8_t data_raw_acceleration[3];
 static float acceleration_mg[3];
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
@@ -161,7 +161,7 @@ void h3lis100dl_read_data_polling(void)
 
     if (reg.status_reg.zyxda) {
       /* Read acceleration data */
-      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
+      memset(data_raw_acceleration, 0x00, 3 * sizeof(int8_t));
       h3lis100dl_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
       acceleration_mg[0] =
         h3lis100dl_from_fs100g_to_mg(data_raw_acceleration[0]);
