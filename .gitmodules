@@ -309,3 +309,6 @@
 [submodule "ilps28qsw_STdC/driver"]
 	path = ilps28qsw_STdC/driver
 	url = https://github.com/STMicroelectronics/ilps28qsw-pid
+[submodule "asm330lhb_STdC/driver"]
+	path = asm330lhb_STdC/driver
+	url = https://github.com/STMicroelectronics/asm330lhb-pid
