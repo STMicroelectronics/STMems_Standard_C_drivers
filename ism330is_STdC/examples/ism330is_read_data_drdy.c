@@ -107,7 +107,7 @@ static int16_t data_raw_temperature;
 static float acceleration_mg[3];
 static float angular_rate_mdps[3];
 static float temperature_degC;
-static uint8_t whoamI, rst;
+static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 
 /* Extern variables ----------------------------------------------------------*/
@@ -205,11 +205,7 @@ void ism330is_read_data_drdy(void)
     while (1);
 
   /* Restore default configuration */
-  ism330is_reset_set(&dev_ctx, PROPERTY_ENABLE);
-
-  do {
-    ism330is_reset_get(&dev_ctx, &rst);
-  } while (rst);
+  ism330is_software_reset(&dev_ctx);
 
   ism330is_pin_int1_route_get(&dev_ctx, &val);
   val.drdy_xl = 1;

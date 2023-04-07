@@ -146,14 +146,8 @@ void ism330is_read_data_polling(void)
   if (whoamI != ISM330IS_ID)
     while (1);
 
-#if 0
   /* Restore default configuration */
-  ism330is_reset_set(&dev_ctx, PROPERTY_ENABLE);
-
-  do {
-    ism330is_reset_get(&dev_ctx, &rst);
-  } while (rst);
-#endif
+  ism330is_software_reset(&dev_ctx);
 
   /* Disable I3C interface */
   //ism330is_i3c_disable_set(&dev_ctx, ISM330IS_I3C_DISABLE);

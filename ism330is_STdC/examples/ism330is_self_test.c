@@ -117,7 +117,7 @@ enum st_test_type {
 
 /* Private variables ---------------------------------------------------------*/
 static int16_t temp_raw[3];
-static uint8_t whoamI, rst;
+static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 
 /* Extern variables ----------------------------------------------------------*/
@@ -207,11 +207,7 @@ void ism330is_self_test(void)
     while (1);
 
   /* Restore default configuration */
-  ism330is_reset_set(&dev_ctx, PROPERTY_ENABLE);
-
-  do {
-    ism330is_reset_get(&dev_ctx, &rst);
-  } while (rst);
+  ism330is_software_reset(&dev_ctx);
 
   /*
    * Accelerometer SELF-TEST

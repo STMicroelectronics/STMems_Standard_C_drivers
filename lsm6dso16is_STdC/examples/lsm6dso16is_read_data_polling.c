@@ -146,14 +146,8 @@ void lsm6dso16is_read_data_polling(void)
   if (whoamI != LSM6DSO16IS_ID)
     while (1);
 
-#if 0
   /* Restore default configuration */
-  lsm6dso16is_reset_set(&dev_ctx, PROPERTY_ENABLE);
-
-  do {
-    lsm6dso16is_reset_get(&dev_ctx, &rst);
-  } while (rst);
-#endif
+  lsm6dso16is_software_reset(&dev_ctx);
 
   /* Disable I3C interface */
   //lsm6dso16is_i3c_disable_set(&dev_ctx, LSM6DSO16IS_I3C_DISABLE);

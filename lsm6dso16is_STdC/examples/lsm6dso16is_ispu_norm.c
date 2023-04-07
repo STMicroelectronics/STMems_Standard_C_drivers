@@ -102,7 +102,7 @@
 #define    BOOT_TIME      10
 
 /* Private variables ---------------------------------------------------------*/
-static uint8_t whoamI, rst;
+static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 
 /* Extern variables ----------------------------------------------------------*/
@@ -177,11 +177,7 @@ void lsm6dso16is_ispu_norm(void)
     while (1);
 
   /* Restore default configuration */
-  lsm6dso16is_reset_set(&dev_ctx, PROPERTY_ENABLE);
-
-  do {
-    lsm6dso16is_reset_get(&dev_ctx, &rst);
-  } while (rst);
+  lsm6dso16is_software_reset(&dev_ctx);
 
   /* Load ISPU configuration */
   for ( i = 0; i < (sizeof(ispu_conf) /
