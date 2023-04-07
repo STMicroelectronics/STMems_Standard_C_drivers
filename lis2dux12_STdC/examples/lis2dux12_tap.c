@@ -216,7 +216,7 @@ void lis2dux12_tap(void)
 
   /* Set Output Data Rate */
   md.fs =  LIS2DUX12_8g;
-  md.odr = LIS2DUX12_400Hz;
+  md.odr = LIS2DUX12_400Hz_LP;
   lis2dux12_mode_set(&dev_ctx, &md);
 
   /* Read samples in polling mode (no int). */

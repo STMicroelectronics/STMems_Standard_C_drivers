@@ -254,7 +254,7 @@ void lis2duxs12_self_test(void)
      *    and wait 50ms.
      */
     md.fs =  LIS2DUXS12_8g;
-    md.odr = LIS2DUXS12_200Hz;
+    md.odr = LIS2DUXS12_200Hz_LP;
     md.bw = LIS2DUXS12_ODR_div_2;
     lis2duxs12_mode_set(&dev_ctx, &md);
     platform_delay(50);
@@ -301,7 +301,7 @@ void lis2duxs12_self_test(void)
      *     and wait 50ms.
      */
     md.fs =  LIS2DUXS12_8g;
-    md.odr = LIS2DUXS12_200Hz;
+    md.odr = LIS2DUXS12_200Hz_LP;
     md.bw = LIS2DUXS12_ODR_div_2;
     lis2duxs12_mode_set(&dev_ctx, &md);
     platform_delay(50);

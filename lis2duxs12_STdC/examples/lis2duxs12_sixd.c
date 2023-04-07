@@ -189,7 +189,7 @@ void lis2duxs12_sixd(void)
 
   /* Set Output Data Rate */
   md.fs =  LIS2DUXS12_2g;
-  md.odr = LIS2DUXS12_200Hz;
+  md.odr = LIS2DUXS12_200Hz_LP;
   lis2duxs12_mode_set(&dev_ctx, &md);
 
   /* Configure interrupt pins */

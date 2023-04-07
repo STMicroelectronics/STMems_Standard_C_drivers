@@ -200,7 +200,7 @@ void lis2dux12_pedometer(void)
 
   /* Set Output Data Rate */
   md.fs =  LIS2DUX12_4g;
-  md.odr = LIS2DUX12_25Hz;
+  md.odr = LIS2DUX12_25Hz_LP;
   lis2dux12_mode_set(&dev_ctx, &md);
 
   /* wait forever and triggers when step is detected */

@@ -189,7 +189,7 @@ void lis2dux12_free_fall(void)
 
   /* Set Output Data Rate */
   md.fs =  LIS2DUX12_2g;
-  md.odr = LIS2DUX12_200Hz;
+  md.odr = LIS2DUX12_200Hz_LP;
   lis2dux12_mode_set(&dev_ctx, &md);
 
   /* wait forever and triggers when free-fall event is caught */
