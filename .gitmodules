@@ -312,3 +312,6 @@
 [submodule "asm330lhb_STdC/driver"]
 	path = asm330lhb_STdC/driver
 	url = https://github.com/STMicroelectronics/asm330lhb-pid
+[submodule "_resources/ispu-examples"]
+	path = _resources/ispu-examples
+	url = https://github.com/STMicroelectronics/ispu-examples
