@@ -78,7 +78,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "./ispu_norm/norm.h"
+#include "norm.h"
 #include "ism330is_reg.h"
 
 #if defined(NUCLEO_F411RE)
