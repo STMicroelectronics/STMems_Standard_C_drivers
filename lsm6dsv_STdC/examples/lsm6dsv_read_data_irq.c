@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * @file    read_data_polling.c
+ * @file    read_data_drdy.c
  * @author  Sensors Software Solution Team
  * @brief   This file shows how to get data from sensor.
  *
@@ -101,21 +101,15 @@
 #define    BOOT_TIME            10 //ms
 
 /* Private variables ---------------------------------------------------------*/
+static lsm6dsv_filt_settling_mask_t filt_settling_mask;
 static int16_t data_raw_acceleration[3];
-static int16_t data_raw_angular_rate[3];
-static int16_t data_raw_temperature;
 static float acceleration_mg[3];
-static float angular_rate_mdps[3];
-static float temperature_degC;
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
-
-static lsm6dsv_filt_settling_mask_t filt_settling_mask;
 
 /* Extern variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
-
 /*
  *   WARNING:
  *   Functions declare in this section are defined at the end of this file
@@ -130,12 +124,38 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
-/* Main Example --------------------------------------------------------------*/
-void lsm6dsv_read_data_polling(void)
+static stmdev_ctx_t dev_ctx;
+
+void lsm6dsv_read_data_drdy_handler(void)
 {
-  lsm6dsv_all_sources_t all_sources;
+  lsm6dsv_data_ready_t drdy;
+
+  /* Read output only if new xl value is available */
+  lsm6dsv_flag_data_ready_get(&dev_ctx, &drdy);
+
+  if (drdy.drdy_xl) {
+    /* Read acceleration field data */
+    memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
+    lsm6dsv_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
+    acceleration_mg[0] =
+      lsm6dsv_from_fs2_to_mg(data_raw_acceleration[0]);
+    acceleration_mg[1] =
+      lsm6dsv_from_fs2_to_mg(data_raw_acceleration[1]);
+    acceleration_mg[2] =
+      lsm6dsv_from_fs2_to_mg(data_raw_acceleration[2]);
+    sprintf((char *)tx_buffer,
+            "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+            acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+    tx_com(tx_buffer, strlen((char const *)tx_buffer));
+  }
+}
+
+/* Main Example --------------------------------------------------------------*/
+void lsm6dsv_read_data_drdy(void)
+{
+  lsm6dsv_pin_int_route_t pin_int;
   lsm6dsv_reset_t rst;
-  stmdev_ctx_t dev_ctx;
+
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
@@ -158,73 +178,29 @@ void lsm6dsv_read_data_polling(void)
 
   /* Enable Block Data Update */
   lsm6dsv_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+
+  pin_int.drdy_xl = PROPERTY_ENABLE;
+  lsm6dsv_pin_int1_route_set(&dev_ctx, &pin_int);
+  //lsm6dsv_pin_int2_route_set(&dev_ctx, &pin_int);
+
   /* Set Output Data Rate.
    * Selected data rate have to be equal or greater with respect
    * with MLC data rate.
    */
-  lsm6dsv_xl_data_rate_set(&dev_ctx, LSM6DSV_ODR_AT_7Hz5);
-  lsm6dsv_gy_data_rate_set(&dev_ctx, LSM6DSV_ODR_AT_15Hz);
+  lsm6dsv_xl_data_rate_set(&dev_ctx, LSM6DSV_ODR_AT_120Hz);
   /* Set full scale */
   lsm6dsv_xl_full_scale_set(&dev_ctx, LSM6DSV_2g);
-  lsm6dsv_gy_full_scale_set(&dev_ctx, LSM6DSV_2000dps);
+
   /* Configure filtering chain */
   filt_settling_mask.drdy = PROPERTY_ENABLE;
   filt_settling_mask.irq_xl = PROPERTY_ENABLE;
   filt_settling_mask.irq_g = PROPERTY_ENABLE;
   lsm6dsv_filt_settling_mask_set(&dev_ctx, filt_settling_mask);
-  lsm6dsv_filt_gy_lp1_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6dsv_filt_gy_lp1_bandwidth_set(&dev_ctx, LSM6DSV_GY_ULTRA_LIGHT);
   lsm6dsv_filt_xl_lp2_set(&dev_ctx, PROPERTY_ENABLE);
   lsm6dsv_filt_xl_lp2_bandwidth_set(&dev_ctx, LSM6DSV_XL_STRONG);
 
-  /* Read samples in polling mode (no int) */
-  while (1) {
-    /* Read output only if new xl value is available */
-    lsm6dsv_all_sources_get(&dev_ctx, &all_sources);
-
-    if (all_sources.drdy_xl) {
-      /* Read acceleration field data */
-      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
-      lsm6dsv_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-      acceleration_mg[0] =
-        lsm6dsv_from_fs2_to_mg(data_raw_acceleration[0]);
-      acceleration_mg[1] =
-        lsm6dsv_from_fs2_to_mg(data_raw_acceleration[1]);
-      acceleration_mg[2] =
-        lsm6dsv_from_fs2_to_mg(data_raw_acceleration[2]);
-      sprintf((char *)tx_buffer,
-              "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-    }
-
-    if (all_sources.drdy_gy) {
-      /* Read angular rate field data */
-      memset(data_raw_angular_rate, 0x00, 3 * sizeof(int16_t));
-      lsm6dsv_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate);
-      angular_rate_mdps[0] =
-        lsm6dsv_from_fs2000_to_mdps(data_raw_angular_rate[0]);
-      angular_rate_mdps[1] =
-        lsm6dsv_from_fs2000_to_mdps(data_raw_angular_rate[1]);
-      angular_rate_mdps[2] =
-        lsm6dsv_from_fs2000_to_mdps(data_raw_angular_rate[2]);
-      sprintf((char *)tx_buffer,
-              "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-              angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-    }
-
-    if (all_sources.drdy_temp) {
-      /* Read temperature data */
-      memset(&data_raw_temperature, 0x00, sizeof(int16_t));
-      lsm6dsv_temperature_raw_get(&dev_ctx, &data_raw_temperature);
-      temperature_degC = lsm6dsv_from_lsb_to_celsius(
-                           data_raw_temperature);
-      sprintf((char *)tx_buffer,
-              "Temperature [degC]:%6.2f\r\n", temperature_degC);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-    }
-  }
+  /* wait forever (xl samples read with drdy irq) */
+  while (1);
 }
 
 /*

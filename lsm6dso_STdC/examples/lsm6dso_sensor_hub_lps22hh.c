@@ -237,7 +237,8 @@ void lsm6dso_hub_fifo_lps22hh(void)
   /* Enable FIFO batching of Slave0.
    * ODR batching is 13 Hz.
    */
-  lsm6dso_sh_batch_slave_0_set(&ag_ctx, PROPERTY_ENABLE);
+  lsm6dso_sh_batch_slave_set(&ag_ctx, 0,
+                             PROPERTY_ENABLE);
   lsm6dso_sh_data_rate_set(&ag_ctx, LSM6DSO_SH_ODR_13Hz);
   /* Set FIFO batch XL/Gyro ODR to 12.5Hz. */
   lsm6dso_fifo_xl_batch_set(&ag_ctx, LSM6DSO_XL_BATCHED_AT_12Hz5);
@@ -249,7 +250,7 @@ void lsm6dso_hub_fifo_lps22hh(void)
                         1; /* 7bit I2C address */
   sh_cfg_read.slv_subadd = LPS22HH_STATUS;
   sh_cfg_read.slv_len = 6;
-  lsm6dso_sh_slv0_cfg_read(&ag_ctx, &sh_cfg_read);
+  lsm6dso_sh_slv_cfg_read(&ag_ctx, 0, &sh_cfg_read);
   /* Configure Sensor Hub to read one slave. */
   lsm6dso_sh_slave_connected_set(&ag_ctx, LSM6DSO_SLV_0);
   /* Enable I2C Master. */
@@ -356,7 +357,7 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-  HAL_I2C_Mem_Write(handle, LSM6DSO_I2C_ADD_L, reg,
+  HAL_I2C_Mem_Write(handle, LSM6DSO_I2C_ADD_H, reg,
                     I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
@@ -383,7 +384,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-  HAL_I2C_Mem_Read(handle, LSM6DSO_I2C_ADD_L, reg,
+  HAL_I2C_Mem_Read(handle, LSM6DSO_I2C_ADD_H, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
   reg |= 0x80;
@@ -519,7 +520,7 @@ static int32_t lsm6dso_read_lps22hh_cx(void *ctx, uint8_t reg,
                         1; /* 7bit I2C address */
   sh_cfg_read.slv_subadd = reg;
   sh_cfg_read.slv_len = len;
-  ret = lsm6dso_sh_slv0_cfg_read(&ag_ctx, &sh_cfg_read);
+  ret = lsm6dso_sh_slv_cfg_read(&ag_ctx, 0, &sh_cfg_read);
   lsm6dso_sh_slave_connected_set(&ag_ctx, LSM6DSO_SLV_0);
   /* Enable I2C Master and I2C master. */
   lsm6dso_sh_master_set(&ag_ctx, PROPERTY_ENABLE);

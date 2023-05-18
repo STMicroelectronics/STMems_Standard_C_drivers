@@ -108,6 +108,9 @@ static uint8_t tx_buffer[1000];
 static uint8_t whoamI;
 static int16_t data;
 
+static lsm6dsv16bx_ah_qvar_mode_t qvar_mode;
+static lsm6dsv16bx_filt_settling_mask_t filt_settling_mask;
+
 /* Extern variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
@@ -128,11 +131,9 @@ static void platform_init(void);
 /* Main Example --------------------------------------------------------------*/
 void lsm6dsv16bx_qvar_read_data_polling(void)
 {
-  lsm6dsv16bx_filt_settling_mask_t filt_settling_mask;
   lsm6dsv16bx_reset_t rst;
   stmdev_ctx_t dev_ctx;
   lsm6dsv16bx_all_sources_t all_sources;
-  lsm6dsv16bx_ah_qvar_mode_t qvar_mode;
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
@@ -157,10 +158,10 @@ void lsm6dsv16bx_qvar_read_data_polling(void)
 
   /* Enable Block Data Update */
   lsm6dsv16bx_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-  
+
   lsm6dsv16bx_xl_data_rate_set(&dev_ctx, LSM6DSV16BX_XL_ODR_AT_15Hz);
   lsm6dsv16bx_xl_full_scale_set(&dev_ctx, LSM6DSV16BX_2g);
-  
+
   /* Configure filtering chain */
   filt_settling_mask.drdy = PROPERTY_ENABLE;
   filt_settling_mask.irq_xl = PROPERTY_ENABLE;

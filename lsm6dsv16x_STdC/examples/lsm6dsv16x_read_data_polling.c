@@ -110,6 +110,8 @@ static float temperature_degC;
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 
+static lsm6dsv16x_filt_settling_mask_t filt_settling_mask;
+
 /* Extern variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
@@ -131,7 +133,6 @@ static void platform_init(void);
 /* Main Example --------------------------------------------------------------*/
 void lsm6dsv16x_read_data_polling(void)
 {
-  lsm6dsv16x_filt_settling_mask_t filt_settling_mask;
   lsm6dsv16x_reset_t rst;
   stmdev_ctx_t dev_ctx;
   /* Initialize mems driver interface */

@@ -190,8 +190,13 @@ static void sflp2q(float quat[4], uint16_t sflp[3])
   for (uint8_t i = 0; i < 3; i++)
     sumsq += quat[i] * quat[i];
 
-  if (sumsq > 1.0f)
+  if (sumsq > 1.0f) {
+    float n = sqrtf(sumsq);
+    quat[0] /= n;
+    quat[1] /= n;
+    quat[2] /= n;
     sumsq = 1.0f;
+  }
 
   quat[3] = sqrtf(1.0f - sumsq);
 }

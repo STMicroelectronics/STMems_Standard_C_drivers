@@ -80,7 +80,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "lsm6dsv16bx_reg.h"
+#include "lsm6dsv_reg.h"
 
 #if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
@@ -112,7 +112,7 @@ static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 
 /* Private variables ---------------------------------------------------------*/
-static lsm6dsv16bx_fifo_sflp_raw_t fifo_sflp;
+static lsm6dsv_fifo_sflp_raw_t fifo_sflp;
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -202,17 +202,17 @@ static void sflp2q(float quat[4], uint16_t sflp[3])
 }
 
 /* Main Example --------------------------------------------------------------*/
-void lsm6dsv16bx_sensor_fusion(void)
+void lsm6dsv_sensor_fusion(void)
 {
-  lsm6dsv16bx_fifo_status_t fifo_status;
+  lsm6dsv_fifo_status_t fifo_status;
   stmdev_ctx_t dev_ctx;
-  lsm6dsv16bx_reset_t rst;
-  lsm6dsv16bx_sflp_gbias_t gbias;
+  lsm6dsv_reset_t rst;
+  lsm6dsv_sflp_gbias_t gbias;
 
   /* Uncomment to configure INT 1 */
-  //lsm6dsv16bx_pin_int1_route_t int1_route;
+  //lsm6dsv_pin_int1_route_t int1_route;
   /* Uncomment to configure INT 2 */
-  //lsm6dsv16bx_pin_int2_route_t int2_route;
+  //lsm6dsv_pin_int2_route_t int2_route;
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
@@ -224,46 +224,44 @@ void lsm6dsv16bx_sensor_fusion(void)
   platform_delay(BOOT_TIME);
 
   /* Check device ID */
-  lsm6dsv16bx_device_id_get(&dev_ctx, &whoamI);
+  lsm6dsv_device_id_get(&dev_ctx, &whoamI);
 
-  if (whoamI != LSM6DSV16BX_ID)
+  if (whoamI != LSM6DSV_ID)
     while (1);
 
   /* Restore default configuration */
-  lsm6dsv16bx_reset_set(&dev_ctx, LSM6DSV16BX_RESTORE_CTRL_REGS);
+  lsm6dsv_reset_set(&dev_ctx, LSM6DSV_RESTORE_CTRL_REGS);
   do {
-    lsm6dsv16bx_reset_get(&dev_ctx, &rst);
-  } while (rst != LSM6DSV16BX_READY);
-
-  lsm6dsv16bx_sflp_configure(&dev_ctx);
+    lsm6dsv_reset_get(&dev_ctx, &rst);
+  } while (rst != LSM6DSV_READY);
 
   /* Enable Block Data Update */
-  lsm6dsv16bx_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsv_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
   /* Set full scale */
-  lsm6dsv16bx_xl_full_scale_set(&dev_ctx, LSM6DSV16BX_4g);
-  lsm6dsv16bx_gy_full_scale_set(&dev_ctx, LSM6DSV16BX_2000dps);
+  lsm6dsv_xl_full_scale_set(&dev_ctx, LSM6DSV_4g);
+  lsm6dsv_gy_full_scale_set(&dev_ctx, LSM6DSV_2000dps);
 
   /*
    * Set FIFO watermark (number of unread sensor data TAG + 6 bytes
    * stored in FIFO) to FIFO_WATERMARK samples
    */
-  lsm6dsv16bx_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
+  lsm6dsv_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
 
   /* Set FIFO batch of sflp data */
   fifo_sflp.game_rotation = 1;
   fifo_sflp.gravity = 1;
   fifo_sflp.gbias = 1;
-  lsm6dsv16bx_fifo_sflp_batch_set(&dev_ctx, fifo_sflp);
+  lsm6dsv_fifo_sflp_batch_set(&dev_ctx, fifo_sflp);
 
   /* Set FIFO mode to Stream mode (aka Continuous Mode) */
-  lsm6dsv16bx_fifo_mode_set(&dev_ctx, LSM6DSV16BX_STREAM_MODE);
+  lsm6dsv_fifo_mode_set(&dev_ctx, LSM6DSV_STREAM_MODE);
 
   /* Set Output Data Rate */
-  lsm6dsv16bx_xl_data_rate_set(&dev_ctx, LSM6DSV16BX_XL_ODR_AT_30Hz);
-  lsm6dsv16bx_gy_data_rate_set(&dev_ctx, LSM6DSV16BX_GY_ODR_AT_30Hz);
-  lsm6dsv16bx_sflp_data_rate_set(&dev_ctx, LSM6DSV16BX_SFLP_30Hz);
+  lsm6dsv_xl_data_rate_set(&dev_ctx, LSM6DSV_ODR_AT_30Hz);
+  lsm6dsv_gy_data_rate_set(&dev_ctx, LSM6DSV_ODR_AT_30Hz);
+  lsm6dsv_sflp_data_rate_set(&dev_ctx, LSM6DSV_SFLP_30Hz);
 
-  lsm6dsv16bx_sflp_game_rotation_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsv_sflp_game_rotation_set(&dev_ctx, PROPERTY_ENABLE);
 
   /*
    * here application may initialize offset with latest values
@@ -272,14 +270,14 @@ void lsm6dsv16bx_sensor_fusion(void)
   gbias.gbias_x = 0.0f;
   gbias.gbias_y = 0.0f;
   gbias.gbias_z = 0.0f;
-  lsm6dsv16bx_sflp_game_gbias_set(&dev_ctx, &gbias);
+  lsm6dsv_sflp_game_gbias_set(&dev_ctx, &gbias);
 
   /* Wait samples */
   while (1) {
     uint16_t num = 0;
 
     /* Read watermark flag */
-    lsm6dsv16bx_fifo_status_get(&dev_ctx, &fifo_status);
+    lsm6dsv_fifo_status_get(&dev_ctx, &fifo_status);
 
     if (fifo_status.fifo_th == 1) {
       num = fifo_status.fifo_level;
@@ -288,35 +286,35 @@ void lsm6dsv16bx_sensor_fusion(void)
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
       while (num--) {
-        lsm6dsv16bx_fifo_out_raw_t f_data;
+        lsm6dsv_fifo_out_raw_t f_data;
         int16_t *axis;
         float quat[4];
         float gravity_mg[3];
         float gbias_mdps[3];
 
         /* Read FIFO sensor value */
-        lsm6dsv16bx_fifo_out_raw_get(&dev_ctx, &f_data);
+        lsm6dsv_fifo_out_raw_get(&dev_ctx, &f_data);
 
         switch (f_data.tag) {
-        case LSM6DSV16BX_SFLP_GYROSCOPE_BIAS_TAG:
+        case LSM6DSV_SFLP_GYROSCOPE_BIAS_TAG:
           axis = (int16_t *)&f_data.data[0];
-          gbias_mdps[0] = lsm6dsv16bx_from_fs125_to_mdps(axis[0]);
-          gbias_mdps[1] = lsm6dsv16bx_from_fs125_to_mdps(axis[1]);
-          gbias_mdps[2] = lsm6dsv16bx_from_fs125_to_mdps(axis[2]);
+          gbias_mdps[0] = lsm6dsv_from_fs125_to_mdps(axis[0]);
+          gbias_mdps[1] = lsm6dsv_from_fs125_to_mdps(axis[1]);
+          gbias_mdps[2] = lsm6dsv_from_fs125_to_mdps(axis[2]);
           sprintf((char *)tx_buffer, "GBIAS [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
                          gbias_mdps[0], gbias_mdps[1], gbias_mdps[2]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
-        case LSM6DSV16BX_SFLP_GRAVITY_VECTOR_TAG:
+        case LSM6DSV_SFLP_GRAVITY_VECTOR_TAG:
           axis = (int16_t *)&f_data.data[0];
-          gravity_mg[0] = lsm6dsv16bx_from_sflp_to_mg(axis[0]);
-          gravity_mg[1] = lsm6dsv16bx_from_sflp_to_mg(axis[1]);
-          gravity_mg[2] = lsm6dsv16bx_from_sflp_to_mg(axis[2]);
+          gravity_mg[0] = lsm6dsv_from_sflp_to_mg(axis[0]);
+          gravity_mg[1] = lsm6dsv_from_sflp_to_mg(axis[1]);
+          gravity_mg[2] = lsm6dsv_from_sflp_to_mg(axis[2]);
           sprintf((char *)tx_buffer, "Gravity [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                          gravity_mg[0], gravity_mg[1], gravity_mg[2]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
-        case LSM6DSV16BX_SFLP_GAME_ROTATION_VECTOR_TAG:
+        case LSM6DSV_SFLP_GAME_ROTATION_VECTOR_TAG:
           sflp2q(quat, (uint16_t *)&f_data.data[0]);
           sprintf((char *)tx_buffer, "Game Rotation \tX: %2.3f\tY: %2.3f\tZ: %2.3f\tW: %2.3f\r\n",
                   quat[0], quat[1], quat[2], quat[3]);
@@ -347,7 +345,7 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-  HAL_I2C_Mem_Write(handle, LSM6DSV16BX_I2C_ADD_L, reg,
+  HAL_I2C_Mem_Write(handle, LSM6DSV_I2C_ADD_L, reg,
                     I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
@@ -355,7 +353,7 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
   HAL_SPI_Transmit(handle, (uint8_t*) bufp, len, 1000);
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
-  i2c_lld_write(handle,  LSM6DSV16BX_I2C_ADD_H & 0xFE, reg, (uint8_t*) bufp, len);
+  i2c_lld_write(handle,  LSM6DSV_I2C_ADD_H & 0xFE, reg, (uint8_t*) bufp, len);
 #endif
   return 0;
 }
@@ -374,7 +372,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-  HAL_I2C_Mem_Read(handle, LSM6DSV16BX_I2C_ADD_L, reg,
+  HAL_I2C_Mem_Read(handle, LSM6DSV_I2C_ADD_L, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
   reg |= 0x80;
@@ -383,7 +381,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   HAL_SPI_Receive(handle, bufp, len, 1000);
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
-  i2c_lld_read(handle, LSM6DSV16BX_I2C_ADD_H & 0xFE, reg, bufp, len);
+  i2c_lld_read(handle, LSM6DSV_I2C_ADD_H & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }
