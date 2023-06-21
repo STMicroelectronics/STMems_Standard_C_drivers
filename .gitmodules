@@ -315,3 +315,6 @@
 [submodule "_resources/ispu-examples"]
 	path = _resources/ispu-examples
 	url = https://github.com/STMicroelectronics/ispu-examples
+[submodule "sths34pf80_STdC/driver"]
+	path = sths34pf80_STdC/driver
+	url = https://github.com/STMicroelectronics/sths34pf80-pid
