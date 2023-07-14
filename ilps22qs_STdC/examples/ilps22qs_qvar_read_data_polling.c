@@ -181,7 +181,7 @@ void ilps22qs_qvar_read_data_polling(void)
     if ( all_sources.drdy_pres ) {
       ilps22qs_ah_qvar_data_get(&dev_ctx, &data);
 
-      sprintf((char*)tx_buffer,"QVAR [LSB]:%d\r\n", data.lsb);
+      sprintf((char*)tx_buffer,"QVAR [mV]:%6.2f [LSB]:%d\r\n", data.mv, data.lsb);
 
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }

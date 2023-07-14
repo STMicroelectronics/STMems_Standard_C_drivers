@@ -87,7 +87,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t tx_buffer[1000];
-static ilps28qsw_data_t data;
+static ilps28qsw_ah_qvar_data_t data;
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -160,9 +160,9 @@ void ilps28qsw_ah_qvar_read_data_polling(void)
     /* Read output only if new values are available */
     ilps28qsw_all_sources_get(&dev_ctx, &all_sources);
     if ( all_sources.drdy_pres ) {
-      ilps28qsw_data_get(&dev_ctx, &md, &data);
+      ilps28qsw_ah_qvar_data_get(&dev_ctx, &data);
 
-      sprintf((char*)tx_buffer,"QVAR [LSB]:%d\r\n", data.ah_qvar.lsb);
+      sprintf((char*)tx_buffer,"QVAR [mV]:%6.2f [LSB]:%d\r\n", data.mv, data.lsb);
 
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
