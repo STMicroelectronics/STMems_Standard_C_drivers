@@ -215,7 +215,7 @@ void lsm6dso_fifo_pedo(void)
         lsm6dso_fifo_sensor_tag_get(&ag_ctx, &reg_tag);
 
         switch (reg_tag) {
-          case LSM6DSO_STEP_CPUNTER_TAG:
+          case LSM6DSO_STEP_COUNTER_TAG:
             lsm6dso_fifo_out_raw_get(&ag_ctx, pedo_sample.byte);
             sprintf((char *)tx_buffer, "Step Count :%u T %u\r\n",
                     (unsigned int)pedo_sample.step_count,
