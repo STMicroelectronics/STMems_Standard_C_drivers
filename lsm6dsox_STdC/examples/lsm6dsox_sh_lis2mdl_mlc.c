@@ -123,7 +123,7 @@ static stmdev_ctx_t mag_ctx;
 /* Private functions ---------------------------------------------------------*/
 
 static int32_t lsm6dsox_write_lis2mdl_cx(void *ctx, uint8_t reg,
-                                         uint8_t *data,
+                                         const uint8_t *data,
                                          uint16_t len);
 
 static int32_t lsm6dsox_read_lis2mdl_cx(void *ctx, uint8_t reg,
@@ -347,7 +347,7 @@ static void platform_init(void)
  *
  */
 static int32_t lsm6dsox_write_lis2mdl_cx(void *ctx, uint8_t reg,
-                                         uint8_t *data,
+                                         const uint8_t *data,
                                          uint16_t len)
 {
   int16_t data_raw_acceleration[3];
