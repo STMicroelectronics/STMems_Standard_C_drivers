@@ -22,9 +22,9 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3 + 
- * - NUCLEO_F411RE + 
- * - DISCOVERY_SPC584B + 
+ * - STEVAL_MKI109V3 +
+ * - NUCLEO_F411RE +
+ * - DISCOVERY_SPC584B +
  *
  * Used interfaces:
  *
@@ -102,6 +102,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 static   lsm6dsv16bx_filt_settling_mask_t filt_settling_mask;
+static uint8_t whoamI;
+static uint8_t tx_buffer[1000];
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -130,10 +132,7 @@ void lsm6dsv16bx_activity(void)
   lsm6dsv16bx_all_sources_t all_sources;
   lsm6dsv16bx_reset_t rst;
   stmdev_ctx_t dev_ctx;
-  lsm6dsv16bx_pin_int1_route_t int1_route;
 
-  uint8_t tx_buffer[1000];
-  uint8_t dummy;
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
@@ -143,9 +142,9 @@ void lsm6dsv16bx_activity(void)
   /* Wait Boot Time */
   platform_delay(BOOT_TIME);
   /* Check device ID */
-  lsm6dsv16bx_device_id_get(&dev_ctx, &dummy);
+  lsm6dsv16bx_device_id_get(&dev_ctx, &whoamI);
 
-  if (dummy != LSM6DSV16BX_ID)
+  if (whoamI != LSM6DSV16BX_ID)
     while (1);
 
   /* Restore default configuration */
@@ -189,10 +188,7 @@ void lsm6dsv16bx_activity(void)
   /* Inactivity configuration: XL to LP, gyro to Power-Down */
   lsm6dsv16bx_act_sleep_xl_odr_set(&dev_ctx, LSM6DSV16BX_15Hz);
   lsm6dsv16bx_act_mode_set(&dev_ctx, LSM6DSV16BX_XL_LOW_POWER_GY_POWER_DOWN);
-  /* Enable interrupt generation on Inactivity INT1 pin */
-  lsm6dsv16bx_pin_int1_route_get(&dev_ctx, &int1_route);
-  int1_route.sleep_change = PROPERTY_ENABLE;
-  lsm6dsv16bx_pin_int1_route_set(&dev_ctx, int1_route);
+
   sprintf((char *)tx_buffer, "Ready\r\n");
   tx_com(tx_buffer, strlen((char const *)tx_buffer));
   /* Wait Events */

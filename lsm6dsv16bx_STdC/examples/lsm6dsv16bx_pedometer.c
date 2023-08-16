@@ -22,9 +22,9 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3 + 
- * - NUCLEO_F411RE + 
- * - DISCOVERY_SPC584B + 
+ * - STEVAL_MKI109V3 +
+ * - NUCLEO_F411RE +
+ * - DISCOVERY_SPC584B +
  *
  * Used interfaces:
  *
@@ -128,7 +128,6 @@ static void platform_init(void);
 void lsm6dsv16bx_pedometer(void)
 {
   /* Variable declaration */
-  lsm6dsv16bx_pin_int1_route_t int1_route;
   lsm6dsv16bx_all_sources_t all_sources;
   lsm6dsv16bx_reset_t rst;
   stmdev_ctx_t dev_ctx;
@@ -167,8 +166,6 @@ void lsm6dsv16bx_pedometer(void)
   lsm6dsv16bx_filt_gy_lp1_bandwidth_set(&dev_ctx, LSM6DSV16BX_GY_ULTRA_LIGHT);
   lsm6dsv16bx_filt_xl_lp2_set(&dev_ctx, PROPERTY_ENABLE);
   lsm6dsv16bx_filt_xl_lp2_bandwidth_set(&dev_ctx, LSM6DSV16BX_XL_STRONG);
-  
-  
 
   /* Enable pedometer */
   stpcnt_mode.step_counter_enable = PROPERTY_ENABLE;
@@ -176,10 +173,6 @@ void lsm6dsv16bx_pedometer(void)
   lsm6dsv16bx_stpcnt_mode_set(&dev_ctx, stpcnt_mode);
   //lsm6dsv16bx_stpcnt_debounce_set(stmdev_ctx_t *ctx, uint8_t val);
   //lsm6dsv16bx_stpcnt_period_set(stmdev_ctx_t *ctx, uint16_t val);
-  /* Route signals on interrupt pin 1 */
-  lsm6dsv16bx_pin_int1_route_get(&dev_ctx, &int1_route);
-  int1_route.step_detector = PROPERTY_ENABLE;
-  lsm6dsv16bx_pin_int1_route_set(&dev_ctx, int1_route);
 
   /* Set Output Data Rate.
    * Selected data rate have to be equal or greater with respect
@@ -187,7 +180,7 @@ void lsm6dsv16bx_pedometer(void)
    */
   lsm6dsv16bx_xl_data_rate_set(&dev_ctx, LSM6DSV16BX_XL_ODR_AT_30Hz);
   lsm6dsv16bx_gy_data_rate_set(&dev_ctx, LSM6DSV16BX_GY_ODR_OFF);
-  
+
   lsm6dsv16bx_stpcnt_rst_step_set(&dev_ctx, PROPERTY_ENABLE);
   /* Main loop */
   while (1) {
