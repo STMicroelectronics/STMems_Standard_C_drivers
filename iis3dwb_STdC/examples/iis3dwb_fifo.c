@@ -3,7 +3,7 @@
  * @file    fifo.c
  * @author  Sensors Software Solution Team
  * @brief   This file how to configure compressed FIFO and to retrieve acc
- *          and gyro data. This sample use a fifo utility library tool
+ *          data. This sample use a fifo utility library tool
  *          for FIFO decompression.
  *
  ******************************************************************************
@@ -73,8 +73,8 @@
 
 /* Private macro -------------------------------------------------------------*/
 /*
- * Select FIFO samples watermark, max value is 512
- * in FIFO are stored acc, gyro and timestamp samples
+ * Select FIFO samples watermark, max value is 511
+ * in FIFO are stored acc and timestamp samples
  */
 #define BOOT_TIME         10
 #define FIFO_WATERMARK    256
@@ -152,7 +152,7 @@ void iis3dwb_fifo(void)
    * stored in FIFO) to FIFO_WATERMARK samples
    */
   iis3dwb_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
-  /* Set FIFO batch XL/Gyro ODR to 12.5Hz */
+  /* Set FIFO batch XL ODR to 12.5Hz */
   iis3dwb_fifo_xl_batch_set(&dev_ctx, IIS3DWB_XL_BATCHED_AT_26k7Hz);
 
   /* Set FIFO mode to Stream mode (aka Continuous Mode) */
