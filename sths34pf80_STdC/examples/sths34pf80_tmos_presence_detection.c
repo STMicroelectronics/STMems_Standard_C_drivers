@@ -179,15 +179,15 @@ void sths34pf80_tmos_presence_detection(void)
   sths34pf80_algo_reset(&dev_ctx);
 
   /* Set interrupt */
-  sths34pf80_tmos_int_or_set(&dev_ctx, STHS34PF80_TMOS_INT_PRESENCE);
-  sths34pf80_tmos_route_int_set(&dev_ctx, STHS34PF80_TMOS_INT_OR);
+  sths34pf80_int_or_set(&dev_ctx, STHS34PF80_INT_PRESENCE);
+  sths34pf80_route_int_set(&dev_ctx, STHS34PF80_INT_OR);
 
   /* Set ODR */
-  sths34pf80_tmos_odr_set(&dev_ctx, STHS34PF80_TMOS_ODR_AT_30Hz);
+  sths34pf80_odr_set(&dev_ctx, STHS34PF80_ODR_AT_30Hz);
 
   /* Presence event detected in irq handler */
   while(1) {
-    sths34pf80_tmos_func_status_t func_status;
+    sths34pf80_func_status_t func_status;
     uint8_t motion;
     uint8_t presence;
 
@@ -198,7 +198,7 @@ void sths34pf80_tmos_presence_detection(void)
       presence = 0;
 
       do {
-        sths34pf80_tmos_func_status_get(&dev_ctx, &func_status);
+        sths34pf80_func_status_get(&dev_ctx, &func_status);
 
         if (func_status.pres_flag != presence)
         {

@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * @file    tmos_data_drdy.c
+ * @file    sths34pf80_data_drdy.c
  * @author  Sensors Software Solution Team
  * @brief   This file show the simplest way to get data from sensor.
  *
@@ -126,15 +126,15 @@ static void platform_init(void);
 
 static   stmdev_ctx_t dev_ctx;
 
-void sths34pf80_tmos_data_drdy_handler(void)
+void sths34pf80_data_drdy_handler(void)
 {
-  sths34pf80_tmos_drdy_status_t status;
-  sths34pf80_tmos_func_status_t func_status;
+  sths34pf80_drdy_status_t status;
+  sths34pf80_func_status_t func_status;
 
-  sths34pf80_tmos_drdy_status_get(&dev_ctx, &status);
+  sths34pf80_drdy_status_get(&dev_ctx, &status);
   if (status.drdy)
   {
-    sths34pf80_tmos_func_status_get(&dev_ctx, &func_status);
+    sths34pf80_func_status_get(&dev_ctx, &func_status);
 
     sprintf((char *)tx_buffer, "TAmbient Shock: %d - Presence: %d - Motion: %d\r\n",
             func_status.tamb_shock_flag, func_status.pres_flag, func_status.mot_flag);
@@ -143,7 +143,7 @@ void sths34pf80_tmos_data_drdy_handler(void)
 }
 
 /* Main Example --------------------------------------------------------------*/
-void sths34pf80_tmos_data_drdy(void)
+void sths34pf80_data_drdy(void)
 {
   uint8_t whoami;
   sths34pf80_lpf_bandwidth_t lpf_m, lpf_p, lpf_p_m, lpf_a_t;
@@ -182,10 +182,10 @@ void sths34pf80_tmos_data_drdy(void)
   sths34pf80_block_data_update_set(&dev_ctx, 1);
 
   /* Set interrupt */
-  sths34pf80_tmos_route_int_set(&dev_ctx, STHS34PF80_TMOS_INT_DRDY);
+  sths34pf80_route_int_set(&dev_ctx, STHS34PF80_INT_DRDY);
 
   /* Set ODR */
-  sths34pf80_tmos_odr_set(&dev_ctx, STHS34PF80_TMOS_ODR_AT_8Hz);
+  sths34pf80_odr_set(&dev_ctx, STHS34PF80_ODR_AT_8Hz);
 
   /* Read samples in drdy handler */
   while(1);

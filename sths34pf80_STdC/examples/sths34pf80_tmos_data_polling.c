@@ -130,8 +130,8 @@ void sths34pf80_tmos_data_polling(void)
   stmdev_ctx_t dev_ctx;
   uint8_t whoami;
   sths34pf80_lpf_bandwidth_t lpf_m, lpf_p, lpf_p_m, lpf_a_t;
-  sths34pf80_tmos_drdy_status_t status;
-  sths34pf80_tmos_func_status_t func_status;
+  sths34pf80_drdy_status_t status;
+  sths34pf80_func_status_t func_status;
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
@@ -167,17 +167,17 @@ void sths34pf80_tmos_data_polling(void)
   sths34pf80_block_data_update_set(&dev_ctx, 1);
 
   /* Set ODR */
-  sths34pf80_tmos_odr_set(&dev_ctx, STHS34PF80_TMOS_ODR_AT_30Hz);
+  sths34pf80_odr_set(&dev_ctx, STHS34PF80_ODR_AT_30Hz);
 
     int32_t cnt = 0;
   /* Read samples in polling mode (no int) */
   while(1)
   {
 
-    sths34pf80_tmos_drdy_status_get(&dev_ctx, &status);
+    sths34pf80_drdy_status_get(&dev_ctx, &status);
     if (status.drdy)
     {
-      sths34pf80_tmos_func_status_get(&dev_ctx, &func_status);
+      sths34pf80_func_status_get(&dev_ctx, &func_status);
       if ((cnt++ % 30) == 0)
       {
         sprintf((char *)tx_buffer, "-->TA %d - P %d - M %d\r\n",
