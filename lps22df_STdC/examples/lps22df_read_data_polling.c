@@ -101,7 +101,6 @@
 #endif
 
 /* Private macro -------------------------------------------------------------*/
-#define    BOOT_TIME         10 //ms
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t tx_buffer[1000];
@@ -130,32 +129,34 @@ void lps22df_read_data_polling(void)
   lps22df_pin_int_route_t int_route;
   lps22df_all_sources_t all_sources;
   lps22df_bus_mode_t bus_mode;
-  lps22df_stat_t status;
   stmdev_ctx_t dev_ctx;
   lps22df_id_t id;
   lps22df_md_t md;
+  int ret;
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
+  dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
 
   /* Initialize platform specific hardware */
   platform_init();
-
-  /* Wait sensor boot time */
-  platform_delay(BOOT_TIME);
 
   /* Check device ID */
   lps22df_id_get(&dev_ctx, &id);
   if (id.whoami != LPS22DF_ID)
     while(1);
 
-  /* Restore default configuration */
-  lps22df_init_set(&dev_ctx, LPS22DF_RESET);
-  do {
-    lps22df_status_get(&dev_ctx, &status);
-  } while (status.sw_reset);
+  /* Boot device */
+  ret = lps22df_init_set(&dev_ctx, LPS22DF_BOOT);
+  if (ret != 0)
+    while(1);
+
+  /* Reset device */
+  ret = lps22df_init_set(&dev_ctx, LPS22DF_RESET);
+  if (ret != 0)
+    while(1);
 
   /* Set bdu and if_inc recommended for driver usage */
   lps22df_init_set(&dev_ctx, LPS22DF_DRV_RDY);
