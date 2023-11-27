@@ -153,6 +153,7 @@ void lis2dux12_tilt(void)
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
+  dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
 
   /* Initialize platform specific hardware */
@@ -162,7 +163,6 @@ void lis2dux12_tilt(void)
   platform_delay(BOOT_TIME);
 
   lis2dux12_exit_deep_power_down(&dev_ctx);
-  platform_delay(25); /* wait 25ms after going out DEEP power state */
 
   /* Check device ID */
   lis2dux12_device_id_get(&dev_ctx, &id);

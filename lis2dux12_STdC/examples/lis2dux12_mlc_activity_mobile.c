@@ -177,7 +177,6 @@ void lis2dux12_mlc_activity_mobile(void)
   platform_delay(BOOT_TIME);
 
   lis2dux12_exit_deep_power_down(&dev_ctx);
-  platform_delay(25); /* wait 25ms after going out DEEP power state */
 
   /* Check device ID */
   lis2dux12_device_id_get(&dev_ctx, &id);
