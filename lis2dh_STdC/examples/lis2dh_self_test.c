@@ -317,7 +317,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
   /* Read multiple command */
-  reg |= 0x80;
+  reg |= 0xC0;
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
   HAL_SPI_Transmit(handle, &reg, 1, 1000);
   HAL_SPI_Receive(handle, bufp, len, 1000);
