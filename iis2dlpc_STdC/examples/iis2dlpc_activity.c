@@ -135,6 +135,7 @@ void iis2dlpc_activity(void)
   iis2dlpc_reg_t int_route;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
+  dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
   /* Initialize platform specific hardware */
   platform_init();

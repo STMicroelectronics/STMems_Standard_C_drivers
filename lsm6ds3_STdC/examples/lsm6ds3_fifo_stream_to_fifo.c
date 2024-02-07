@@ -137,6 +137,7 @@ void example_main_fifo_stream_lsm6ds3(void)
   uint16_t pattern_len, pattern_numbers;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
+  dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
   /* Init test platform */
   platform_init();

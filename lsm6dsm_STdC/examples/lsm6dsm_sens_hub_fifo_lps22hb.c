@@ -258,6 +258,7 @@ void example_fifo_lps22hb_simple_lsm6dsm(void)
   //lsm6dsm_int2_route_t int_2_reg;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
+  dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
   /* Configure low level function to access to external device */
   press_ctx.read_reg = lsm6dsm_read_lps22hb_cx;

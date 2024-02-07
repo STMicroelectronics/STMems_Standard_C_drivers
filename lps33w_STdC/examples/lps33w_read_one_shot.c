@@ -132,6 +132,7 @@ void lps33w_read_one_shot_(void)
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
+  dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
   /* Initialize platform specific hardware */
   platform_init();

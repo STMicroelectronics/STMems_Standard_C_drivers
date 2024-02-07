@@ -262,6 +262,7 @@ void lsm6dsm_sens_hub_fifo_lis2mdl(void)
   //lsm6dsm_int2_route_t int_2_reg;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
+  dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
   /* Configure low level function to access to external device */
   mag_ctx.read_reg = lsm6dsm_read_lis2mdl_cx;

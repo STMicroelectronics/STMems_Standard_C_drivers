@@ -169,6 +169,7 @@ void lsm6dsox_fsm_sh_mag_anomalies_detection(void)
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg  = platform_read;
+  dev_ctx.mdelay = platform_delay;
   dev_ctx.handle    = &SENSOR_BUS;
   /* Initialize lis2mdl driver interface */
   mag_ctx.read_reg = lsm6dsox_read_lis2mdl_cx;

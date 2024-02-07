@@ -111,6 +111,7 @@ void stts22h_read_data_polling(void)
   stmdev_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
+  dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
   /* Check device ID */
   stts22h_dev_id_get(&dev_ctx, &whoamI);

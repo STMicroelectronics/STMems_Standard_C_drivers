@@ -147,6 +147,7 @@ void ais328dq_self_test(void)
   /* Initialize mems driver interface */
   dev_ctx_xl.write_reg = platform_write;
   dev_ctx_xl.read_reg = platform_read;
+  dev_ctx_xl.mdelay = platform_delay;
   dev_ctx_xl.handle = &SENSOR_BUS;
   /* Initialize self test results */
   st_result = ST_PASS;

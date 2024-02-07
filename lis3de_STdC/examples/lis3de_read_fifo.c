@@ -138,6 +138,7 @@ void lis3de_fifo_read(void)
   uint8_t whoamI;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
+  dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
   whoamI = 0;
   /* Initialize platform specific hardware */

@@ -290,6 +290,7 @@ void example_main_fifo_lsm6ds3(void)
   //lsm6ds3_int1_route_t int_1_reg;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
+  dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
   /* Init test platform */
   platform_init();

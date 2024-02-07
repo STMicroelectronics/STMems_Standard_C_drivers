@@ -141,6 +141,7 @@ void lis2ds12_read_8bit_module(void)
   stmdev_ctx_t dev_ctx;
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
+  dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
   /* Check device ID. */
   whoamI = 0;
