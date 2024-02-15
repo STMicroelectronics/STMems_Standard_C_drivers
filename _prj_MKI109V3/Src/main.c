@@ -57,6 +57,7 @@ void SystemClock_Config(void);
 void iis3dhhc_read_data_polling(void);
 void iis3dwb_read_data_polling(void);
 void iis3dwb_fifo(void);
+void iis3dwb10is_read_data_polling(void);
 
 /* USER CODE END PFP */
 
@@ -108,7 +109,8 @@ int main(void)
   {
     //iis3dhhc_read_data_polling();
     //iis3dwb_read_data_polling();
-    iis3dwb_fifo();
+    //iis3dwb_fifo();
+    iis3dwb10is_read_data_polling();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
