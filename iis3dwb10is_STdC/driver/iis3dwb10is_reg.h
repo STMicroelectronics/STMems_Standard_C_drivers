@@ -217,7 +217,7 @@ typedef struct
 typedef struct
 {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-  uint8_t not_used0                    : 2;
+  uint8_t io_pad_strength              : 2;
   uint8_t pd_dis_int                   : 2;
   uint8_t not_used1                    : 3;
   uint8_t ibhr_por_en                  : 1;
@@ -225,7 +225,7 @@ typedef struct
   uint8_t ibhr_por_en                  : 1;
   uint8_t not_used1                    : 3;
   uint8_t pd_dis_int                   : 2;
-  uint8_t not_used0                    : 2;
+  uint8_t io_pad_strength              : 2;
 #endif /* DRV_BYTE_ORDER */
 } iis3dwb10is_pad_ctrl_t;
 
@@ -250,6 +250,24 @@ typedef struct
 } iis3dwb10is_if_cfg_t;
 
 #define IIS3DWB10IS_WHO_AM_I                     0x0FU
+
+/**
+  * @defgroup IIS3DWB10IS_Register_Union
+  * @brief    This union group all the registers having a bit-field
+  *           description.
+  *           This union is useful but it's not needed by the driver.
+  *
+  *           REMOVING this union you are compliant with:
+  *           MISRA-C 2012 [Rule 19.2] -> " Union are not allowed "
+  */
+typedef union
+{
+  iis3dwb10is_ram_access_t             ram_access;
+  iis3dwb10is_pad_ctrl_t               pad_ctrl;
+  iis3dwb10is_if_cfg_t                 if_cfg;
+  bitwise_t                            bitwise;
+  uint8_t                              byte;
+} iis3dwb10is_reg_t;
 
 /**
   * @}
@@ -286,15 +304,30 @@ typedef enum
 int32_t iis3dwb10is_mem_bank_set(const stmdev_ctx_t *ctx, iis3dwb10is_mem_bank_t val);
 int32_t iis3dwb10is_mem_bank_get(const stmdev_ctx_t *ctx, iis3dwb10is_mem_bank_t *val);
 
-typedef enum
+typedef struct
 {
-  IIS3DWB10IS_PD_INT1_ON_INT2_ON =               0x0,
-  IIS3DWB10IS_PD_INT1_OFF_INT2_ON =              0x1,
-  IIS3DWB10IS_PD_INT1_ON_INT2_OFF =              0x2,
-  IIS3DWB10IS_PD_INT1_OFF_INT2_OFF =             0x3,
-} iis3dwb10is_pd_dis_int_t;
-int32_t iis3dwb10is_pd_dis_int_set(const stmdev_ctx_t *ctx, iis3dwb10is_pd_dis_int_t val);
-int32_t iis3dwb10is_pd_dis_int_get(const stmdev_ctx_t *ctx, iis3dwb10is_pd_dis_int_t *val);
+  enum
+  {
+    IIS3DWB10IS_PAD_STRENGTH_LOWER        = 0x0,
+    IIS3DWB10IS_PAD_STRENGTH_INTERMEDIATE = 0x1,
+    IIS3DWB10IS_PAD_STRENGTH_HIGHEST      = 0x3,
+  } strength;
+  enum
+  {
+    IIS3DWB10IS_PD_INT1_ON_INT2_ON     = 0x0,
+    IIS3DWB10IS_PD_INT1_OFF_INT2_ON    = 0x1,
+    IIS3DWB10IS_PD_INT1_ON_INT2_OFF    = 0x2,
+    IIS3DWB10IS_PD_INT1_OFF_INT2_OFF   = 0x3,
+  } pd_dis;
+  enum
+  {
+    IIS3DWB10IS_PUSH_PULL   = 0,
+    IIS3DWB10IS_OPEN_DRAIN  = 1,
+  } pp_od;
+  uint8_t int_active_level : 1;
+} iis3dwb10is_int_pin_t;
+int32_t iis3dwb10is_interrupt_pin_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_int_pin_t val);
+int32_t iis3dwb10is_interrupt_pin_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_int_pin_t *val);
 
 /**
   * @}

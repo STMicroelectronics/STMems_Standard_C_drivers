@@ -138,60 +138,107 @@ int32_t iis3dwb10is_mem_bank_get(const stmdev_ctx_t *ctx, iis3dwb10is_mem_bank_t
 }
 
 /**
-  * @brief  Pull-Down on INT1 and INT2 pins.[set]
+  * @brief  Configure INT1 and INT2 pins.[set]
   *
   * @param  ctx      read / write interface definitions
-  * @param  val      enum iis3dwb10is_pd_dis_int_t
+  * @param  val      enum iis3dwb10is_int_pin_t
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t iis3dwb10is_pd_dis_int_set(const stmdev_ctx_t *ctx, iis3dwb10is_pd_dis_int_t val)
+int32_t iis3dwb10is_interrupt_pin_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_int_pin_t val)
 {
   iis3dwb10is_pad_ctrl_t pad;
+  iis3dwb10is_if_cfg_t if_cfg;
   int32_t ret;
 
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PAD_CTRL, (uint8_t *)&pad, 1);
-  pad.pd_dis_int = (uint8_t)val;
+  pad.io_pad_strength = (uint8_t)val.strength;
+  pad.pd_dis_int = (uint8_t)val.pd_dis;
   ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_PAD_CTRL, (uint8_t *)&pad, 1);
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_IF_CFG, (uint8_t *)&if_cfg, 1);
+  if_cfg.int_pp_od = (uint8_t)val.pp_od;
+  if_cfg.int_active_level = val.int_active_level;
+  ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_IF_CFG, (uint8_t *)&if_cfg, 1);
+
 
   return ret;
 }
 
 /**
-  * @brief  Pull-Down on INT1 and INT2 pins.[get]
+  * @brief  Configure INT1 and INT2 pins.[get]
   *
   * @param  ctx      read / write interface definitions
-  * @param  val      pointer to enum iis3dwb10is_pd_dis_int_t
+  * @param  val      pointer to enum iis3dwb10is_int_pin_t
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t iis3dwb10is_pd_dis_int_get(const stmdev_ctx_t *ctx, iis3dwb10is_pd_dis_int_t *val)
+int32_t iis3dwb10is_interrupt_pin_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_int_pin_t *val)
 {
   iis3dwb10is_pad_ctrl_t pad;
+  iis3dwb10is_if_cfg_t if_cfg;
   int32_t ret;
 
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PAD_CTRL, (uint8_t *)&pad, 1);
 
-  switch (pad.pd_dis_int)
+  switch (pad.io_pad_strength)
   {
-    case IIS3DWB10IS_PD_INT1_ON_INT2_ON:
-      *val = IIS3DWB10IS_PD_INT1_ON_INT2_ON;
+    case IIS3DWB10IS_PAD_STRENGTH_LOWER:
+      val->strength = IIS3DWB10IS_PAD_STRENGTH_LOWER;
       break;
 
-    case IIS3DWB10IS_PD_INT1_OFF_INT2_ON:
-      *val = IIS3DWB10IS_PD_INT1_OFF_INT2_ON;
+    case IIS3DWB10IS_PAD_STRENGTH_INTERMEDIATE:
+      val->strength = IIS3DWB10IS_PAD_STRENGTH_INTERMEDIATE;
       break;
 
-    case IIS3DWB10IS_PD_INT1_ON_INT2_OFF:
-      *val = IIS3DWB10IS_PD_INT1_ON_INT2_OFF;
-      break;
-
-    case IIS3DWB10IS_PD_INT1_OFF_INT2_OFF:
-      *val = IIS3DWB10IS_PD_INT1_OFF_INT2_OFF;
+    case IIS3DWB10IS_PAD_STRENGTH_HIGHEST:
+      val->strength = IIS3DWB10IS_PAD_STRENGTH_HIGHEST;
       break;
 
     default:
-      *val = IIS3DWB10IS_PD_INT1_ON_INT2_ON;
+      val->strength = IIS3DWB10IS_PAD_STRENGTH_LOWER;
+      break;
+  }
+
+
+  switch (pad.pd_dis_int)
+  {
+    case IIS3DWB10IS_PD_INT1_ON_INT2_ON:
+      val->pd_dis = IIS3DWB10IS_PD_INT1_ON_INT2_ON;
+      break;
+
+    case IIS3DWB10IS_PD_INT1_OFF_INT2_ON:
+      val->pd_dis = IIS3DWB10IS_PD_INT1_OFF_INT2_ON;
+      break;
+
+    case IIS3DWB10IS_PD_INT1_ON_INT2_OFF:
+      val->pd_dis = IIS3DWB10IS_PD_INT1_ON_INT2_OFF;
+      break;
+
+    case IIS3DWB10IS_PD_INT1_OFF_INT2_OFF:
+      val->pd_dis = IIS3DWB10IS_PD_INT1_OFF_INT2_OFF;
+      break;
+
+    default:
+      val->pd_dis = IIS3DWB10IS_PD_INT1_ON_INT2_ON;
+      break;
+  }
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_IF_CFG, (uint8_t *)&if_cfg, 1);
+  val->int_active_level = if_cfg.int_active_level;
+
+  switch (if_cfg.int_pp_od)
+  {
+    case IIS3DWB10IS_PUSH_PULL:
+      val->pp_od = IIS3DWB10IS_PUSH_PULL;
+      break;
+
+    case IIS3DWB10IS_OPEN_DRAIN:
+      val->pp_od = IIS3DWB10IS_OPEN_DRAIN;
+      break;
+
+    default:
+      val->pp_od = IIS3DWB10IS_PUSH_PULL;
       break;
   }
 
