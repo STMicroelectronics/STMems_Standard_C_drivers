@@ -229,6 +229,26 @@ typedef struct
 #endif /* DRV_BYTE_ORDER */
 } iis3dwb10is_pad_ctrl_t;
 
+#define IIS3DWB10IS_IF_CFG                       0x3U
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t i3c_disable          : 1;
+  uint8_t not_used0            : 2;
+  uint8_t int_pp_od            : 1;
+  uint8_t int_active_level     : 1;
+  uint8_t not_used1            : 2;
+  uint8_t sda_pu_en            : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t sda_pu_en            : 1;
+  uint8_t not_used1            : 2;
+  uint8_t int_active_level     : 1;
+  uint8_t int_pp_od            : 1;
+  uint8_t not_used0            : 2;
+  uint8_t i3c_disable          : 1;
+#endif /* DRV_BYTE_ORDER */
+} iis3dwb10is_if_cfg_t;
+
 #define IIS3DWB10IS_WHO_AM_I                     0x0FU
 
 /**
