@@ -597,3 +597,97 @@ int32_t iis3dwb10is_fifo_ispu_ctrl_get(const stmdev_ctx_t *ctx,
   * @}
   *
   */
+
+int32_t iis3dwb10is_interrupt_pll_ctrl_set(const stmdev_ctx_t *ctx, iis3dwb10is_pll_ctrl_t val)
+{
+  iis3dwb10is_pll_ctrl1_t pll_ctrl1;
+  iis3dwb10is_pll_ctrl2_t pll_ctrl2;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PLL_CTRL1, (uint8_t *)&pll_ctrl1, 1);
+  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PLL_CTRL2, (uint8_t *)&pll_ctrl2, 1);
+  if (ret == 0)
+  {
+    pll_ctrl1.osc_ext_sel  = (uint8_t)val.osc_ext_sel;
+    pll_ctrl1.ref_div      = (uint8_t)val.ref_div;
+    pll_ctrl2.pll_div      = val.pll_div;
+    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_PLL_CTRL1, (uint8_t *)&pll_ctrl1, 1);
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_PLL_CTRL2, (uint8_t *)&pll_ctrl2, 1);
+  }
+
+  return ret;
+}
+
+int32_t iis3dwb10is_interrupt_pll_ctrl_get(const stmdev_ctx_t *ctx, iis3dwb10is_pll_ctrl_t *val)
+{
+  iis3dwb10is_pll_ctrl1_t pll_ctrl1;
+  iis3dwb10is_pll_ctrl2_t pll_ctrl2;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PLL_CTRL1, (uint8_t *)&pll_ctrl1, 1);
+  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PLL_CTRL2, (uint8_t *)&pll_ctrl2, 1);
+  if (ret != 0) { return ret; }
+
+  val->pll_div = pll_ctrl2.pll_div;
+
+  switch (pll_ctrl1.ref_div)
+  {
+    case IIS3DWB10IS_PLL_NO_DIVIDER:
+      val->ref_div = IIS3DWB10IS_PLL_NO_DIVIDER;
+      break;
+
+    case IIS3DWB10IS_PLL_DIV_2:
+      val->ref_div = IIS3DWB10IS_PLL_DIV_2;
+      break;
+
+    case IIS3DWB10IS_PLL_DIV_4:
+      val->ref_div = IIS3DWB10IS_PLL_DIV_4;
+      break;
+
+    case IIS3DWB10IS_PLL_DIV_8:
+      val->ref_div = IIS3DWB10IS_PLL_DIV_8;
+      break;
+
+    case IIS3DWB10IS_PLL_DIV_16:
+      val->ref_div = IIS3DWB10IS_PLL_DIV_16;
+      break;
+
+    case IIS3DWB10IS_PLL_DIV_32:
+      val->ref_div = IIS3DWB10IS_PLL_DIV_32;
+      break;
+
+    case IIS3DWB10IS_PLL_DIV_64:
+      val->ref_div = IIS3DWB10IS_PLL_DIV_64;
+      break;
+
+    case IIS3DWB10IS_PLL_DIV_128:
+      val->ref_div = IIS3DWB10IS_PLL_DIV_128;
+      break;
+
+    default:
+      val->ref_div = IIS3DWB10IS_PLL_NO_DIVIDER;
+      break;
+  }
+
+  switch (pll_ctrl1.osc_ext_sel)
+  {
+    case IIS3DWB10IS_PLL_INTERNAL_CLOCK:
+      val->osc_ext_sel = IIS3DWB10IS_PLL_INTERNAL_CLOCK;
+      break;
+
+    case IIS3DWB10IS_PLL_EXTERNAL_CLOCK:
+      val->osc_ext_sel = IIS3DWB10IS_PLL_EXTERNAL_CLOCK;
+      break;
+
+    default:
+      val->osc_ext_sel = IIS3DWB10IS_PLL_INTERNAL_CLOCK;
+      break;
+  }
+
+  return ret;
+}
+
+/**
+  * @}
+  *
+  */

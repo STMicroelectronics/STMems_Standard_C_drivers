@@ -291,6 +291,32 @@ typedef struct
 #endif /* DRV_BYTE_ORDER */
 } iis3dwb10is_fifo_ctrl3_t;
 
+#define IIS3DWB10IS_PLL_CTRL1                  0x0AU
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t ref_div                      : 3;
+  uint8_t not_used0                    : 4;
+  uint8_t osc_ext_sel                  : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t osc_ext_sel                  : 1;
+  uint8_t not_used0                    : 4;
+  uint8_t ref_div                      : 3;
+#endif /* DRV_BYTE_ORDER */
+} iis3dwb10is_pll_ctrl1_t;
+
+#define IIS3DWB10IS_PLL_CTRL2                  0x0BU
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t pll_div                      : 6;
+  uint8_t not_used0                    : 2;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used0                    : 2;
+  uint8_t pll_div                      : 6;
+#endif /* DRV_BYTE_ORDER */
+} iis3dwb10is_pll_ctrl2_t;
+
 #define IIS3DWB10IS_WHO_AM_I                     0x0FU
 
 /**
@@ -310,6 +336,8 @@ typedef union
   iis3dwb10is_fifo_ctrl1_t             fifo_ctrl1;
   iis3dwb10is_fifo_ctrl2_t             fifo_ctrl2;
   iis3dwb10is_fifo_ctrl3_t             fifo_ctrl3;
+  iis3dwb10is_pll_ctrl1_t              pll_ctrl1;
+  iis3dwb10is_pll_ctrl2_t              pll_ctrl2;
   bitwise_t                            bitwise;
   uint8_t                              byte;
 } iis3dwb10is_reg_t;
@@ -429,6 +457,28 @@ int32_t iis3dwb10is_fifo_ispu_ctrl_set(const stmdev_ctx_t *ctx,
 int32_t iis3dwb10is_fifo_ispu_ctrl_get(const stmdev_ctx_t *ctx,
                                        iis3dwb10is_fifo_ispu_ctrl_batch_t *val);
 
+typedef struct
+{
+  enum
+  {
+    IIS3DWB10IS_PLL_NO_DIVIDER        = 0x0,
+    IIS3DWB10IS_PLL_DIV_2             = 0x1,
+    IIS3DWB10IS_PLL_DIV_4             = 0x2,
+    IIS3DWB10IS_PLL_DIV_8             = 0x3,
+    IIS3DWB10IS_PLL_DIV_16            = 0x4,
+    IIS3DWB10IS_PLL_DIV_32            = 0x5,
+    IIS3DWB10IS_PLL_DIV_64            = 0x6,
+    IIS3DWB10IS_PLL_DIV_128           = 0x7,
+  } ref_div;
+  enum
+  {
+    IIS3DWB10IS_PLL_INTERNAL_CLOCK    = 0x0,
+    IIS3DWB10IS_PLL_EXTERNAL_CLOCK    = 0x1,
+  } osc_ext_sel;
+  uint8_t pll_div : 6;
+} iis3dwb10is_pll_ctrl_t;
+int32_t iis3dwb10is_interrupt_pll_ctrl_set(const stmdev_ctx_t *ctx, iis3dwb10is_pll_ctrl_t val);
+int32_t iis3dwb10is_interrupt_pll_ctrl_get(const stmdev_ctx_t *ctx, iis3dwb10is_pll_ctrl_t *val);
 
 /**
   * @}
