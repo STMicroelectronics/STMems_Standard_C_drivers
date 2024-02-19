@@ -598,7 +598,7 @@ int32_t iis3dwb10is_fifo_ispu_ctrl_get(const stmdev_ctx_t *ctx,
   *
   */
 
-int32_t iis3dwb10is_interrupt_pll_ctrl_set(const stmdev_ctx_t *ctx, iis3dwb10is_pll_ctrl_t val)
+int32_t iis3dwb10is_pll_ctrl_set(const stmdev_ctx_t *ctx, iis3dwb10is_pll_ctrl_t val)
 {
   iis3dwb10is_pll_ctrl1_t pll_ctrl1;
   iis3dwb10is_pll_ctrl2_t pll_ctrl2;
@@ -618,7 +618,7 @@ int32_t iis3dwb10is_interrupt_pll_ctrl_set(const stmdev_ctx_t *ctx, iis3dwb10is_
   return ret;
 }
 
-int32_t iis3dwb10is_interrupt_pll_ctrl_get(const stmdev_ctx_t *ctx, iis3dwb10is_pll_ctrl_t *val)
+int32_t iis3dwb10is_pll_ctrl_get(const stmdev_ctx_t *ctx, iis3dwb10is_pll_ctrl_t *val)
 {
   iis3dwb10is_pll_ctrl1_t pll_ctrl1;
   iis3dwb10is_pll_ctrl2_t pll_ctrl2;
@@ -682,6 +682,69 @@ int32_t iis3dwb10is_interrupt_pll_ctrl_get(const stmdev_ctx_t *ctx, iis3dwb10is_
     default:
       val->osc_ext_sel = IIS3DWB10IS_PLL_INTERNAL_CLOCK;
       break;
+  }
+
+  return ret;
+}
+
+/**
+  * @}
+  *
+  */
+
+int32_t iis3dwb10is_pin_int_route_set(const stmdev_ctx_t *ctx,
+                                      iis3dwb10is_pin_int_route_t val)
+{
+  iis3dwb10is_int0_ctrl_t int0_ctrl;
+  iis3dwb10is_int1_ctrl_t int1_ctrl;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT0_CTRL, (uint8_t *)&int0_ctrl, 1);
+  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT1_CTRL, (uint8_t *)&int1_ctrl, 1);
+  if (ret == 0)
+  {
+    int0_ctrl.int1_boot        = val.int1_boot;
+    int0_ctrl.int1_drdy_temp   = val.int1_drdy_temp;
+    int0_ctrl.int2_drdy_temp   = val.int2_drdy_temp;
+    int0_ctrl.int2_on_int1     = val.int2_on_int1;
+    int0_ctrl.int2_sleep_ispu  = val.int2_sleep_ispu;
+    int1_ctrl.int1_drdy_qvar   = val.int1_drdy_qvar;
+    int1_ctrl.int1_drdy_xl     = val.int1_drdy_xl;
+    int1_ctrl.int1_ext_trig    = val.int1_ext_trig;
+    int1_ctrl.int1_ovr         = val.int1_fifo_ovr;
+    int1_ctrl.int1_fss11       = val.int1_fifo_full;
+    int1_ctrl.int1_fth         = val.int1_fifo_th;
+    int1_ctrl.int1_sleepcnt    = val.int1_sleep_cnt;
+    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_INT0_CTRL, (uint8_t *)&int0_ctrl, 1);
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_INT1_CTRL, (uint8_t *)&int1_ctrl, 1);
+  }
+
+  return ret;
+}
+
+int32_t iis3dwb10is_pin_int_route_get(const stmdev_ctx_t *ctx,
+                                      iis3dwb10is_pin_int_route_t *val)
+{
+  iis3dwb10is_int0_ctrl_t int0_ctrl;
+  iis3dwb10is_int1_ctrl_t int1_ctrl;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT0_CTRL, (uint8_t *)&int0_ctrl, 1);
+  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT1_CTRL, (uint8_t *)&int1_ctrl, 1);
+  if (ret == 0)
+  {
+    val->int1_boot       = int0_ctrl.int1_boot;
+    val->int1_drdy_temp  = int0_ctrl.int1_drdy_temp;
+    val->int2_drdy_temp  = int0_ctrl.int2_drdy_temp;
+    val->int2_on_int1    = int0_ctrl.int2_on_int1;
+    val->int2_sleep_ispu = int0_ctrl.int2_sleep_ispu;
+    val->int1_drdy_qvar  = int1_ctrl.int1_drdy_qvar;
+    val->int1_drdy_xl    = int1_ctrl.int1_drdy_xl;
+    val->int1_ext_trig   = int1_ctrl.int1_ext_trig;
+    val->int1_fifo_ovr   = int1_ctrl.int1_ovr;
+    val->int1_fifo_full  = int1_ctrl.int1_fss11;
+    val->int1_fifo_th    = int1_ctrl.int1_fth;
+    val->int1_sleep_cnt  = int1_ctrl.int1_sleepcnt;
   }
 
   return ret;
