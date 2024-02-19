@@ -155,6 +155,7 @@ int32_t iis3dwb10is_interrupt_pin_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_
   pad.io_pad_strength = (uint8_t)val.strength;
   pad.pd_dis_int = (uint8_t)val.pd_dis;
   ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_PAD_CTRL, (uint8_t *)&pad, 1);
+  if (ret != 0) { return -1; }
 
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_IF_CFG, (uint8_t *)&if_cfg, 1);
   if_cfg.int_pp_od = (uint8_t)val.pp_od;
@@ -180,6 +181,7 @@ int32_t iis3dwb10is_interrupt_pin_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_
   int32_t ret;
 
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PAD_CTRL, (uint8_t *)&pad, 1);
+  if (ret != 0) { return -1; }
 
   switch (pad.io_pad_strength)
   {
@@ -225,6 +227,8 @@ int32_t iis3dwb10is_interrupt_pin_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_
   }
 
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_IF_CFG, (uint8_t *)&if_cfg, 1);
+  if (ret != 0) { return -1; }
+
   val->int_active_level = if_cfg.int_active_level;
 
   switch (if_cfg.int_pp_od)
@@ -239,6 +243,350 @@ int32_t iis3dwb10is_interrupt_pin_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_
 
     default:
       val->pp_od = IIS3DWB10IS_PUSH_PULL;
+      break;
+  }
+
+  return ret;
+}
+
+/**
+  * @}
+  *
+  */
+
+ /**
+  * @brief  FIFO watermark threshold (1 LSb = TAG (1 Byte) + 1 sensor (9 Bytes) written in FIFO).[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      FIFO watermark threshold.
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_fifo_watermark_set(const stmdev_ctx_t *ctx, uint16_t val)
+{
+  iis3dwb10is_fifo_ctrl1_t fifo_ctrl1;
+  iis3dwb10is_fifo_ctrl2_t fifo_ctrl2;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL1, (uint8_t *)&fifo_ctrl1, 1);
+  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL2, (uint8_t *)&fifo_ctrl2, 1);
+
+  if (ret == 0)
+  {
+    fifo_ctrl1.wtm = val & 0xffU;
+    fifo_ctrl2.wtm = (val >> 8U) & 0xfU;
+    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_FIFO_CTRL1, (uint8_t *)&fifo_ctrl1, 1);
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_FIFO_CTRL2, (uint8_t *)&fifo_ctrl2, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  FIFO watermark threshold (1 LSb = TAG (1 Byte) + 1 sensor (9 Bytes) written in FIFO).[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      pointer to FIFO watermark threshold.
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_fifo_watermark_get(const stmdev_ctx_t *ctx, uint16_t *val)
+{
+  iis3dwb10is_fifo_ctrl1_t fifo_ctrl1;
+  iis3dwb10is_fifo_ctrl2_t fifo_ctrl2;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL1, (uint8_t *)&fifo_ctrl1, 1);
+  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL2, (uint8_t *)&fifo_ctrl2, 1);
+  *val = (fifo_ctrl2.wtm << 8U) | fifo_ctrl1.wtm;
+
+  return ret;
+}
+
+/**
+  * @brief  Stop FIFO recording when watermark is reached.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      1: stop enabled, 0: stop disabled.
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_fifo_stop_on_wtm_set(const stmdev_ctx_t *ctx, uint8_t val)
+{
+  iis3dwb10is_fifo_ctrl3_t fifo_ctrl3;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL3, (uint8_t *)&fifo_ctrl3, 1);
+  if (ret == 0)
+  {
+    fifo_ctrl3.stop_on_wtm = val;
+    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_FIFO_CTRL3, (uint8_t *)&fifo_ctrl3, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Stop FIFO recording when watermark is reached.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      1: stop enabled, 0: stop disabled.
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_fifo_stop_on_wtm_get(const stmdev_ctx_t *ctx, uint8_t *val)
+{
+  iis3dwb10is_fifo_ctrl3_t fifo_ctrl3;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL3, (uint8_t *)&fifo_ctrl3, 1);
+  *val = fifo_ctrl3.stop_on_wtm;
+
+  return ret;
+}
+
+/**
+  * @brief  FIFO mode selection.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      iis3dwb10is_fifo_mode_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_fifo_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_mode_t val)
+{
+  iis3dwb10is_fifo_ctrl3_t fifo_ctrl3;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL3, (uint8_t *)&fifo_ctrl3, 1);
+  if (ret == 0)
+  {
+    fifo_ctrl3.fifo_mode = (uint8_t)val & 0x07U;
+    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_FIFO_CTRL3, (uint8_t *)&fifo_ctrl3, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  FIFO mode selection.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      iis3dwb10is_fifo_mode_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_fifo_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_mode_t *val)
+{
+  iis3dwb10is_fifo_ctrl3_t fifo_ctrl3;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL3, (uint8_t *)&fifo_ctrl3, 1);
+  if (ret != 0) { return ret; }
+
+  switch (fifo_ctrl3.fifo_mode)
+  {
+    case IIS3DWB10IS_BYPASS_MODE:
+      *val = IIS3DWB10IS_BYPASS_MODE;
+      break;
+
+    case IIS3DWB10IS_FIFO_MODE:
+      *val = IIS3DWB10IS_FIFO_MODE;
+      break;
+
+    case IIS3DWB10IS_STREAM_MODE:
+      *val = IIS3DWB10IS_STREAM_MODE;
+      break;
+
+    case IIS3DWB10IS_STREAM_TO_FIFO_MODE:
+      *val = IIS3DWB10IS_STREAM_TO_FIFO_MODE;
+      break;
+
+    case IIS3DWB10IS_BYPASS_TO_STREAM_MODE:
+      *val = IIS3DWB10IS_BYPASS_TO_STREAM_MODE;
+      break;
+
+    case IIS3DWB10IS_BYPASS_TO_FIFO_MODE:
+      *val = IIS3DWB10IS_BYPASS_TO_FIFO_MODE;
+      break;
+
+    default:
+      *val = IIS3DWB10IS_BYPASS_MODE;
+      break;
+  }
+  return ret;
+}
+
+/**
+  * @brief  Selects decimation for timestamp batching in FIFO.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      TMSTMP_NOT_BATCHED, TMSTMP_DEC_1, TMSTMP_DEC_8, TMSTMP_DEC_32,
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_fifo_timestamp_batch_set(const stmdev_ctx_t *ctx,
+                                             iis3dwb10is_fifo_timestamp_batch_t val)
+{
+  iis3dwb10is_fifo_ctrl2_t fifo_ctrl2;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL2, (uint8_t *)&fifo_ctrl2, 1);
+  if (ret == 0)
+  {
+    fifo_ctrl2.dec_ts_batch = (uint8_t)val & 0x03U;
+    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_FIFO_CTRL2, (uint8_t *)&fifo_ctrl2, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Selects decimation for timestamp batching in FIFO.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      TMSTMP_NOT_BATCHED, TMSTMP_DEC_1, TMSTMP_DEC_8, TMSTMP_DEC_32,
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_fifo_timestamp_batch_get(const stmdev_ctx_t *ctx,
+                                             iis3dwb10is_fifo_timestamp_batch_t *val)
+{
+  iis3dwb10is_fifo_ctrl2_t fifo_ctrl2;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL2, (uint8_t *)&fifo_ctrl2, 1);
+  if (ret != 0) { return ret; }
+
+  switch (fifo_ctrl2.dec_ts_batch)
+  {
+    case IIS3DWB10IS_TMSTMP_NOT_BATCHED:
+      *val = IIS3DWB10IS_TMSTMP_NOT_BATCHED;
+      break;
+
+    case IIS3DWB10IS_TMSTMP_DEC_1:
+      *val = IIS3DWB10IS_TMSTMP_DEC_1;
+      break;
+
+    case IIS3DWB10IS_TMSTMP_DEC_8:
+      *val = IIS3DWB10IS_TMSTMP_DEC_8;
+      break;
+
+    case IIS3DWB10IS_TMSTMP_DEC_32:
+      *val = IIS3DWB10IS_TMSTMP_DEC_32;
+      break;
+
+    default:
+      *val = IIS3DWB10IS_TMSTMP_NOT_BATCHED;
+      break;
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Batching in FIFO buffer of sensor data.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      1: enable, 0: disable (sensors: XL, temp, QVAR, ISPU).
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_fifo_batch_set(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_sensor_batch_t val)
+{
+  iis3dwb10is_fifo_ctrl3_t fifo_ctrl3;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL3, (uint8_t *)&fifo_ctrl3, 1);
+  if (ret == 0)
+  {
+    fifo_ctrl3.xl_batch   = val.batch_xl;
+    fifo_ctrl3.qvar_batch = val.batch_temp;
+    fifo_ctrl3.qvar_batch = val.batch_qvar;
+    fifo_ctrl3.ispu_batch = val.batch_ispu;
+    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_FIFO_CTRL3, (uint8_t *)&fifo_ctrl3, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Batching in FIFO buffer of sensor data.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      1: enable, 0: disable (sensors: XL, temp, QVAR, ISPU).
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_fifo_batch_get(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_sensor_batch_t *val)
+{
+  iis3dwb10is_fifo_ctrl3_t fifo_ctrl3;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL3, (uint8_t *)&fifo_ctrl3, 1);
+  val->batch_xl   = fifo_ctrl3.xl_batch;
+  val->batch_temp = fifo_ctrl3.t_batch;
+  val->batch_qvar = fifo_ctrl3.qvar_batch;
+  val->batch_ispu = fifo_ctrl3.ispu_batch;
+
+  return ret;
+}
+
+/**
+  * @brief  Configure FIFO ISPU control.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      iis3dwb10is_fifo_ispu_ctrl_batch_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_fifo_ispu_ctrl_set(const stmdev_ctx_t *ctx,
+                                       iis3dwb10is_fifo_ispu_ctrl_batch_t val)
+{
+  iis3dwb10is_fifo_ctrl2_t fifo_ctrl2;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL2, (uint8_t *)&fifo_ctrl2, 1);
+  if (ret == 0)
+  {
+    fifo_ctrl2.fifo_read_from_ispu   = val.read_from_ispu;
+    fifo_ctrl2.fifo_trigger_cfg      = (uint8_t)val.trigger;
+    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_FIFO_CTRL2, (uint8_t *)&fifo_ctrl2, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Configure FIFO ISPU control.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      iis3dwb10is_fifo_ispu_ctrl_batch_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_fifo_ispu_ctrl_get(const stmdev_ctx_t *ctx,
+                                       iis3dwb10is_fifo_ispu_ctrl_batch_t *val)
+{
+  iis3dwb10is_fifo_ctrl2_t fifo_ctrl2;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL2, (uint8_t *)&fifo_ctrl2, 1);
+  if (ret != 0) { return ret; }
+
+  val->read_from_ispu = fifo_ctrl2.fifo_read_from_ispu;
+  switch (fifo_ctrl2.fifo_trigger_cfg)
+  {
+    case IIS3DWB10IS_FIFO_TRIGGER_ISPU:
+      val->trigger = IIS3DWB10IS_FIFO_TRIGGER_ISPU;
+      break;
+
+    case IIS3DWB10IS_FIFO_TRIGGER_INT2:
+      val->trigger = IIS3DWB10IS_FIFO_TRIGGER_INT2;
+      break;
+
+    default:
+      val->trigger = IIS3DWB10IS_FIFO_TRIGGER_ISPU;
       break;
   }
 

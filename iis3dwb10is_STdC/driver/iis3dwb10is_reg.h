@@ -233,21 +233,63 @@ typedef struct
 typedef struct
 {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-  uint8_t i3c_disable          : 1;
-  uint8_t not_used0            : 2;
-  uint8_t int_pp_od            : 1;
-  uint8_t int_active_level     : 1;
-  uint8_t not_used1            : 2;
-  uint8_t sda_pu_en            : 1;
+  uint8_t i3c_disable                  : 1;
+  uint8_t not_used0                    : 2;
+  uint8_t int_pp_od                    : 1;
+  uint8_t int_active_level             : 1;
+  uint8_t not_used1                    : 2;
+  uint8_t sda_pu_en                    : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-  uint8_t sda_pu_en            : 1;
-  uint8_t not_used1            : 2;
-  uint8_t int_active_level     : 1;
-  uint8_t int_pp_od            : 1;
-  uint8_t not_used0            : 2;
-  uint8_t i3c_disable          : 1;
+  uint8_t sda_pu_en                    : 1;
+  uint8_t not_used1                    : 2;
+  uint8_t int_active_level             : 1;
+  uint8_t int_pp_od                    : 1;
+  uint8_t not_used0                    : 2;
+  uint8_t i3c_disable                  : 1;
 #endif /* DRV_BYTE_ORDER */
 } iis3dwb10is_if_cfg_t;
+
+#define IIS3DWB10IS_FIFO_CTRL1                   0x05U
+typedef struct
+{
+  uint8_t wtm                          : 8;
+} iis3dwb10is_fifo_ctrl1_t;
+
+#define IIS3DWB10IS_FIFO_CTRL2                   0x06U
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t wtm                          : 4;
+  uint8_t dec_ts_batch                 : 2;
+  uint8_t fifo_trigger_cfg             : 1;
+  uint8_t fifo_read_from_ispu          : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t fifo_read_from_ispu          : 1;
+  uint8_t fifo_trigger_cfg             : 1;
+  uint8_t dec_ts_batch                 : 2;
+  uint8_t wtm                          : 4;
+#endif /* DRV_BYTE_ORDER */
+} iis3dwb10is_fifo_ctrl2_t;
+
+#define IIS3DWB10IS_FIFO_CTRL3                   0x07U
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t fifo_mode                    : 3;
+  uint8_t xl_batch                     : 1;
+  uint8_t t_batch                      : 1;
+  uint8_t ispu_batch                   : 1;
+  uint8_t qvar_batch                   : 1;
+  uint8_t stop_on_wtm                  : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t stop_on_wtm                  : 1;
+  uint8_t qvar_batch                   : 1;
+  uint8_t ispu_batch                   : 1;
+  uint8_t t_batch                      : 1;
+  uint8_t xl_batch                     : 1;
+  uint8_t fifo_mode                    : 3;
+#endif /* DRV_BYTE_ORDER */
+} iis3dwb10is_fifo_ctrl3_t;
 
 #define IIS3DWB10IS_WHO_AM_I                     0x0FU
 
@@ -265,6 +307,9 @@ typedef union
   iis3dwb10is_ram_access_t             ram_access;
   iis3dwb10is_pad_ctrl_t               pad_ctrl;
   iis3dwb10is_if_cfg_t                 if_cfg;
+  iis3dwb10is_fifo_ctrl1_t             fifo_ctrl1;
+  iis3dwb10is_fifo_ctrl2_t             fifo_ctrl2;
+  iis3dwb10is_fifo_ctrl3_t             fifo_ctrl3;
   bitwise_t                            bitwise;
   uint8_t                              byte;
 } iis3dwb10is_reg_t;
@@ -328,6 +373,62 @@ typedef struct
 } iis3dwb10is_int_pin_t;
 int32_t iis3dwb10is_interrupt_pin_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_int_pin_t val);
 int32_t iis3dwb10is_interrupt_pin_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_int_pin_t *val);
+
+int32_t iis3dwb10is_fifo_watermark_set(const stmdev_ctx_t *ctx, uint16_t val);
+int32_t iis3dwb10is_fifo_watermark_get(const stmdev_ctx_t *ctx, uint16_t *val);
+
+int32_t iis3dwb10is_fifo_stop_on_wtm_set(const stmdev_ctx_t *ctx, uint8_t val);
+int32_t iis3dwb10is_fifo_stop_on_wtm_get(const stmdev_ctx_t *ctx, uint8_t *val);
+
+typedef enum
+{
+  IIS3DWB10IS_BYPASS_MODE             = 0x0,
+  IIS3DWB10IS_FIFO_MODE               = 0x1,
+  IIS3DWB10IS_STREAM_MODE             = 0x2,
+  IIS3DWB10IS_STREAM_TO_FIFO_MODE     = 0x3,
+  IIS3DWB10IS_BYPASS_TO_STREAM_MODE   = 0x4,
+  IIS3DWB10IS_BYPASS_TO_FIFO_MODE     = 0x7,
+} iis3dwb10is_fifo_mode_t;
+int32_t iis3dwb10is_fifo_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_mode_t val);
+int32_t iis3dwb10is_fifo_mode_get(const stmdev_ctx_t *ctx,
+                                  iis3dwb10is_fifo_mode_t *val);
+
+typedef enum
+{
+  IIS3DWB10IS_TMSTMP_NOT_BATCHED = 0x0,
+  IIS3DWB10IS_TMSTMP_DEC_1       = 0x1,
+  IIS3DWB10IS_TMSTMP_DEC_8       = 0x2,
+  IIS3DWB10IS_TMSTMP_DEC_32      = 0x3,
+} iis3dwb10is_fifo_timestamp_batch_t;
+int32_t iis3dwb10is_fifo_timestamp_batch_set(const stmdev_ctx_t *ctx,
+                                             iis3dwb10is_fifo_timestamp_batch_t val);
+int32_t iis3dwb10is_fifo_timestamp_batch_get(const stmdev_ctx_t *ctx,
+                                             iis3dwb10is_fifo_timestamp_batch_t *val);
+
+typedef struct
+{
+  uint8_t batch_xl   : 1;
+  uint8_t batch_temp : 1;
+  uint8_t batch_qvar : 1;
+  uint8_t batch_ispu : 1;
+} iis3dwb10is_fifo_sensor_batch_t;
+int32_t iis3dwb10is_fifo_batch_set(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_sensor_batch_t val);
+int32_t iis3dwb10is_fifo_batch_get(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_sensor_batch_t *val);
+
+typedef struct
+{
+  enum
+  {
+    IIS3DWB10IS_FIFO_TRIGGER_ISPU   = 0,
+    IIS3DWB10IS_FIFO_TRIGGER_INT2   = 1,
+  } trigger;
+  uint8_t read_from_ispu : 1;
+} iis3dwb10is_fifo_ispu_ctrl_batch_t;
+int32_t iis3dwb10is_fifo_ispu_ctrl_set(const stmdev_ctx_t *ctx,
+                                       iis3dwb10is_fifo_ispu_ctrl_batch_t val);
+int32_t iis3dwb10is_fifo_ispu_ctrl_get(const stmdev_ctx_t *ctx,
+                                       iis3dwb10is_fifo_ispu_ctrl_batch_t *val);
+
 
 /**
   * @}
