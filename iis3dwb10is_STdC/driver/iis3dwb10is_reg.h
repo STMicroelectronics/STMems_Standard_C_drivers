@@ -317,7 +317,7 @@ typedef struct
 #endif /* DRV_BYTE_ORDER */
 } iis3dwb10is_pll_ctrl2_t;
 
-#define IIS3DWB10IS_INT0_CTRL                    0x0CU
+#define IIS3DWB10IS_INT_CTRL0                    0x0CU
 typedef struct
 {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
@@ -339,7 +339,7 @@ typedef struct
 #endif /* DRV_BYTE_ORDER */
 } iis3dwb10is_int0_ctrl_t;
 
-#define IIS3DWB10IS_INT1_CTRL                    0x0DU
+#define IIS3DWB10IS_INT_CTRL1                    0x0DU
 typedef struct
 {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
@@ -347,13 +347,13 @@ typedef struct
   uint8_t int1_drdy_qvar               : 1;
   uint8_t int1_sleepcnt                : 1;
   uint8_t int1_ext_trig                : 1;
-  uint8_t int1_fth                     : 1;
-  uint8_t int1_ovr                     : 1;
-  uint8_t int1_fss11                   : 1;
+  uint8_t int1_fifo_th                 : 1;
+  uint8_t int1_fifo_ovr                : 1;
+  uint8_t int1_fifo_full               : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-  uint8_t int1_fss11                   : 1;
-  uint8_t int1_ovr                     : 1;
-  uint8_t int1_fth                     : 1;
+  uint8_t int1_fifo_full               : 1;
+  uint8_t int1_fifo_ovr                : 1;
+  uint8_t int1_fifo_th                 : 1;
   uint8_t int1_ext_trig                : 1;
   uint8_t int1_sleepcnt                : 1;
   uint8_t int1_drdy_qvar               : 1;
