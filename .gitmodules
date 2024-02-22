@@ -321,3 +321,6 @@
 [submodule "asm330lhhxg1_STdC/driver"]
 	path = asm330lhhxg1_STdC/driver
 	url = https://github.com/STMicroelectronics/asm330lhhxg1-pid
+[submodule "lsm6dsv32x_STdC/driver"]
+	path = lsm6dsv32x_STdC/driver
+	url = https://github.com/STMicroelectronics/lsm6dsv32x-pid
