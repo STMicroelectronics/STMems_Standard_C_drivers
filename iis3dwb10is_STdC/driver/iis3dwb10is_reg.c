@@ -138,6 +138,221 @@ int32_t iis3dwb10is_mem_bank_get(const stmdev_ctx_t *ctx, iis3dwb10is_mem_bank_t
 }
 
 /**
+  * @brief  reset device.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      enum iis3dwb10is_reset_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_reset_set(const stmdev_ctx_t *ctx, iis3dwb10is_reset_t val)
+{
+  iis3dwb10is_ctrl3_t ctrl3;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
+  ctrl3.sw_reset = (uint8_t)val.sw_rst;
+  ctrl3.boot = (uint8_t)val.boot;
+  ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
+
+  return ret;
+}
+
+/**
+  * @brief  reset device.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      pointer to enum iis3dwb10is_reset_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_reset_get(const stmdev_ctx_t *ctx, iis3dwb10is_reset_t *val)
+{
+  iis3dwb10is_ctrl3_t ctrl3;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
+  val->sw_rst = ctrl3.sw_reset;
+  val->boot = ctrl3.boot;
+
+  return ret;
+}
+
+/**
+  * @}
+  *
+  */
+
+/**
+  * @brief  ODR and burst values.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      enum iis3dwb10is_data_rate_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_xl_data_rate_set(const stmdev_ctx_t *ctx, iis3dwb10is_data_rate_t val)
+{
+  iis3dwb10is_ctrl1_t ctrl1;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL1, (uint8_t *)&ctrl1, 1);
+
+  /* write burst when odr is 0 */
+  ctrl1.burst_cfg = (uint8_t)val.burst;
+  ctrl1.odr_xl = 0U;
+  ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_CTRL1, (uint8_t *)&ctrl1, 1);
+
+  ctrl1.burst_cfg = (uint8_t)val.burst;
+  ctrl1.odr_xl = (uint8_t)val.odr;
+  ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_CTRL1, (uint8_t *)&ctrl1, 1);
+
+  return ret;
+}
+
+/**
+  * @brief  ODR and burst values.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      pointer to enum iis3dwb10is_data_rate_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_xl_data_rate_get(const stmdev_ctx_t *ctx, iis3dwb10is_data_rate_t *val)
+{
+  iis3dwb10is_ctrl1_t ctrl1;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL1, (uint8_t *)&ctrl1, 1);
+
+  switch (ctrl1.burst_cfg)
+  {
+    case IIS3DWB10IS_CONTINUOS_MODE:
+      val->burst = IIS3DWB10IS_CONTINUOS_MODE;
+      break;
+
+    case IIS3DWB10IS_TON_UI_TOFF_ISPU:
+      val->burst = IIS3DWB10IS_TON_UI_TOFF_ISPU;
+      break;
+
+    case IIS3DWB10IS_TON_UI_TOFF_FIFO:
+      val->burst = IIS3DWB10IS_TON_UI_TOFF_FIFO;
+      break;
+
+    case IIS3DWB10IS_TON_STC_TOFF_UI:
+      val->burst = IIS3DWB10IS_TON_STC_TOFF_UI;
+      break;
+
+    case IIS3DWB10IS_TON_STC_TOFF_ISPU:
+      val->burst = IIS3DWB10IS_TON_STC_TOFF_ISPU;
+      break;
+
+    case IIS3DWB10IS_TON_STC_TOFF_FIFO:
+      val->burst = IIS3DWB10IS_TON_STC_TOFF_FIFO;
+      break;
+
+    case IIS3DWB10IS_TON_EXT_TOFF_UI:
+      val->burst = IIS3DWB10IS_TON_EXT_TOFF_UI;
+      break;
+
+    case IIS3DWB10IS_TON_EXT_TOFF_ISPU:
+      val->burst = IIS3DWB10IS_TON_EXT_TOFF_ISPU;
+      break;
+
+    case IIS3DWB10IS_TON_EXT_TOFF_FIFO:
+      val->burst = IIS3DWB10IS_TON_EXT_TOFF_FIFO;
+      break;
+
+    default:
+      val->burst = IIS3DWB10IS_CONTINUOS_MODE;
+      break;
+  }
+
+  switch(ctrl1.odr_xl)
+  {
+    case IIS3DWB10IS_ODR_IDLE:
+      val->odr = IIS3DWB10IS_ODR_IDLE;
+
+    case IIS3DWB10IS_ODR_2KHz5:
+      val->odr = IIS3DWB10IS_ODR_2KHz5;
+
+    case IIS3DWB10IS_ODR_5KHz:
+      val->odr = IIS3DWB10IS_ODR_5KHz;
+
+    case IIS3DWB10IS_ODR_10KHz:
+      val->odr = IIS3DWB10IS_ODR_10KHz;
+
+    case IIS3DWB10IS_ODR_20KHz:
+      val->odr = IIS3DWB10IS_ODR_20KHz;
+
+    case IIS3DWB10IS_ODR_40KHz:
+      val->odr = IIS3DWB10IS_ODR_40KHz;
+
+    default:
+      val->odr = IIS3DWB10IS_ODR_IDLE;
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  ODR and burst values.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      enum iis3dwb10is_data_rate_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_xl_full_scale_set(const stmdev_ctx_t *ctx, iis3dwb10is_fs_xl_t val)
+{
+  iis3dwb10is_ctrl2_t ctrl2;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL2, (uint8_t *)&ctrl2, 1);
+  ctrl2.fs = (uint8_t)val;
+  ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_CTRL2, (uint8_t *)&ctrl2, 1);
+
+  return ret;
+}
+
+/**
+  * @brief  ODR and burst values.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      enum iis3dwb10is_data_rate_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_xl_full_scale_get(const stmdev_ctx_t *ctx, iis3dwb10is_fs_xl_t *val)
+{
+  iis3dwb10is_ctrl2_t ctrl2;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL2, (uint8_t *)&ctrl2, 1);
+  switch (ctrl2.fs)
+  {
+    case IIS3DWB_50g:
+      *val = IIS3DWB_50g;
+
+    case IIS3DWB_100g:
+      *val = IIS3DWB_100g;
+
+    case IIS3DWB_200g:
+      *val = IIS3DWB_200g;
+
+    default:
+      *val = IIS3DWB_50g;
+  }
+
+  return ret;
+}
+
+/**
+  * @}
+  *
+  */
+
+/**
   * @brief  Configure INT1 and INT2 pins.[set]
   *
   * @param  ctx      read / write interface definitions
@@ -356,13 +571,18 @@ int32_t iis3dwb10is_fifo_stop_on_wtm_get(const stmdev_ctx_t *ctx, uint8_t *val)
 int32_t iis3dwb10is_fifo_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_mode_t val)
 {
   iis3dwb10is_fifo_ctrl3_t fifo_ctrl3;
+  iis3dwb10is_ctrl3_t ctrl3;
   int32_t ret;
 
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL3, (uint8_t *)&fifo_ctrl3, 1);
+  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
   if (ret == 0)
   {
     fifo_ctrl3.fifo_mode = (uint8_t)val & 0x07U;
     ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_FIFO_CTRL3, (uint8_t *)&fifo_ctrl3, 1);
+
+    ctrl3.fifo_en = (val == IIS3DWB10IS_FIFO_OFF) ? 0U : 1U;
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
   }
 
   return ret;
@@ -379,10 +599,18 @@ int32_t iis3dwb10is_fifo_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_mode
 int32_t iis3dwb10is_fifo_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_mode_t *val)
 {
   iis3dwb10is_fifo_ctrl3_t fifo_ctrl3;
+  iis3dwb10is_ctrl3_t ctrl3;
   int32_t ret;
 
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL3, (uint8_t *)&fifo_ctrl3, 1);
+  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
   if (ret != 0) { return ret; }
+
+  if (ctrl3.fifo_en == 0U)
+  {
+    *val = IIS3DWB10IS_FIFO_OFF;
+    return 0;
+  }
 
   switch (fifo_ctrl3.fifo_mode)
   {
