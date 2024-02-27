@@ -76,6 +76,40 @@ int32_t __weak iis3dwb10is_write_reg(const stmdev_ctx_t* ctx, uint8_t reg, uint8
   * @}
   *
   */
+float_t iis3dwb10is_from_lsb_to_celsius(int16_t lsb)
+{
+  return ((float_t)lsb / 200.0f);
+}
+
+float_t iis3dwb10is_from_fs50g_to_mg(int16_t lsb)
+{
+  return ((float_t)lsb * 0.38f);
+}
+
+float_t iis3dwb10is_from_fs100g_to_mg(int16_t lsb)
+{
+  return ((float_t)lsb * 0.764f);
+}
+
+float_t iis3dwb10is_from_fs200g_to_mg(int16_t lsb)
+{
+  return ((float_t)lsb * 1.524f);
+}
+
+float_t iis3dwb10is_20b_from_fs50g_to_mg(int32_t lsb)
+{
+  return ((float_t)lsb * 0.095f);
+}
+
+float_t iis3dwb10is_20b_from_fs100g_to_mg(int32_t lsb)
+{
+  return ((float_t)lsb * 0.191f);
+}
+
+float_t iis3dwb10is_20b_from_fs200g_to_mg(int32_t lsb)
+{
+  return ((float_t)lsb * 0.381f);
+}
 
 /**
   * @brief  Device Who am I.[get]
@@ -199,11 +233,13 @@ int32_t iis3dwb10is_xl_data_rate_set(const stmdev_ctx_t *ctx, iis3dwb10is_data_r
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL1, (uint8_t *)&ctrl1, 1);
 
   /* write burst when odr is 0 */
-  ctrl1.burst_cfg = (uint8_t)val.burst;
-  ctrl1.odr_xl = 0U;
-  ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_CTRL1, (uint8_t *)&ctrl1, 1);
+  if (val.burst != IIS3DWB10IS_CONTINUOS_MODE)
+  {
+    ctrl1.burst_cfg = (uint8_t)val.burst;
+    ctrl1.odr_xl = 0U;
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_CTRL1, (uint8_t *)&ctrl1, 1);
+  }
 
-  ctrl1.burst_cfg = (uint8_t)val.burst;
   ctrl1.odr_xl = (uint8_t)val.odr;
   ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_CTRL1, (uint8_t *)&ctrl1, 1);
 
@@ -272,24 +308,31 @@ int32_t iis3dwb10is_xl_data_rate_get(const stmdev_ctx_t *ctx, iis3dwb10is_data_r
   {
     case IIS3DWB10IS_ODR_IDLE:
       val->odr = IIS3DWB10IS_ODR_IDLE;
+      break;
 
     case IIS3DWB10IS_ODR_2KHz5:
       val->odr = IIS3DWB10IS_ODR_2KHz5;
+      break;
 
     case IIS3DWB10IS_ODR_5KHz:
       val->odr = IIS3DWB10IS_ODR_5KHz;
+      break;
 
     case IIS3DWB10IS_ODR_10KHz:
       val->odr = IIS3DWB10IS_ODR_10KHz;
+      break;
 
     case IIS3DWB10IS_ODR_20KHz:
       val->odr = IIS3DWB10IS_ODR_20KHz;
+      break;
 
     case IIS3DWB10IS_ODR_40KHz:
       val->odr = IIS3DWB10IS_ODR_40KHz;
+      break;
 
     default:
       val->odr = IIS3DWB10IS_ODR_IDLE;
+      break;
   }
 
   return ret;
@@ -333,15 +376,121 @@ int32_t iis3dwb10is_xl_full_scale_get(const stmdev_ctx_t *ctx, iis3dwb10is_fs_xl
   {
     case IIS3DWB_50g:
       *val = IIS3DWB_50g;
+      break;
 
     case IIS3DWB_100g:
       *val = IIS3DWB_100g;
+      break;
 
     case IIS3DWB_200g:
       *val = IIS3DWB_200g;
+      break;
 
     default:
       *val = IIS3DWB_50g;
+      break;
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Block data update.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      0: bdu off, 1: bdu on
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_block_data_update_set(const stmdev_ctx_t *ctx, uint8_t val)
+{
+  iis3dwb10is_ctrl3_t ctrl3;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
+  ctrl3.bdu = (uint8_t)val;
+  ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
+
+  return ret;
+}
+
+/**
+  * @brief  Block data update.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      0: bdu off, 1: bdu on
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_block_data_update_get(const stmdev_ctx_t *ctx, uint8_t *val)
+{
+  iis3dwb10is_ctrl3_t ctrl3;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
+  *val = ctrl3.bdu;
+
+  return ret;
+}
+
+/**
+  * @brief  XL axis configuration.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      iis3dwb10is_xl_data_cfg_t enum
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_xl_data_config_set(const stmdev_ctx_t *ctx, iis3dwb10is_xl_data_cfg_t val)
+{
+  iis3dwb10is_ctrl4_t ctrl4;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL4, (uint8_t *)&ctrl4, 1);
+  ctrl4.x_axis_enable_us = val.x_axis_en;
+  ctrl4.y_axis_enable_us = val.y_axis_en;
+  ctrl4.z_axis_enable_us = val.z_axis_en;
+  ctrl4.rounding = (uint8_t)val.rounding;
+  ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_CTRL4, (uint8_t *)&ctrl4, 1);
+
+  return ret;
+}
+
+/**
+  * @brief  XL axis configuration.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      pointer to iis3dwb10is_xl_data_cfg_t enum
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_xl_data_config_get(const stmdev_ctx_t *ctx, iis3dwb10is_xl_data_cfg_t *val)
+{
+  iis3dwb10is_ctrl4_t ctrl4;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL4, (uint8_t *)&ctrl4, 1);
+  val->x_axis_en = ctrl4.x_axis_enable_us;
+  val->y_axis_en = ctrl4.y_axis_enable_us;
+  val->z_axis_en = ctrl4.z_axis_enable_us;
+
+  switch(ctrl4.rounding)
+  {
+    case IIS3DWB10IS_WRAPAROUND_DISABLED:
+      val->rounding = IIS3DWB10IS_WRAPAROUND_DISABLED;
+      break;
+
+    case IIS3DWB10IS_WRAPAROUND_1_EN:
+      val->rounding = IIS3DWB10IS_WRAPAROUND_1_EN;
+      break;
+
+    case IIS3DWB10IS_WRAPAROUND_2_EN:
+      val->rounding = IIS3DWB10IS_WRAPAROUND_2_EN;
+      break;
+
+    default:
+      val->rounding = IIS3DWB10IS_WRAPAROUND_DISABLED;
+      break;
   }
 
   return ret;
@@ -826,6 +975,14 @@ int32_t iis3dwb10is_fifo_ispu_ctrl_get(const stmdev_ctx_t *ctx,
   *
   */
 
+/**
+  * @brief  Configure PLL control.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      iis3dwb10is_pll_ctrl_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
 int32_t iis3dwb10is_pll_ctrl_set(const stmdev_ctx_t *ctx, iis3dwb10is_pll_ctrl_t val)
 {
   iis3dwb10is_pll_ctrl1_t pll_ctrl1;
@@ -846,6 +1003,14 @@ int32_t iis3dwb10is_pll_ctrl_set(const stmdev_ctx_t *ctx, iis3dwb10is_pll_ctrl_t
   return ret;
 }
 
+/**
+  * @brief  Configure PLL control.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      pointer to iis3dwb10is_pll_ctrl_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
 int32_t iis3dwb10is_pll_ctrl_get(const stmdev_ctx_t *ctx, iis3dwb10is_pll_ctrl_t *val)
 {
   iis3dwb10is_pll_ctrl1_t pll_ctrl1;
@@ -920,6 +1085,14 @@ int32_t iis3dwb10is_pll_ctrl_get(const stmdev_ctx_t *ctx, iis3dwb10is_pll_ctrl_t
   *
   */
 
+/**
+  * @brief  Configure interrupt routing.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      iis3dwb10is_pin_int_route_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
 int32_t iis3dwb10is_pin_int_route_set(const stmdev_ctx_t *ctx,
                                       iis3dwb10is_pin_int_route_t val)
 {
@@ -950,6 +1123,14 @@ int32_t iis3dwb10is_pin_int_route_set(const stmdev_ctx_t *ctx,
   return ret;
 }
 
+/**
+  * @brief  Configure interrupt routing.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      pinter to iis3dwb10is_pin_int_route_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
 int32_t iis3dwb10is_pin_int_route_get(const stmdev_ctx_t *ctx,
                                       iis3dwb10is_pin_int_route_t *val)
 {
@@ -973,6 +1154,100 @@ int32_t iis3dwb10is_pin_int_route_get(const stmdev_ctx_t *ctx,
     val->int1_fifo_full  = int1_ctrl.int1_fifo_full;
     val->int1_fifo_th    = int1_ctrl.int1_fifo_th;
     val->int1_sleep_cnt  = int1_ctrl.int1_sleepcnt;
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  return data ready status flag.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      pinter to iis3dwb10is_data_ready_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_flag_data_ready_get(const stmdev_ctx_t *ctx, iis3dwb10is_data_ready_t *val)
+{
+  iis3dwb10is_status_reg_t status;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_STATUS_REG, (uint8_t *)&status, 1);
+  val->drdy_xl   = status.xlda;
+  val->drdy_temp = status.tda;
+  val->drdy_qvar = status.qvarda;
+
+  return ret;
+}
+
+/**
+  * @brief  Temperature data output register (r).
+  *         L and H registers together express a 16-bit word in two’s
+  *         complement.[get]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Buffer that stores data read
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t iis3dwb10is_temperature_raw_get(const stmdev_ctx_t *ctx, int16_t *val)
+{
+  uint8_t buff[2];
+
+  const int32_t ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_OUT_TEMP_L, buff, 2);
+  *val = (int16_t)buff[1];
+  *val = (*val * 256) + (int16_t)buff[0];
+
+  return ret;
+}
+
+/**
+  * @brief  Linear acceleration output register. The value is expressed as a
+  *         16-bit word in two's complement.[get]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Buffer that stores data read
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t iis3dwb10is_acceleration_raw_get(const stmdev_ctx_t *ctx, int16_t *val)
+{
+  uint8_t buff[6];
+  uint8_t i;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_OUTX_L_A, buff, 6);
+  for (i = 0; i < 3; i++)
+  {
+    val[i] = (int16_t)buff[2*i + 1];
+    val[i] = (val[i] * 256) + (int16_t)buff[2*i];
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Linear acceleration output register. The value is expressed as a
+  *         20-bit word in two's complement.[get]
+  *
+  * @param  ctx    Read / write interface definitions.(ptr)
+  * @param  val    Buffer that stores data read
+  * @retval        Interface status (MANDATORY: return 0 -> no Error).
+  *
+  */
+int32_t iis3dwb10is_acceleration_20b_raw_get(const stmdev_ctx_t *ctx, int32_t *val)
+{
+  uint8_t buff[12];
+  uint8_t i;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_OUTX_L_A, buff, 12);
+  for (i = 0; i < 3; i++)
+  {
+    val[i] = (int32_t)buff[4*i + 3];
+    val[i] = (val[i] * 256) + (int32_t)buff[4*i + 2];
+    val[i] = (val[i] * 256) + (int32_t)buff[4*i + 1];
+    val[i] = (val[i] * 256) + (int32_t)buff[4*i];
   }
 
   return ret;

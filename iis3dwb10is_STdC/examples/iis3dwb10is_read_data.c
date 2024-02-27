@@ -95,11 +95,13 @@
 
 /* Private variables ---------------------------------------------------------*/
 static int16_t data_raw_acceleration[3];
+static int32_t data_raw_20b_acceleration[3];
 static int16_t data_raw_temperature;
 static float acceleration_mg[3];
 static float temperature_degC;
-static uint8_t whoamI, rst;
+static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
+iis3dwb10is_pin_int_route_t route = {0};
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -119,10 +121,36 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
+static uint64_t xl_event_num = 0, temp_event_num = 0;
+static uint8_t xl_event = 0, temp_event = 0;
+static stmdev_ctx_t dev_ctx;
+
+void iis3dwb10is_read_data_polling_handler(void)
+{
+  iis3dwb10is_data_ready_t drdy;
+
+  /* Read output only if new xl value is available */
+  iis3dwb10is_flag_data_ready_get(&dev_ctx, &drdy);
+  if (drdy.drdy_xl) {
+    xl_event = 1;
+    xl_event_num++;
+    iis3dwb10is_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
+  }
+
+  if (drdy.drdy_temp) {
+    temp_event = 1;
+    temp_event_num++;
+    iis3dwb10is_temperature_raw_get(&dev_ctx, &data_raw_temperature);
+  }
+}
+
 /* Main Example --------------------------------------------------------------*/
 void iis3dwb10is_read_data_polling(void)
 {
-  stmdev_ctx_t dev_ctx;
+  iis3dwb10is_reset_t rst;
+  iis3dwb10is_data_rate_t rate;
+  iis3dwb10is_xl_data_cfg_t xl_cfg;
+
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
@@ -138,61 +166,63 @@ void iis3dwb10is_read_data_polling(void)
   if (whoamI != IIS3DWB10IS_ID)
     while (1);
 
-#if 0
   /* Restore default configuration */
-  iis3dwb_reset_set(&dev_ctx, PROPERTY_ENABLE);
+  rst.boot = 0;
+  rst.sw_rst = 1;
+  iis3dwb10is_reset_set(&dev_ctx, rst);
 
   do {
-    iis3dwb_reset_get(&dev_ctx, &rst);
-  } while (rst);
+    iis3dwb10is_reset_get(&dev_ctx, &rst);
+  } while (rst.sw_rst);
 
   /* Enable Block Data Update */
-  iis3dwb_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  iis3dwb10is_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+
+  iis3dwb10is_xl_data_config_get(&dev_ctx, &xl_cfg);
+  xl_cfg.rounding = IIS3DWB10IS_WRAPAROUND_2_EN;
+  iis3dwb10is_xl_data_config_set(&dev_ctx, xl_cfg);
+
   /* Set Output Data Rate */
-  iis3dwb_xl_data_rate_set(&dev_ctx, IIS3DWB_XL_ODR_26k7Hz);
+  rate.burst = IIS3DWB10IS_CONTINUOS_MODE;
+  rate.odr = IIS3DWB10IS_ODR_10KHz;
+  iis3dwb10is_xl_data_rate_set(&dev_ctx, rate);
+
   /* Set full scale */
-  iis3dwb_xl_full_scale_set(&dev_ctx, IIS3DWB_2g);
-  /* Configure filtering chain(No aux interface)
-   * Accelerometer low pass filter path
-   */
-  iis3dwb_xl_filt_path_on_out_set(&dev_ctx, IIS3DWB_LP_ODR_DIV_100);
+  iis3dwb10is_xl_full_scale_set(&dev_ctx, IIS3DWB_50g);
 
+  iis3dwb10is_pin_int_route_get(&dev_ctx, &route);
+  route.int1_drdy_xl = 1;
+  route.int1_drdy_temp = 1;
+  iis3dwb10is_pin_int_route_set(&dev_ctx, route);
 
-  /* Read samples in polling mode (no int) */
+  /* Read samples in polling mode */
   while (1) {
-    uint8_t reg;
-    /* Read output only if new xl value is available */
-    iis3dwb_xl_flag_data_ready_get(&dev_ctx, &reg);
+    if (xl_event && xl_event_num%1000 == 1) {
+      xl_event = 0;
 
-    if (reg) {
-      /* Read acceleration field data */
-      memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
-      iis3dwb_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
       acceleration_mg[0] =
-        iis3dwb_from_fs2g_to_mg(data_raw_acceleration[0]);
+        iis3dwb10is_from_fs50g_to_mg(data_raw_acceleration[0]);
       acceleration_mg[1] =
-        iis3dwb_from_fs2g_to_mg(data_raw_acceleration[1]);
+        iis3dwb10is_from_fs50g_to_mg(data_raw_acceleration[1]);
       acceleration_mg[2] =
-        iis3dwb_from_fs2g_to_mg(data_raw_acceleration[2]);
+        iis3dwb10is_from_fs50g_to_mg(data_raw_acceleration[2]);
+
       sprintf((char *)tx_buffer,
               "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
-    iis3dwb_temp_flag_data_ready_get(&dev_ctx, &reg);
+    if (temp_event && temp_event_num%52 == 1) {
+      temp_event = 0;
 
-    if (reg) {
       /* Read temperature data */
-      memset(&data_raw_temperature, 0x00, sizeof(int16_t));
-      iis3dwb_temperature_raw_get(&dev_ctx, &data_raw_temperature);
-      temperature_degC = iis3dwb_from_lsb_to_celsius(data_raw_temperature);
-      sprintf((char *)tx_buffer,
-              "Temperature [degC]:%6.2f\r\n", temperature_degC);
+      temperature_degC = iis3dwb10is_from_lsb_to_celsius(data_raw_temperature);
+
+      sprintf((char *)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
-#endif
 }
 
 /*

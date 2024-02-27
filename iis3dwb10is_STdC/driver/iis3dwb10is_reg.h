@@ -433,6 +433,45 @@ typedef struct
 #endif /* DRV_BYTE_ORDER */
 } iis3dwb10is_ctrl4_t;
 
+#define IIS3DWB10IS_STATUS_REG                   0x1EU
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t xlda                         : 1;
+  uint8_t qvarda                       : 1;
+  uint8_t tda                          : 1;
+  uint8_t sleepcnt_ia                  : 1;
+  uint8_t ext_trig_ia                  : 1;
+  uint8_t not_used0                    : 1;
+  uint8_t ispu_ia                      : 1;
+  uint8_t timer_ia                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t timer_ia                     : 1;
+  uint8_t ispu_ia                      : 1;
+  uint8_t not_used0                    : 1;
+  uint8_t ext_trig_ia                  : 1;
+  uint8_t sleepcnt_ia                  : 1;
+  uint8_t tda                          : 1;
+  uint8_t qvarda                       : 1;
+  uint8_t xlda                         : 1;
+#endif /* DRV_BYTE_ORDER */
+} iis3dwb10is_status_reg_t;
+
+#define IIS3DWB10IS_OUT_TEMP_L                   0x22U
+#define IIS3DWB10IS_OUT_TEMP_H                   0x23U
+#define IIS3DWB10IS_OUTX_L_A                     0x24U
+#define IIS3DWB10IS_OUTX_M_A                     0x25U
+#define IIS3DWB10IS_OUTX_H_A                     0x26U
+#define IIS3DWB10IS_OUTX_HH_A                    0x27U
+#define IIS3DWB10IS_OUTY_L_A                     0x28U
+#define IIS3DWB10IS_OUTY_M_A                     0x29U
+#define IIS3DWB10IS_OUTY_H_A                     0x2AU
+#define IIS3DWB10IS_OUTY_HH_A                    0x2BU
+#define IIS3DWB10IS_OUTZ_L_A                     0x2CU
+#define IIS3DWB10IS_OUTZ_M_A                     0x2DU
+#define IIS3DWB10IS_OUTZ_H_A                     0x2EU
+#define IIS3DWB10IS_OUTZ_HH_A                    0x2FU
+
 /**
   * @defgroup IIS3DWB10IS_Register_Union
   * @brief    This union group all the registers having a bit-field
@@ -458,6 +497,7 @@ typedef union
   iis3dwb10is_ctrl2_t                  ctrl2;
   iis3dwb10is_ctrl3_t                  ctrl3;
   iis3dwb10is_ctrl4_t                  ctrl4;
+  iis3dwb10is_status_reg_t             status_reg;
   bitwise_t                            bitwise;
   uint8_t                              byte;
 } iis3dwb10is_reg_t;
@@ -488,6 +528,15 @@ int32_t iis3dwb10is_write_reg(const stmdev_ctx_t *ctx, uint8_t reg,
                               uint16_t len);
 
 int32_t iis3dwb10is_device_id_get(const stmdev_ctx_t *ctx, uint8_t *id);
+
+float_t iis3dwb10is_from_lsb_to_celsius(int16_t lsb);
+
+float_t iis3dwb10is_from_fs50g_to_mg(int16_t lsb);
+float_t iis3dwb10is_from_fs100g_to_mg(int16_t lsb);
+float_t iis3dwb10is_from_fs200g_to_mg(int16_t lsb);
+float_t iis3dwb10is_20b_from_fs50g_to_mg(int32_t lsb);
+float_t iis3dwb10is_20b_from_fs100g_to_mg(int32_t lsb);
+float_t iis3dwb10is_20b_from_fs200g_to_mg(int32_t lsb);
 
 typedef enum
 {
@@ -541,6 +590,25 @@ typedef enum
 } iis3dwb10is_fs_xl_t;
 int32_t iis3dwb10is_xl_full_scale_set(const stmdev_ctx_t *ctx, iis3dwb10is_fs_xl_t val);
 int32_t iis3dwb10is_xl_full_scale_get(const stmdev_ctx_t *ctx, iis3dwb10is_fs_xl_t *val);
+
+int32_t iis3dwb10is_block_data_update_set(const stmdev_ctx_t *ctx, uint8_t val);
+int32_t iis3dwb10is_block_data_update_get(const stmdev_ctx_t *ctx, uint8_t *val);
+
+typedef struct
+{
+  enum
+  {
+    IIS3DWB10IS_WRAPAROUND_DISABLED  = 0x0,
+    IIS3DWB10IS_WRAPAROUND_1_EN      = 0x1,
+    IIS3DWB10IS_WRAPAROUND_2_EN      = 0x2,
+  } rounding;
+
+  uint8_t x_axis_en : 1;
+  uint8_t y_axis_en : 1;
+  uint8_t z_axis_en : 1;
+} iis3dwb10is_xl_data_cfg_t;
+int32_t iis3dwb10is_xl_data_config_set(const stmdev_ctx_t *ctx, iis3dwb10is_xl_data_cfg_t val);
+int32_t iis3dwb10is_xl_data_config_get(const stmdev_ctx_t *ctx, iis3dwb10is_xl_data_cfg_t *val);
 
 typedef struct
 {
@@ -669,6 +737,19 @@ int32_t iis3dwb10is_pin_int_route_set(const stmdev_ctx_t *ctx,
                                       iis3dwb10is_pin_int_route_t val);
 int32_t iis3dwb10is_pin_int_route_get(const stmdev_ctx_t *ctx,
                                       iis3dwb10is_pin_int_route_t *val);
+
+typedef struct
+{
+  uint8_t drdy_xl              : 1;
+  uint8_t drdy_qvar            : 1;
+  uint8_t drdy_temp            : 1;
+} iis3dwb10is_data_ready_t;
+int32_t iis3dwb10is_flag_data_ready_get(const stmdev_ctx_t *ctx, iis3dwb10is_data_ready_t *val);
+
+int32_t iis3dwb10is_temperature_raw_get(const stmdev_ctx_t *ctx, int16_t *val);
+int32_t iis3dwb10is_acceleration_raw_get(const stmdev_ctx_t *ctx, int16_t *val);
+int32_t iis3dwb10is_acceleration_20b_raw_get(const stmdev_ctx_t *ctx, int32_t *val);
+
 /**
   * @}
   *
