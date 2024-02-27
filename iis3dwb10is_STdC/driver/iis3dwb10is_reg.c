@@ -878,7 +878,7 @@ int32_t iis3dwb10is_fifo_batch_set(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_sen
   if (ret == 0)
   {
     fifo_ctrl3.xl_batch   = val.batch_xl;
-    fifo_ctrl3.qvar_batch = val.batch_temp;
+    fifo_ctrl3.t_batch    = val.batch_temp;
     fifo_ctrl3.qvar_batch = val.batch_qvar;
     fifo_ctrl3.ispu_batch = val.batch_ispu;
     ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_FIFO_CTRL3, (uint8_t *)&fifo_ctrl3, 1);
@@ -965,6 +965,115 @@ int32_t iis3dwb10is_fifo_ispu_ctrl_get(const stmdev_ctx_t *ctx,
     default:
       val->trigger = IIS3DWB10IS_FIFO_TRIGGER_ISPU;
       break;
+  }
+
+  return ret;
+}
+
+int32_t iis3dwb10is_fifo_status_get(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_status_t *val)
+{
+  uint8_t buff[2];
+  iis3dwb10is_fifo_status2_t *status;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_STATUS1, (uint8_t *)&buff[0], 2);
+  if (ret != 0)
+  {
+    return ret;
+  }
+
+  status = (iis3dwb10is_fifo_status2_t *)&buff[1];
+
+  val->fifo_ovr  = status->fifo_ovr_ia;
+  val->fifo_full = status->fifo_full_ia;
+  val->fifo_th   = status->fifo_wtm_ia;
+
+  val->fifo_level = (uint16_t)buff[1] & 0x0fU;
+  val->fifo_level = (val->fifo_level * 256U) + buff[0];
+
+  return ret;
+}
+
+/**
+  * @brief  FIFO data output[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      iis3dwb10is_fifo_out_raw_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_fifo_out_raw_get(const stmdev_ctx_t *ctx,
+                                     iis3dwb10is_fifo_out_raw_t *val)
+{
+  iis3dwb10is_fifo_data_out_tag_t *fifo_tag;
+  uint8_t buff[10];
+  uint8_t *datap;
+  int32_t ret;
+  uint8_t i;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_DATA_OUT_TAG, buff, 10);
+  if (ret != 0)
+  {
+    return ret;
+  }
+
+  fifo_tag = (iis3dwb10is_fifo_data_out_tag_t *)&buff[0];
+  datap = &buff[1];
+
+  switch (fifo_tag->tag_sensor)
+  {
+    case IIS3DWB10IS_TAG_EMPTY:
+      val->tag = IIS3DWB10IS_TAG_EMPTY;
+      break;
+
+    case IIS3DWB10IS_TAG_QVAR:
+      val->tag = IIS3DWB10IS_TAG_QVAR;
+
+      val->qvar = (int16_t)datap[2];
+      val->qvar = (val->qvar * 256) + (int16_t)datap[1];
+      break;
+
+    case IIS3DWB10IS_TAG_XL:
+      val->tag = IIS3DWB10IS_TAG_XL;
+
+      val->xl.x_raw = (int32_t)datap[2];
+      val->xl.x_raw = (val->xl.x_raw * 256) + (int32_t)datap[1];
+      val->xl.x_raw = (val->xl.x_raw * 256) + (int32_t)datap[0];
+      val->xl.y_raw = (int32_t)datap[5];
+      val->xl.y_raw = (val->xl.y_raw * 256) + (int32_t)datap[4];
+      val->xl.y_raw = (val->xl.y_raw * 256) + (int32_t)datap[3];
+      val->xl.z_raw = (int32_t)datap[8];
+      val->xl.z_raw = (val->xl.z_raw * 256) + (int32_t)datap[7];
+      val->xl.z_raw = (val->xl.z_raw * 256) + (int32_t)datap[6];
+      break;
+
+    case IIS3DWB10IS_TAG_TEMP:
+      val->tag = IIS3DWB10IS_TAG_TEMP;
+
+      val->temp = (int16_t)datap[2];
+      val->temp = (val->temp * 256) + (int16_t)datap[1];
+      break;
+
+    case IIS3DWB10IS_TAG_TS:
+      val->tag = IIS3DWB10IS_TAG_TS;
+      break;
+
+    case IIS3DWB10IS_TAG_TEMP_QVAR:
+      val->tag = IIS3DWB10IS_TAG_TEMP_QVAR;
+
+      val->qvar = (int16_t)datap[2];
+      val->qvar = (val->qvar * 256) + (int16_t)datap[1];
+      break;
+
+    default:
+      val->tag = IIS3DWB10IS_TAG_EMPTY;
+      break;
+  }
+
+  /* always return register data */
+  for (i = 0; i < 9; i++)
+  {
+    val->raw[i] = datap[i];
   }
 
   return ret;

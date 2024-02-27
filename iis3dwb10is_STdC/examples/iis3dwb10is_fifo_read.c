@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * @file    read_data.c
+ * @file    fifo_read.c
  * @author  Sensors Software Solution Team
  * @brief   This file show the simplest way to get data from sensor.
  *
@@ -92,11 +92,9 @@
 
 /* Private macro -------------------------------------------------------------*/
 #define    BOOT_TIME        10 //ms
+#define    FIFO_WATERMARK   1000
 
 /* Private variables ---------------------------------------------------------*/
-static int16_t data_raw_acceleration[3];
-static int32_t data_raw_20b_acceleration[3];
-static int16_t data_raw_temperature;
 static float acceleration_mg[3];
 static float temperature_degC;
 static uint8_t whoamI;
@@ -121,35 +119,41 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
-static uint64_t xl_event_num = 0, temp_event_num = 0;
-static uint8_t xl_event = 0, temp_event = 0;
 static stmdev_ctx_t dev_ctx;
+static uint64_t fifo_event_num = 0;
+static uint8_t fifo_event = 0, do_print = 0;
+static uint16_t fifo_level = 0;
+static iis3dwb10is_fifo_out_raw_t fifo_data[FIFO_WATERMARK];
 
-void iis3dwb10is_read_data_handler(void)
+void iis3dwb10is_fifo_read_handler(void)
 {
-  iis3dwb10is_data_ready_t drdy;
+  iis3dwb10is_fifo_status_t fifo_status;
+  uint16_t i;
 
-  /* Read output only if new xl value is available */
-  iis3dwb10is_flag_data_ready_get(&dev_ctx, &drdy);
-  if (drdy.drdy_xl) {
-    xl_event = 1;
-    xl_event_num++;
-    iis3dwb10is_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
-  }
+  /* Read watermark flag */
+  iis3dwb10is_fifo_status_get(&dev_ctx, &fifo_status);
 
-  if (drdy.drdy_temp) {
-    temp_event = 1;
-    temp_event_num++;
-    iis3dwb10is_temperature_raw_get(&dev_ctx, &data_raw_temperature);
+  if (fifo_status.fifo_th) {
+    fifo_event_num++;
+    if (fifo_event_num%10 == 0) {
+      do_print = 1;
+    }
+
+    fifo_level = fifo_status.fifo_level;
+    fifo_event = 1;
+
+    for (i = 0; i < fifo_level; i++) {
+      iis3dwb10is_fifo_out_raw_get(&dev_ctx, &fifo_data[i]);
+    }
   }
 }
 
 /* Main Example --------------------------------------------------------------*/
-void iis3dwb10is_read_data(void)
+void iis3dwb10is_fifo_read(void)
 {
   iis3dwb10is_reset_t rst;
   iis3dwb10is_data_rate_t rate;
-  iis3dwb10is_xl_data_cfg_t xl_cfg;
+  iis3dwb10is_fifo_sensor_batch_t fifo_batch;
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
@@ -178,49 +182,91 @@ void iis3dwb10is_read_data(void)
   /* Enable Block Data Update */
   iis3dwb10is_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
-  iis3dwb10is_xl_data_config_get(&dev_ctx, &xl_cfg);
-  xl_cfg.rounding = IIS3DWB10IS_WRAPAROUND_2_EN;
-  iis3dwb10is_xl_data_config_set(&dev_ctx, xl_cfg);
-
   /* Set Output Data Rate */
   rate.burst = IIS3DWB10IS_CONTINUOS_MODE;
   rate.odr = IIS3DWB10IS_ODR_10KHz;
   iis3dwb10is_xl_data_rate_set(&dev_ctx, rate);
 
+  /*
+   * Set FIFO watermark (number of unread sensor data TAG + 10 bytes
+   * stored in FIFO) to FIFO_WATERMARK samples
+   */
+
+  iis3dwb10is_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
+  iis3dwb10is_fifo_stop_on_wtm_set(&dev_ctx, 1);
+
+  iis3dwb10is_fifo_batch_get(&dev_ctx,  &fifo_batch);
+  fifo_batch.batch_xl = 1;
+  fifo_batch.batch_temp = 1;
+  //fifo_batch.batch_qvar = 1;
+  iis3dwb10is_fifo_batch_set(&dev_ctx,  fifo_batch);
+
+  /* Set FIFO mode to Stream mode (aka Continuous Mode) */
+  iis3dwb10is_fifo_mode_set(&dev_ctx, IIS3DWB10IS_STREAM_MODE);
+
   /* Set full scale */
   iis3dwb10is_xl_full_scale_set(&dev_ctx, IIS3DWB_50g);
 
   iis3dwb10is_pin_int_route_get(&dev_ctx, &route);
-  route.int1_drdy_xl = 1;
-  route.int1_drdy_temp = 1;
+  route.int1_fifo_th = 1;
   iis3dwb10is_pin_int_route_set(&dev_ctx, route);
 
   /* Read samples in polling mode */
   while (1) {
-    if (xl_event && xl_event_num%1000 == 1) {
-      xl_event = 0;
+    if (fifo_event) {
+      uint16_t i, num = fifo_level;
+      iis3dwb10is_fifo_out_raw_t *fdatap;
 
-      acceleration_mg[0] =
-        iis3dwb10is_from_fs50g_to_mg(data_raw_acceleration[0]);
-      acceleration_mg[1] =
-        iis3dwb10is_from_fs50g_to_mg(data_raw_acceleration[1]);
-      acceleration_mg[2] =
-        iis3dwb10is_from_fs50g_to_mg(data_raw_acceleration[2]);
+      fifo_event = 0;
 
-      sprintf((char *)tx_buffer,
-              "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-    }
+      if (do_print) {
+        sprintf((char *)tx_buffer, "%lld: FIFO level %d\r\n", fifo_event_num, fifo_level);
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
-    if (temp_event && temp_event_num%52 == 1) {
-      temp_event = 0;
+        for (i = 0; i < num; i++) {
+          fdatap = &fifo_data[i];
 
-      /* Read temperature data */
-      temperature_degC = iis3dwb10is_from_lsb_to_celsius(data_raw_temperature);
+          switch(fdatap->tag) {
+            case IIS3DWB10IS_TAG_XL:
+              acceleration_mg[0] =
+                iis3dwb10is_20b_from_fs50g_to_mg(fdatap->xl.x_raw);
+              acceleration_mg[1] =
+                iis3dwb10is_20b_from_fs50g_to_mg(fdatap->xl.y_raw);
+              acceleration_mg[2] =
+                iis3dwb10is_20b_from_fs50g_to_mg(fdatap->xl.z_raw);
 
-      sprintf((char *)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
+              sprintf((char *)tx_buffer,
+                      "%d: Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n", i,
+                      acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+              tx_com(tx_buffer, strlen((char const *)tx_buffer));
+              break;
+
+            case IIS3DWB10IS_TAG_TEMP:
+              temperature_degC = iis3dwb10is_from_lsb_to_celsius(fdatap->temp);
+
+              sprintf((char *)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC);
+              tx_com(tx_buffer, strlen((char const *)tx_buffer));
+              break;
+
+            case IIS3DWB10IS_TAG_QVAR:
+              //temperature_degC = iis3dwb10is_from_lsb_to_celsius(fdatap->temp);
+
+              sprintf((char *)tx_buffer, "Temperature [degC]:%04x\r\n", fdatap->qvar);
+              tx_com(tx_buffer, strlen((char const *)tx_buffer));
+              break;
+
+            default:
+              sprintf((char *)tx_buffer, "unhandled tag %02x\r\n", fdatap->tag);
+              //tx_com(tx_buffer, strlen((char const *)tx_buffer));
+              break;
+          }
+        }
+
+        sprintf((char *)tx_buffer, "-- DONE %d\r\n\r\n", i);
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
+
+        do_print = 0;
+      }
     }
   }
 }

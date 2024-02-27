@@ -433,6 +433,34 @@ typedef struct
 #endif /* DRV_BYTE_ORDER */
 } iis3dwb10is_ctrl4_t;
 
+#define IIS3DWB10IS_FIFO_STATUS1                 0x1CU
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t diff_fifo                : 8;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t diff_fifo                : 8;
+#endif /* DRV_BYTE_ORDER */
+} iis3dwb10is_fifo_status1_t;
+
+#define IIS3DWB10IS_FIFO_STATUS2                 0x1DU
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t diff_fifo                : 4;
+  uint8_t fifo_full_ia             : 1;
+  uint8_t not_used_01              : 1;
+  uint8_t fifo_ovr_ia              : 1;
+  uint8_t fifo_wtm_ia              : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t fifo_wtm_ia              : 1;
+  uint8_t fifo_ovr_ia              : 1;
+  uint8_t not_used_01              : 1;
+  uint8_t fifo_full_ia             : 1;
+  uint8_t diff_fifo                : 4;
+#endif /* DRV_BYTE_ORDER */
+} iis3dwb10is_fifo_status2_t;
+
 #define IIS3DWB10IS_STATUS_REG                   0x1EU
 typedef struct
 {
@@ -472,6 +500,26 @@ typedef struct
 #define IIS3DWB10IS_OUTZ_H_A                     0x2EU
 #define IIS3DWB10IS_OUTZ_HH_A                    0x2FU
 
+#define IIS3DWB10IS_FIFO_DATA_OUT_TAG            0x40U
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t tag_sensor           : 8;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t tag_sensor           : 8;
+#endif /* DRV_BYTE_ORDER */
+} iis3dwb10is_fifo_data_out_tag_t;
+
+#define IIS3DWB10IS_FIFO_DATA_OUT_D0             0x41U
+#define IIS3DWB10IS_FIFO_DATA_OUT_D1             0x42U
+#define IIS3DWB10IS_FIFO_DATA_OUT_D2             0x43U
+#define IIS3DWB10IS_FIFO_DATA_OUT_D3             0x44U
+#define IIS3DWB10IS_FIFO_DATA_OUT_D4             0x45U
+#define IIS3DWB10IS_FIFO_DATA_OUT_D5             0x46U
+#define IIS3DWB10IS_FIFO_DATA_OUT_D6             0x47U
+#define IIS3DWB10IS_FIFO_DATA_OUT_D7             0x48U
+#define IIS3DWB10IS_FIFO_DATA_OUT_D8             0x49U
+
 /**
   * @defgroup IIS3DWB10IS_Register_Union
   * @brief    This union group all the registers having a bit-field
@@ -497,7 +545,10 @@ typedef union
   iis3dwb10is_ctrl2_t                  ctrl2;
   iis3dwb10is_ctrl3_t                  ctrl3;
   iis3dwb10is_ctrl4_t                  ctrl4;
+  iis3dwb10is_fifo_status1_t           fifo_status1;
+  iis3dwb10is_fifo_status2_t           fifo_status2;
   iis3dwb10is_status_reg_t             status_reg;
+  iis3dwb10is_fifo_data_out_tag_t      fifo_data_out_tag;
   bitwise_t                            bitwise;
   uint8_t                              byte;
 } iis3dwb10is_reg_t;
@@ -692,6 +743,40 @@ int32_t iis3dwb10is_fifo_ispu_ctrl_set(const stmdev_ctx_t *ctx,
                                        iis3dwb10is_fifo_ispu_ctrl_batch_t val);
 int32_t iis3dwb10is_fifo_ispu_ctrl_get(const stmdev_ctx_t *ctx,
                                        iis3dwb10is_fifo_ispu_ctrl_batch_t *val);
+
+typedef struct
+{
+  uint16_t fifo_level          : 12;
+  uint8_t  fifo_full           : 1;
+  uint8_t  fifo_ovr            : 1;
+  uint8_t  fifo_th             : 1;
+} iis3dwb10is_fifo_status_t;
+
+int32_t iis3dwb10is_fifo_status_get(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_status_t *val);
+
+typedef struct
+{
+  enum
+  {
+    IIS3DWB10IS_TAG_EMPTY                 = 0x00,
+    IIS3DWB10IS_TAG_QVAR                  = 0x08,
+    IIS3DWB10IS_TAG_XL                    = 0x10,
+    IIS3DWB10IS_TAG_TEMP                  = 0x18,
+    IIS3DWB10IS_TAG_TS                    = 0x20,
+    IIS3DWB10IS_TAG_TEMP_QVAR             = 0x28,
+  } tag;
+
+  uint8_t raw[9];
+  struct {
+    int32_t x_raw    : 20;
+    int32_t y_raw    : 20;
+    int32_t z_raw    : 20;
+  } xl;
+  int16_t temp;
+  int16_t qvar;
+} iis3dwb10is_fifo_out_raw_t;
+int32_t iis3dwb10is_fifo_out_raw_get(const stmdev_ctx_t *ctx,
+                                     iis3dwb10is_fifo_out_raw_t *val);
 
 typedef struct
 {
