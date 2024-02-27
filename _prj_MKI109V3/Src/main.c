@@ -57,12 +57,21 @@ void SystemClock_Config(void);
 void iis3dhhc_read_data_polling(void);
 void iis3dwb_read_data_polling(void);
 void iis3dwb_fifo(void);
-void iis3dwb10is_read_data_polling(void);
+void iis3dwb10is_read_data(void);
+void iis3dwb10is_fifo_read(void);
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void iis3dwb10is_read_data_handler(void);
+void iis3dwb10is_fifo_read_handler(void);
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  //iis3dwb10is_read_data_handler();
+  iis3dwb10is_fifo_read_handler();
+}
 
 /* USER CODE END 0 */
 
@@ -110,7 +119,8 @@ int main(void)
     //iis3dhhc_read_data_polling();
     //iis3dwb_read_data_polling();
     //iis3dwb_fifo();
-    iis3dwb10is_read_data_polling();
+    //iis3dwb10is_read_data();
+    iis3dwb10is_fifo_read();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

@@ -1200,7 +1200,10 @@
     <group>
         <name>iis3dwb10is</name>
         <file>
-            <name>$PROJ_DIR$\..\..\iis3dwb10is_STdC\examples\iis3dwb10is_read_data_polling.c</name>
+            <name>$PROJ_DIR$\..\..\iis3dwb10is_STdC\examples\iis3dwb10is_fifo_read.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\iis3dwb10is_STdC\examples\iis3dwb10is_read_data.c</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\iis3dwb10is_STdC\driver\iis3dwb10is_reg.c</name>
