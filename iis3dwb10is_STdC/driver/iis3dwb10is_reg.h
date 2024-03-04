@@ -660,12 +660,12 @@ int32_t iis3dwb10is_device_id_get(const stmdev_ctx_t *ctx, uint8_t *id);
 
 float_t iis3dwb10is_from_lsb_to_celsius(int16_t lsb);
 
-float_t iis3dwb10is_from_fs50g_to_mg(int16_t lsb);
-float_t iis3dwb10is_from_fs100g_to_mg(int16_t lsb);
-float_t iis3dwb10is_from_fs200g_to_mg(int16_t lsb);
-float_t iis3dwb10is_20b_from_fs50g_to_mg(int32_t lsb);
-float_t iis3dwb10is_20b_from_fs100g_to_mg(int32_t lsb);
-float_t iis3dwb10is_20b_from_fs200g_to_mg(int32_t lsb);
+float_t iis3dwb10is_16b_from_fs50g_to_mg(int16_t lsb);
+float_t iis3dwb10is_16b_from_fs100g_to_mg(int16_t lsb);
+float_t iis3dwb10is_16b_from_fs200g_to_mg(int16_t lsb);
+float_t iis3dwb10is_from_fs50g_to_mg(int32_t lsb);
+float_t iis3dwb10is_from_fs100g_to_mg(int32_t lsb);
+float_t iis3dwb10is_from_fs200g_to_mg(int32_t lsb);
 
 typedef enum
 {
@@ -910,8 +910,8 @@ typedef struct
 int32_t iis3dwb10is_flag_data_ready_get(const stmdev_ctx_t *ctx, iis3dwb10is_data_ready_t *val);
 
 int32_t iis3dwb10is_temperature_raw_get(const stmdev_ctx_t *ctx, int16_t *val);
-int32_t iis3dwb10is_acceleration_raw_get(const stmdev_ctx_t *ctx, int16_t *val);
-int32_t iis3dwb10is_acceleration_20b_raw_get(const stmdev_ctx_t *ctx, int32_t *val);
+int32_t iis3dwb10is_acceleration_16b_raw_get(const stmdev_ctx_t *ctx, int16_t *val);
+int32_t iis3dwb10is_acceleration_raw_get(const stmdev_ctx_t *ctx, int32_t *val);
 
 /**
   * @}

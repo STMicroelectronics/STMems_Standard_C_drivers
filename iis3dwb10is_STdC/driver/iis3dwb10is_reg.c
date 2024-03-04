@@ -81,32 +81,32 @@ float_t iis3dwb10is_from_lsb_to_celsius(int16_t lsb)
   return ((float_t)lsb / 200.0f);
 }
 
-float_t iis3dwb10is_from_fs50g_to_mg(int16_t lsb)
+float_t iis3dwb10is_16b_from_fs50g_to_mg(int16_t lsb)
 {
   return ((float_t)lsb * 0.38f);
 }
 
-float_t iis3dwb10is_from_fs100g_to_mg(int16_t lsb)
+float_t iis3dwb10is_16b_from_fs100g_to_mg(int16_t lsb)
 {
   return ((float_t)lsb * 0.764f);
 }
 
-float_t iis3dwb10is_from_fs200g_to_mg(int16_t lsb)
+float_t iis3dwb10is_16b_from_fs200g_to_mg(int16_t lsb)
 {
   return ((float_t)lsb * 1.524f);
 }
 
-float_t iis3dwb10is_20b_from_fs50g_to_mg(int32_t lsb)
+float_t iis3dwb10is_from_fs50g_to_mg(int32_t lsb)
 {
   return ((float_t)lsb * 0.095f);
 }
 
-float_t iis3dwb10is_20b_from_fs100g_to_mg(int32_t lsb)
+float_t iis3dwb10is_from_fs100g_to_mg(int32_t lsb)
 {
   return ((float_t)lsb * 0.191f);
 }
 
-float_t iis3dwb10is_20b_from_fs200g_to_mg(int32_t lsb)
+float_t iis3dwb10is_from_fs200g_to_mg(int32_t lsb)
 {
   return ((float_t)lsb * 0.381f);
 }
@@ -1319,17 +1319,17 @@ int32_t iis3dwb10is_temperature_raw_get(const stmdev_ctx_t *ctx, int16_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb10is_acceleration_raw_get(const stmdev_ctx_t *ctx, int16_t *val)
+int32_t iis3dwb10is_acceleration_16b_raw_get(const stmdev_ctx_t *ctx, int16_t *val)
 {
-  uint8_t buff[6];
+  uint8_t buff[12];
   uint8_t i;
   int32_t ret;
 
-  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_OUTX_L_A, buff, 6);
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_OUTX_L_A, buff, 12);
   for (i = 0; i < 3; i++)
   {
-    val[i] = (int16_t)buff[2*i + 1];
-    val[i] = (val[i] * 256) + (int16_t)buff[2*i];
+    val[i] = (int16_t)buff[4*i + 1];
+    val[i] = (val[i] * 256) + (int16_t)buff[4*i];
   }
 
   return ret;
@@ -1344,7 +1344,7 @@ int32_t iis3dwb10is_acceleration_raw_get(const stmdev_ctx_t *ctx, int16_t *val)
   * @retval        Interface status (MANDATORY: return 0 -> no Error).
   *
   */
-int32_t iis3dwb10is_acceleration_20b_raw_get(const stmdev_ctx_t *ctx, int32_t *val)
+int32_t iis3dwb10is_acceleration_raw_get(const stmdev_ctx_t *ctx, int32_t *val)
 {
   uint8_t buff[12];
   uint8_t i;
