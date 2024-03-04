@@ -337,7 +337,7 @@ typedef struct
   uint8_t int1_drdy_temp               : 1;
   uint8_t int2_drdy_temp               : 1;
 #endif /* DRV_BYTE_ORDER */
-} iis3dwb10is_int0_ctrl_t;
+} iis3dwb10is_int_ctrl0_t;
 
 #define IIS3DWB10IS_INT_CTRL1                    0x0DU
 typedef struct
@@ -359,7 +359,7 @@ typedef struct
   uint8_t int1_drdy_qvar               : 1;
   uint8_t int1_drdy_xl                 : 1;
 #endif /* DRV_BYTE_ORDER */
-} iis3dwb10is_int1_ctrl_t;
+} iis3dwb10is_int_ctrl1_t;
 
 #define IIS3DWB10IS_WHO_AM_I                     0x0FU
 
@@ -437,9 +437,9 @@ typedef struct
 typedef struct
 {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-  uint8_t diff_fifo                : 8;
+  uint8_t diff_fifo                    : 8;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-  uint8_t diff_fifo                : 8;
+  uint8_t diff_fifo                    : 8;
 #endif /* DRV_BYTE_ORDER */
 } iis3dwb10is_fifo_status1_t;
 
@@ -447,17 +447,17 @@ typedef struct
 typedef struct
 {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-  uint8_t diff_fifo                : 4;
-  uint8_t fifo_full_ia             : 1;
-  uint8_t not_used_01              : 1;
-  uint8_t fifo_ovr_ia              : 1;
-  uint8_t fifo_wtm_ia              : 1;
+  uint8_t diff_fifo                    : 4;
+  uint8_t fifo_full_ia                 : 1;
+  uint8_t not_used_01                  : 1;
+  uint8_t fifo_ovr_ia                  : 1;
+  uint8_t fifo_wtm_ia                  : 1;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-  uint8_t fifo_wtm_ia              : 1;
-  uint8_t fifo_ovr_ia              : 1;
-  uint8_t not_used_01              : 1;
-  uint8_t fifo_full_ia             : 1;
-  uint8_t diff_fifo                : 4;
+  uint8_t fifo_wtm_ia                  : 1;
+  uint8_t fifo_ovr_ia                  : 1;
+  uint8_t not_used_01                  : 1;
+  uint8_t fifo_full_ia                 : 1;
+  uint8_t diff_fifo                    : 4;
 #endif /* DRV_BYTE_ORDER */
 } iis3dwb10is_fifo_status2_t;
 
@@ -499,14 +499,59 @@ typedef struct
 #define IIS3DWB10IS_OUTZ_M_A                     0x2DU
 #define IIS3DWB10IS_OUTZ_H_A                     0x2EU
 #define IIS3DWB10IS_OUTZ_HH_A                    0x2FU
+#define IIS3DWB10IS_TIMESTAMP0                   0x30U
+#define IIS3DWB10IS_TIMESTAMP1                   0x31U
+#define IIS3DWB10IS_TIMESTAMP2                   0x32U
+#define IIS3DWB10IS_TIMESTAMP3                   0x33U
+#define IIS3DWB10IS_TIMESTAMP4                   0x34U
+#define IIS3DWB10IS_OUT_QVAR_L                   0x36U
+#define IIS3DWB10IS_OUT_QVAR_H                   0x37U
+
+#define IIS3DWB10IS_SLEEPCNT_CFG                 0x38U
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t tick_sel                     : 1;
+  uint8_t enable_sleepcnt              : 1;
+  uint8_t pl_sleepcnt                  : 1;
+  uint8_t rst_sleepcnt                 : 1;
+  uint8_t not_used0                    : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used0                    : 4;
+  uint8_t rst_sleepcnt                 : 1;
+  uint8_t pl_sleepcnt                  : 1;
+  uint8_t enable_sleepcnt              : 1;
+  uint8_t tick_sel                     : 1;
+#endif /* DRV_BYTE_ORDER */
+} iis3dwb10is_sleepcnt_cfg_t;
+
+#define IIS3DWB10IS_SLEEPCNT_PL_L                0x3CU
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t sleepcnt_pl_l                : 8;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t sleepcnt_pl_l                : 8;
+#endif /* DRV_BYTE_ORDER */
+} iis3dwb10is_sleepcnt_pl_l_t;
+
+#define IIS3DWB10IS_SLEEPCNT_PL_H                0x3DU
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t sleepcnt_pl_h                : 8;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t sleepcnt_pl_h                : 8;
+#endif /* DRV_BYTE_ORDER */
+} iis3dwb10is_sleepcnt_pl_h_t;
 
 #define IIS3DWB10IS_FIFO_DATA_OUT_TAG            0x40U
 typedef struct
 {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-  uint8_t tag_sensor           : 8;
+  uint8_t tag_sensor                   : 8;
 #elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-  uint8_t tag_sensor           : 8;
+  uint8_t tag_sensor                   : 8;
 #endif /* DRV_BYTE_ORDER */
 } iis3dwb10is_fifo_data_out_tag_t;
 
@@ -519,6 +564,34 @@ typedef struct
 #define IIS3DWB10IS_FIFO_DATA_OUT_D6             0x47U
 #define IIS3DWB10IS_FIFO_DATA_OUT_D7             0x48U
 #define IIS3DWB10IS_FIFO_DATA_OUT_D8             0x49U
+
+#define IIS3DWB10IS_INTERNAL_FREQ_FINE           0x50U
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t internal_freq_fine           : 8;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t internal_freq_fine           : 8;
+#endif /* DRV_BYTE_ORDER */
+} iis3dwb10is_internal_freq_fine_t;
+
+#define IIS3DWB10IS_INT_CTRL3                    0x6EU
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t int2_ispu_intb               : 1;
+  uint8_t int1_ispu_inta               : 1;
+  uint8_t int1_timer                   : 1;
+  uint8_t int2_timer                   : 1;
+  uint8_t not_used0                    : 4;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used0                    : 4;
+  uint8_t int2_timer                   : 1;
+  uint8_t int1_timer                   : 1;
+  uint8_t int1_ispu_inta               : 1;
+  uint8_t int2_ispu_intb               : 1;
+#endif /* DRV_BYTE_ORDER */
+} iis3dwb10is_int_ctrl3_t;
 
 /**
   * @defgroup IIS3DWB10IS_Register_Union
@@ -539,8 +612,8 @@ typedef union
   iis3dwb10is_fifo_ctrl3_t             fifo_ctrl3;
   iis3dwb10is_pll_ctrl1_t              pll_ctrl1;
   iis3dwb10is_pll_ctrl2_t              pll_ctrl2;
-  iis3dwb10is_int0_ctrl_t              int0_ctrl;
-  iis3dwb10is_int1_ctrl_t              int1_ctrl;
+  iis3dwb10is_int_ctrl0_t              int_ctrl0;
+  iis3dwb10is_int_ctrl1_t              int_ctrl1;
   iis3dwb10is_ctrl1_t                  ctrl1;
   iis3dwb10is_ctrl2_t                  ctrl2;
   iis3dwb10is_ctrl3_t                  ctrl3;
@@ -548,7 +621,12 @@ typedef union
   iis3dwb10is_fifo_status1_t           fifo_status1;
   iis3dwb10is_fifo_status2_t           fifo_status2;
   iis3dwb10is_status_reg_t             status_reg;
+  iis3dwb10is_sleepcnt_cfg_t           sleepcnt_cfg;
+  iis3dwb10is_sleepcnt_pl_l_t          sleepcnt_pl_l;
+  iis3dwb10is_sleepcnt_pl_h_t          sleepcnt_pl_h;
   iis3dwb10is_fifo_data_out_tag_t      fifo_data_out_tag;
+  iis3dwb10is_internal_freq_fine_t     internal_freq_fine;
+  iis3dwb10is_int_ctrl3_t              int_ctrl3;
   bitwise_t                            bitwise;
   uint8_t                              byte;
 } iis3dwb10is_reg_t;
