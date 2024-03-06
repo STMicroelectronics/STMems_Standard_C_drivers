@@ -433,6 +433,54 @@ typedef struct
 #endif /* DRV_BYTE_ORDER */
 } iis3dwb10is_ctrl4_t;
 
+#define IIS3DWB10IS_I3C_CTRL                     0x14U
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t int_enable_i3c               : 1;
+  uint8_t bus_act_sel                  : 1;
+  uint8_t not_used0                    : 6;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used0                    : 6;
+  uint8_t bus_act_sel                  : 1;
+  uint8_t int_enable_i3c               : 1;
+#endif /* DRV_BYTE_ORDER */
+} iis3dwb10is_i3c_ctrl_t;
+
+#define IIS3DWB10IS_SPI_CTRL                     0x15U
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t sim                          : 1;
+  uint8_t not_used0                    : 7;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t not_used0                    : 7;
+  uint8_t sim                          : 1;
+#endif /* DRV_BYTE_ORDER */
+} iis3dwb10is_spi_ctrl_t;
+
+#define IIS3DWB10IS_QVAR_CTRL                    0x16U
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t qvar_c_zin                   : 2;
+  uint8_t not_used0                    : 1;
+  uint8_t qvar_switch                  : 1;
+  uint8_t qvar2_en                     : 1;
+  uint8_t qvar1_en                     : 1;
+  uint8_t qvar_hpf                     : 1;
+  uint8_t qvar_lpf                     : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t qvar_lpf                     : 1;
+  uint8_t qvar_hpf                     : 1;
+  uint8_t qvar1_en                     : 1;
+  uint8_t qvar2_en                     : 1;
+  uint8_t qvar_switch                  : 1;
+  uint8_t not_used0                    : 1;
+  uint8_t qvar_c_zin                   : 2;
+#endif /* DRV_BYTE_ORDER */
+} iis3dwb10is_qvar_ctrl_t;
+
 #define IIS3DWB10IS_FIFO_STATUS1                 0x1CU
 typedef struct
 {
@@ -618,6 +666,9 @@ typedef union
   iis3dwb10is_ctrl2_t                  ctrl2;
   iis3dwb10is_ctrl3_t                  ctrl3;
   iis3dwb10is_ctrl4_t                  ctrl4;
+  iis3dwb10is_i3c_ctrl_t               i3c_ctrl;
+  iis3dwb10is_spi_ctrl_t               spi_ctrl;
+  iis3dwb10is_qvar_ctrl_t              qvar_ctrl;
   iis3dwb10is_fifo_status1_t           fifo_status1;
   iis3dwb10is_fifo_status2_t           fifo_status2;
   iis3dwb10is_status_reg_t             status_reg;
@@ -768,6 +819,27 @@ typedef struct
 int32_t iis3dwb10is_interrupt_pin_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_int_pin_t val);
 int32_t iis3dwb10is_interrupt_pin_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_int_pin_t *val);
 
+
+typedef struct {
+  enum {
+    IIS3DWB10IS_I3C_BUS_AVAIL_TIME_50US = 0x0,
+    IIS3DWB10IS_I3C_BUS_AVAIL_TIME_2US  = 0x1,
+  } bus_act_sel;
+  uint8_t i3c_int_en                   : 1;
+  uint8_t i3c_disable                  : 1;
+  uint8_t sda_pu_en                    : 1;
+} iis3dwb10is_i3c_cfg_t;
+int32_t iis3dwb10is_i3c_configure_set(const stmdev_ctx_t *ctx, iis3dwb10is_i3c_cfg_t val);
+int32_t iis3dwb10is_i3c_configure_get(const stmdev_ctx_t *ctx, iis3dwb10is_i3c_cfg_t *val);
+
+typedef enum
+{
+  IIS3DWB10IS_SPI_4_WIRE  = 0x0, /* SPI 4 wires */
+  IIS3DWB10IS_SPI_3_WIRE  = 0x1, /* SPI 3 wires */
+} iis3dwb10is_spi_mode_t;
+int32_t iis3dwb10is_spi_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_spi_mode_t val);
+int32_t iis3dwb10is_spi_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_spi_mode_t *val);
+
 int32_t iis3dwb10is_fifo_watermark_set(const stmdev_ctx_t *ctx, uint16_t val);
 int32_t iis3dwb10is_fifo_watermark_get(const stmdev_ctx_t *ctx, uint16_t *val);
 
@@ -852,6 +924,13 @@ typedef struct
 } iis3dwb10is_fifo_out_raw_t;
 int32_t iis3dwb10is_fifo_out_raw_get(const stmdev_ctx_t *ctx,
                                      iis3dwb10is_fifo_out_raw_t *val);
+
+typedef struct
+{
+  uint8_t qvar_en              : 1;
+} iis3dwb10is_qvar_mode_t;
+int32_t iis3dwb10is_qvar_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_qvar_mode_t val);
+int32_t iis3dwb10is_qvar_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_qvar_mode_t *val);
 
 typedef struct
 {
