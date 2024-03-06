@@ -658,6 +658,7 @@ int32_t iis3dwb10is_write_reg(const stmdev_ctx_t *ctx, uint8_t reg,
 
 int32_t iis3dwb10is_device_id_get(const stmdev_ctx_t *ctx, uint8_t *id);
 
+uint64_t iis3dwb10is_from_lsb_to_us(uint64_t lsb);
 float_t iis3dwb10is_from_lsb_to_celsius(int16_t lsb);
 
 float_t iis3dwb10is_16b_from_fs50g_to_mg(int16_t lsb);
@@ -786,24 +787,19 @@ typedef enum
 int32_t iis3dwb10is_fifo_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_mode_t val);
 int32_t iis3dwb10is_fifo_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_mode_t *val);
 
-typedef enum
-{
-  IIS3DWB10IS_TMSTMP_NOT_BATCHED = 0x0,
-  IIS3DWB10IS_TMSTMP_DEC_1       = 0x1,
-  IIS3DWB10IS_TMSTMP_DEC_8       = 0x2,
-  IIS3DWB10IS_TMSTMP_DEC_32      = 0x3,
-} iis3dwb10is_fifo_timestamp_batch_t;
-int32_t iis3dwb10is_fifo_timestamp_batch_set(const stmdev_ctx_t *ctx,
-                                             iis3dwb10is_fifo_timestamp_batch_t val);
-int32_t iis3dwb10is_fifo_timestamp_batch_get(const stmdev_ctx_t *ctx,
-                                             iis3dwb10is_fifo_timestamp_batch_t *val);
-
 typedef struct
 {
   uint8_t batch_xl   : 1;
   uint8_t batch_temp : 1;
   uint8_t batch_qvar : 1;
   uint8_t batch_ispu : 1;
+  enum
+  {
+    IIS3DWB10IS_TMSTMP_NOT_BATCHED = 0x0,
+    IIS3DWB10IS_TMSTMP_DEC_1       = 0x1,
+    IIS3DWB10IS_TMSTMP_DEC_8       = 0x2,
+    IIS3DWB10IS_TMSTMP_DEC_32      = 0x3,
+  } batch_ts;
 } iis3dwb10is_fifo_sensor_batch_t;
 int32_t iis3dwb10is_fifo_batch_set(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_sensor_batch_t val);
 int32_t iis3dwb10is_fifo_batch_get(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_sensor_batch_t *val);
@@ -850,8 +846,9 @@ typedef struct
     int32_t y_raw    : 20;
     int32_t z_raw    : 20;
   } xl;
-  int16_t temp;
+  int16_t temp_raw;
   int16_t qvar;
+  uint64_t ts_raw;
 } iis3dwb10is_fifo_out_raw_t;
 int32_t iis3dwb10is_fifo_out_raw_get(const stmdev_ctx_t *ctx,
                                      iis3dwb10is_fifo_out_raw_t *val);

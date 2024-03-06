@@ -91,11 +91,10 @@
 #endif
 
 /* Private macro -------------------------------------------------------------*/
-#define    BOOT_TIME        10 //ms
+#define    BOOT_TIME        20 //ms
 
 /* Private variables ---------------------------------------------------------*/
-static int16_t data_raw_acceleration[3];
-static int32_t data_raw_20b_acceleration[3];
+static int32_t data_raw_acceleration[3];
 static int16_t data_raw_temperature;
 static float acceleration_mg[3];
 static float temperature_degC;
@@ -167,7 +166,7 @@ void iis3dwb10is_read_data(void)
     while (1);
 
   /* Restore default configuration */
-  rst.boot = 0;
+  rst.boot = 1;
   rst.sw_rst = 1;
   iis3dwb10is_reset_set(&dev_ctx, rst);
 
@@ -179,7 +178,7 @@ void iis3dwb10is_read_data(void)
   iis3dwb10is_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
   iis3dwb10is_xl_data_config_get(&dev_ctx, &xl_cfg);
-  xl_cfg.rounding = IIS3DWB10IS_WRAPAROUND_2_EN;
+  xl_cfg.rounding = IIS3DWB10IS_WRAPAROUND_DISABLED;
   iis3dwb10is_xl_data_config_set(&dev_ctx, xl_cfg);
 
   /* Set Output Data Rate */
@@ -197,7 +196,7 @@ void iis3dwb10is_read_data(void)
 
   /* Read samples in polling mode */
   while (1) {
-    if (xl_event && xl_event_num%1000 == 1) {
+    if (xl_event && xl_event_num%100 == 0) {
       xl_event = 0;
 
       acceleration_mg[0] =
@@ -213,7 +212,7 @@ void iis3dwb10is_read_data(void)
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
-    if (temp_event && temp_event_num%52 == 1) {
+    if (temp_event && temp_event_num%52 == 0) {
       temp_event = 0;
 
       /* Read temperature data */

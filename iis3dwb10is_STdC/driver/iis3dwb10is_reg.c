@@ -76,6 +76,11 @@ int32_t __weak iis3dwb10is_write_reg(const stmdev_ctx_t* ctx, uint8_t reg, uint8
   * @}
   *
   */
+uint64_t iis3dwb10is_from_lsb_to_us(uint64_t lsb)
+{
+  return (lsb * 25);
+}
+
 float_t iis3dwb10is_from_lsb_to_celsius(int16_t lsb)
 {
   return ((float_t)lsb / 200.0f);
@@ -795,73 +800,6 @@ int32_t iis3dwb10is_fifo_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_mode
 }
 
 /**
-  * @brief  Selects decimation for timestamp batching in FIFO.[set]
-  *
-  * @param  ctx      read / write interface definitions
-  * @param  val      TMSTMP_NOT_BATCHED, TMSTMP_DEC_1, TMSTMP_DEC_8, TMSTMP_DEC_32,
-  * @retval          interface status (MANDATORY: return 0 -> no Error)
-  *
-  */
-int32_t iis3dwb10is_fifo_timestamp_batch_set(const stmdev_ctx_t *ctx,
-                                             iis3dwb10is_fifo_timestamp_batch_t val)
-{
-  iis3dwb10is_fifo_ctrl2_t fifo_ctrl2;
-  int32_t ret;
-
-  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL2, (uint8_t *)&fifo_ctrl2, 1);
-  if (ret == 0)
-  {
-    fifo_ctrl2.dec_ts_batch = (uint8_t)val & 0x03U;
-    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_FIFO_CTRL2, (uint8_t *)&fifo_ctrl2, 1);
-  }
-
-  return ret;
-}
-
-/**
-  * @brief  Selects decimation for timestamp batching in FIFO.[get]
-  *
-  * @param  ctx      read / write interface definitions
-  * @param  val      TMSTMP_NOT_BATCHED, TMSTMP_DEC_1, TMSTMP_DEC_8, TMSTMP_DEC_32,
-  * @retval          interface status (MANDATORY: return 0 -> no Error)
-  *
-  */
-int32_t iis3dwb10is_fifo_timestamp_batch_get(const stmdev_ctx_t *ctx,
-                                             iis3dwb10is_fifo_timestamp_batch_t *val)
-{
-  iis3dwb10is_fifo_ctrl2_t fifo_ctrl2;
-  int32_t ret;
-
-  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL2, (uint8_t *)&fifo_ctrl2, 1);
-  if (ret != 0) { return ret; }
-
-  switch (fifo_ctrl2.dec_ts_batch)
-  {
-    case IIS3DWB10IS_TMSTMP_NOT_BATCHED:
-      *val = IIS3DWB10IS_TMSTMP_NOT_BATCHED;
-      break;
-
-    case IIS3DWB10IS_TMSTMP_DEC_1:
-      *val = IIS3DWB10IS_TMSTMP_DEC_1;
-      break;
-
-    case IIS3DWB10IS_TMSTMP_DEC_8:
-      *val = IIS3DWB10IS_TMSTMP_DEC_8;
-      break;
-
-    case IIS3DWB10IS_TMSTMP_DEC_32:
-      *val = IIS3DWB10IS_TMSTMP_DEC_32;
-      break;
-
-    default:
-      *val = IIS3DWB10IS_TMSTMP_NOT_BATCHED;
-      break;
-  }
-
-  return ret;
-}
-
-/**
   * @brief  Batching in FIFO buffer of sensor data.[set]
   *
   * @param  ctx      read / write interface definitions
@@ -871,17 +809,23 @@ int32_t iis3dwb10is_fifo_timestamp_batch_get(const stmdev_ctx_t *ctx,
   */
 int32_t iis3dwb10is_fifo_batch_set(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_sensor_batch_t val)
 {
-  iis3dwb10is_fifo_ctrl3_t fifo_ctrl3;
+  uint8_t buf[2];
+  iis3dwb10is_fifo_ctrl2_t *fifo_ctrl2;
+  iis3dwb10is_fifo_ctrl3_t *fifo_ctrl3;
   int32_t ret;
 
-  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL3, (uint8_t *)&fifo_ctrl3, 1);
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL2, buf, 2);
   if (ret == 0)
   {
-    fifo_ctrl3.xl_batch   = val.batch_xl;
-    fifo_ctrl3.t_batch    = val.batch_temp;
-    fifo_ctrl3.qvar_batch = val.batch_qvar;
-    fifo_ctrl3.ispu_batch = val.batch_ispu;
-    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_FIFO_CTRL3, (uint8_t *)&fifo_ctrl3, 1);
+    fifo_ctrl2 = (iis3dwb10is_fifo_ctrl2_t *)&buf[0];
+    fifo_ctrl3 = (iis3dwb10is_fifo_ctrl3_t *)&buf[1];
+
+    fifo_ctrl2->dec_ts_batch = (uint8_t)val.batch_ts;
+    fifo_ctrl3->xl_batch   = val.batch_xl;
+    fifo_ctrl3->t_batch    = val.batch_temp;
+    fifo_ctrl3->qvar_batch = val.batch_qvar;
+    fifo_ctrl3->ispu_batch = val.batch_ispu;
+    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_FIFO_CTRL2, buf, 2);
   }
 
   return ret;
@@ -897,14 +841,45 @@ int32_t iis3dwb10is_fifo_batch_set(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_sen
   */
 int32_t iis3dwb10is_fifo_batch_get(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_sensor_batch_t *val)
 {
-  iis3dwb10is_fifo_ctrl3_t fifo_ctrl3;
+  uint8_t buf[2];
+  iis3dwb10is_fifo_ctrl2_t *fifo_ctrl2;
+  iis3dwb10is_fifo_ctrl3_t *fifo_ctrl3;
   int32_t ret;
 
-  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL3, (uint8_t *)&fifo_ctrl3, 1);
-  val->batch_xl   = fifo_ctrl3.xl_batch;
-  val->batch_temp = fifo_ctrl3.t_batch;
-  val->batch_qvar = fifo_ctrl3.qvar_batch;
-  val->batch_ispu = fifo_ctrl3.ispu_batch;
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL2, buf, 2);
+  if (ret == 0)
+  {
+    fifo_ctrl2 = (iis3dwb10is_fifo_ctrl2_t *)&buf[0];
+    fifo_ctrl3 = (iis3dwb10is_fifo_ctrl3_t *)&buf[1];
+
+    switch (fifo_ctrl2->dec_ts_batch)
+    {
+      case IIS3DWB10IS_TMSTMP_NOT_BATCHED:
+        val->batch_ts = IIS3DWB10IS_TMSTMP_NOT_BATCHED;
+        break;
+
+      case IIS3DWB10IS_TMSTMP_DEC_1:
+        val->batch_ts = IIS3DWB10IS_TMSTMP_DEC_1;
+        break;
+
+      case IIS3DWB10IS_TMSTMP_DEC_8:
+        val->batch_ts = IIS3DWB10IS_TMSTMP_DEC_8;
+        break;
+
+      case IIS3DWB10IS_TMSTMP_DEC_32:
+        val->batch_ts = IIS3DWB10IS_TMSTMP_DEC_32;
+        break;
+
+      default:
+        val->batch_ts = IIS3DWB10IS_TMSTMP_NOT_BATCHED;
+        break;
+    }
+
+    val->batch_xl   = fifo_ctrl3->xl_batch;
+    val->batch_temp = fifo_ctrl3->t_batch;
+    val->batch_qvar = fifo_ctrl3->qvar_batch;
+    val->batch_ispu = fifo_ctrl3->ispu_batch;
+  }
 
   return ret;
 }
@@ -1050,12 +1025,18 @@ int32_t iis3dwb10is_fifo_out_raw_get(const stmdev_ctx_t *ctx,
     case IIS3DWB10IS_TAG_TEMP:
       val->tag = IIS3DWB10IS_TAG_TEMP;
 
-      val->temp = (int16_t)datap[2];
-      val->temp = (val->temp * 256) + (int16_t)datap[1];
+      val->temp_raw = (int16_t)datap[2];
+      val->temp_raw = (val->temp_raw * 256) + (int16_t)datap[1];
       break;
 
     case IIS3DWB10IS_TAG_TS:
       val->tag = IIS3DWB10IS_TAG_TS;
+
+      val->ts_raw = (uint64_t)datap[4];
+      val->ts_raw = (val->ts_raw * 256) + (uint64_t)datap[3];
+      val->ts_raw = (val->ts_raw * 256) + (uint64_t)datap[2];
+      val->ts_raw = (val->ts_raw * 256) + (uint64_t)datap[1];
+      val->ts_raw = (val->ts_raw * 256) + (uint64_t)datap[0];
       break;
 
     case IIS3DWB10IS_TAG_TEMP_QVAR:
@@ -1066,11 +1047,11 @@ int32_t iis3dwb10is_fifo_out_raw_get(const stmdev_ctx_t *ctx,
       break;
 
     default:
-      val->tag = IIS3DWB10IS_TAG_EMPTY;
+      /* unknown tag */
       break;
   }
 
-  /* always return register data */
+  /* always return register raw data */
   for (i = 0; i < 9; i++)
   {
     val->raw[i] = datap[i];
