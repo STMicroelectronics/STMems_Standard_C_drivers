@@ -181,11 +181,6 @@ void iis3dwb10is_read_data(void)
   xl_cfg.rounding = IIS3DWB10IS_WRAPAROUND_DISABLED;
   iis3dwb10is_xl_data_config_set(&dev_ctx, xl_cfg);
 
-  /* Set Output Data Rate */
-  rate.burst = IIS3DWB10IS_CONTINUOS_MODE;
-  rate.odr = IIS3DWB10IS_ODR_10KHz;
-  iis3dwb10is_xl_data_rate_set(&dev_ctx, rate);
-
   /* Set full scale */
   iis3dwb10is_xl_full_scale_set(&dev_ctx, IIS3DWB_50g);
 
@@ -193,6 +188,11 @@ void iis3dwb10is_read_data(void)
   route.int1_drdy_xl = 1;
   route.int1_drdy_temp = 1;
   iis3dwb10is_pin_int_route_set(&dev_ctx, route);
+
+  /* Set Output Data Rate */
+  rate.burst = IIS3DWB10IS_CONTINUOS_MODE;
+  rate.odr = IIS3DWB10IS_ODR_10KHz;
+  iis3dwb10is_xl_data_rate_set(&dev_ctx, rate);
 
   /* Read samples in polling mode */
   while (1) {

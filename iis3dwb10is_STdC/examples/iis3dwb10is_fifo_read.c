@@ -136,8 +136,7 @@ void iis3dwb10is_fifo_read_handler(void)
   iis3dwb10is_fifo_status_get(&dev_ctx, &fifo_status);
 
   if (fifo_status.fifo_th) {
-    fifo_event_num++;
-    if (fifo_event_num%10 == 0) {
+    if (fifo_event_num++%10 == 0) {
       do_print = 1;
     }
 
@@ -156,6 +155,8 @@ void iis3dwb10is_fifo_read(void)
   iis3dwb10is_reset_t rst;
   iis3dwb10is_data_rate_t rate;
   iis3dwb10is_fifo_sensor_batch_t fifo_batch;
+  iis3dwb10is_qvar_mode_t qvar_mode;
+  iis3dwb10is_int_pin_t int_pin;
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
@@ -194,7 +195,7 @@ void iis3dwb10is_fifo_read(void)
   fifo_batch.batch_xl = 1;
   fifo_batch.batch_temp = 1;
   fifo_batch.batch_ts = IIS3DWB10IS_TMSTMP_NOT_BATCHED;
-  //fifo_batch.batch_qvar = 1;
+  fifo_batch.batch_qvar = 1;
   iis3dwb10is_fifo_batch_set(&dev_ctx,  fifo_batch);
 
   /* Set FIFO mode to Stream mode (aka Continuous Mode) */
@@ -206,9 +207,21 @@ void iis3dwb10is_fifo_read(void)
   /* Set full scale */
   iis3dwb10is_xl_full_scale_set(&dev_ctx, IIS3DWB_50g);
 
+  iis3dwb10is_interrupt_pin_mode_get(&dev_ctx, &int_pin);
+  int_pin.pp_od = IIS3DWB10IS_PUSH_PULL;
+  int_pin.strength = IIS3DWB10IS_PAD_STRENGTH_LOWER;
+  iis3dwb10is_interrupt_pin_mode_set(&dev_ctx, int_pin);
+
   iis3dwb10is_pin_int_route_get(&dev_ctx, &route);
   route.int1_fifo_th = 1;
   iis3dwb10is_pin_int_route_set(&dev_ctx, route);
+
+  iis3dwb10is_qvar_mode_get(&dev_ctx, &qvar_mode);
+  qvar_mode.qvar_en = 1;
+  qvar_mode.qvar1_pad_en = 1;
+  qvar_mode.qvar2_pad_en = 1;
+  qvar_mode.c_zin = IIS3DWB10IS_QVAR_GAIN_2X;
+  iis3dwb10is_qvar_mode_set(&dev_ctx, qvar_mode);
 
   /* Set Output Data Rate */
   rate.burst = IIS3DWB10IS_CONTINUOS_MODE;
@@ -265,7 +278,14 @@ void iis3dwb10is_fifo_read(void)
             case IIS3DWB10IS_TAG_QVAR:
               //temperature_degC = iis3dwb10is_from_lsb_to_celsius(fdatap->temp);
 
-              sprintf((char *)tx_buffer, "Temperature [degC]:%04x\r\n", fdatap->qvar);
+              sprintf((char *)tx_buffer, "QVAR [mV]:%04x\r\n", fdatap->qvar);
+              tx_com(tx_buffer, strlen((char const *)tx_buffer));
+              break;
+
+            case IIS3DWB10IS_TAG_TEMP_QVAR:
+              temperature_degC = iis3dwb10is_from_lsb_to_celsius(fdatap->temp_raw);
+
+              sprintf((char *)tx_buffer, "Temperature [degC]:%6.2f - QVAR [mV]:%04x\r\n", temperature_degC, fdatap->qvar);
               tx_com(tx_buffer, strlen((char const *)tx_buffer));
               break;
 
