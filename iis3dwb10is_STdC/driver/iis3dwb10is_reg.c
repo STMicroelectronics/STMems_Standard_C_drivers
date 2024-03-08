@@ -1225,11 +1225,20 @@ int32_t iis3dwb10is_fifo_out_raw_get(const stmdev_ctx_t *ctx,
 int32_t iis3dwb10is_qvar_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_qvar_mode_t val)
 {
   iis3dwb10is_ctrl4_t ctrl4;
+  iis3dwb10is_qvar_ctrl_t qvar_ctrl;
   int32_t ret;
 
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL4, (uint8_t *)&ctrl4, 1);
+  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_QVAR_CTRL, (uint8_t *)&qvar_ctrl, 1);
   if (ret == 0)
   {
+    qvar_ctrl.qvar1_en = val.qvar1_pad_en;
+    qvar_ctrl.qvar2_en = val.qvar2_pad_en;
+    qvar_ctrl.qvar2_en = val.qvar2_pad_en;
+    qvar_ctrl.qvar_switch = val.qvar_switch;
+    qvar_ctrl.qvar_lpf = val.lpf;
+    qvar_ctrl.qvar_hpf = val.hpf;
+    qvar_ctrl.qvar_c_zin = (uint8_t)val.c_zin;
     ctrl4.qvar_enable  = val.qvar_en;
     ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_CTRL4, (uint8_t *)&ctrl4, 1);
   }
@@ -1247,6 +1256,38 @@ int32_t iis3dwb10is_qvar_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_qvar_mode
   */
 int32_t iis3dwb10is_qvar_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_qvar_mode_t *val)
 {
+  iis3dwb10is_ctrl4_t ctrl4;
+  iis3dwb10is_qvar_ctrl_t qvar_ctrl;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL4, (uint8_t *)&ctrl4, 1);
+  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_QVAR_CTRL, (uint8_t *)&qvar_ctrl, 1);
+  if (ret == 0)
+  {
+    val->qvar1_pad_en = qvar_ctrl.qvar1_en;
+    val->qvar2_pad_en = qvar_ctrl.qvar2_en;
+    val->qvar_switch = qvar_ctrl.qvar_switch;
+    val->lpf = qvar_ctrl.qvar_lpf;
+    val->hpf = qvar_ctrl.qvar_hpf;
+    val->qvar_en = ctrl4.qvar_enable;
+
+    switch(qvar_ctrl.qvar_c_zin)
+    {
+      case IIS3DWB10IS_QVAR_GAIN_1X:
+        val->c_zin = IIS3DWB10IS_QVAR_GAIN_1X;
+        break;
+
+      case IIS3DWB10IS_QVAR_GAIN_2X:
+        val->c_zin = IIS3DWB10IS_QVAR_GAIN_2X;
+        break;
+
+      default:
+        val->c_zin = IIS3DWB10IS_QVAR_GAIN_1X;
+        break;
+    }
+  }
+
+  return ret;
 }
 
 /**

@@ -928,6 +928,15 @@ int32_t iis3dwb10is_fifo_out_raw_get(const stmdev_ctx_t *ctx,
 typedef struct
 {
   uint8_t qvar_en              : 1;
+  uint8_t qvar1_pad_en         : 1;
+  uint8_t qvar2_pad_en         : 1;
+  uint8_t qvar_switch          : 1;
+  uint8_t lpf                  : 1;
+  uint8_t hpf                  : 1;
+  enum {
+    IIS3DWB10IS_QVAR_GAIN_1X    = 0x0,
+    IIS3DWB10IS_QVAR_GAIN_2X    = 0x1,
+  } c_zin;
 } iis3dwb10is_qvar_mode_t;
 int32_t iis3dwb10is_qvar_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_qvar_mode_t val);
 int32_t iis3dwb10is_qvar_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_qvar_mode_t *val);
