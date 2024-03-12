@@ -123,14 +123,22 @@ static void platform_init(void);
 
 static stmdev_ctx_t dev_ctx;
 static uint64_t fifo_event_num = 0;
-static uint8_t fifo_event = 0, do_print = 0;
-static uint16_t fifo_level = 0;
-static iis3dwb10is_fifo_out_raw_t fifo_data[FIFO_MAX_SIZE];
+static uint8_t fifo_event = 0;
+static uint8_t fifo_buf[FIFO_ROW_LEN * FIFO_MAX_SIZE];
+static iis3dwb10is_fifo_out_raw_t fifo_data;
 
 void iis3dwb10is_fifo_read_handler(void)
 {
-  iis3dwb10is_fifo_status_t fifo_status;
+  fifo_event = 1;
+}
+
+static void iis3dwb10is_fifo_read_thread(void)
+{
   uint16_t i;
+  iis3dwb10is_fifo_out_raw_t *fdatap;
+  iis3dwb10is_fifo_status_t fifo_status;
+  uint16_t fifo_level = 0;
+  uint8_t do_print = 0;
 
   /* Read watermark flag */
   iis3dwb10is_fifo_status_get(&dev_ctx, &fifo_status);
@@ -141,11 +149,72 @@ void iis3dwb10is_fifo_read_handler(void)
     }
 
     fifo_level = fifo_status.fifo_level;
-    fifo_event = 1;
+  }
+
+  /* spurious interrupt */
+  if (fifo_level == 0)
+    return;
+
+  iis3dwb10is_fifo_out_raw_get(&dev_ctx, fifo_buf, fifo_level);
+
+  if (do_print) {
+    sprintf((char *)tx_buffer, "%lld: FIFO level %d\r\n", fifo_event_num, fifo_level);
+    tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
     for (i = 0; i < fifo_level; i++) {
-      iis3dwb10is_fifo_out_raw_get(&dev_ctx, &fifo_data[i]);
+      iis3dwb10is_fifo_process(&fifo_buf[i*FIFO_ROW_LEN], &fifo_data);
+      fdatap = &fifo_data;
+
+      switch(fdatap->tag) {
+        case IIS3DWB10IS_TAG_EMPTY:
+          break;
+
+        case IIS3DWB10IS_TAG_TS:
+          timestamp_us = iis3dwb10is_from_lsb_to_us(fdatap->ts_raw);
+
+          sprintf((char *)tx_buffer, "Timestamp [us]:%lld\r\n", timestamp_us);
+          tx_com(tx_buffer, strlen((char const *)tx_buffer));
+          break;
+
+        case IIS3DWB10IS_TAG_XL:
+          acceleration_mg[0] =
+            iis3dwb10is_from_fs50g_to_mg(fdatap->xl.x_raw);
+          acceleration_mg[1] =
+            iis3dwb10is_from_fs50g_to_mg(fdatap->xl.y_raw);
+          acceleration_mg[2] =
+            iis3dwb10is_from_fs50g_to_mg(fdatap->xl.z_raw);
+
+          sprintf((char *)tx_buffer,
+                  "%d: Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n", i,
+                  acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+          tx_com(tx_buffer, strlen((char const *)tx_buffer));
+          break;
+
+        case IIS3DWB10IS_TAG_TEMP:
+          temperature_degC = iis3dwb10is_from_lsb_to_celsius(fdatap->temp_raw);
+
+          sprintf((char *)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC);
+          tx_com(tx_buffer, strlen((char const *)tx_buffer));
+          break;
+
+        case IIS3DWB10IS_TAG_TEMP_QVAR:
+          temperature_degC = iis3dwb10is_from_lsb_to_celsius(fdatap->temp_raw);
+
+          sprintf((char *)tx_buffer, "Temperature [degC]:%6.2f - QVAR [mV]:%04x\r\n", temperature_degC, fdatap->qvar);
+          tx_com(tx_buffer, strlen((char const *)tx_buffer));
+          break;
+
+        default:
+          sprintf((char *)tx_buffer, "unhandled tag %02x\r\n", fdatap->tag);
+          tx_com(tx_buffer, strlen((char const *)tx_buffer));
+          break;
+      }
     }
+
+    sprintf((char *)tx_buffer, "-- DONE %d\r\n\r\n", i);
+    tx_com(tx_buffer, strlen((char const *)tx_buffer));
+
+    do_print = 0;
   }
 }
 
@@ -231,76 +300,8 @@ void iis3dwb10is_fifo_read(void)
   /* Read samples in polling mode */
   while (1) {
     if (fifo_event) {
-      uint16_t i, num = fifo_level;
-      iis3dwb10is_fifo_out_raw_t *fdatap;
-
       fifo_event = 0;
-
-      if (do_print) {
-        sprintf((char *)tx_buffer, "%lld: FIFO level %d\r\n", fifo_event_num, fifo_level);
-        tx_com(tx_buffer, strlen((char const *)tx_buffer));
-
-        for (i = 0; i < num; i++) {
-          fdatap = &fifo_data[i];
-
-          switch(fdatap->tag) {
-            case IIS3DWB10IS_TAG_EMPTY:
-              break;
-
-            case IIS3DWB10IS_TAG_TS:
-              timestamp_us = iis3dwb10is_from_lsb_to_us(fdatap->ts_raw);
-
-              sprintf((char *)tx_buffer, "Timestamp [us]:%lld\r\n", timestamp_us);
-              tx_com(tx_buffer, strlen((char const *)tx_buffer));
-              break;
-
-            case IIS3DWB10IS_TAG_XL:
-              acceleration_mg[0] =
-                iis3dwb10is_from_fs50g_to_mg(fdatap->xl.x_raw);
-              acceleration_mg[1] =
-                iis3dwb10is_from_fs50g_to_mg(fdatap->xl.y_raw);
-              acceleration_mg[2] =
-                iis3dwb10is_from_fs50g_to_mg(fdatap->xl.z_raw);
-
-              sprintf((char *)tx_buffer,
-                      "%d: Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n", i,
-                      acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-              tx_com(tx_buffer, strlen((char const *)tx_buffer));
-              break;
-
-            case IIS3DWB10IS_TAG_TEMP:
-              temperature_degC = iis3dwb10is_from_lsb_to_celsius(fdatap->temp_raw);
-
-              sprintf((char *)tx_buffer, "Temperature [degC]:%6.2f\r\n", temperature_degC);
-              tx_com(tx_buffer, strlen((char const *)tx_buffer));
-              break;
-
-            case IIS3DWB10IS_TAG_QVAR:
-              //temperature_degC = iis3dwb10is_from_lsb_to_celsius(fdatap->temp);
-
-              sprintf((char *)tx_buffer, "QVAR [mV]:%04x\r\n", fdatap->qvar);
-              tx_com(tx_buffer, strlen((char const *)tx_buffer));
-              break;
-
-            case IIS3DWB10IS_TAG_TEMP_QVAR:
-              temperature_degC = iis3dwb10is_from_lsb_to_celsius(fdatap->temp_raw);
-
-              sprintf((char *)tx_buffer, "Temperature [degC]:%6.2f - QVAR [mV]:%04x\r\n", temperature_degC, fdatap->qvar);
-              tx_com(tx_buffer, strlen((char const *)tx_buffer));
-              break;
-
-            default:
-              sprintf((char *)tx_buffer, "unhandled tag %02x\r\n", fdatap->tag);
-              tx_com(tx_buffer, strlen((char const *)tx_buffer));
-              break;
-          }
-        }
-
-        sprintf((char *)tx_buffer, "-- DONE %d\r\n\r\n", i);
-        tx_com(tx_buffer, strlen((char const *)tx_buffer));
-
-        do_print = 0;
-      }
+      iis3dwb10is_fifo_read_thread();
     }
   }
 }
