@@ -883,6 +883,8 @@ typedef struct
 
 int32_t iis3dwb10is_fifo_status_get(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_status_t *val);
 
+#define FIFO_ROW_LEN 10U
+
 typedef struct
 {
   enum
@@ -895,7 +897,7 @@ typedef struct
     IIS3DWB10IS_TAG_TEMP_QVAR             = 0x28,
   } tag;
 
-  uint8_t raw[9];
+  uint8_t raw[FIFO_ROW_LEN-1];
   struct {
     int32_t x_raw    : 20;
     int32_t y_raw    : 20;
@@ -905,8 +907,10 @@ typedef struct
   int16_t qvar;
   uint64_t ts_raw;
 } iis3dwb10is_fifo_out_raw_t;
-int32_t iis3dwb10is_fifo_out_raw_get(const stmdev_ctx_t *ctx,
-                                     iis3dwb10is_fifo_out_raw_t *val);
+int32_t iis3dwb10is_fifo_process(uint8_t *fifo_buf, iis3dwb10is_fifo_out_raw_t *val);
+
+int32_t iis3dwb10is_fifo_out_raw_get(const stmdev_ctx_t *ctx, uint8_t *fifo_buf, uint16_t cnt);
+
 
 typedef struct
 {

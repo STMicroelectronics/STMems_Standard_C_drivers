@@ -1116,30 +1116,38 @@ int32_t iis3dwb10is_fifo_status_get(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_st
 }
 
 /**
-  * @brief  FIFO data output[get]
+  * @brief  FIFO raw data output[get]
   *
   * @param  ctx      read / write interface definitions
   * @param  val      iis3dwb10is_fifo_out_raw_t
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t iis3dwb10is_fifo_out_raw_get(const stmdev_ctx_t *ctx,
-                                     iis3dwb10is_fifo_out_raw_t *val)
+int32_t iis3dwb10is_fifo_out_raw_get(const stmdev_ctx_t *ctx, uint8_t *fifo_buf, uint16_t cnt)
+{
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_DATA_OUT_TAG, fifo_buf, FIFO_ROW_LEN * cnt);
+
+  return ret;
+}
+
+/**
+  * @brief  FIFO data process[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      iis3dwb10is_fifo_out_raw_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_fifo_process(uint8_t *fifo_buf, iis3dwb10is_fifo_out_raw_t *val)
 {
   iis3dwb10is_fifo_data_out_tag_t *fifo_tag;
-  uint8_t buff[10];
   uint8_t *datap;
-  int32_t ret;
   uint8_t i;
 
-  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_DATA_OUT_TAG, buff, 10);
-  if (ret != 0)
-  {
-    return ret;
-  }
-
-  fifo_tag = (iis3dwb10is_fifo_data_out_tag_t *)&buff[0];
-  datap = &buff[1];
+  fifo_tag = (iis3dwb10is_fifo_data_out_tag_t *)&fifo_buf[0];
+  datap = &fifo_buf[1];
 
   switch (fifo_tag->tag_sensor)
   {
@@ -1197,16 +1205,16 @@ int32_t iis3dwb10is_fifo_out_raw_get(const stmdev_ctx_t *ctx,
 
     default:
       /* unknown tag */
-      break;
+      return -1;
   }
 
   /* always return register raw data */
-  for (i = 0U; i < 9U; i++)
+  for (i = 0U; i < (FIFO_ROW_LEN - 1U); i++)
   {
     val->raw[i] = datap[i];
   }
 
-  return ret;
+  return 0;
 }
 
 /**
