@@ -1215,6 +1215,116 @@ int32_t iis3dwb10is_fifo_out_raw_get(const stmdev_ctx_t *ctx,
   */
 
 /**
+  * @brief  SLEEPCNT configuration.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      iis3dwb10is_slpcnt_cfg_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_sleepcnt_cfg_set(const stmdev_ctx_t *ctx, iis3dwb10is_slpcnt_cfg_t val)
+{
+  iis3dwb10is_sleepcnt_cfg_t cfg;
+  uint8_t preload[2];
+  uint8_t threshold[2];
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_SLEEPCNT_CFG, (uint8_t *)&cfg, 1);
+  if (ret == 0)
+  {
+    preload[0] = (uint8_t)(val.preload_val & 0xFFU);
+    preload[1] = (uint8_t)(val.preload_val / 256U);
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_SLEEPCNT_PL_L, preload, 2);
+
+    threshold[0] = (uint8_t)(val.threshold_val & 0xFFU);
+    threshold[1] = (uint8_t)(val.threshold_val / 256U);
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_SLEEPCNT_TH_L, threshold, 2);
+
+    cfg.pl_sleepcnt = val.preload_en;
+    cfg.rst_sleepcnt = val.reset;
+    cfg.enable_sleepcnt = val.enable;
+    cfg.tick_sel = (uint8_t)val.tick_sel;
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_SLEEPCNT_CFG, (uint8_t *)&cfg, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  SLEEPCNT configuration.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      pointer to iis3dwb10is_slpcnt_cfg_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_sleepcnt_cfg_get(const stmdev_ctx_t *ctx, iis3dwb10is_slpcnt_cfg_t *val)
+{
+  iis3dwb10is_sleepcnt_cfg_t cfg;
+  uint8_t preload[2];
+  uint8_t threshold[2];
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_SLEEPCNT_CFG, (uint8_t *)&cfg, 1);
+  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_SLEEPCNT_PL_L, preload, 2);
+  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_SLEEPCNT_TH_L, threshold, 2);
+  if (ret == 0)
+  {
+    val->preload_val = preload[1];
+    val->preload_val = (val->preload_val * 256U) + preload[0];
+
+    val->threshold_val = threshold[1];
+    val->threshold_val = (val->threshold_val * 256U) + threshold[0];
+
+    val->preload_en = cfg.pl_sleepcnt;
+    val->reset = cfg.rst_sleepcnt;
+    val->enable = cfg.enable_sleepcnt;
+
+    switch(cfg.tick_sel)
+    {
+      case IIS3DWB10IS_SLP_TICK_SLOW:
+        val->tick_sel = IIS3DWB10IS_SLP_TICK_SLOW;
+        break;
+
+      case IIS3DWB10IS_SLP_TICK_FAST:
+        val->tick_sel = IIS3DWB10IS_SLP_TICK_FAST;
+        break;
+
+      default:
+        val->tick_sel = IIS3DWB10IS_SLP_TICK_SLOW;
+        break;
+    }
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Set Trigger from UI.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      0: trigger OFF - 1: trigger ON
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_burst_ui_trigger_set(const stmdev_ctx_t *ctx, uint8_t val)
+{
+  iis3dwb10is_ctrl3_t ctrl3;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
+  ctrl3.burst_force_trg = val & 0x1U;
+  ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
+
+  return ret;
+}
+
+/**
+  * @}
+  *
+  */
+
+/**
   * @brief  QVAR configuration.[set]
   *
   * @param  ctx      read / write interface definitions
@@ -1496,6 +1606,10 @@ int32_t iis3dwb10is_flag_data_ready_get(const stmdev_ctx_t *ctx, iis3dwb10is_dat
   val->drdy_xl   = status.xlda;
   val->drdy_temp = status.tda;
   val->drdy_qvar = status.qvarda;
+  val->ext_trig_ia = status.ext_trig_ia;
+  val->sleepcnt_ia = status.sleepcnt_ia;
+  val->timer_ia = status.timer_ia;
+  val->ispu_ia = status.ispu_ia;
 
   return ret;
 }

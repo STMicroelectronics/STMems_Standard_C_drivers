@@ -574,24 +574,9 @@ typedef struct
 } iis3dwb10is_sleepcnt_cfg_t;
 
 #define IIS3DWB10IS_SLEEPCNT_PL_L                0x3CU
-typedef struct
-{
-#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-  uint8_t sleepcnt_pl_l                : 8;
-#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-  uint8_t sleepcnt_pl_l                : 8;
-#endif /* DRV_BYTE_ORDER */
-} iis3dwb10is_sleepcnt_pl_l_t;
-
 #define IIS3DWB10IS_SLEEPCNT_PL_H                0x3DU
-typedef struct
-{
-#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
-  uint8_t sleepcnt_pl_h                : 8;
-#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
-  uint8_t sleepcnt_pl_h                : 8;
-#endif /* DRV_BYTE_ORDER */
-} iis3dwb10is_sleepcnt_pl_h_t;
+#define IIS3DWB10IS_SLEEPCNT_TH_L                0x3EU
+#define IIS3DWB10IS_SLEEPCNT_TH_H                0x3FU
 
 #define IIS3DWB10IS_FIFO_DATA_OUT_TAG            0x40U
 typedef struct
@@ -673,8 +658,6 @@ typedef union
   iis3dwb10is_fifo_status2_t           fifo_status2;
   iis3dwb10is_status_reg_t             status_reg;
   iis3dwb10is_sleepcnt_cfg_t           sleepcnt_cfg;
-  iis3dwb10is_sleepcnt_pl_l_t          sleepcnt_pl_l;
-  iis3dwb10is_sleepcnt_pl_h_t          sleepcnt_pl_h;
   iis3dwb10is_fifo_data_out_tag_t      fifo_data_out_tag;
   iis3dwb10is_internal_freq_fine_t     internal_freq_fine;
   iis3dwb10is_int_ctrl3_t              int_ctrl3;
@@ -943,6 +926,23 @@ int32_t iis3dwb10is_qvar_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_qvar_mode
 
 typedef struct
 {
+  enum {
+    IIS3DWB10IS_SLP_TICK_SLOW   = 0x0,
+    IIS3DWB10IS_SLP_TICK_FAST    = 0x1,
+  } tick_sel;
+  uint8_t enable               : 1;
+  uint8_t preload_en           : 1;
+  uint8_t reset                : 1;
+  uint16_t preload_val;
+  uint16_t threshold_val;
+} iis3dwb10is_slpcnt_cfg_t;
+int32_t iis3dwb10is_sleepcnt_cfg_set(const stmdev_ctx_t *ctx, iis3dwb10is_slpcnt_cfg_t val);
+int32_t iis3dwb10is_sleepcnt_cfg_get(const stmdev_ctx_t *ctx, iis3dwb10is_slpcnt_cfg_t *val);
+
+int32_t iis3dwb10is_burst_ui_trigger_set(const stmdev_ctx_t *ctx, uint8_t val);
+
+typedef struct
+{
   enum
   {
     IIS3DWB10IS_PLL_NO_DIVIDER        = 0x0,
@@ -991,6 +991,10 @@ typedef struct
   uint8_t drdy_xl              : 1;
   uint8_t drdy_qvar            : 1;
   uint8_t drdy_temp            : 1;
+  uint8_t sleepcnt_ia          : 1;
+  uint8_t ext_trig_ia          : 1;
+  uint8_t ispu_ia              : 1;
+  uint8_t timer_ia             : 1;
 } iis3dwb10is_data_ready_t;
 int32_t iis3dwb10is_flag_data_ready_get(const stmdev_ctx_t *ctx, iis3dwb10is_data_ready_t *val);
 
