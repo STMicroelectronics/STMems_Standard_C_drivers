@@ -144,10 +144,7 @@ static void iis3dwb10is_fifo_read_lp_thread(void)
   iis3dwb10is_fifo_status_get(&dev_ctx, &fifo_status);
 
   if (fifo_status.fifo_th) {
-    if (fifo_event_num++%10 == 0) {
-      do_print = 1;
-    }
-
+    do_print = 1;
     fifo_level = fifo_status.fifo_level;
   }
 
@@ -285,31 +282,28 @@ void iis3dwb10is_fifo_read_low_power(void)
   iis3dwb10is_pin_int_route_set(&dev_ctx, route);
 
   /*
-   * Get 10K sample per second but keeping an higher odr (40Khz)
-   * and put the device to sleep after the FIFO reaches the threshold (1000).
-   *
-   * The sleepcnt is programmed to provide triggers (TSC) every 100 ms.
-   * Since odr is 40Khz the FIFO threshold level (FTH) is reached after 25ms and
-   * the device is put off for 75ms until next TSC event.
+   * The sleepcnt is programmed to provide triggers (TSC) every 5sec.
+   * Since odr is 10Khz the FIFO threshold level (FTH) is reached after 100ms and
+   * the device is put off for 4.9s until next TSC event.
    * At FTH event (so, during the OFF period) the MCU empties FIFO using SPI in
    * about 24ms.
    *
    *  TSC      FTH                TSC      FTH                TSC
    *   |   ON   |        OFF       |   ON   |        OFF       |
-   *   +---------------------------+---------------------------+
-   *      25ms         75ms           25ms         75ms
+   *   +-----------------///-------+-----------------///-------+
+   *     100ms          4.9s         100ms          4.9s
    */
 
   /* Program sleepcnt for Trigger-ON */
   iis3dwb10is_sleepcnt_cfg_get(&dev_ctx, &slp_cfg);
   slp_cfg.tick_sel = IIS3DWB10IS_SLP_TICK_FAST;
-  slp_cfg.threshold_val = 1;
+  slp_cfg.threshold_val = 50; /* TON every 5 seconds */
   slp_cfg.enable = 1;
   iis3dwb10is_sleepcnt_cfg_set(&dev_ctx, slp_cfg);
 
   /* Set Output Data Rate */
   rate.burst = IIS3DWB10IS_TON_STC_TOFF_FIFO;
-  rate.odr = IIS3DWB10IS_ODR_40KHz;
+  rate.odr = IIS3DWB10IS_ODR_10KHz;
   iis3dwb10is_xl_data_rate_set(&dev_ctx, rate);
 
   /* Read samples in polling mode */
