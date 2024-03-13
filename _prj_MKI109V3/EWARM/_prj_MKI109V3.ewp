@@ -1212,9 +1212,6 @@
             <name>$PROJ_DIR$\..\..\iis3dwb10is_STdC\examples\iis3dwb10is_read_data_16b.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\iis3dwb10is_STdC\examples\iis3dwb10is_read_data_low_power.c</name>
-        </file>
-        <file>
             <name>$PROJ_DIR$\..\..\iis3dwb10is_STdC\driver\iis3dwb10is_reg.c</name>
         </file>
     </group>
