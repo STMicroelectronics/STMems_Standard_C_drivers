@@ -23,7 +23,7 @@
 #define IIS3DWB10IS_REGS_H
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -75,7 +75,8 @@
 #ifndef MEMS_SHARED_TYPES
 #define MEMS_SHARED_TYPES
 
-typedef struct{
+typedef struct
+{
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint8_t bit0                         : 1;
   uint8_t bit1                         : 1;
@@ -145,7 +146,8 @@ typedef struct
   *
   */
 
-typedef struct {
+typedef struct
+{
   uint8_t address;
   uint8_t data;
 } ucf_line_t;
@@ -182,7 +184,8 @@ typedef struct {
 #define MEMS_UCF_OP_POLL_SET   3
 #define MEMS_UCF_OP_POLL_RESET 4
 
-typedef struct {
+typedef struct
+{
   uint8_t op;
   uint8_t address;
   uint8_t data;
@@ -817,8 +820,10 @@ int32_t iis3dwb10is_interrupt_pin_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_
 int32_t iis3dwb10is_interrupt_pin_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_int_pin_t *val);
 
 
-typedef struct {
-  enum {
+typedef struct
+{
+  enum
+  {
     IIS3DWB10IS_I3C_BUS_AVAIL_TIME_50US = 0x0,
     IIS3DWB10IS_I3C_BUS_AVAIL_TIME_2US  = 0x1,
   } bus_act_sel;
@@ -911,8 +916,9 @@ typedef struct
     IIS3DWB10IS_TAG_TEMP_QVAR             = 0x28,
   } tag;
 
-  uint8_t raw[FIFO_ROW_LEN-1];
-  struct {
+  uint8_t raw[FIFO_ROW_LEN - 1];
+  struct
+  {
     int32_t x_raw    : 20;
     int32_t y_raw    : 20;
     int32_t z_raw    : 20;
@@ -934,7 +940,8 @@ typedef struct
   uint8_t qvar_switch          : 1;
   uint8_t lpf                  : 1;
   uint8_t hpf                  : 1;
-  enum {
+  enum
+  {
     IIS3DWB10IS_QVAR_GAIN_1X    = 0x0,
     IIS3DWB10IS_QVAR_GAIN_2X    = 0x1,
   } c_zin;
@@ -944,7 +951,8 @@ int32_t iis3dwb10is_qvar_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_qvar_mode
 
 typedef struct
 {
-  enum {
+  enum
+  {
     IIS3DWB10IS_SLP_TICK_SLOW   = 0x0,
     IIS3DWB10IS_SLP_TICK_FAST    = 0x1,
   } tick_sel;
@@ -990,7 +998,8 @@ typedef enum
   IIS3DWB10IS_DRDY_PULSED  = 0x1,
 } iis3dwb10is_data_ready_mode_t;
 int32_t iis3dwb10is_data_ready_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_data_ready_mode_t val);
-int32_t iis3dwb10is_data_ready_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_data_ready_mode_t *val);
+int32_t iis3dwb10is_data_ready_mode_get(const stmdev_ctx_t *ctx,
+                                        iis3dwb10is_data_ready_mode_t *val);
 
 typedef struct
 {

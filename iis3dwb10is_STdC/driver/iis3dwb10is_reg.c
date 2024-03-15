@@ -46,10 +46,13 @@
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t __weak iis3dwb10is_read_reg(const stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t __weak iis3dwb10is_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint8_t *data,
                                     uint16_t len)
 {
-  if (ctx == NULL) { return -1; }
+  if (ctx == NULL)
+  {
+    return -1;
+  }
 
   return ctx->read_reg(ctx->handle, reg, data, len);
 }
@@ -64,10 +67,13 @@ int32_t __weak iis3dwb10is_read_reg(const stmdev_ctx_t* ctx, uint8_t reg, uint8_
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t __weak iis3dwb10is_write_reg(const stmdev_ctx_t* ctx, uint8_t reg, uint8_t* data,
+int32_t __weak iis3dwb10is_write_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint8_t *data,
                                      uint16_t len)
 {
-  if (ctx == NULL) { return -1; }
+  if (ctx == NULL)
+  {
+    return -1;
+  }
 
   return ctx->write_reg(ctx->handle, reg, data, len);
 }
@@ -309,7 +315,7 @@ int32_t iis3dwb10is_xl_data_rate_get(const stmdev_ctx_t *ctx, iis3dwb10is_data_r
       break;
   }
 
-  switch(ctrl1.odr_xl)
+  switch (ctrl1.odr_xl)
   {
     case IIS3DWB10IS_ODR_IDLE:
       val->odr = IIS3DWB10IS_ODR_IDLE;
@@ -479,7 +485,7 @@ int32_t iis3dwb10is_xl_data_config_get(const stmdev_ctx_t *ctx, iis3dwb10is_xl_d
   val->y_axis_en = ctrl4.y_axis_enable_us;
   val->z_axis_en = ctrl4.z_axis_enable_us;
 
-  switch(ctrl4.rounding)
+  switch (ctrl4.rounding)
   {
     case IIS3DWB10IS_WRAPAROUND_DISABLED:
       val->rounding = IIS3DWB10IS_WRAPAROUND_DISABLED;
@@ -524,7 +530,10 @@ int32_t iis3dwb10is_interrupt_pin_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_
   pad.io_pad_strength = (uint8_t)val.strength;
   pad.pd_dis_int = (uint8_t)val.pd_dis;
   ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_PAD_CTRL, (uint8_t *)&pad, 1);
-  if (ret != 0) { return -1; }
+  if (ret != 0)
+  {
+    return -1;
+  }
 
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_IF_CFG, (uint8_t *)&if_cfg, 1);
   if_cfg.int_pp_od = (uint8_t)val.pp_od;
@@ -550,7 +559,10 @@ int32_t iis3dwb10is_interrupt_pin_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_
   int32_t ret;
 
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PAD_CTRL, (uint8_t *)&pad, 1);
-  if (ret != 0) { return -1; }
+  if (ret != 0)
+  {
+    return -1;
+  }
 
   switch (pad.io_pad_strength)
   {
@@ -596,7 +608,10 @@ int32_t iis3dwb10is_interrupt_pin_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_
   }
 
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_IF_CFG, (uint8_t *)&if_cfg, 1);
-  if (ret != 0) { return -1; }
+  if (ret != 0)
+  {
+    return -1;
+  }
 
   val->int_active_level = if_cfg.int_active_level;
 
@@ -623,7 +638,7 @@ int32_t iis3dwb10is_interrupt_pin_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_
   *
   */
 
- /**
+/**
   * @brief  I3C configuration.[set]
   *
   * @param  ctx      read / write interface definitions
@@ -653,7 +668,7 @@ int32_t iis3dwb10is_i3c_configure_set(const stmdev_ctx_t *ctx, iis3dwb10is_i3c_c
   return ret;
 }
 
- /**
+/**
   * @brief  I3C configuration.[get]
   *
   * @param  ctx      read / write interface definitions
@@ -676,26 +691,26 @@ int32_t iis3dwb10is_i3c_configure_get(const stmdev_ctx_t *ctx, iis3dwb10is_i3c_c
     val->sda_pu_en = if_cfg.sda_pu_en;
     val->i3c_int_en = i3c_ctrl.int_en_i3c;
 
-    switch(i3c_ctrl.bus_act_sel)
+    switch (i3c_ctrl.bus_act_sel)
     {
-     case IIS3DWB10IS_I3C_BUS_AVAIL_TIME_50US:
-      val->bus_act_sel = IIS3DWB10IS_I3C_BUS_AVAIL_TIME_50US;
-      break;
+      case IIS3DWB10IS_I3C_BUS_AVAIL_TIME_50US:
+        val->bus_act_sel = IIS3DWB10IS_I3C_BUS_AVAIL_TIME_50US;
+        break;
 
-     case IIS3DWB10IS_I3C_BUS_AVAIL_TIME_2US:
-      val->bus_act_sel = IIS3DWB10IS_I3C_BUS_AVAIL_TIME_2US;
-      break;
+      case IIS3DWB10IS_I3C_BUS_AVAIL_TIME_2US:
+        val->bus_act_sel = IIS3DWB10IS_I3C_BUS_AVAIL_TIME_2US;
+        break;
 
-     default:
-      val->bus_act_sel = IIS3DWB10IS_I3C_BUS_AVAIL_TIME_50US;
-      break;
-   }
+      default:
+        val->bus_act_sel = IIS3DWB10IS_I3C_BUS_AVAIL_TIME_50US;
+        break;
+    }
   }
 
   return ret;
 }
 
- /**
+/**
   * @brief  SPI mode.[set]
   *
   * @param  ctx      read / write interface definitions
@@ -719,7 +734,7 @@ int32_t iis3dwb10is_spi_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_spi_mode_t
   return ret;
 }
 
- /**
+/**
   * @brief  SPI mode.[get]
   *
   * @param  ctx      read / write interface definitions
@@ -736,20 +751,20 @@ int32_t iis3dwb10is_spi_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_spi_mode_t
 
   if (ret == 0)
   {
-    switch(spi_ctrl.sim)
+    switch (spi_ctrl.sim)
     {
-     case IIS3DWB10IS_SPI_4_WIRE:
-      *val = IIS3DWB10IS_SPI_4_WIRE;
-      break;
+      case IIS3DWB10IS_SPI_4_WIRE:
+        *val = IIS3DWB10IS_SPI_4_WIRE;
+        break;
 
-     case IIS3DWB10IS_SPI_3_WIRE:
-      *val = IIS3DWB10IS_SPI_3_WIRE;
-      break;
+      case IIS3DWB10IS_SPI_3_WIRE:
+        *val = IIS3DWB10IS_SPI_3_WIRE;
+        break;
 
-     default:
-      *val = IIS3DWB10IS_SPI_4_WIRE;
-      break;
-   }
+      default:
+        *val = IIS3DWB10IS_SPI_4_WIRE;
+        break;
+    }
   }
 
   return ret;
@@ -760,7 +775,7 @@ int32_t iis3dwb10is_spi_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_spi_mode_t
   *
   */
 
- /**
+/**
   * @brief  FIFO watermark threshold (1 LSb = TAG (1 Byte) + 1 sensor (9 Bytes) written in FIFO).[set]
   *
   * @param  ctx      read / write interface definitions
@@ -904,7 +919,10 @@ int32_t iis3dwb10is_fifo_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_fifo_mode
 
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL3, (uint8_t *)&fifo_ctrl3, 1);
   ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
-  if (ret != 0) { return ret; }
+  if (ret != 0)
+  {
+    return ret;
+  }
 
   if (ctrl3.fifo_en == 0U)
   {
@@ -1070,7 +1088,10 @@ int32_t iis3dwb10is_fifo_ispu_ctrl_get(const stmdev_ctx_t *ctx,
   int32_t ret;
 
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_FIFO_CTRL2, (uint8_t *)&fifo_ctrl2, 1);
-  if (ret != 0) { return ret; }
+  if (ret != 0)
+  {
+    return ret;
+  }
 
   val->read_from_ispu = fifo_ctrl2.fifo_read_from_ispu;
   switch (fifo_ctrl2.fifo_trigger_cfg)
@@ -1288,7 +1309,7 @@ int32_t iis3dwb10is_sleepcnt_cfg_get(const stmdev_ctx_t *ctx, iis3dwb10is_slpcnt
     val->reset = cfg.rst_sleepcnt;
     val->enable = cfg.enable_sleepcnt;
 
-    switch(cfg.tick_sel)
+    switch (cfg.tick_sel)
     {
       case IIS3DWB10IS_SLP_TICK_SLOW:
         val->tick_sel = IIS3DWB10IS_SLP_TICK_SLOW;
@@ -1389,7 +1410,7 @@ int32_t iis3dwb10is_qvar_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_qvar_mode
     val->hpf = qvar_ctrl.qvar_hpf;
     val->qvar_en = ctrl4.qvar_en;
 
-    switch(qvar_ctrl.qvar_c_zin)
+    switch (qvar_ctrl.qvar_c_zin)
     {
       case IIS3DWB10IS_QVAR_GAIN_1X:
         val->c_zin = IIS3DWB10IS_QVAR_GAIN_1X;
@@ -1457,7 +1478,10 @@ int32_t iis3dwb10is_pll_ctrl_get(const stmdev_ctx_t *ctx, iis3dwb10is_pll_ctrl_t
 
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PLL_CTRL_1, (uint8_t *)&pll_ctrl1, 1);
   ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PLL_CTRL_2, (uint8_t *)&pll_ctrl2, 1);
-  if (ret != 0) { return ret; }
+  if (ret != 0)
+  {
+    return ret;
+  }
 
   val->pll_div = pll_ctrl2.pll_div;
 
@@ -1722,8 +1746,8 @@ int32_t iis3dwb10is_acceleration_16b_raw_get(const stmdev_ctx_t *ctx, int16_t *v
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_OUTX_L_A, buff, 6);
   for (i = 0U; i < 3U; i++)
   {
-    val[i] = (int16_t)buff[2U*i + 1U];
-    val[i] = (val[i] * 256) + (int16_t)buff[2U*i];
+    val[i] = (int16_t)buff[2U * i + 1U];
+    val[i] = (val[i] * 256) + (int16_t)buff[2U * i];
   }
 
   return ret;
@@ -1747,10 +1771,10 @@ int32_t iis3dwb10is_acceleration_raw_get(const stmdev_ctx_t *ctx, int32_t *val)
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_OUTX_L_A, buff, 12);
   for (i = 0U; i < 3U; i++)
   {
-    val[i] = (int32_t)buff[4U*i + 3U];
-    val[i] = (val[i] * 256) + (int32_t)buff[4U*i + 2U];
-    val[i] = (val[i] * 256) + (int32_t)buff[4U*i + 1U];
-    val[i] = (val[i] * 256) + (int32_t)buff[4U*i];
+    val[i] = (int32_t)buff[4U * i + 3U];
+    val[i] = (val[i] * 256) + (int32_t)buff[4U * i + 2U];
+    val[i] = (val[i] * 256) + (int32_t)buff[4U * i + 1U];
+    val[i] = (val[i] * 256) + (int32_t)buff[4U * i];
   }
 
   return ret;
