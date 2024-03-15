@@ -644,7 +644,7 @@ int32_t iis3dwb10is_i3c_configure_set(const stmdev_ctx_t *ctx, iis3dwb10is_i3c_c
   {
     if_cfg.i3c_disable = val.i3c_disable;
     if_cfg.sda_pu_en = val.sda_pu_en;
-    i3c_ctrl.int_enable_i3c = val.i3c_int_en;
+    i3c_ctrl.int_en_i3c = val.i3c_int_en;
     i3c_ctrl.bus_act_sel = (uint8_t)val.bus_act_sel;
     ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_IF_CFG, (uint8_t *)&if_cfg, 1);
     ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_I3C_CTRL, (uint8_t *)&i3c_ctrl, 1);
@@ -674,7 +674,7 @@ int32_t iis3dwb10is_i3c_configure_get(const stmdev_ctx_t *ctx, iis3dwb10is_i3c_c
   {
     val->i3c_disable = if_cfg.i3c_disable;
     val->sda_pu_en = if_cfg.sda_pu_en;
-    val->i3c_int_en = i3c_ctrl.int_enable_i3c;
+    val->i3c_int_en = i3c_ctrl.int_en_i3c;
 
     switch(i3c_ctrl.bus_act_sel)
     {
@@ -1199,8 +1199,8 @@ int32_t iis3dwb10is_fifo_process(uint8_t *fifo_buf, iis3dwb10is_fifo_out_raw_t *
       val->temp_raw = (int16_t)datap[2];
       val->temp_raw = (val->temp_raw * 256) + (int16_t)datap[1];
 
-      val->qvar = (int16_t)datap[5];
-      val->qvar = (val->qvar * 256) + (int16_t)datap[4];
+      val->qvar = (int16_t)datap[0];
+      val->qvar = (val->qvar * 256) + (int16_t)datap[5];
       break;
 
     default:
@@ -1357,7 +1357,7 @@ int32_t iis3dwb10is_qvar_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_qvar_mode
     qvar_ctrl.qvar_lpf = val.lpf;
     qvar_ctrl.qvar_hpf = val.hpf;
     qvar_ctrl.qvar_c_zin = (uint8_t)val.c_zin;
-    ctrl4.qvar_enable  = val.qvar_en;
+    ctrl4.qvar_en  = val.qvar_en;
     ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_CTRL4, (uint8_t *)&ctrl4, 1);
   }
 
@@ -1387,7 +1387,7 @@ int32_t iis3dwb10is_qvar_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_qvar_mode
     val->qvar_switch = qvar_ctrl.qvar_switch;
     val->lpf = qvar_ctrl.qvar_lpf;
     val->hpf = qvar_ctrl.qvar_hpf;
-    val->qvar_en = ctrl4.qvar_enable;
+    val->qvar_en = ctrl4.qvar_en;
 
     switch(qvar_ctrl.qvar_c_zin)
     {
@@ -1423,19 +1423,19 @@ int32_t iis3dwb10is_qvar_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_qvar_mode
   */
 int32_t iis3dwb10is_pll_ctrl_set(const stmdev_ctx_t *ctx, iis3dwb10is_pll_ctrl_t val)
 {
-  iis3dwb10is_pll_ctrl1_t pll_ctrl1;
-  iis3dwb10is_pll_ctrl2_t pll_ctrl2;
+  iis3dwb10is_pll_ctrl_1_t pll_ctrl1;
+  iis3dwb10is_pll_ctrl_2_t pll_ctrl2;
   int32_t ret;
 
-  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PLL_CTRL1, (uint8_t *)&pll_ctrl1, 1);
-  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PLL_CTRL2, (uint8_t *)&pll_ctrl2, 1);
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PLL_CTRL_1, (uint8_t *)&pll_ctrl1, 1);
+  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PLL_CTRL_2, (uint8_t *)&pll_ctrl2, 1);
   if (ret == 0)
   {
     pll_ctrl1.osc_ext_sel  = (uint8_t)val.osc_ext_sel;
     pll_ctrl1.ref_div      = (uint8_t)val.ref_div;
     pll_ctrl2.pll_div      = val.pll_div;
-    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_PLL_CTRL1, (uint8_t *)&pll_ctrl1, 1);
-    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_PLL_CTRL2, (uint8_t *)&pll_ctrl2, 1);
+    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_PLL_CTRL_1, (uint8_t *)&pll_ctrl1, 1);
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_PLL_CTRL_2, (uint8_t *)&pll_ctrl2, 1);
   }
 
   return ret;
@@ -1451,12 +1451,12 @@ int32_t iis3dwb10is_pll_ctrl_set(const stmdev_ctx_t *ctx, iis3dwb10is_pll_ctrl_t
   */
 int32_t iis3dwb10is_pll_ctrl_get(const stmdev_ctx_t *ctx, iis3dwb10is_pll_ctrl_t *val)
 {
-  iis3dwb10is_pll_ctrl1_t pll_ctrl1;
-  iis3dwb10is_pll_ctrl2_t pll_ctrl2;
+  iis3dwb10is_pll_ctrl_1_t pll_ctrl1;
+  iis3dwb10is_pll_ctrl_2_t pll_ctrl2;
   int32_t ret;
 
-  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PLL_CTRL1, (uint8_t *)&pll_ctrl1, 1);
-  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PLL_CTRL2, (uint8_t *)&pll_ctrl2, 1);
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PLL_CTRL_1, (uint8_t *)&pll_ctrl1, 1);
+  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PLL_CTRL_2, (uint8_t *)&pll_ctrl2, 1);
   if (ret != 0) { return ret; }
 
   val->pll_div = pll_ctrl2.pll_div;
@@ -1522,6 +1522,66 @@ int32_t iis3dwb10is_pll_ctrl_get(const stmdev_ctx_t *ctx, iis3dwb10is_pll_ctrl_t
   * @}
   *
   */
+
+/**
+  * @brief  Enables pulsed data-ready mode.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      DRDY_LEVEL, DRDY_PULSED,
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_data_ready_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_data_ready_mode_t val)
+{
+  iis3dwb10is_int_ctrl0_t ctrl0;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL0, (uint8_t *)&ctrl0, 1);
+
+  if (ret == 0)
+  {
+    ctrl0.pulsed_dataready = ((uint8_t)val & 0x1U);
+    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_INT_CTRL0, (uint8_t *)&ctrl0, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Enables pulsed data-ready mode.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      DRDY_LATCHED, DRDY_PULSED,
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_data_ready_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_data_ready_mode_t *val)
+{
+  iis3dwb10is_int_ctrl0_t ctrl0;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL0, (uint8_t *)&ctrl0, 1);
+
+  if (ret == 0)
+  {
+    switch (ctrl0.pulsed_dataready)
+    {
+      case IIS3DWB10IS_DRDY_LEVEL:
+        *val = IIS3DWB10IS_DRDY_LEVEL;
+        break;
+
+      case IIS3DWB10IS_DRDY_PULSED:
+        *val = IIS3DWB10IS_DRDY_PULSED;
+        break;
+
+      default:
+        *val = IIS3DWB10IS_DRDY_LEVEL;
+        break;
+    }
+  }
+
+  return ret;
+}
 
 /**
   * @brief  Configure interrupt routing.[set]
