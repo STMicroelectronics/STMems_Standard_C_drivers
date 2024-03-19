@@ -182,7 +182,7 @@ void lis2mdl_int_conf(void)
    * and the event is notified by hardware through the
    * INT/DRDY pin
    */
-  lis2mdl_int_gen_treshold_set(&dev_ctx, threshold);
+  lis2mdl_int_gen_threshold_set(&dev_ctx, threshold);
   int_ctrl.iea = PROPERTY_ENABLE;
   int_ctrl.ien = PROPERTY_ENABLE;
   int_ctrl.iel = PROPERTY_ENABLE;

@@ -153,7 +153,7 @@ void lis331dlh_orientation_6D(void)
   /* Set 6D position detection */
   lis331dlh_int1_6d_mode_set(&dev_ctx, LIS331DLH_6D_INT1_POSITION);
   /* Apply 6D Orientation axis threshold */
-  lis331dlh_int1_treshold_set(&dev_ctx, 33);
+  lis331dlh_int1_threshold_set(&dev_ctx, 33);
   /* Set Output Data Rate */
   lis331dlh_data_rate_set(&dev_ctx, LIS331DLH_ODR_100Hz);
 

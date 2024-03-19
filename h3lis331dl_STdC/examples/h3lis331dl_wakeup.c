@@ -171,7 +171,7 @@ void h3lis331dl_wakeup(void)
   /*
    * Apply wakeup axis threshold (lsb is FS/128)
    */
-  h3lis331dl_int1_treshold_set(&dev_ctx, 3);
+  h3lis331dl_int1_threshold_set(&dev_ctx, 3);
 
   h3lis331dl_int1_on_threshold_mode_set(&dev_ctx, H3LIS331DL_INT1_ON_THRESHOLD_OR);
 

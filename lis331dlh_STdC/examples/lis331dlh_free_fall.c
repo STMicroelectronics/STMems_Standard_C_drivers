@@ -152,7 +152,7 @@ void lis331dlh_free_fall(void)
   /* Set minimum event duration for free fall */
   lis331dlh_int1_dur_set(&dev_ctx, 3);
   /* Apply free-fall axis threshold to 350mg */
-  lis331dlh_int1_treshold_set(&dev_ctx, 22);
+  lis331dlh_int1_threshold_set(&dev_ctx, 22);
   /* Enable interrupt generation on free fall INT1 pin */
   lis331dlh_int1_on_threshold_mode_set(&dev_ctx,
                                        LIS331DLH_INT1_ON_THRESHOLD_AND);

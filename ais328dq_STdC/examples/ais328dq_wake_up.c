@@ -168,7 +168,7 @@ void ais328dq_wake_up(void)
     ais328dq_hp_path_set(&dev_ctx, AIS328DQ_HP_ON_INT1_OUT);
     HAL_Delay(150);
     /* set interrupt threshold */
-    ais328dq_int1_treshold_set(&dev_ctx, 0x04);
+    ais328dq_int1_threshold_set(&dev_ctx, 0x04);
     /* set interrupt duration */
     ais328dq_int1_dur_set(&dev_ctx, 0x01);
     /* set interrupt on pin mode */

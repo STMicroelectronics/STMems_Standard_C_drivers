@@ -152,7 +152,7 @@ void h3lis100dl_free_fall(void)
   /* Apply free-fall axis threshold
    * Set threshold to 350mg
    */
-  h3lis100dl_int1_treshold_set(&dev_ctx, 22);
+  h3lis100dl_int1_threshold_set(&dev_ctx, 22);
   /* Enable interrupt generation on free fall INT1 pin */
   h3lis100dl_int1_on_threshold_mode_set(&dev_ctx,
                                         H3LIS100DL_INT1_ON_THRESHOLD_AND);

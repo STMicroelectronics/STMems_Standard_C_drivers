@@ -162,7 +162,7 @@ void lis331dlh_wake_up(void)
    */
   lis331dlh_int1_dur_set(&dev_ctx, 0);
   /* Set wake-up threshold to 250 mg */
-  lis331dlh_int1_treshold_set(&dev_ctx, 16);
+  lis331dlh_int1_threshold_set(&dev_ctx, 16);
   /* Dummy read to force the HP filter to
    * actual acceleration value
    * (i.e. set reference acceleration/tilt value

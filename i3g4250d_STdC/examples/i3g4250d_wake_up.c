@@ -147,9 +147,9 @@ void i3g4250d_wake_up(void)
   /* The value of 1 LSB of the threshold corresponds to ~7.5 mdps
    * Set Threshold ~100 dps on X, Y and Z axis
    */
-  i3g4250d_int_x_treshold_set(&dev_ctx, 0x3415);
-  i3g4250d_int_y_treshold_set(&dev_ctx, 0x3415);
-  i3g4250d_int_z_treshold_set(&dev_ctx, 0x3415);
+  i3g4250d_int_x_threshold_set(&dev_ctx, 0x3415);
+  i3g4250d_int_y_threshold_set(&dev_ctx, 0x3415);
+  i3g4250d_int_z_threshold_set(&dev_ctx, 0x3415);
   /* Set event duration to 0 1/ODR */
   i3g4250d_int_on_threshold_dur_set(&dev_ctx, 0);
   /* Simple interrupt configuration for detect wake-up

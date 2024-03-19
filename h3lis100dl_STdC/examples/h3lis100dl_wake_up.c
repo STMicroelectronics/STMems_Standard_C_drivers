@@ -160,7 +160,7 @@ void example_main_wake_up_h3lis100dl(void)
   /* Set wake-up threshold
    * Threshold = 250 mg
    */
-  h3lis100dl_int1_treshold_set(&dev_ctx, 16);
+  h3lis100dl_int1_threshold_set(&dev_ctx, 16);
   /* Dummy read to force the HP filter to
    * actual acceleration value
    * (i.e. set reference acceleration/tilt value
