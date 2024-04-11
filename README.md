@@ -1,3 +1,5 @@
+![latest tag](https://img.shields.io/github/v/tag/STMicroelectronics/STMems_Standard_C_drivers.svg?color=brightgreen)
+
 # 1 - Introduction
 
 This repository contains examples of *low-level* [platform-independent drivers]( http://www.st.com/content/st_com/en/products/embedded-software/mems-and-sensors-software/drivers-for-mems/c-driver-mems.html ) for [STMicroelectronics](www.st.com/mems) sensors. Sensor drivers and examples are written in C programming language.
