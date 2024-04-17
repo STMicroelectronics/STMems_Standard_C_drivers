@@ -22,9 +22,9 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3 + 
- * - NUCLEO_F411RE + 
- * - DISCOVERY_SPC584B + 
+ * - STEVAL_MKI109V3 +
+ * - NUCLEO_F411RE +
+ * - DISCOVERY_SPC584B +
  *
  * Used interfaces:
  *
@@ -130,6 +130,7 @@ void lsm6dsv16bx_wake_up(void)
   lsm6dsv16bx_all_sources_t all_sources;
   lsm6dsv16bx_reset_t rst;
   stmdev_ctx_t dev_ctx;
+
   /* Uncomment to configure INT 1 */
   lsm6dsv16bx_pin_int1_route_t int1_route;
   /* Uncomment to configure INT 2 */
@@ -140,10 +141,13 @@ void lsm6dsv16bx_wake_up(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
+
   /* Check device ID */
   lsm6dsv16bx_device_id_get(&dev_ctx, &whoamI);
 
@@ -158,20 +162,25 @@ void lsm6dsv16bx_wake_up(void)
 
   /* Enable Block Data Update */
   lsm6dsv16bx_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+
   /* Set full scale */
   lsm6dsv16bx_xl_full_scale_set(&dev_ctx, LSM6DSV16BX_2g);
   lsm6dsv16bx_xl_data_rate_set(&dev_ctx, LSM6DSV16BX_XL_ODR_AT_60Hz);
+
   /* Configure filtering chain */
   filt_settling_mask.drdy = PROPERTY_ENABLE;
   filt_settling_mask.irq_xl = PROPERTY_ENABLE;
   lsm6dsv16bx_filt_settling_mask_set(&dev_ctx, filt_settling_mask);
   lsm6dsv16bx_filt_xl_lp2_set(&dev_ctx, PROPERTY_ENABLE);
   lsm6dsv16bx_filt_xl_lp2_bandwidth_set(&dev_ctx, LSM6DSV16BX_XL_ULTRA_LIGHT);
+
   /* Apply high-pass digital filter on Wake-Up function */
   lsm6dsv16bx_filt_wkup_act_feed_set(&dev_ctx, LSM6DSV16BX_WK_FEED_HIGH_PASS);
+
   /* Set Wake-Up threshold */
   act_thresholds.wk_ths_mg = 100;
   lsm6dsv16bx_act_thresholds_set(&dev_ctx, act_thresholds);
+
   /* Uncomment interrupt generation on Wake-Up INT1 pin */
   lsm6dsv16bx_pin_int1_route_get(&dev_ctx, &int1_route);
   int1_route.wake_up = PROPERTY_ENABLE;

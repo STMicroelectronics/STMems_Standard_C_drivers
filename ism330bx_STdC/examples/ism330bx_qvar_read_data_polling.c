@@ -140,8 +140,10 @@ void ism330bx_qvar_read_data_polling(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
 
@@ -178,17 +180,14 @@ void ism330bx_qvar_read_data_polling(void)
   /* Read samples in polling mode (no int) */
   while(1)
   {
-
     /* Read output only if new values are available */
     ism330bx_all_sources_get(&dev_ctx, &all_sources);
     if ( all_sources.drdy_ah_qvar ) {
       ism330bx_ah_qvar_raw_get(&dev_ctx, &data);
 
       sprintf((char*)tx_buffer,"QVAR [LSB]:%d\r\n", data);
-
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
-
   }
 }
 

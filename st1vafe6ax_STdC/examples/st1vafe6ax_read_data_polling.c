@@ -78,7 +78,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "ism330bx_reg.h"
+#include "st1vafe6ax_reg.h"
 
 #if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
@@ -103,16 +103,17 @@
 /* Private variables ---------------------------------------------------------*/
 static int16_t data_raw_acceleration[3];
 static int16_t data_raw_angular_rate[3];
+static int16_t data_raw_temperature;
 static float acceleration_mg[3];
 static float angular_rate_mdps[3];
+static float temperature_degC;
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 
 /* Extern variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
-static   ism330bx_filt_settling_mask_t filt_settling_mask;
-static   ism330bx_xl_axis_t xl_axis;
+static   st1vafe6ax_filt_settling_mask_t filt_settling_mask;
 
 /*
  *   WARNING:
@@ -129,10 +130,9 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void ism330bx_tdm_conf(void)
+void st1vafe6ax_read_data_polling(void)
 {
-  ism330bx_all_sources_t all_sources;
-  ism330bx_reset_t rst;
+  st1vafe6ax_reset_t rst;
   stmdev_ctx_t dev_ctx;
 
   /* Initialize mems driver interface */
@@ -140,94 +140,98 @@ void ism330bx_tdm_conf(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-  /* Check device ID */
-  ism330bx_device_id_get(&dev_ctx, &whoamI);
 
-  if (whoamI != ISM330BX_ID)
+  /* Check device ID */
+  st1vafe6ax_device_id_get(&dev_ctx, &whoamI);
+
+  if (whoamI != ST1VAFE6AX_ID)
     while (1);
 
   /* Restore default configuration */
-  ism330bx_reset_set(&dev_ctx, ISM330BX_RESTORE_CTRL_REGS);
+  st1vafe6ax_reset_set(&dev_ctx, ST1VAFE6AX_RESTORE_CTRL_REGS);
   do {
-    ism330bx_reset_get(&dev_ctx, &rst);
-  } while (rst != ISM330BX_READY);
+    st1vafe6ax_reset_get(&dev_ctx, &rst);
+  } while (rst != ST1VAFE6AX_READY);
 
   /* Enable Block Data Update */
-  xl_axis.x = PROPERTY_ENABLE;
-  xl_axis.y = PROPERTY_DISABLE;
-  xl_axis.z = PROPERTY_ENABLE;
-  ism330bx_xl_axis_set(&dev_ctx, xl_axis);
+  st1vafe6ax_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /* Enable Block Data Update */
-  ism330bx_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-  /* Set Output Data Rate */
-  ism330bx_xl_data_rate_set(&dev_ctx, ISM330BX_XL_ODR_AT_30Hz);
-  ism330bx_gy_data_rate_set(&dev_ctx, ISM330BX_GY_ODR_AT_60Hz);
+  /* Set Output Data Rate.
+   * Selected data rate have to be equal or greater with respect
+   * with MLC data rate.
+   */
+  st1vafe6ax_xl_data_rate_set(&dev_ctx, ST1VAFE6AX_XL_ODR_AT_7Hz5);
+  st1vafe6ax_gy_data_rate_set(&dev_ctx, ST1VAFE6AX_GY_ODR_AT_15Hz);
+
   /* Set full scale */
-  ism330bx_xl_full_scale_set(&dev_ctx, ISM330BX_2g);
-  ism330bx_gy_full_scale_set(&dev_ctx, ISM330BX_2000dps);
+  st1vafe6ax_xl_full_scale_set(&dev_ctx, ST1VAFE6AX_2g);
+  st1vafe6ax_gy_full_scale_set(&dev_ctx, ST1VAFE6AX_2000dps);
+
   /* Configure filtering chain */
   filt_settling_mask.drdy = PROPERTY_ENABLE;
   filt_settling_mask.irq_xl = PROPERTY_ENABLE;
   filt_settling_mask.irq_g = PROPERTY_ENABLE;
-  filt_settling_mask.tdm_excep_code = PROPERTY_ENABLE;
-  ism330bx_filt_settling_mask_set(&dev_ctx, filt_settling_mask);
-  ism330bx_filt_gy_lp1_set(&dev_ctx, PROPERTY_ENABLE);
-  ism330bx_filt_gy_lp1_bandwidth_set(&dev_ctx, ISM330BX_GY_ULTRA_LIGHT);
-  ism330bx_filt_xl_lp2_set(&dev_ctx, PROPERTY_ENABLE);
-  ism330bx_filt_xl_lp2_bandwidth_set(&dev_ctx, ISM330BX_XL_STRONG);
-
-  /* Configure TDM */
-  ism330bx_tdm_dis_wclk_pull_up_set(&dev_ctx, PROPERTY_DISABLE);
-  ism330bx_tdm_tdmout_pull_up_set(&dev_ctx, PROPERTY_DISABLE);
-  ism330bx_tdm_wclk_bclk_set(&dev_ctx, ISM330BX_WCLK_8kHZ_BCLK_2048kHz);
-  ism330bx_tdm_bclk_edge_set(&dev_ctx, ISM330BX_BCLK_RISING);
-  ism330bx_tdm_slot_set(&dev_ctx, ISM330BX_SLOT_012);
-  ism330bx_tdm_delayed_conf_set(&dev_ctx, PROPERTY_DISABLE);
-  ism330bx_tdm_axis_order_set(&dev_ctx, ISM330BX_TDM_ORDER_XYZ);
-  ism330bx_tdm_xl_full_scale_set(&dev_ctx, ISM330BX_TDM_4g);
+  st1vafe6ax_filt_settling_mask_set(&dev_ctx, filt_settling_mask);
+  st1vafe6ax_filt_gy_lp1_set(&dev_ctx, PROPERTY_ENABLE);
+  st1vafe6ax_filt_gy_lp1_bandwidth_set(&dev_ctx, ST1VAFE6AX_GY_ULTRA_LIGHT);
+  st1vafe6ax_filt_xl_lp2_set(&dev_ctx, PROPERTY_ENABLE);
+  st1vafe6ax_filt_xl_lp2_bandwidth_set(&dev_ctx, ST1VAFE6AX_XL_STRONG);
 
   /* Read samples in polling mode (no int) */
   while (1) {
-    /* Read output only if new xl value is available */
-    ism330bx_all_sources_get(&dev_ctx, &all_sources);
+    st1vafe6ax_data_ready_t drdy;
 
-    if (all_sources.drdy_xl) {
+    /* Read output only if new xl value is available */
+    st1vafe6ax_flag_data_ready_get(&dev_ctx, &drdy);
+
+    if (drdy.drdy_xl) {
       /* Read acceleration field data */
       memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
-      ism330bx_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
+      st1vafe6ax_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
       acceleration_mg[0] =
-        ism330bx_from_fs2_to_mg(data_raw_acceleration[0]);
+        st1vafe6ax_from_fs2_to_mg(data_raw_acceleration[0]);
       acceleration_mg[1] =
-        ism330bx_from_fs2_to_mg(data_raw_acceleration[1]);
+        st1vafe6ax_from_fs2_to_mg(data_raw_acceleration[1]);
       acceleration_mg[2] =
-        ism330bx_from_fs2_to_mg(data_raw_acceleration[2]);
+        st1vafe6ax_from_fs2_to_mg(data_raw_acceleration[2]);
       sprintf((char *)tx_buffer,
               "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
-    if (all_sources.drdy_gy) {
+    if (drdy.drdy_gy) {
       /* Read angular rate field data */
       memset(data_raw_angular_rate, 0x00, 3 * sizeof(int16_t));
-      ism330bx_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate);
+      st1vafe6ax_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate);
       angular_rate_mdps[0] =
-        ism330bx_from_fs2000_to_mdps(data_raw_angular_rate[0]);
+        st1vafe6ax_from_fs2000_to_mdps(data_raw_angular_rate[0]);
       angular_rate_mdps[1] =
-        ism330bx_from_fs2000_to_mdps(data_raw_angular_rate[1]);
+        st1vafe6ax_from_fs2000_to_mdps(data_raw_angular_rate[1]);
       angular_rate_mdps[2] =
-        ism330bx_from_fs2000_to_mdps(data_raw_angular_rate[2]);
+        st1vafe6ax_from_fs2000_to_mdps(data_raw_angular_rate[2]);
       sprintf((char *)tx_buffer,
               "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
               angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
+    if (drdy.drdy_gy) {
+      /* Read temperature data */
+      memset(&data_raw_temperature, 0x00, sizeof(int16_t));
+      st1vafe6ax_temperature_raw_get(&dev_ctx, &data_raw_temperature);
+      temperature_degC = st1vafe6ax_from_lsb_to_celsius(
+                           data_raw_temperature);
+      sprintf((char *)tx_buffer,
+              "Temperature [degC]:%6.2f\r\n", temperature_degC);
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
+    }
   }
 }
 
@@ -245,7 +249,7 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-  HAL_I2C_Mem_Write(handle, ISM330BX_I2C_ADD_L, reg,
+  HAL_I2C_Mem_Write(handle, ST1VAFE6AX_I2C_ADD_L, reg,
                     I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
@@ -253,7 +257,7 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
   HAL_SPI_Transmit(handle, (uint8_t*) bufp, len, 1000);
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
-  i2c_lld_write(handle,  ISM330BX_I2C_ADD_L & 0xFE, reg, (uint8_t*) bufp, len);
+  i2c_lld_write(handle,  ST1VAFE6AX_I2C_ADD_L & 0xFE, reg, (uint8_t*) bufp, len);
 #endif
   return 0;
 }
@@ -272,7 +276,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-  HAL_I2C_Mem_Read(handle, ISM330BX_I2C_ADD_L, reg,
+  HAL_I2C_Mem_Read(handle, ST1VAFE6AX_I2C_ADD_L, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
   reg |= 0x80;
@@ -281,7 +285,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   HAL_SPI_Receive(handle, bufp, len, 1000);
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
-  i2c_lld_read(handle, ISM330BX_I2C_ADD_L & 0xFE, reg, bufp, len);
+  i2c_lld_read(handle, ST1VAFE6AX_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }

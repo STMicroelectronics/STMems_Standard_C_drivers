@@ -138,10 +138,13 @@ void ism330bx_activity(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait Boot Time */
   platform_delay(BOOT_TIME);
+
   /* Check device ID */
   ism330bx_device_id_get(&dev_ctx, &whoamI);
 
@@ -162,9 +165,11 @@ void ism330bx_activity(void)
    */
   ism330bx_xl_data_rate_set(&dev_ctx, ISM330BX_XL_ODR_AT_30Hz);
   ism330bx_gy_data_rate_set(&dev_ctx, ISM330BX_GY_ODR_AT_60Hz);
+
   /* Set full scale */
   ism330bx_xl_full_scale_set(&dev_ctx, ISM330BX_2g);
   ism330bx_gy_full_scale_set(&dev_ctx, ISM330BX_2000dps);
+
   /* Configure filtering chain */
   filt_settling_mask.drdy = PROPERTY_ENABLE;
   filt_settling_mask.irq_xl = PROPERTY_ENABLE;
@@ -177,34 +182,40 @@ void ism330bx_activity(void)
 
   /* Set duration for Wake up detection to (= 2 * 1 / ODR_XL_LOW) */
   time_windows.shock = 2;
+
   /* Set duration for Inactivity detection to (= 1 * 512 / ODR_XL) */
   time_windows.quiet = 2;
   ism330bx_act_wkup_time_windows_set(&dev_ctx, time_windows);
+
   /* Set Wake-Up / Inactivity threshold */
   act_thresholds.wk_ths_mg = 100;
   act_thresholds.inact_ths_mg = 50;
   ism330bx_act_thresholds_set(&dev_ctx, act_thresholds);
+
   /* Change ODR immediately when detect wuakeup */
   ism330bx_act_from_sleep_to_act_dur_set(&dev_ctx, ISM330BX_SLEEP_TO_ACT_AT_1ST_SAMPLE);
+
   /* Inactivity configuration: XL to LP, gyro to Power-Down */
   ism330bx_act_sleep_xl_odr_set(&dev_ctx, ISM330BX_15Hz);
   ism330bx_act_mode_set(&dev_ctx, ISM330BX_XL_LOW_POWER_GY_POWER_DOWN);
 
   sprintf((char *)tx_buffer, "Ready\r\n");
   tx_com(tx_buffer, strlen((char const *)tx_buffer));
+
   /* Wait Events */
   while (1) {
     /* Check if Activity/Inactivity events */
     ism330bx_all_sources_get(&dev_ctx, &all_sources);
-	if (all_sources.sleep_state) {
-	  sprintf((char *)tx_buffer, "Inactivity Detected\r\n");
-	  tx_com(tx_buffer, strlen((char const *)tx_buffer));
-	}
 
-	if (all_sources.wake_up) {
-	  sprintf((char *)tx_buffer, "Activity Detected\r\n");
-	  tx_com(tx_buffer, strlen((char const *)tx_buffer));
-	}
+    if (all_sources.sleep_state) {
+      sprintf((char *)tx_buffer, "Inactivity Detected\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
+    }
+
+    if (all_sources.wake_up) {
+      sprintf((char *)tx_buffer, "Activity Detected\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
+    }
   }
 }
 

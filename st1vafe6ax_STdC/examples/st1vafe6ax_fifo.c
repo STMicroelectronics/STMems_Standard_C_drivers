@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    mlc_activity.c
+ * @file    fifo.c
  * @author  Sensors Software Solution Team
- * @brief   This file shows how to generate and handle a Free Fall event.
+ * @brief   This file shows how to get data from sensor FIFO.
  *
  ******************************************************************************
  * @attention
@@ -78,8 +78,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "ism330bx_activity_recognition_for_wrist.h"
-#include "ism330bx_reg.h"
+#include "st1vafe6ax_reg.h"
 
 #if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
@@ -104,10 +103,15 @@
 /* Private variables ---------------------------------------------------------*/
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
+static st1vafe6ax_filt_settling_mask_t filt_settling_mask;
 
 /* Extern variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
+static int16_t *datax;
+static int16_t *datay;
+static int16_t *dataz;
+
 /*
  *   WARNING:
  *   Functions declare in this section are defined at the end of this file
@@ -122,75 +126,124 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
-static stmdev_ctx_t dev_ctx;
-static uint8_t activity_event_catched = 0;
-
-void ism330bx_mlc_activity_handler(void)
-{
-  ism330bx_all_sources_t status;
-  ism330bx_mlc_out_t mlc_out;
-
-  /* Read output only if new xl value is available */
-  ism330bx_all_sources_get(&dev_ctx, &status);
-
-  if (status.mlc1) {
-    ism330bx_mlc_out_get(&dev_ctx, &mlc_out);
-    activity_event_catched = mlc_out.mlc1_src;
-  }
-}
-
 /* Main Example --------------------------------------------------------------*/
-void ism330bx_mlc_activity(void)
+void st1vafe6ax_fifo(void)
 {
-  ism330bx_reset_t rst;
-  uint32_t i;
+  st1vafe6ax_fifo_status_t fifo_status;
+  st1vafe6ax_reset_t rst;
+  stmdev_ctx_t dev_ctx;
+
+  /* Uncomment to configure INT 1 */
+  //st1vafe6ax_pin_int1_route_t int1_route;
+  /* Uncomment to configure INT 2 */
+  //st1vafe6ax_pin_int2_route_t int2_route;
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-  /* Check device ID */
-  ism330bx_device_id_get(&dev_ctx, &whoamI);
 
-  if (whoamI != ISM330BX_ID)
+  /* Check device ID */
+  st1vafe6ax_device_id_get(&dev_ctx, &whoamI);
+
+  if (whoamI != ST1VAFE6AX_ID)
     while (1);
 
   /* Restore default configuration */
-  ism330bx_reset_set(&dev_ctx, ISM330BX_RESTORE_CTRL_REGS);
+  st1vafe6ax_reset_set(&dev_ctx, ST1VAFE6AX_RESTORE_CTRL_REGS);
   do {
-    ism330bx_reset_get(&dev_ctx, &rst);
-  } while (rst != ISM330BX_READY);
+    st1vafe6ax_reset_get(&dev_ctx, &rst);
+  } while (rst != ST1VAFE6AX_READY);
 
-  /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(ism330bx_activity_recognition_for_wrist) /
-                    sizeof(ucf_line_t) ); i++ ) {
-    ism330bx_write_reg(&dev_ctx, lsm6dsv16bx_activity_recognition_for_wrist[i].address,
-                       (uint8_t *)&ism330bx_activity_recognition_for_wrist[i].data, 1);
-  }
+  /* Enable Block Data Update */
+  st1vafe6ax_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
-  /* wait forever (FF event handle in irq handler) */
+  /* Set full scale */
+  st1vafe6ax_xl_full_scale_set(&dev_ctx, ST1VAFE6AX_2g);
+  st1vafe6ax_gy_full_scale_set(&dev_ctx, ST1VAFE6AX_2000dps);
+
+  /* Configure filtering chain */
+  filt_settling_mask.drdy = PROPERTY_ENABLE;
+  filt_settling_mask.irq_xl = PROPERTY_ENABLE;
+  filt_settling_mask.irq_g = PROPERTY_ENABLE;
+  st1vafe6ax_filt_settling_mask_set(&dev_ctx, filt_settling_mask);
+  st1vafe6ax_filt_gy_lp1_set(&dev_ctx, PROPERTY_ENABLE);
+  st1vafe6ax_filt_gy_lp1_bandwidth_set(&dev_ctx, ST1VAFE6AX_GY_ULTRA_LIGHT);
+  st1vafe6ax_filt_xl_lp2_set(&dev_ctx, PROPERTY_ENABLE);
+  st1vafe6ax_filt_xl_lp2_bandwidth_set(&dev_ctx, ST1VAFE6AX_XL_STRONG);
+
+  /*
+   * Set FIFO watermark (number of unread sensor data TAG + 6 bytes
+   * stored in FIFO) to 10 samples
+   */
+  st1vafe6ax_fifo_watermark_set(&dev_ctx, 50);
+  st1vafe6ax_fifo_stop_on_wtm_set(&dev_ctx, PROPERTY_ENABLE);
+  st1vafe6ax_fifo_xl_batch_set(&dev_ctx, ST1VAFE6AX_XL_BATCHED_AT_7Hz5);
+  st1vafe6ax_fifo_gy_batch_set(&dev_ctx, ST1VAFE6AX_GY_BATCHED_AT_15Hz);
+
+  /* Set FIFO mode to Stream mode (aka Continuous Mode) */
+  st1vafe6ax_fifo_mode_set(&dev_ctx, ST1VAFE6AX_STREAM_MODE);
+
+  /* Set Output Data Rate.
+   * Selected data rate have to be equal or greater with respect
+   * with MLC data rate.
+   */
+  st1vafe6ax_xl_data_rate_set(&dev_ctx, ST1VAFE6AX_XL_ODR_AT_30Hz);
+  st1vafe6ax_gy_data_rate_set(&dev_ctx, ST1VAFE6AX_GY_ODR_AT_60Hz);
+
+  /* Wait samples. */
   while (1) {
-    if (activity_event_catched != 0x0) {
-      switch(activity_event_catched) {
-      case 1:
-        sprintf((char *)tx_buffer, "Stationary\r\n");
-        tx_com(tx_buffer, strlen((char const *)tx_buffer));
-        break;
-      case 4:
-        sprintf((char *)tx_buffer, "Walking\r\n");
-        tx_com(tx_buffer, strlen((char const *)tx_buffer));
-        break;
-      case 8:
-        sprintf((char *)tx_buffer, "Jogging/Running\r\n");
-        tx_com(tx_buffer, strlen((char const *)tx_buffer));
-        break;
+    uint16_t num = 0;
+
+    /* Read watermark flag */
+    st1vafe6ax_fifo_status_get(&dev_ctx, &fifo_status);
+
+    if (fifo_status.fifo_th == 1) {
+      num = fifo_status.fifo_level;
+      sprintf((char *)tx_buffer, "-- FIFO num %d \r\n", num);
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
+
+      while (num--) {
+        st1vafe6ax_fifo_out_raw_t f_data;
+
+        /* Read FIFO tag */
+        st1vafe6ax_fifo_out_raw_get(&dev_ctx, &f_data);
+        dataz = (int16_t *)&f_data.data[0]; /* axis are inverted */
+        datay = (int16_t *)&f_data.data[2];
+        datax = (int16_t *)&f_data.data[4];
+
+        switch (f_data.tag) {
+          case ST1VAFE6AX_XL_NC_TAG:
+            sprintf((char *)tx_buffer, "ACC [mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
+                  st1vafe6ax_from_fs2_to_mg(*datax),
+                  st1vafe6ax_from_fs2_to_mg(*datay),
+                  st1vafe6ax_from_fs2_to_mg(*dataz));
+            tx_com(tx_buffer, strlen((char const *)tx_buffer));
+            break;
+
+          case ST1VAFE6AX_GY_NC_TAG:
+            sprintf((char *)tx_buffer, "GYR [mdps]:\t%4.2f\t%4.2f\t%4.2f\r\n",
+                  st1vafe6ax_from_fs2000_to_mdps(*datax),
+                  st1vafe6ax_from_fs2000_to_mdps(*datay),
+                  st1vafe6ax_from_fs2000_to_mdps(*dataz));
+            tx_com(tx_buffer, strlen((char const *)tx_buffer));
+            break;
+
+          default:
+            /* Flush unused samples */
+            break;
+        }
       }
-      activity_event_catched = 0;
+
+      sprintf((char *)tx_buffer, "------ \r\n\r\n");
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
@@ -209,7 +262,7 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-  HAL_I2C_Mem_Write(handle, ISM330BX_I2C_ADD_L, reg,
+  HAL_I2C_Mem_Write(handle, ST1VAFE6AX_I2C_ADD_L, reg,
                     I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
@@ -217,7 +270,7 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
   HAL_SPI_Transmit(handle, (uint8_t*) bufp, len, 1000);
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
-  i2c_lld_write(handle,  ISM330BX_I2C_ADD_L & 0xFE, reg, (uint8_t*) bufp, len);
+  i2c_lld_write(handle,  ST1VAFE6AX_I2C_ADD_L & 0xFE, reg, (uint8_t*) bufp, len);
 #endif
   return 0;
 }
@@ -236,7 +289,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
 #if defined(NUCLEO_F411RE)
-  HAL_I2C_Mem_Read(handle, ISM330BX_I2C_ADD_L, reg,
+  HAL_I2C_Mem_Read(handle, ST1VAFE6AX_I2C_ADD_L, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
   reg |= 0x80;
@@ -245,7 +298,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   HAL_SPI_Receive(handle, bufp, len, 1000);
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
-  i2c_lld_read(handle, ISM330BX_I2C_ADD_L & 0xFE, reg, bufp, len);
+  i2c_lld_read(handle, ST1VAFE6AX_I2C_ADD_L & 0xFE, reg, bufp, len);
 #endif
   return 0;
 }

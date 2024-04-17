@@ -22,9 +22,9 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3 + 
- * - NUCLEO_F411RE + 
- * - DISCOVERY_SPC584B + 
+ * - STEVAL_MKI109V3 +
+ * - NUCLEO_F411RE +
+ * - DISCOVERY_SPC584B +
  *
  * Used interfaces:
  *
@@ -145,15 +145,19 @@ void ism330bx_self_test(void)
   uint8_t st_result;
   uint8_t i;
   uint8_t j;
+
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
+
   /* Check device ID */
   ism330bx_device_id_get(&dev_ctx, &whoamI);
 
@@ -178,8 +182,10 @@ void ism330bx_self_test(void)
    */
   ism330bx_xl_data_rate_set(&dev_ctx, ISM330BX_XL_ODR_AT_60Hz);
   ism330bx_gy_data_rate_set(&dev_ctx, ISM330BX_GY_ODR_OFF);
+
   /* Set full scale */
   ism330bx_xl_full_scale_set(&dev_ctx, ISM330BX_8g);
+
   /* Wait stable output */
   platform_delay(120);
 
@@ -188,10 +194,11 @@ void ism330bx_self_test(void)
     ism330bx_flag_data_ready_get(&dev_ctx, &drdy);
   } while (!drdy.drdy_xl);
   ism330bx_acceleration_raw_get(&dev_ctx, data_raw);
-  
+
   /* Enable Self Test */
   ism330bx_xl_self_test_set(&dev_ctx, ISM330BX_XL_ST_POSITIVE);
   //ism330bx_xl_self_test_set(&dev_ctx, ISM330BX_XL_ST_NEGATIVE);
+
   /* Wait stable output */
   platform_delay(100);
 
@@ -208,6 +215,7 @@ void ism330bx_self_test(void)
     do {
       ism330bx_flag_data_ready_get(&dev_ctx, &drdy);
     } while (!drdy.drdy_xl);
+
     /* Read data and accumulate the mg value */
     ism330bx_acceleration_raw_get(&dev_ctx, data_raw);
     for (j = 0; j < 3; j++) {
@@ -222,6 +230,7 @@ void ism330bx_self_test(void)
   /* Enable Self Test OFFSET Mode*/
   ism330bx_xl_self_test_set(&dev_ctx, ISM330BX_XL_ST_OFFSET_POS);
   //ism330bx_xl_self_test_set(&dev_ctx, ISM330BX_XL_ST_OFFSET_NEG);
+
   /* Wait stable output */
   platform_delay(100);
 
@@ -238,6 +247,7 @@ void ism330bx_self_test(void)
     do {
       ism330bx_flag_data_ready_get(&dev_ctx, &drdy);
     } while (!drdy.drdy_xl);
+
     /* Read data and accumulate the mg value */
     ism330bx_acceleration_raw_get(&dev_ctx, data_raw);
     for (j = 0; j < 3; j++) {
@@ -248,13 +258,13 @@ void ism330bx_self_test(void)
   for (i = 0; i < 3; i++) {
     val_st_off[i] /= 5.0f;
   }
-  
-  
+
+
   /* Calculate the mg values for self test */
   for (i = 0; i < 3; i++) {
     test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
   }
-  
+
   /* Check self test limit */
   st_result = ST_PASS;
 
@@ -267,6 +277,7 @@ void ism330bx_self_test(void)
 
   /* Disable Self Test */
   ism330bx_xl_self_test_set(&dev_ctx, ISM330BX_XL_ST_DISABLE);
+
   /* Disable sensor. */
   ism330bx_xl_data_rate_set(&dev_ctx, ISM330BX_XL_ODR_OFF);
 
@@ -275,8 +286,10 @@ void ism330bx_self_test(void)
    */
   /* Set Output Data Rate */
   ism330bx_gy_data_rate_set(&dev_ctx, ISM330BX_GY_ODR_AT_60Hz);
+
   /* Set full scale */
   ism330bx_gy_full_scale_set(&dev_ctx, ISM330BX_2000dps);
+
   /* Wait stable output */
   platform_delay(100);
 
@@ -293,12 +306,14 @@ void ism330bx_self_test(void)
     do {
       ism330bx_flag_data_ready_get(&dev_ctx, &drdy);
     } while (!drdy.drdy_gy);
+
     /* Read data and accumulate the mg value */
     ism330bx_angular_rate_raw_get(&dev_ctx, data_raw);
     for (j = 0; j < 3; j++) {
       val_st_off[j] += ism330bx_from_fs2000_to_mdps(data_raw[j]);
     }
   }
+
   /* Calculate the mg average values */
   for (i = 0; i < 3; i++) {
     val_st_off[i] /= 5.0f;
@@ -307,15 +322,16 @@ void ism330bx_self_test(void)
   /* Enable Self Test positive (or negative) */
   ism330bx_gy_self_test_set(&dev_ctx, ISM330BX_GY_ST_POSITIVE);
   //ism330bx_gy_self_test_set(&dev_ctx, LIS2DH12_GY_ST_NEGATIVE);
+
   /* Wait stable output */
   platform_delay(100);
-  
+
   /* Read dummy data and discard it */
   do {
     ism330bx_flag_data_ready_get(&dev_ctx, &drdy);
   } while (!drdy.drdy_gy);
   ism330bx_angular_rate_raw_get(&dev_ctx, data_raw);
-  
+
   /* Read 5 sample and get the average vale for each axis */
   memset(val_st_on, 0x00, 3 * sizeof(float));
   for (i = 0; i < 5; i++) {
@@ -323,12 +339,14 @@ void ism330bx_self_test(void)
     do {
       ism330bx_flag_data_ready_get(&dev_ctx, &drdy);
     } while (!drdy.drdy_gy);
+
     /* Read data and accumulate the mg value */
     ism330bx_angular_rate_raw_get(&dev_ctx, data_raw);
     for (j = 0; j < 3; j++) {
       val_st_on[j] += ism330bx_from_fs2000_to_mdps(data_raw[j]);
     }
   }
+
   /* Calculate the mg average values */
   for (i = 0; i < 3; i++) {
     val_st_on[i] /= 5.0f;
@@ -349,6 +367,7 @@ void ism330bx_self_test(void)
 
   /* Disable Self Test */
   ism330bx_gy_self_test_set(&dev_ctx, ISM330BX_GY_ST_DISABLE);
+
   /* Disable sensor. */
   ism330bx_gy_data_rate_set(&dev_ctx, ISM330BX_GY_ODR_OFF);
 

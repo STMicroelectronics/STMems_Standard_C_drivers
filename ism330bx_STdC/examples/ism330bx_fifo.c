@@ -22,9 +22,9 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3 + 
- * - NUCLEO_F411RE + 
- * - DISCOVERY_SPC584B + 
+ * - STEVAL_MKI109V3 +
+ * - NUCLEO_F411RE +
+ * - DISCOVERY_SPC584B +
  *
  * Used interfaces:
  *
@@ -132,19 +132,24 @@ void ism330bx_fifo(void)
   ism330bx_fifo_status_t fifo_status;
   ism330bx_reset_t rst;
   stmdev_ctx_t dev_ctx;
+
   /* Uncomment to configure INT 1 */
   //ism330bx_pin_int1_route_t int1_route;
   /* Uncomment to configure INT 2 */
   //ism330bx_pin_int2_route_t int2_route;
+
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
+
   /* Check device ID */
   ism330bx_device_id_get(&dev_ctx, &whoamI);
 
@@ -159,9 +164,11 @@ void ism330bx_fifo(void)
 
   /* Enable Block Data Update */
   ism330bx_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+
   /* Set full scale */
   ism330bx_xl_full_scale_set(&dev_ctx, ISM330BX_2g);
   ism330bx_gy_full_scale_set(&dev_ctx, ISM330BX_2000dps);
+
   /* Configure filtering chain */
   filt_settling_mask.drdy = PROPERTY_ENABLE;
   filt_settling_mask.irq_xl = PROPERTY_ENABLE;

@@ -213,13 +213,16 @@ void lsm6dsv16bx_sensor_fusion(void)
   //lsm6dsv16bx_pin_int1_route_t int1_route;
   /* Uncomment to configure INT 2 */
   //lsm6dsv16bx_pin_int2_route_t int2_route;
+
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
 
@@ -239,6 +242,7 @@ void lsm6dsv16bx_sensor_fusion(void)
 
   /* Enable Block Data Update */
   lsm6dsv16bx_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+
   /* Set full scale */
   lsm6dsv16bx_xl_full_scale_set(&dev_ctx, LSM6DSV16BX_4g);
   lsm6dsv16bx_gy_full_scale_set(&dev_ctx, LSM6DSV16BX_2000dps);

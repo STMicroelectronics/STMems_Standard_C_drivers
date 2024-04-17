@@ -138,10 +138,13 @@ void lsm6dsv16bx_pedometer(void)
   dev_ctx.read_reg  = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle    = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
+
   /* Check device ID */
   lsm6dsv16bx_device_id_get(&dev_ctx, &whoamI);
 
@@ -158,6 +161,7 @@ void lsm6dsv16bx_pedometer(void)
   lsm6dsv16bx_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
   lsm6dsv16bx_xl_full_scale_set(&dev_ctx, LSM6DSV16BX_4g);
   lsm6dsv16bx_gy_full_scale_set(&dev_ctx, LSM6DSV16BX_2000dps);
+
   /* Configure filtering chain */
   filt_settling_mask.drdy = PROPERTY_ENABLE;
   filt_settling_mask.irq_xl = PROPERTY_ENABLE;

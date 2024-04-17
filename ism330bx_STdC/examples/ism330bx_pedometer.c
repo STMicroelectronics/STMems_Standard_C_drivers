@@ -138,10 +138,13 @@ void ism330bx_pedometer(void)
   dev_ctx.read_reg  = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle    = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
+
   /* Check device ID */
   ism330bx_device_id_get(&dev_ctx, &whoamI);
 
@@ -158,6 +161,7 @@ void ism330bx_pedometer(void)
   ism330bx_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
   ism330bx_xl_full_scale_set(&dev_ctx, ISM330BX_4g);
   ism330bx_gy_full_scale_set(&dev_ctx, ISM330BX_2000dps);
+
   /* Configure filtering chain */
   filt_settling_mask.drdy = PROPERTY_ENABLE;
   filt_settling_mask.irq_xl = PROPERTY_ENABLE;
