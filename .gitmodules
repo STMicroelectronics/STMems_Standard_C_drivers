@@ -333,3 +333,6 @@
 [submodule "st1vafe6ax_STdC/driver"]
 	path = st1vafe6ax_STdC/driver
 	url = https://github.com/STMicroelectronics/st1vafe6ax-pid/
+[submodule "asm330lhbg1_STdC/driver"]
+	path = asm330lhbg1_STdC/driver
+	url = https://github.com/STMicroelectronics/asm330lhbg1-pid
