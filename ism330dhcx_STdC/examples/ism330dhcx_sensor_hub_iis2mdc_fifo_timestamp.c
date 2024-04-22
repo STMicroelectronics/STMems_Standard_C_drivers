@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * @file    _sensor_hub_fifo_iis2mdc_timestamp_simple.c
+ * @file    ism330dhcx_sensor_hub_iis2mdc_fifo_timestamp.c
  * @author  Sensor Solutions Software Team
  * @brief   This file show how to get data from magnetometer sensor through
  *          sensor hub using fifo and timestamp.

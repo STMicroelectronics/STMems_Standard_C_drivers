@@ -122,7 +122,7 @@
  */
 
 /* Program: glance */
-static const uint8_t lsm6so_prg_glance[] = {
+static const uint8_t lsm6sox_prg_glance[] = {
   0xb2, 0x10, 0x24, 0x20, 0x17, 0x17, 0x66, 0x32,
   0x66, 0x3c, 0x20, 0x20, 0x02, 0x02, 0x08, 0x08,
   0x00, 0x04, 0x0c, 0x00, 0xc7, 0x66, 0x33, 0x73,
@@ -131,19 +131,19 @@ static const uint8_t lsm6so_prg_glance[] = {
 };
 
 /* Program: motion */
-static const uint8_t lsm6so_prg_motion[] = {
+static const uint8_t lsm6sox_prg_motion[] = {
   0x51, 0x10, 0x16, 0x00, 0x00, 0x00, 0x66, 0x3c,
   0x02, 0x00, 0x00, 0x7d, 0x00, 0xc7, 0x05, 0x99,
   0x33, 0x53, 0x44, 0xf5, 0x22, 0x00,
 };
 
 /* Program: no_motion */
-static const uint8_t lsm6so_prg_no_motion[] = {
+static const uint8_t lsm6sox_prg_no_motion[] = {
   0x51, 0x00, 0x10, 0x00, 0x00, 0x00, 0x66, 0x3c,
   0x02, 0x00, 0x00, 0x7d, 0xff, 0x53, 0x99, 0x50,
 };
 /* Program: wakeup */
-static const uint8_t lsm6so_prg_wakeup[] = {
+static const uint8_t lsm6sox_prg_wakeup[] = {
   0xe2, 0x00, 0x1e, 0x20, 0x13, 0x15, 0x66, 0x3e,
   0x66, 0xbe, 0xcd, 0x3c, 0xc0, 0xc0, 0x02, 0x02,
   0x0b, 0x10, 0x05, 0x66, 0xcc, 0x35, 0x38, 0x35,
@@ -151,20 +151,20 @@ static const uint8_t lsm6so_prg_wakeup[] = {
 };
 
 /* Program: pickup */
-static const uint8_t lsm6so_prg_pickup[] = {
+static const uint8_t lsm6sox_prg_pickup[] = {
   0x51, 0x00, 0x10, 0x00, 0x00, 0x00, 0x33, 0x3c,
   0x02, 0x00, 0x00, 0x05, 0x05, 0x99, 0x30, 0x00,
 };
 
 /* Program: orientation */
-static const uint8_t lsm6so_prg_orientation[] = {
+static const uint8_t lsm6sox_prg_orientation[] = {
   0x91, 0x10, 0x16, 0x00, 0x00, 0x00, 0x66, 0x3a,
   0x66, 0x32, 0xf0, 0x00, 0x00, 0x0d, 0x00, 0xc7,
   0x05, 0x73, 0x99, 0x08, 0xf5, 0x22,
 };
 
 /* Program: wrist_tilt */
-static const uint8_t lsm6so_prg_wrist_tilt[] = {
+static const uint8_t lsm6sox_prg_wrist_tilt[] = {
   0x52, 0x00, 0x14, 0x00, 0x00, 0x00, 0xae, 0xb7,
   0x80, 0x00, 0x00, 0x06, 0x0f, 0x05, 0x73, 0x33,
   0x07, 0x54, 0x44, 0x22,
@@ -284,35 +284,35 @@ void lsm6dsox_fsm_raw(void)
   /* Write Programs */
   fsm_addr = LSM6DSOX_START_FSM_ADD;
   /* Glance */
-  lsm6dsox_ln_pg_write(&dev_ctx, fsm_addr, (uint8_t *)lsm6so_prg_glance,
-                       sizeof(lsm6so_prg_glance));
-  fsm_addr += sizeof(lsm6so_prg_glance);
+  lsm6dsox_ln_pg_write(&dev_ctx, fsm_addr, (uint8_t *)lsm6sox_prg_glance,
+                       sizeof(lsm6sox_prg_glance));
+  fsm_addr += sizeof(lsm6sox_prg_glance);
   /* motion */
-  lsm6dsox_ln_pg_write(&dev_ctx, fsm_addr, (uint8_t *)lsm6so_prg_motion,
-                       sizeof(lsm6so_prg_motion));
-  fsm_addr += sizeof(lsm6so_prg_motion);
+  lsm6dsox_ln_pg_write(&dev_ctx, fsm_addr, (uint8_t *)lsm6sox_prg_motion,
+                       sizeof(lsm6sox_prg_motion));
+  fsm_addr += sizeof(lsm6sox_prg_motion);
   /* no_motion */
   lsm6dsox_ln_pg_write(&dev_ctx, fsm_addr,
-                       (uint8_t *)lsm6so_prg_no_motion,
-                       sizeof(lsm6so_prg_no_motion));
-  fsm_addr += sizeof(lsm6so_prg_no_motion);
+                       (uint8_t *)lsm6sox_prg_no_motion,
+                       sizeof(lsm6sox_prg_no_motion));
+  fsm_addr += sizeof(lsm6sox_prg_no_motion);
   /* wakeup */
-  lsm6dsox_ln_pg_write(&dev_ctx, fsm_addr, (uint8_t *)lsm6so_prg_wakeup,
-                       sizeof(lsm6so_prg_wakeup));
-  fsm_addr += sizeof(lsm6so_prg_wakeup);
+  lsm6dsox_ln_pg_write(&dev_ctx, fsm_addr, (uint8_t *)lsm6sox_prg_wakeup,
+                       sizeof(lsm6sox_prg_wakeup));
+  fsm_addr += sizeof(lsm6sox_prg_wakeup);
   /* pickup */
-  lsm6dsox_ln_pg_write(&dev_ctx, fsm_addr, (uint8_t *)lsm6so_prg_pickup,
-                       sizeof(lsm6so_prg_pickup));
-  fsm_addr += sizeof(lsm6so_prg_pickup);
+  lsm6dsox_ln_pg_write(&dev_ctx, fsm_addr, (uint8_t *)lsm6sox_prg_pickup,
+                       sizeof(lsm6sox_prg_pickup));
+  fsm_addr += sizeof(lsm6sox_prg_pickup);
   /* orientation */
   lsm6dsox_ln_pg_write(&dev_ctx, fsm_addr,
-                       (uint8_t *)lsm6so_prg_orientation,
-                       sizeof(lsm6so_prg_orientation));
-  fsm_addr += sizeof(lsm6so_prg_orientation);
+                       (uint8_t *)lsm6sox_prg_orientation,
+                       sizeof(lsm6sox_prg_orientation));
+  fsm_addr += sizeof(lsm6sox_prg_orientation);
   /* wrist_tilt */
   lsm6dsox_ln_pg_write(&dev_ctx, fsm_addr,
-                       (uint8_t *)lsm6so_prg_wrist_tilt,
-                       sizeof(lsm6so_prg_wrist_tilt));
+                       (uint8_t *)lsm6sox_prg_wrist_tilt,
+                       sizeof(lsm6sox_prg_wrist_tilt));
   emb_sens.fsm = PROPERTY_ENABLE;
   lsm6dsox_embedded_sens_set(&dev_ctx, &emb_sens);
   /*
