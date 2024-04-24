@@ -22,3 +22,9 @@ Read accelerometer and gyroscope sensor data from FIFO on FIFO threshold event (
 
   - st1vafe6ax_fifo.c
 
+## Read vAFE data
+
+Read vAFE data using data ready on INT2 pin
+
+  - st1vafe6ax_vafe_read_data.c
+
