@@ -28,7 +28,7 @@ Program ISM330BX to act as a step counter:
 
   - ism330bx_pedometer.c
 
-Program ISM330BX to receive eake up events:
+Program ISM330BX to receive wake up events on INT1:
 
   - ism330bx_wake_up.c
 

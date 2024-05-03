@@ -28,7 +28,7 @@ Program LSM6DSV16BX to act as a step counter:
 
   - lsm6dsv16bx_pedometer.c
 
-Program LSM6DSV16BX to receive eake up events:
+Program LSM6DSV16BX to receive wake up events on INT1:
 
   - lsm6dsv16bx_wake_up.c
 

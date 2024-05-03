@@ -123,6 +123,12 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
+static uint8_t drdy_event = 0;
+void ism330bx_wake_up_handler(void)
+{
+  drdy_event = 1;
+}
+
 /* Main Example --------------------------------------------------------------*/
 void ism330bx_wake_up(void)
 {
@@ -130,11 +136,7 @@ void ism330bx_wake_up(void)
   ism330bx_all_sources_t all_sources;
   ism330bx_reset_t rst;
   stmdev_ctx_t dev_ctx;
-
-  /* Uncomment to configure INT 1 */
-  ism330bx_pin_int1_route_t int1_route;
-  /* Uncomment to configure INT 2 */
-  //ism330bx_pin_int2_route_t int2_route;
+  ism330bx_pin_int_route_t int_route;
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
@@ -182,40 +184,44 @@ void ism330bx_wake_up(void)
   ism330bx_act_thresholds_set(&dev_ctx, act_thresholds);
 
   /* Uncomment interrupt generation on Wake-Up INT1 pin */
-  ism330bx_pin_int1_route_get(&dev_ctx, &int1_route);
-  int1_route.wake_up = PROPERTY_ENABLE;
-  ism330bx_pin_int1_route_set(&dev_ctx, int1_route);
+  ism330bx_pin_int1_route_get(&dev_ctx, &int_route);
+  int_route.wake_up = PROPERTY_ENABLE;
+  ism330bx_pin_int1_route_set(&dev_ctx, int_route);
 
   /* Enable if interrupt generation on Wake-Up INT2 pin */
-  //ism330bx_pin_int2_route_get(&dev_ctx, &int2_route);
-  //int2_route.wake_up = PROPERTY_ENABLE;
-  //ism330bx_pin_int2_route_set(&dev_ctx, int2_route);
+  //ism330bx_pin_int2_route_get(&dev_ctx, &int_route);
+  //int_route.wake_up = PROPERTY_ENABLE;
+  //ism330bx_pin_int2_route_set(&dev_ctx, int_route);
 
   sprintf((char *)tx_buffer, "Waiting ");
   tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
   /* Wait Events */
   while (1) {
-    /* Check if Wake-Up events */
-    ism330bx_all_sources_get(&dev_ctx, &all_sources);
+    if (drdy_event > 0) {
+      drdy_event = 0;
 
-    if (all_sources.wake_up) {
-      sprintf((char *)tx_buffer, "Wake-Up event on ");
+      /* Check if Wake-Up events */
+      ism330bx_all_sources_get(&dev_ctx, &all_sources);
 
-      if (all_sources.wake_up_x) {
-        strcat((char *)tx_buffer, "X");
+      if (all_sources.wake_up) {
+        sprintf((char *)tx_buffer, "Wake-Up event on ");
+
+        if (all_sources.wake_up_x) {
+          strcat((char *)tx_buffer, "X");
+        }
+
+        if (all_sources.wake_up_y) {
+          strcat((char *)tx_buffer, "Y");
+        }
+
+        if (all_sources.wake_up_z) {
+          strcat((char *)tx_buffer, "Z");
+        }
+
+        strcat((char *)tx_buffer, " direction\r\n");
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
       }
-
-      if (all_sources.wake_up_y) {
-        strcat((char *)tx_buffer, "Y");
-      }
-
-      if (all_sources.wake_up_z) {
-        strcat((char *)tx_buffer, "Z");
-      }
-
-      strcat((char *)tx_buffer, " direction\r\n");
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
 }
