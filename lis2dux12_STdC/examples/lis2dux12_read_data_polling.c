@@ -183,7 +183,7 @@ void lis2dux12_read_data_polling(void)
               data_xl.mg[0], data_xl.mg[1], data_xl.mg[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
 
-      lis2dux12_outt_data_get(&dev_ctx, &md, &data_temp);
+      lis2dux12_outt_data_get(&dev_ctx, &data_temp);
 
       /* print Temp data  */
       sprintf((char*)tx_buffer, "Temp[degC]:%3.2f\r\n",

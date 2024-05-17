@@ -196,7 +196,7 @@ void lis2duxs12_qvar_read_data(void)
     if (qvar_drdy_event) {
       qvar_drdy_event = 0;
 
-      lis2duxs12_ah_qvar_data_get(&dev_ctx, &md, &data);
+      lis2duxs12_ah_qvar_data_get(&dev_ctx, &data);
       lis2duxs12_xl_data_get(&dev_ctx, &md, &data_xl);
 
       sprintf((char*)tx_buffer,"Acceleration [mg]:%4.2f\t%4.2f\t%4.2f - QVAR [LSB]: %d\r\n",
