@@ -27,17 +27,21 @@
  * - STEVAL_MKI109V3 + STEVAL-MKI196V1
  * - NUCLEO_F411RE + X_NUCLEO_IKS01A3
  * - DISCOVERY_SPC584B + STEVAL-MKI196V1
- *
+ * - NUCLEO_H503RB + X-NUCLEO-IKS4A1
+*
  * Used interfaces:
  *
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
  * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
- *                    - I2C(Default) / SPI(supported)
+ *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
  *                    - Sensor side: I2C(Default) / SPI(supported)
+ *
+ * NUCLEO_STM32H503RG - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I3C(Default)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -75,6 +79,10 @@
 /* DISCOVERY_SPC584B: Define communication interface */
 #define SENSOR_BUS I2CD1
 
+#elif defined(NUCLEO_H503RB)
+/* NUCLEO_H503RB: Define communication interface */
+#define SENSOR_BUS hi3c1
+
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -97,6 +105,14 @@
 
 #elif defined(SPC584B_DIS)
 #include "components.h"
+
+#elif defined(NUCLEO_H503RB)
+#include "usart.h"
+#include "i3c.h"
+#include "board.h"
+#include <stdio.h>
+
+static uint8_t i3c_dyn_addr = 0x0A;
 #endif
 
 /* Private macro -------------------------------------------------------------*/
@@ -130,7 +146,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
-static void platform_init(void);
+static void platform_init(void *handle);
 
 /*
  * Original conversion routines taken from: https://github.com/numpy/numpy
@@ -218,8 +234,9 @@ void lsm6dsv16x_sensor_fusion(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+
   /* Init test platform */
-  platform_init();
+  platform_init(dev_ctx.handle);
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
 
@@ -302,7 +319,7 @@ void lsm6dsv16x_sensor_fusion(void)
           gbias_mdps[1] = lsm6dsv16x_from_fs125_to_mdps(axis[1]);
           gbias_mdps[2] = lsm6dsv16x_from_fs125_to_mdps(axis[2]);
           sprintf((char *)tx_buffer, "GBIAS [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-                         gbias_mdps[0], gbias_mdps[1], gbias_mdps[2]);
+                         (double_t)gbias_mdps[0], (double_t)gbias_mdps[1], (double_t)gbias_mdps[2]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
         case LSM6DSV16X_SFLP_GRAVITY_VECTOR_TAG:
@@ -311,13 +328,13 @@ void lsm6dsv16x_sensor_fusion(void)
           gravity_mg[1] = lsm6dsv16x_from_sflp_to_mg(axis[1]);
           gravity_mg[2] = lsm6dsv16x_from_sflp_to_mg(axis[2]);
           sprintf((char *)tx_buffer, "Gravity [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-                         gravity_mg[0], gravity_mg[1], gravity_mg[2]);
+                         (double_t)gravity_mg[0], (double_t)gravity_mg[1], (double_t)gravity_mg[2]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
         case LSM6DSV16X_SFLP_GAME_ROTATION_VECTOR_TAG:
           sflp2q(quat, (uint16_t *)&f_data.data[0]);
           sprintf((char *)tx_buffer, "Game Rotation \tX: %2.3f\tY: %2.3f\tZ: %2.3f\tW: %2.3f\r\n",
-                  quat[0], quat[1], quat[2], quat[3]);
+                  (double_t)quat[0], (double_t)quat[1], (double_t)quat[2], (double_t)quat[3]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
         default:
@@ -354,6 +371,8 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_write(handle,  LSM6DSV16X_I2C_ADD_H & 0xFE, reg, (uint8_t*) bufp, len);
+#elif defined(NUCLEO_H503RB)
+  i3c_write(handle, i3c_dyn_addr, reg, (uint8_t*) bufp, len);
 #endif
   return 0;
 }
@@ -382,6 +401,8 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_read(handle, LSM6DSV16X_I2C_ADD_H & 0xFE, reg, bufp, len);
+#elif defined(NUCLEO_H503RB)
+  i3c_read(handle, i3c_dyn_addr, reg, bufp, len);
 #endif
   return 0;
 }
@@ -401,6 +422,8 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
   CDC_Transmit_FS(tx_buffer, len);
 #elif defined(SPC584B_DIS)
   sd_lld_write(&SD2, tx_buffer, len);
+#elif defined(NUCLEO_H503RB)
+  HAL_UART_Transmit(&huart3, tx_buffer, len, 1000);
 #endif
 }
 
@@ -412,7 +435,7 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
-#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
+#if defined(NUCLEO_F411RE) || defined(STEVAL_MKI109V3) || defined(NUCLEO_H503RB)
   HAL_Delay(ms);
 #elif defined(SPC584B_DIS)
   osalThreadDelayMilliseconds(ms);
@@ -422,7 +445,7 @@ static void platform_delay(uint32_t ms)
 /*
  * @brief  platform specific initialization (platform dependent)
  */
-static void platform_init(void)
+static void platform_init(void *handle)
 {
 #if defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
@@ -430,5 +453,12 @@ static void platform_init(void)
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
+
+#elif defined(NUCLEO_H503RB)
+  i3c_set_bus_frequency(handle, 1000000);
+  i3c_rstdaa(handle);
+  i3c_setdasa(handle, LSM6DSV16X_I2C_ADD_L, &i3c_dyn_addr, 1);
+  i3c_set_bus_frequency(handle, 12500000);
+
 #endif
 }

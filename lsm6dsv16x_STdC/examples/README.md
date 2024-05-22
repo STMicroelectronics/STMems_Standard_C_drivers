@@ -5,6 +5,7 @@ This folder contains application examples. The examples refer to following board
 - STEVAL-MKI109V3 (https://www.st.com/en/evaluation-tools/steval-mki109v3.html)
 - NUCLEO-F411RE (https://www.st.com/en/microcontrollers-microprocessors/stm32f411re.html)
 - DISCOVERY-SPC584B (https://www.st.com/en/evaluation-tools/spc584b-dis.html)
+- NUCLEO-H503RB (https://www.st.com/en/evaluation-tools/nucleo-h503rb.html)
 
 ## Self Test (ST)
 
