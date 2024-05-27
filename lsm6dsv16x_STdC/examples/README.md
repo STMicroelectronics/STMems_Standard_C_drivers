@@ -62,7 +62,7 @@ magnetometer data from lps22df and lis2mdl sensors attached through Sensor HUB:
 
 Program LSM6DSV16X to read AH_QVAR data in polling mode:
 
-  - lis2duxs12_qvar_read_data.c
+  - lsm6dsv16x_qvar_read_data.c
 
 ## Finite State Machine (FSM)
 
