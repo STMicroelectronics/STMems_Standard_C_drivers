@@ -92,7 +92,7 @@
 #elif defined(NUCLEO_H503RB)
 #include "usart.h"
 #include "i3c.h"
-#include "board.h"
+#include "i3c_api.h"
 #include <stdio.h>
 
 static uint8_t i3c_dyn_addr = 0x0A;
