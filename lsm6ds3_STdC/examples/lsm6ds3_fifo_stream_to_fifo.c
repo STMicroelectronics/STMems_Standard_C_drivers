@@ -22,7 +22,7 @@
  * evaluation boards:
  *
  * - STEVAL_MKI109V3
- * - NUCLEO_F411RE
+ * - NUCLEO_F401RE
  * - DISCOVERY_SPC584B
  *
  * Used interfaces:
@@ -50,7 +50,7 @@
  */
 
 //#define STEVAL_MKI109V3  /* little endian */
-//#define NUCLEO_F411RE    /* little endian */
+//#define NUCLEO_F401RE    /* little endian */
 //#define SPC584B_DIS      /* big endian */
 
 /* ATTENTION: By default the driver is little endian. If you need switch
@@ -64,8 +64,8 @@
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#elif defined(NUCLEO_F411RE)
-/* NUCLEO_F411RE: Define communication interface */
+#elif defined(NUCLEO_F401RE)
+/* NUCLEO_F401RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
 #elif defined(SPC584B_DIS)
@@ -79,7 +79,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#if defined(NUCLEO_F411RE)
+#if defined(NUCLEO_F401RE)
 #include "stm32f4xx_hal.h"
 #include "usart.h"
 #include "gpio.h"
@@ -229,7 +229,7 @@ void example_main_fifo_stream_lsm6ds3(void)
 static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len)
 {
-#if defined(NUCLEO_F411RE)
+#if defined(NUCLEO_F401RE)
   HAL_I2C_Mem_Write(handle, LSM6DS3_I2C_ADD_L, reg,
                     I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
@@ -256,7 +256,7 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-#if defined(NUCLEO_F411RE)
+#if defined(NUCLEO_F401RE)
   HAL_I2C_Mem_Read(handle, LSM6DS3_I2C_ADD_L, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
@@ -280,7 +280,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-#if defined(NUCLEO_F411RE)
+#if defined(NUCLEO_F401RE)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
 #elif defined(STEVAL_MKI109V3)
   CDC_Transmit_FS(tx_buffer, len);
@@ -297,7 +297,7 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
-#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
+#if defined(NUCLEO_F401RE) | defined(STEVAL_MKI109V3)
   HAL_Delay(ms);
 #elif defined(SPC584B_DIS)
   osalThreadDelayMilliseconds(ms);

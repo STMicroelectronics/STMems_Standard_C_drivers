@@ -26,7 +26,7 @@
  * evaluation boards:
  *
  * - STEVAL_MKI109V3 + STEVAL-MKI189V1
- * - NUCLEO_F411RE + STEVAL-MKI189V1
+ * - NUCLEO_F401RE + STEVAL-MKI189V1
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
@@ -51,7 +51,7 @@
  * following target board and redefine yours.
  */
 //#define STEVAL_MKI109V3
-#define NUCLEO_F411RE_X_NUCLEO_IKS01A2
+#define NUCLEO_F401RE_X_NUCLEO_IKS01A2
 
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
@@ -60,8 +60,8 @@
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
-/* NUCLEO_F411RE_X_NUCLEO_IKS01A2: Define communication interface */
+#elif defined(NUCLEO_F401RE_X_NUCLEO_IKS01A2)
+/* NUCLEO_F401RE_X_NUCLEO_IKS01A2: Define communication interface */
 #define SENSOR_BUS hi2c1
 
 #endif
@@ -72,7 +72,7 @@
 #include "lsm6dsm_reg.h"
 #include "lis2mdl_reg.h"
 
-#if defined(NUCLEO_F411RE)
+#if defined(NUCLEO_F401RE)
 #include "stm32f4xx_hal.h"
 #include "usart.h"
 #include "gpio.h"
@@ -95,17 +95,17 @@ typedef union {
 } axis3bit16_t;
 
 /* Private macro -------------------------------------------------------------*/
-#if defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
+#if defined(NUCLEO_F401RE_X_NUCLEO_IKS01A2)
 #define LSM6DSM_INT2_PIN GPIO_PIN_1
 #define LSM6DSM_INT2_GPIO_PORT GPIOC
 #define LSM6DSM_INT1_PIN GPIO_PIN_0
 #define LSM6DSM_INT1_GPIO_PORT GPIOC
-#else /* NUCLEO_F411RE_X_NUCLEO_IKS01A2 */
+#else /* NUCLEO_F401RE_X_NUCLEO_IKS01A2 */
 #define LSM6DSM_INT2_PIN GPIO_PIN_5
 #define LSM6DSM_INT2_GPIO_PORT GPIOB
 #define LSM6DSM_INT1_PIN GPIO_PIN_8
 #define LSM6DSM_INT1_GPIO_PORT GPIOB
-#endif /* NUCLEO_F411RE_X_NUCLEO_IKS01A2 */
+#endif /* NUCLEO_F401RE_X_NUCLEO_IKS01A2 */
 
 /* Private variables ---------------------------------------------------------*/
 axis3bit16_t data_raw_magnetic;
@@ -330,7 +330,7 @@ void example_sensor_hub_fifo_lis2mdl_passthrough_lsm6dsm(void)
 static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len)
 {
-#if defined(NUCLEO_F411RE)
+#if defined(NUCLEO_F401RE)
   HAL_I2C_Mem_Write(handle, LSM6DSM_I2C_ADD_H, reg,
                     I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
@@ -357,7 +357,7 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-#if defined(NUCLEO_F411RE)
+#if defined(NUCLEO_F401RE)
   HAL_I2C_Mem_Read(handle, LSM6DSM_I2C_ADD_H, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(STEVAL_MKI109V3)
@@ -381,7 +381,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-#if defined(NUCLEO_F411RE)
+#if defined(NUCLEO_F401RE)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
 #elif defined(STEVAL_MKI109V3)
   CDC_Transmit_FS(tx_buffer, len);
@@ -398,7 +398,7 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
-#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
+#if defined(NUCLEO_F401RE) | defined(STEVAL_MKI109V3)
   HAL_Delay(ms);
 #elif defined(SPC584B_DIS)
   osalThreadDelayMilliseconds(ms);

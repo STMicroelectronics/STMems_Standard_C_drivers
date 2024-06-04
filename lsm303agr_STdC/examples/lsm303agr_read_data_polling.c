@@ -24,7 +24,7 @@
  * evaluation boards:
  *
  * - STEVAL_MKI109V3 + STEVAL-MKI172V1
- * - NUCLEO_F411RE + X-NUCLEO-IKS01A2
+ * - NUCLEO_F401RE + X-NUCLEO-IKS01A2
  * - DISCOVERY_SPC584B + STEVAL-MKI173V1
  *
  * Used interfaces:
@@ -32,7 +32,7 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_F411RE      - Host side: UART(COM) to USB bridge
+ * NUCLEO_F401RE      - Host side: UART(COM) to USB bridge
  *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
@@ -52,7 +52,7 @@
  */
 
 //#define STEVAL_MKI109V3  /* little endian */
-//#define NUCLEO_F411RE    /* little endian */
+//#define NUCLEO_F401RE    /* little endian */
 //#define SPC584B_DIS      /* big endian */
 
 /* ATTENTION: By default the driver is little endian. If you need switch
@@ -66,8 +66,8 @@
 /* MKI109V3: Vdd and Vddio power supply values */
 #define PWM_3V3 915
 
-#elif defined(NUCLEO_F411RE)
-/* NUCLEO_F411RE: Define communication interface */
+#elif defined(NUCLEO_F401RE)
+/* NUCLEO_F401RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
 #elif defined(SPC584B_DIS)
@@ -81,7 +81,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#if defined(NUCLEO_F411RE)
+#if defined(NUCLEO_F401RE)
 #include "stm32f4xx_hal.h"
 #include "usart.h"
 #include "gpio.h"
@@ -121,7 +121,7 @@ static sensbus_t mag_bus = {&SENSOR_BUS,
                             CS_A_up_GPIO_Port,
                             CS_A_up_Pin
                            };
-#elif defined(NUCLEO_F411RE) || defined(SPC584B_DIS)
+#elif defined(NUCLEO_F401RE) || defined(SPC584B_DIS)
 static sensbus_t xl_bus  = {&SENSOR_BUS,
                             LSM303AGR_I2C_ADD_XL,
                             0,
@@ -289,7 +289,7 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len)
 {
   sensbus_t *sensbus = (sensbus_t *)handle;
-#if defined(NUCLEO_F411RE)
+#if defined(NUCLEO_F401RE)
 
   if (sensbus->i2c_address == LSM303AGR_I2C_ADD_XL) {
     /* enable auto incremented in multiple read/write commands */
@@ -336,7 +336,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
   sensbus_t *sensbus = (sensbus_t *)handle;
-#if defined(NUCLEO_F411RE)
+#if defined(NUCLEO_F401RE)
 
   if (sensbus->i2c_address == LSM303AGR_I2C_ADD_XL) {
     /* enable auto incremented in multiple read/write commands */
@@ -379,7 +379,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-#if defined(NUCLEO_F411RE)
+#if defined(NUCLEO_F401RE)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
 #elif defined(STEVAL_MKI109V3)
   CDC_Transmit_FS(tx_buffer, len);
@@ -396,7 +396,7 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
-#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
+#if defined(NUCLEO_F401RE) | defined(STEVAL_MKI109V3)
   HAL_Delay(ms);
 #elif defined(SPC584B_DIS)
   osalThreadDelayMilliseconds(ms);

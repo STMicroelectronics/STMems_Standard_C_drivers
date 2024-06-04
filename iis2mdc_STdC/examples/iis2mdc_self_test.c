@@ -22,7 +22,7 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - NUCLEO_F411RE + STEVAL-MKI185V1
+ * - NUCLEO_F401RE + STEVAL-MKI185V1
  * - DISCOVERY_SPC584B + STEVAL-MKI185V1
  *
  * Used interfaces:
@@ -46,7 +46,7 @@
  * following target board and redefine yours.
  */
 
-//#define NUCLEO_F411RE    /* little endian */
+//#define NUCLEO_F401RE    /* little endian */
 //#define SPC584B_DIS      /* big endian */
 
 /* ATTENTION: By default the driver is little endian. If you need switch
@@ -55,8 +55,8 @@
  */
 
 
-#if defined(NUCLEO_F411RE)
-/* NUCLEO_F411RE: Define communication interface */
+#if defined(NUCLEO_F401RE)
+/* NUCLEO_F401RE: Define communication interface */
 #define SENSOR_BUS hi2c1
 
 #elif defined(SPC584B_DIS)
@@ -70,7 +70,7 @@
 #include <stdio.h>
 #include "iis2mdc_reg.h"
 
-#if defined(NUCLEO_F411RE)
+#if defined(NUCLEO_F401RE)
 #include "stm32f4xx_hal.h"
 #include "usart.h"
 #include "gpio.h"
@@ -298,7 +298,7 @@ void iis2mdc_self_test(void)
 static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len)
 {
-#if defined(NUCLEO_F411RE)
+#if defined(NUCLEO_F401RE)
   HAL_I2C_Mem_Write(handle, IIS2MDC_I2C_ADD, reg,
                     I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, len, 1000);
 #elif defined(SPC584B_DIS)
@@ -320,7 +320,7 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-#if defined(NUCLEO_F411RE)
+#if defined(NUCLEO_F401RE)
   HAL_I2C_Mem_Read(handle, IIS2MDC_I2C_ADD, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 #elif defined(SPC584B_DIS)
@@ -338,7 +338,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-#if defined(NUCLEO_F411RE)
+#if defined(NUCLEO_F401RE)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
 #elif defined(SPC584B_DIS)
   sd_lld_write(&SD2, tx_buffer, len);
@@ -353,7 +353,7 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
-#if defined(NUCLEO_F411RE)
+#if defined(NUCLEO_F401RE)
   HAL_Delay(ms);
 #elif defined(SPC584B_DIS)
   osalThreadDelayMilliseconds(ms);
