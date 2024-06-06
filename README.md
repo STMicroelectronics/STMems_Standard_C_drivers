@@ -4,7 +4,7 @@
 
 This repository contains examples of *low-level* [platform-independent drivers]( http://www.st.com/content/st_com/en/products/embedded-software/mems-and-sensors-software/drivers-for-mems/c-driver-mems.html ) for [STMicroelectronics](www.st.com/mems) sensors. Sensor drivers and examples are written in C programming language.
 
-If you are using [STM32Cube packages](https://www.st.com/en/ecosystems/stm32cube.html), evaluate also the *hardware abstractions* [STM32Cube-compatible drivers](https://github.com/STMicroelectronics/STM32Cube_MCU_Overall_Offer/blob/master/README.md#stm32cube-bsp-components-drivers). 
+If you are using [STM32Cube packages](https://www.st.com/en/ecosystems/stm32cube.html), evaluate also the *hardware abstractions* [STM32Cube-compatible drivers](https://github.com/STMicroelectronics/STM32Cube_MCU_Overall_Offer/blob/master/README.md#stm32cube-bsp-components-drivers).
 
 The STMicroelectronics naming convention for driver repositories is:
  - `PARTNUMBER` (*i.e. [hts221](https://github.com/STMicroelectronics/hts221)*) for *low-level platform-independent drivers*
@@ -67,8 +67,35 @@ dev_ctx.read_reg = platform_read;
 ```c
 dev_ctx.handle = &platform_handle;
 ```
+### 2.c Using the handle to integrate this driver in c++ classes
 
-### 2.b Required properties
+- Non static member functions of classes need an pointer to their own instance as first argument this is implicit done by the compiler.
+- This libraries pass the ```ctx.handle ``` as first argument to the read and write Functions so we can store the pointer to the class instance there.
+- When defining out platform member functions we must skip the first argument since this will be the this pointer
+See example:
+
+```c++
+class MemsSensor{
+public:
+  ...
+private:
+  int32_t platform_write(uint8_t reg, const uint8_t *bufp,uint16_t len);
+  int32_t platform_read(uint8_t reg, uint8_t *bufp,uint16_t len);
+  stmdev_ctx_t _dev_ctx={(stmdev_write_ptr)  &MemsSensor::platform_write,
+		  	  	    (stmdev_read_ptr)    &MemsSensor::platform_read,
+						(stmdev_mdelay_ptr)  NULL, // no delay function set
+						                     this};
+}
+```
+
+- With in the classes code the driver functions can than easily be used with &_dev_ctx as first argument like:
+
+
+ ```c++
+lsm6dsrx_device_id_get(&_dev_ctx, &_whoamI);
+ ```
+
+### 2.c Required properties
 
 > * A standard C language compiler for the target MCU
 > * A C library for the target MCU and the desired interface (ie. SPI, I²C)
@@ -116,4 +143,3 @@ If a different MCU is used, please follow these steps:
 **More information: [http://www.st.com](http://st.com/MEMS)**
 
 **Copyright (C) 2018-2022 STMicroelectronics**
-
