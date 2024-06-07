@@ -27,7 +27,7 @@
  *
  * Used interfaces:
  *
- * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ * NUCLEO_STM32F401RE - Host side: UART(COM) to USB bridge
  *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge

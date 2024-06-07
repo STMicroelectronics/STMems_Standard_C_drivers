@@ -31,7 +31,7 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ * NUCLEO_STM32F401RE - Host side: UART(COM) to USB bridge
  *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
@@ -327,7 +327,7 @@ static int32_t platform_reap_int_pin(void)
 {
 #ifdef NUCLEO_F401RE
   return HAL_GPIO_ReadPin(LIS3DE_INT1_GPIO_PORT, LIS3DE_INT1_PIN);
-#else /* NUCLEO_STM32F411RE */
+#else /* NUCLEO_STM32F401RE */
   return 0;
-#endif /* NUCLEO_STM32F411RE */
+#endif /* NUCLEO_STM32F401RE */
 }

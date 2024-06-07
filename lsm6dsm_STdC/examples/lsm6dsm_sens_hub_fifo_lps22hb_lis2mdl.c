@@ -34,7 +34,7 @@
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ * NUCLEO_STM32F401RE - Host side: UART(COM) to USB bridge
  *                    - I2C(Default) / SPI(supported)
  *
  * If you need to run this example on a different hardware platform a
