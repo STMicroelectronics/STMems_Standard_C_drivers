@@ -185,7 +185,7 @@ void lis2dux12_tilt(void)
   int1_route.tilt   = PROPERTY_ENABLE;
   lis2dux12_emb_pin_int1_route_set(&dev_ctx, &int1_route);
 
-  lis2dux12_embedded_int_config_set(&dev_ctx, LIS2DUX12_EMBEDDED_INT_LATCHED);
+  lis2dux12_embedded_int_cfg_set(&dev_ctx, LIS2DUX12_EMBEDDED_INT_LATCHED);
 
   int_mode.int_cfg = LIS2DUX12_INT_LEVEL;
   lis2dux12_int_config_set(&dev_ctx, &int_mode);

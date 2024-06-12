@@ -184,7 +184,7 @@ void lis2dux12_pedo_fifo(void)
   lis2dux12_init_set(&dev_ctx, LIS2DUX12_SENSOR_EMB_FUNC_ON);
   platform_delay(10);
 
-  lis2dux12_embedded_int_config_set(&dev_ctx, LIS2DUX12_EMBEDDED_INT_LATCHED);
+  lis2dux12_embedded_int_cfg_set(&dev_ctx, LIS2DUX12_EMBEDDED_INT_LATCHED);
 
   lis2dux12_stpcnt_debounce_set(&dev_ctx, 4);
 
