@@ -1,4 +1,4 @@
-# Nucleo H503RG platform
+# NUCLEO-H503RB platform
 
 This folder contains a simple STM32H5 CubeMX .ioc project file, which declares the minimal things necessary to set up a basic system based on I3C with interrupt and UART capability and that can be used to test I3C-based examples.
 
