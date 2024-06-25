@@ -6,25 +6,19 @@ This folder contains application examples. The examples refer to following board
 - NUCLEO-F401RE (https://www.st.com/en/microcontrollers-microprocessors/stm32f401re.html)
 - DISCOVERY-SPC584B (https://www.st.com/en/evaluation-tools/spc584b-dis.html)
 
-## Self Test (ST)
-
-Run the device Self Test procedure:
-
-  - iis3dwb_self_test.c
-
 ## Read data
 
-Read accelerometer and temperature sensor data in polling mode:
+Read pressure and temperature sensor data in both polling and drdy mode:
 
-  - iis3dwb_read_data_polling.c
+  - ilps22qs_read_data_polling.c
 
-Read accelerometer and temperature sensor data from FIFO on FIFO threshold event:
+Read pressure and temperature sensor data from FIFO on FIFO threshold event:
 
-  - iis3dwb_fifo.c
+  - ilps22qs_fifo.c
 
-## Program and use embedded digital functions
+## Read AH_QVAR data
 
-Program IIS3DWB to receive wakeup from sleep events:
+Program ILPS22QS to read AH_QVAR data:
 
-  - iis3dwb_wake_up.c
+  - ilps22qs_qvar_read_data_polling.c
 

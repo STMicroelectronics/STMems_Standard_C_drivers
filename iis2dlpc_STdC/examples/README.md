@@ -20,24 +20,24 @@ Read accelerometer and temperature sensor data in polling mode:
 
 ## Program and use embedded digital functions
 
-Program LIS3DH to receive activity events:
+Program IIS2DLPC to receive activity events:
 
   - iis2dlpc_activity.c
 
-Program LIS3DH to receive free fall events:
+Program IIS2DLPC to receive free fall events:
 
   - iis2dlpc_free_fall.c
 
-Program LIS3DH to receive 6D orientation detection events:
+Program IIS2DLPC to receive 6D orientation detection events:
 
   - iis2dlpc_orientation.c
 
-Program LIS3DH to receive single/double tap events:
+Program IIS2DLPC to receive single/double tap events:
 
   - iis2dlpc_tap_single.c
   - iis2dlpc_tap_double.c
 
-Program LIS3DH to receive wakeup from sleep events:
+Program IIS2DLPC to receive wakeup from sleep events:
 
   - iis2dlpc_wake_up.c
 

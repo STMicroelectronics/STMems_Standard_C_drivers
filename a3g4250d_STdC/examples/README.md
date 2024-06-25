@@ -6,25 +6,19 @@ This folder contains application examples. The examples refer to following board
 - NUCLEO-F401RE (https://www.st.com/en/microcontrollers-microprocessors/stm32f401re.html)
 - DISCOVERY-SPC584B (https://www.st.com/en/evaluation-tools/spc584b-dis.html)
 
-## Self Test (ST)
-
-Run the device Self Test procedure:
-
-  - iis3dwb_self_test.c
-
 ## Read data
 
-Read accelerometer and temperature sensor data in polling mode:
+Read gyroscope sensor data in polling mode:
 
-  - iis3dwb_read_data_polling.c
+  - a3g4250d_read_data_polling.c
 
-Read accelerometer and temperature sensor data from FIFO on FIFO threshold event:
+Read gyroscope sensor data from FIFO on FIFO threshold event:
 
-  - iis3dwb_fifo.c
+  - a3g4250d_fifo_read.c
 
 ## Program and use embedded digital functions
 
-Program IIS3DWB to receive wakeup from sleep events:
+Program A3G4250D to receive wakeup from sleep events:
 
-  - iis3dwb_wake_up.c
+  - a3g4250d_wake_up.c
 

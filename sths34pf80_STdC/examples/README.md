@@ -6,25 +6,11 @@ This folder contains application examples. The examples refer to following board
 - NUCLEO-F401RE (https://www.st.com/en/microcontrollers-microprocessors/stm32f401re.html)
 - DISCOVERY-SPC584B (https://www.st.com/en/evaluation-tools/spc584b-dis.html)
 
-## Self Test (ST)
+Read TMOS sensor data (Tamb/Presence/Motion flags) in both polling and drdy mode:
 
-Run the device Self Test procedure:
+  - sths34pf80_tmos_data_polling.c
+  - sths34pf80_tmos_data_drdy.c
 
-  - iis3dwb_self_test.c
+Program STHS34PF80 to get Presence Detection event on INT1:
 
-## Read data
-
-Read accelerometer and temperature sensor data in polling mode:
-
-  - iis3dwb_read_data_polling.c
-
-Read accelerometer and temperature sensor data from FIFO on FIFO threshold event:
-
-  - iis3dwb_fifo.c
-
-## Program and use embedded digital functions
-
-Program IIS3DWB to receive wakeup from sleep events:
-
-  - iis3dwb_wake_up.c
-
+  - sths34pf80_tmos_presence_detection.c

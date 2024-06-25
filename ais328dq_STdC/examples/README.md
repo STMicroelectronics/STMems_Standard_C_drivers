@@ -10,21 +10,17 @@ This folder contains application examples. The examples refer to following board
 
 Run the device Self Test procedure:
 
-  - iis3dwb_self_test.c
+  - ais328dq_self_test.c
 
 ## Read data
 
-Read accelerometer and temperature sensor data in polling mode:
+Read accelerometer sensor data in polling mode:
 
-  - iis3dwb_read_data_polling.c
-
-Read accelerometer and temperature sensor data from FIFO on FIFO threshold event:
-
-  - iis3dwb_fifo.c
+  - ais328dq_read_data_polling.c
 
 ## Program and use embedded digital functions
 
-Program IIS3DWB to receive wakeup from sleep events:
+Program AIS328DQ to receive wakeup from sleep events:
 
-  - iis3dwb_wake_up.c
+  - ais328dq_wake_up.c
 

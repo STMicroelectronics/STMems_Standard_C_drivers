@@ -24,20 +24,20 @@ Read accelerometer and temperature sensor data from FIFO on FIFO threshold event
 
 ## Program and use embedded digital functions
 
-Program LIS3DH to receive free fall events:
+Program IIS2DH to receive free fall events:
 
   - iis2dh_free_fall.c
 
-Program LIS3DH to receive 6D orientation detection events:
+Program IIS2DH to receive 6D orientation detection events:
 
   - iis2dh_orientation.c
 
-Program LIS3DH to receive single/double tap events:
+Program IIS2DH to receive single/double tap events:
 
   - iis2dh_tap_single.c
   - iis2dh_tap_double.c
 
-Program LIS3DH to receive wakeup from sleep events:
+Program IIS2DH to receive wakeup from sleep events:
 
   - iis2dh_wake_up.c
 

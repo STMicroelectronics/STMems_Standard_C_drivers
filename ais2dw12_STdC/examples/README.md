@@ -10,21 +10,33 @@ This folder contains application examples. The examples refer to following board
 
 Run the device Self Test procedure:
 
-  - iis3dwb_self_test.c
+  - ais2dw12_self_test.c
 
 ## Read data
 
 Read accelerometer and temperature sensor data in polling mode:
 
-  - iis3dwb_read_data_polling.c
+  - ais2dw12_read_data_polling.c
 
 Read accelerometer and temperature sensor data from FIFO on FIFO threshold event:
 
-  - iis3dwb_fifo.c
+  - ais2dw12_read_fifo.c
 
 ## Program and use embedded digital functions
 
-Program IIS3DWB to receive wakeup from sleep events:
+Program AIS2DW12 to receive activity events:
 
-  - iis3dwb_wake_up.c
+  - ais2dw12_activity.c
+
+Program AIS2DW12 to receive free fall events:
+
+  - ais2dw12_free_fall.c
+
+Program AIS2DW12 to receive 6D orientation detection events:
+
+  - ais2dw12_orientation.c
+
+Program AIS2DW12 to receive wakeup from sleep events:
+
+  - ais2dw12_wake_up.c
 
