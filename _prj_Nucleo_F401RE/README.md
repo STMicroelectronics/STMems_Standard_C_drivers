@@ -12,7 +12,7 @@ Once a simple project has been generated, it needs to be customized in order to 
 
 ### Customize source code
 
-1. Open the *$STDC_PATH/_prj_NucleoF401/Src/main.c* file previously generated to edit it
+1. Open the *$STDC_PATH/_prj_Nucleo_F401/Src/main.c* file previously generated to edit it
 
 2. Define the prototypes for both the example routine and its interrupt handler:
 
