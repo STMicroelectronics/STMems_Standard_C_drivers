@@ -86,10 +86,6 @@
 	path = ism330dlc_STdC/driver
 	url = https://github.com/STMicroelectronics/ism330dlc-pid
 	branch = master
-[submodule "l20g20is_STdC/driver"]
-	path = l20g20is_STdC/driver
-	url = https://github.com/STMicroelectronics/l20g20is-pid
-	branch = master
 [submodule "l3gd20h_STdC/driver"]
 	path = l3gd20h_STdC/driver
 	url = https://github.com/STMicroelectronics/l3gd20h-pid
@@ -101,10 +97,6 @@
 [submodule "lis2de12_STdC/driver"]
 	path = lis2de12_STdC/driver
 	url = https://github.com/STMicroelectronics/lis2de12-pid
-	branch = master
-[submodule "lis2dh_STdC/driver"]
-	path = lis2dh_STdC/driver
-	url = https://github.com/STMicroelectronics/lis2dh-pid
 	branch = master
 [submodule "lis2dh12_STdC/driver"]
 	path = lis2dh12_STdC/driver
@@ -146,10 +138,6 @@
 	path = lis3dh_STdC/driver
 	url = https://github.com/STMicroelectronics/lis3dh-pid
 	branch = master
-[submodule "lis3dsh_STdC/driver"]
-	path = lis3dsh_STdC/driver
-	url = https://github.com/STMicroelectronics/lis3dsh-pid
-	branch = master
 [submodule "lis3mdl_STdC/driver"]
 	path = lis3mdl_STdC/driver
 	url = https://github.com/STMicroelectronics/lis3mdl-pid
@@ -186,17 +174,9 @@
 	path = lps28dfw_STdC/driver
 	url = https://github.com/STMicroelectronics/lps28dfw-pid
 	branch = master
-[submodule "lps33hw_STdC/driver"]
-	path = lps33hw_STdC/driver
-	url = https://github.com/STMicroelectronics/lps33hw-pid
-	branch = master
 [submodule "lps33k_STdC/driver"]
 	path = lps33k_STdC/driver
 	url = https://github.com/STMicroelectronics/lps33k-pid
-	branch = master
-[submodule "lps33w_STdC/driver"]
-	path = lps33w_STdC/driver
-	url = https://github.com/STMicroelectronics/lps33w-pid
 	branch = master
 [submodule "lsm303agr_STdC/driver"]
 	path = lsm303agr_STdC/driver
@@ -209,10 +189,6 @@
 [submodule "lsm6ds3tr-c_STdC/driver"]
 	path = lsm6ds3tr-c_STdC/driver
 	url = https://github.com/STMicroelectronics/lsm6ds3tr-c-pid
-	branch = master
-[submodule "lsm6ds3_STdC/driver"]
-	path = lsm6ds3_STdC/driver
-	url = https://github.com/STMicroelectronics/lsm6ds3-pid
 	branch = master
 [submodule "lsm6dsl_STdC/driver"]
 	path = lsm6dsl_STdC/driver
