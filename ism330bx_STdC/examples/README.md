@@ -45,4 +45,9 @@ Program ISM330BX Sensor Fusion Low Power (SFLP) to receive GBIAS, Gravity and Ga
 Program ISM330BX to read AH_QVAR data:
 
   - ism330bx_qvar_read_data_polling.c
+## Finite State Machine (FSM)
+
+Program ISM330BX FSM to detect 4D position recognition typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/STMems_Finite_State_Machine/blob/master/application_examples/ism330bx/FourD%20position%20recognition/README.md)):
+
+  - ism330bx_fsm_fourd.c
 
