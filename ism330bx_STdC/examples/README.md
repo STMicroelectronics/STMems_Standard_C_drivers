@@ -51,3 +51,13 @@ Program ISM330BX FSM to detect 4D position recognition typically used in smartph
 
   - ism330bx_fsm_fourd.c
 
+## Machine Learning Core (MLC)
+
+Program ISM330BX MLC to detect device inclination in industrial applications. (read more [here](https://github.com/STMicroelectronics/STMems_Machine_Learning_Core/blob/master/application_examples/ism330bx/tilt_angle_mode0/README.md)):
+
+  - ism330bx_mlc_tilt.c
+
+Program ISM330BX MLC to monitor device vibration in industrial applications. (read more [here](https://github.com/STMicroelectronics/STMems_Machine_Learning_Core/blob/master/application_examples/ism330bx/Vibration%20monitoring/README.md)):
+
+  - ism330bx_mlc_vibration_monitoring.c
+
