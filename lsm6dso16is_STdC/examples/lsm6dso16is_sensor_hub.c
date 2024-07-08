@@ -244,7 +244,7 @@ void lsm6dso16is_sensor_hub(void)
   lps22df_init_set(&lps22df_ctx, LPS22DF_DRV_RDY);
 
   /* Select bus interface */
-  bus_mode.filter = LPS22DF_AUTO;
+  bus_mode.filter = LPS22DF_FILTER_AUTO;
   bus_mode.interface = LPS22DF_SEL_BY_HW;
   lps22df_bus_mode_set(&lps22df_ctx, &bus_mode);
 

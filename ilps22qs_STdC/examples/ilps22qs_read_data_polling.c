@@ -164,7 +164,7 @@ void ilps22qs_read_data_polling(void)
   ilps22qs_init_set(&dev_ctx, ILPS22QS_DRV_RDY);
 
   /* Select bus interface */
-  bus_mode.filter = ILPS22QS_AUTO;
+  bus_mode.filter = ILPS22QS_FILTER_AUTO;
   bus_mode.interface = ILPS22QS_SEL_BY_HW;
   ilps22qs_bus_mode_set(&dev_ctx, &bus_mode);
 

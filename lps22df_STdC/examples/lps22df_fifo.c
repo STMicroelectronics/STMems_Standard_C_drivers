@@ -162,7 +162,7 @@ void lps22df_fifo(void)
   lps22df_init_set(&dev_ctx, LPS22DF_DRV_RDY);
 
   /* Select bus interface */
-  bus_mode.filter = LPS22DF_AUTO;
+  bus_mode.filter = LPS22DF_FILTER_AUTO;
   bus_mode.interface = LPS22DF_SEL_BY_HW;
   lps22df_bus_mode_set(&dev_ctx, &bus_mode);
 
