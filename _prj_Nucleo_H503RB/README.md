@@ -63,7 +63,7 @@ void lsm6dsv16x_fifo_irq_handler(void);
 /* USER CODE BEGIN 0 */
 
 /* overwrite default interrupt callback */
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 {
   lsm6dsv16x_fifo_irq_handler();
 }
@@ -95,7 +95,7 @@ CFLAGS += -I $STDC_PATH/_prj_Nucleo_H503RB/
 
 ### Visualize example output messages
 
-Open a serial port emulator and configure it as 115200 8n1:
+Open a serial port emulator and configure it as 921600 8n1:
 
 <p align="center">
   <img src="./serial_port.png" />
