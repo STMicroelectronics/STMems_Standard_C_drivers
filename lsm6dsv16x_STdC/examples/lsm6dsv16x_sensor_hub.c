@@ -364,6 +364,7 @@ void lsm6dsv16x_sensor_hub(void)
 
       while (num--) {
         lsm6dsv16x_fifo_out_raw_t f_data;
+        float_t ts_usec;
 
         /* Read FIFO sensor value */
         lsm6dsv16x_fifo_out_raw_get(&lsm6dsv16x_ctx, &f_data);
@@ -381,7 +382,8 @@ void lsm6dsv16x_sensor_hub(void)
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
         case LSM6DSV16X_TIMESTAMP_TAG:
-          sprintf((char *)tx_buffer, "TIMESTAMP [ms] %d\r\n", *ts);
+          ts_usec = lsm6dsv16x_from_lsb_to_nsec(*ts)/1000;
+          sprintf((char *)tx_buffer, "TIMESTAMP %6.1f [us] (lsb: %d)\r\n", ts_usec, *ts);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
         case LSM6DSV16X_SENSORHUB_SLAVE0_TAG:
