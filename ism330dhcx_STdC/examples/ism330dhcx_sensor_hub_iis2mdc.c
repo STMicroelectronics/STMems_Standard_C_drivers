@@ -251,7 +251,7 @@ void ism330dhcx_mlc_iis2mdc(void)
       mag_fielg_mG[0] = iis2mdc_from_lsb_to_mgauss(data_raw.i16bit[0]);
       mag_fielg_mG[1] = iis2mdc_from_lsb_to_mgauss(data_raw.i16bit[1]);
       mag_fielg_mG[2] = iis2mdc_from_lsb_to_mgauss(data_raw.i16bit[2]);
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "xl[mg]:%4.2f\t%4.2f\t%4.2f\t"
               "gy[mdps]:%4.2f\t%4.2f\t%4.2f\t"
               "mag[mG]:%4.2f\t%4.2f\t%4.2f\r\n",

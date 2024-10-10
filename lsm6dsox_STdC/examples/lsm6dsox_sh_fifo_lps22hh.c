@@ -287,7 +287,7 @@ void lsm6dsox_sh_fifo_lps22hh(void)
                                    data_raw_acceleration.i16bit[1]);
             acceleration_mg[2] = lsm6dsox_from_fs2_to_mg(
                                    data_raw_acceleration.i16bit[2]);
-            sprintf( (char *)tx_buffer,
+            snprintf((char *)tx_buffer, sizeof(tx_buffer),
                      "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                      acceleration_mg[0],
                      acceleration_mg[1],
@@ -304,7 +304,7 @@ void lsm6dsox_sh_fifo_lps22hh(void)
                                      data_raw_angular_rate.i16bit[1]);
             angular_rate_mdps[2] = lsm6dsox_from_fs2000_to_mdps(
                                      data_raw_angular_rate.i16bit[2]);
-            sprintf( (char *)tx_buffer,
+            snprintf((char *)tx_buffer, sizeof(tx_buffer),
                      "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
                      angular_rate_mdps[0],
                      angular_rate_mdps[1],
@@ -327,7 +327,7 @@ void lsm6dsox_sh_fifo_lps22hh(void)
                              data_raw_press_temp.p_and_t.u32bit);
             temperature_degC = lps22hh_from_lsb_to_celsius(
                                  data_raw_press_temp.p_and_t.i16bit );
-            sprintf( (char *)tx_buffer,
+            snprintf((char *)tx_buffer, sizeof(tx_buffer),
                      "Press [hPa]:%4.2f\r\nTemp [degC]:%4.2f\r\n",
                      pressure_hPa, temperature_degC);
             tx_com(tx_buffer, strlen((char const *)tx_buffer));

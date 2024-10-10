@@ -178,7 +178,7 @@ void lsm6dso_wake_up(void)
     lsm6dso_all_sources_get(&dev_ctx, &all_source);
 
     if (all_source.wake_up) {
-      sprintf((char *)tx_buffer, "Wake-Up event on ");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Wake-Up event on ");
 
       if (all_source.wake_up_x) {
         strcat((char *)tx_buffer, "X");

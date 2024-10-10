@@ -276,7 +276,7 @@ void lsm6dsr_compressed_fifo(void)
                              ST_FIFO_GYROSCOPE);
 
       for (int i = 0; i < acc_samples; i++) {
-        sprintf((char *)tx_buffer, "ACC:\t%u\t%d\t%4.2f\t%4.2f\t%4.2f\r\n",
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "ACC:\t%u\t%d\t%4.2f\t%4.2f\t%4.2f\r\n",
                 (unsigned int)acc_slot[i].timestamp,
                 acc_slot[i].sensor_tag,
                 lsm6dsr_from_fs2g_to_mg(acc_slot[i].sensor_data.x),
@@ -286,7 +286,7 @@ void lsm6dsr_compressed_fifo(void)
       }
 
       for (int i = 0; i < gyr_samples; i++) {
-        sprintf((char *)tx_buffer, "GYR:\t%u\t%d\t%4.2f\t%4.2f\t%4.2f\r\n",
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "GYR:\t%u\t%d\t%4.2f\t%4.2f\t%4.2f\r\n",
                 (unsigned int)gyr_slot[i].timestamp,
                 gyr_slot[i].sensor_tag,
                 lsm6dsr_from_fs2000dps_to_mdps(gyr_slot[i].sensor_data.x),

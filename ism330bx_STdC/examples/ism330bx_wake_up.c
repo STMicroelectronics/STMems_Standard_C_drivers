@@ -193,7 +193,7 @@ void ism330bx_wake_up(void)
   //int_route.wake_up = PROPERTY_ENABLE;
   //ism330bx_pin_int2_route_set(&dev_ctx, int_route);
 
-  sprintf((char *)tx_buffer, "Waiting ");
+  snprintf((char *)tx_buffer, sizeof(tx_buffer), "Waiting ");
   tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
   /* Wait Events */
@@ -205,7 +205,7 @@ void ism330bx_wake_up(void)
       ism330bx_all_sources_get(&dev_ctx, &all_sources);
 
       if (all_sources.wake_up) {
-        sprintf((char *)tx_buffer, "Wake-Up event on ");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "Wake-Up event on ");
 
         if (all_sources.wake_up_x) {
           strcat((char *)tx_buffer, "X");

@@ -189,19 +189,19 @@ void lis2dtw12_single_tap(void)
     lis2dtw12_all_sources_get(&dev_ctx, &all_source);
 
     if (all_source.tap_src.single_tap) {
-      sprintf((char *)tx_buffer, "Tap Detected: Sign %s",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Tap Detected: Sign %s",
               all_source.tap_src.tap_sign ? "positive" : "negative");
 
       if (all_source.tap_src.x_tap) {
-        sprintf((char *)tx_buffer, "%s on X axis\r\n", tx_buffer);
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "%s on X axis\r\n", tx_buffer);
       }
 
       if (all_source.tap_src.y_tap) {
-        sprintf((char *)tx_buffer, "%s on Y axis\r\n", tx_buffer);
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "%s on Y axis\r\n", tx_buffer);
       }
 
       if (all_source.tap_src.z_tap) {
-        sprintf((char *)tx_buffer, "%s on Z axis\r\n", tx_buffer);
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "%s on Z axis\r\n", tx_buffer);
       }
 
       tx_com(tx_buffer, strlen((char const *)tx_buffer));

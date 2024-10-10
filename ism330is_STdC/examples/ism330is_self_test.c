@@ -284,9 +284,9 @@ void ism330is_self_test(void)
     }
 
     if (st_result == ST_PASS) {
-      sprintf((char *)tx_buffer, "%s XL Self Test - PASS\r\n", (test == ST_POS) ? "\nPOS" : "NEG");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "%s XL Self Test - PASS\r\n", (test == ST_POS) ? "\nPOS" : "NEG");
     } else {
-      sprintf((char *)tx_buffer, "%s XL Self Test - FAIL!!!!\r\n", (test == ST_POS) ? "\nPOS" : "NEG");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "%s XL Self Test - FAIL!!!!\r\n", (test == ST_POS) ? "\nPOS" : "NEG");
     }
     tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
@@ -366,9 +366,9 @@ void ism330is_self_test(void)
     }
 
     if (st_result == ST_PASS) {
-      sprintf((char *)tx_buffer, "%s GY Self Test - PASS\r\n", (test == ST_POS) ? "POS" : "NEG");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "%s GY Self Test - PASS\r\n", (test == ST_POS) ? "POS" : "NEG");
     } else {
-      sprintf((char *)tx_buffer, "%s GY Self Test - FAIL!!!!\r\n", (test == ST_POS) ? "POS" : "NEG");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "%s GY Self Test - FAIL!!!!\r\n", (test == ST_POS) ? "POS" : "NEG");
     }
     tx_com(tx_buffer, strlen((char const *)tx_buffer));
 

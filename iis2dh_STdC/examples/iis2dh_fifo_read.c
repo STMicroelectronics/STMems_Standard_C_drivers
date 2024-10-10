@@ -182,7 +182,7 @@ void iis2dh_fifo_read(void)
           iis2dh_from_fs2_hr_to_mg(data_raw_acceleration[1]);
         acceleration_mg[2] =
           iis2dh_from_fs2_hr_to_mg(data_raw_acceleration[2]);
-        sprintf((char *)tx_buffer,
+        snprintf((char *)tx_buffer, sizeof(tx_buffer),
                 "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                 acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
         tx_com(tx_buffer, strlen((char const *)tx_buffer));

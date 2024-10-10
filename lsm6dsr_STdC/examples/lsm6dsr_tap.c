@@ -208,7 +208,7 @@ void lsm6dsr_tap(void)
     lsm6dsr_all_sources_get(&dev_ctx, &all_source);
 
     if (all_source.tap_src.double_tap) {
-      sprintf((char *)tx_buffer, "D-Tap: ");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "D-Tap: ");
 
       if (all_source.tap_src.x_tap) {
         strcat((char *)tx_buffer, "x-axis");
@@ -235,7 +235,7 @@ void lsm6dsr_tap(void)
     }
 
     if (all_source.tap_src.single_tap) {
-      sprintf((char *)tx_buffer, "S-Tap: ");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "S-Tap: ");
 
       if (all_source.tap_src.x_tap) {
         strcat((char *)tx_buffer, "x-axis");

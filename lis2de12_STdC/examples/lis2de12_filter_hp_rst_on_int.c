@@ -186,7 +186,7 @@ void lis2de12_filter_hp_rst_on_int(void)
         lis2de12_from_fs2_to_mg(data_raw_acceleration[1]);
       acceleration_mg[2] =
         lis2de12_from_fs2_to_mg(data_raw_acceleration[2]);
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "Acceleration [mg]:\t%4.2f\t%4.2f\t%4.2f\t%02X\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2], reg.byte);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));

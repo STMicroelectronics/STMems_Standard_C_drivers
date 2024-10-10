@@ -191,14 +191,14 @@ void lis2duxs12_read_data_drdy(void)
       drdy_event = 0;
 
       /* print Accel data  */
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               data_xl.mg[0], data_xl.mg[1], data_xl.mg[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
 
       lis2duxs12_outt_data_get(&dev_ctx, &data_temp);
 
       /* print Temp data  */
-      sprintf((char*)tx_buffer, "Temp[degC]:%3.2f\r\n",
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "Temp[degC]:%3.2f\r\n",
               data_temp.heat.deg_c);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }

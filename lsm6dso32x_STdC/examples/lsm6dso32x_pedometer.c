@@ -190,7 +190,7 @@ void lsm6dso32x_pedometer(void)
     if (status.step_detector) {
       /* Read steps */
       lsm6dso32x_number_of_steps_get(&dev_ctx, &steps);
-      sprintf((char *)tx_buffer, "steps :%d\r\n", steps);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "steps :%d\r\n", steps);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

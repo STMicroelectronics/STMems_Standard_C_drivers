@@ -172,7 +172,7 @@ void iis3dwb_fifo(void)
 
     if (fifo_status.fifo_th == 1) {
       num = fifo_status.fifo_level;
-      sprintf((char *)tx_buffer, "-- FIFO num %d \r\n", num);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "-- FIFO num %d \r\n", num);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
       /* read out all FIFO entries in a single read */
@@ -195,7 +195,7 @@ void iis3dwb_fifo(void)
 
         switch (f_data->tag >> 3) {
         case IIS3DWB_XL_TAG:
-          sprintf((char *)tx_buffer, "%d: ACC [mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "%d: ACC [mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
                   k,
                   iis3dwb_from_fs8g_to_mg(*datax),
                   iis3dwb_from_fs8g_to_mg(*datay),
@@ -203,7 +203,7 @@ void iis3dwb_fifo(void)
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
         case IIS3DWB_TIMESTAMP_TAG:
-          sprintf((char *)tx_buffer, "%d TIMESTAMP [ms] %d\r\n", k, *ts);
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "%d TIMESTAMP [ms] %d\r\n", k, *ts);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
         default:
@@ -211,7 +211,7 @@ void iis3dwb_fifo(void)
         }
       }
       
-      sprintf((char *)tx_buffer, "------ \r\n\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "------ \r\n\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

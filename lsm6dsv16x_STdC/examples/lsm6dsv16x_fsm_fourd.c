@@ -200,19 +200,19 @@ void lsm6dsv16x_fsm_fourd(void)
     if (fourd_event_catched != 0x0) {
       switch(fourd_event_catched) {
       case 0x10:
-        sprintf((char *)tx_buffer, "Y down event\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "Y down event\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       case 0x20:
-        sprintf((char *)tx_buffer, "Y up event\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "Y up event\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       case 0x40:
-        sprintf((char *)tx_buffer, "X down event\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "X down event\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       case 0x80:
-        sprintf((char *)tx_buffer, "X up event\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "X up event\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       }

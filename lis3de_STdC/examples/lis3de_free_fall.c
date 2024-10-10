@@ -193,7 +193,7 @@ void lis3de_freefall(void)
 
     if (platform_reap_int_pin()) {
       lis3de_int1_gen_source_get(&dev_ctx, &src);
-      sprintf((char *)tx_buffer, "freefall detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "freefall detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

@@ -325,33 +325,33 @@ void lsm6dso32x_fsm(void)
     lsm6dso32x_all_sources_get(&dev_ctx, &status);
 
     if (status.fsm1) {
-      sprintf((char *)tx_buffer, "glance detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "glance detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     if (status.fsm2) {
-      sprintf((char *)tx_buffer, "motion detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "motion detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     if (status.fsm3) {
-      sprintf((char *)tx_buffer, "no motion detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "no motion detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     if (status.fsm4) {
-      sprintf((char *)tx_buffer, "wakeup detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "wakeup detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     if (status.fsm5) {
-      sprintf((char *)tx_buffer, "pickup detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "pickup detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     if (status.fsm6) {
       lsm6dso32x_fsm_out_get(&dev_ctx, &fsm_out);
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "orientation detected (%d, %d, %d, %d, %d, %d, %d, %d)\r\n",
               fsm_out.fsm_outs6.n_v, fsm_out.fsm_outs6.p_v,
               fsm_out.fsm_outs6.n_z, fsm_out.fsm_outs6.p_z,
@@ -361,7 +361,7 @@ void lsm6dso32x_fsm(void)
     }
 
     if (status.fsm7) {
-      sprintf((char *)tx_buffer, "wrist tilt detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "wrist tilt detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 

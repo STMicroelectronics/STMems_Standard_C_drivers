@@ -334,7 +334,7 @@ void lsm6dsv_sensor_hub(void)
       lsm6dsv_fifo_status_get(&lsm6dsv_ctx, &fifo_status);
 
       num = fifo_status.fifo_level;
-      sprintf((char *)tx_buffer, "-- FIFO num %d \r\n", num);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "-- FIFO num %d \r\n", num);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
       while (num--) {
@@ -349,18 +349,18 @@ void lsm6dsv_sensor_hub(void)
 
         switch (f_data.tag) {
         case LSM6DSV_XL_NC_TAG:
-          sprintf((char *)tx_buffer, "ACC [mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "ACC [mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
                   lsm6dsv_from_fs2_to_mg(*datax),
                   lsm6dsv_from_fs2_to_mg(*datay),
                   lsm6dsv_from_fs2_to_mg(*dataz));
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
         case LSM6DSV_TIMESTAMP_TAG:
-          sprintf((char *)tx_buffer, "TIMESTAMP [ms] %d\r\n", *ts);
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "TIMESTAMP [ms] %d\r\n", *ts);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
         case LSM6DSV_SENSORHUB_SLAVE0_TAG:
-          sprintf((char *)tx_buffer, "LIS2MDL [mGa]:\t%4.2f\t%4.2f\t%4.2f\r\n",
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "LIS2MDL [mGa]:\t%4.2f\t%4.2f\t%4.2f\r\n",
                   lis2mdl_from_lsb_to_mgauss(*datax),
                   lis2mdl_from_lsb_to_mgauss(*datay),
                   lis2mdl_from_lsb_to_mgauss(*dataz));
@@ -375,19 +375,19 @@ void lsm6dsv_sensor_hub(void)
           /* temperature conversion */
           temp = (int16_t)f_data.data[4];
           temp = (temp * 256) + (int16_t) f_data.data[3];
-          sprintf((char *)tx_buffer, "LPS22DF [hPa]:%6.2f [degC]:%6.2f\r\n",
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "LPS22DF [hPa]:%6.2f [degC]:%6.2f\r\n",
                   lps22df_from_lsb_to_hPa(baro),
                   lps22df_from_lsb_to_celsius(temp));
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
         default:
-          sprintf((char *)tx_buffer, "Invalid TAG %02x\r\n", f_data.tag);
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "Invalid TAG %02x\r\n", f_data.tag);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
         }
       }
 
-      sprintf((char *)tx_buffer, "------ \r\n\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "------ \r\n\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

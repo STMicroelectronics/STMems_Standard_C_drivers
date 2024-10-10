@@ -182,7 +182,7 @@ void lsm6dsm_tilt(void)
     lsm6dsm_all_sources_get(&dev_ctx, &all_source);
 
     if (all_source.func_src1.tilt_ia) {
-      sprintf((char *)tx_buffer, "TILT Detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "TILT Detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 

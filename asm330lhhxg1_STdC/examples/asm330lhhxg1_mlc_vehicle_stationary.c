@@ -192,13 +192,13 @@ void asm330lhhxg1_mlc_vehicle_stationary(void)
 
       switch (vehicle_status[0]) {
       case 4:
-        sprintf((char *)tx_buffer, "vehicle is stationary\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "vehicle is stationary\r\n");
         break;
       case 0:
-        sprintf((char *)tx_buffer, "vehicle is moving\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "vehicle is moving\r\n");
         break;
       default:
-        sprintf((char *)tx_buffer, "unknown state\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "unknown state\r\n");
         break;
       }
       tx_com(tx_buffer, strlen((char const *)tx_buffer));

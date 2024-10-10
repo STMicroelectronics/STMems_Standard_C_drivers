@@ -185,7 +185,7 @@ void lsm6dsox_orientation(void)
     lsm6dsox_all_sources_get(&dev_ctx, &all_source);
 
     if (all_source.six_d) {
-      sprintf((char *)tx_buffer, "6D Or. switched to ");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "6D Or. switched to ");
 
       if (all_source.six_d_xh) {
         strcat((char *)tx_buffer, "XH");

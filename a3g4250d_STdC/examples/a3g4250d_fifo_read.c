@@ -179,7 +179,7 @@ void a3g4250d_fifo_read(void)
                                  data_raw_angular_rate[1]);
         angular_rate_mdps[2] = a3g4250d_from_fs245dps_to_mdps(
                                  data_raw_angular_rate[2]);
-        sprintf((char *)tx_buffer,
+        snprintf((char *)tx_buffer, sizeof(tx_buffer),
                 "Angular Rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
                 angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
         tx_com(tx_buffer, strlen((char const *)tx_buffer));

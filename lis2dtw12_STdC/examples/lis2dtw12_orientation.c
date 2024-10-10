@@ -178,7 +178,7 @@ void lis2dtw12_orientation(void)
 
     /* Check 6D Orientation events */
     if (all_source.sixd_src._6d_ia) {
-      sprintf((char *)tx_buffer, "6D Or. switched to ");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "6D Or. switched to ");
 
       if (all_source.sixd_src.xh) {
         strcat((char *)tx_buffer, "XH");

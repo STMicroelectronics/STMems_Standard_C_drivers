@@ -195,13 +195,13 @@ void asm330lhhxg1_activity(void)
     asm330lhhxg1_all_sources_get(&dev_ctx, &all_source);
     if (all_source.wake_up_src.sleep_state)
     {
-      sprintf((char*)tx_buffer, "Inactivity Detected\r\n");
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "Inactivity Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
 
     if (all_source.wake_up_src.wu_ia)
     {
-      sprintf((char*)tx_buffer, "Activity Detected\r\n");
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "Activity Detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

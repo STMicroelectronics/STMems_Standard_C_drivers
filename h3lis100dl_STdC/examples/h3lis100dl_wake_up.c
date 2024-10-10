@@ -185,17 +185,17 @@ void example_main_wake_up_h3lis100dl(void)
     h3lis100dl_int1_src_get(&dev_ctx, &all_source);
 
     if (all_source.xh) {
-      sprintf((char *)tx_buffer, "Wake-Up event on X\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Wake-Up event on X\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     if (all_source.yh) {
-      sprintf((char *)tx_buffer, "Wake-Up event on Y\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Wake-Up event on Y\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     if (all_source.zh) {
-      sprintf((char *)tx_buffer, "Wake-Up event on Z\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Wake-Up event on Z\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 

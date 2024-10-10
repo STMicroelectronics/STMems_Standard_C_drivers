@@ -185,7 +185,7 @@ void iis2iclx_fsm_tilt(void)
     iis2iclx_all_sources_get(&dev_ctx, &status);
 
     if (status.fsm_status_a.is_fsm1) {
-      sprintf((char *)tx_buffer, "tilt detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "tilt detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 

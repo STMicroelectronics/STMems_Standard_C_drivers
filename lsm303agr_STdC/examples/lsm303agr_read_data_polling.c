@@ -235,7 +235,7 @@ void lsm303agr_read_data_polling(void)
                              data_raw_acceleration[1] );
       acceleration_mg[2] = lsm303agr_from_fs_2g_hr_to_mg(
                              data_raw_acceleration[2] );
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
@@ -253,7 +253,7 @@ void lsm303agr_read_data_polling(void)
                          data_raw_magnetic[1]);
       magnetic_mG[2] = lsm303agr_from_lsb_to_mgauss(
                          data_raw_magnetic[2]);
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "Magnetic field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
       tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
@@ -268,7 +268,7 @@ void lsm303agr_read_data_polling(void)
                                     &data_raw_temperature);
       temperature_degC = lsm303agr_from_lsb_hr_to_celsius(
                            data_raw_temperature );
-      sprintf((char *)tx_buffer, "Temperature [degC]:%6.2f\r\n",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Temperature [degC]:%6.2f\r\n",
               temperature_degC );
       tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
     }

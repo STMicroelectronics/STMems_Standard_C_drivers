@@ -248,7 +248,7 @@ void ism303dac_read_data_polling(void)
                              data_raw_acceleration[1]);
       acceleration_mg[2] = ism303dac_from_fs2g_to_mg(
                              data_raw_acceleration[2]);
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
@@ -263,7 +263,7 @@ void ism303dac_read_data_polling(void)
       magnetic_mG[0] = ism303dac_from_lsb_to_mG( data_raw_magnetic[0]);
       magnetic_mG[1] = ism303dac_from_lsb_to_mG( data_raw_magnetic[1]);
       magnetic_mG[2] = ism303dac_from_lsb_to_mG( data_raw_magnetic[2]);
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "Magnetic field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
       tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );

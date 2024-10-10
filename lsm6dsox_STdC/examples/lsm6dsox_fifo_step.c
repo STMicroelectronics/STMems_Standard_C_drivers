@@ -217,7 +217,7 @@ void lsm6dsox_fifo_step(void)
         switch (reg_tag) {
           case LSM6DSOX_STEP_CPUNTER_TAG:
             lsm6dsox_fifo_out_raw_get(&ag_ctx, pedo_sample.byte);
-            sprintf((char *)tx_buffer, "Step Count :%u T %u\r\n",
+            snprintf((char *)tx_buffer, sizeof(tx_buffer), "Step Count :%u T %u\r\n",
                     (unsigned int)pedo_sample.step_count,
                     (unsigned int)pedo_sample.timestamp);
             tx_com(tx_buffer, strlen((char const *)tx_buffer));

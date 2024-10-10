@@ -218,27 +218,27 @@ void lsm6dsv16x_sixd(void)
 
       switch (sixd_event_catched) {
       case 0x48:
-        sprintf((char *)tx_buffer, "6D Position A\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "6D Position A\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       case 0x41:
-        sprintf((char *)tx_buffer, "6D Position B\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "6D Position B\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       case 0x42:
-        sprintf((char *)tx_buffer, "6D Position C\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "6D Position C\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       case 0x44:
-        sprintf((char *)tx_buffer, "6D Position D\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "6D Position D\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       case 0x60:
-        sprintf((char *)tx_buffer, "6D Position E\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "6D Position E\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       case 0x50:
-        sprintf((char *)tx_buffer, "6D Position F\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "6D Position F\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       }

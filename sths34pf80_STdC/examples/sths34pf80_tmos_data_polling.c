@@ -160,7 +160,7 @@ void sths34pf80_tmos_data_polling(void)
   sths34pf80_lpf_p_m_bandwidth_get(&dev_ctx, &lpf_p_m);
   sths34pf80_lpf_a_t_bandwidth_get(&dev_ctx, &lpf_a_t);
 
-  sprintf((char *)tx_buffer,
+  snprintf((char *)tx_buffer, sizeof(tx_buffer),
           "lpf_m: %02d, lpf_p: %02d, lpf_p_m: %02d, lpf_a_t: %02d\r\n", lpf_m, lpf_p, lpf_p_m, lpf_a_t);
   tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
@@ -181,7 +181,7 @@ void sths34pf80_tmos_data_polling(void)
       sths34pf80_func_status_get(&dev_ctx, &func_status);
       if ((cnt++ % 30) == 0)
       {
-        sprintf((char *)tx_buffer, "-->TA %d - P %d - M %d\r\n",
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "-->TA %d - P %d - M %d\r\n",
                 func_status.tamb_shock_flag, func_status.pres_flag, func_status.mot_flag);
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
       }

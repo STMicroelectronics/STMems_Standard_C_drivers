@@ -179,7 +179,7 @@ void asm330lhhx_fsm_shake(void)
     asm330lhhx_fsm_status_get(&dev_ctx, &status);
 
     if (status.fsm1) {
-      sprintf((char *)tx_buffer, "shake detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "shake detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 

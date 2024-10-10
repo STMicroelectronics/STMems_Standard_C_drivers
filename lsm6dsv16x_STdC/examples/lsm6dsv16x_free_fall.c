@@ -211,7 +211,7 @@ void lsm6dsv16x_free_fall(void)
     if (ff_event_catched) {
       ff_event_catched = 0;
 
-      sprintf((char *)tx_buffer, "Free Fall event\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Free Fall event\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

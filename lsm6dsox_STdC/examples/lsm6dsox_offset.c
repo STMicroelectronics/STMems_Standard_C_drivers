@@ -197,7 +197,7 @@ void lsm6dsox_offset(void)
         lsm6dsox_from_fs2_to_mg(data_raw_acceleration[1]);
       acceleration_mg[2] =
         lsm6dsox_from_fs2_to_mg(data_raw_acceleration[2]);
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
@@ -215,7 +215,7 @@ void lsm6dsox_offset(void)
         lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate[1]);
       angular_rate_mdps[2] =
         lsm6dsox_from_fs2000_to_mdps(data_raw_angular_rate[2]);
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
               angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
@@ -229,7 +229,7 @@ void lsm6dsox_offset(void)
       lsm6dsox_temperature_raw_get(&dev_ctx, &data_raw_temperature);
       temperature_degC = lsm6dsox_from_lsb_to_celsius(
                            data_raw_temperature);
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "Temperature [degC]:%6.2f\r\n", temperature_degC);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }

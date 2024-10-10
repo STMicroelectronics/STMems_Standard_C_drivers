@@ -182,11 +182,11 @@ void ilps28qsw_ah_qvar_press_interleaved(void)
 
       /* check needed in case of interleaved mode ON */
       if (data.ah_qvar.lsb == 0) {
-        sprintf((char*)tx_buffer,
+        snprintf((char*)tx_buffer, sizeof(tx_buffer),
                 "pressure [hPa]:%6.2f temperature [degC]:%6.2f\r\n",
                 data.pressure.hpa, data.heat.deg_c);
       } else {
-        sprintf((char*)tx_buffer,
+        snprintf((char*)tx_buffer, sizeof(tx_buffer),
                 "AH_QVAR lsb %d temperature [degC]:%6.2f\r\n",
                 data.ah_qvar.lsb, data.heat.deg_c);
       }

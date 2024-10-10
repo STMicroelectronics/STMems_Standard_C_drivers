@@ -206,17 +206,17 @@ void lis2du12_sixd(void)
   {
     if (sixd_event & 0x40) {
       if (sixd_event & 0x8) {
-        sprintf((char*)tx_buffer, "Y-axis UP\r\n");
+        snprintf((char*)tx_buffer, sizeof(tx_buffer), "Y-axis UP\r\n");
       } else if (sixd_event & 0x01) {
-        sprintf((char*)tx_buffer, "X-axis DOWN\r\n");
+        snprintf((char*)tx_buffer, sizeof(tx_buffer), "X-axis DOWN\r\n");
       } else if (sixd_event & 0x02) {
-        sprintf((char*)tx_buffer, "X-axis UP\r\n");
+        snprintf((char*)tx_buffer, sizeof(tx_buffer), "X-axis UP\r\n");
       } else if (sixd_event & 0x04) {
-        sprintf((char*)tx_buffer, "Y-axis DOWN\r\n");
+        snprintf((char*)tx_buffer, sizeof(tx_buffer), "Y-axis DOWN\r\n");
       } else if (sixd_event & 0x20) {
-        sprintf((char*)tx_buffer, "Z-axis UP\r\n");
+        snprintf((char*)tx_buffer, sizeof(tx_buffer), "Z-axis UP\r\n");
       } else if (sixd_event & 0x10) {
-        sprintf((char*)tx_buffer, "Z-axis DOWN\r\n");
+        snprintf((char*)tx_buffer, sizeof(tx_buffer), "Z-axis DOWN\r\n");
       }
       sixd_event = 0;
 

@@ -215,27 +215,27 @@ void lis2dux12_read_fifo(void)
       /* Read number of samples in FIFO */
       lis2dux12_fifo_data_level_get(&dev_ctx, &num);
 
-      sprintf((char *)tx_buffer,"-- %d in FIFO\r\n", num);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "-- %d in FIFO\r\n", num);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
       while (num--) {
         lis2dux12_fifo_data_get(&dev_ctx, &md, &fifo_mode, &fdata);
 
         switch (fdata.tag) {
         case LIS2DUX12_XL_ONLY_2X_TAG:
-          sprintf((char*)tx_buffer, "%02d_0: Acceleration [0][mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
+          snprintf((char*)tx_buffer, sizeof(tx_buffer), "%02d_0: Acceleration [0][mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
                   NUM_FIFO_ENTRY - num, fdata.xl[0].mg[0], fdata.xl[0].mg[1], fdata.xl[0].mg[2]);
           tx_com(tx_buffer, strlen((char const*)tx_buffer));
-          sprintf((char*)tx_buffer, "%02d_1: Acceleration [1][mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
+          snprintf((char*)tx_buffer, sizeof(tx_buffer), "%02d_1: Acceleration [1][mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
                   NUM_FIFO_ENTRY - num, fdata.xl[1].mg[0], fdata.xl[1].mg[1], fdata.xl[1].mg[2]);
           tx_com(tx_buffer, strlen((char const*)tx_buffer));
           break;
         case LIS2DUX12_XL_TEMP_TAG:
           if (fifo_mode.xl_only == 0) {
-            sprintf((char *)tx_buffer,
+            snprintf((char *)tx_buffer, sizeof(tx_buffer),
                     "%02d: Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\tTemp[degC]:%3.2f\r\n", NUM_FIFO_ENTRY - num,
                     fdata.xl[0].mg[0], fdata.xl[0].mg[1], fdata.xl[0].mg[2], fdata.heat.deg_c);
           } else {
-            sprintf((char *)tx_buffer,
+            snprintf((char *)tx_buffer, sizeof(tx_buffer),
                     "%02d: Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n", NUM_FIFO_ENTRY - num,
                     fdata.xl[0].mg[0], fdata.xl[0].mg[1], fdata.xl[0].mg[2]);
           }
@@ -243,16 +243,16 @@ void lis2dux12_read_fifo(void)
           break;
         case LIS2DUX12_TIMESTAMP_TAG:
           ts = fdata.cfg_chg.timestamp / 100;
-          sprintf((char*)tx_buffer, "Timestamp:\t%lu ms\t\r\n", ts);
+          snprintf((char*)tx_buffer, sizeof(tx_buffer), "Timestamp:\t%lu ms\t\r\n", ts);
           tx_com(tx_buffer, strlen((char const*)tx_buffer));
           break;
        default:
-          sprintf((char*)tx_buffer, "unknown TAG (%02x)\t\r\n", fdata.tag);
+          snprintf((char*)tx_buffer, sizeof(tx_buffer), "unknown TAG (%02x)\t\r\n", fdata.tag);
           tx_com(tx_buffer, strlen((char const*)tx_buffer));
           break;
         }
       }
-      sprintf((char *)tx_buffer,"\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),"\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

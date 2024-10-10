@@ -212,7 +212,7 @@ void lis2duxs12_pedometer(void)
       lis2duxs12_stpcnt_steps_get(&dev_ctx, &steps);
 
       /* print number of steps  */
-      sprintf((char*)tx_buffer, "Steps: %d\r\n", steps);
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "Steps: %d\r\n", steps);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
 
     }

@@ -193,22 +193,22 @@ void ilps22qs_fifo(void)
       ilps22qs_fifo_level_get(&dev_ctx, &level);
       ilps22qs_fifo_data_get(&dev_ctx, level, &md, data);
 
-      sprintf((char*)tx_buffer, "--- FIFO samples\r\n");
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "--- FIFO samples\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
 
       for (i = 0; i < level; i++) {
         /* check needed in case of interleaved mode ON */
         if (data[i].lsb == 0) {
-          sprintf((char*)tx_buffer,
+          snprintf((char*)tx_buffer, sizeof(tx_buffer),
                   "%02d: pressure [hPa]:%6.2f\r\n", i, data[i].hpa);
         } else {
-          sprintf((char*)tx_buffer,
+          snprintf((char*)tx_buffer, sizeof(tx_buffer),
                   "%02d: AH_QVAR lsb %d\r\n", i, data[i].lsb);
         }
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
       }
 
-      sprintf((char*)tx_buffer, "\r\n");
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
    }
 

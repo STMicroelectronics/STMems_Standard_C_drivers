@@ -205,7 +205,7 @@ void lsm6dsm_fifo_stream(void)
           lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
         acceleration_mg[2] =
           lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
-        sprintf((char *)tx_buffer, "[%03d] Acc [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "[%03d] Acc [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                 num_pattern, acceleration_mg[0],
                 acceleration_mg[1], acceleration_mg[2]);
         tx_com(tx_buffer, strlen((char const *)tx_buffer));

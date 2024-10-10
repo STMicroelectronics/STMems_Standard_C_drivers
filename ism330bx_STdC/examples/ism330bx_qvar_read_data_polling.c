@@ -185,7 +185,7 @@ void ism330bx_qvar_read_data_polling(void)
     if ( all_sources.drdy_ah_qvar ) {
       ism330bx_ah_qvar_raw_get(&dev_ctx, &data);
 
-      sprintf((char*)tx_buffer,"QVAR [LSB]:%d\r\n", data);
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "QVAR [LSB]:%d\r\n", data);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

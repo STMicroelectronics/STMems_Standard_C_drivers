@@ -178,12 +178,12 @@ void lsm6dso_activity(void)
     lsm6dso_all_sources_get(&dev_ctx, &all_source);
 
     if (all_source.sleep_state) {
-      sprintf((char *)tx_buffer, "Inactivity Detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Inactivity Detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     if (all_source.wake_up) {
-      sprintf((char *)tx_buffer, "Activity Detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Activity Detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

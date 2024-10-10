@@ -182,7 +182,7 @@ void lsm6dsrx_tilt(void)
     lsm6dsrx_tilt_flag_data_ready_get(&dev_ctx, &is_tilt);
 
     if (is_tilt) {
-      sprintf((char *)tx_buffer, "TILT Detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "TILT Detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

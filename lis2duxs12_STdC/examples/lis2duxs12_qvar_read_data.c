@@ -199,7 +199,7 @@ void lis2duxs12_qvar_read_data(void)
       lis2duxs12_ah_qvar_data_get(&dev_ctx, &data);
       lis2duxs12_xl_data_get(&dev_ctx, &md, &data_xl);
 
-      sprintf((char*)tx_buffer,"Acceleration [mg]:%4.2f\t%4.2f\t%4.2f - QVAR [LSB]: %d\r\n",
+      snprintf((char*)tx_buffer, sizeof(tx_buffer),"Acceleration [mg]:%4.2f\t%4.2f\t%4.2f - QVAR [LSB]: %d\r\n",
                data_xl.mg[0], data_xl.mg[1], data_xl.mg[2], data.raw);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }

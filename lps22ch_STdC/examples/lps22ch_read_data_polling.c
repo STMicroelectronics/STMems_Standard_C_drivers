@@ -176,7 +176,7 @@ void lps22ch_read_data_polling(void)
       memset(&data_raw_pressure, 0x00, sizeof(uint32_t));
       lps22ch_pressure_raw_get(&dev_ctx, &data_raw_pressure);
       pressure_hPa = lps22ch_from_lsb_to_hpa( data_raw_pressure);
-      sprintf((char *)tx_buffer, "pressure [hPa]:%6.2f\r\n", pressure_hPa);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "pressure [hPa]:%6.2f\r\n", pressure_hPa);
       tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
     }
 
@@ -185,7 +185,7 @@ void lps22ch_read_data_polling(void)
       lps22ch_temperature_raw_get(&dev_ctx, &data_raw_temperature);
       temperature_degC = lps22ch_from_lsb_to_celsius(
                            data_raw_temperature );
-      sprintf((char *)tx_buffer, "temperature [degC]:%6.2f\r\n",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "temperature [degC]:%6.2f\r\n",
               temperature_degC );
       tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
     }

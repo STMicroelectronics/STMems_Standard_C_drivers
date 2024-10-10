@@ -151,7 +151,7 @@ void lsm6dso16is_ispu_norm_handler()
   temp = (dout[9] << 24) | (dout[8] << 16) | (dout[7] << 8) | dout[6];
   norm = *(float *)&temp;
 
-  sprintf((char *)tx_buffer, "x: %d\ty: %d\tz: %d\tnorm: %4.2f\r\n", x, y, z, norm);
+  snprintf((char *)tx_buffer, sizeof(tx_buffer), "x: %d\ty: %d\tz: %d\tnorm: %4.2f\r\n", x, y, z, norm);
   tx_com(tx_buffer, strlen((char const *)tx_buffer));
 }
 
@@ -193,7 +193,7 @@ void lsm6dso16is_ispu_norm(void)
   }
 
   lsm6dso16is_ispu_data_rate_get(&dev_ctx, &ispu_odr);
-  sprintf((char *)tx_buffer, "ISPU started: at rate %d\r\n", ispu_odr);
+  snprintf((char *)tx_buffer, sizeof(tx_buffer), "ISPU started: at rate %d\r\n", ispu_odr);
   tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
   /* Read norm result in interrupt handler */

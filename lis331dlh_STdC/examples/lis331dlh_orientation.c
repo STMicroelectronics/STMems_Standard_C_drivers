@@ -165,32 +165,32 @@ void lis331dlh_orientation_6D(void)
     /* Check 6D Orientation */
     switch (all_source.byte & 0x3f) {
       case 0x01:
-        sprintf((char *)tx_buffer, "6D Or. position XL\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "6D Or. position XL\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
 
       case 0x02:
-        sprintf((char *)tx_buffer, "6D Or. position XH\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "6D Or. position XH\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
 
       case 0x04:
-        sprintf((char *)tx_buffer, "6D Or. position YL\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "6D Or. position YL\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
 
       case 0x08:
-        sprintf((char *)tx_buffer, "6D Or. position YH\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "6D Or. position YH\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
 
       case 0x10:
-        sprintf((char *)tx_buffer, "6D Or. position ZL\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "6D Or. position ZL\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
 
       case 0x20:
-        sprintf((char *)tx_buffer, "6D Or. position ZH\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "6D Or. position ZH\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
 

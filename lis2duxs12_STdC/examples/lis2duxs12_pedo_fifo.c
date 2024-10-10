@@ -226,7 +226,7 @@ void lis2duxs12_pedo_fifo(void)
       /* Read number of samples in FIFO */
       lis2duxs12_fifo_data_level_get(&dev_ctx, &num);
 
-      sprintf((char *)tx_buffer,"-- %d in FIFO\r\n", num);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "-- %d in FIFO\r\n", num);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
       while (num--) {
         lis2duxs12_fifo_data_get(&dev_ctx, &md, &fifo_mode, &fdata);
@@ -235,13 +235,13 @@ void lis2duxs12_pedo_fifo(void)
         case LIS2DUXS12_STEP_COUNTER_TAG:
           ts = fdata.pedo.timestamp / 100;
           steps = fdata.pedo.steps;
-          sprintf((char*)tx_buffer, "Steps: %03d (%lu ms)\r\n", steps, ts);
+          snprintf((char*)tx_buffer, sizeof(tx_buffer), "Steps: %03d (%lu ms)\r\n", steps, ts);
           tx_com(tx_buffer, strlen((char const*)tx_buffer));
         default:
           break;
         }
       }
-      sprintf((char *)tx_buffer,"\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),"\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

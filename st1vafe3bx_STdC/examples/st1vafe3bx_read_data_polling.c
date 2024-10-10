@@ -186,7 +186,7 @@ void st1vafe3bx_read_data_polling(void)
       st1vafe3bx_ah_bio_data_get(&dev_ctx, &data);
 
       /* print ENG data  */
-      sprintf((char*)tx_buffer, "QVAR [LSB]: %d\r\n", data.raw);
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "QVAR [LSB]: %d\r\n", data.raw);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

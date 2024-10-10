@@ -178,15 +178,15 @@ void lsm6dsv32x_mlc_gym(void)
     if (gym_event_catched != 0x0) {
       switch(gym_event_catched) {
       case 4:
-        sprintf((char *)tx_buffer, "biceps curl event\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "biceps curl event\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       case 8:
-        sprintf((char *)tx_buffer, "Lateral raises event\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "Lateral raises event\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       case 12:
-        sprintf((char *)tx_buffer, "Squats event\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "Squats event\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       }

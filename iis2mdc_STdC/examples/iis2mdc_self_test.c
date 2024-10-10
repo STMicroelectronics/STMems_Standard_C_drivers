@@ -242,7 +242,7 @@ static int test_self_test_iis2mdc(stmdev_ctx_t *dev_ctx)
       result += 1;
     }
 
-    sprintf((char *)tx_buffer, "%d: |%f| <= |%f| <= |%f| %s\r\n", k,
+    snprintf((char *)tx_buffer, sizeof(tx_buffer), "%d: |%f| <= |%f| <= |%f| %s\r\n", k,
             ST_MIN_POS, ABSF(mediast[k] - media[k]), ST_MAX_POS,
             match[k] == 1 ? "PASSED" : "FAILED");
     tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );

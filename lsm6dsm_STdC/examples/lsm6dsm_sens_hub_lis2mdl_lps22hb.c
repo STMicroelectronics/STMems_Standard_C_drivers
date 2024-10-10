@@ -452,7 +452,7 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6dsm(void)
         lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[1]);
       acceleration_mg[2] =
         lsm6dsm_from_fs2g_to_mg(data_raw_acceleration.i16bit[2]);
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
@@ -470,7 +470,7 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6dsm(void)
                          data_raw_magnetic.i16bit[1]);
       magnetic_mG[2] = lis2mdl_from_lsb_to_mgauss(
                          data_raw_magnetic.i16bit[2]);
-      sprintf((char *)tx_buffer, "Mag [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Mag [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
       /* Read pressure data from sensor hub register: XL trigger a new read to
@@ -486,9 +486,9 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6dsm(void)
       pressure_hPa = lps22hb_from_lsb_to_hpa(data_raw_pressure.i32bit);
       temperature_degC = lps22hb_from_lsb_to_degc(
                            data_raw_temperature.i16bit);
-      sprintf((char *)tx_buffer, "Press [hPa]:%4.2f\t\r\n", pressure_hPa);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Press [hPa]:%4.2f\t\r\n", pressure_hPa);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
-      sprintf((char *)tx_buffer, "Temp [C]:%4.2f\t\r\n", temperature_degC);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Temp [C]:%4.2f\t\r\n", temperature_degC);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
@@ -504,7 +504,7 @@ void example_sensor_hub_lis2mdl_lps22hb_no_fifo_lsm6dsm(void)
         lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[1]);
       angular_rate_mdps[2] =
         lsm6dsm_from_fs2000dps_to_mdps(data_raw_angular_rate.i16bit[2]);
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
               angular_rate_mdps[0],
               angular_rate_mdps[1],

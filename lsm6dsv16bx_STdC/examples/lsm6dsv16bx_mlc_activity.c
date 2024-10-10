@@ -178,15 +178,15 @@ void lsm6dsv16bx_mlc_activity(void)
     if (activity_event_catched != 0x0) {
       switch(activity_event_catched) {
       case 1:
-        sprintf((char *)tx_buffer, "Stationary\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "Stationary\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       case 4:
-        sprintf((char *)tx_buffer, "Walking\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "Walking\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       case 8:
-        sprintf((char *)tx_buffer, "Jogging/Running\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "Jogging/Running\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       }

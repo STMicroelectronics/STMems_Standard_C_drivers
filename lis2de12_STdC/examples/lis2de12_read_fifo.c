@@ -181,7 +181,7 @@ void lis2de12_read_fifo(void)
           lis2de12_from_fs2_to_mg(data_raw_acceleration[1]);
         acceleration_mg[2] =
           lis2de12_from_fs2_to_mg(data_raw_acceleration[2]);
-        sprintf((char *)tx_buffer,
+        snprintf((char *)tx_buffer, sizeof(tx_buffer),
                 "%d - Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                 FIFO_WATERMARK - dummy,
                 acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);

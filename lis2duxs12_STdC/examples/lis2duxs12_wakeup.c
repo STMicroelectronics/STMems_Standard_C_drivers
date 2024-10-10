@@ -204,7 +204,7 @@ void lis2duxs12_wakeup(void)
       wu_event = 0;
 
       /* print wakeup event  */
-      sprintf((char*)tx_buffer, "WAKEUP event detected\r\n");
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "WAKEUP event detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
       platform_delay(30);
    }

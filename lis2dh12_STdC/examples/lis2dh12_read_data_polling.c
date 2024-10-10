@@ -177,7 +177,7 @@ void lis2dh12_read_data_polling(void)
         lis2dh12_from_fs2_hr_to_mg(data_raw_acceleration[1]);
       acceleration_mg[2] =
         lis2dh12_from_fs2_hr_to_mg(data_raw_acceleration[2]);
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
@@ -191,7 +191,7 @@ void lis2dh12_read_data_polling(void)
       lis2dh12_temperature_raw_get(&dev_ctx, &data_raw_temperature);
       temperature_degC =
         lis2dh12_from_lsb_hr_to_celsius(data_raw_temperature);
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "Temperature [degC]:%6.2f\r\n",
               temperature_degC);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));

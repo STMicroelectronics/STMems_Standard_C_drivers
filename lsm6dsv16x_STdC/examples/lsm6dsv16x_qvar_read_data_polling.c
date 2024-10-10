@@ -199,7 +199,7 @@ void lsm6dsv16x_qvar_read_data_polling(void)
     if ( all_sources.drdy_ah_qvar ) {
       lsm6dsv16x_ah_qvar_raw_get(&dev_ctx, &data);
 
-      sprintf((char*)tx_buffer,"QVAR [mV]:%6.2f\r\n", lsm6dsv16x_from_lsb_to_mv(data));
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "QVAR [mV]:%6.2f\r\n", lsm6dsv16x_from_lsb_to_mv(data));
 
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }

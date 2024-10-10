@@ -368,11 +368,11 @@ void lsm6dsv16b_self_test(void)
   lsm6dsv16b_gy_data_rate_set(&dev_ctx, LSM6DSV16B_GY_ODR_OFF);
 
   if (st_result == ST_PASS) {
-    sprintf((char *)tx_buffer, "Self Test - PASS\r\n" );
+    snprintf((char *)tx_buffer, sizeof(tx_buffer), "Self Test - PASS\r\n" );
   }
 
   else {
-    sprintf((char *)tx_buffer, "Self Test - FAIL\r\n" );
+    snprintf((char *)tx_buffer, sizeof(tx_buffer), "Self Test - FAIL\r\n" );
   }
 
   tx_com(tx_buffer, strlen((char const *)tx_buffer));

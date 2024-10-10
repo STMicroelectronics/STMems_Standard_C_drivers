@@ -190,7 +190,7 @@ void iis2iclx_mlc_tilt_angle(void)
 
       iis2iclx_mlc_out_get(&dev_ctx, angle);
 
-      sprintf((char *)tx_buffer, "tilt angle %d\r\n", angle[0]);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "tilt angle %d\r\n", angle[0]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 

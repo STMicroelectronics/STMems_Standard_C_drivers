@@ -191,7 +191,7 @@ void lis2dtw12_read_data_polling(void)
       memset(&data_raw_temperature, 0x00, sizeof(int16_t));
       lis2dtw12_temperature_raw_get(&dev_ctx, &data_raw_temperature);
       temperature = lis2dtw12_from_lsb_to_celsius(data_raw_temperature);
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\t Temperature[degC]: %3.1f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2],
               temperature);

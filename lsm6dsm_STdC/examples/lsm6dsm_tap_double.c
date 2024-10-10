@@ -199,12 +199,12 @@ void lsm6dsm_tap_double(void)
     lsm6dsm_all_sources_get(&dev_ctx, &all_source);
 
     if (all_source.tap_src.double_tap) {
-      sprintf((char *)tx_buffer, "Double Tap Detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Double Tap Detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     if (all_source.tap_src.single_tap) {
-      sprintf((char *)tx_buffer, "Single Tap Detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Single Tap Detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

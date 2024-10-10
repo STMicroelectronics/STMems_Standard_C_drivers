@@ -186,7 +186,7 @@ void ais328dq_wake_up(void)
     ais328dq_int1_src_get(&dev_ctx, &int1_src);
 
     if (int1_src.xh | int1_src.yh | int1_src.zh) {
-        sprintf((char *)tx_buffer, "Wake up detect!\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "Wake up detect!\r\n");
         tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
     }
 

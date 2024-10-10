@@ -178,15 +178,15 @@ void ism330bx_mlc_vibration_monitoring(void)
     if (vibration_monitoring_event_catched != 0xFF) {
       switch(vibration_monitoring_event_catched) {
       case 0:
-        sprintf((char *)tx_buffer, "no vibration\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "no vibration\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       case 1:
-        sprintf((char *)tx_buffer, "low vibration\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "low vibration\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       case 2:
-        sprintf((char *)tx_buffer, "high vibration\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "high vibration\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
         break;
       }

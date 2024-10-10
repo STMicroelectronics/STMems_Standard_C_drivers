@@ -206,7 +206,7 @@ void lis2du12_read_data_fifo(void)
 
       lis2du12_fifo_level_get(&dev_ctx, &fifo_mode, &fifo_level);
 
-      sprintf((char*)tx_buffer, "-- FIFO level is %d\r\n", fifo_level);
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "-- FIFO level is %d\r\n", fifo_level);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
 
       for (i = 0; i < fifo_level; i++) {
@@ -214,19 +214,19 @@ void lis2du12_read_data_fifo(void)
 
         /* print sensor data */
         if (fifo_mode.store == LIS2DU12_8_BIT) {
-          sprintf((char*)tx_buffer, "%02d: Acceleration [mg]:\t%4.2f\t%4.2f\t%4.2f\tTemp[degC]:%3.2f\r\n",
+          snprintf((char*)tx_buffer, sizeof(tx_buffer), "%02d: Acceleration [mg]:\t%4.2f\t%4.2f\t%4.2f\tTemp[degC]:%3.2f\r\n",
                   i, data.xl[0].mg[0], data.xl[0].mg[1], data.xl[0].mg[2], data.heat.deg_c);
           tx_com(tx_buffer, strlen((char const*)tx_buffer));
         } else {
-          sprintf((char*)tx_buffer, "%02d: Acceleration [0][mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
+          snprintf((char*)tx_buffer, sizeof(tx_buffer), "%02d: Acceleration [0][mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
                   i, data.xl[0].mg[0], data.xl[0].mg[1], data.xl[0].mg[2]);
           tx_com(tx_buffer, strlen((char const*)tx_buffer));
-          sprintf((char*)tx_buffer, "%02d: Acceleration [1][mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
+          snprintf((char*)tx_buffer, sizeof(tx_buffer), "%02d: Acceleration [1][mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
                   i, data.xl[1].mg[0], data.xl[1].mg[1], data.xl[1].mg[2]);
           tx_com(tx_buffer, strlen((char const*)tx_buffer));
        }
       }
-      sprintf((char*)tx_buffer, "\r\n");
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

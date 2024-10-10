@@ -178,7 +178,7 @@ void example_main_wake_up_lsm6dsr(void)
     lsm6dsr_all_sources_get(&dev_ctx, &all_source);
 
     if (all_source.wake_up_src.wu_ia) {
-      sprintf((char *)tx_buffer, "Wake-Up event on ");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Wake-Up event on ");
 
       if (all_source.wake_up_src.x_wu) {
         strcat((char *)tx_buffer, "X");

@@ -209,7 +209,7 @@ void asm330lhhx_main_interrupt(void)
       acceleration_mg[2] =
         asm330lhhx_from_fs2g_to_mg(data_raw_acceleration[2]);
 
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
@@ -228,7 +228,7 @@ void asm330lhhx_main_interrupt(void)
       angular_rate_mdps[2] =
         asm330lhhx_from_fs2000dps_to_mdps(data_raw_angular_rate[2]);
 
-      sprintf((char*)tx_buffer, "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
               angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }

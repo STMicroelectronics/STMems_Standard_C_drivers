@@ -199,7 +199,7 @@ void lis3de_wake_up(void)
 
     if (platform_reap_int_pin()) {
       lis3de_int1_gen_source_get(&dev_ctx, &src);
-      sprintf((char *)tx_buffer, "wake-up detected : "
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "wake-up detected : "
               "x %d, y %d, z %d\r\n",
               src.xh, src.yh, src.zh);
       tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );

@@ -308,7 +308,7 @@ void lsm6dso16is_sensor_hub(void)
         lsm6dso16is_from_fs2g_to_mg(data_raw_acceleration[1]);
       acceleration_mg[2] =
         lsm6dso16is_from_fs2g_to_mg(data_raw_acceleration[2]);
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
@@ -319,7 +319,7 @@ void lsm6dso16is_sensor_hub(void)
       magx = (int16_t *)&data_raw_sensor_hub[0];
       magy = (int16_t *)&data_raw_sensor_hub[2];
       magz = (int16_t *)&data_raw_sensor_hub[4];
-      sprintf((char *)tx_buffer, "LIS2MDL [mGa]:\t%4.2f\t%4.2f\t%4.2f\r\n",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "LIS2MDL [mGa]:\t%4.2f\t%4.2f\t%4.2f\r\n",
               lis2mdl_from_lsb_to_mgauss(*magx),
               lis2mdl_from_lsb_to_mgauss(*magy),
               lis2mdl_from_lsb_to_mgauss(*magz));
@@ -333,7 +333,7 @@ void lsm6dso16is_sensor_hub(void)
       /* temperature conversion */
       temp = (int16_t)data_raw_sensor_hub[10];
       temp = (temp * 256) + (int16_t) data_raw_sensor_hub[9];
-      sprintf((char *)tx_buffer, "LPS22DF [hPa]:%6.2f [degC]:%6.2f\r\n\r\n",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "LPS22DF [hPa]:%6.2f [degC]:%6.2f\r\n\r\n",
               lps22df_from_lsb_to_hPa(baro),
               lps22df_from_lsb_to_celsius(temp));
       tx_com(tx_buffer, strlen((char const *)tx_buffer));

@@ -165,7 +165,7 @@ void sths34pf80_tmos_presence_detection(void)
   sths34pf80_lpf_p_m_bandwidth_get(&dev_ctx, &lpf_p_m);
   sths34pf80_lpf_a_t_bandwidth_get(&dev_ctx, &lpf_a_t);
 
-  sprintf((char *)tx_buffer,
+  snprintf((char *)tx_buffer, sizeof(tx_buffer),
           "lpf_m: %02d, lpf_p: %02d, lpf_p_m: %02d, lpf_a_t: %02d\r\n", lpf_m, lpf_p, lpf_p_m, lpf_a_t);
   tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
@@ -206,10 +206,10 @@ void sths34pf80_tmos_presence_detection(void)
           presence = func_status.pres_flag;
 
           if (presence) {
-            sprintf((char *)tx_buffer, "Start of Presence\r\n");
+            snprintf((char *)tx_buffer, sizeof(tx_buffer), "Start of Presence\r\n");
             tx_com(tx_buffer, strlen((char const *)tx_buffer));
           } else {
-            sprintf((char *)tx_buffer, "End of Presence\r\n");
+            snprintf((char *)tx_buffer, sizeof(tx_buffer), "End of Presence\r\n");
             tx_com(tx_buffer, strlen((char const *)tx_buffer));
           }
         }
@@ -219,7 +219,7 @@ void sths34pf80_tmos_presence_detection(void)
           motion = func_status.mot_flag;
 
           if (motion) {
-            sprintf((char *)tx_buffer, "Motion Detected!\r\n");
+            snprintf((char *)tx_buffer, sizeof(tx_buffer), "Motion Detected!\r\n");
             tx_com(tx_buffer, strlen((char const *)tx_buffer));
           }
         }

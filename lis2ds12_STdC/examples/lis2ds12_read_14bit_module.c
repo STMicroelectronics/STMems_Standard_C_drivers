@@ -221,15 +221,15 @@ void lis2ds12_14bit_module(void)
       for (i = 0; i < 10; i++) {
         lis2ds12_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
         magnitude[j++] = lis2ds12_from_fs4g_to_mg(data_raw_acceleration[0]);
-        sprintf((char *)tx_buffer, "Acceleration [mg]:%4.2f\r\n",
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "Acceleration [mg]:%4.2f\r\n",
                 magnitude[j - 1]);
         tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
         magnitude[j++] = lis2ds12_from_fs4g_to_mg(data_raw_acceleration[1]);
-        sprintf((char *)tx_buffer, "Acceleration [mg]:%4.2f\r\n",
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "Acceleration [mg]:%4.2f\r\n",
                 magnitude[j - 1]);
         tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
         magnitude[j++] = lis2ds12_from_fs4g_to_mg(data_raw_acceleration[2]);
-        sprintf((char *)tx_buffer, "Acceleration [mg]:%4.2f\r\n",
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "Acceleration [mg]:%4.2f\r\n",
                 magnitude[j - 1]);
         tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
       }

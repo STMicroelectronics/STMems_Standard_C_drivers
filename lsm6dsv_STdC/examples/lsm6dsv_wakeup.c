@@ -199,7 +199,7 @@ void lsm6dsv_wakeup(void)
    if (wu_event_catched) {
       wu_event_catched = 0;
 
-      sprintf((char *)tx_buffer, "Wakeup event\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Wakeup event\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

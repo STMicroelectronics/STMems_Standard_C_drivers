@@ -199,7 +199,7 @@ void hts221_read_data_polling(void)
         humidity_perc = 100;
       }
 
-      sprintf((char *)tx_buffer, "Humidity [%%]:%3.2f\r\n", humidity_perc);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Humidity [%%]:%3.2f\r\n", humidity_perc);
       tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
     }
 
@@ -209,7 +209,7 @@ void hts221_read_data_polling(void)
       hts221_temperature_raw_get(&dev_ctx, &data_raw_temperature);
       temperature_degC = linear_interpolation(&lin_temp,
                                               data_raw_temperature);
-      sprintf((char *)tx_buffer, "Temperature [degC]:%6.2f\r\n",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Temperature [degC]:%6.2f\r\n",
               temperature_degC );
       tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
     }

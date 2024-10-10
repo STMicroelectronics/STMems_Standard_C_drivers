@@ -170,17 +170,17 @@ void lps28dfw_fifo(void)
       lps28dfw_fifo_level_get(&dev_ctx, &level);
       lps28dfw_fifo_data_get(&dev_ctx, level, &md, data);
 
-      sprintf((char*)tx_buffer, "--- FIFO samples\r\n");
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "--- FIFO samples\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
 
       for (i = 0; i < level; i++) {
-        sprintf((char*)tx_buffer,
+        snprintf((char*)tx_buffer, sizeof(tx_buffer),
                 "%02d: pressure [hPa]:%6.2f\r\n", i, data[i].hpa);
 
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
       }
 
-      sprintf((char*)tx_buffer, "\r\n");
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
    }
 

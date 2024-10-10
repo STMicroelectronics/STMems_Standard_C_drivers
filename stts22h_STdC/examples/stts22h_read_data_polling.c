@@ -149,7 +149,7 @@ void stts22h_read_data_polling(void)
       stts22h_temperature_raw_get(&dev_ctx, &data_raw_temperature);
       temperature_degC = stts22h_from_lsb_to_celsius(
                            data_raw_temperature);
-      sprintf((char *)tx_buffer, "Temperature [degC]:%3.2f\r\n",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Temperature [degC]:%3.2f\r\n",
               temperature_degC);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }

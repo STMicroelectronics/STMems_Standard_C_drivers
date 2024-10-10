@@ -186,13 +186,13 @@ void asm330lhhx_fsm_motion(void)
 
       switch (motion[0]) {
       case 0:
-        sprintf((char *)tx_buffer, "stationary...\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "stationary...\r\n");
         break;
       case 1:
-        sprintf((char *)tx_buffer, "moving...\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "moving...\r\n");
         break;
       default:
-        sprintf((char *)tx_buffer, "unknown state\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "unknown state\r\n");
         break;
       }
       tx_com(tx_buffer, strlen((char const *)tx_buffer));

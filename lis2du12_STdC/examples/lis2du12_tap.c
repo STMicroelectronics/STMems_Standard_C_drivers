@@ -216,14 +216,14 @@ void lis2du12_tap(void)
       tap_1_event = 0;
 
       /* single tap detected  */
-      sprintf((char*)tx_buffer, "single TAP detected\r\n");
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "single TAP detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
     if (tap_2_event) {
       tap_2_event = 0;
 
       /* double tap detected  */
-      sprintf((char*)tx_buffer, "double TAP detected\r\n");
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "double TAP detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

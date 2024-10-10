@@ -178,7 +178,7 @@ void lis2ds12_single_tap_(void)
 
     /* Check if Single Tap events */
     if (all_source.tap_src.single_tap) {
-      sprintf((char *)tx_buffer, "Tap Detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Tap Detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

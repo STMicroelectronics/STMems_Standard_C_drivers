@@ -199,7 +199,7 @@ void lis3de_orientation(void)
 
     if (platform_reap_int_pin()) {
       lis3de_int1_gen_source_get(&dev_ctx, &src);
-      sprintf((char *)tx_buffer, "6D orientation detected : "
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "6D orientation detected : "
               "xl %d xh %d, yl %d yh %d, zl %d zh %d\r\n",
               src.xl, src.xh, src.yl, src.yh, src.zl, src.zh);
       tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );

@@ -206,12 +206,12 @@ void lsm6dsv_single_double_tap(void)
   while (1) {
     if (stap_event_catched) {
         stap_event_catched = 0;
-        sprintf((char *)tx_buffer, "Single TAP\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "Single TAP\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
     if (dtap_event_catched) {
         dtap_event_catched = 0;
-        sprintf((char *)tx_buffer, "Double TAP\r\n");
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "Double TAP\r\n");
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

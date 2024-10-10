@@ -146,7 +146,7 @@ void lsm6dsv32x_fifo_irq_handler(void)
   lsm6dsv32x_fifo_status_get(&dev_ctx, &fifo_status);
 
   num = fifo_status.fifo_level;
-  sprintf((char *)tx_buffer, "-- FIFO num %d \r\n", num);
+  snprintf((char *)tx_buffer, sizeof(tx_buffer), "-- FIFO num %d \r\n", num);
   tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
   while (num--) {
@@ -161,14 +161,14 @@ void lsm6dsv32x_fifo_irq_handler(void)
 
     switch (f_data.tag) {
     case LSM6DSV32X_XL_NC_TAG:
-      sprintf((char *)tx_buffer, "ACC [mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "ACC [mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
               lsm6dsv32x_from_fs32_to_mg(*datax),
               lsm6dsv32x_from_fs32_to_mg(*datay),
               lsm6dsv32x_from_fs32_to_mg(*dataz));
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
       break;
     case LSM6DSV32X_TIMESTAMP_TAG:
-      sprintf((char *)tx_buffer, "TIMESTAMP [ms] %d\r\n", *ts);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "TIMESTAMP [ms] %d\r\n", *ts);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
       break;
     default:
@@ -176,7 +176,7 @@ void lsm6dsv32x_fifo_irq_handler(void)
     }
   }
 
-  sprintf((char *)tx_buffer, "------ \r\n\r\n");
+  snprintf((char *)tx_buffer, sizeof(tx_buffer), "------ \r\n\r\n");
   tx_com(tx_buffer, strlen((char const *)tx_buffer));
 }
 

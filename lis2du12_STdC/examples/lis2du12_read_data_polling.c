@@ -186,7 +186,7 @@ void lis2du12_read_data_polling(void)
       lis2du12_data_get(&dev_ctx, &md, &data);
 
       /* print sensor data  */
-      sprintf((char*)tx_buffer, "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\tTemp[degC]:%3.2f\r\n",
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\tTemp[degC]:%3.2f\r\n",
               data.xl.mg[0], data.xl.mg[1], data.xl.mg[2], data.heat.deg_c);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
 

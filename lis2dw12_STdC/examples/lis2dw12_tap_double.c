@@ -187,43 +187,43 @@ void lis2dw12_double_tap(void)
     lis2dw12_all_sources_get(&dev_ctx, &all_source);
 
     if (all_source.tap_src.double_tap) {
-      sprintf((char *)tx_buffer, "Double Tap Detected: Sign %s",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Double Tap Detected: Sign %s",
               all_source.tap_src.tap_sign ? "positive" : "negative");
 
       if (all_source.tap_src.x_tap) {
-        sprintf((char *)tx_buffer, "%s on X", tx_buffer);
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "%s on X", tx_buffer);
       }
 
       if (all_source.tap_src.y_tap) {
-        sprintf((char *)tx_buffer, "%s on Y", tx_buffer);
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "%s on Y", tx_buffer);
       }
 
       if (all_source.tap_src.z_tap) {
-        sprintf((char *)tx_buffer, "%s on Z", tx_buffer);
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "%s on Z", tx_buffer);
       }
 
-      sprintf((char *)tx_buffer, "%s axis\r\n", tx_buffer);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "%s axis\r\n", tx_buffer);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     /* Check Single Tap events */
     if (all_source.tap_src.single_tap) {
-      sprintf((char *)tx_buffer, "Tap Detected: Sign %s",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Tap Detected: Sign %s",
               all_source.tap_src.tap_sign ? "positive" : "negative");
 
       if (all_source.tap_src.x_tap) {
-        sprintf((char *)tx_buffer, "%s on X", tx_buffer);
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "%s on X", tx_buffer);
       }
 
       if (all_source.tap_src.y_tap) {
-        sprintf((char *)tx_buffer, "%s on Y", tx_buffer);
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "%s on Y", tx_buffer);
       }
 
       if (all_source.tap_src.z_tap) {
-        sprintf((char *)tx_buffer, "%s on Z", tx_buffer);
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "%s on Z", tx_buffer);
       }
 
-      sprintf((char *)tx_buffer, "%s axis\r\n", tx_buffer);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "%s axis\r\n", tx_buffer);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

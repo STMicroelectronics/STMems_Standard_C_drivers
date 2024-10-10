@@ -204,15 +204,15 @@ void lps22df_read_fifo_irq(void)
 
         lps22df_fifo_data_get(&dev_ctx, num, data);
 
-        sprintf((char*)tx_buffer, "-- FIFO interrupt %d\r\n", num);
+        snprintf((char*)tx_buffer, sizeof(tx_buffer), "-- FIFO interrupt %d\r\n", num);
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
 
         for (i = 0; i < num; i++) {
-          sprintf((char*)tx_buffer, "pressure [hPa]:%6.2f\r\n", data[i].hpa);
+          snprintf((char*)tx_buffer, sizeof(tx_buffer), "pressure [hPa]:%6.2f\r\n", data[i].hpa);
           tx_com(tx_buffer, strlen((char const*)tx_buffer));
         }
 
-        sprintf((char*)tx_buffer, "-- \r\n\n");
+        snprintf((char*)tx_buffer, sizeof(tx_buffer), "-- \r\n\n");
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
       }
     }

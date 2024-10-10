@@ -183,7 +183,7 @@ void iis2dh_free_fall(void)
     iis2dh_int1_gen_source_get(&dev_ctx, &all_source.int1_src);
 
     if (!(all_source.byte & 0x3f)) {
-      sprintf((char *)tx_buffer, "freefall detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "freefall detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

@@ -217,7 +217,7 @@ void lsm6dso32x_mlc(void)
 
     if (status.mlc1) {
       lsm6dso32x_mlc_out_get(&dev_ctx, mlc_out);
-      sprintf((char *)tx_buffer, "Detect MLC interrupt code: %02X\r\n",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Detect MLC interrupt code: %02X\r\n",
               mlc_out[0]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }

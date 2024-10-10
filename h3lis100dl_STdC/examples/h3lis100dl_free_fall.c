@@ -174,7 +174,7 @@ void h3lis100dl_free_fall(void)
     h3lis100dl_int1_src_get(&dev_ctx, &all_source);
 
     if (all_source.xl && all_source.yl && all_source.zl) {
-      sprintf((char *)tx_buffer, "Free fall\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Free fall\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

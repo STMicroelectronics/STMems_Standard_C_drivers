@@ -186,7 +186,7 @@ void iis2dh_tap_double(void)
     iis2dh_tap_source_get(&dev_ctx, &src);
 
     if (src.dclick) {
-      sprintf((char *)tx_buffer, "d-click detected : "
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "d-click detected : "
               "x %d, y %d, z %d, sign %d\r\n",
               src.x, src.y, src.z, src.sign);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));

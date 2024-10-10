@@ -256,11 +256,11 @@ void iis3dwb_self_test(void)
   iis3dwb_xl_data_rate_set(&dev_ctx, IIS3DWB_XL_ODR_OFF);
 
   if (st_result == ST_PASS) {
-    sprintf((char *)tx_buffer, "Self Test - PASS\r\n" );
+    snprintf((char *)tx_buffer, sizeof(tx_buffer), "Self Test - PASS\r\n" );
   }
 
   else {
-    sprintf((char *)tx_buffer, "Self Test - FAIL\r\n" );
+    snprintf((char *)tx_buffer, sizeof(tx_buffer), "Self Test - FAIL\r\n" );
   }
 
   tx_com(tx_buffer, strlen((char const *)tx_buffer));

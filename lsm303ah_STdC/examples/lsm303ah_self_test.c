@@ -401,11 +401,11 @@ void lsm303ah_self_test(void)
   lsm303ah_mg_operating_mode_set(&dev_ctx_mg, LSM303AH_MG_POWER_DOWN);
 
   if (st_result == ST_PASS) {
-    sprintf((char *)tx_buffer, "Self Test - PASS\r\n" );
+    snprintf((char *)tx_buffer, sizeof(tx_buffer), "Self Test - PASS\r\n" );
   }
 
   else {
-    sprintf((char *)tx_buffer, "Self Test - FAIL\r\n" );
+    snprintf((char *)tx_buffer, sizeof(tx_buffer), "Self Test - FAIL\r\n" );
   }
 
   tx_com(tx_buffer, strlen((char const *)tx_buffer));

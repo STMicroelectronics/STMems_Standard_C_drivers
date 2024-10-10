@@ -231,7 +231,7 @@ void lis3mdl_interrupt(void)
         exceeds_info = "Z-axis pos";
       }
 
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "Magnetic [mG]:%4.2f\t%4.2f\t%4.2f (%s)\r\n",
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2],
               exceeds_info != NULL ? exceeds_info : "");

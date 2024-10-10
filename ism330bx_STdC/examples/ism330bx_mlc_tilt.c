@@ -178,7 +178,7 @@ void ism330bx_mlc_tilt(void)
   /* wait forever (event handle in irq handler) */
   while (1) {
     if (mlc_tilt_event_catched != 0x0) {
-      sprintf((char *)tx_buffer, "tilt angle %02d degree\r\n", mlc_tilt_angle * 6);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "tilt angle %02d degree\r\n", mlc_tilt_angle * 6);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
       mlc_tilt_event_catched = 0x0;

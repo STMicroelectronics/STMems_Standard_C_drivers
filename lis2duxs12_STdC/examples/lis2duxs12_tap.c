@@ -226,21 +226,21 @@ void lis2duxs12_tap(void)
       fifo_1_tap_event = 0;
 
       /* print tap orientation  */
-      sprintf((char*)tx_buffer, "single TAP detected\r\n");
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "single TAP detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
     if (fifo_2_tap_event) {
       fifo_2_tap_event = 0;
 
       /* print tap orientation  */
-      sprintf((char*)tx_buffer, "double TAP detected\r\n");
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "double TAP detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
     if (fifo_3_tap_event) {
       fifo_3_tap_event = 0;
 
       /* print tap orientation  */
-      sprintf((char*)tx_buffer, "triple TAP detected\r\n");
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "triple TAP detected\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

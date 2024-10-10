@@ -157,7 +157,7 @@ void lsm6dsox_sh_fifo_lis2mdl_handler(void)
     /* Read number of samples in FIFO. */
     lsm6dsox_fifo_data_level_get(&ag_ctx, &num);
 
-    sprintf( (char *)tx_buffer, "\r\nFIFO num %d\r\n", num);
+    snprintf((char *)tx_buffer, sizeof(tx_buffer), "\r\nFIFO num %d\r\n", num);
     tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
     while (num--) {
@@ -174,7 +174,7 @@ void lsm6dsox_sh_fifo_lis2mdl_handler(void)
                                  raw_data.i16bit[1]);
           acceleration_mg[2] = lsm6dsox_from_fs2_to_mg(
                                  raw_data.i16bit[2]);
-          sprintf( (char *)tx_buffer,
+          snprintf((char *)tx_buffer, sizeof(tx_buffer),
                    "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                    acceleration_mg[0],
                    acceleration_mg[1],
@@ -191,7 +191,7 @@ void lsm6dsox_sh_fifo_lis2mdl_handler(void)
                                    raw_data.i16bit[1]);
           angular_rate_mdps[2] = lsm6dsox_from_fs2000_to_mdps(
                                    raw_data.i16bit[2]);
-          sprintf( (char *)tx_buffer,
+          snprintf((char *)tx_buffer, sizeof(tx_buffer),
                    "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
                    angular_rate_mdps[0],
                    angular_rate_mdps[1],
@@ -208,7 +208,7 @@ void lsm6dsox_sh_fifo_lis2mdl_handler(void)
                              raw_data.i16bit[1]);
           magnetic_mG[2] = lis2mdl_from_lsb_to_mgauss(
                              raw_data.i16bit[2]);
-          sprintf( (char *)tx_buffer, "Mag [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "Mag [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
                    magnetic_mG[0],
                    magnetic_mG[1],
                    magnetic_mG[2]);

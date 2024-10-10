@@ -372,11 +372,11 @@ void ism330bx_self_test(void)
   ism330bx_gy_data_rate_set(&dev_ctx, ISM330BX_GY_ODR_OFF);
 
   if (st_result == ST_PASS) {
-    sprintf((char *)tx_buffer, "Self Test - PASS\r\n" );
+    snprintf((char *)tx_buffer, sizeof(tx_buffer), "Self Test - PASS\r\n" );
   }
 
   else {
-    sprintf((char *)tx_buffer, "Self Test - FAIL\r\n" );
+    snprintf((char *)tx_buffer, sizeof(tx_buffer), "Self Test - FAIL\r\n" );
   }
 
   tx_com(tx_buffer, strlen((char const *)tx_buffer));

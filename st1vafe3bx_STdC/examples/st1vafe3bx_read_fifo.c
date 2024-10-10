@@ -217,28 +217,28 @@ void st1vafe3bx_read_fifo(void)
       /* Read number of samples in FIFO */
       st1vafe3bx_fifo_data_level_get(&dev_ctx, &num);
 
-      sprintf((char *)tx_buffer,"-- %d in FIFO\r\n", num);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "-- %d in FIFO\r\n", num);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
       while (num--) {
         st1vafe3bx_fifo_data_get(&dev_ctx, &md, &fifo_mode, &fdata);
 
         switch (fdata.tag) {
         case ST1VAFE3BX_AH_VAFE_ONLY_TAG:
-          sprintf((char *)tx_buffer, "%02d: QVAR [LSB]: %d\r\n", NUM_FIFO_ENTRY - num, fdata.ah_bio.raw);
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "%02d: QVAR [LSB]: %d\r\n", NUM_FIFO_ENTRY - num, fdata.ah_bio.raw);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
         case ST1VAFE3BX_TIMESTAMP_CFG_CHG_TAG:
           ts = fdata.cfg_chg.timestamp / 100;
-          sprintf((char*)tx_buffer, "Timestamp:\t%lu ms\t\r\n", ts);
+          snprintf((char*)tx_buffer, sizeof(tx_buffer), "Timestamp:\t%lu ms\t\r\n", ts);
           tx_com(tx_buffer, strlen((char const*)tx_buffer));
           break;
        default:
-          sprintf((char*)tx_buffer, "unknown TAG (%02x)\t\r\n", fdata.tag);
+          snprintf((char*)tx_buffer, sizeof(tx_buffer), "unknown TAG (%02x)\t\r\n", fdata.tag);
           tx_com(tx_buffer, strlen((char const*)tx_buffer));
           break;
         }
       }
-      sprintf((char *)tx_buffer,"\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),"\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

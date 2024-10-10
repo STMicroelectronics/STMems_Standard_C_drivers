@@ -181,21 +181,21 @@ void i3g4250d_wake_up(void)
     i3g4250d_int_on_threshold_src_get(&dev_ctx, &int1_src);
 
     if (int1_src.ia) {
-      sprintf((char *)tx_buffer, "wake-up event on ");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "wake-up event on ");
 
       if (int1_src.zh) {
-        sprintf((char *)tx_buffer, "%sz", tx_buffer);
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "%sz", tx_buffer);
       }
 
       if (int1_src.yh) {
-        sprintf((char *)tx_buffer, "%sy", tx_buffer);
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "%sy", tx_buffer);
       }
 
       if (int1_src.xh) {
-        sprintf((char *)tx_buffer, "%sx", tx_buffer);
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "%sx", tx_buffer);
       }
 
-      sprintf((char *)tx_buffer, "%s\r\n", tx_buffer);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "%s\r\n", tx_buffer);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

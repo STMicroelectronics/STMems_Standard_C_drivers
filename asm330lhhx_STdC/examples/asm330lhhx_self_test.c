@@ -348,10 +348,10 @@ void asm330lhhx_self_test(void)
   asm330lhhx_xl_data_rate_set(&dev_ctx, ASM330LHHX_XL_ODR_OFF);
 
   if (st_result == ST_PASS) {
-    sprintf((char*)tx_buffer, "Self Test - PASS\r\n" );
+    snprintf((char*)tx_buffer, sizeof(tx_buffer), "Self Test - PASS\r\n" );
   }
   else {
-    sprintf((char*)tx_buffer, "Self Test - FAIL\r\n" );
+    snprintf((char*)tx_buffer, sizeof(tx_buffer), "Self Test - FAIL\r\n" );
   }
   tx_com(tx_buffer, strlen((char const*)tx_buffer));
 }

@@ -132,7 +132,7 @@ void h3lis331dl_wakeup_handler(void)
   h3lis331dl_int1_src_get(&dev_ctx, &status);
 
   if (status.xl || status.yl || status.zl) {
-    sprintf((char *)tx_buffer, "wakeup detected\r\n");
+    snprintf((char *)tx_buffer, sizeof(tx_buffer), "wakeup detected\r\n");
     tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
   }
 }

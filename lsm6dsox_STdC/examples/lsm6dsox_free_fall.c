@@ -183,7 +183,7 @@ void lsm6dsox_free_fall(void)
     lsm6dsox_all_sources_get(&dev_ctx, &all_source);
 
     if (all_source.free_fall) {
-      sprintf((char *)tx_buffer, "Free Fall Detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Free Fall Detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

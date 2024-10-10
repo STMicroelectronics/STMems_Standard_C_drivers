@@ -200,7 +200,7 @@ void lsm6dsv16bx_activity(void)
   lsm6dsv16bx_act_sleep_xl_odr_set(&dev_ctx, LSM6DSV16BX_15Hz);
   lsm6dsv16bx_act_mode_set(&dev_ctx, LSM6DSV16BX_XL_LOW_POWER_GY_POWER_DOWN);
 
-  sprintf((char *)tx_buffer, "Ready\r\n");
+  snprintf((char *)tx_buffer, sizeof(tx_buffer), "Ready\r\n");
   tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
   /* Wait Events */
@@ -209,12 +209,12 @@ void lsm6dsv16bx_activity(void)
     lsm6dsv16bx_all_sources_get(&dev_ctx, &all_sources);
 
     if (all_sources.sleep_state) {
-      sprintf((char *)tx_buffer, "Inactivity Detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Inactivity Detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     if (all_sources.wake_up) {
-      sprintf((char *)tx_buffer, "Activity Detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Activity Detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

@@ -186,7 +186,7 @@ void lps22df_read_data_polling(void)
     if ( all_sources.drdy_pres | all_sources.drdy_temp ) {
       lps22df_data_get(&dev_ctx, &data);
 
-      sprintf((char*)tx_buffer,
+      snprintf((char*)tx_buffer, sizeof(tx_buffer),
               "pressure [hPa]:%6.2f temperature [degC]:%6.2f\r\n",
               data.pressure.hpa, data.heat.deg_c);
 

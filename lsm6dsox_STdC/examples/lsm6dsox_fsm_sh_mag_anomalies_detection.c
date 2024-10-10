@@ -153,7 +153,7 @@ void lsm6dsox_fsm_sh_mag_anomalies_detection_handler(void)
   lsm6dsox_all_sources_get(&dev_ctx, &status);
 
   if (status.fsm1) {
-    sprintf((char *)tx_buffer, "MAG anomaly detected\r\n");
+    snprintf((char *)tx_buffer, sizeof(tx_buffer), "MAG anomaly detected\r\n");
     tx_com(tx_buffer, strlen((char const *)tx_buffer));
   }
 }

@@ -209,13 +209,13 @@ void lsm6dsv16x_fsm_glance(void)
     if (glance_event_catched) {
       glance_event_catched = 0;
 
-      sprintf((char *)tx_buffer, "GLANCE event\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "GLANCE event\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
     if (deglance_event_catched) {
       deglance_event_catched = 0;
 
-      sprintf((char *)tx_buffer, "DEGLANCE event\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "DEGLANCE event\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

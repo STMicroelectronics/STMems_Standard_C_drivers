@@ -229,7 +229,7 @@ void lsm6dsv16x_fifo_irq(void)
       lsm6dsv16x_fifo_status_get(&dev_ctx, &fifo_status);
 
       num = fifo_status.fifo_level;
-      sprintf((char *)tx_buffer, "-- FIFO num %d \r\n", num);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "-- FIFO num %d \r\n", num);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
       while (num--) {
@@ -245,7 +245,7 @@ void lsm6dsv16x_fifo_irq(void)
 
         switch (f_data.tag) {
         case LSM6DSV16X_XL_NC_TAG:
-          sprintf((char *)tx_buffer, "ACC [mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "ACC [mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
                   lsm6dsv16x_from_fs2_to_mg(*datax),
                   lsm6dsv16x_from_fs2_to_mg(*datay),
                   lsm6dsv16x_from_fs2_to_mg(*dataz));
@@ -253,7 +253,7 @@ void lsm6dsv16x_fifo_irq(void)
           break;
         case LSM6DSV16X_TIMESTAMP_TAG:
           ts_usec = lsm6dsv16x_from_lsb_to_nsec(*ts)/1000;
-          sprintf((char *)tx_buffer, "TIMESTAMP %6.1f [us] (lsb: %d)\r\n", ts_usec, *ts);
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "TIMESTAMP %6.1f [us] (lsb: %d)\r\n", ts_usec, *ts);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
         default:
@@ -261,7 +261,7 @@ void lsm6dsv16x_fifo_irq(void)
         }
       }
 
-      sprintf((char *)tx_buffer, "------ \r\n\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "------ \r\n\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

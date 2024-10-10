@@ -173,7 +173,7 @@ void ais328dq_read_data_polling(void)
                              data_raw_acceleration[1]);
       acceleration_mg[2] = AIS328DQ_FROM_FS_2g_TO_mg(
                              data_raw_acceleration[2]);
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );

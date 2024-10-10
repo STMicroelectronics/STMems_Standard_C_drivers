@@ -201,7 +201,7 @@ void st1vafe6ax_vafe_read_data(void)
         st1vafe6ax_ah_bio_raw_get(&dev_ctx, &data);
         vafe_mv = st1vafe6ax_from_lsb_to_mv(data);
 
-        sprintf((char*)tx_buffer,"vAFE [mV]:%6.3f\r\n", vafe_mv);
+        snprintf((char*)tx_buffer, sizeof(tx_buffer), "vAFE [mV]:%6.3f\r\n", vafe_mv);
         tx_com(tx_buffer, strlen((char const*)tx_buffer));
       }
     }

@@ -207,31 +207,31 @@ void lis2dux12_mlc_activity_mobile(void)
     if (stationary_event_catched) {
       stationary_event_catched = 0;
 
-      sprintf((char *)tx_buffer, "stationary event\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "stationary event\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
     if (walking_event_catched) {
       walking_event_catched = 0;
 
-      sprintf((char *)tx_buffer, "walking event\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "walking event\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
     if (jogging_event_catched) {
       jogging_event_catched = 0;
 
-      sprintf((char *)tx_buffer, "jogging event\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "jogging event\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
     if (biking_event_catched) {
       biking_event_catched = 0;
 
-      sprintf((char *)tx_buffer, "biking event\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "biking event\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
     if (driving_event_catched) {
       driving_event_catched = 0;
 
-      sprintf((char *)tx_buffer, "driving event\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "driving event\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

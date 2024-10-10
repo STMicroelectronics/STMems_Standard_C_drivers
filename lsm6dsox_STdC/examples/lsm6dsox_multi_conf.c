@@ -272,7 +272,7 @@ void lsm6dsox_multi_conf(void)
     lsm6dsox_all_sources_get(&dev_ctx, &status);
 
     if (status.wake_up) {
-      sprintf((char *)tx_buffer, "Wake-Up event on ");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Wake-Up event on ");
 
       if (status.wake_up_x) {
         strcat((char *)tx_buffer, "X");
@@ -293,19 +293,19 @@ void lsm6dsox_multi_conf(void)
     if (status.step_detector) {
       /* Read steps */
       lsm6dsox_number_of_steps_get(&dev_ctx, &steps);
-      sprintf((char *)tx_buffer, "steps :%d\r\n", steps);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "steps :%d\r\n", steps);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     if (status.mlc1) {
       lsm6dsox_mlc_out_get(&dev_ctx, mlc_out);
-      sprintf((char *)tx_buffer, "Detect MLC interrupt code: %02X\r\n",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Detect MLC interrupt code: %02X\r\n",
               mlc_out[0]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     if (status.double_tap) {
-      sprintf((char *)tx_buffer, "D-Tap: ");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "D-Tap: ");
 
       if (status.tap_x) {
         strcat((char *)tx_buffer, "x-axis");
@@ -332,7 +332,7 @@ void lsm6dsox_multi_conf(void)
     }
 
     if (status.single_tap) {
-      sprintf((char *)tx_buffer, "S-Tap: ");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "S-Tap: ");
 
       if (status.tap_x) {
         strcat((char *)tx_buffer, "x-axis");
@@ -359,12 +359,12 @@ void lsm6dsox_multi_conf(void)
     }
 
     if (status.tilt) {
-      sprintf((char *)tx_buffer, "TILT Detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "TILT Detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     if (status.six_d) {
-      sprintf((char *)tx_buffer, "6D Or. switched to ");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "6D Or. switched to ");
 
       if (status.six_d_xh) {
         strcat((char *)tx_buffer, "XH");
@@ -395,7 +395,7 @@ void lsm6dsox_multi_conf(void)
     }
 
     if (status.free_fall) {
-      sprintf((char *)tx_buffer, "Free Fall Detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Free Fall Detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

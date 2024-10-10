@@ -299,7 +299,7 @@ void lsm6dsv16x_sensor_fusion(void)
     if (fifo_status.fifo_th == 1) {
       num = fifo_status.fifo_level;
 
-      sprintf((char *)tx_buffer, "-- FIFO num %d \r\n", num);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "-- FIFO num %d \r\n", num);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
       while (num--) {
@@ -318,7 +318,7 @@ void lsm6dsv16x_sensor_fusion(void)
           gbias_mdps[0] = lsm6dsv16x_from_fs125_to_mdps(axis[0]);
           gbias_mdps[1] = lsm6dsv16x_from_fs125_to_mdps(axis[1]);
           gbias_mdps[2] = lsm6dsv16x_from_fs125_to_mdps(axis[2]);
-          sprintf((char *)tx_buffer, "GBIAS [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "GBIAS [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
                          (double_t)gbias_mdps[0], (double_t)gbias_mdps[1], (double_t)gbias_mdps[2]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
@@ -327,13 +327,13 @@ void lsm6dsv16x_sensor_fusion(void)
           gravity_mg[0] = lsm6dsv16x_from_sflp_to_mg(axis[0]);
           gravity_mg[1] = lsm6dsv16x_from_sflp_to_mg(axis[1]);
           gravity_mg[2] = lsm6dsv16x_from_sflp_to_mg(axis[2]);
-          sprintf((char *)tx_buffer, "Gravity [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "Gravity [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                          (double_t)gravity_mg[0], (double_t)gravity_mg[1], (double_t)gravity_mg[2]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
         case LSM6DSV16X_SFLP_GAME_ROTATION_VECTOR_TAG:
           sflp2q(quat, (uint16_t *)&f_data.data[0]);
-          sprintf((char *)tx_buffer, "Game Rotation \tX: %2.3f\tY: %2.3f\tZ: %2.3f\tW: %2.3f\r\n",
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "Game Rotation \tX: %2.3f\tY: %2.3f\tZ: %2.3f\tW: %2.3f\r\n",
                   (double_t)quat[0], (double_t)quat[1], (double_t)quat[2], (double_t)quat[3]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
@@ -342,7 +342,7 @@ void lsm6dsv16x_sensor_fusion(void)
         }
       }
 
-      sprintf((char *)tx_buffer, "------ \r\n\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "------ \r\n\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

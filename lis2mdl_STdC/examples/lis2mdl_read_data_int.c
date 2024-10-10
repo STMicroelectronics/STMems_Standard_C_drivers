@@ -189,7 +189,7 @@ void lis2mdl_read_data_int(void)
       magnetic_mG[0] = lis2mdl_from_lsb_to_mgauss( data_raw_magnetic[0]);
       magnetic_mG[1] = lis2mdl_from_lsb_to_mgauss( data_raw_magnetic[1]);
       magnetic_mG[2] = lis2mdl_from_lsb_to_mgauss( data_raw_magnetic[2]);
-      sprintf((char *)tx_buffer, "Mag field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Mag field [mG]:%4.2f\t%4.2f\t%4.2f\r\n",
               magnetic_mG[0], magnetic_mG[1], magnetic_mG[2]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
       /* Read temperature data */
@@ -197,7 +197,7 @@ void lis2mdl_read_data_int(void)
       lis2mdl_temperature_raw_get(&dev_ctx, &data_raw_temperature);
       temperature_degC =
         lis2mdl_from_lsb_to_celsius(data_raw_temperature);
-      sprintf((char *)tx_buffer, "Temperature [degC]:%6.2f\r\n",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Temperature [degC]:%6.2f\r\n",
               temperature_degC);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }

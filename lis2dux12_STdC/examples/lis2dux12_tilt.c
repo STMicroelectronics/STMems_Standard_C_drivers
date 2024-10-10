@@ -203,7 +203,7 @@ void lis2dux12_tilt(void)
       tilt_event = 0;
 
       /* print tilt status  */
-      sprintf((char*)tx_buffer, "Tilt detected!\r\n");
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "Tilt detected!\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

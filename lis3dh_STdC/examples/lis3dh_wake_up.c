@@ -189,7 +189,7 @@ void lis3dh_wake_up(void)
 
     if (src.xh || src.yh || src.zh) {
       lis3dh_int1_gen_source_get(&dev_ctx, &src);
-      sprintf((char *)tx_buffer, "wake-up detected : "
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "wake-up detected : "
               "x %d, y %d, z %d\r\n",
               src.xh, src.yh, src.zh);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));

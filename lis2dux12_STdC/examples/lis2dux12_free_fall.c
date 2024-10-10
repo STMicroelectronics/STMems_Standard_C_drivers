@@ -199,7 +199,7 @@ void lis2dux12_free_fall(void)
       ff_event = 0;
 
       /* print free-fall status  */
-      sprintf((char*)tx_buffer, "Free-Fall detected!\r\n");
+      snprintf((char*)tx_buffer, sizeof(tx_buffer), "Free-Fall detected!\r\n");
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
     }
   }

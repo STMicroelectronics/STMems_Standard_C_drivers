@@ -190,7 +190,7 @@ void ism330dhcx_mlc_six_d_position(void)
 
       ism330dhcx_mlc_out_get(&dev_ctx, six_d_pos);
 
-      sprintf((char *)tx_buffer, "six_d_pos %d\r\n", six_d_pos[0]);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "six_d_pos %d\r\n", six_d_pos[0]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 

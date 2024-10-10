@@ -195,12 +195,12 @@ void ais2ih_activity(void)
 
     /* Check if Activity/Inactivity events */
     if (all_source.wake_up_src.sleep_state_ia) {
-      sprintf((char *)tx_buffer, "Inactivity Detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Inactivity Detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
     if (all_source.wake_up_src.wu_ia) {
-      sprintf((char *)tx_buffer, "Activity Detected\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "Activity Detected\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

@@ -245,13 +245,13 @@ void lis3dh_self_test(void)
   for (i = 0; i < 3; i++) {
     if (( min_st_limit_mg < test_val_mg[i] ) &&
         ( test_val_mg[i] < max_st_limit_mg)) {
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "Axis[%d]: lmt min %4.2f mg - lmt max %4.2f mg - val %4.2f mg - PASS\r\n",
               i, min_st_limit_mg, max_st_limit_mg, test_val_mg[i]);
     }
 
     else {
-      sprintf((char *)tx_buffer,
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),
               "Axis[%d]: lmt min %4.2f mg - lmt max %4.2f mg - val %4.2f mg - FAIL\r\n",
               i, min_st_limit_mg, max_st_limit_mg, test_val_mg[i]);
     }
