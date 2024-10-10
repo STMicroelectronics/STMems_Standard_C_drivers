@@ -142,7 +142,7 @@ void l3gd20h_self_test(void)
   float val_st_off[3];
   float val_st_on[3];
   float test_val[3];
-  uint8_t st_result;
+  uint8_t st_result = ST_PASS;
   uint8_t whoamI;
   uint8_t drdy;
   uint8_t rst;
