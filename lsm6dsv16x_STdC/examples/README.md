@@ -29,7 +29,23 @@ Read accelerometer and gyroscope sensor data, both compressed and uncompressed, 
   - lsm6dsv16x_fifo_irq.c
   - lsm6dsv16x_compressed_fifo.c
 
+Read step counter virtual sensor from FIFO:
+
+  - lsm6dsv16x_fifo_stepcnt.c
+
 ## Program and use embedded digital functions
+
+Program LSM6DSV16X to receive step detection events and data on INT1:
+
+  - lsm6dsv16x_pedometer.c
+
+Program LSM6DSV16X to receive significant motion detection events on INT1:
+
+  - lsm6dsv16x_sig_mot.c
+
+Program LSM6DSV16X to receive relative tilt detection events on INT1:
+
+  - lsm6dsv16x_tilt.c
 
 Program LSM6DSV16X to receive 6D orientation detection events on INT1:
 

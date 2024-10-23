@@ -1,15 +1,13 @@
 /*
  ******************************************************************************
- * @file    fifo_irq.c
+ * @file    pedometer.c
  * @author  Sensors Software Solution Team
- * @brief   This file how to configure compressed FIFO and to retrieve acc
- *          and gyro data. This sample use a fifo utility library tool
- *          for FIFO decompression.
+ * @brief   This file shows how to generate and handle a Free Fall event.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+ * <h2><center>&copy; Copyright (c) 2024 STMicroelectronics.
  * All rights reserved.</center></h2>
  *
  * This software component is licensed by ST under BSD 3-Clause license,
@@ -116,27 +114,15 @@ static uint8_t i3c_dyn_addr = 0x0A;
 #endif
 
 /* Private macro -------------------------------------------------------------*/
-/*
- * Select FIFO samples watermark, max value is 512
- * in FIFO are stored acc, gyro and timestamp samples
- */
-#define BOOT_TIME         10
-#define FIFO_WATERMARK    64
+#define    BOOT_TIME            10 //ms
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 
-/* Private variables ---------------------------------------------------------*/
-static int16_t *datax;
-static int16_t *datay;
-static int16_t *dataz;
-static int32_t *ts;
-
 /* Extern variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
-
 /*
  *   WARNING:
  *   Functions declare in this section are defined at the end of this file
@@ -152,17 +138,26 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void *handle);
 
 static stmdev_ctx_t dev_ctx;
-static uint8_t fifo_event = 0;
+static uint8_t step_event_catched = 0;
 
-void lsm6dsv16x_fifo_irq_handler(void)
+void lsm6dsv16x_pedometer_handler(void)
 {
-  fifo_event = 1;
+  lsm6dsv16x_embedded_status_t status;
+
+  /* Read output only if new xl value is available */
+  lsm6dsv16x_embedded_status_get(&dev_ctx, &status);
+
+  if (status.step_detector) {
+    step_event_catched = 1;
+  }
 }
 
 /* Main Example --------------------------------------------------------------*/
-void lsm6dsv16x_fifo_irq(void)
+void lsm6dsv16x_pedometer(void)
 {
-  lsm6dsv16x_pin_int_route_t pin_int;
+  lsm6dsv16x_emb_pin_int_route_t pin_int = { 0 };
+  lsm6dsv16x_stpcnt_mode_t stpcnt_mode = { 0 };
+  uint16_t steps;
   lsm6dsv16x_reset_t rst;
 
   /* Initialize mems driver interface */
@@ -175,7 +170,6 @@ void lsm6dsv16x_fifo_irq(void)
   platform_init(dev_ctx.handle);
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
-
   /* Check device ID */
   lsm6dsv16x_device_id_get(&dev_ctx, &whoamI);
 
@@ -190,79 +184,35 @@ void lsm6dsv16x_fifo_irq(void)
 
   /* Enable Block Data Update */
   lsm6dsv16x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
-  /* Set full scale */
-  lsm6dsv16x_xl_full_scale_set(&dev_ctx, LSM6DSV16X_2g);
-
-  /*
-   * Set FIFO watermark (number of unread sensor data TAG + 6 bytes
-   * stored in FIFO) to FIFO_WATERMARK samples
-   */
-  lsm6dsv16x_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
-  /* Set FIFO batch XL/Gyro ODR to 12.5Hz */
-  lsm6dsv16x_fifo_xl_batch_set(&dev_ctx, LSM6DSV16X_XL_BATCHED_AT_60Hz);
-  /* Set FIFO mode to Stream mode (aka Continuous Mode) */
-  lsm6dsv16x_fifo_mode_set(&dev_ctx, LSM6DSV16X_STREAM_MODE);
 
 #if defined(NUCLEO_H503RB)
   /* if I3C is used then INT pin must be explicitly enabled */
   lsm6dsv16x_i3c_int_en_set(&dev_ctx, 1);
 #endif
 
-  pin_int.fifo_th = PROPERTY_ENABLE;
-  lsm6dsv16x_pin_int1_route_set(&dev_ctx, &pin_int);
-  //lsm6dsv16x_pin_int2_route_set(&dev_ctx, &pin_int);
+  /* Enable pedometer */
+  stpcnt_mode.step_counter_enable = PROPERTY_ENABLE;
+  stpcnt_mode.false_step_rej = PROPERTY_ENABLE;
+  lsm6dsv16x_stpcnt_mode_set(&dev_ctx, stpcnt_mode);
 
-  /* Set Output Data Rate */
-  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_AT_60Hz);
-  lsm6dsv16x_fifo_timestamp_batch_set(&dev_ctx, LSM6DSV16X_TMSTMP_DEC_32);
-  lsm6dsv16x_timestamp_set(&dev_ctx, PROPERTY_ENABLE);
+  pin_int.step_det = PROPERTY_ENABLE;
+  lsm6dsv16x_emb_pin_int1_route_set(&dev_ctx, &pin_int);
+  //lsm6dsv16x_emb_pin_int2_route_set(&dev_ctx, &pin_int);
 
-  /* handle fifo events */
+  lsm6dsv16x_embedded_int_cfg_set(&dev_ctx, LSM6DSV16X_INT_LATCH_ENABLE);
+
+  /* Set Output Data Rate.*/
+  lsm6dsv16x_xl_data_rate_set(&dev_ctx, LSM6DSV16X_ODR_AT_120Hz);
+  /* Set full scale */
+  lsm6dsv16x_xl_full_scale_set(&dev_ctx, LSM6DSV16X_2g);
+
+  /* wait forever (6D event handle in irq handler) */
   while (1) {
-    if (fifo_event) {
-      uint16_t num = 0;
-      lsm6dsv16x_fifo_status_t fifo_status;
+    if (step_event_catched) {
+      step_event_catched = 0;
 
-      fifo_event = 0;
-
-      /* Read watermark flag */
-      lsm6dsv16x_fifo_status_get(&dev_ctx, &fifo_status);
-
-      num = fifo_status.fifo_level;
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "-- FIFO num %d \r\n", num);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-
-      while (num--) {
-        lsm6dsv16x_fifo_out_raw_t f_data;
-        lsm6dsv16x_fifo_xl *fxl = (lsm6dsv16x_fifo_xl *)f_data.data;
-        float_t ts_usec;
-
-        /* Read FIFO sensor value */
-        lsm6dsv16x_fifo_out_raw_get(&dev_ctx, &f_data);
-        datax = &fxl->axis[0];
-        datay = &fxl->axis[1];
-        dataz = &fxl->axis[2];
-        ts = (int32_t *)&f_data.data[0];
-
-        switch (f_data.tag) {
-        case LSM6DSV16X_XL_NC_TAG:
-          snprintf((char *)tx_buffer, sizeof(tx_buffer), "ACC [mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
-                  lsm6dsv16x_from_fs2_to_mg(*datax),
-                  lsm6dsv16x_from_fs2_to_mg(*datay),
-                  lsm6dsv16x_from_fs2_to_mg(*dataz));
-          tx_com(tx_buffer, strlen((char const *)tx_buffer));
-          break;
-        case LSM6DSV16X_TIMESTAMP_TAG:
-          ts_usec = lsm6dsv16x_from_lsb_to_nsec(*ts)/1000;
-          snprintf((char *)tx_buffer, sizeof(tx_buffer), "TIMESTAMP %6.1f [us] (lsb: %d)\r\n", ts_usec, *ts);
-          tx_com(tx_buffer, strlen((char const *)tx_buffer));
-          break;
-        default:
-          break;
-        }
-      }
-
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "------ \r\n\r\n");
+      lsm6dsv16x_stpcnt_steps_get(&dev_ctx, &steps);
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "steps :%d\r\n", steps);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }
@@ -290,7 +240,7 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
   HAL_SPI_Transmit(handle, (uint8_t*) bufp, len, 1000);
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
-  i2c_lld_write(handle,  LSM6DSV16X_I2C_ADD_H & 0xFE, reg, (uint8_t*) bufp, len);
+  i2c_lld_write(handle,  LSM6DSV16X_I2C_ADD_L & 0xFE, reg, (uint8_t*) bufp, len);
 #elif defined(NUCLEO_H503RB)
   i3c_write(handle, i3c_dyn_addr, reg, (uint8_t*) bufp, len);
 #endif
@@ -320,7 +270,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   HAL_SPI_Receive(handle, bufp, len, 1000);
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
-  i2c_lld_read(handle, LSM6DSV16X_I2C_ADD_H & 0xFE, reg, bufp, len);
+  i2c_lld_read(handle, LSM6DSV16X_I2C_ADD_L & 0xFE, reg, bufp, len);
 #elif defined(NUCLEO_H503RB)
   i3c_read(handle, i3c_dyn_addr, reg, bufp, len);
 #endif
@@ -328,7 +278,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 }
 
 /*
- * @brief  Send buffer to console (platform dependent)
+ * @brief  platform specific outputs on terminal (platform dependent)
  *
  * @param  tx_buffer     buffer to transmit
  * @param  len           number of byte to send

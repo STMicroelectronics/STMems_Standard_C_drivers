@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * @file    fifo_irq.c
+ * @file    fifo_emb_functions.c
  * @author  Sensors Software Solution Team
  * @brief   This file how to configure compressed FIFO and to retrieve acc
  *          and gyro data. This sample use a fifo utility library tool
@@ -121,17 +121,13 @@ static uint8_t i3c_dyn_addr = 0x0A;
  * in FIFO are stored acc, gyro and timestamp samples
  */
 #define BOOT_TIME         10
-#define FIFO_WATERMARK    64
+#define FIFO_WATERMARK    8
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 
 /* Private variables ---------------------------------------------------------*/
-static int16_t *datax;
-static int16_t *datay;
-static int16_t *dataz;
-static int32_t *ts;
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -153,16 +149,27 @@ static void platform_init(void *handle);
 
 static stmdev_ctx_t dev_ctx;
 static uint8_t fifo_event = 0;
+static uint16_t fifo_level = 0;
 
-void lsm6dsv16x_fifo_irq_handler(void)
+void lsm6dsv16x_fifo_emb_functions_handler(void)
 {
-  fifo_event = 1;
+  lsm6dsv16x_fifo_status_t status;
+
+  lsm6dsv16x_fifo_status_get(&dev_ctx, &status);
+
+  if (status.fifo_th) {
+    fifo_event = 1;
+    fifo_level = status.fifo_level;
+  }
 }
 
 /* Main Example --------------------------------------------------------------*/
-void lsm6dsv16x_fifo_irq(void)
+void lsm6dsv16x_fifo_emb_functions(void)
 {
-  lsm6dsv16x_pin_int_route_t pin_int;
+  lsm6dsv16x_pin_int_route_t pin_int = { 0 };
+  lsm6dsv16x_stpcnt_mode_t stpcnt_mode = { 0 };
+  uint16_t steps = 0;
+
   lsm6dsv16x_reset_t rst;
 
   /* Initialize mems driver interface */
@@ -198,8 +205,15 @@ void lsm6dsv16x_fifo_irq(void)
    * stored in FIFO) to FIFO_WATERMARK samples
    */
   lsm6dsv16x_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
-  /* Set FIFO batch XL/Gyro ODR to 12.5Hz */
-  lsm6dsv16x_fifo_xl_batch_set(&dev_ctx, LSM6DSV16X_XL_BATCHED_AT_60Hz);
+
+  /* Enable pedometer */
+  stpcnt_mode.step_counter_enable = PROPERTY_ENABLE;
+  stpcnt_mode.false_step_rej = PROPERTY_ENABLE;
+  lsm6dsv16x_stpcnt_mode_set(&dev_ctx, stpcnt_mode);
+
+  /* Enable step counter data in FIFO */
+  lsm6dsv16x_fifo_stpcnt_batch_set(&dev_ctx, 1);
+
   /* Set FIFO mode to Stream mode (aka Continuous Mode) */
   lsm6dsv16x_fifo_mode_set(&dev_ctx, LSM6DSV16X_STREAM_MODE);
 
@@ -221,41 +235,27 @@ void lsm6dsv16x_fifo_irq(void)
   while (1) {
     if (fifo_event) {
       uint16_t num = 0;
-      lsm6dsv16x_fifo_status_t fifo_status;
 
       fifo_event = 0;
 
-      /* Read watermark flag */
-      lsm6dsv16x_fifo_status_get(&dev_ctx, &fifo_status);
-
-      num = fifo_status.fifo_level;
+      num = fifo_level;
       snprintf((char *)tx_buffer, sizeof(tx_buffer), "-- FIFO num %d \r\n", num);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
       while (num--) {
         lsm6dsv16x_fifo_out_raw_t f_data;
-        lsm6dsv16x_fifo_xl *fxl = (lsm6dsv16x_fifo_xl *)f_data.data;
+        lsm6dsv16x_fifo_step_counter *fpedo = (lsm6dsv16x_fifo_step_counter *)f_data.data;
         float_t ts_usec;
 
         /* Read FIFO sensor value */
         lsm6dsv16x_fifo_out_raw_get(&dev_ctx, &f_data);
-        datax = &fxl->axis[0];
-        datay = &fxl->axis[1];
-        dataz = &fxl->axis[2];
-        ts = (int32_t *)&f_data.data[0];
 
         switch (f_data.tag) {
-        case LSM6DSV16X_XL_NC_TAG:
-          snprintf((char *)tx_buffer, sizeof(tx_buffer), "ACC [mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
-                  lsm6dsv16x_from_fs2_to_mg(*datax),
-                  lsm6dsv16x_from_fs2_to_mg(*datay),
-                  lsm6dsv16x_from_fs2_to_mg(*dataz));
-          tx_com(tx_buffer, strlen((char const *)tx_buffer));
-          break;
-        case LSM6DSV16X_TIMESTAMP_TAG:
-          ts_usec = lsm6dsv16x_from_lsb_to_nsec(*ts)/1000;
-          snprintf((char *)tx_buffer, sizeof(tx_buffer), "TIMESTAMP %6.1f [us] (lsb: %d)\r\n", ts_usec, *ts);
-          tx_com(tx_buffer, strlen((char const *)tx_buffer));
+        case LSM6DSV16X_STEP_COUNTER_TAG:
+          ts_usec = lsm6dsv16x_from_lsb_to_nsec(fpedo->timestamp)/1000;
+          steps = fpedo->steps;
+          snprintf((char*)tx_buffer, sizeof(tx_buffer), "Steps: %03d (%6.1f us)\r\n", steps, ts_usec);
+          tx_com(tx_buffer, strlen((char const*)tx_buffer));
           break;
         default:
           break;
