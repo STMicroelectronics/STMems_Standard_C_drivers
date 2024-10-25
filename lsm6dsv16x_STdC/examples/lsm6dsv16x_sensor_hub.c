@@ -197,22 +197,27 @@ void lsm6dsv16x_sensor_hub(void)
   /* Initialize mems driver interface */
   lsm6dsv16x_ctx.write_reg = platform_write;
   lsm6dsv16x_ctx.read_reg = platform_read;
+  lsm6dsv16x_ctx.mdelay = platform_delay;
   lsm6dsv16x_ctx.handle = &SENSOR_BUS;
 
   /* Initialize lis2mdl driver interface */
   lis2mdl_ctx.read_reg = lsm6dsv16x_read_lis2mdl_cx;
   lis2mdl_ctx.write_reg = lsm6dsv16x_write_lis2mdl_cx;
+  lis2mdl_ctx.mdelay = platform_delay;
   lis2mdl_ctx.handle = &SENSOR_BUS;
 
   /* Initialize lps22df driver interface */
   lps22df_ctx.read_reg = lsm6dsv16x_read_lps22df_cx;
   lps22df_ctx.write_reg = lsm6dsv16x_write_lps22df_cx;
+  lps22df_ctx.mdelay = platform_delay;
   lps22df_ctx.handle = &SENSOR_BUS;
 
   /* Init test platform */
   platform_init(lsm6dsv16x_ctx.handle);
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
+
   /* Check device ID */
   lsm6dsv16x_device_id_get(&lsm6dsv16x_ctx, &whoamI);
 
@@ -337,6 +342,9 @@ void lsm6dsv16x_sensor_hub(void)
 
   /* Configure Sensor Hub to read one slave. */
   lsm6dsv16x_sh_slave_connected_set(&lsm6dsv16x_ctx, LSM6DSV16X_SLV_0_1);
+
+  /* set SHUB write_once bit */
+  lsm6dsv16x_sh_write_mode_set(&lsm6dsv16x_ctx, LSM6DSV16X_ONLY_FIRST_CYCLE);
 
   /* Enable I2C Master. */
   lsm6dsv16x_sh_master_set(&lsm6dsv16x_ctx, PROPERTY_ENABLE);
@@ -547,12 +555,16 @@ static int32_t lsm6dsv16x_write_target_cx(void *ctx, uint8_t i2c_add, uint8_t re
   sh_cfg_write.slv0_subadd = reg,
   sh_cfg_write.slv0_data = *data,
   ret = lsm6dsv16x_sh_cfg_write(&lsm6dsv16x_ctx, &sh_cfg_write);
+
   /* Disable accelerometer. */
   lsm6dsv16x_xl_data_rate_set(&lsm6dsv16x_ctx, LSM6DSV16X_ODR_OFF);
+
   /* Enable I2C Master. */
   lsm6dsv16x_sh_master_set(&lsm6dsv16x_ctx, PROPERTY_ENABLE);
+
   /* Enable accelerometer to trigger Sensor Hub operation. */
   lsm6dsv16x_xl_data_rate_set(&lsm6dsv16x_ctx, LSM6DSV16X_ODR_AT_120Hz);
+
   /* Wait Sensor Hub operation flag set. */
   lsm6dsv16x_acceleration_raw_get(&lsm6dsv16x_ctx, raw_xl);
 
@@ -569,6 +581,7 @@ static int32_t lsm6dsv16x_write_target_cx(void *ctx, uint8_t i2c_add, uint8_t re
   /* Disable I2C master and XL (trigger). */
   lsm6dsv16x_sh_master_set(&lsm6dsv16x_ctx, PROPERTY_DISABLE);
   lsm6dsv16x_xl_data_rate_set(&lsm6dsv16x_ctx, LSM6DSV16X_ODR_OFF);
+
   return ret;
 }
 
@@ -615,16 +628,21 @@ static int32_t lsm6dsv16x_read_target_cx(void *ctx, uint8_t i2c_add, uint8_t reg
 
   /* Disable accelerometer. */
   lsm6dsv16x_xl_data_rate_set(&lsm6dsv16x_ctx, LSM6DSV16X_ODR_OFF);
+
   /* Configure Sensor Hub to read LIS2MDL. */
   sh_cfg_read.slv_add = (i2c_add & 0xFEU) >> 1; /* 7bit I2C address */
   sh_cfg_read.slv_subadd = reg;
   sh_cfg_read.slv_len = len;
   ret = lsm6dsv16x_sh_slv_cfg_read(&lsm6dsv16x_ctx, 0, &sh_cfg_read);
+
   lsm6dsv16x_sh_slave_connected_set(&lsm6dsv16x_ctx, LSM6DSV16X_SLV_0_1);
+
   /* Enable I2C Master and I2C master. */
   lsm6dsv16x_sh_master_set(&lsm6dsv16x_ctx, PROPERTY_ENABLE);
+
   /* Enable accelerometer to trigger Sensor Hub operation. */
   lsm6dsv16x_xl_data_rate_set(&lsm6dsv16x_ctx, LSM6DSV16X_ODR_AT_120Hz);
+
   /* Wait Sensor Hub operation flag set. */
   lsm6dsv16x_acceleration_raw_get(&lsm6dsv16x_ctx, raw_xl);
 
@@ -643,6 +661,7 @@ static int32_t lsm6dsv16x_read_target_cx(void *ctx, uint8_t i2c_add, uint8_t reg
   lsm6dsv16x_xl_data_rate_set(&lsm6dsv16x_ctx, LSM6DSV16X_ODR_OFF);
   /* Read SensorHub registers. */
   lsm6dsv16x_sh_read_data_raw_get(&lsm6dsv16x_ctx, data, len);
+
   return ret;
 }
 

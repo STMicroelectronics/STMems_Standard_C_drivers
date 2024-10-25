@@ -172,16 +172,19 @@ void lsm6dso16is_sensor_hub(void)
   /* Initialize mems driver interface */
   lsm6dso16is_ctx.write_reg = platform_write;
   lsm6dso16is_ctx.read_reg = platform_read;
+  lsm6dso16is_ctx.mdelay = platform_delay;
   lsm6dso16is_ctx.handle = &SENSOR_BUS;
 
   /* Initialize lis2mdl driver interface */
   lis2mdl_ctx.read_reg = lsm6dso16is_read_lis2mdl_cx;
   lis2mdl_ctx.write_reg = lsm6dso16is_write_lis2mdl_cx;
+  lis2mdl_ctx.mdelay = platform_delay;
   lis2mdl_ctx.handle = &SENSOR_BUS;
 
   /* Initialize lps22df driver interface */
   lps22df_ctx.read_reg = lsm6dso16is_read_lps22df_cx;
   lps22df_ctx.write_reg = lsm6dso16is_write_lps22df_cx;
+  lps22df_ctx.mdelay = platform_delay;
   lps22df_ctx.handle = &SENSOR_BUS;
 
   /* Init test platform */
@@ -286,6 +289,9 @@ void lsm6dso16is_sensor_hub(void)
 
   /* Configure Sensor Hub to read one slave. */
   lsm6dso16is_sh_slave_connected_set(&lsm6dso16is_ctx, LSM6DSO16IS_SLV_0_1);
+
+  /* set SHUB write_once bit */
+  lsm6dso16is_sh_write_mode_set(&lsm6dso16is_ctx, LSM6DSO16IS_ONLY_FIRST_CYCLE);
 
   /* Enable I2C Master. */
   lsm6dso16is_sh_master_set(&lsm6dso16is_ctx, PROPERTY_ENABLE);

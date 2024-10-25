@@ -151,18 +151,25 @@ void ism330dhcx_mlc_iis2mdc(void)
   axis3bit16_t data_raw;
   uint8_t whoamI, rst;
   uint16_t dummy;
+
   /* Initialize ism330dhcx driver interface */
   ag_ctx.write_reg = platform_write;
   ag_ctx.read_reg = platform_read;
+  ag_ctx.mdelay = platform_delay;
   ag_ctx.handle = &SENSOR_BUS;
+
   /* Initialize iis2mdc driver interface */
   mag_ctx.read_reg = ism330dhcx_read_iis2mdc_cx;
   mag_ctx.write_reg = ism330dhcx_write_iis2mdc_cx;
+  mag_ctx.mdelay = platform_delay;
   mag_ctx.handle = &SENSOR_BUS;
+
   /* initialize HW */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(10);
+
   /* Check ism330dhcx ID. */
   ism330dhcx_device_id_get(&ag_ctx, &whoamI);
 
@@ -178,11 +185,13 @@ void ism330dhcx_mlc_iis2mdc(void)
 
   /* Start device configuration. */
   ism330dhcx_device_conf_set(&ag_ctx, PROPERTY_ENABLE);
+
   /* Disable I3C interface.*/
   //ism330dhcx_i3c_disable_set(&ag_ctx, ISM330DHCX_I3C_DISABLE);
   /* Turn off Sensors */
   ism330dhcx_xl_data_rate_set(&ag_ctx, ISM330DHCX_XL_ODR_OFF);
   ism330dhcx_gy_data_rate_set(&ag_ctx, ISM330DHCX_GY_ODR_OFF);
+
   /* Some hardware require to enable pull up on master I2C interface. */
   //ism330dhcx_sh_pin_mode_set(&ag_ctx, ISM330DHCX_INTERNAL_PULL_UP);
   /* Check if IIS2MDC connected to Sensor Hub. */
@@ -196,24 +205,34 @@ void ism330dhcx_mlc_iis2mdc(void)
   iis2mdc_offset_temp_comp_set(&mag_ctx, PROPERTY_ENABLE);
   iis2mdc_operating_mode_set(&mag_ctx, IIS2MDC_CONTINUOUS_MODE);
   iis2mdc_data_rate_set(&mag_ctx, IIS2MDC_ODR_20Hz);
+
   /* Prepare sensor hub to read data from external Slave0 continuously */
   ism330dhcx_sh_data_rate_set(&ag_ctx, ISM330DHCX_SH_ODR_26Hz);
   sh_cfg_read.slv_add = IIS2MDC_I2C_ADD; /* 8bit I2C address */
   sh_cfg_read.slv_subadd = IIS2MDC_OUTX_L_REG;
   sh_cfg_read.slv_len = 6;
   ism330dhcx_sh_slv0_cfg_read(&ag_ctx, &sh_cfg_read);
+
   /* Configure Sensor Hub to read one slave. */
   ism330dhcx_sh_slave_connected_set(&ag_ctx, ISM330DHCX_SLV_0);
+
+  /* set write_once bit */
+  ism330dhcx_sh_write_mode_set(&ag_ctx, ISM330DHCX_ONLY_FIRST_CYCLE);
+
   /* Enable I2C Master. */
   ism330dhcx_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
+
   /* Set xl and gy full scale */
   ism330dhcx_xl_full_scale_set(&ag_ctx, ISM330DHCX_2g);
   ism330dhcx_gy_full_scale_set(&ag_ctx, ISM330DHCX_2000dps);
+
   /* Turn on Sensors */
   ism330dhcx_xl_data_rate_set(&ag_ctx, ISM330DHCX_XL_ODR_26Hz);
   ism330dhcx_gy_data_rate_set(&ag_ctx, ISM330DHCX_GY_ODR_26Hz);
+
   /* Route signals on interrupt pin 1 */
   ism330dhcx_pin_int1_route_get(&ag_ctx, &pin_int1_route);
+
   //pin_int1_route.mlc1 = PROPERTY_ENABLE;
   ism330dhcx_pin_int1_route_set(&ag_ctx, &pin_int1_route);
 
@@ -230,6 +249,7 @@ void ism330dhcx_mlc_iis2mdc(void)
         ism330dhcx_from_fs2g_to_mg(data_raw.i16bit[1]);
       acceleration_mg[2] =
         ism330dhcx_from_fs2g_to_mg(data_raw.i16bit[2]);
+
       /* Read angular rate */
       ism330dhcx_angular_rate_raw_get(&ag_ctx, data_raw.i16bit);
       angular_rate_mdps[0] =
@@ -282,17 +302,22 @@ static int32_t ism330dhcx_write_iis2mdc_cx(void *ctx, uint8_t reg,
   uint8_t drdy;
   ism330dhcx_status_master_t master_status;
   ism330dhcx_sh_cfg_write_t sh_cfg_write;
+
   /* Configure Sensor Hub to read IIS2MDC. */
   sh_cfg_write.slv0_add = IIS2MDC_I2C_ADD; /* 8bit I2C address */
   sh_cfg_write.slv0_subadd = reg,
   sh_cfg_write.slv0_data = *data,
   ret = ism330dhcx_sh_cfg_write(&ag_ctx, &sh_cfg_write);
+
   /* Disable accelerometer. */
   ism330dhcx_xl_data_rate_set(&ag_ctx, ISM330DHCX_XL_ODR_OFF);
+
   /* Enable I2C Master. */
   ism330dhcx_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
+
   /* Enable accelerometer to trigger Sensor Hub operation. */
   ism330dhcx_xl_data_rate_set(&ag_ctx, ISM330DHCX_XL_ODR_104Hz);
+
   /* Wait Sensor Hub operation flag set. */
   ism330dhcx_acceleration_raw_get(&ag_ctx, data_raw_acceleration);
 
@@ -331,18 +356,27 @@ static int32_t ism330dhcx_read_iis2mdc_cx(void *ctx, uint8_t reg,
   int32_t ret;
   uint8_t drdy;
   ism330dhcx_status_master_t master_status;
+
   /* Disable accelerometer. */
   ism330dhcx_xl_data_rate_set(&ag_ctx, ISM330DHCX_XL_ODR_OFF);
+
   /* Configure Sensor Hub to read IIS2MDC. */
   sh_cfg_read.slv_add = IIS2MDC_I2C_ADD; /* 8bit I2C address */
   sh_cfg_read.slv_subadd = reg;
   sh_cfg_read.slv_len = len;
   ret = ism330dhcx_sh_slv0_cfg_read(&ag_ctx, &sh_cfg_read);
+
   ism330dhcx_sh_slave_connected_set(&ag_ctx, ISM330DHCX_SLV_0);
-  /* Enable I2C Master and I2C master. */
+
+  /* set write_once bit */
+  ism330dhcx_sh_write_mode_set(&ag_ctx, ISM330DHCX_ONLY_FIRST_CYCLE);
+
+  /* Enable I2C Master. */
   ism330dhcx_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
+
   /* Enable accelerometer to trigger Sensor Hub operation. */
   ism330dhcx_xl_data_rate_set(&ag_ctx, ISM330DHCX_XL_ODR_104Hz);
+
   /* Wait Sensor Hub operation flag set. */
   ism330dhcx_acceleration_raw_get(&ag_ctx, data_raw_acceleration);
 
