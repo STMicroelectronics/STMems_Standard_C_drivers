@@ -1,7 +1,7 @@
 /*
  ******************************************************************************
- * @file    sths34pf80_tmos_presence_detection.c
- * @author  MEMS Software Solutions Team
+ * @file    sths34pf80_tmos_tamb_shock_reset.c
+ * @author  AME MEMS Applications Team
  * @brief   This file show the simplest way to get data from sensor.
  *
  ******************************************************************************
@@ -125,13 +125,13 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Interrupt handler  --------------------------------------------------------*/
-void sths34pf80_tmos_presence_detection_handler(void)
+void sths34pf80_tmos_tamb_shock_reset_handler(void)
 {
   wakeup_thread = 1;
 }
 
 /* Main Example --------------------------------------------------------------*/
-void sths34pf80_tmos_presence_detection(void)
+void sths34pf80_tmos_tamb_shock_reset(void)
 {
   uint8_t whoami;
   sths34pf80_lpf_bandwidth_t lpf_m, lpf_p, lpf_p_m, lpf_a_t;
@@ -170,6 +170,10 @@ void sths34pf80_tmos_presence_detection(void)
   /* Set BDU */
   sths34pf80_block_data_update_set(&dev_ctx, 1);
 
+  /* Set tambient shock threshold and hysteresis values */
+  sths34pf80_tambient_shock_threshold_set(&dev_ctx, 35);
+  sths34pf80_tambient_shock_hysteresis_set(&dev_ctx, 5);
+
   sths34pf80_presence_threshold_set(&dev_ctx, 200);
   sths34pf80_presence_hysteresis_set(&dev_ctx, 20);
   sths34pf80_motion_threshold_set(&dev_ctx, 300);
@@ -178,11 +182,11 @@ void sths34pf80_tmos_presence_detection(void)
   sths34pf80_algo_reset(&dev_ctx);
 
   /* Set interrupt */
-  sths34pf80_int_or_set(&dev_ctx, STHS34PF80_INT_PRESENCE);
+  sths34pf80_int_or_set(&dev_ctx, STHS34PF80_INT_ALL);
   sths34pf80_route_int_set(&dev_ctx, STHS34PF80_INT_OR);
 
   /* Set ODR */
-  sths34pf80_odr_set(&dev_ctx, STHS34PF80_ODR_AT_30Hz);
+  sths34pf80_odr_set(&dev_ctx, STHS34PF80_ODR_AT_15Hz);
 
   /* Presence event detected in irq handler */
   while (1)
@@ -190,6 +194,7 @@ void sths34pf80_tmos_presence_detection(void)
     sths34pf80_func_status_t func_status;
     uint8_t motion;
     uint8_t presence;
+    uint8_t tambshock;
 
     /* handle event in a "thread" alike code */
     if (wakeup_thread)
@@ -197,6 +202,7 @@ void sths34pf80_tmos_presence_detection(void)
       wakeup_thread = 0;
       motion = 0;
       presence = 0;
+      tambshock = 0;
 
       do
       {
@@ -225,6 +231,24 @@ void sths34pf80_tmos_presence_detection(void)
           if (motion)
           {
             snprintf((char *)tx_buffer, sizeof(tx_buffer), "Motion Detected!\r\n");
+            tx_com(tx_buffer, strlen((char const *)tx_buffer));
+          }
+        }
+
+        if (func_status.tamb_shock_flag != tambshock)
+        {
+          tambshock = func_status.tamb_shock_flag;
+
+          if (tambshock)
+          {
+            sprintf((char *)tx_buffer, "TAmbient Shock Detected! Clear FoV for reset operation! \r\n");
+            tx_com(tx_buffer, strlen((char const *)tx_buffer));
+
+            platform_delay(5000);
+
+            sths34pf80_algo_reset(&dev_ctx);
+
+            sprintf((char *)tx_buffer, "Emb Algorithm Reset Performed!!\r\n");
             tx_com(tx_buffer, strlen((char const *)tx_buffer));
           }
         }

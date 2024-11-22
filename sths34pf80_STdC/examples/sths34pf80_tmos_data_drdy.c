@@ -1,14 +1,14 @@
 /*
  ******************************************************************************
- * @file    sths34pf80_data_drdy.c
- * @author  Sensors Software Solution Team
+ * @file    sths34pf80_tmos_data_drdy.c
+ * @author  MEMS Software Solutions Team
  * @brief   This file show the simplest way to get data from sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
- * All rights reserved.</center></h2>
+ * Copyright (c) 2021 STMicroelectronics.
+ * All rights reserved.
  *
  * This software component is licensed by ST under BSD 3-Clause license,
  * the "License"; You may not use this file except in compliance with the
@@ -61,7 +61,6 @@
  *            header file of the driver (_reg.h).
  */
 
-
 #if defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
@@ -105,7 +104,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t tx_buffer[1000];
-//static sths34pf80_data_t data;
+static stmdev_ctx_t dev_ctx;
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -120,13 +119,12 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len);
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
-static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void tx_com(uint8_t *tx_buffer, uint16_t len);
 static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
-static   stmdev_ctx_t dev_ctx;
-
-void sths34pf80_data_drdy_handler(void)
+/* Interrupt handler  --------------------------------------------------------*/
+void sths34pf80_tmos_data_drdy_handler(void)
 {
   sths34pf80_drdy_status_t status;
   sths34pf80_func_status_t func_status;
@@ -137,13 +135,13 @@ void sths34pf80_data_drdy_handler(void)
     sths34pf80_func_status_get(&dev_ctx, &func_status);
 
     snprintf((char *)tx_buffer, sizeof(tx_buffer), "TAmbient Shock: %d - Presence: %d - Motion: %d\r\n",
-            func_status.tamb_shock_flag, func_status.pres_flag, func_status.mot_flag);
+             func_status.tamb_shock_flag, func_status.pres_flag, func_status.mot_flag);
     tx_com(tx_buffer, strlen((char const *)tx_buffer));
- }
+  }
 }
 
 /* Main Example --------------------------------------------------------------*/
-void sths34pf80_data_drdy(void)
+void sths34pf80_tmos_data_drdy(void)
 {
   uint8_t whoami;
   sths34pf80_lpf_bandwidth_t lpf_m, lpf_p, lpf_p_m, lpf_a_t;
@@ -163,7 +161,7 @@ void sths34pf80_data_drdy(void)
   /* Check device ID */
   sths34pf80_device_id_get(&dev_ctx, &whoami);
   if (whoami != STHS34PF80_ID)
-    while(1);
+    while (1);
 
   /* Set averages (AVG_TAMB = 8, AVG_TMOS = 32) */
   sths34pf80_avg_tobject_num_set(&dev_ctx, STHS34PF80_AVG_TMOS_32);
@@ -176,7 +174,7 @@ void sths34pf80_data_drdy(void)
   sths34pf80_lpf_a_t_bandwidth_get(&dev_ctx, &lpf_a_t);
 
   snprintf((char *)tx_buffer, sizeof(tx_buffer),
-          "lpf_m: %02d, lpf_p: %02d, lpf_p_m: %02d, lpf_a_t: %02d\r\n", lpf_m, lpf_p, lpf_p_m, lpf_a_t);
+           "lpf_m: %02d, lpf_p: %02d, lpf_p_m: %02d, lpf_a_t: %02d\r\n", lpf_m, lpf_p, lpf_p_m, lpf_a_t);
   tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
   /* Set BDU */
@@ -189,7 +187,7 @@ void sths34pf80_data_drdy(void)
   sths34pf80_odr_set(&dev_ctx, STHS34PF80_ODR_AT_8Hz);
 
   /* Read samples in drdy handler */
-  while(1);
+  while (1);
 }
 
 /*
@@ -220,7 +218,7 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
 }
 
 #if defined(STEVAL_MKI109V3)
-static void SPI_3W_Read(SPI_HandleTypeDef* xSpiHandle, uint8_t *val)
+static void SPI_3W_Read(SPI_HandleTypeDef *xSpiHandle, uint8_t *val)
 {
   __disable_irq();
 
@@ -242,7 +240,8 @@ static void SPI_3W_Receive(uint8_t *pBuffer, uint16_t nBytesToRead)
   __HAL_SPI_DISABLE(&hspi2);
   SPI_1LINE_RX(&hspi2);
 
-  for(uint16_t i = 0; i < nBytesToRead; i++) {
+  for (uint16_t i = 0; i < nBytesToRead; i++)
+  {
     SPI_3W_Read(&hspi2, pBuffer++);
   }
 
