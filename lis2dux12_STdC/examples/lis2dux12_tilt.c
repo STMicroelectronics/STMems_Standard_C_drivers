@@ -192,6 +192,7 @@ void lis2dux12_tilt(void)
 
   /* Set Output Data Rate */
   md.fs =  LIS2DUX12_2g;
+  md.bw = LIS2DUX12_ODR_div_4;
   md.odr = LIS2DUX12_25Hz_LP;
   lis2dux12_mode_set(&dev_ctx, &md);
 

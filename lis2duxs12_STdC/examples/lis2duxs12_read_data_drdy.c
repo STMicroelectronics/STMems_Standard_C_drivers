@@ -180,6 +180,7 @@ void lis2duxs12_read_data_drdy(void)
 
   /* Set Output Data Rate */
   md.fs =  LIS2DUXS12_4g;
+  md.bw = LIS2DUXS12_ODR_div_4;
   md.odr = LIS2DUXS12_25Hz_LP;
   lis2duxs12_mode_set(&dev_ctx, &md);
 

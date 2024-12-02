@@ -200,6 +200,7 @@ void lis2dux12_read_fifo(void)
 
   /* Set Output Data Rate */
   md.fs =  LIS2DUX12_4g;
+  md.bw = LIS2DUX12_ODR_div_4;
   md.odr = LIS2DUX12_25Hz_LP;
   lis2dux12_mode_set(&dev_ctx, &md);
 
