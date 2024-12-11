@@ -111,9 +111,9 @@ typedef union {
 axis3bit16_t data_raw_magnetic;
 axis3bit16_t data_raw_acceleration;
 axis3bit16_t data_raw_angular_rate;
-float acceleration_mg[3];
-float angular_rate_mdps[3];
-float magnetic_mG[3];
+float_t acceleration_mg[3];
+float_t angular_rate_mdps[3];
+float_t magnetic_mG[3];
 uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 uint8_t slave_address = LSM6DSM_I2C_ADD_H;

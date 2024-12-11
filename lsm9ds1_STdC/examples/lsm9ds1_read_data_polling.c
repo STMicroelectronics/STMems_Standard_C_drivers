@@ -135,9 +135,9 @@ static sensbus_t imu_bus = {&SENSOR_BUS,
 static int16_t data_raw_acceleration[3];
 static int16_t data_raw_angular_rate[3];
 static int16_t data_raw_magnetic_field[3];
-static float acceleration_mg[3];
-static float angular_rate_mdps[3];
-static float magnetic_field_mgauss[3];
+static float_t acceleration_mg[3];
+static float_t angular_rate_mdps[3];
+static float_t magnetic_field_mgauss[3];
 static lsm9ds1_id_t whoamI;
 static lsm9ds1_status_t reg;
 static uint8_t rst;

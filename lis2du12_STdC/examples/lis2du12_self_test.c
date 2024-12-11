@@ -301,7 +301,7 @@ void lis2du12_self_test(void)
 
     /* 12. calculate self test deviation */
     for (i = 0; i < 3; i++)
-      st_dev.xl.mg[i] = fabs(out2.xl.mg[i] - out1.xl.mg[i]);
+      st_dev.xl.mg[i] = fabsf(out2.xl.mg[i] - out1.xl.mg[i]);
 
     /*
      * 13. Set device in Power Down mode

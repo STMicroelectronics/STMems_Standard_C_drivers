@@ -107,12 +107,12 @@
 
 /* Private variables ---------------------------------------------------------*/
 static int16_t data_raw_acceleration[3];
-static float acceleration_st_mg[3];
-static float acceleration_mg[3];
+static float_t acceleration_st_mg[3];
+static float_t acceleration_mg[3];
 static uint8_t tx_buffer[1000];
-static float test_val_mg[3];
-static float max_st_limit_mg;
-static float min_st_limit_mg;
+static float_t test_val_mg[3];
+static float_t max_st_limit_mg;
+static float_t min_st_limit_mg;
 
 
 /* Extern variables ----------------------------------------------------------*/
@@ -235,7 +235,7 @@ void lis2dh12_self_test(void)
 
   /* Calculate the mg values for self test */
   for (i = 0; i < 3; i++) {
-    test_val_mg[i] = fabs((acceleration_st_mg[i] - acceleration_mg[i]));
+    test_val_mg[i] = fabsf((acceleration_st_mg[i] - acceleration_mg[i]));
   }
 
   min_st_limit_mg = lis2dh12_from_fs2_nm_to_mg(MIN_ST_LIMIT_LSb);

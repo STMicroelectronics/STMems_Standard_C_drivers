@@ -111,7 +111,7 @@
 
 static uint8_t tx_buffer[TX_BUF_DIM];
 
-static float acceleration_mg[3];
+static float_t acceleration_mg[3];
 static int16_t data_raw_acceleration[3];
 static stmdev_ctx_t dev_ctx;
 

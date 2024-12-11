@@ -109,8 +109,8 @@ typedef union {
 /* Private variables ---------------------------------------------------------*/
 static int16_t data_raw_acceleration[3];
 static int16_t data_raw_angular_rate[3];
-static float acceleration_mg[3];
-static float angular_rate_mdps[3];
+static float_t acceleration_mg[3];
+static float_t angular_rate_mdps[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 

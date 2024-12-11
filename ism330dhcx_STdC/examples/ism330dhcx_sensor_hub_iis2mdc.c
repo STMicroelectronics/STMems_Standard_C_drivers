@@ -145,9 +145,9 @@ void ism330dhcx_mlc_iis2mdc(void)
   ism330dhcx_pin_int1_route_t pin_int1_route;
   ism330dhcx_sh_cfg_read_t sh_cfg_read;
   ism330dhcx_status_reg_t status;
-  float angular_rate_mdps[3];
-  float acceleration_mg[3];
-  float mag_fielg_mG[3];
+  float_t angular_rate_mdps[3];
+  float_t acceleration_mg[3];
+  float_t mag_fielg_mG[3];
   axis3bit16_t data_raw;
   uint8_t whoamI, rst;
   uint16_t dummy;

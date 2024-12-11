@@ -163,9 +163,9 @@ void ism330dhcx_sensor_hub_iis2mdc_fifo_timestamp(void)
   axis3bit16_t data_raw_angular_rate;
   axis3bit16_t data_raw_magnetic;
   uint8_t whoamI, rst, fifo_wtm;
-  float angular_rate_mdps[3];
-  float acceleration_mg[3];
-  float magnetic_mG[3];
+  float_t angular_rate_mdps[3];
+  float_t acceleration_mg[3];
+  float_t magnetic_mG[3];
   axis3bit16_t dummy;
 
   /* Initialize ism330dhcx driver interface */

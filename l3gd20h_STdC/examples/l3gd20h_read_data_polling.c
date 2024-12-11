@@ -105,7 +105,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 static int16_t data_raw_angular_rate[3];
-static float angular_rate_mdps[3];
+static float_t angular_rate_mdps[3];
 static uint8_t whoamI;
 static l3gd20h_status_reg_t status;
 static uint8_t rst;

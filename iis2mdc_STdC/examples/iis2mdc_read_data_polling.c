@@ -87,8 +87,8 @@
 /* Private variables ---------------------------------------------------------*/
 static int16_t data_raw_temperature;
 static int16_t data_raw_magnetic[3];
-static float temperature_degC;
-static float magnetic_mG[3];
+static float_t temperature_degC;
+static float_t magnetic_mG[3];
 static uint8_t whoamI, rst, drdy;
 static uint8_t tx_buffer[1000];
 

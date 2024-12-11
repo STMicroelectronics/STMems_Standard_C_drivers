@@ -158,10 +158,10 @@ void lsm6dsox_sh_lis2mdl(void)
 {
 
   lsm6dsox_sh_cfg_read_t sh_cfg_read;
-  float angular_rate_mdps[3];
-  float acceleration_mg[3];
+  float_t angular_rate_mdps[3];
+  float_t acceleration_mg[3];
   axis3bit16_t raw_data;
-  float magnetic_mG[3];
+  float_t magnetic_mG[3];
   lsm6dsox_reg_t reg;
 
   /* Initialize lsm6dsox driver interface */

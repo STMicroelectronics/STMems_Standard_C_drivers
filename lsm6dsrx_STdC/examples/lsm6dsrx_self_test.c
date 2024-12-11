@@ -135,9 +135,9 @@ static void platform_init(void);
 void lsm6dsrx_self_test(void)
 {
   stmdev_ctx_t dev_ctx;
-  float val_st_off[3];
-  float val_st_on[3];
-  float test_val[3];
+  float_t val_st_off[3];
+  float_t val_st_on[3];
+  float_t test_val[3];
   int16_t data_raw[3];
   uint8_t tx_buffer[1000];
   uint8_t st_result;
@@ -246,7 +246,7 @@ void lsm6dsrx_self_test(void)
 
   /* Calculate the mg values for self test */
   for (i = 0; i < 3; i++) {
-    test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
+    test_val[i] = fabsf((val_st_on[i] - val_st_off[i]));
   }
 
   /* Check self test limit */
@@ -329,7 +329,7 @@ void lsm6dsrx_self_test(void)
 
   /* Calculate the mg values for self test */
   for (i = 0; i < 3; i++) {
-    test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
+    test_val[i] = fabsf((val_st_on[i] - val_st_off[i]));
   }
 
   /* Check self test limit */

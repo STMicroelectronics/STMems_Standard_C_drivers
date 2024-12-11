@@ -138,7 +138,7 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
-static void ism330is_avg_5_xl_samples(stmdev_ctx_t *ctx, float out[3])
+static void ism330is_avg_5_xl_samples(stmdev_ctx_t *ctx, float_t out[3])
 {
   uint8_t drdy, i;
 
@@ -161,7 +161,7 @@ static void ism330is_avg_5_xl_samples(stmdev_ctx_t *ctx, float out[3])
   out[2] /= 5;
 }
 
-static void ism330is_avg_5_gy_samples(stmdev_ctx_t *ctx, float out[3])
+static void ism330is_avg_5_gy_samples(stmdev_ctx_t *ctx, float_t out[3])
 {
   uint8_t drdy, i;
 
@@ -189,7 +189,7 @@ void ism330is_self_test(void)
 {
   stmdev_ctx_t dev_ctx;
   uint8_t drdy, i, test;
-  float out_st_mg[3], out_nost_mg[3], abs_diff_mg[3];
+  float_t out_st_mg[3], out_nost_mg[3], abs_diff_mg[3];
   uint8_t st_result = ST_PASS;
 
   /* Initialize mems driver interface */
@@ -277,7 +277,7 @@ void ism330is_self_test(void)
      */
     st_result = ST_PASS;
     for (i = 0; i < 3; i++) {
-      abs_diff_mg[i] = fabs(out_st_mg[i] - out_nost_mg[i]);
+      abs_diff_mg[i] = fabsf(out_st_mg[i] - out_nost_mg[i]);
 
       if (abs_diff_mg[i] < ST_XL_RANGE_MG_MIN || abs_diff_mg[i] > ST_XL_RANGE_MG_MAX)
         st_result = ST_FAIL;
@@ -359,7 +359,7 @@ void ism330is_self_test(void)
      */
     st_result = ST_PASS;
     for (i = 0; i < 3; i++) {
-      abs_diff_mg[i] = fabs(out_st_mg[i] - out_nost_mg[i]);
+      abs_diff_mg[i] = fabsf(out_st_mg[i] - out_nost_mg[i]);
 
       if (abs_diff_mg[i] < ST_GY_RANGE_MDPS_MIN || abs_diff_mg[i] > ST_GY_RANGE_MDPS_MAX)
         st_result = ST_FAIL;

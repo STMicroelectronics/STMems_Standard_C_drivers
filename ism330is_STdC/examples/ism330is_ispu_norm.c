@@ -131,7 +131,7 @@ void ism330is_ispu_norm_handler()
   uint8_t dout[10];
   int16_t x, y, z;
   int32_t temp;
-  float norm;
+  float_t norm;
 
   ism330is_ispu_int_status_get(&dev_ctx, &ispu_int);
 
@@ -149,7 +149,7 @@ void ism330is_ispu_norm_handler()
   z = (z * 256) + (int16_t)dout[4];
 
   temp = (dout[9] << 24) | (dout[8] << 16) | (dout[7] << 8) | dout[6];
-  norm = *(float *)&temp;
+  norm = *(float_t *)&temp;
 
   snprintf((char *)tx_buffer, sizeof(tx_buffer), "x: %d\ty: %d\tz: %d\tnorm: %4.2f\r\n", x, y, z, norm);
   tx_com(tx_buffer, strlen((char const *)tx_buffer));

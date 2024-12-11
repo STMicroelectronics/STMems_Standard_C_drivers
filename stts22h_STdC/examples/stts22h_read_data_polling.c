@@ -83,7 +83,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 static int16_t data_raw_temperature;
-static float temperature_degC;
+static float_t temperature_degC;
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 
@@ -113,6 +113,10 @@ void stts22h_read_data_polling(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+
+  /* Init test platform */
+  platform_init();
+
   /* Check device ID */
   stts22h_dev_id_get(&dev_ctx, &whoamI);
 
@@ -126,10 +130,10 @@ void stts22h_read_data_polling(void)
   stts22h_temp_data_rate_set(&dev_ctx, STTS22H_1Hz);
 
   /* Enable interrupt on high(=49.5 degC)/low(=2.5 degC) temperature. */
-  //float temperature_high_limit = 49.5f;
+  //float_t temperature_high_limit = 49.5f;
   //stts22h_temp_trshld_high_set(&dev_ctx, (int8_t)(temperature_high_limit / 0.64f) + 64 );
 
-  //float temperature_low_limit = 2.5f;
+  //float_t temperature_low_limit = 2.5f;
   //stts22h_temp_trshld_low_set(&dev_ctx, (int8_t)(temperature_low_limit / 0.64f) + 64 );
 
   /* Read samples in polling mode */
@@ -236,5 +240,12 @@ static void platform_delay(uint32_t ms)
  */
 static void platform_init(void)
 {
+#if defined(STEVAL_MKI109V3)
+  TIM3->CCR1 = PWM_3V3;
+  TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  HAL_Delay(1000);
+#endif
 }
 

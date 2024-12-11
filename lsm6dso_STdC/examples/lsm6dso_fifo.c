@@ -108,8 +108,8 @@ typedef union {
 /* Private variables ---------------------------------------------------------*/
 static axis3bit16_t data_raw_acceleration;
 static axis3bit16_t data_raw_angular_rate;
-static float acceleration_mg[3];
-static float angular_rate_mdps[3];
+static float_t acceleration_mg[3];
+static float_t angular_rate_mdps[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -219,7 +219,7 @@ void lsm6dso_fifo(void)
             acceleration_mg[2] =
               lsm6dso_from_fs2_to_mg(data_raw_acceleration.i16bit[2]);
             snprintf((char *)tx_buffer, sizeof(tx_buffer),
-                    "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+                    "Acceleration [mg]: %4.2f\t%4.2f\t%4.2f\r\n",
                     acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
             tx_com(tx_buffer, strlen((char const *)tx_buffer));
             break;
@@ -234,7 +234,7 @@ void lsm6dso_fifo(void)
             angular_rate_mdps[2] =
               lsm6dso_from_fs2000_to_mdps(data_raw_angular_rate.i16bit[2]);
             snprintf((char *)tx_buffer, sizeof(tx_buffer),
-                    "Angular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+                    "Angular rate [mdps]: %4.2f\t%4.2f\t%4.2f\r\n",
                     angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
             tx_com(tx_buffer, strlen((char const *)tx_buffer));
             break;

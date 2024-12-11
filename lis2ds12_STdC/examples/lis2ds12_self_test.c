@@ -138,10 +138,10 @@ void lis2ds12_self_test(void)
   stmdev_ctx_t dev_ctx_xl;
   uint8_t tx_buffer[1000];
   int16_t data_raw[3] = {0};
-  float maes_st_off[3] = {0};
-  float maes_st_on[3] = {0};
+  float_t maes_st_off[3] = {0};
+  float_t maes_st_on[3] = {0};
   lis2ds12_reg_t reg;
-  float test_val[3] = {0};
+  float_t test_val[3] = {0};
   uint8_t st_result;
   uint8_t i, j;
   /* Initialize mems driver interface */
@@ -236,7 +236,7 @@ void lis2ds12_self_test(void)
 
   /* Calculate the mg values for self test */
   for (i = 0; i < 3; i++) {
-    test_val[i] = fabs((maes_st_on[i] - maes_st_off[i]));
+    test_val[i] = fabsf((maes_st_on[i] - maes_st_off[i]));
   }
 
   /* Check self test limit */

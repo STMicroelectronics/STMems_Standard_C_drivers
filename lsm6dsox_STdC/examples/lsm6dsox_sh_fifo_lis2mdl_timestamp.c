@@ -166,9 +166,9 @@ void lsm6dsox_sh_fifo_lis2mdl_timestamp(void)
   lsm6dsox_pin_int1_route_t int1_route;
   lsm6dsox_sh_cfg_read_t sh_cfg_read;
   uint8_t tx_buffer[TX_BUF_DIM];
-  float angular_rate_mdps[3];
-  float acceleration_mg[3];
-  float magnetic_mG[3];
+  float_t angular_rate_mdps[3];
+  float_t acceleration_mg[3];
+  float_t magnetic_mG[3];
   axis3bit16_t data_raw_magnetic;
   axis3bit16_t data_raw_acceleration;
   axis3bit16_t data_raw_angular_rate;

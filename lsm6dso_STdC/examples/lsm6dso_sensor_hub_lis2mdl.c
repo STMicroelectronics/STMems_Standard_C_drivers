@@ -114,9 +114,9 @@ static uint8_t tx_buffer[TX_BUF_DIM];
 static stmdev_ctx_t ag_ctx;
 static stmdev_ctx_t mag_ctx;
 
-static float acceleration_mg[3];
-static float angular_rate_mdps[3];
-static float magnetic_mG[3];
+static float_t acceleration_mg[3];
+static float_t angular_rate_mdps[3];
+static float_t magnetic_mG[3];
 
 /* Extern variables ----------------------------------------------------------*/
 

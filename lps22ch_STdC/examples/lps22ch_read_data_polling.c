@@ -107,8 +107,8 @@
 /* Private variables ---------------------------------------------------------*/
 static uint32_t data_raw_pressure;
 static int16_t data_raw_temperature;
-static float pressure_hPa;
-static float temperature_degC;
+static float_t pressure_hPa;
+static float_t temperature_degC;
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[TX_BUF_DIM];
 

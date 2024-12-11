@@ -106,10 +106,10 @@
 /* Private variables ---------------------------------------------------------*/
 static int16_t data_raw_acceleration[3];
 static int16_t data_raw_temperature;
-static float acceleration_mg[3];
+static float_t acceleration_mg[3];
 static uint8_t tx_buffer[1000];
 static uint8_t whoamI, rst;
-static float temperature;
+static float_t temperature;
 
 /* Extern variables ----------------------------------------------------------*/
 

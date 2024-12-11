@@ -144,9 +144,9 @@ void lsm6dsox_sh_fifo_lis2mdl_handler(void)
   lsm6dsox_fifo_tag_t reg_tag;
   axis3bit16_t raw_data;
   uint16_t num;
-  float angular_rate_mdps[3];
-  float acceleration_mg[3];
-  float magnetic_mG[3];
+  float_t angular_rate_mdps[3];
+  float_t acceleration_mg[3];
+  float_t magnetic_mG[3];
   uint8_t dummy;
 
   num = 0;

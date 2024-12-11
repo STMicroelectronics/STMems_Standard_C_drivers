@@ -102,7 +102,7 @@
 #define    BOOT_TIME          5 //ms
 /* Private variables ---------------------------------------------------------*/
 static int16_t data_raw_acceleration[3];
-static float acceleration_mg[3];
+static float_t acceleration_mg[3];
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 

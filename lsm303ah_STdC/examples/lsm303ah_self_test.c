@@ -175,11 +175,11 @@ void lsm303ah_self_test(void)
   stmdev_ctx_t dev_ctx_xl;
   stmdev_ctx_t dev_ctx_mg;
   uint8_t tx_buffer[1000];
-  float meas_st_off[3];
+  float_t meas_st_off[3];
   int16_t data_raw[3];
-  float meas_st_on[3];
+  float_t meas_st_on[3];
   lsm303ah_reg_t reg;
-  float test_val[3];
+  float_t test_val[3];
   uint8_t st_result;
   uint8_t i, j;
   /* Initialize mems driver interface */
@@ -293,7 +293,7 @@ void lsm303ah_self_test(void)
 
   /* Calculate the mg values for self test */
   for (i = 0; i < 3; i++) {
-    test_val[i] = fabs((meas_st_on[i] - meas_st_off[i]));
+    test_val[i] = fabsf((meas_st_on[i] - meas_st_off[i]));
   }
 
   /* Check self test limit */
@@ -384,7 +384,7 @@ void lsm303ah_self_test(void)
 
   /* Calculate the mg values for self test */
   for (i = 0; i < 3; i++) {
-    test_val[i] = fabs((meas_st_on[i] - meas_st_off[i]));
+    test_val[i] = fabsf((meas_st_on[i] - meas_st_off[i]));
   }
 
   /* Check self test limit */

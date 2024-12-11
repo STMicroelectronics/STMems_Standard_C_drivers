@@ -123,11 +123,11 @@ typedef union {
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t whoamI, rst;
-static float pressure_hPa;
-static float temperature_degC;
-static float acceleration_mg[3];
-static float angular_rate_mdps[3];
-static float magnetic_mG[3];
+static float_t pressure_hPa;
+static float_t temperature_degC;
+static float_t acceleration_mg[3];
+static float_t angular_rate_mdps[3];
+static float_t magnetic_mG[3];
 static axis3bit16_t data_raw_magnetic;
 static axis1bit32_t data_raw_pressure;
 static axis1bit16_t data_raw_temperature;

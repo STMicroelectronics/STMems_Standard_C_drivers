@@ -124,10 +124,10 @@ static uint8_t tx_buffer[TX_BUF_DIM];
 static stmdev_ctx_t press_ctx;
 static stmdev_ctx_t ag_ctx;
 
-static float angular_rate_mdps[3];
-static float acceleration_mg[3];
-static float temperature_degC;
-static float pressure_hPa;
+static float_t angular_rate_mdps[3];
+static float_t acceleration_mg[3];
+static float_t temperature_degC;
+static float_t pressure_hPa;
 
 
 /* Extern variables ----------------------------------------------------------*/

@@ -110,8 +110,8 @@
 #define    ST_FAIL     0U
 
 /* Self test limits changes with the power supply. these are @ 3.3V */
-static const float min_st_limit[] = {500.0f, 500.0f, 400.0f};
-static const float max_st_limit[] = {1100.0f, 1100.0f, 800.0f};
+static const float_t min_st_limit[] = {500.0f, 500.0f, 400.0f};
+static const float_t max_st_limit[] = {1100.0f, 1100.0f, 800.0f};
 
 /* Private variables ---------------------------------------------------------*/
 
@@ -137,9 +137,9 @@ void ais328dq_self_test(void)
 {
   stmdev_ctx_t dev_ctx_xl;
   ais328dq_reg_t reg;
-  float maes_st_off[3];
-  float maes_st_on[3];
-  float test_val[3];
+  float_t maes_st_off[3];
+  float_t maes_st_on[3];
+  float_t test_val[3];
   int16_t data_raw[3];
   uint8_t tx_buffer[1000];
   uint8_t st_result;
@@ -237,7 +237,7 @@ void ais328dq_self_test(void)
 
   /* Calculate the mg values for self test */
   for (i = 0; i < 3; i++) {
-    test_val[i] = fabs((maes_st_on[i] - maes_st_off[i]));
+    test_val[i] = fabsf((maes_st_on[i] - maes_st_off[i]));
   }
 
   /* Check self test limit */

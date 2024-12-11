@@ -114,7 +114,7 @@ typedef union {
 
 /* Private variables ---------------------------------------------------------*/
 static axis3bit16_t data_raw_acceleration[SELF_TEST_SAMPLES];
-static float acceleration_mg[SELF_TEST_SAMPLES][3];
+static float_t acceleration_mg[SELF_TEST_SAMPLES][3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -136,7 +136,7 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Utility functions ---------------------------------------------------------*/
-static inline float ABSF(float _x)
+static inline float_t ABSF(float_t _x)
 {
   return (_x < 0.0f) ? -(_x) : _x;
 }
@@ -162,8 +162,8 @@ static int flush_samples(stmdev_ctx_t *dev_ctx)
 static void test_self_test_ais2dw12(stmdev_ctx_t *dev_ctx)
 {
   ais2dw12_reg_t reg;
-  float media[3] = { 0.0f, 0.0f, 0.0f };
-  float mediast[3] = { 0.0f, 0.0f, 0.0f };
+  float_t media[3] = { 0.0f, 0.0f, 0.0f };
+  float_t mediast[3] = { 0.0f, 0.0f, 0.0f };
   uint8_t match[3] = { 0, 0, 0 };
   uint8_t j = 0;
   uint16_t i = 0;

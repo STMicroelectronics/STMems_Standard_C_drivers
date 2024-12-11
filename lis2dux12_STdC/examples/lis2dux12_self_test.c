@@ -344,7 +344,7 @@ void lis2dux12_self_test(void)
      * datasheet
      */
     for (i = 0; i < 3; i++)
-      st_dev.xl[0].mg[i] = 2 * fabs(out2.xl[0].mg[i] - out1.xl[0].mg[i]);
+      st_dev.xl[0].mg[i] = 2 * fabsf(out2.xl[0].mg[i] - out1.xl[0].mg[i]);
 
     /*
      * 19. Set device in Power Down mode

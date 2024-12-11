@@ -119,16 +119,16 @@ typedef struct {
 #define    ST_FAIL     0U
 
 /* Self test limits in mgauss @ 12G*/
-static const float min_st_mag_limit[] = {1000.0f, 1000.0f,  100.0f};
-static const float max_st_mag_limit[] = {3000.0f, 3000.0f, 1000.0f};
+static const float_t min_st_mag_limit[] = {1000.0f, 1000.0f,  100.0f};
+static const float_t max_st_mag_limit[] = {3000.0f, 3000.0f, 1000.0f};
 
 /* Self test limits in mg @ 2g*/
-static const float min_st_xl_limit[] = {70.0f, 70.0f,  70.0f};
-static const float max_st_xl_limit[] = {1500.0f, 1500.0f, 1500.0f};
+static const float_t min_st_xl_limit[] = {70.0f, 70.0f,  70.0f};
+static const float_t max_st_xl_limit[] = {1500.0f, 1500.0f, 1500.0f};
 
 /* Self test limits in mdps @ 2000 dps*/
-static const float min_st_gy_limit[] = {200000.0f, 200000.0f, 200000.0f};
-static const float max_st_gy_limit[] = {800000.0f, 800000.0f, 800000.0f};
+static const float_t min_st_gy_limit[] = {200000.0f, 200000.0f, 200000.0f};
+static const float_t max_st_gy_limit[] = {800000.0f, 800000.0f, 800000.0f};
 
 /* Private variables ---------------------------------------------------------*/
 #if defined(STEVAL_MKI109V3)
@@ -185,9 +185,9 @@ void lis9ds1_self_test(void)
   int16_t data_raw[3];
   lsm9ds1_status_t reg;
   lsm9ds1_id_t whoamI;
-  float val_st_off[3];
-  float val_st_on[3];
-  float test_val[3];
+  float_t val_st_off[3];
+  float_t val_st_on[3];
+  float_t test_val[3];
   uint8_t st_result;
   uint8_t rst;
   uint8_t i;
@@ -300,7 +300,7 @@ void lis9ds1_self_test(void)
 
   /* Calculate the values for self test */
   for (i = 0; i < 3; i++) {
-    test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
+    test_val[i] = fabsf((val_st_on[i] - val_st_off[i]));
   }
 
   /* Check self test limit */
@@ -393,7 +393,7 @@ void lis9ds1_self_test(void)
 
   /* Calculate the values for self test */
   for (i = 0; i < 3; i++) {
-    test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
+    test_val[i] = fabsf((val_st_on[i] - val_st_off[i]));
   }
 
   /* Check self test limit */
@@ -486,7 +486,7 @@ void lis9ds1_self_test(void)
 
   /* Calculate the values for self test */
   for (i = 0; i < 3; i++) {
-    test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
+    test_val[i] = fabsf((val_st_on[i] - val_st_off[i]));
   }
 
   /* Check self test limit */

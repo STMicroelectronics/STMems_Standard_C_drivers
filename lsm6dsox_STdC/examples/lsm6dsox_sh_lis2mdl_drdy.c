@@ -142,10 +142,10 @@ static void platform_init(void);
 
 void lsm6dsox_sh_lis2mdl_drdy_handler(void)
 {
-  float angular_rate_mdps[3];
-  float acceleration_mg[3];
+  float_t angular_rate_mdps[3];
+  float_t acceleration_mg[3];
   axis3bit16_t raw_data;
-  float magnetic_mG[3];
+  float_t magnetic_mG[3];
   lsm6dsox_status_reg_t status;
 
   lsm6dsox_status_reg_get(&ag_ctx, &status);

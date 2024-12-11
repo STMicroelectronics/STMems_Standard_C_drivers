@@ -117,7 +117,7 @@ static int16_t *magy;
 static int16_t *magz;
 static int16_t data_raw_acceleration[3];
 static uint8_t data_raw_sensor_hub[12];
-static float acceleration_mg[3];
+static float_t acceleration_mg[3];
 static int32_t baro;
 static int16_t temp;
 

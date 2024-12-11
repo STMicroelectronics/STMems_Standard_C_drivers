@@ -141,9 +141,9 @@ void lis2mdl_self_test(void)
   uint8_t tx_buffer[1000];
   int16_t data_raw[3];
   stmdev_ctx_t dev_ctx;
-  float val_st_off[3];
-  float val_st_on[3];
-  float test_val[3];
+  float_t val_st_off[3];
+  float_t val_st_on[3];
+  float_t test_val[3];
   uint8_t st_result;
   uint8_t whoamI;
   uint8_t drdy;
@@ -250,7 +250,7 @@ void lis2mdl_self_test(void)
 
   /* Calculate the mg values for self test */
   for (i = 0; i < 3; i++) {
-    test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
+    test_val[i] = fabsf((val_st_on[i] - val_st_off[i]));
   }
 
   /* Check self test limit */

@@ -111,8 +111,8 @@
 #define    ST_FAIL     0U
 
 /* Self test limits changes with the power supply. these are @ 2.5V*/
-static const float min_st_limit[] = {120.0f, 120.0f, 140.0f};
-static const float max_st_limit[] = {550.0f, 550.0f, 750.0f};
+static const float_t min_st_limit[] = {120.0f, 120.0f, 140.0f};
+static const float_t max_st_limit[] = {550.0f, 550.0f, 750.0f};
 
 /* Private variables ---------------------------------------------------------*/
 
@@ -139,10 +139,10 @@ void lis331dlh_self_test(void)
   stmdev_ctx_t dev_ctx_xl;
   uint8_t tx_buffer[1000];
   int16_t data_raw[3];
-  float maes_st_off[3];
-  float maes_st_on[3];
+  float_t maes_st_off[3];
+  float_t maes_st_on[3];
   lis331dlh_reg_t reg;
-  float test_val[3];
+  float_t test_val[3];
   uint8_t st_result;
   uint8_t i, j;
   /* Initialize mems driver interface */
@@ -237,7 +237,7 @@ void lis331dlh_self_test(void)
 
   /* Calculate the mg values for self test */
   for (i = 0; i < 3; i++) {
-    test_val[i] = fabs((maes_st_on[i] - maes_st_off[i]));
+    test_val[i] = fabsf((maes_st_on[i] - maes_st_off[i]));
   }
 
   /* Check self test limit */

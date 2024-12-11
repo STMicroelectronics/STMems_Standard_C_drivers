@@ -146,8 +146,8 @@ static sensbus_t mag_bus = {&SENSOR_BUS,
 
 static int16_t data_raw_acceleration[3];
 static int16_t data_raw_magnetic[3];
-static float acceleration_mg[3];
-static float magnetic_mG[3];
+static float_t acceleration_mg[3];
+static float_t magnetic_mG[3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[TX_BUF_DIM];
 

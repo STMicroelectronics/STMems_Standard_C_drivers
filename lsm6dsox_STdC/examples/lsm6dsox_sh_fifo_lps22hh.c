@@ -164,10 +164,10 @@ static void platform_init(void);
 void lsm6dsox_sh_fifo_lps22hh(void)
 {
   uint8_t tx_buffer[TX_BUF_DIM];
-  float angular_rate_mdps[3];
-  float acceleration_mg[3];
-  float temperature_degC;
-  float pressure_hPa;
+  float_t angular_rate_mdps[3];
+  float_t acceleration_mg[3];
+  float_t temperature_degC;
+  float_t pressure_hPa;
   uint8_t whoamI, rst, wtm_flag;
   lsm6dsox_pin_int1_route_t int1_route;
   lsm6dsox_sh_cfg_read_t sh_cfg_read;

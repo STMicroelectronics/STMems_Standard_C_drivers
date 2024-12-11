@@ -96,7 +96,7 @@ typedef union {
 
 /* Private variables ---------------------------------------------------------*/
 static axis3bit16_t data_raw_magnetic[SELF_TEST_SAMPLES];
-static float magnetic_mG[SELF_TEST_SAMPLES][3];
+static float_t magnetic_mG[SELF_TEST_SAMPLES][3];
 static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
@@ -117,7 +117,7 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len);
 static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
-static inline float ABSF(float _x)
+static inline float_t ABSF(float_t _x)
 {
   return (_x < 0.0f) ? -(_x) : _x;
 }
@@ -150,8 +150,8 @@ static int iis2mdc_flush_samples(stmdev_ctx_t *dev_ctx)
 static int test_self_test_iis2mdc(stmdev_ctx_t *dev_ctx)
 {
   uint8_t reg;
-  float media[3] = { 0.0f, 0.0f, 0.0f };
-  float mediast[3] = { 0.0f, 0.0f, 0.0f };
+  float_t media[3] = { 0.0f, 0.0f, 0.0f };
+  float_t mediast[3] = { 0.0f, 0.0f, 0.0f };
   uint8_t match[3] = { 0, 0, 0 };
   uint8_t j = 0;
   uint16_t i = 0;

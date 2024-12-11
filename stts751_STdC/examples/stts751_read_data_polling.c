@@ -83,7 +83,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 static int16_t data_raw_temperature;
-static float temperature_degC;
+static float_t temperature_degC;
 static stts751_id_t whoamI;
 static uint8_t tx_buffer[1000];
 
@@ -125,10 +125,10 @@ void stts751_read_data_polling(void)
     while (1); /* manage here device not found */
 
   /* Enable interrupt on high(=49.5 degC)/low(=-4.5 degC) temperature. */
-  float temperature_high_limit = 49.5f;
+  float_t temperature_high_limit = 49.5f;
   stts751_high_temperature_threshold_set(&dev_ctx,
                                          stts751_from_celsius_to_lsb(temperature_high_limit));
-  float temperature_low_limit = -4.5f;
+  float_t temperature_low_limit = -4.5f;
   stts751_low_temperature_threshold_set(&dev_ctx,
                                         stts751_from_celsius_to_lsb(temperature_low_limit));
   stts751_pin_event_route_set(&dev_ctx,  PROPERTY_ENABLE);

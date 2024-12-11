@@ -104,8 +104,8 @@
 /* Private variables ---------------------------------------------------------*/
 static int16_t data_raw_humidity;
 static int16_t data_raw_temperature;
-static float humidity_perc;
-static float temperature_degC;
+static float_t humidity_perc;
+static float_t temperature_degC;
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 
@@ -130,13 +130,13 @@ static void platform_init(void);
  *  Function used to apply coefficient
  */
 typedef struct {
-  float x0;
-  float y0;
-  float x1;
-  float y1;
+  float_t x0;
+  float_t y0;
+  float_t x1;
+  float_t y1;
 } lin_t;
 
-float linear_interpolation(lin_t *lin, int16_t x)
+float_t linear_interpolation(lin_t *lin, int16_t x)
 {
   return ((lin->y1 - lin->y0) * x + ((lin->x1 * lin->y0) -
                                      (lin->x0 * lin->y1)))

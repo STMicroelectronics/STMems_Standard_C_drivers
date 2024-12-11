@@ -108,9 +108,9 @@ typedef union {
 #define    BOOT_TIME          15 //ms
 
 /* Private variables ---------------------------------------------------------*/
-static float acceleration_mg[3];
-static float angular_rate_mdps[3];
-static float magnetic_mG[3];
+static float_t acceleration_mg[3];
+static float_t angular_rate_mdps[3];
+static float_t magnetic_mG[3];
 static axis3bit16_t data_raw_magnetic;
 static axis3bit16_t data_raw_acceleration;
 static axis3bit16_t data_raw_angular_rate;

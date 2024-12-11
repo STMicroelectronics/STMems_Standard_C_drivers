@@ -195,9 +195,9 @@ static float_t npy_half_to_float(uint16_t h)
     return conv.ret;
 }
 
-static void sflp2q(float quat[4], uint16_t sflp[3])
+static void sflp2q(float_t quat[4], uint16_t sflp[3])
 {
-  float sumsq = 0;
+  float_t sumsq = 0;
 
   quat[0] = npy_half_to_float(sflp[0]);
   quat[1] = npy_half_to_float(sflp[1]);
@@ -207,7 +207,7 @@ static void sflp2q(float quat[4], uint16_t sflp[3])
     sumsq += quat[i] * quat[i];
 
   if (sumsq > 1.0f) {
-    float n = sqrtf(sumsq);
+    float_t n = sqrtf(sumsq);
     quat[0] /= n;
     quat[1] /= n;
     quat[2] /= n;
@@ -305,9 +305,9 @@ void lsm6dsv16x_sensor_fusion(void)
       while (num--) {
         lsm6dsv16x_fifo_out_raw_t f_data;
         int16_t *axis;
-        float quat[4];
-        float gravity_mg[3];
-        float gbias_mdps[3];
+        float_t quat[4];
+        float_t gravity_mg[3];
+        float_t gbias_mdps[3];
 
         /* Read FIFO sensor value */
         lsm6dsv16x_fifo_out_raw_get(&dev_ctx, &f_data);
