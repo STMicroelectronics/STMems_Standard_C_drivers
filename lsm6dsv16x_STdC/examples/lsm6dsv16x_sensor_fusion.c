@@ -148,50 +148,10 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void *handle);
 
-/*
- * Original conversion routines taken from: https://github.com/numpy/numpy
- *
- * uint32_t npy_halfbits_to_floatbits(uint16_t h);
- * float_t npy_half_to_float(uint16_t h);
- *
- * Released under BSD-3-Clause License
- */
-static uint32_t npy_halfbits_to_floatbits(uint16_t h)
-{
-    uint16_t h_exp, h_sig;
-    uint32_t f_sgn, f_exp, f_sig;
-
-    h_exp = (h&0x7c00u);
-    f_sgn = ((uint32_t)h&0x8000u) << 16;
-    switch (h_exp) {
-        case 0x0000u: /* 0 or subnormal */
-            h_sig = (h&0x03ffu);
-            /* Signed zero */
-            if (h_sig == 0) {
-                return f_sgn;
-            }
-            /* Subnormal */
-            h_sig <<= 1;
-            while ((h_sig&0x0400u) == 0) {
-                h_sig <<= 1;
-                h_exp++;
-            }
-            f_exp = ((uint32_t)(127 - 15 - h_exp)) << 23;
-            f_sig = ((uint32_t)(h_sig&0x03ffu)) << 13;
-            return f_sgn + f_exp + f_sig;
-        case 0x7c00u: /* inf or NaN */
-            /* All-ones exponent and a copy of the significand */
-            return f_sgn + 0x7f800000u + (((uint32_t)(h&0x03ffu)) << 13);
-        default: /* normalized */
-            /* Just need to adjust the exponent and shift */
-            return f_sgn + (((uint32_t)(h&0x7fffu) + 0x1c000u) << 13);
-    }
-}
-
 static float_t npy_half_to_float(uint16_t h)
 {
     union { float_t ret; uint32_t retbits; } conv;
-    conv.retbits = npy_halfbits_to_floatbits(h);
+    conv.retbits = lsm6dsv16x_from_f16_to_f32(h);
     return conv.ret;
 }
 
@@ -304,7 +264,7 @@ void lsm6dsv16x_sensor_fusion(void)
 
       while (num--) {
         lsm6dsv16x_fifo_out_raw_t f_data;
-        int16_t *axis;
+        uint8_t *axis;
         float_t quat[4];
         float_t gravity_mg[3];
         float_t gbias_mdps[3];
@@ -314,27 +274,28 @@ void lsm6dsv16x_sensor_fusion(void)
 
         switch (f_data.tag) {
         case LSM6DSV16X_SFLP_GYROSCOPE_BIAS_TAG:
-          axis = (int16_t *)&f_data.data[0];
-          gbias_mdps[0] = lsm6dsv16x_from_fs125_to_mdps(axis[0]);
-          gbias_mdps[1] = lsm6dsv16x_from_fs125_to_mdps(axis[1]);
-          gbias_mdps[2] = lsm6dsv16x_from_fs125_to_mdps(axis[2]);
+          axis = &f_data.data[0];
+          gbias_mdps[0] = lsm6dsv16x_from_fs125_to_mdps(axis[0] | (axis[1] << 8));
+          gbias_mdps[1] = lsm6dsv16x_from_fs125_to_mdps(axis[2] | (axis[3] << 8));
+          gbias_mdps[2] = lsm6dsv16x_from_fs125_to_mdps(axis[4] | (axis[5] << 8));
           snprintf((char *)tx_buffer, sizeof(tx_buffer), "GBIAS [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
                          (double_t)gbias_mdps[0], (double_t)gbias_mdps[1], (double_t)gbias_mdps[2]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
         case LSM6DSV16X_SFLP_GRAVITY_VECTOR_TAG:
-          axis = (int16_t *)&f_data.data[0];
-          gravity_mg[0] = lsm6dsv16x_from_sflp_to_mg(axis[0]);
-          gravity_mg[1] = lsm6dsv16x_from_sflp_to_mg(axis[1]);
-          gravity_mg[2] = lsm6dsv16x_from_sflp_to_mg(axis[2]);
+          axis = &f_data.data[0];
+          gravity_mg[0] = lsm6dsv16x_from_sflp_to_mg(axis[0] | (axis[1] << 8));
+          gravity_mg[1] = lsm6dsv16x_from_sflp_to_mg(axis[2] | (axis[3] << 8));
+          gravity_mg[2] = lsm6dsv16x_from_sflp_to_mg(axis[4] | (axis[5] << 8));
           snprintf((char *)tx_buffer, sizeof(tx_buffer), "Gravity [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                          (double_t)gravity_mg[0], (double_t)gravity_mg[1], (double_t)gravity_mg[2]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
         case LSM6DSV16X_SFLP_GAME_ROTATION_VECTOR_TAG:
           sflp2q(quat, (uint16_t *)&f_data.data[0]);
-          snprintf((char *)tx_buffer, sizeof(tx_buffer), "Game Rotation \tX: %2.3f\tY: %2.3f\tZ: %2.3f\tW: %2.3f\r\n",
-                  (double_t)quat[0], (double_t)quat[1], (double_t)quat[2], (double_t)quat[3]);
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "[%02x %02x %02x %02x %02x %02x] Game Rotation \tX: %2.3f\tY: %2.3f\tZ: %2.3f\tW: %2.3f\r\n",
+                   f_data.data[0], f_data.data[1],f_data.data[2],f_data.data[3],f_data.data[4],f_data.data[5],
+                   (double_t)quat[0], (double_t)quat[1], (double_t)quat[2], (double_t)quat[3]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
         default:
