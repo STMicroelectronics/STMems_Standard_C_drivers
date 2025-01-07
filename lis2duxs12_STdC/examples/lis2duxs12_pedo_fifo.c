@@ -198,6 +198,7 @@ void lis2duxs12_pedo_fifo(void)
   /* Set FIFO mode */
   fifo_mode.store = LIS2DUXS12_FIFO_2X;
   fifo_mode.watermark = NUM_FIFO_ENTRY;
+  fifo_mode.fifo_event = LIS2DUXS12_FIFO_EV_WTM;
   fifo_mode.operation = LIS2DUXS12_STREAM_MODE;
   fifo_mode.batch.dec_ts = LIS2DUXS12_DEC_TS_1;
   fifo_mode.batch.bdr_xl = LIS2DUXS12_BDR_XL_ODR_OFF;

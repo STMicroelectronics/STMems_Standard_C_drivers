@@ -187,6 +187,7 @@ void lis2duxs12_read_fifo(void)
   fifo_mode.store = LIS2DUXS12_FIFO_1X;
   fifo_mode.xl_only = 0;
   fifo_mode.watermark = NUM_FIFO_ENTRY;
+  fifo_mode.fifo_event = LIS2DUXS12_FIFO_EV_WTM;
   fifo_mode.operation = LIS2DUXS12_STREAM_MODE;
   fifo_mode.batch.dec_ts = LIS2DUXS12_DEC_TS_32;
   fifo_mode.batch.bdr_xl = LIS2DUXS12_BDR_XL_ODR;
