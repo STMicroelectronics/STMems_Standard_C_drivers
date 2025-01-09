@@ -28,3 +28,19 @@ Read vAFE data using data ready on INT2 pin
 
   - st1vafe6ax_vafe_read_data.c
 
+## Finite State Machine (FSM)
+
+Program LSM6DSV16X FSM to detect *glance* and *de-glance* gestures typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/STMems_Finite_State_Machine/blob/master/application_examples/st1vafe6ax/Glance%20detection/README.md)):
+
+  - st1vafe6ax_fsm_glance.c
+
+Program LSM6DSV16X FSM to detect 4D position recognition typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/STMems_Finite_State_Machine/blob/master/application_examples/st1vafe6ax/FourD%20position%20recognition/README.md)):
+
+  - st1vafe6ax_fsm_fourd.c
+
+## Machine Learning Core (MLC)
+
+Program LSM6DSV16X MLC for activity recognition used on wearable device, such a smartwatch or a wristband. (read more [here](https://github.com/STMicroelectronics/STMems_Machine_Learning_Core/blob/master/application_examples/st1vafe6ax/activity_recognition_for_wrist/README.md)):
+
+  - st1vafe6ax_mlc_activity_wrist.c
+
