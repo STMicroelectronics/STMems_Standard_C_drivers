@@ -139,6 +139,7 @@ void i3g4250d_read_data_polling(void)
   platform_init();
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
+
   /* Check device ID */
   i3g4250d_device_id_get(&dev_ctx, &whoamI);
 
@@ -153,6 +154,7 @@ void i3g4250d_read_data_polling(void)
   //int2_reg.i2_drdy = PROPERTY_ENABLE;
   //i3g4250d_pin_int2_route_set(&dev_ctx, int2_reg);
   /* Set Output Data Rate */
+
   i3g4250d_data_rate_set(&dev_ctx, I3G4250D_ODR_100Hz);
 
   /* Read samples in polling mode (no int) */
@@ -284,6 +286,10 @@ static void platform_delay(uint32_t ms)
 static void platform_init(void)
 {
 #if defined(STEVAL_MKI109V3)
+  /* set the sensing resistor to  100 Kohm */
+  HAL_GPIO_WritePin(Range_100x_A_GPIO_Port, Range_100x_A_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(Range_100x_B_GPIO_Port, Range_100x_B_Pin, GPIO_PIN_SET);
+
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);

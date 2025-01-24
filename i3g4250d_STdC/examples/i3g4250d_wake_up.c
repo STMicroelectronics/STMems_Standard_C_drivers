@@ -306,6 +306,10 @@ static void platform_delay(uint32_t ms)
 static void platform_init(void)
 {
 #if defined(STEVAL_MKI109V3)
+  /* set the sensing resistor to  100 Kohm */
+  HAL_GPIO_WritePin(Range_100x_A_GPIO_Port, Range_100x_A_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(Range_100x_B_GPIO_Port, Range_100x_B_Pin, GPIO_PIN_SET);
+
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
