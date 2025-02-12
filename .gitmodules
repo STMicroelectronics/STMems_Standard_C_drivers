@@ -315,3 +315,6 @@
 [submodule "st1vafe3bx_STdC/driver"]
 	path = st1vafe3bx_STdC/driver
 	url = https://github.com/STMicroelectronics/st1vafe3bx-pid
+[submodule "iis2dulpx_STdC/driver"]
+	path = iis2dulpx_STdC/driver
+	url = https://github.com/STMicroelectronics/iis2dulpx-pid
