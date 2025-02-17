@@ -171,7 +171,7 @@ void lps22hh_read_data_drdy(void)
 
   lps22hh_pin_int_route_get(&dev_ctx, &int_route);
   int_route.drdy_pres = PROPERTY_ENABLE;
-  lps22hh_pin_int_route_set(&dev_ctx, &int_route);
+  lps22hh_pin_int_route_set(&dev_ctx, int_route);
 
   /* Enable Block Data Update */
   lps22hh_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);

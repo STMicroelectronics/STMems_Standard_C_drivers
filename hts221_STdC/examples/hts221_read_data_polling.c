@@ -182,10 +182,10 @@ void hts221_read_data_polling(void)
   /* Read samples in polling mode */
   while (1) {
     /* Read output only if new value is available */
-    hts221_reg_t reg;
-    hts221_status_get(&dev_ctx, &reg.status_reg);
+    hts221_status_reg_t status;
+    hts221_status_get(&dev_ctx, &status);
 
-    if (reg.status_reg.h_da) {
+    if (status.h_da) {
       /* Read humidity data */
       memset(&data_raw_humidity, 0x00, sizeof(int16_t));
       hts221_humidity_raw_get(&dev_ctx, &data_raw_humidity);
@@ -203,7 +203,7 @@ void hts221_read_data_polling(void)
       tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
     }
 
-    if (reg.status_reg.t_da) {
+    if (status.t_da) {
       /* Read temperature data */
       memset(&data_raw_temperature, 0x00, sizeof(int16_t));
       hts221_temperature_raw_get(&dev_ctx, &data_raw_temperature);

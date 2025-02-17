@@ -136,7 +136,7 @@ static void platform_init(void);
 void lps22hh_read_data_polling(void)
 {
   stmdev_ctx_t dev_ctx;
-  lps22hh_reg_t reg;
+  lps22hh_status_t status;
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
@@ -168,9 +168,9 @@ void lps22hh_read_data_polling(void)
   /* Read samples in polling mode (no int) */
   while (1) {
     /* Read output only if new value is available */
-    lps22hh_read_reg(&dev_ctx, LPS22HH_STATUS, (uint8_t *)&reg, 1);
+    lps22hh_read_reg(&dev_ctx, LPS22HH_STATUS, (uint8_t *)&status, 1);
 
-    if (reg.status.p_da) {
+    if (status.p_da) {
       memset(&data_raw_pressure, 0x00, sizeof(uint32_t));
       lps22hh_pressure_raw_get(&dev_ctx, &data_raw_pressure);
       pressure_hPa = lps22hh_from_lsb_to_hpa( data_raw_pressure);
@@ -178,7 +178,7 @@ void lps22hh_read_data_polling(void)
       tx_com( tx_buffer, strlen( (char const *)tx_buffer ) );
     }
 
-    if (reg.status.t_da) {
+    if (status.t_da) {
       memset(&data_raw_temperature, 0x00, sizeof(int16_t));
       lps22hh_temperature_raw_get(&dev_ctx, &data_raw_temperature);
       temperature_degC = lps22hh_from_lsb_to_celsius(

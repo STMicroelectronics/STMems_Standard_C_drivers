@@ -175,7 +175,7 @@ void lps22hh_read_fifo_irq(void)
 
   lps22hh_pin_int_route_get(&dev_ctx, &int_route);
   int_route.fifo_th = PROPERTY_ENABLE;
-  lps22hh_pin_int_route_set(&dev_ctx, &int_route);
+  lps22hh_pin_int_route_set(&dev_ctx, int_route);
 
   /* Set Output Data Rate */
   lps22hh_data_rate_set(&dev_ctx, LPS22HH_10_Hz);
