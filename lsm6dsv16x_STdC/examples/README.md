@@ -7,6 +7,8 @@ This folder contains application examples. The examples refer to following board
 - DISCOVERY-SPC584B (https://www.st.com/en/evaluation-tools/spc584b-dis.html)
 - NUCLEO-H503RB (https://www.st.com/en/evaluation-tools/nucleo-h503rb.html)
 
+*Nucleo H503RB board has been used to run the examples on I3C bus. All the examples except the sensor_hub one have been run on a [X-NUCLEO-IKS4A1 shield](https://www.st.com/en/ecosystems/x-nucleo-iks4a1.html) with a LSM6DSV16X device on DIL24. In all these cases, the shield has been configured in Mode 1 (Standard Mode). For the sensor_hub example case the shield is configured in Mode 3 (lsm6dsv16x SensorHub Mode), and the DIL24 is not required.*
+
 ## Self Test (ST)
 
 Run the device Self Test procedure:
