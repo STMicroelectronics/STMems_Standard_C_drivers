@@ -318,3 +318,6 @@
 [submodule "iis2dulpx_STdC/driver"]
 	path = iis2dulpx_STdC/driver
 	url = https://github.com/STMicroelectronics/iis2dulpx-pid
+[submodule "lsm6dsv80x_STdC/driver"]
+	path = lsm6dsv80x_STdC/driver
+	url = https://github.com/STMicroelectronics/lsm6dsv80x-pid
