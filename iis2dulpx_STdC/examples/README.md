@@ -38,3 +38,15 @@ Program IIS2DULPX to read AH_QVAR data on INT1:
 
   - iis2dulpx_qvar_read_data.c
 
+## Finite State Machine (FSM)
+
+Program IIS2DULPX FSM to detect 4D position recognition typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/STMems_Finite_State_Machine/blob/master/application_examples/iis2dulpx/FourD%20position%20recognition/README.md)):
+
+  - iis2dulpx_fsm_fourd.c
+
+## Machine Learning Core (MLC)
+
+Program IIS2DULPX MLC to recognize user activity optimized for mobile devices (read more [here](https://github.com/STMicroelectronics/STMems_Machine_Learning_Core/blob/master/application_examples/iis2dulpx/activity_recognition_for_mobile/README.md)):
+
+  - iis2dulpx_mlc_activity_mobile.c
+
