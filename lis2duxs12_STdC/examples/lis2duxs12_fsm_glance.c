@@ -128,15 +128,15 @@ static uint8_t deglance_event_catched = 0;
 void lis2duxs12_fsm_glance_handler(void)
 {
   lis2duxs12_fsm_status_mainpage_t status;
-  uint8_t fsm_out;
+  uint8_t fsm_out[8];
 
   /* Read output only if new xl value is available */
   lis2duxs12_fsm_status_get(&dev_ctx, &status);
 
   if (status.is_fsm1) {
-    lis2duxs12_fsm_out_get(&dev_ctx, &fsm_out);
+    lis2duxs12_fsm_out_get(&dev_ctx, fsm_out);
 
-    switch(fsm_out) {
+    switch(fsm_out[0]) {
     case 0x20:
       glance_event_catched = 1;
       break;
