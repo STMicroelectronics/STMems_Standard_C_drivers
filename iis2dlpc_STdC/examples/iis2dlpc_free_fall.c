@@ -146,7 +146,7 @@ void iis2dlpc_freefall(void)
     }
 
   /*Restore default configuration */
-  iis2dlpc_reset_set(&dev_ctx, PROPERTY_ENABLE);
+  iis2dlpc_reset_set(&dev_ctx);
 
   do {
     iis2dlpc_reset_get(&dev_ctx, &rst);

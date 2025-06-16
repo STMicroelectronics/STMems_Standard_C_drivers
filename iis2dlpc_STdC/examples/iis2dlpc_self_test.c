@@ -171,7 +171,7 @@ static void test_self_test_iis2dlpc(stmdev_ctx_t *dev_ctx)
   uint8_t k = 0;
   uint8_t axis;
   /*Restore default configuration */
-  iis2dlpc_reset_set(dev_ctx, PROPERTY_ENABLE);
+  iis2dlpc_reset_set(dev_ctx);
 
   do {
     iis2dlpc_reset_get(dev_ctx, &rst);
