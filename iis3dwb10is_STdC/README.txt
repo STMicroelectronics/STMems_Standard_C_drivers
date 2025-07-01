@@ -13,4 +13,4 @@ every hardware.
 
 www.st.com/mems
 
-IIS3DWB10IS DS rev0.8
+IIS3DWB10IS DS rev0.93

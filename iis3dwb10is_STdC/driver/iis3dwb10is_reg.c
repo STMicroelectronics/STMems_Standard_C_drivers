@@ -192,13 +192,22 @@ int32_t iis3dwb10is_mem_bank_get(const stmdev_ctx_t *ctx, iis3dwb10is_mem_bank_t
   */
 int32_t iis3dwb10is_reset_set(const stmdev_ctx_t *ctx, iis3dwb10is_reset_t val)
 {
-  iis3dwb10is_ctrl3_t ctrl3;
   int32_t ret;
 
-  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
-  ctrl3.sw_reset = (uint8_t)val.sw_rst;
-  ctrl3.boot = (uint8_t)val.boot;
-  ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
+  if (val.sw_por) {
+    iis3dwb10is_ram_access_t ram_access;
+
+    ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_RAM_ACCESS, (uint8_t *)&ram_access, 1);
+    ram_access.sw_por = (uint8_t)val.sw_por;
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_RAM_ACCESS, (uint8_t *)&ram_access, 1);
+  } else {
+    iis3dwb10is_ctrl3_t ctrl3;
+
+    ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
+    ctrl3.sw_reset = (uint8_t)val.sw_rst;
+    ctrl3.boot = (uint8_t)val.boot;
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
+  }
 
   return ret;
 }
@@ -274,39 +283,39 @@ int32_t iis3dwb10is_xl_data_rate_get(const stmdev_ctx_t *ctx, iis3dwb10is_data_r
 
   switch (ctrl1.burst_cfg)
   {
-    case IIS3DWB10IS_CONTINUOS_MODE:
+    case 0x0:
       val->burst = IIS3DWB10IS_CONTINUOS_MODE;
       break;
 
-    case IIS3DWB10IS_TON_UI_TOFF_ISPU:
+    case 0x1:
       val->burst = IIS3DWB10IS_TON_UI_TOFF_ISPU;
       break;
 
-    case IIS3DWB10IS_TON_UI_TOFF_FIFO:
+    case 0x2:
       val->burst = IIS3DWB10IS_TON_UI_TOFF_FIFO;
       break;
 
-    case IIS3DWB10IS_TON_STC_TOFF_UI:
+    case 0x4:
       val->burst = IIS3DWB10IS_TON_STC_TOFF_UI;
       break;
 
-    case IIS3DWB10IS_TON_STC_TOFF_ISPU:
+    case 0x5:
       val->burst = IIS3DWB10IS_TON_STC_TOFF_ISPU;
       break;
 
-    case IIS3DWB10IS_TON_STC_TOFF_FIFO:
+    case 0x6:
       val->burst = IIS3DWB10IS_TON_STC_TOFF_FIFO;
       break;
 
-    case IIS3DWB10IS_TON_EXT_TOFF_UI:
+    case 0x8:
       val->burst = IIS3DWB10IS_TON_EXT_TOFF_UI;
       break;
 
-    case IIS3DWB10IS_TON_EXT_TOFF_ISPU:
+    case 0x9:
       val->burst = IIS3DWB10IS_TON_EXT_TOFF_ISPU;
       break;
 
-    case IIS3DWB10IS_TON_EXT_TOFF_FIFO:
+    case 0xa:
       val->burst = IIS3DWB10IS_TON_EXT_TOFF_FIFO;
       break;
 
@@ -317,28 +326,32 @@ int32_t iis3dwb10is_xl_data_rate_get(const stmdev_ctx_t *ctx, iis3dwb10is_data_r
 
   switch (ctrl1.odr_xl)
   {
-    case IIS3DWB10IS_ODR_IDLE:
+    case 0:
       val->odr = IIS3DWB10IS_ODR_IDLE;
       break;
 
-    case IIS3DWB10IS_ODR_2KHz5:
+    case 2:
       val->odr = IIS3DWB10IS_ODR_2KHz5;
       break;
 
-    case IIS3DWB10IS_ODR_5KHz:
+    case 3:
       val->odr = IIS3DWB10IS_ODR_5KHz;
       break;
 
-    case IIS3DWB10IS_ODR_10KHz:
+    case 4:
       val->odr = IIS3DWB10IS_ODR_10KHz;
       break;
 
-    case IIS3DWB10IS_ODR_20KHz:
+    case 5:
       val->odr = IIS3DWB10IS_ODR_20KHz;
       break;
 
-    case IIS3DWB10IS_ODR_40KHz:
+    case 6:
       val->odr = IIS3DWB10IS_ODR_40KHz;
+      break;
+
+    case 7:
+      val->odr = IIS3DWB10IS_ODR_80KHz;
       break;
 
     default:
@@ -522,14 +535,14 @@ int32_t iis3dwb10is_xl_data_config_get(const stmdev_ctx_t *ctx, iis3dwb10is_xl_d
   */
 int32_t iis3dwb10is_interrupt_pin_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_int_pin_t val)
 {
-  iis3dwb10is_pad_ctrl_t pad;
+  iis3dwb10is_pin_ctrl_t pin;
   iis3dwb10is_if_cfg_t if_cfg;
   int32_t ret;
 
-  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PAD_CTRL, (uint8_t *)&pad, 1);
-  pad.io_pad_strength = (uint8_t)val.strength;
-  pad.pd_dis_int = (uint8_t)val.pd_dis;
-  ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_PAD_CTRL, (uint8_t *)&pad, 1);
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PIN_CTRL, (uint8_t *)&pin, 1);
+  pin.io_pin_strength = (uint8_t)val.strength;
+  pin.pd_dis_int = (uint8_t)val.pd_dis;
+  ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_PIN_CTRL, (uint8_t *)&pin, 1);
   if (ret != 0)
   {
     return -1;
@@ -554,17 +567,17 @@ int32_t iis3dwb10is_interrupt_pin_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_
   */
 int32_t iis3dwb10is_interrupt_pin_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_int_pin_t *val)
 {
-  iis3dwb10is_pad_ctrl_t pad;
+  iis3dwb10is_pin_ctrl_t pin;
   iis3dwb10is_if_cfg_t if_cfg;
   int32_t ret;
 
-  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PAD_CTRL, (uint8_t *)&pad, 1);
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_PIN_CTRL, (uint8_t *)&pin, 1);
   if (ret != 0)
   {
     return -1;
   }
 
-  switch (pad.io_pad_strength)
+  switch (pin.io_pin_strength)
   {
     case IIS3DWB10IS_PAD_STRENGTH_LOWER:
       val->strength = IIS3DWB10IS_PAD_STRENGTH_LOWER;
@@ -584,7 +597,7 @@ int32_t iis3dwb10is_interrupt_pin_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_
   }
 
 
-  switch (pad.pd_dis_int)
+  switch (pin.pd_dis_int)
   {
     case IIS3DWB10IS_PD_INT1_ON_INT2_ON:
       val->pd_dis = IIS3DWB10IS_PD_INT1_ON_INT2_ON;
@@ -1236,6 +1249,67 @@ int32_t iis3dwb10is_fifo_process(uint8_t *fifo_buf, iis3dwb10is_fifo_out_raw_t *
   }
 
   return 0;
+}
+
+/**
+  * @brief  COUNTER ODR configuration.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      counter_odr value
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_counter_odr_cfg_set(const stmdev_ctx_t *ctx, uint16_t val)
+{
+  iis3dwb10is_counter_odr_h_t odr_h;
+  iis3dwb10is_counter_odr_l_t odr_l;
+  int32_t ret;
+
+  if (val > 4096)
+    return -1;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_COUNTER_ODR_H, (uint8_t *)&odr_h, 1);
+
+  if (ret != 0)
+  {
+    return ret;
+  }
+
+  odr_l.counter_odr = val & 0xff;
+  odr_h.counter_odr = val / 256;
+
+  ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_COUNTER_ODR_L, (uint8_t *)&odr_l, 1);
+  ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_COUNTER_ODR_H, (uint8_t *)&odr_h, 1);
+
+  return ret;
+}
+
+/**
+  * @brief  COUNTER ODR configuration.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      counter_odr value
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_counter_odr_cfg_get(const stmdev_ctx_t *ctx, uint16_t *val)
+{
+  iis3dwb10is_counter_odr_h_t odr_h;
+  iis3dwb10is_counter_odr_l_t odr_l;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_COUNTER_ODR_L, (uint8_t *)&odr_l, 1);
+  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_COUNTER_ODR_H, (uint8_t *)&odr_h, 1);
+
+  if (ret != 0)
+  {
+    return ret;
+  }
+
+  *val = odr_l.counter_odr;
+  *val += odr_h.counter_odr * 256;
+
+  return ret;
 }
 
 /**
