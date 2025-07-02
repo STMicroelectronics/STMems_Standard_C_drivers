@@ -96,8 +96,8 @@
 /* Private variables ---------------------------------------------------------*/
 static int32_t data_raw_acceleration[3];
 static int16_t data_raw_temperature;
-static float acceleration_mg[3];
-static float temperature_degC;
+static float_t acceleration_mg[3];
+static float_t temperature_degC;
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 static iis3dwb10is_pin_int_route_t route = {0};
@@ -129,7 +129,7 @@ void iis3dwb10is_read_data_handler(void)
   iis3dwb10is_data_ready_t drdy;
 
   /* Read output only if new xl value is available */
-  iis3dwb10is_flag_data_ready_get(&dev_ctx, &drdy);
+  iis3dwb10is_data_ready_get(&dev_ctx, &drdy);
   if (drdy.drdy_xl) {
     xl_event = 1;
     xl_event_num++;

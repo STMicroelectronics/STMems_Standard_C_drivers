@@ -82,6 +82,27 @@ int32_t __weak iis3dwb10is_write_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint8
   * @}
   *
   */
+
+/**
+  * @defgroup  Private_functions
+  * @brief     Section collect all the utility functions needed by APIs.
+  * @{
+  *
+  */
+
+static void bytecpy(uint8_t *target, uint8_t *source)
+{
+  if ((target != NULL) && (source != NULL))
+  {
+    *target = *source;
+  }
+}
+
+/**
+  * @}
+  *
+  */
+
 uint64_t iis3dwb10is_from_lsb_to_us(uint64_t lsb)
 {
   return (lsb * 25U);
@@ -398,15 +419,15 @@ int32_t iis3dwb10is_xl_full_scale_get(const stmdev_ctx_t *ctx, iis3dwb10is_fs_xl
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL2, (uint8_t *)&ctrl2, 1);
   switch (ctrl2.fs)
   {
-    case IIS3DWB_50g:
+    case 0:
       *val = IIS3DWB_50g;
       break;
 
-    case IIS3DWB_100g:
+    case 1:
       *val = IIS3DWB_100g;
       break;
 
-    case IIS3DWB_200g:
+    case 2:
       *val = IIS3DWB_200g;
       break;
 
@@ -1318,6 +1339,374 @@ int32_t iis3dwb10is_counter_odr_cfg_get(const stmdev_ctx_t *ctx, uint16_t *val)
   */
 
 /**
+  * @defgroup ispu
+  * @brief    ispu
+  * @{/
+  *
+  */
+
+/**
+  * @brief  ISPU reset
+  *
+  * @param  ctx      read / write interface definitions
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_ispu_reset(const stmdev_ctx_t *ctx)
+{
+  iis3dwb10is_ispu_ctrl1_t ctrl;
+  int32_t ret;
+
+  /* assert reset bit */
+  ctrl.sw_reset_ispu = 1;
+  ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_ISPU_CTRL1, (uint8_t *)&ctrl, 1);
+
+  /* wait at least 100 usecs */
+  ctx->mdelay(1);
+
+  /* de-assert reset bit */
+  ctrl.sw_reset_ispu = 0;
+  ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_ISPU_CTRL1, (uint8_t *)&ctrl, 1);
+
+  return ret;
+}
+
+/**
+  * @brief  ispu TIMESTAMP_EN.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      0: disable timestamp, 1: enable timestamp
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_ispu_timestamp_en_set(const stmdev_ctx_t *ctx, uint8_t val)
+{
+  iis3dwb10is_ispu_ctrl1_t ctrl;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_ISPU_CTRL1, (uint8_t *)&ctrl, 1);
+  if (ret == 0)
+  {
+    ctrl.timestamp_en = val;
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_ISPU_CTRL1, (uint8_t *)&ctrl, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  ispu TIMESTAMP_EN.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      0: disable timestamp, 1: enable timestamp
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_ispu_timestamp_en_get(const stmdev_ctx_t *ctx, uint8_t *val)
+{
+  iis3dwb10is_ispu_ctrl1_t ctrl;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_ISPU_CTRL1, (uint8_t *)&ctrl, 1);
+  *val = ctrl.timestamp_en;
+
+  return ret;
+}
+
+/**
+  * @brief  ispu rate.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      rate values (iis3dwb10is_ispu_rate_t)
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_ispu_rate_set(const stmdev_ctx_t *ctx, iis3dwb10is_ispu_rate_t val)
+{
+  iis3dwb10is_ispu_ctrl0_t ctrl;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_ISPU_CTRL0, (uint8_t *)&ctrl, 1);
+  if (ret == 0)
+  {
+    ctrl.ispu_rate = val;
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_ISPU_CTRL0, (uint8_t *)&ctrl, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  ispu rate.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      rate values (iis3dwb10is_ispu_rate_t)
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_ispu_rate_get(const stmdev_ctx_t *ctx, iis3dwb10is_ispu_rate_t *val)
+{
+  iis3dwb10is_ispu_ctrl0_t ctrl;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_ISPU_CTRL0, (uint8_t *)&ctrl, 1);
+  switch (ctrl.ispu_rate)
+  {
+    case 0:
+      *val = IIS3DWB10IS_ISPU_RATE_IDLE;
+      break;
+
+    case 2:
+      *val = IIS3DWB10IS_ISPU_RATE_2KHz5;
+      break;
+
+    case 3:
+      *val = IIS3DWB10IS_ISPU_RATE_5KHz;
+      break;
+
+    case 4:
+      *val = IIS3DWB10IS_ISPU_RATE_10KHz;
+      break;
+
+    case 5:
+      *val = IIS3DWB10IS_ISPU_RATE_20KHz;
+      break;
+
+    case 6:
+      *val = IIS3DWB10IS_ISPU_RATE_40KHz;
+      break;
+
+    case 7:
+      *val = IIS3DWB10IS_ISPU_RATE_80KHz;
+      break;
+
+    default:
+      *val = IIS3DWB10IS_ISPU_RATE_IDLE;
+      break;
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  ispu bdu.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      0: bdu disabled, 1: bdu enabled
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_ispu_bdu_set(const stmdev_ctx_t *ctx, uint8_t val)
+{
+  iis3dwb10is_ispu_ctrl0_t ctrl;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_ISPU_CTRL0, (uint8_t *)&ctrl, 1);
+  if (ret == 0)
+  {
+    ctrl.ispu_bdu = val;
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_ISPU_CTRL0, (uint8_t *)&ctrl, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  ispu bdu.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      0: bdu disabled, 1: bdu enabled
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_ispu_bdu_get(const stmdev_ctx_t *ctx, uint8_t *val)
+{
+  iis3dwb10is_ispu_ctrl0_t ctrl;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_ISPU_CTRL0, (uint8_t *)&ctrl, 1);
+  *val = ctrl.ispu_bdu;
+
+  return ret;
+}
+
+/**
+  * @brief  ispu grant register access.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      0: access disabled, 1: access enabled
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_grant_ispu_regs_access_set(const stmdev_ctx_t *ctx, uint8_t val)
+{
+  iis3dwb10is_ispu_ctrl0_t ctrl;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_ISPU_CTRL0, (uint8_t *)&ctrl, 1);
+  if (ret == 0)
+  {
+    ctrl.reg_access_confirm = val;
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_ISPU_CTRL0, (uint8_t *)&ctrl, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  ispu register access.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      0: access disabled, 1: access enabled
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_grant_ispu_regs_access_get(const stmdev_ctx_t *ctx, uint8_t *val)
+{
+  iis3dwb10is_ispu_ctrl0_t ctrl;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_ISPU_CTRL0, (uint8_t *)&ctrl, 1);
+  *val = ctrl.reg_access_confirm;
+
+  return ret;
+}
+
+/**
+  * @brief  ispu trigger interrupt.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      0: clear interrupt trigger, 1: assert interrupt trigger
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_ispu_trigger_interrupt(const stmdev_ctx_t *ctx, uint8_t val)
+{
+  iis3dwb10is_ispu_ctrl0_t ctrl;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_ISPU_CTRL0, (uint8_t *)&ctrl, 1);
+  if (ret == 0)
+  {
+    ctrl.loprio_user_trig = val;
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_ISPU_CTRL0, (uint8_t *)&ctrl, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  ispu status.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      iis3dwb10is_ispu_status_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_ispu_status_get(const stmdev_ctx_t *ctx, iis3dwb10is_ispu_status_t *val)
+{
+  uint8_t reg[2];
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_STATUS_A_SL, reg, 2);
+  if (ret == 0)
+  {
+    bytecpy(&val->status_a_sl, &reg[0]);
+    bytecpy(&val->status_b_sl, &reg[1]);
+
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  ispu device status.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      iis3dwb10is_ispu_dev_status_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_ispu_dev_status_get(const stmdev_ctx_t *ctx,
+                                        iis3dwb10is_ispu_dev_status_t *val)
+{
+  iis3dwb10is_device_status_t status;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_DEVICE_STATUS, (uint8_t *)&status, 1);
+  if (ret == 0)
+  {
+      val->ctrl_access = status.ispu_ctrl_access;
+      val->core_sleep = status.ispu_core_sleep;
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  ispu loprio configuration.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      iis3dwb10is_ispu_loprio_cfg_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_ispu_loprio_cfg_set(const stmdev_ctx_t *ctx,
+                                        iis3dwb10is_ispu_loprio_cfg_t val)
+{
+  iis3dwb10is_ispu_loprio_en_t loprio;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_ISPU_LOPRIO_EN, (uint8_t *)&loprio, 1);
+  if (ret == 0)
+  {
+    loprio.loprio_fifo_en = val.fifo_en;
+    loprio.loprio_sleepcnt_en = val.sleepcnt_en;
+    loprio.loprio_qvar_en = val.qvar_en;
+    loprio.loprio_ext_trg_en = val.ext_trg_en;
+    loprio.loprio_user_trg_en = val.user_trg_en;
+    loprio.loprio_temp_en = val.temp_en;
+
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_ISPU_LOPRIO_EN, (uint8_t *)&loprio, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  ispu loprio configuration.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      iis3dwb10is_ispu_loprio_cfg_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_ispu_loprio_cfg_get(const stmdev_ctx_t *ctx,
+                                        iis3dwb10is_ispu_loprio_cfg_t *val)
+{
+  iis3dwb10is_ispu_loprio_en_t loprio;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_ISPU_LOPRIO_EN, (uint8_t *)&loprio, 1);
+  if (ret == 0)
+  {
+    val->fifo_en = loprio.loprio_fifo_en;
+    val->sleepcnt_en = loprio.loprio_sleepcnt_en;
+    val->qvar_en = loprio.loprio_qvar_en;
+    val->ext_trg_en = loprio.loprio_ext_trg_en;
+    val->user_trg_en = loprio.loprio_user_trg_en;
+    val->temp_en = loprio.loprio_temp_en;
+  }
+
+  return ret;
+}
+
+/**
+  * @}
+  *
+  */
+
+/**
   * @brief  SLEEPCNT configuration.[set]
   *
   * @param  ctx      read / write interface definitions
@@ -1398,6 +1787,44 @@ int32_t iis3dwb10is_sleepcnt_cfg_get(const stmdev_ctx_t *ctx, iis3dwb10is_slpcnt
         break;
     }
   }
+
+  return ret;
+}
+
+/**
+  * @brief  SLEEPCNT time.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      tiime (uint16_t)
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_sleepcnt_time_set(const stmdev_ctx_t *ctx, uint16_t val)
+{
+  uint8_t *valp = (uint8_t *)&val;
+  int32_t ret;
+
+  ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_SLEEPCNT_TIME_L, valp, 2);
+
+  return ret;
+}
+
+/**
+  * @brief  SLEEPCNT time.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      tiime (uint16_t)
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_sleepcnt_time_get(const stmdev_ctx_t *ctx, uint16_t *val)
+{
+  uint8_t buf[2];
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_SLEEPCNT_TIME_L, buf, 2);
+
+  *val = buf[0] | (buf[1] & 0x7F) * 256U;
 
   return ret;
 }
@@ -1692,28 +2119,41 @@ int32_t iis3dwb10is_data_ready_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_dat
 int32_t iis3dwb10is_pin_int_route_set(const stmdev_ctx_t *ctx,
                                       iis3dwb10is_pin_int_route_t val)
 {
+  uint8_t reg[3];
   iis3dwb10is_int_ctrl0_t int_ctrl0;
   iis3dwb10is_int_ctrl1_t int_ctrl1;
+  iis3dwb10is_int_ctrl2_t int_ctrl2;
   int32_t ret;
 
-  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL0, (uint8_t *)&int_ctrl0, 1);
-  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL1, (uint8_t *)&int_ctrl1, 1);
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL0, reg, 3);
   if (ret == 0)
   {
+    bytecpy((uint8_t *)&int_ctrl0, &reg[0]);
+    bytecpy((uint8_t *)&int_ctrl1, &reg[1]);
+    bytecpy((uint8_t *)&int_ctrl2, &reg[2]);
+
     int_ctrl0.int1_boot        = val.int1_boot;
     int_ctrl0.int1_drdy_temp   = val.int1_drdy_temp;
     int_ctrl0.int2_drdy_temp   = val.int2_drdy_temp;
     int_ctrl0.int2_on_int1     = val.int2_on_int1;
     int_ctrl0.int2_sleep_ispu  = val.int2_sleep_ispu;
-    int_ctrl1.int1_drdy_qvar   = val.int1_drdy_qvar;
     int_ctrl1.int1_drdy_xl     = val.int1_drdy_xl;
+    int_ctrl1.int1_drdy_qvar   = val.int1_drdy_qvar;
     int_ctrl1.int1_ext_trig    = val.int1_ext_trig;
+    int_ctrl1.int1_fifo_th     = val.int1_fifo_th;
     int_ctrl1.int1_fifo_ovr    = val.int1_fifo_ovr;
     int_ctrl1.int1_fifo_full   = val.int1_fifo_full;
-    int_ctrl1.int1_fifo_th         = val.int1_fifo_th;
+    int_ctrl2.int2_drdy_xl     = val.int2_drdy_xl;
+    int_ctrl2.int2_drdy_qvar   = val.int2_drdy_qvar;
+    int_ctrl2.int2_fifo_th     = val.int2_fifo_th;
+    int_ctrl2.int2_fifo_ovr    = val.int2_fifo_ovr;
+    int_ctrl2.int2_fifo_full   = val.int2_fifo_full;
     int_ctrl1.int1_sleepcnt    = val.int1_sleep_cnt;
-    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_INT_CTRL0, (uint8_t *)&int_ctrl0, 1);
-    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_INT_CTRL1, (uint8_t *)&int_ctrl1, 1);
+
+    bytecpy(&reg[0], (uint8_t *)&int_ctrl0);
+    bytecpy(&reg[1], (uint8_t *)&int_ctrl1);
+    bytecpy(&reg[2], (uint8_t *)&int_ctrl2);
+    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_INT_CTRL0, reg, 3);
   }
 
   return ret;
@@ -1730,25 +2170,35 @@ int32_t iis3dwb10is_pin_int_route_set(const stmdev_ctx_t *ctx,
 int32_t iis3dwb10is_pin_int_route_get(const stmdev_ctx_t *ctx,
                                       iis3dwb10is_pin_int_route_t *val)
 {
+  uint8_t reg[3];
   iis3dwb10is_int_ctrl0_t int_ctrl0;
   iis3dwb10is_int_ctrl1_t int_ctrl1;
+  iis3dwb10is_int_ctrl2_t int_ctrl2;
   int32_t ret;
 
-  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL0, (uint8_t *)&int_ctrl0, 1);
-  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL1, (uint8_t *)&int_ctrl1, 1);
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL0, reg, 3);
   if (ret == 0)
   {
+    bytecpy((uint8_t *)&int_ctrl0, &reg[0]);
+    bytecpy((uint8_t *)&int_ctrl1, &reg[1]);
+    bytecpy((uint8_t *)&int_ctrl2, &reg[2]);
+
     val->int1_boot       = int_ctrl0.int1_boot;
     val->int1_drdy_temp  = int_ctrl0.int1_drdy_temp;
     val->int2_drdy_temp  = int_ctrl0.int2_drdy_temp;
     val->int2_on_int1    = int_ctrl0.int2_on_int1;
     val->int2_sleep_ispu = int_ctrl0.int2_sleep_ispu;
-    val->int1_drdy_qvar  = int_ctrl1.int1_drdy_qvar;
     val->int1_drdy_xl    = int_ctrl1.int1_drdy_xl;
+    val->int1_drdy_qvar  = int_ctrl1.int1_drdy_qvar;
     val->int1_ext_trig   = int_ctrl1.int1_ext_trig;
+    val->int1_fifo_th    = int_ctrl1.int1_fifo_th;
     val->int1_fifo_ovr   = int_ctrl1.int1_fifo_ovr;
     val->int1_fifo_full  = int_ctrl1.int1_fifo_full;
-    val->int1_fifo_th    = int_ctrl1.int1_fifo_th;
+    val->int2_drdy_xl    = int_ctrl2.int2_drdy_xl;
+    val->int2_drdy_qvar  = int_ctrl2.int2_drdy_qvar;
+    val->int2_fifo_th    = int_ctrl2.int2_fifo_th;
+    val->int2_fifo_ovr   = int_ctrl2.int2_fifo_ovr;
+    val->int2_fifo_full  = int_ctrl2.int2_fifo_full;
     val->int1_sleep_cnt  = int_ctrl1.int1_sleepcnt;
   }
 
@@ -1763,7 +2213,7 @@ int32_t iis3dwb10is_pin_int_route_get(const stmdev_ctx_t *ctx,
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t iis3dwb10is_flag_data_ready_get(const stmdev_ctx_t *ctx, iis3dwb10is_data_ready_t *val)
+int32_t iis3dwb10is_data_ready_get(const stmdev_ctx_t *ctx, iis3dwb10is_data_ready_t *val)
 {
   iis3dwb10is_status_reg_t status;
   int32_t ret;
@@ -1774,7 +2224,7 @@ int32_t iis3dwb10is_flag_data_ready_get(const stmdev_ctx_t *ctx, iis3dwb10is_dat
   val->drdy_qvar = status.qvarda;
   val->ext_trig_ia = status.ext_trig_ia;
   val->sleepcnt_ia = status.sleepcnt_ia;
-  val->timer_ia = status.timer_ia;
+  val->timestamp_endcount = status.timestamp_endcount;
   val->ispu_ia = status.ispu_ia;
 
   return ret;

@@ -96,8 +96,8 @@
 #define    FIFO_MAX_SIZE    2048
 
 /* Private variables ---------------------------------------------------------*/
-static float acceleration_mg[3];
-static float temperature_degC;
+static float_t acceleration_mg[3];
+static float_t temperature_degC;
 static uint64_t timestamp_us;
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
