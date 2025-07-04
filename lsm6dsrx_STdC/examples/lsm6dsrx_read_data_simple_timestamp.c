@@ -175,16 +175,16 @@ void lsm6dsrx_read_simple_timestamp(void)
 
   /* Read samples in polling mode (no int). */
   while (1) {
-    lsm6dsrx_reg_t reg;
+    lsm6dsrx_status_reg_t status;
     uint32_t timestamp;
     /* Read output only if new value is available. */
-    lsm6dsrx_status_reg_get(&dev_ctx, &reg.status_reg);
+    lsm6dsrx_status_reg_get(&dev_ctx, &status);
 
-    if (reg.status_reg.xlda || reg.status_reg.gda || reg.status_reg.tda) {
+    if (status.xlda || status.gda || status.tda) {
       lsm6dsrx_timestamp_raw_get(&dev_ctx, &timestamp);
     }
 
-    if (reg.status_reg.xlda) {
+    if (status.xlda) {
       /* Read acceleration field data */
       memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
       lsm6dsrx_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
@@ -201,7 +201,7 @@ void lsm6dsrx_read_simple_timestamp(void)
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
-    if (reg.status_reg.gda) {
+    if (status.gda) {
       /* Read angular rate field data */
       memset(data_raw_angular_rate, 0x00, 3 * sizeof(int16_t));
       lsm6dsrx_angular_rate_raw_get(&dev_ctx, data_raw_angular_rate);
@@ -218,7 +218,7 @@ void lsm6dsrx_read_simple_timestamp(void)
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
-    if (reg.status_reg.tda) {
+    if (status.tda) {
       /* Read temperature data */
       memset(&data_raw_temperature, 0x00, sizeof(int16_t));
       lsm6dsrx_temperature_raw_get(&dev_ctx, &data_raw_temperature);

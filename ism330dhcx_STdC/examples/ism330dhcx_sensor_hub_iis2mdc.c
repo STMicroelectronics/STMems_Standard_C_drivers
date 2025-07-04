@@ -259,8 +259,7 @@ void ism330dhcx_mlc_iis2mdc(void)
       angular_rate_mdps[2] =
         ism330dhcx_from_fs2000dps_to_mdps(data_raw.i16bit[2]);
       /* Read mag field */
-      ism330dhcx_sh_read_data_raw_get(&ag_ctx,
-                                      (ism330dhcx_emb_sh_read_t *)data_raw.u8bit, 6);
+      ism330dhcx_sh_read_data_raw_get(&ag_ctx, data_raw.u8bit, 6);
       /*fix data format with endianness */
       dummy = data_raw.u8bit[1];
       data_raw.i16bit[0] = dummy * 256 + data_raw.u8bit[0];
@@ -394,8 +393,7 @@ static int32_t ism330dhcx_read_iis2mdc_cx(void *ctx, uint8_t reg,
   ism330dhcx_sh_master_set(&ag_ctx, PROPERTY_DISABLE);
   ism330dhcx_xl_data_rate_set(&ag_ctx, ISM330DHCX_XL_ODR_OFF);
   /* Read SensorHub registers. */
-  ism330dhcx_sh_read_data_raw_get(&ag_ctx,
-                                  (ism330dhcx_emb_sh_read_t *)data, len);
+  ism330dhcx_sh_read_data_raw_get(&ag_ctx, data, len);
   return ret;
 }
 

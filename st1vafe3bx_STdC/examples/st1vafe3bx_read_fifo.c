@@ -157,6 +157,8 @@ void st1vafe3bx_read_fifo(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+  st1vafe3bx_priv_t vafe_info;
+  dev_ctx.priv_data = &vafe_info;
 
   /* Initialize platform specific hardware */
   platform_init();

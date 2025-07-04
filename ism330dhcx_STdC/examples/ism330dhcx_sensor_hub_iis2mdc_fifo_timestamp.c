@@ -276,7 +276,7 @@ void ism330dhcx_sensor_hub_iis2mdc_fifo_timestamp(void)
    */
   ism330dhcx_fifo_xl_batch_set(&ag_ctx, ISM330DHCX_XL_BATCHED_AT_26Hz);
   ism330dhcx_fifo_gy_batch_set(&ag_ctx, ISM330DHCX_GY_BATCHED_AT_26Hz);
-  ism330dhcx_fifo_ts_dec_set(&ag_ctx, ISM330DHCX_DEC_1);
+  ism330dhcx_fifo_timestamp_decimation_set(&ag_ctx, ISM330DHCX_DEC_1);
   ism330dhcx_timestamp_set(&ag_ctx, PROPERTY_ENABLE);
   /* Enable I2C Master. */
   //ism330dhcx_sh_master_set(&ag_ctx, PROPERTY_ENABLE);
@@ -481,8 +481,7 @@ static int32_t ism330dhcx_read_iis2mdc_cx(void *ctx, uint8_t reg,
   ism330dhcx_xl_data_rate_set(&ag_ctx, ISM330DHCX_XL_ODR_OFF);
 
   /* Read SensorHub registers. */
-  ism330dhcx_sh_read_data_raw_get(&ag_ctx,
-                                  (ism330dhcx_emb_sh_read_t *)data, len);
+  ism330dhcx_sh_read_data_raw_get(&ag_ctx, data, len);
   return ret;
 }
 

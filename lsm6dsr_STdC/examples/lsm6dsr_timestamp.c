@@ -176,15 +176,16 @@ void lsm6dsr_timestamp(void)
 
   /* Read samples in polling mode (no int) */
   while (1) {
-    lsm6dsr_reg_t reg;
-    /* Read output only if new value is available */
-    lsm6dsr_status_reg_get(&dev_ctx, &reg.status_reg);
+    lsm6dsr_status_reg_t status;
 
-    if (reg.status_reg.xlda || reg.status_reg.gda || reg.status_reg.tda) {
+    /* Read output only if new value is available */
+    lsm6dsr_status_reg_get(&dev_ctx, &status);
+
+    if (status.xlda || status.gda || status.tda) {
       lsm6dsr_timestamp_raw_get(&dev_ctx, &timestamp);
     }
 
-    if (reg.status_reg.xlda) {
+    if (status.xlda) {
       /* Read acceleration field data */
       memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
       lsm6dsr_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
@@ -201,7 +202,7 @@ void lsm6dsr_timestamp(void)
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
-    if (reg.status_reg.gda) {
+    if (status.gda) {
       /*
        * Read angular rate field data
        */
@@ -220,7 +221,7 @@ void lsm6dsr_timestamp(void)
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
 
-    if (reg.status_reg.tda) {
+    if (status.tda) {
       /*
        * Read temperature data
        */
