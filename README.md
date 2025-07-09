@@ -107,7 +107,7 @@ In order to run that file, please follow these steps:
 
 More info is available in each specific provided example platform:
 
-- [NUCLEO_F401RE](https://github.com/STMicroelectronics/STMems_Standard_C_drivers/tree/master/_prj_NucleoF401)
+- [NUCLEO_F401RE](https://github.com/STMicroelectronics/STMems_Standard_C_drivers/tree/master/_prj_Nucleo_F401RE)
 - [STEVAL_MKI109V3](https://github.com/STMicroelectronics/STMems_Standard_C_drivers/tree/master/_prj_MKI109V3)
 - [NUCLEO_H503RB](https://github.com/STMicroelectronics/STMems_Standard_C_drivers/tree/master/_prj_Nucleo_H503RB)
 
