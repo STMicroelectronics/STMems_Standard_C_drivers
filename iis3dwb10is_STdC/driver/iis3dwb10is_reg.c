@@ -420,19 +420,19 @@ int32_t iis3dwb10is_xl_full_scale_get(const stmdev_ctx_t *ctx, iis3dwb10is_fs_xl
   switch (ctrl2.fs)
   {
     case 0:
-      *val = IIS3DWB_50g;
+      *val = IIS3DWB10IS_50g;
       break;
 
     case 1:
-      *val = IIS3DWB_100g;
+      *val = IIS3DWB10IS_100g;
       break;
 
     case 2:
-      *val = IIS3DWB_200g;
+      *val = IIS3DWB10IS_200g;
       break;
 
     default:
-      *val = IIS3DWB_50g;
+      *val = IIS3DWB10IS_50g;
       break;
   }
 
@@ -2109,97 +2109,136 @@ int32_t iis3dwb10is_data_ready_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_dat
 }
 
 /**
-  * @brief  Configure interrupt routing.[set]
+  * @brief  Configure interrupt routing on INT1 pin.[set]
   *
   * @param  ctx      read / write interface definitions
   * @param  val      iis3dwb10is_pin_int_route_t
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t iis3dwb10is_pin_int_route_set(const stmdev_ctx_t *ctx,
+int32_t iis3dwb10is_pin_int1_route_set(const stmdev_ctx_t *ctx,
                                       iis3dwb10is_pin_int_route_t val)
 {
-  uint8_t reg[3];
   iis3dwb10is_int_ctrl0_t int_ctrl0;
   iis3dwb10is_int_ctrl1_t int_ctrl1;
-  iis3dwb10is_int_ctrl2_t int_ctrl2;
   int32_t ret;
 
-  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL0, reg, 3);
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL0, (uint8_t *)&int_ctrl0, 1);
   if (ret == 0)
   {
-    bytecpy((uint8_t *)&int_ctrl0, &reg[0]);
-    bytecpy((uint8_t *)&int_ctrl1, &reg[1]);
-    bytecpy((uint8_t *)&int_ctrl2, &reg[2]);
+    int_ctrl0.int1_boot        = val.int_boot;
+    int_ctrl0.int1_drdy_temp   = val.int_drdy_temp;
+    int_ctrl1.int1_drdy_xl     = val.int_drdy_xl;
+    int_ctrl1.int1_drdy_qvar   = val.int_drdy_qvar;
+    int_ctrl1.int1_ext_trig    = val.int_ext_trig;
+    int_ctrl1.int1_fifo_th     = val.int_fifo_th;
+    int_ctrl1.int1_fifo_ovr    = val.int_fifo_ovr;
+    int_ctrl1.int1_fifo_full   = val.int_fifo_full;
+    int_ctrl1.int1_sleepcnt    = val.int_sleep_cnt;
 
-    int_ctrl0.int1_boot        = val.int1_boot;
-    int_ctrl0.int1_drdy_temp   = val.int1_drdy_temp;
-    int_ctrl0.int2_drdy_temp   = val.int2_drdy_temp;
-    int_ctrl0.int2_on_int1     = val.int2_on_int1;
-    int_ctrl0.int2_sleep_ispu  = val.int2_sleep_ispu;
-    int_ctrl1.int1_drdy_xl     = val.int1_drdy_xl;
-    int_ctrl1.int1_drdy_qvar   = val.int1_drdy_qvar;
-    int_ctrl1.int1_ext_trig    = val.int1_ext_trig;
-    int_ctrl1.int1_fifo_th     = val.int1_fifo_th;
-    int_ctrl1.int1_fifo_ovr    = val.int1_fifo_ovr;
-    int_ctrl1.int1_fifo_full   = val.int1_fifo_full;
-    int_ctrl2.int2_drdy_xl     = val.int2_drdy_xl;
-    int_ctrl2.int2_drdy_qvar   = val.int2_drdy_qvar;
-    int_ctrl2.int2_fifo_th     = val.int2_fifo_th;
-    int_ctrl2.int2_fifo_ovr    = val.int2_fifo_ovr;
-    int_ctrl2.int2_fifo_full   = val.int2_fifo_full;
-    int_ctrl1.int1_sleepcnt    = val.int1_sleep_cnt;
-
-    bytecpy(&reg[0], (uint8_t *)&int_ctrl0);
-    bytecpy(&reg[1], (uint8_t *)&int_ctrl1);
-    bytecpy(&reg[2], (uint8_t *)&int_ctrl2);
-    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_INT_CTRL0, reg, 3);
+    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_INT_CTRL0, (uint8_t *)&int_ctrl0, 1);
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_INT_CTRL1, (uint8_t *)&int_ctrl1, 1);
   }
 
   return ret;
 }
 
 /**
-  * @brief  Configure interrupt routing.[get]
+  * @brief  Configure interrupt routing on INT1 pin.[get]
   *
   * @param  ctx      read / write interface definitions
   * @param  val      pinter to iis3dwb10is_pin_int_route_t
   * @retval          interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t iis3dwb10is_pin_int_route_get(const stmdev_ctx_t *ctx,
-                                      iis3dwb10is_pin_int_route_t *val)
+int32_t iis3dwb10is_pin_int1_route_get(const stmdev_ctx_t *ctx,
+                                       iis3dwb10is_pin_int_route_t *val)
 {
-  uint8_t reg[3];
   iis3dwb10is_int_ctrl0_t int_ctrl0;
   iis3dwb10is_int_ctrl1_t int_ctrl1;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL0, (uint8_t *)&int_ctrl0, 1);
+  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL1, (uint8_t *)&int_ctrl1, 1);
+  if (ret == 0)
+  {
+    val->int_boot       = int_ctrl0.int1_boot;
+    val->int_drdy_temp  = int_ctrl0.int1_drdy_temp;
+    val->int_drdy_xl    = int_ctrl1.int1_drdy_xl;
+    val->int_drdy_qvar  = int_ctrl1.int1_drdy_qvar;
+    val->int_ext_trig   = int_ctrl1.int1_ext_trig;
+    val->int_fifo_th    = int_ctrl1.int1_fifo_th;
+    val->int_fifo_ovr   = int_ctrl1.int1_fifo_ovr;
+    val->int_fifo_full  = int_ctrl1.int1_fifo_full;
+    val->int_sleep_cnt  = int_ctrl1.int1_sleepcnt;
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Configure interrupt routing on INT2 pin.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      iis3dwb10is_pin_int_route_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_pin_int2_route_set(const stmdev_ctx_t *ctx,
+                                      iis3dwb10is_pin_int_route_t val)
+{
+  iis3dwb10is_int_ctrl0_t int_ctrl0;
   iis3dwb10is_int_ctrl2_t int_ctrl2;
   int32_t ret;
 
-  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL0, reg, 3);
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL0, (uint8_t *)&int_ctrl0, 1);
   if (ret == 0)
   {
-    bytecpy((uint8_t *)&int_ctrl0, &reg[0]);
-    bytecpy((uint8_t *)&int_ctrl1, &reg[1]);
-    bytecpy((uint8_t *)&int_ctrl2, &reg[2]);
+    int_ctrl0.int2_drdy_temp   = val.int_drdy_temp;
+    int_ctrl0.int2_sleep_ispu  = val.int_sleep_ispu;
+    int_ctrl0.int2_on_int1     = val.int2_on_int1;
+    int_ctrl2.int2_drdy_xl     = val.int_drdy_xl;
+    int_ctrl2.int2_drdy_qvar   = val.int_drdy_qvar;
+    int_ctrl2.int2_fifo_th     = val.int_fifo_th;
+    int_ctrl2.int2_fifo_ovr    = val.int_fifo_ovr;
+    int_ctrl2.int2_fifo_full   = val.int_fifo_full;
+    int_ctrl2.int2_sleepcnt    = val.int_sleep_cnt;
 
-    val->int1_boot       = int_ctrl0.int1_boot;
-    val->int1_drdy_temp  = int_ctrl0.int1_drdy_temp;
-    val->int2_drdy_temp  = int_ctrl0.int2_drdy_temp;
-    val->int2_on_int1    = int_ctrl0.int2_on_int1;
-    val->int2_sleep_ispu = int_ctrl0.int2_sleep_ispu;
-    val->int1_drdy_xl    = int_ctrl1.int1_drdy_xl;
-    val->int1_drdy_qvar  = int_ctrl1.int1_drdy_qvar;
-    val->int1_ext_trig   = int_ctrl1.int1_ext_trig;
-    val->int1_fifo_th    = int_ctrl1.int1_fifo_th;
-    val->int1_fifo_ovr   = int_ctrl1.int1_fifo_ovr;
-    val->int1_fifo_full  = int_ctrl1.int1_fifo_full;
-    val->int2_drdy_xl    = int_ctrl2.int2_drdy_xl;
-    val->int2_drdy_qvar  = int_ctrl2.int2_drdy_qvar;
-    val->int2_fifo_th    = int_ctrl2.int2_fifo_th;
-    val->int2_fifo_ovr   = int_ctrl2.int2_fifo_ovr;
-    val->int2_fifo_full  = int_ctrl2.int2_fifo_full;
-    val->int1_sleep_cnt  = int_ctrl1.int1_sleepcnt;
+    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_INT_CTRL0, (uint8_t *)&int_ctrl0, 1);
+    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_INT_CTRL2, (uint8_t *)&int_ctrl2, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  Configure interrupt routing on INT2 pin.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      pinter to iis3dwb10is_pin_int_route_t
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_pin_int2_route_get(const stmdev_ctx_t *ctx,
+                                       iis3dwb10is_pin_int_route_t *val)
+{
+  iis3dwb10is_int_ctrl0_t int_ctrl0;
+  iis3dwb10is_int_ctrl2_t int_ctrl2;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL0, (uint8_t *)&int_ctrl0, 1);
+  ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL2, (uint8_t *)&int_ctrl2, 1);
+  if (ret == 0)
+  {
+    val->int_drdy_temp  = int_ctrl0.int2_drdy_temp;
+    val->int_sleep_ispu = int_ctrl0.int2_sleep_ispu;
+    val->int2_on_int1   = int_ctrl0.int2_on_int1;
+    val->int_drdy_xl    = int_ctrl2.int2_drdy_xl;
+    val->int_drdy_qvar  = int_ctrl2.int2_drdy_qvar;
+    val->int_fifo_th    = int_ctrl2.int2_fifo_th;
+    val->int_fifo_ovr   = int_ctrl2.int2_fifo_ovr;
+    val->int_fifo_full  = int_ctrl2.int2_fifo_full;
+    val->int_sleep_cnt  = int_ctrl2.int2_sleepcnt;
   }
 
   return ret;

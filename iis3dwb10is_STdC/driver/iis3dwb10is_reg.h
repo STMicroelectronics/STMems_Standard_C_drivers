@@ -886,9 +886,9 @@ int32_t iis3dwb10is_xl_data_rate_get(const stmdev_ctx_t *ctx, iis3dwb10is_data_r
 
 typedef enum
 {
-  IIS3DWB_50g   = 0,
-  IIS3DWB_100g  = 1,
-  IIS3DWB_200g  = 2,
+  IIS3DWB10IS_50g   = 0,
+  IIS3DWB10IS_100g  = 1,
+  IIS3DWB10IS_200g  = 2,
 } iis3dwb10is_fs_xl_t;
 int32_t iis3dwb10is_xl_full_scale_set(const stmdev_ctx_t *ctx, iis3dwb10is_fs_xl_t val);
 int32_t iis3dwb10is_xl_full_scale_get(const stmdev_ctx_t *ctx, iis3dwb10is_fs_xl_t *val);
@@ -1129,29 +1129,26 @@ int32_t iis3dwb10is_data_ready_mode_get(const stmdev_ctx_t *ctx,
 
 typedef struct
 {
-  uint8_t int1_drdy_xl         : 1;
-  uint8_t int1_drdy_qvar       : 1;
-  uint8_t int1_sleep_cnt       : 1;
-  uint8_t int1_ext_trig        : 1;
-  uint8_t int1_fifo_th         : 1;
-  uint8_t int1_fifo_ovr        : 1;
-  uint8_t int1_fifo_full       : 1;
-  uint8_t int2_drdy_xl         : 1;
-  uint8_t int2_drdy_qvar       : 1;
-  uint8_t int2_sleep_cnt       : 1;
-  uint8_t int2_fifo_th         : 1;
-  uint8_t int2_fifo_ovr        : 1;
-  uint8_t int2_fifo_full       : 1;
-  uint8_t int1_drdy_temp       : 1;
-  uint8_t int1_boot            : 1;
-  uint8_t int2_drdy_temp       : 1;
-  uint8_t int2_sleep_ispu      : 1;
+  uint8_t int_drdy_xl          : 1;
+  uint8_t int_drdy_qvar        : 1;
+  uint8_t int_sleep_cnt        : 1;
+  uint8_t int_ext_trig         : 1;
+  uint8_t int_fifo_th          : 1;
+  uint8_t int_fifo_ovr         : 1;
+  uint8_t int_fifo_full        : 1;
+  uint8_t int_drdy_temp        : 1;
+  uint8_t int_boot             : 1;
+  uint8_t int_sleep_ispu       : 1;
   uint8_t int2_on_int1         : 1;
 } iis3dwb10is_pin_int_route_t;
-int32_t iis3dwb10is_pin_int_route_set(const stmdev_ctx_t *ctx,
-                                      iis3dwb10is_pin_int_route_t val);
-int32_t iis3dwb10is_pin_int_route_get(const stmdev_ctx_t *ctx,
-                                      iis3dwb10is_pin_int_route_t *val);
+int32_t iis3dwb10is_pin_int1_route_set(const stmdev_ctx_t *ctx,
+                                       iis3dwb10is_pin_int_route_t val);
+int32_t iis3dwb10is_pin_int1_route_get(const stmdev_ctx_t *ctx,
+                                       iis3dwb10is_pin_int_route_t *val);
+int32_t iis3dwb10is_pin_int2_route_set(const stmdev_ctx_t *ctx,
+                                       iis3dwb10is_pin_int_route_t val);
+int32_t iis3dwb10is_pin_int2_route_get(const stmdev_ctx_t *ctx,
+                                       iis3dwb10is_pin_int_route_t *val);
 
 typedef struct
 {
