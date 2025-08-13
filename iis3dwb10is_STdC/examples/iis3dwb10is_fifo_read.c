@@ -274,16 +274,16 @@ void iis3dwb10is_fifo_read(void)
   iis3dwb10is_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
 
   /* Set full scale */
-  iis3dwb10is_xl_full_scale_set(&dev_ctx, IIS3DWB_50g);
+  iis3dwb10is_xl_full_scale_set(&dev_ctx, IIS3DWB10IS_50g);
 
   iis3dwb10is_interrupt_pin_mode_get(&dev_ctx, &int_pin);
   int_pin.pp_od = IIS3DWB10IS_PUSH_PULL;
   int_pin.strength = IIS3DWB10IS_PAD_STRENGTH_LOWER;
   iis3dwb10is_interrupt_pin_mode_set(&dev_ctx, int_pin);
 
-  iis3dwb10is_pin_int_route_get(&dev_ctx, &route);
-  route.int1_fifo_th = 1;
-  iis3dwb10is_pin_int_route_set(&dev_ctx, route);
+  iis3dwb10is_pin_int1_route_get(&dev_ctx, &route);
+  route.int_fifo_th = 1;
+  iis3dwb10is_pin_int1_route_set(&dev_ctx, route);
 
   iis3dwb10is_qvar_mode_get(&dev_ctx, &qvar_mode);
   qvar_mode.qvar_en = 1;
