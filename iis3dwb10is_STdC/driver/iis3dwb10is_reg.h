@@ -7,13 +7,12 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2024 STMicroelectronics.
- * All rights reserved.</center></h2>
+ * Copyright (c) 2025 STMicroelectronics.
+ * All rights reserved.
  *
- * This software component is licensed by ST under BSD 3-Clause license,
- * the "License"; You may not use this file except in compliance with the
- * License. You may obtain a copy of the License at:
- *                        opensource.org/licenses/BSD-3-Clause
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
  *
  ******************************************************************************
  */
@@ -1129,16 +1128,16 @@ int32_t iis3dwb10is_data_ready_mode_get(const stmdev_ctx_t *ctx,
 
 typedef struct
 {
-  uint8_t int_drdy_xl          : 1;
-  uint8_t int_drdy_qvar        : 1;
-  uint8_t int_sleep_cnt        : 1;
-  uint8_t int_ext_trig         : 1;
-  uint8_t int_fifo_th          : 1;
-  uint8_t int_fifo_ovr         : 1;
-  uint8_t int_fifo_full        : 1;
-  uint8_t int_drdy_temp        : 1;
-  uint8_t int_boot             : 1;
-  uint8_t int_sleep_ispu       : 1;
+  uint8_t drdy_xl              : 1;
+  uint8_t drdy_qvar            : 1;
+  uint8_t sleep_cnt            : 1;
+  uint8_t ext_trig             : 1;
+  uint8_t fifo_th              : 1;
+  uint8_t fifo_ovr             : 1;
+  uint8_t fifo_full            : 1;
+  uint8_t drdy_temp            : 1;
+  uint8_t boot                 : 1;
+  uint8_t sleep_ispu           : 1;
   uint8_t int2_on_int1         : 1;
 } iis3dwb10is_pin_int_route_t;
 int32_t iis3dwb10is_pin_int1_route_set(const stmdev_ctx_t *ctx,

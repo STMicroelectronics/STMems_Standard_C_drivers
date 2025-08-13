@@ -6,13 +6,12 @@
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2024 STMicroelectronics.
- * All rights reserved.</center></h2>
+ * Copyright (c) 2025 STMicroelectronics.
+ * All rights reserved.
  *
- * This software component is licensed by ST under BSD 3-Clause license,
- * the "License"; You may not use this file except in compliance with the
- * License. You may obtain a copy of the License at:
- *                        opensource.org/licenses/BSD-3-Clause
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
  *
  ******************************************************************************
  */
@@ -2126,15 +2125,15 @@ int32_t iis3dwb10is_pin_int1_route_set(const stmdev_ctx_t *ctx,
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL0, (uint8_t *)&int_ctrl0, 1);
   if (ret == 0)
   {
-    int_ctrl0.int1_boot        = val.int_boot;
-    int_ctrl0.int1_drdy_temp   = val.int_drdy_temp;
-    int_ctrl1.int1_drdy_xl     = val.int_drdy_xl;
-    int_ctrl1.int1_drdy_qvar   = val.int_drdy_qvar;
-    int_ctrl1.int1_ext_trig    = val.int_ext_trig;
-    int_ctrl1.int1_fifo_th     = val.int_fifo_th;
-    int_ctrl1.int1_fifo_ovr    = val.int_fifo_ovr;
-    int_ctrl1.int1_fifo_full   = val.int_fifo_full;
-    int_ctrl1.int1_sleepcnt    = val.int_sleep_cnt;
+    int_ctrl0.int1_boot        = val.boot;
+    int_ctrl0.int1_drdy_temp   = val.drdy_temp;
+    int_ctrl1.int1_drdy_xl     = val.drdy_xl;
+    int_ctrl1.int1_drdy_qvar   = val.drdy_qvar;
+    int_ctrl1.int1_ext_trig    = val.ext_trig;
+    int_ctrl1.int1_fifo_th     = val.fifo_th;
+    int_ctrl1.int1_fifo_ovr    = val.fifo_ovr;
+    int_ctrl1.int1_fifo_full   = val.fifo_full;
+    int_ctrl1.int1_sleepcnt    = val.sleep_cnt;
 
     ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_INT_CTRL0, (uint8_t *)&int_ctrl0, 1);
     ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_INT_CTRL1, (uint8_t *)&int_ctrl1, 1);
@@ -2162,15 +2161,15 @@ int32_t iis3dwb10is_pin_int1_route_get(const stmdev_ctx_t *ctx,
   ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL1, (uint8_t *)&int_ctrl1, 1);
   if (ret == 0)
   {
-    val->int_boot       = int_ctrl0.int1_boot;
-    val->int_drdy_temp  = int_ctrl0.int1_drdy_temp;
-    val->int_drdy_xl    = int_ctrl1.int1_drdy_xl;
-    val->int_drdy_qvar  = int_ctrl1.int1_drdy_qvar;
-    val->int_ext_trig   = int_ctrl1.int1_ext_trig;
-    val->int_fifo_th    = int_ctrl1.int1_fifo_th;
-    val->int_fifo_ovr   = int_ctrl1.int1_fifo_ovr;
-    val->int_fifo_full  = int_ctrl1.int1_fifo_full;
-    val->int_sleep_cnt  = int_ctrl1.int1_sleepcnt;
+    val->boot       = int_ctrl0.int1_boot;
+    val->drdy_temp  = int_ctrl0.int1_drdy_temp;
+    val->drdy_xl    = int_ctrl1.int1_drdy_xl;
+    val->drdy_qvar  = int_ctrl1.int1_drdy_qvar;
+    val->ext_trig   = int_ctrl1.int1_ext_trig;
+    val->fifo_th    = int_ctrl1.int1_fifo_th;
+    val->fifo_ovr   = int_ctrl1.int1_fifo_ovr;
+    val->fifo_full  = int_ctrl1.int1_fifo_full;
+    val->sleep_cnt  = int_ctrl1.int1_sleepcnt;
   }
 
   return ret;
@@ -2194,15 +2193,15 @@ int32_t iis3dwb10is_pin_int2_route_set(const stmdev_ctx_t *ctx,
   ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL0, (uint8_t *)&int_ctrl0, 1);
   if (ret == 0)
   {
-    int_ctrl0.int2_drdy_temp   = val.int_drdy_temp;
-    int_ctrl0.int2_sleep_ispu  = val.int_sleep_ispu;
+    int_ctrl0.int2_drdy_temp   = val.drdy_temp;
+    int_ctrl0.int2_sleep_ispu  = val.sleep_ispu;
     int_ctrl0.int2_on_int1     = val.int2_on_int1;
-    int_ctrl2.int2_drdy_xl     = val.int_drdy_xl;
-    int_ctrl2.int2_drdy_qvar   = val.int_drdy_qvar;
-    int_ctrl2.int2_fifo_th     = val.int_fifo_th;
-    int_ctrl2.int2_fifo_ovr    = val.int_fifo_ovr;
-    int_ctrl2.int2_fifo_full   = val.int_fifo_full;
-    int_ctrl2.int2_sleepcnt    = val.int_sleep_cnt;
+    int_ctrl2.int2_drdy_xl     = val.drdy_xl;
+    int_ctrl2.int2_drdy_qvar   = val.drdy_qvar;
+    int_ctrl2.int2_fifo_th     = val.fifo_th;
+    int_ctrl2.int2_fifo_ovr    = val.fifo_ovr;
+    int_ctrl2.int2_fifo_full   = val.fifo_full;
+    int_ctrl2.int2_sleepcnt    = val.sleep_cnt;
 
     ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_INT_CTRL0, (uint8_t *)&int_ctrl0, 1);
     ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_INT_CTRL2, (uint8_t *)&int_ctrl2, 1);
@@ -2230,15 +2229,15 @@ int32_t iis3dwb10is_pin_int2_route_get(const stmdev_ctx_t *ctx,
   ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_INT_CTRL2, (uint8_t *)&int_ctrl2, 1);
   if (ret == 0)
   {
-    val->int_drdy_temp  = int_ctrl0.int2_drdy_temp;
-    val->int_sleep_ispu = int_ctrl0.int2_sleep_ispu;
+    val->drdy_temp  = int_ctrl0.int2_drdy_temp;
+    val->sleep_ispu = int_ctrl0.int2_sleep_ispu;
     val->int2_on_int1   = int_ctrl0.int2_on_int1;
-    val->int_drdy_xl    = int_ctrl2.int2_drdy_xl;
-    val->int_drdy_qvar  = int_ctrl2.int2_drdy_qvar;
-    val->int_fifo_th    = int_ctrl2.int2_fifo_th;
-    val->int_fifo_ovr   = int_ctrl2.int2_fifo_ovr;
-    val->int_fifo_full  = int_ctrl2.int2_fifo_full;
-    val->int_sleep_cnt  = int_ctrl2.int2_sleepcnt;
+    val->drdy_xl    = int_ctrl2.int2_drdy_xl;
+    val->drdy_qvar  = int_ctrl2.int2_drdy_qvar;
+    val->fifo_th    = int_ctrl2.int2_fifo_th;
+    val->fifo_ovr   = int_ctrl2.int2_fifo_ovr;
+    val->fifo_full  = int_ctrl2.int2_fifo_full;
+    val->sleep_cnt  = int_ctrl2.int2_sleepcnt;
   }
 
   return ret;
