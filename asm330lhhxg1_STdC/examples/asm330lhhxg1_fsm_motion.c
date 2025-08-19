@@ -23,7 +23,7 @@
 
 /*
  * Some FSM examples are available at:
- * https://github.com/STMicroelectronics/STMems_Finite_State_Machine
+ * https://github.com/STMicroelectronics/st-mems-finite-state-machine
  * the same repository is linked to this repository in folder "_resources"
  *
  * For more information about Finite State Machine tool please refer
@@ -89,7 +89,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "asm330lhhx_motion_stationary.h"
+#include "asm330lhhxg1_motion_stationary.h"
 #include "asm330lhhxg1_reg.h"
 
 #if defined(NUCLEO_F401RE)
@@ -165,10 +165,10 @@ void asm330lhhxg1_fsm_motion(void)
   } while (rst);
 
   /* Start FSM configuration */
-    for ( i = 0; i < (sizeof(asm330lhhx_motion_stationary) /
-                    sizeof(ucf_line_t) ); i++ ) {
-    asm330lhhxg1_write_reg(&dev_ctx, asm330lhhx_motion_stationary[i].address,
-                       (uint8_t *)&asm330lhhx_motion_stationary[i].data, 1);
+    for ( i = 0; i < (sizeof(asm330lhhxg1_motion_stationary_conf_0) /
+                    sizeof(struct mems_conf_op) ); i++ ) {
+    asm330lhhxg1_write_reg(&dev_ctx, asm330lhhxg1_motion_stationary_conf_0[i].address,
+                       (uint8_t *)&asm330lhhxg1_motion_stationary_conf_0[i].data, 1);
   }
 
   asm330lhhxg1_int_notification_set(&dev_ctx,

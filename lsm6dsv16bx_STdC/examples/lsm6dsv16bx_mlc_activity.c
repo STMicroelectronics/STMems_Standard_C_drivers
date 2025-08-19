@@ -167,10 +167,10 @@ void lsm6dsv16bx_mlc_activity(void)
   } while (rst != LSM6DSV16BX_READY);
 
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(lsm6dsv16bx_activity_recognition_for_wrist) /
-                    sizeof(ucf_line_t) ); i++ ) {
-    lsm6dsv16bx_write_reg(&dev_ctx, lsm6dsv16bx_activity_recognition_for_wrist[i].address,
-                       (uint8_t *)&lsm6dsv16bx_activity_recognition_for_wrist[i].data, 1);
+  for ( i = 0; i < (sizeof(lsm6dsv16bx_activity_recognition_for_wrist_conf_0) /
+                    sizeof(struct mems_conf_op) ); i++ ) {
+    lsm6dsv16bx_write_reg(&dev_ctx, lsm6dsv16bx_activity_recognition_for_wrist_conf_0[i].address,
+                       (uint8_t *)&lsm6dsv16bx_activity_recognition_for_wrist_conf_0[i].data, 1);
   }
 
   /* wait forever (FF event handle in irq handler) */

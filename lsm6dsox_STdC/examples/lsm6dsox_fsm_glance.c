@@ -23,7 +23,7 @@
 
 /*
  * Some MLC examples are available at:
- * https://github.com/STMicroelectronics/STMems_Finite_State_Machine
+ * https://github.com/STMicroelectronics/st-mems-finite-state-machine
  * the same repository is linked to this repository in folder "_resources"
  *
  * For more information about Finite State Machine tool please refer
@@ -168,10 +168,10 @@ void lsm6dsox_fsm_glance(void)
   lsm6dsox_i3c_disable_set(&dev_ctx, LSM6DSOX_I3C_DISABLE);
 
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(lsm6dsox_glance) /
-                    sizeof(ucf_line_t) ); i++ ) {
-    lsm6dsox_write_reg(&dev_ctx, lsm6dsox_glance[i].address,
-                       (uint8_t *)&lsm6dsox_glance[i].data, 1);
+  for ( i = 0; i < (sizeof(lsm6dsox_glance_conf_0) /
+                    sizeof(struct mems_conf_op) ); i++ ) {
+    lsm6dsox_write_reg(&dev_ctx, lsm6dsox_glance_conf_0[i].address,
+                       (uint8_t *)&lsm6dsox_glance_conf_0[i].data, 1);
   }
 
   /* Route signals on interrupt pin 1 */

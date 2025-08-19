@@ -48,17 +48,17 @@ Program LSM6DSV16BX to read AH_QVAR data:
 
 ## Finite State Machine (FSM)
 
-Program LSM6DSV16BX FSM to detect *glance* and *de-glance* gestures typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/STMems_Finite_State_Machine/blob/master/application_examples/lsm6dsv16bx/Glance%20detection/README.md)):
+Program LSM6DSV16BX FSM to detect *glance* and *de-glance* gestures typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/st-mems-finite-state-machine/blob/main/examples/glance_detection/lsm6dsv16bx/README.md)):
 
   - lsm6dsv16bx_fsm_glance.c
 
-Program LSM6DSV16BX FSM to detect 4D position recognition typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/STMems_Finite_State_Machine/blob/master/application_examples/lsm6dsv16bx/FourD%20position%20recognition/README.md)):
+Program LSM6DSV16BX FSM to detect 4D position recognition typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/st-mems-finite-state-machine/blob/main/examples/fourd_orientation_detection/lsm6dsv16bx/README.md)):
 
   - lsm6dsv16bx_fsm_fourd.c
 
 ## Machine Learning Core (MLC)
 
-Program LSM6DSV16BX MLC for activity recognition on wrist used on wearable device, such a smartwatch or a wristband. (read more [here](https://github.com/STMicroelectronics/STMems_Machine_Learning_Core/blob/master/application_examples/lsm6dsv16bx/activity_recognition_for_wrist/README.md)):
+Program LSM6DSV16BX MLC for activity recognition on wrist used on wearable device, such a smartwatch or a wristband. (read more [here](https://github.com/STMicroelectronics/st-mems-machine-learning-core/blob/main/examples/activity_recognition_for_wrist/lsm6dsv16bx/README.md)):
 
   - lsm6dsv17bx_mlc_gym.c
 

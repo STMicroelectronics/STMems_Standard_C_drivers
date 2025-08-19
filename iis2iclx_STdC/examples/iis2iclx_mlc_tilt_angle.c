@@ -23,7 +23,7 @@
 
 /*
  * Some MLC examples are available at:
- * https://github.com/STMicroelectronics/STMems_Machine_Learning_Core
+ * https://github.com/STMicroelectronics/st-mems-machine-learning-core
  * the same repository is linked to this repository in folder "_resources"
  *
  * For more information about Machine Learning Code tool please refer
@@ -166,10 +166,10 @@ void iis2iclx_mlc_tilt_angle(void)
   } while (rst);
 
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(iis2iclx_tilt_angle) /
-                    sizeof(ucf_line_t) ); i++ ) {
-    iis2iclx_write_reg(&dev_ctx, iis2iclx_tilt_angle[i].address,
-                       (uint8_t *)&iis2iclx_tilt_angle[i].data, 1);
+  for ( i = 0; i < (sizeof(iis2iclx_tilt_angle_conf_0) /
+                    sizeof(struct mems_conf_op) ); i++ ) {
+    iis2iclx_write_reg(&dev_ctx, iis2iclx_tilt_angle_conf_0[i].address,
+                       (uint8_t *)&iis2iclx_tilt_angle_conf_0[i].data, 1);
   }
 
   /* Route signals on interrupt pin 1 */

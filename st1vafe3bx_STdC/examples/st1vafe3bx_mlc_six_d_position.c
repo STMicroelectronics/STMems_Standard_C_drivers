@@ -23,7 +23,7 @@
 
 /*
  * Some MLC examples are available at:
- * https://github.com/STMicroelectronics/STMems_Machine_Learning_Core
+ * https://github.com/STMicroelectronics/st-mems-machine-learning-core
  * the same repository is linked to this repository in folder "_resources"
  *
  * For more information about Machine Learning Code tool please refer
@@ -173,14 +173,14 @@ void st1vafe3bx_mlc_six_d_position(void)
   } while (rst.sw_reset);
 
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(st1vafe3bx_six_d_position) / sizeof(ucf_line_ext_t) ); i++ ) {
-    switch(st1vafe3bx_six_d_position[i].op) {
-    case MEMS_UCF_OP_DELAY:
-      platform_delay(st1vafe3bx_six_d_position[i].data);
+  for ( i = 0; i < (sizeof(st1vafe3bx_six_d_position_conf_0) / sizeof(struct mems_conf_op) ); i++ ) {
+    switch(st1vafe3bx_six_d_position_conf_0[i].type) {
+    case MEMS_CONF_OP_TYPE_DELAY:
+      platform_delay(st1vafe3bx_six_d_position_conf_0[i].data);
       break;
-    case MEMS_UCF_OP_WRITE:
-      st1vafe3bx_write_reg(&dev_ctx, st1vafe3bx_six_d_position[i].address,
-                           (uint8_t *)&st1vafe3bx_six_d_position[i].data, 1);
+    case MEMS_CONF_OP_TYPE_WRITE:
+      st1vafe3bx_write_reg(&dev_ctx, st1vafe3bx_six_d_position_conf_0[i].address,
+                           (uint8_t *)&st1vafe3bx_six_d_position_conf_0[i].data, 1);
       break;
     }
   }

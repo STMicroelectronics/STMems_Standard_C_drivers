@@ -86,7 +86,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "st1vafe6ax_glance_detection.h"
+#include "st1vafe6ax_glance.h"
 #include "st1vafe6ax_reg.h"
 
 #if defined(NUCLEO_F401RE)
@@ -195,10 +195,10 @@ void st1vafe6ax_fsm_glance(void)
   } while (rst != ST1VAFE6AX_READY);
 
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(st1vafe6ax_glance_detection) /
-                    sizeof(ucf_line_t) ); i++ ) {
-    st1vafe6ax_write_reg(&dev_ctx, st1vafe6ax_glance_detection[i].address,
-                       (uint8_t *)&st1vafe6ax_glance_detection[i].data, 1);
+  for ( i = 0; i < (sizeof(st1vafe6ax_glance_conf_0) /
+                    sizeof(struct mems_conf_op) ); i++ ) {
+    st1vafe6ax_write_reg(&dev_ctx, st1vafe6ax_glance_conf_0[i].address,
+                       (uint8_t *)&st1vafe6ax_glance_conf_0[i].data, 1);
   }
 
   /* wait forever (FF event handle in irq handler) */

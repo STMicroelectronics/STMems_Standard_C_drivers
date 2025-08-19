@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * @file    mlc_activity_mobile.c
+ * @file    vibration_monitoring.c
  * @author  Sensors Software Solution Team
  * @brief   This file shows how to generate and handle a Free Fall event.
  *
@@ -78,7 +78,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "iis2dulpx_activity_recognition_for_mobile.h"
+#include "iis2dulpx_vibration_monitoring.h"
 #include "iis2dulpx_reg.h"
 
 #if defined(NUCLEO_F401RE)
@@ -122,13 +122,11 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 static stmdev_ctx_t dev_ctx;
-static uint8_t stationary_event_catched = 0;
-static uint8_t walking_event_catched = 0;
-static uint8_t jogging_event_catched = 0;
-static uint8_t biking_event_catched = 0;
-static uint8_t driving_event_catched = 0;
+static uint8_t no_vibration = 0;
+static uint8_t low_vibration = 0;
+static uint8_t high_vibration = 0;
 
-void iis2dulpx_mlc_activity_mobile_handler(void)
+void iis2dulpx_vibration_monitoring_handler(void)
 {
   iis2dulpx_mlc_status_mainpage_t status;
   uint8_t mlc_out;
@@ -141,26 +139,20 @@ void iis2dulpx_mlc_activity_mobile_handler(void)
 
     switch(mlc_out) {
     case 0:
-      stationary_event_catched = 1;
+      no_vibration = 1;
       break;
     case 1:
-      walking_event_catched = 1;
+      low_vibration = 1;
       break;
-    case 4:
-      jogging_event_catched = 1;
-      break;
-    case 8:
-      biking_event_catched = 1;
-      break;
-    case 12:
-      driving_event_catched = 1;
+    case 2:
+      high_vibration = 1;
       break;
     }
   }
 }
 
 /* Main Example --------------------------------------------------------------*/
-void iis2dulpx_mlc_activity_mobile(void)
+void iis2dulpx_vibration_monitoring(void)
 {
   iis2dulpx_status_t status;
   uint8_t id;
@@ -190,48 +182,36 @@ void iis2dulpx_mlc_activity_mobile(void)
   } while (status.sw_reset);
 
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(iis2dulpx_activity_recognition_for_mobile) / sizeof(ucf_line_ext_t) ); i++ ) {
-    switch(iis2dulpx_activity_recognition_for_mobile[i].op) {
-    case MEMS_UCF_OP_DELAY:
-      platform_delay(iis2dulpx_activity_recognition_for_mobile[i].data);
+  for ( i = 0; i < (sizeof(iis2dulpx_vibration_monitoring_conf_0) / sizeof(struct mems_conf_op) ); i++ ) {
+    switch(iis2dulpx_vibration_monitoring_conf_0[i].type) {
+    case MEMS_CONF_OP_TYPE_DELAY:
+      platform_delay(iis2dulpx_vibration_monitoring_conf_0[i].data);
       break;
-    case MEMS_UCF_OP_WRITE:
-      iis2dulpx_write_reg(&dev_ctx, iis2dulpx_activity_recognition_for_mobile[i].address,
-                           (uint8_t *)&iis2dulpx_activity_recognition_for_mobile[i].data, 1);
+    case MEMS_CONF_OP_TYPE_WRITE:
+      iis2dulpx_write_reg(&dev_ctx, iis2dulpx_vibration_monitoring_conf_0[i].address,
+                           (uint8_t *)&iis2dulpx_vibration_monitoring_conf_0[i].data, 1);
       break;
     }
   }
 
   /* wait forever (FF event handle in irq handler) */
   while (1) {
-    if (stationary_event_catched) {
-      stationary_event_catched = 0;
+    if (no_vibration) {
+      no_vibration = 0;
 
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "stationary event\r\n");
+      //snprintf((char *)tx_buffer, sizeof(tx_buffer), "no vibration\r\n");
+      //tx_com(tx_buffer, strlen((char const *)tx_buffer));
+    }
+    if (low_vibration) {
+      low_vibration = 0;
+
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "low-vibration event\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
-    if (walking_event_catched) {
-      walking_event_catched = 0;
+    if (high_vibration) {
+      high_vibration = 0;
 
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "walking event\r\n");
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-    }
-    if (jogging_event_catched) {
-      jogging_event_catched = 0;
-
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "jogging event\r\n");
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-    }
-    if (biking_event_catched) {
-      biking_event_catched = 0;
-
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "biking event\r\n");
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-    }
-    if (driving_event_catched) {
-      driving_event_catched = 0;
-
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "driving event\r\n");
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "high-vibration event\r\n");
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
   }

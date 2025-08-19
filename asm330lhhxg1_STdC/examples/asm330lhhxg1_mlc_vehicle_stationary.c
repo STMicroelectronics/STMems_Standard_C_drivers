@@ -23,7 +23,7 @@
 
 /*
  * Some MLC examples are available at:
- * https://github.com/STMicroelectronics/STMems_Machine_Learning_Core
+ * https://github.com/STMicroelectronics/st-mems-machine-learning-core
  * the same repository is linked to this repository in folder "_resources"
  *
  * For more information about Machine Learning Code tool please refer
@@ -89,7 +89,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "asm330lhhx_vehicle_stationary_detection.h"
+#include "asm330lhhxg1_vehicle_stationary_detection.h"
 #include <asm330lhhxg1_reg.h>
 
 #if defined(NUCLEO_F401RE)
@@ -165,10 +165,10 @@ void asm330lhhxg1_mlc_vehicle_stationary(void)
   } while (rst);
 
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(asm330lhhx_vehicle_stationary_detection) /
-                    sizeof(ucf_line_t) ); i++ ) {
-    asm330lhhxg1_write_reg(&dev_ctx, asm330lhhx_vehicle_stationary_detection[i].address,
-                       (uint8_t *)&asm330lhhx_vehicle_stationary_detection[i].data, 1);
+  for ( i = 0; i < (sizeof(asm330lhhxg1_vehicle_stationary_detection_conf_0) /
+                    sizeof(struct mems_conf_op) ); i++ ) {
+    asm330lhhxg1_write_reg(&dev_ctx, asm330lhhxg1_vehicle_stationary_detection_conf_0[i].address,
+                       (uint8_t *)&asm330lhhxg1_vehicle_stationary_detection_conf_0[i].data, 1);
   }
 
   /* Route signals on interrupt pin 1 */

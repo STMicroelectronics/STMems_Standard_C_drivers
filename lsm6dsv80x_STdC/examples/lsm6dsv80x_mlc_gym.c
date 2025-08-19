@@ -189,10 +189,10 @@ void lsm6dsv80x_mlc_gym(void)
 #endif
 
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(lsm6dsv80x_gym_activity_recognition_right) /
-                    sizeof(ucf_line_t) ); i++ ) {
-    lsm6dsv80x_write_reg(&dev_ctx, lsm6dsv80x_gym_activity_recognition_right[i].address,
-                       (uint8_t *)&lsm6dsv80x_gym_activity_recognition_right[i].data, 1);
+  for ( i = 0; i < (sizeof(lsm6dsv80x_gym_activity_recognition_right_conf_0) /
+                    sizeof(struct mems_conf_op) ); i++ ) {
+    lsm6dsv80x_write_reg(&dev_ctx, lsm6dsv80x_gym_activity_recognition_right_conf_0[i].address,
+                       (uint8_t *)&lsm6dsv80x_gym_activity_recognition_right_conf_0[i].data, 1);
   }
 
   /* wait forever (FF event handle in irq handler) */

@@ -86,7 +86,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "st1vafe6ax_four_d.h"
+#include "st1vafe6ax_fourd_orientation.h"
 #include "st1vafe6ax_reg.h"
 
 #if defined(NUCLEO_F401RE)
@@ -186,10 +186,10 @@ void st1vafe6ax_fsm_fourd(void)
   } while (rst != ST1VAFE6AX_READY);
 
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(st1vafe6ax_four_d) /
-                    sizeof(ucf_line_t) ); i++ ) {
-    st1vafe6ax_write_reg(&dev_ctx, st1vafe6ax_four_d[i].address,
-                       (uint8_t *)&st1vafe6ax_four_d[i].data, 1);
+  for ( i = 0; i < (sizeof(st1vafe6ax_fourd_orientation_conf_0) /
+                    sizeof(struct mems_conf_op) ); i++ ) {
+    st1vafe6ax_write_reg(&dev_ctx, st1vafe6ax_fourd_orientation_conf_0[i].address,
+                       (uint8_t *)&st1vafe6ax_fourd_orientation_conf_0[i].data, 1);
   }
 
   snprintf((char *)tx_buffer, sizeof(tx_buffer), "Start FOURD recognition\r\n");

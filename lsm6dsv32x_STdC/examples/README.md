@@ -39,17 +39,17 @@ Program LSM6DSV32X Sensor Fusion Low Power (SFLP) to receive GBIAS, Gravity and 
 
 ## Finite State Machine (FSM)
 
-Program LSM6DSV32X FSM to detect *glance* and *de-glance* gestures typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/STMems_Finite_State_Machine/blob/master/application_examples/lsm6dsv32x/Glance%20detection/README.md)):
+Program LSM6DSV32X FSM to detect *glance* and *de-glance* gestures typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/st-mems-finite-state-machine/blob/main/examples/fourd_orientation_detection/lsm6dsv32x/README.md)):
 
   - lsm6dsv32x_fsm_glance.c
 
-Program LSM6DSV32X FSM to detect 4D position recognition typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/STMems_Finite_State_Machine/blob/master/application_examples/lsm6dsv32x/FourD%20position%20recognition/README.md)):
+Program LSM6DSV32X FSM to detect 4D position recognition typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/st-mems-finite-state-machine/blob/main/examples/glance_detection/lsm6dsv32x/README.md)):
 
   - lsm6dsv32x_fsm_fourd.c
 
 ## Machine Learning Core (MLC)
 
-Program LSM6DSV32X MLC for gym activity recognition used on wearable device, such a smartwatch or a wristband. (read more [here](https://github.com/STMicroelectronics/STMems_Machine_Learning_Core/blob/master/application_examples/lsm6dsv32x/gym_activity_recognition/README.md)):
+Program LSM6DSV32X MLC for gym activity recognition used on wearable device, such a smartwatch or a wristband. (read more [here](https://github.com/STMicroelectronics/st-mems-machine-learning-core/blob/main/examples/gym_activity_recognition/lsm6dsv32x/README.md)):
 
   - lsm6dsv32x_mlc_gym.c
 

@@ -30,13 +30,13 @@ Program ISM330DHCX to receive accelerometer and gyroscope data as well as magnet
 
 ## Finite State Machine (FSM)
 
-Program ISM330DHCX FSM to detect if device is falling down (read more [here](https://github.com/STMicroelectronics/STMems_Finite_State_Machine/blob/master/application_examples/ism330dhcx/Freefall%20detection/README.md)):
+Program ISM330DHCX FSM to detect if device is falling down (read more [here](https://github.com/STMicroelectronics/st-mems-finite-state-machine/blob/main/examples/free_fall_detection/ism330dhcx/README.md)):
 
   - ism330dhcx_fsm_freefall.c
 
 ## Machine Learning Core (MLC)
 
-Program ISM330DHCX MLC for 6D position recognition (read more [here](https://github.com/STMicroelectronics/STMems_Machine_Learning_Core/blob/master/application_examples/ism330dhcx/6D%20position%20recognition/README.md)):
+Program ISM330DHCX MLC for 6D position recognition (read more [here](https://github.com/STMicroelectronics/st-mems-machine-learning-core/blob/main/examples/6d_position_recognition/ism330dhcx/README.md)):
 
   - ism330dhcx_mlc_six_d_position.c
 

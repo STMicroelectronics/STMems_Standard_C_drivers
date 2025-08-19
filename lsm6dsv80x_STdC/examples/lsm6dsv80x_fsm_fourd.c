@@ -86,7 +86,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "lsm6dsv80x_four_d.h"
+#include "lsm6dsv80x_fourd_orientation.h"
 #include "lsm6dsv80x_reg.h"
 
 #if defined(NUCLEO_F401RE)
@@ -189,10 +189,10 @@ void lsm6dsv80x_fsm_fourd(void)
 #endif
 
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(lsm6dsv80x_four_d) /
-                    sizeof(ucf_line_t) ); i++ ) {
-    lsm6dsv80x_write_reg(&dev_ctx, lsm6dsv80x_four_d[i].address,
-                       (uint8_t *)&lsm6dsv80x_four_d[i].data, 1);
+  for ( i = 0; i < (sizeof(lsm6dsv80x_fourd_orientation_conf_0) /
+                    sizeof(struct mems_conf_op) ); i++ ) {
+    lsm6dsv80x_write_reg(&dev_ctx, lsm6dsv80x_fourd_orientation_conf_0[i].address,
+                       (uint8_t *)&lsm6dsv80x_fourd_orientation_conf_0[i].data, 1);
   }
 
   /* wait forever (FF event handle in irq handler) */

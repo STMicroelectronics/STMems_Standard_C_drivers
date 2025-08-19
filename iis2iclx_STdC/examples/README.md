@@ -14,13 +14,13 @@ Read accelerometer and temperature sensor data in polling mode:
 
 ## Finite State Machine (FSM)
 
-Program IIS2ICLX FSM to detect tilt events (read more [here](https://github.com/STMicroelectronics/STMems_Finite_State_Machine/blob/master/application_examples/iis2iclx/Tilt%20detection/README.md)):
+Program IIS2ICLX FSM to detect tilt events (read more [here](https://github.com/STMicroelectronics/st-mems-finite-state-machine/blob/main/examples/tilt_detection/iis2iclx/README.md)):
 
   - iis2iclx_tilt.c
 
 ## Machine Learning Core (MLC)
 
-Program IIS2ICLX MLC to detect tilt events (read more [here](https://github.com/STMicroelectronics/STMems_Machine_Learning_Core/blob/master/application_examples/iis2iclx/tilt_angle/README.md)):
+Program IIS2ICLX MLC to detect tilt events (read more [here](https://github.com/STMicroelectronics/st-mems-machine-learning-core/blob/main/examples/tilt_angle/iis2iclx/README.md)):
 
   - iis2iclx_mlc_tilt_angle.c
 

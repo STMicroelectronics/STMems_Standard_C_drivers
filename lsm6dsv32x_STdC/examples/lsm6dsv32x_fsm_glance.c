@@ -78,7 +78,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "lsm6dsv32x_glance_detection.h"
+#include "lsm6dsv32x_glance.h"
 #include "lsm6dsv32x_reg.h"
 
 #if defined(NUCLEO_F401RE)
@@ -176,10 +176,10 @@ void lsm6dsv32x_fsm_glance(void)
   } while (rst != LSM6DSV32X_READY);
 
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(lsm6dsv32x_glance_detection) /
-                    sizeof(ucf_line_t) ); i++ ) {
-    lsm6dsv32x_write_reg(&dev_ctx, lsm6dsv32x_glance_detection[i].address,
-                       (uint8_t *)&lsm6dsv32x_glance_detection[i].data, 1);
+  for ( i = 0; i < (sizeof(lsm6dsv32x_glance_conf_0) /
+                    sizeof(struct mems_conf_op) ); i++ ) {
+    lsm6dsv32x_write_reg(&dev_ctx, lsm6dsv32x_glance_conf_0[i].address,
+                       (uint8_t *)&lsm6dsv32x_glance_conf_0[i].data, 1);
   }
 
   /* wait forever (FF event handle in irq handler) */

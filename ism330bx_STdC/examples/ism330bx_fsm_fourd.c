@@ -78,7 +78,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "ism330bx_four_d.h"
+#include "ism330bx_fourd_orientation.h"
 #include "ism330bx_reg.h"
 
 #if defined(NUCLEO_F401RE)
@@ -167,10 +167,10 @@ void ism330bx_fsm_fourd(void)
   } while (rst != ISM330BX_READY);
 
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(ism330bx_four_d) /
-                    sizeof(ucf_line_t) ); i++ ) {
-    ism330bx_write_reg(&dev_ctx, ism330bx_four_d[i].address,
-                       (uint8_t *)&ism330bx_four_d[i].data, 1);
+  for ( i = 0; i < (sizeof(ism330bx_fourd_orientation_conf_0) /
+                    sizeof(struct mems_conf_op) ); i++ ) {
+    ism330bx_write_reg(&dev_ctx, ism330bx_fourd_orientation_conf_0[i].address,
+                       (uint8_t *)&ism330bx_fourd_orientation_conf_0[i].data, 1);
   }
 
   /* wait forever (FF event handle in irq handler) */

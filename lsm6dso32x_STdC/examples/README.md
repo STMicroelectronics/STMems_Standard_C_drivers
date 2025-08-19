@@ -74,7 +74,7 @@ Program LSM6DSO32X FSM with 7 consecutive ucf configurations to detect *glance*,
 
 ## Machine Learning Core (MLC)
 
-Program LSM6DSO32X MLC for vibration monitoring recognition (read more [here](https://github.com/STMicroelectronics/STMems_Machine_Learning_Core/blob/master/application_examples/lsm6dso32x/Vibration%20monitoring/README.md)):
+Program LSM6DSO32X MLC for vibration monitoring recognition (read more [here](https://github.com/STMicroelectronics/st-mems-machine-learning-core/blob/main/examples/vibration_monitoring/lsm6dso32x/README.md)):
 
   - lsm6dso32x_mlc.c
 

@@ -183,9 +183,9 @@ void st1vafe6ax_mlc_activity_wrist(void)
   } while (rst != ST1VAFE6AX_READY);
 
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(st1vafe6ax_activity_recognition_for_wrist) / sizeof(ucf_line_t) ); i++ ) {
-    st1vafe6ax_write_reg(&dev_ctx, st1vafe6ax_activity_recognition_for_wrist[i].address,
-                         (uint8_t *)&st1vafe6ax_activity_recognition_for_wrist[i].data, 1);
+  for ( i = 0; i < (sizeof(st1vafe6ax_activity_recognition_for_wrist_conf_0) / sizeof(struct mems_conf_op) ); i++ ) {
+    st1vafe6ax_write_reg(&dev_ctx, st1vafe6ax_activity_recognition_for_wrist_conf_0[i].address,
+                         (uint8_t *)&st1vafe6ax_activity_recognition_for_wrist_conf_0[i].data, 1);
   }
 
   /* wait forever (FF event handle in irq handler) */

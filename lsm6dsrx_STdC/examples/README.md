@@ -64,13 +64,13 @@ Program LSM6DSRX to receive free-fall events:
 
 ## Finite State Machine (FSM)
 
-Program LSM6DSRX FSM (read more [here](https://github.com/STMicroelectronics/STMems_Finite_State_Machine/blob/master/application_examples/lsm6dsrx/Freefall%20detection/README.md)):
+Program LSM6DSRX FSM (read more [here](https://github.com/STMicroelectronics/st-mems-finite-state-machine/blob/main/examples/free_fall_detection/lsm6dsrx/README.md)):
 
   - lsm6dsrx_fsm_freefall_detection.c
 
 ## Machine Learning Core (MLC)
 
-Program LSM6DSRX MLC for 6D position recognition (read more [here](https://github.com/STMicroelectronics/STMems_Machine_Learning_Core/blob/master/application_examples/lsm6dsrx/6D%20position%20recognition/README.md)):
+Program LSM6DSRX MLC for 6D position recognition (read more [here](https://github.com/STMicroelectronics/st-mems-machine-learning-core/blob/main/examples/6d_position_recognition/lsm6dsrx/README.md)):
 
   - lsm6dsrx_mlc_six_d_position.c
 
