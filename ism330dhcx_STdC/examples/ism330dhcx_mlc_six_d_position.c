@@ -23,7 +23,7 @@
 
 /*
  * Some MLC examples are available at:
- * https://github.com/STMicroelectronics/STMems_Machine_Learning_Core
+ * https://github.com/STMicroelectronics/st-mems-machine-learning-core
  * the same repository is linked to this repository in folder "_resources"
  *
  * For more information about Machine Learning Code tool please refer
@@ -166,10 +166,10 @@ void ism330dhcx_mlc_six_d_position(void)
   } while (rst);
 
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(ism330dhcx_six_d_position) /
-                    sizeof(ucf_line_t) ); i++ ) {
-    ism330dhcx_write_reg(&dev_ctx, ism330dhcx_six_d_position[i].address,
-                       (uint8_t *)&ism330dhcx_six_d_position[i].data, 1);
+  for ( i = 0; i < (sizeof(ism330dhcx_six_d_position_conf_0) /
+                    sizeof(struct mems_conf_op) ); i++ ) {
+    ism330dhcx_write_reg(&dev_ctx, ism330dhcx_six_d_position_conf_0[i].address,
+                       (uint8_t *)&ism330dhcx_six_d_position_conf_0[i].data, 1);
   }
 
   /* Route signals on interrupt pin 1 */

@@ -181,13 +181,13 @@ void ism330is_ispu_norm(void)
   ism330is_software_reset(&dev_ctx);
 
   /* Load ISPU configuration */
-  for ( i = 0; i < (sizeof(ispu_conf) / sizeof(ucf_line_ext_t) ); i++ ) {
-    switch(ispu_conf[i].op) {
-    case MEMS_UCF_OP_DELAY:
-      platform_delay(ispu_conf[i].data);
+  for ( i = 0; i < (sizeof(ispu_conf_conf_0) / sizeof(struct mems_conf_op) ); i++ ) {
+    switch(ispu_conf_conf_0[i].type) {
+    case MEMS_CONF_OP_TYPE_DELAY:
+      platform_delay(ispu_conf_conf_0[i].data);
       break;
-    case MEMS_UCF_OP_WRITE:
-      ism330is_write_reg(&dev_ctx, ispu_conf[i].address, (uint8_t *)&ispu_conf[i].data, 1);
+    case MEMS_CONF_OP_TYPE_WRITE:
+      ism330is_write_reg(&dev_ctx, ispu_conf_conf_0[i].address, (uint8_t *)&ispu_conf_conf_0[i].data, 1);
       break;
     }
   }

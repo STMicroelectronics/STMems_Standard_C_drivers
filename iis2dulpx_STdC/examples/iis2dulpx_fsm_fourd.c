@@ -86,7 +86,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "iis2dulpx_four_d.h"
+#include "iis2dulpx_fourd_orientation.h"
 #include "iis2dulpx_reg.h"
 
 #if defined(NUCLEO_F401RE)
@@ -191,14 +191,14 @@ void iis2dulpx_fsm_fourd(void)
 #endif
 
   /* Start Machine Learning Core configuration */
-    for ( i = 0; i < (sizeof(iis2dulpx_four_d) / sizeof(ucf_line_ext_t) ); i++ ) {
-    switch(iis2dulpx_four_d[i].op) {
-    case MEMS_UCF_OP_DELAY:
-      platform_delay(iis2dulpx_four_d[i].data);
+    for ( i = 0; i < (sizeof(iis2dulpx_fourd_orientation_conf_0) / sizeof(struct mems_conf_op) ); i++ ) {
+    switch(iis2dulpx_fourd_orientation_conf_0[i].type) {
+    case MEMS_CONF_OP_TYPE_DELAY:
+      platform_delay(iis2dulpx_fourd_orientation_conf_0[i].data);
       break;
-    case MEMS_UCF_OP_WRITE:
-      iis2dulpx_write_reg(&dev_ctx, iis2dulpx_four_d[i].address,
-                           (uint8_t *)&iis2dulpx_four_d[i].data, 1);
+    case MEMS_CONF_OP_TYPE_WRITE:
+      iis2dulpx_write_reg(&dev_ctx, iis2dulpx_fourd_orientation_conf_0[i].address,
+                           (uint8_t *)&iis2dulpx_fourd_orientation_conf_0[i].data, 1);
       break;
     }
   }

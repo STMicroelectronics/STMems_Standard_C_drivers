@@ -167,10 +167,10 @@ void ism330bx_mlc_vibration_monitoring(void)
   } while (rst != ISM330BX_READY);
 
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(ism330bx_vibration_monitoring) /
-                    sizeof(ucf_line_t) ); i++ ) {
-    ism330bx_write_reg(&dev_ctx, ism330bx_vibration_monitoring[i].address,
-                       (uint8_t *)&ism330bx_vibration_monitoring[i].data, 1);
+  for ( i = 0; i < (sizeof(ism330bx_vibration_monitoring_conf_0) /
+                    sizeof(struct mems_conf_op) ); i++ ) {
+    ism330bx_write_reg(&dev_ctx, ism330bx_vibration_monitoring_conf_0[i].address,
+                       (uint8_t *)&ism330bx_vibration_monitoring_conf_0[i].data, 1);
   }
 
   /* wait forever (FF event handle in irq handler) */

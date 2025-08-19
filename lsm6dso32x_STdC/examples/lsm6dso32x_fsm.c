@@ -100,7 +100,7 @@
 #endif
 
 /*
- * Programs can be extracted from ".ucf" configuration file generated
+ * Programs can be extracted from ".json" configuration file generated
  * by Unico / Unicleo tool.
  *
  * This example contains 7 programs of the Finite State Machine:

@@ -190,14 +190,14 @@ void lis2dux12_mlc_activity_mobile(void)
   } while (status.sw_reset);
 
   /* Start Machine Learning Core configuration */
-  for ( i = 0; i < (sizeof(lis2dux12_activity_recognition_for_mobile) / sizeof(ucf_line_ext_t) ); i++ ) {
-    switch(lis2dux12_activity_recognition_for_mobile[i].op) {
-    case MEMS_UCF_OP_DELAY:
-      platform_delay(lis2dux12_activity_recognition_for_mobile[i].data);
+  for ( i = 0; i < (sizeof(lis2dux12_activity_recognition_for_mobile_conf_0) / sizeof(struct mems_conf_op) ); i++ ) {
+    switch(lis2dux12_activity_recognition_for_mobile_conf_0[i].type) {
+    case MEMS_CONF_OP_TYPE_DELAY:
+      platform_delay(lis2dux12_activity_recognition_for_mobile_conf_0[i].data);
       break;
-    case MEMS_UCF_OP_WRITE:
-      lis2dux12_write_reg(&dev_ctx, lis2dux12_activity_recognition_for_mobile[i].address,
-                           (uint8_t *)&lis2dux12_activity_recognition_for_mobile[i].data, 1);
+    case MEMS_CONF_OP_TYPE_WRITE:
+      lis2dux12_write_reg(&dev_ctx, lis2dux12_activity_recognition_for_mobile_conf_0[i].address,
+                           (uint8_t *)&lis2dux12_activity_recognition_for_mobile_conf_0[i].data, 1);
       break;
     }
   }

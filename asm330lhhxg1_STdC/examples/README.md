@@ -54,17 +54,17 @@ Program ASM330LHHXG1 to receive activity/inactivity events:
 
 ## Finite State Machine (FSM)
 
-Program ASM330LHHXG1 FSM to detect *motion* and *stationary* states (read more [here](https://github.com/STMicroelectronics/STMems_Finite_State_Machine/blob/master/application_examples/asm330lhhx/Motion-Stationary%20detection/README.md)):
+Program ASM330LHHXG1 FSM to detect *motion* and *stationary* states (read more [here](https://github.com/STMicroelectronics/st-mems-finite-state-machine/blob/main/examples/motion_stationary_detection/asm330lhhxg1/README.md)):
 
   - asm330lhhxg1_fsm_motion.c
 
-Program ASM330LHHXG1 FSM to detect shake gesture recognition (read more [here](https://github.com/STMicroelectronics/STMems_Finite_State_Machine/blob/master/application_examples/asm330lhhx/Shake%20detection/README.md)):
+Program ASM330LHHXG1 FSM to detect shake gesture recognition (read more [here](https://github.com/STMicroelectronics/st-mems-finite-state-machine/blob/main/examples/shake_detection/asm330lhhxg1/README.md)):
 
   - asm330lhhxg1_shake.c
 
 ## Machine Learning Core (MLC)
 
-Program ASM330LHHXG1 MLC for vehicle stationary/motion recognition used on vehicles. (read more [here](https://github.com/STMicroelectronics/STMems_Machine_Learning_Core/blob/master/application_examples/asm330lhhx/Vehicle%20stationary%20detection/README.md)):
+Program ASM330LHHXG1 MLC for vehicle stationary/motion recognition used on vehicles. (read more [here](https://github.com/STMicroelectronics/st-mems-machine-learning-core/blob/main/examples/vehicle_stationary_detection/asm330lhhxg1/README.md)):
 
   - asm330lhhxg1_vehicle_stationary.c
 

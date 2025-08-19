@@ -29,11 +29,11 @@ Program LSM6DSV320X to receive High-g wakeup events and data on INT1:
 
 ## Finite State Machine (FSM)
 
-Program LSM6DSV320X FSM to detect *glance* and *de-glance* gestures typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/STMems_Finite_State_Machine/blob/master/application_examples/lsm6dsv320x/Glance%20detection/README.md)):
+Program LSM6DSV320X FSM to detect *glance* and *de-glance* gestures typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/st-mems-finite-state-machine/blob/main/examples/glance_detection/lsm6dsv320x/README.md)):
 
   - lsm6dsv320x_fsm_glance.c
 
-Program LSM6DSV320X FSM to detect 4D position recognition typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/STMems_Finite_State_Machine/blob/master/application_examples/lsm6dsv320x/FourD%20position%20recognition/README.md)):
+Program LSM6DSV320X FSM to detect 4D position recognition typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/st-mems-finite-state-machine/blob/main/examples/fourd_orientation_detection/lsm6dsv320x/README.md)):
 
   - lsm6dsv320x_fsm_fourd.c
 

@@ -1,11 +1,3 @@
-[submodule "_resources/STMems_Machine_Learning_Core"]
-	path = _resources/STMems_Machine_Learning_Core
-	url = https://github.com/STMicroelectronics/STMems_Machine_Learning_Core.git
-	branch = master
-[submodule "_resources/STMems_Finite_State_Machine"]
-	path = _resources/STMems_Finite_State_Machine
-	url = https://github.com/STMicroelectronics/STMems_Finite_State_Machine
-	branch = master
 [submodule "a3g4250d_STdC/driver"]
 	path = a3g4250d_STdC/driver
 	url = https://github.com/STMicroelectronics/a3g4250d-pid
@@ -288,9 +280,6 @@
 [submodule "asm330lhb_STdC/driver"]
 	path = asm330lhb_STdC/driver
 	url = https://github.com/STMicroelectronics/asm330lhb-pid
-[submodule "_resources/ispu-examples"]
-	path = _resources/ispu-examples
-	url = https://github.com/STMicroelectronics/ispu-examples
 [submodule "sths34pf80_STdC/driver"]
 	path = sths34pf80_STdC/driver
 	url = https://github.com/STMicroelectronics/sths34pf80-pid
@@ -324,3 +313,12 @@
 [submodule "lsm6dsv320x_STdC/driver"]
 	path = lsm6dsv320x_STdC/driver
 	url = https://github.com/STMicroelectronics/lsm6dsv320x-pid.git
+[submodule "_resources/st-mems-ispu"]
+	path = _resources/st-mems-ispu
+	url = https://github.com/STMicroelectronics/st-mems-ispu.git
+[submodule "_resources/st-mems-finite-state-machine"]
+	path = _resources/st-mems-finite-state-machine
+	url = https://github.com/STMicroelectronics/st-mems-finite-state-machine.git
+[submodule "_resources/st-mems-machine-learning-core"]
+	path = _resources/st-mems-machine-learning-core
+	url = https://github.com/STMicroelectronics/st-mems-machine-learning-core.git

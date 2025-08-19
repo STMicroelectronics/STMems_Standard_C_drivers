@@ -76,10 +76,6 @@ Program LSM6DSOX to receive accelerometer and gyrometer data as well as magnetom
 
   - lsm6dsox_sh_lis2mdl_drdy.c
 
-Program LSM6DSOX to receive accelerometer and gyrometer data as well as magnetometer data from lis2mdl sensors attached through Sensor HUB using MLC:
-
-  - lsm6dsox_sh_lis2mdl_mlc.c
-
 ## Sensor HUB and FIFO
 
 Program LSM6DSOX to receive in FIFO accelerometer and gyrometer data as well as magnetometer data from lis2mdl sensors attached through Sensor HUB using FIFO threshold events on INT1:
@@ -96,7 +92,7 @@ Program LSM6DSOX to receive in FIFO accelerometer, gyrometer and timestamp data 
 
 ## Finite State Machine (FSM)
 
-Program LSM6DSOX FSM to detect *glance* and *de-glance* gestures typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/STMems_Finite_State_Machine/blob/master/application_examples/lsm6dsox/Glance%20detection/README.md)):
+Program LSM6DSOX FSM to detect *glance* and *de-glance* gestures typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/st-mems-finite-state-machine/blob/main/examples/glance_detection/lsm6dsox/README.md)):
 
   - lsm6dsox_fsm_glance.c
 
@@ -110,7 +106,7 @@ Program LSM6DSOX FSM to
 
 ## Machine Learning Core (MLC)
 
-Program LSM6DSOX MLC for vibration monitoring recognition (read more [here](https://github.com/STMicroelectronics/STMems_Machine_Learning_Core/blob/master/application_examples/lsm6dsox/Vibration%20monitoring/README.md)):
+Program LSM6DSOX MLC for vibration monitoring recognition (read more [here](https://github.com/STMicroelectronics/st-mems-machine-learning-core/blob/main/examples/vibration_monitoring/lsm6dsox/README.md)):
 
   - lsm6dsox_mlc.c
 

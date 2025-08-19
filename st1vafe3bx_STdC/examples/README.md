@@ -22,7 +22,7 @@ Read vAFE data:
 
 ## Machine Learning Core (MLC)
 
-Program ST1VAFE3BX MLC device to recognize 6D position (read more [here](https://github.com/STMicroelectronics/STMems_Machine_Learning_Core/blob/master/application_examples/st1vafe3bx/6D%20position%20recognition/README.md)):
+Program ST1VAFE3BX MLC device to recognize 6D position (read more [here](https://github.com/STMicroelectronics/st-mems-machine-learning-core/blob/main/examples/6d_position_recognition/st1vafe3bx/README.md)):
 
   - st1vafe3bx_mlc_six_d_position.c
 
