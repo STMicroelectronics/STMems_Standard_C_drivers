@@ -102,6 +102,13 @@ static void bytecpy(uint8_t *target, uint8_t *source)
   *
   */
 
+/**
+  * @defgroup  Sensitivity
+  * @brief     These functions convert raw-data into engineering units.
+  * @{
+  *
+  */
+
 uint64_t iis3dwb10is_from_lsb_to_us(uint64_t lsb)
 {
   return (lsb * 25U);
@@ -119,7 +126,7 @@ float_t iis3dwb10is_16b_from_fs50g_to_mg(int16_t lsb)
 
 float_t iis3dwb10is_16b_from_fs100g_to_mg(int16_t lsb)
 {
-  return ((float_t)lsb * 3.052);
+  return ((float_t)lsb * 3.052f);
 }
 
 float_t iis3dwb10is_16b_from_fs200g_to_mg(int16_t lsb)
@@ -141,6 +148,18 @@ float_t iis3dwb10is_from_fs200g_to_mg(int32_t lsb)
 {
   return ((float_t)lsb * 0.381f);
 }
+
+/**
+  * @}
+  *
+  */
+
+/**
+  * @defgroup  Utility
+  * @brief     These are standard utility functions
+  * @{
+  *
+  */
 
 /**
   * @brief  Device Who am I.[get]
@@ -254,6 +273,13 @@ int32_t iis3dwb10is_reset_get(const stmdev_ctx_t *ctx, iis3dwb10is_reset_t *val)
 
 /**
   * @}
+  *
+  */
+
+/**
+  * @defgroup  device_configuration
+  * @brief     These functions configure rate and full scale
+  * @{
   *
   */
 
@@ -546,6 +572,13 @@ int32_t iis3dwb10is_xl_data_config_get(const stmdev_ctx_t *ctx, iis3dwb10is_xl_d
   */
 
 /**
+  * @defgroup  interrupts
+  * @brief     These functions configure the interrupts
+  * @{
+  *
+  */
+
+/**
   * @brief  Configure INT1 and INT2 pins.[set]
   *
   * @param  ctx      read / write interface definitions
@@ -668,6 +701,13 @@ int32_t iis3dwb10is_interrupt_pin_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_
 
 /**
   * @}
+  *
+  */
+
+/**
+  * @defgroup  bus_cfg
+  * @brief     These functions configure various busses
+  * @{
   *
   */
 
@@ -805,6 +845,114 @@ int32_t iis3dwb10is_spi_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_spi_mode_t
 
 /**
   * @}
+  *
+  */
+
+/**
+  * @defgroup  filters
+  * @brief     These functions configure the device filters
+  * @{
+  *
+  */
+
+/**
+  * @brief  LPF1 filter configuration.[set]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      Filter configuration structure
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_lpf1_cfg_set(const stmdev_ctx_t *ctx, iis3dwb10is_lpf1_cfg_t val)
+{
+  iis3dwb10is_st_ctrl_t st_ctrl1;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_ST_CTRL, (uint8_t *)&st_ctrl1, 1);
+
+  if (ret == 0)
+  {
+    st_ctrl1.lpf1_cfg = (uint8_t)val;
+    ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_ST_CTRL, (uint8_t *)&st_ctrl1, 1);
+  }
+
+  return ret;
+}
+
+/**
+  * @brief  LPF1 filter configuration.[get]
+  *
+  * @param  ctx      read / write interface definitions
+  * @param  val      Filter configuration structure
+  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t iis3dwb10is_lpf1_cfg_get(const stmdev_ctx_t *ctx, iis3dwb10is_lpf1_cfg_t *val)
+{
+  iis3dwb10is_st_ctrl_t st_ctrl1;
+  int32_t ret;
+
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_ST_CTRL, (uint8_t *)&st_ctrl1, 1);
+
+  switch (st_ctrl1.lpf1_cfg)
+  {
+    case IIS3DWB10IS_LPF1_BYPASS:
+      *val = IIS3DWB10IS_LPF1_BYPASS;
+      break;
+
+    case IIS3DWB10IS_LPF1_BW_20KHz:
+      *val = IIS3DWB10IS_LPF1_BW_20KHz;
+      break;
+
+    case IIS3DWB10IS_LPF1_BW_17KHz2:
+      *val = IIS3DWB10IS_LPF1_BW_17KHz2;
+      break;
+
+    case IIS3DWB10IS_LPF1_BW_14KHz7:
+      *val = IIS3DWB10IS_LPF1_BW_14KHz7;
+      break;
+
+    case IIS3DWB10IS_LPF1_BW_12KHz:
+      *val = IIS3DWB10IS_LPF1_BW_12KHz;
+      break;
+
+    case IIS3DWB10IS_LPF1_BW_9KHz32:
+      *val = IIS3DWB10IS_LPF1_BW_9KHz32;
+      break;
+
+    case IIS3DWB10IS_LPF1_BW_6KHz89:
+      *val = IIS3DWB10IS_LPF1_BW_6KHz89;
+      break;
+
+    case IIS3DWB10IS_LPF1_BW_4KHz55:
+      *val = IIS3DWB10IS_LPF1_BW_4KHz55;
+      break;
+
+    case IIS3DWB10IS_LPF1_BW_2KHz56:
+      *val = IIS3DWB10IS_LPF1_BW_2KHz56;
+      break;
+
+    case IIS3DWB10IS_LPF1_SWITCH_ODR:
+      *val = IIS3DWB10IS_LPF1_SWITCH_ODR;
+      break;
+
+    default:
+      *val = IIS3DWB10IS_LPF1_BYPASS;
+      break;
+  }
+
+  return ret;
+}
+
+/**
+  * @}
+  *
+  */
+
+/**
+  * @defgroup  FIFO
+  * @brief     These functions configure the device FIFO
+  * @{
   *
   */
 

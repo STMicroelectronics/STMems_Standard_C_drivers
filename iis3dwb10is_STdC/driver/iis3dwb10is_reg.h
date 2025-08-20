@@ -962,6 +962,22 @@ typedef enum
 int32_t iis3dwb10is_spi_mode_set(const stmdev_ctx_t *ctx, iis3dwb10is_spi_mode_t val);
 int32_t iis3dwb10is_spi_mode_get(const stmdev_ctx_t *ctx, iis3dwb10is_spi_mode_t *val);
 
+typedef enum
+{
+  IIS3DWB10IS_LPF1_BYPASS           = 0xF,
+  IIS3DWB10IS_LPF1_BW_20KHz         = 0x0,
+  IIS3DWB10IS_LPF1_BW_17KHz2        = 0x1,
+  IIS3DWB10IS_LPF1_BW_14KHz7        = 0x2,
+  IIS3DWB10IS_LPF1_BW_12KHz         = 0x3,
+  IIS3DWB10IS_LPF1_BW_9KHz32        = 0x4,
+  IIS3DWB10IS_LPF1_BW_6KHz89        = 0x5,
+  IIS3DWB10IS_LPF1_BW_4KHz55        = 0x6,
+  IIS3DWB10IS_LPF1_BW_2KHz56        = 0x7,
+  IIS3DWB10IS_LPF1_SWITCH_ODR       = 0x8,
+} iis3dwb10is_lpf1_cfg_t;
+int32_t iis3dwb10is_lpf1_cfg_set(const stmdev_ctx_t *ctx, iis3dwb10is_lpf1_cfg_t val);
+int32_t iis3dwb10is_lpf1_cfg_get(const stmdev_ctx_t *ctx, iis3dwb10is_lpf1_cfg_t *val);
+
 int32_t iis3dwb10is_fifo_watermark_set(const stmdev_ctx_t *ctx, uint16_t val);
 int32_t iis3dwb10is_fifo_watermark_get(const stmdev_ctx_t *ctx, uint16_t *val);
 

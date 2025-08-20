@@ -278,7 +278,7 @@ void iis3dwb10is_fifo_read_low_power(void)
   iis3dwb10is_interrupt_pin_mode_set(&dev_ctx, int_pin);
 
   iis3dwb10is_pin_int1_route_get(&dev_ctx, &route);
-  route.int_fifo_th = 1;
+  route.fifo_th = 1;
   iis3dwb10is_pin_int1_route_set(&dev_ctx, route);
 
   /*

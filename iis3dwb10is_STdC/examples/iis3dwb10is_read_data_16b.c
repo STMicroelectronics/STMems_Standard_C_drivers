@@ -185,8 +185,8 @@ void iis3dwb10is_read_data_16b(void)
   iis3dwb10is_xl_full_scale_set(&dev_ctx, IIS3DWB10IS_50g);
 
   iis3dwb10is_pin_int1_route_get(&dev_ctx, &route);
-  route.int_drdy_xl = 1;
-  route.int_drdy_temp = 1;
+  route.drdy_xl = 1;
+  route.drdy_temp = 1;
   iis3dwb10is_pin_int1_route_set(&dev_ctx, route);
 
     /* Set Output Data Rate */
