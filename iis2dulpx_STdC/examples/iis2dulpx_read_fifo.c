@@ -135,6 +135,7 @@ static void platform_init(void);
 
 static stmdev_ctx_t dev_ctx;
 static iis2dulpx_fifo_mode_t fifo_mode;
+static iis2dulpx_fifo_batch_t batch;
 static uint8_t fifo_wtm_event = 0;
 
 void iis2dulpx_read_fifo_handler(void)
@@ -186,12 +187,13 @@ void iis2dulpx_read_fifo(void)
   /* Set FIFO watermark to 32 sample(s) */
   fifo_mode.store = IIS2DULPX_FIFO_1X;
   fifo_mode.xl_only = 0;
-  fifo_mode.watermark = NUM_FIFO_ENTRY;
-  fifo_mode.fifo_event = IIS2DULPX_FIFO_EV_WTM;
   fifo_mode.operation = IIS2DULPX_STREAM_MODE;
-  fifo_mode.batch.dec_ts = IIS2DULPX_DEC_TS_32;
-  fifo_mode.batch.bdr_xl = IIS2DULPX_BDR_XL_ODR;
   iis2dulpx_fifo_mode_set(&dev_ctx, fifo_mode);
+  iis2dulpx_fifo_watermark_set(&dev_ctx, NUM_FIFO_ENTRY);
+  batch.dec_ts = IIS2DULPX_DEC_TS_32;
+  batch.bdr_xl = IIS2DULPX_BDR_XL_ODR;
+  iis2dulpx_fifo_batch_set(&dev_ctx, batch);
+  iis2dulpx_fifo_stop_on_wtm_set(&dev_ctx, IIS2DULPX_FIFO_EV_WTM);
 
   iis2dulpx_timestamp_set(&dev_ctx, PROPERTY_ENABLE);
 
