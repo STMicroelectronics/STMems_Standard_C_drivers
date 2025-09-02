@@ -113,6 +113,8 @@ void stts22h_read_data_polling(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+  stts22h_priv_t auto_inc_info;
+  dev_ctx.priv_data = &auto_inc_info;
 
   /* Init test platform */
   platform_init();
@@ -122,6 +124,9 @@ void stts22h_read_data_polling(void)
 
   if (whoamI != STTS22H_ID)
     while (1); /* manage here device not found */
+
+  // Set autoincrement to improve reading performance
+  stts22h_auto_increment_set(&dev_ctx, 1);
 
   /*
    * Set Output Data Rate
