@@ -135,6 +135,7 @@ static void platform_init(void);
 
 static stmdev_ctx_t dev_ctx;
 static lis2dux12_fifo_mode_t fifo_mode;
+static lis2dux12_fifo_batch_t batch;
 static uint8_t fifo_wtm_event = 0;
 
 void lis2dux12_read_fifo_handler(void)
@@ -186,12 +187,13 @@ void lis2dux12_read_fifo(void)
   /* Set FIFO watermark to 32 sample(s) */
   fifo_mode.store = LIS2DUX12_FIFO_1X;
   fifo_mode.xl_only = 0;
-  fifo_mode.watermark = NUM_FIFO_ENTRY;
-  fifo_mode.fifo_event = LIS2DUX12_FIFO_EV_WTM;
   fifo_mode.operation = LIS2DUX12_STREAM_MODE;
-  fifo_mode.batch.dec_ts = LIS2DUX12_DEC_TS_32;
-  fifo_mode.batch.bdr_xl = LIS2DUX12_BDR_XL_ODR;
   lis2dux12_fifo_mode_set(&dev_ctx, fifo_mode);
+  lis2dux12_fifo_watermark_set(&dev_ctx, NUM_FIFO_ENTRY);
+  batch.dec_ts = LIS2DUX12_DEC_TS_32;
+  batch.bdr_xl = LIS2DUX12_BDR_XL_ODR;
+  lis2dux12_fifo_batch_set(&dev_ctx, batch);
+  lis2dux12_fifo_stop_on_wtm_set(&dev_ctx, LIS2DUX12_FIFO_EV_WTM);
 
   lis2dux12_timestamp_set(&dev_ctx, PROPERTY_ENABLE);
 
