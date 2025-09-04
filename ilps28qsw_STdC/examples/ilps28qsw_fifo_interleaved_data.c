@@ -155,7 +155,7 @@ void ilps28qsw_fifo_interleaved_data(void)
   } while (status.sw_reset);
 
   /* Disable AH/QVAR to save power consumption */
-  ilps28qsw_ah_qvar_disable(&dev_ctx);
+  ilps28qsw_ah_qvar_en_set(&dev_ctx, 0);
 
   /* Set bdu and if_inc recommended for driver usage */
   ilps28qsw_init_set(&dev_ctx, ILPS28QSW_DRV_RDY);
@@ -164,14 +164,12 @@ void ilps28qsw_fifo_interleaved_data(void)
   bus_mode.filter = ILPS28QSW_AUTO;
   ilps28qsw_bus_mode_set(&dev_ctx, &bus_mode);
 
-  /* Enable ah_qvar/pressure data interleaved mode */
-  ilps28qsw_ah_qvar_en_set(&dev_ctx, 0);
-
   /* Set Output Data Rate */
   md.odr = ILPS28QSW_200Hz;
   md.avg = ILPS28QSW_16_AVG;
   md.lpf = ILPS28QSW_LPF_ODR_DIV_4;
   md.fs = ILPS28QSW_1260hPa;
+  /* Enable ah_qvar/pressure data interleaved mode */
   md.interleaved_mode = 1;
   ilps28qsw_mode_set(&dev_ctx, &md);
 
