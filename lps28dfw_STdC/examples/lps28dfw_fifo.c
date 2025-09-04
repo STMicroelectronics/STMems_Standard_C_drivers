@@ -109,7 +109,6 @@ static void platform_init(void);
 /* Main Example --------------------------------------------------------------*/
 void lps28dfw_fifo(void)
 {
-  lps28dfw_fifo_md_t fifo_mode;
   lps28dfw_all_sources_t all_sources;
   lps28dfw_bus_mode_t bus_mode;
   lps28dfw_stat_t status;
@@ -155,9 +154,9 @@ void lps28dfw_fifo(void)
   lps28dfw_mode_set(&dev_ctx, &md);
 
   /* Enable FIFO */
-  fifo_mode.operation = LPS28DFW_STREAM;
-  fifo_mode.watermark = 32;
-  lps28dfw_fifo_mode_set(&dev_ctx, &fifo_mode);
+  lps28dfw_fifo_mode_set(&dev_ctx, LPS28DFW_STREAM);
+  lps28dfw_fifo_stop_on_wtm_set(&dev_ctx, LPS28DFW_FIFO_EV_WTM);
+  lps28dfw_fifo_watermark_set(&dev_ctx, 32);
 
   /* Read samples in polling mode (no int) */
   while(1)
