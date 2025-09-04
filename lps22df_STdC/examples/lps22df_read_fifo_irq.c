@@ -141,7 +141,6 @@ void lps22df_read_fifo_irq(void)
   lps22df_stat_t status;
   lps22df_id_t id;
   lps22df_md_t md;
-  lps22df_fifo_md_t fifo_md;
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
@@ -180,9 +179,9 @@ void lps22df_read_fifo_irq(void)
   md.lpf = LPS22DF_LPF_ODR_DIV_4;
   lps22df_mode_set(&dev_ctx, &md);
 
-  fifo_md.watermark = FIFO_TH;
-  fifo_md.operation = LPS22DF_STREAM;
-  lps22df_fifo_mode_set(&dev_ctx, &fifo_md);
+  lps22df_fifo_mode_set(&dev_ctx, LPS22DF_STREAM);
+  lps22df_fifo_watermark_set(&dev_ctx, FIFO_TH);
+  lps22df_fifo_stop_on_wtm_set(&dev_ctx, LPS22DF_FIFO_EV_WTM);
 
   /* Configure inerrupt pins */
   lps22df_pin_int_route_get(&dev_ctx, &int_route);

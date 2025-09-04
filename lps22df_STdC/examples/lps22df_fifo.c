@@ -127,7 +127,6 @@ static void platform_init(void);
 /* Main Example --------------------------------------------------------------*/
 void lps22df_fifo(void)
 {
-  lps22df_fifo_md_t fifo_mode;
   lps22df_all_sources_t all_sources;
   lps22df_bus_mode_t bus_mode;
   lps22df_stat_t status;
@@ -173,9 +172,9 @@ void lps22df_fifo(void)
   lps22df_mode_set(&dev_ctx, &md);
 
   /* Enable FIFO */
-  fifo_mode.operation = LPS22DF_STREAM;
-  fifo_mode.watermark = 32;
-  lps22df_fifo_mode_set(&dev_ctx, &fifo_mode);
+  lps22df_fifo_mode_set(&dev_ctx, LPS22DF_STREAM);
+  lps22df_fifo_watermark_set(&dev_ctx, 32);
+  lps22df_fifo_stop_on_wtm_set(&dev_ctx, LPS22DF_FIFO_EV_WTM);
 
   /* Read samples in polling mode (no int) */
   while(1)
