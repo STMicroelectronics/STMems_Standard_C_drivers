@@ -125,7 +125,6 @@ static void platform_init(void *handle);
 /* Main Example --------------------------------------------------------------*/
 void ilps28qsw_fifo(void)
 {
-  ilps28qsw_fifo_md_t fifo_mode;
   ilps28qsw_bus_mode_t bus_mode;
   ilps28qsw_stat_t status;
   stmdev_ctx_t dev_ctx;
@@ -172,9 +171,9 @@ void ilps28qsw_fifo(void)
   ilps28qsw_mode_set(&dev_ctx, &md);
 
   /* Enable FIFO */
-  fifo_mode.operation = ILPS28QSW_STREAM;
-  fifo_mode.watermark = 32;
-  ilps28qsw_fifo_mode_set(&dev_ctx, &fifo_mode);
+  ilps28qsw_fifo_mode_set(&dev_ctx, ILPS28QSW_STREAM);
+  ilps28qsw_fifo_stop_on_wtm_set(&dev_ctx, ILPS28QSW_FIFO_EV_WTM);
+  ilps28qsw_fifo_watermark_set(&dev_ctx, 32);
 
   /* Read samples in polling mode (no int) */
   while(1)
