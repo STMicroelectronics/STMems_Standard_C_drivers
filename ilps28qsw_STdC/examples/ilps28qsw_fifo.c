@@ -155,7 +155,7 @@ void ilps28qsw_fifo(void)
   } while (status.sw_reset);
 
   /* Disable AH/QVAR to save power consumption */
-  ilps28qsw_ah_qvar_disable(&dev_ctx);
+  ilps28qsw_ah_qvar_en_set(&dev_ctx, 0);
 
   /* Set bdu and if_inc recommended for driver usage */
   ilps28qsw_init_set(&dev_ctx, ILPS28QSW_DRV_RDY);
