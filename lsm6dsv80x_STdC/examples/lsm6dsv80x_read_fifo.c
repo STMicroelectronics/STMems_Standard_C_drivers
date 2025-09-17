@@ -134,12 +134,25 @@ static   stmdev_ctx_t dev_ctx;
 static double_t lowg_xl_sum[3], hg_xl_sum[3], gyro_sum[3];
 static uint16_t lowg_xl_cnt = 0, hg_xl_cnt = 0, gyro_cnt = 0;
 
+static uint16_t gravity_cnt = 0, gbias_cnt = 0, rot_cnt = 0;
+static float_t gravity_sum[3], gbias_sum[3];
+static double_t rot_sum[4];
+
 static   uint8_t fifo_thread_run = 0;
+
+static float_t npy_half_to_float(uint16_t h)
+{
+    union { float_t ret; uint32_t retbits; } conv;
+    conv.retbits = lsm6dsv80x_from_f16_to_f32(h);
+    return conv.ret;
+}
 
 static void lsm6dsv80x_fifo_thread(void)
 {
   float_t acceleration_mg[3];
   float_t angular_rate_mdps[3];
+  float_t gravity_mg[3], gbias_mdps[3], quat[4];
+  uint8_t *axis;
 
   if (fifo_thread_run) {
     lsm6dsv80x_fifo_status_t fifo_status;
@@ -197,6 +210,58 @@ static void lsm6dsv80x_fifo_thread(void)
         gyro_cnt++;
         break;
 
+      case LSM6DSV80X_SFLP_GYROSCOPE_BIAS_TAG:
+        axis = &f_data.data[0];
+        gbias_mdps[0] = lsm6dsv80x_from_fs125_to_mdps(axis[0] | (axis[1] << 8));
+        gbias_mdps[1] = lsm6dsv80x_from_fs125_to_mdps(axis[2] | (axis[3] << 8));
+        gbias_mdps[2] = lsm6dsv80x_from_fs125_to_mdps(axis[4] | (axis[5] << 8));
+
+        gbias_sum[0] += gbias_mdps[0];
+        gbias_sum[1] += gbias_mdps[1];
+        gbias_sum[2] += gbias_mdps[2];
+        gbias_cnt++;
+        break;
+
+      case LSM6DSV80X_SFLP_GRAVITY_VECTOR_TAG:
+        axis = &f_data.data[0];
+        gravity_mg[0] = lsm6dsv80x_from_sflp_to_mg(axis[0] | (axis[1] << 8));
+        gravity_mg[1] = lsm6dsv80x_from_sflp_to_mg(axis[2] | (axis[3] << 8));
+        gravity_mg[2] = lsm6dsv80x_from_sflp_to_mg(axis[4] | (axis[5] << 8));
+
+        gravity_sum[0] += gravity_mg[0];
+        gravity_sum[1] += gravity_mg[1];
+        gravity_sum[2] += gravity_mg[2];
+        gravity_cnt++;
+        break;
+
+      case LSM6DSV80X_SFLP_GAME_ROTATION_VECTOR_TAG:
+      {
+        uint16_t *sflp = (uint16_t *)&f_data.data[2];
+
+        if (f_data.data[0] == 0x00) {
+          /* Game Rotation first word */
+          quat[0] = npy_half_to_float(sflp[0]);
+          quat[1] = npy_half_to_float(sflp[1]);
+        } else if (f_data.data[0] == 0x01) {
+          /* Game Rotation second word */
+          quat[2] = npy_half_to_float(sflp[0]);
+          quat[3] = npy_half_to_float(sflp[1]);
+
+          rot_sum[0] += quat[0];
+          rot_sum[1] += quat[1];
+          rot_sum[2] += quat[2];
+          rot_sum[3] += quat[3];
+
+          rot_cnt++;
+        } else {
+          /* error */
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "[%02x - %02x] wrong word \r\n", f_data.data[0], f_data.data[1]);
+          tx_com(tx_buffer, strlen((char const *)tx_buffer));
+       }
+
+        break;
+      }
+
       case LSM6DSV80X_TIMESTAMP_TAG:
         snprintf((char *)tx_buffer, sizeof(tx_buffer), "TIMESTAMP [ms] %d\r\n", *ts);
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
@@ -233,12 +298,53 @@ static void lsm6dsv80x_fifo_thread(void)
           angular_rate_mdps[1] = gyro_sum[1] / gyro_cnt;
           angular_rate_mdps[2] = gyro_sum[2] / gyro_cnt;
 
-          snprintf((char *)tx_buffer, sizeof(tx_buffer), "gyro (media of %d samples) [mdps]:%4.2f\t%4.2f\t%4.2f\r\n\r\n",
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "gyro (media of %d samples) [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
                   gyro_cnt, angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           gyro_sum[0] = gyro_sum[1] = gyro_sum[2] = 0.0;
           gyro_cnt = 0;
         }
+
+         /* print SFLP gbias data */
+        if (gbias_cnt > 0) {
+          gbias_mdps[0] = gbias_sum[0] / gbias_cnt;
+          gbias_mdps[1] = gbias_sum[1] / gbias_cnt;
+          gbias_mdps[2] = gbias_sum[2] / gbias_cnt;
+
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "SFLP gbias (media of %d samples) [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+                  gbias_cnt, gbias_mdps[0], gbias_mdps[1], gbias_mdps[2]);
+          tx_com(tx_buffer, strlen((char const *)tx_buffer));
+          gbias_sum[0] = gbias_sum[1] = gbias_sum[2] = 0.0;
+          gbias_cnt = 0;
+        }
+
+         /* print SFLP gravity data */
+        if (gravity_cnt > 0) {
+          gravity_mg[0] = gravity_sum[0] / gravity_cnt;
+          gravity_mg[1] = gravity_sum[1] / gravity_cnt;
+          gravity_mg[2] = gravity_sum[2] / gravity_cnt;
+
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "SFLP gravity (media of %d samples) [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+                  gravity_cnt, gravity_mg[0], gravity_mg[1], gravity_mg[2]);
+          tx_com(tx_buffer, strlen((char const *)tx_buffer));
+          gravity_sum[0] = gravity_sum[1] = gravity_sum[2] = 0.0;
+          gravity_cnt = 0;
+        }
+
+         /* print SFLP game rotation data */
+        if (rot_cnt > 0) {
+          quat[0] = rot_sum[0] / rot_cnt;
+          quat[1] = rot_sum[1] / rot_cnt;
+          quat[2] = rot_sum[2] / rot_cnt;
+          quat[3] = rot_sum[3] / rot_cnt;
+
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "SFLP rotation (media of %d samples) [quaternions]:X: %2.3f\tY: %2.3f\tZ: %2.3f\tW: %2.3f\r\n\r\n",
+                  rot_cnt, quat[0], quat[1], quat[2], quat[3]);
+          tx_com(tx_buffer, strlen((char const *)tx_buffer));
+          rot_sum[0] = rot_sum[1] = rot_sum[2] = rot_sum[3] = 0.0;
+          rot_cnt = 0;
+        }
+
         break;
 
       default:
@@ -290,10 +396,25 @@ void lsm6dsv80x_read_fifo(void)
    * stored in FIFO) to FIFO_WATERMARK samples
    */
   lsm6dsv80x_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
+
   /* Set FIFO batch XL/Gyro ODR */
   lsm6dsv80x_fifo_xl_batch_set(&dev_ctx, LSM6DSV80X_XL_BATCHED_AT_60Hz);
   lsm6dsv80x_fifo_hg_xl_batch_set(&dev_ctx, 1);
   lsm6dsv80x_fifo_gy_batch_set(&dev_ctx, LSM6DSV80X_GY_BATCHED_AT_120Hz);
+
+  /* Set FIFO batch SFLP */
+  lsm6dsv80x_sflp_data_rate_set(&dev_ctx, LSM6DSV80X_SFLP_120Hz);
+
+  lsm6dsv80x_fifo_sflp_raw_t sflp =
+        {
+          .game_rotation = 1,
+          .gravity = 1,
+          .gbias = 1,
+        };
+  lsm6dsv80x_fifo_sflp_batch_set(&dev_ctx, sflp);
+
+  lsm6dsv80x_sflp_game_rotation_set(&dev_ctx, PROPERTY_ENABLE);
+
   /* Set FIFO mode to Stream mode (aka Continuous Mode) */
   lsm6dsv80x_fifo_mode_set(&dev_ctx, LSM6DSV80X_STREAM_MODE);
   lsm6dsv80x_fifo_timestamp_batch_set(&dev_ctx, LSM6DSV80X_TMSTMP_DEC_32);
