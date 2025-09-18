@@ -322,3 +322,6 @@
 [submodule "_resources/st-mems-machine-learning-core"]
 	path = _resources/st-mems-machine-learning-core
 	url = https://github.com/STMicroelectronics/st-mems-machine-learning-core.git
+[submodule "ism6hg256x_STdC/driver"]
+	path = ism6hg256x_STdC/driver
+	url = https://github.com/STMicroelectronics/ism6hg256x-pid
