@@ -140,13 +140,6 @@ static double_t rot_sum[4];
 
 static   uint8_t fifo_thread_run = 0;
 
-static float_t npy_half_to_float(uint16_t h)
-{
-    union { float_t ret; uint32_t retbits; } conv;
-    conv.retbits = lsm6dsv80x_from_f16_to_f32(h);
-    return conv.ret;
-}
-
 static void lsm6dsv80x_fifo_thread(void)
 {
   float_t acceleration_mg[3];
@@ -240,12 +233,12 @@ static void lsm6dsv80x_fifo_thread(void)
 
         if (f_data.data[0] == 0x00) {
           /* Game Rotation first word */
-          quat[0] = npy_half_to_float(sflp[0]);
-          quat[1] = npy_half_to_float(sflp[1]);
+          quat[0] = lsm6dsv80x_from_quaternion_lsb_to_float(sflp[0]);
+          quat[1] = lsm6dsv80x_from_quaternion_lsb_to_float(sflp[1]);
         } else if (f_data.data[0] == 0x01) {
           /* Game Rotation second word */
-          quat[2] = npy_half_to_float(sflp[0]);
-          quat[3] = npy_half_to_float(sflp[1]);
+          quat[2] = lsm6dsv80x_from_quaternion_lsb_to_float(sflp[0]);
+          quat[3] = lsm6dsv80x_from_quaternion_lsb_to_float(sflp[1]);
 
           rot_sum[0] += quat[0];
           rot_sum[1] += quat[1];
