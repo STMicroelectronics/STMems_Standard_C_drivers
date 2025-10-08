@@ -164,8 +164,8 @@ static int flush_samples(stmdev_ctx_t *dev_ctx)
 static void test_self_test_ais2ih(stmdev_ctx_t *dev_ctx)
 {
   ais2ih_reg_t reg;
-  float_t media[3] = { 0.0f, 0.0f, 0.0f };
-  float_t mediast[3] = { 0.0f, 0.0f, 0.0f };
+  float_t avg[3] = { 0.0f, 0.0f, 0.0f };
+  float_t avgst[3] = { 0.0f, 0.0f, 0.0f };
   uint8_t match[3] = { 0, 0, 0 };
   uint8_t j = 0;
   uint16_t i = 0;
@@ -205,10 +205,10 @@ static void test_self_test_ais2ih(stmdev_ctx_t *dev_ctx)
 
   for (k = 0; k < 3; k++) {
     for (j = 0; j < SELF_TEST_SAMPLES; j++) {
-      media[k] += acceleration_mg[j][k];
+      avg[k] += acceleration_mg[j][k];
     }
 
-    media[k] = (media[k] / j);
+    avg[k] = (avg[k] / j);
   }
 
   /* Enable self test mode */
@@ -236,21 +236,21 @@ static void test_self_test_ais2ih(stmdev_ctx_t *dev_ctx)
 
   for (k = 0; k < 3; k++) {
     for (j = 0; j < SELF_TEST_SAMPLES; j++) {
-      mediast[k] += acceleration_mg[j][k];
+      avgst[k] += acceleration_mg[j][k];
     }
 
-    mediast[k] = (mediast[k] / j);
+    avgst[k] = (avgst[k] / j);
   }
 
   /* Check for all axis self test value range */
   for (k = 0; k < 3; k++) {
-    if ((ABSF(mediast[k] - media[k]) >= ST_MIN_POS) &&
-        (ABSF(mediast[k] - media[k]) <= ST_MAX_POS)) {
+    if ((ABSF(avgst[k] - avg[k]) >= ST_MIN_POS) &&
+        (ABSF(avgst[k] - avg[k]) <= ST_MAX_POS)) {
       match[k] = 1;
     }
 
     snprintf((char *)tx_buffer, sizeof(tx_buffer), "%d: |%f| <= |%f| <= |%f| %s\r\n", k,
-            ST_MIN_POS, ABSF(mediast[k] - media[k]), ST_MAX_POS,
+            ST_MIN_POS, ABSF(avgst[k] - avg[k]), ST_MAX_POS,
             match[k] == 1 ? "PASSED" : "FAILED");
     tx_com(tx_buffer, strlen((char const *)tx_buffer));
   }

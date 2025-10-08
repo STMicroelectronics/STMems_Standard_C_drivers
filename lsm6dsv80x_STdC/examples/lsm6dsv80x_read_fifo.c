@@ -259,39 +259,39 @@ static void lsm6dsv80x_fifo_thread(void)
         snprintf((char *)tx_buffer, sizeof(tx_buffer), "TIMESTAMP [ms] %d\r\n", *ts);
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
-        /* print media low-g xl data */
+        /* print avg low-g xl data */
         if (lowg_xl_cnt > 0) {
           acceleration_mg[0] = lowg_xl_sum[0] / lowg_xl_cnt;
           acceleration_mg[1] = lowg_xl_sum[1] / lowg_xl_cnt;
           acceleration_mg[2] = lowg_xl_sum[2] / lowg_xl_cnt;
 
-          snprintf((char *)tx_buffer, sizeof(tx_buffer), "lg xl (media of %d samples) [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "lg xl (avg of %d samples) [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                   lowg_xl_cnt, acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           lowg_xl_sum[0] = lowg_xl_sum[1] = lowg_xl_sum[2] = 0.0;
           lowg_xl_cnt = 0;
         }
 
-        /* print media high-g xl data */
+        /* print avg high-g xl data */
         if (hg_xl_cnt > 0) {
           acceleration_mg[0] = hg_xl_sum[0] / hg_xl_cnt;
           acceleration_mg[1] = hg_xl_sum[1] / hg_xl_cnt;
           acceleration_mg[2] = hg_xl_sum[2] / hg_xl_cnt;
 
-          snprintf((char *)tx_buffer, sizeof(tx_buffer), "hg xl (media of %d samples) [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "hg xl (avg of %d samples) [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                   hg_xl_cnt, acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           hg_xl_sum[0] = hg_xl_sum[1] = hg_xl_sum[2] = 0.0;
           hg_xl_cnt = 0;
         }
 
-        /* print media gyro data */
+        /* print avg gyro data */
         if (gyro_cnt > 0) {
           angular_rate_mdps[0] = gyro_sum[0] / gyro_cnt;
           angular_rate_mdps[1] = gyro_sum[1] / gyro_cnt;
           angular_rate_mdps[2] = gyro_sum[2] / gyro_cnt;
 
-          snprintf((char *)tx_buffer, sizeof(tx_buffer), "gyro (media of %d samples) [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "gyro (avg of %d samples) [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
                   gyro_cnt, angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           gyro_sum[0] = gyro_sum[1] = gyro_sum[2] = 0.0;
@@ -304,7 +304,7 @@ static void lsm6dsv80x_fifo_thread(void)
           gbias_mdps[1] = gbias_sum[1] / gbias_cnt;
           gbias_mdps[2] = gbias_sum[2] / gbias_cnt;
 
-          snprintf((char *)tx_buffer, sizeof(tx_buffer), "SFLP gbias (media of %d samples) [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "SFLP gbias (avg of %d samples) [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
                   gbias_cnt, gbias_mdps[0], gbias_mdps[1], gbias_mdps[2]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           gbias_sum[0] = gbias_sum[1] = gbias_sum[2] = 0.0;
@@ -317,7 +317,7 @@ static void lsm6dsv80x_fifo_thread(void)
           gravity_mg[1] = gravity_sum[1] / gravity_cnt;
           gravity_mg[2] = gravity_sum[2] / gravity_cnt;
 
-          snprintf((char *)tx_buffer, sizeof(tx_buffer), "SFLP gravity (media of %d samples) [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "SFLP gravity (avg of %d samples) [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
                   gravity_cnt, gravity_mg[0], gravity_mg[1], gravity_mg[2]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           gravity_sum[0] = gravity_sum[1] = gravity_sum[2] = 0.0;
@@ -331,7 +331,7 @@ static void lsm6dsv80x_fifo_thread(void)
           quat[2] = rot_sum[2] / rot_cnt;
           quat[3] = rot_sum[3] / rot_cnt;
 
-          snprintf((char *)tx_buffer, sizeof(tx_buffer), "SFLP rotation (media of %d samples) [quaternions]:X: %2.3f\tY: %2.3f\tZ: %2.3f\tW: %2.3f\r\n\r\n",
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "SFLP rotation (avg of %d samples) [quaternions]:X: %2.3f\tY: %2.3f\tZ: %2.3f\tW: %2.3f\r\n\r\n",
                   rot_cnt, quat[0], quat[1], quat[2], quat[3]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           rot_sum[0] = rot_sum[1] = rot_sum[2] = rot_sum[3] = 0.0;

@@ -249,42 +249,42 @@ void ism6hg256x_read_data_polling(void)
     }
 
     if (lowg_xl_cnt >= CNT_FOR_OUTPUT) {
-      /* print media low-g xl data */
+      /* print avg low-g xl data */
       acceleration_mg[0] = lowg_xl_sum[0] / lowg_xl_cnt;
       acceleration_mg[1] = lowg_xl_sum[1] / lowg_xl_cnt;
       acceleration_mg[2] = lowg_xl_sum[2] / lowg_xl_cnt;
 
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "lg xl (media of %d samples) [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "lg xl (avg of %d samples) [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               lowg_xl_cnt, acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
       lowg_xl_sum[0] = lowg_xl_sum[1] = lowg_xl_sum[2] = 0.0;
       lowg_xl_cnt = 0;
 
-      /* print media high-g xl data */
+      /* print avg high-g xl data */
       acceleration_mg[0] = hg_xl_sum[0] / hg_xl_cnt;
       acceleration_mg[1] = hg_xl_sum[1] / hg_xl_cnt;
       acceleration_mg[2] = hg_xl_sum[2] / hg_xl_cnt;
 
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "hg xl (media of %d samples) [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "hg xl (avg of %d samples) [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               hg_xl_cnt, acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
       hg_xl_sum[0] = hg_xl_sum[1] = hg_xl_sum[2] = 0.0;
       hg_xl_cnt = 0;
 
-      /* print media gyro data */
+      /* print avg gyro data */
       angular_rate_mdps[0] = gyro_sum[0] / gyro_cnt;
       angular_rate_mdps[1] = gyro_sum[1] / gyro_cnt;
       angular_rate_mdps[2] = gyro_sum[2] / gyro_cnt;
 
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "gyro (media of %d samples) [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer), "gyro (avg of %d samples) [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
               gyro_cnt, angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
       gyro_sum[0] = gyro_sum[1] = gyro_sum[2] = 0.0;
       gyro_cnt = 0;
 
-      /* print media temperature data */
+      /* print avg temperature data */
       temperature_degC = temp_sum / temp_cnt;
-      snprintf((char *)tx_buffer, sizeof(tx_buffer),"Temperature (media of %d samples) [degC]:%6.2f\r\n\r\n",
+      snprintf((char *)tx_buffer, sizeof(tx_buffer),"Temperature (avg of %d samples) [degC]:%6.2f\r\n\r\n",
               temp_cnt, temperature_degC);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
       temp_cnt = 0;
