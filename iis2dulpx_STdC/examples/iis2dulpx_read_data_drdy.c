@@ -142,7 +142,6 @@ void iis2dulpx_read_data_drdy_handler(void)
 void iis2dulpx_read_data_drdy(void)
 {
   iis2dulpx_pin_int_route_t int_route;
-  iis2dulpx_status_t status;
   uint8_t id;
 
   /* Initialize mems driver interface */
@@ -165,13 +164,10 @@ void iis2dulpx_read_data_drdy(void)
     while(1);
 
   /* Restore default configuration */
-  iis2dulpx_init_set(&dev_ctx, IIS2DULPX_RESET);
-  do {
-    iis2dulpx_status_get(&dev_ctx, &status);
-  } while (status.sw_reset);
+  iis2dulpx_sw_reset(&dev_ctx);
 
-  /* Set bdu and if_inc recommended for driver usage */
-  iis2dulpx_init_set(&dev_ctx, IIS2DULPX_SENSOR_ONLY_ON);
+  /* init bdu and add_inc */
+  iis2dulpx_init_set(&dev_ctx);
 
   /* Configure interrupt pins */
   int_route.drdy   = PROPERTY_ENABLE;

@@ -145,7 +145,6 @@ static void platform_init(void *handle);
 /* Main Example --------------------------------------------------------------*/
 void lsm6dsv16x_qvar_read_data_polling(void)
 {
-  lsm6dsv16x_reset_t rst;
   stmdev_ctx_t dev_ctx;
   lsm6dsv16x_all_sources_t all_sources;
 
@@ -157,6 +156,7 @@ void lsm6dsv16x_qvar_read_data_polling(void)
 
   /* Init test platform */
   platform_init(dev_ctx.handle);
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
 
@@ -167,10 +167,7 @@ void lsm6dsv16x_qvar_read_data_polling(void)
     while (1);
 
   /* Restore default configuration */
-  lsm6dsv16x_reset_set(&dev_ctx, LSM6DSV16X_RESTORE_CTRL_REGS);
-  do {
-    lsm6dsv16x_reset_get(&dev_ctx, &rst);
-  } while (rst != LSM6DSV16X_READY);
+  lsm6dsv16x_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
   lsm6dsv16x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);

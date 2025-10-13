@@ -167,7 +167,6 @@ void lsm6dsv16x_fsm_glance_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lsm6dsv16x_fsm_glance(void)
 {
-  lsm6dsv16x_reset_t rst;
   uint32_t i;
 
   /* Initialize mems driver interface */
@@ -178,8 +177,10 @@ void lsm6dsv16x_fsm_glance(void)
 
   /* Init test platform */
   platform_init(dev_ctx.handle);
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
+
   /* Check device ID */
   lsm6dsv16x_device_id_get(&dev_ctx, &whoamI);
 
@@ -187,10 +188,7 @@ void lsm6dsv16x_fsm_glance(void)
     while (1);
 
   /* Restore default configuration */
-  lsm6dsv16x_reset_set(&dev_ctx, LSM6DSV16X_RESTORE_CTRL_REGS);
-  do {
-    lsm6dsv16x_reset_get(&dev_ctx, &rst);
-  } while (rst != LSM6DSV16X_READY);
+  lsm6dsv16x_sw_por(&dev_ctx);
 
 #if defined(NUCLEO_H503RB)
   /* if I3C is used then INT pin must be explicitly enabled */

@@ -157,7 +157,6 @@ void iis2dulpx_fsm_fourd_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void iis2dulpx_fsm_fourd(void)
 {
-  iis2dulpx_status_t status;
   uint8_t id;
   uint32_t i;
 
@@ -180,10 +179,7 @@ void iis2dulpx_fsm_fourd(void)
     while(1);
 
   /* Restore default configuration */
-  iis2dulpx_init_set(&dev_ctx, IIS2DULPX_RESET);
-  do {
-    iis2dulpx_status_get(&dev_ctx, &status);
-  } while (status.sw_reset);
+  iis2dulpx_sw_reset(&dev_ctx);
 
 #if defined(NUCLEO_H503RB)
   /* if I3C is used then INT pin must be explicitly enabled */

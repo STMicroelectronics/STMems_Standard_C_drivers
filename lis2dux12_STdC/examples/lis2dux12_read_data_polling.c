@@ -157,13 +157,10 @@ void lis2dux12_read_data_polling(void)
     while(1);
 
   /* Restore default configuration */
-  lis2dux12_init_set(&dev_ctx, LIS2DUX12_RESET);
-  do {
-    lis2dux12_status_get(&dev_ctx, &status);
-  } while (status.sw_reset);
+  lis2dux12_sw_reset(&dev_ctx);
 
-  /* Set bdu and if_inc recommended for driver usage */
-  lis2dux12_init_set(&dev_ctx, LIS2DUX12_SENSOR_ONLY_ON);
+  /* init bdu and add_inc */
+  lis2dux12_init_set(&dev_ctx);
 
   /* Set Output Data Rate */
   md.fs =  LIS2DUX12_4g;

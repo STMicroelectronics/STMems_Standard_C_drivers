@@ -366,7 +366,6 @@ void ism6hg256x_read_fifo_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void ism6hg256x_read_fifo(void)
 {
-  ism6hg256x_reset_t rst;
   ism6hg256x_pin_int_route_t pin_int = { 0 };
 
   /* Initialize mems driver interface */
@@ -374,21 +373,21 @@ void ism6hg256x_read_fifo(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
+
   /* Check device ID */
   ism6hg256x_device_id_get(&dev_ctx, &whoamI);
 
   if (whoamI != ISM6HG256X_ID)
     while (1);
 
-  /* Restore default configuration */
-  ism6hg256x_reset_set(&dev_ctx, ISM6HG256X_RESTORE_CTRL_REGS);
-  do {
-    ism6hg256x_reset_get(&dev_ctx, &rst);
-  } while (rst != ISM6HG256X_READY);
+  /* Perform device power-on-reset */
+  ism6hg256x_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
   ism6hg256x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
@@ -398,10 +397,12 @@ void ism6hg256x_read_fifo(void)
    * stored in FIFO) to FIFO_WATERMARK samples
    */
   ism6hg256x_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
+
   /* Set FIFO batch XL/Gyro ODR */
   ism6hg256x_fifo_xl_batch_set(&dev_ctx, ISM6HG256X_XL_BATCHED_AT_60Hz);
   ism6hg256x_fifo_hg_xl_batch_set(&dev_ctx, 1);
   ism6hg256x_fifo_gy_batch_set(&dev_ctx, ISM6HG256X_GY_BATCHED_AT_120Hz);
+
   /* Set FIFO batch SFLP */
   ism6hg256x_sflp_data_rate_set(&dev_ctx, ISM6HG256X_SFLP_120Hz);
 

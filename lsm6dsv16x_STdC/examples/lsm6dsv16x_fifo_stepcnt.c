@@ -170,8 +170,6 @@ void lsm6dsv16x_fifo_emb_functions(void)
   lsm6dsv16x_stpcnt_mode_t stpcnt_mode = { 0 };
   uint16_t steps = 0;
 
-  lsm6dsv16x_reset_t rst;
-
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
@@ -190,10 +188,7 @@ void lsm6dsv16x_fifo_emb_functions(void)
     while (1);
 
   /* Restore default configuration */
-  lsm6dsv16x_reset_set(&dev_ctx, LSM6DSV16X_RESTORE_CTRL_REGS);
-  do {
-    lsm6dsv16x_reset_get(&dev_ctx, &rst);
-  } while (rst != LSM6DSV16X_READY);
+  lsm6dsv16x_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
   lsm6dsv16x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);

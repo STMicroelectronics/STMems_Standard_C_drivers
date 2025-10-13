@@ -150,7 +150,6 @@ void lis2duxs12_fsm_glance_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lis2duxs12_fsm_glance(void)
 {
-  lis2duxs12_status_t status;
   uint8_t id;
   uint32_t i;
 
@@ -172,10 +171,10 @@ void lis2duxs12_fsm_glance(void)
     while(1);
 
   /* Restore default configuration */
-  lis2duxs12_init_set(&dev_ctx, LIS2DUXS12_RESET);
-  do {
-    lis2duxs12_status_get(&dev_ctx, &status);
-  } while (status.sw_reset);
+  lis2duxs12_sw_reset(&dev_ctx);
+
+  /* init bdu and add_inc */
+  lis2duxs12_init_set(&dev_ctx);
 
   /* Start Machine Learning Core configuration */
   for ( i = 0; i < (sizeof(lis2duxs12_glance_conf_0) / sizeof(struct mems_conf_op) ); i++ ) {

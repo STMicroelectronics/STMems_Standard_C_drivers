@@ -144,7 +144,6 @@ void lis2dux12_wu_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lis2dux12_wakeup(void)
 {
-  lis2dux12_status_t status;
   uint8_t id;
   lis2dux12_md_t md;
   lis2dux12_wakeup_config_t val;
@@ -170,13 +169,10 @@ void lis2dux12_wakeup(void)
     while(1);
 
   /* Restore default configuration */
-  lis2dux12_init_set(&dev_ctx, LIS2DUX12_RESET);
-  do {
-    lis2dux12_status_get(&dev_ctx, &status);
-  } while (status.sw_reset);
+  lis2dux12_sw_reset(&dev_ctx);
 
-  /* Set bdu and if_inc recommended for driver usage */
-  lis2dux12_init_set(&dev_ctx, LIS2DUX12_SENSOR_ONLY_ON);
+  /* init bdu and add_inc */
+  lis2dux12_init_set(&dev_ctx);
 
   val.wake_dur = LIS2DUX12_0_ODR;
   val.sleep_dur = 0;

@@ -146,7 +146,6 @@ void iis2dulpx_step_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void iis2dulpx_pedometer(void)
 {
-  iis2dulpx_status_t status;
   uint8_t id;
   iis2dulpx_md_t md;
   uint16_t steps = 0;
@@ -172,14 +171,10 @@ void iis2dulpx_pedometer(void)
     while(1);
 
   /* Restore default configuration */
-  iis2dulpx_init_set(&dev_ctx, IIS2DULPX_RESET);
-  do {
-    iis2dulpx_status_get(&dev_ctx, &status);
-  } while (status.sw_reset);
+  iis2dulpx_sw_reset(&dev_ctx);
 
-  /* Set bdu and if_inc recommended for driver usage */
-  iis2dulpx_init_set(&dev_ctx, IIS2DULPX_SENSOR_EMB_FUNC_ON);
-  platform_delay(10);
+  /* init bdu and add_inc */
+  iis2dulpx_init_set(&dev_ctx);
 
   iis2dulpx_embedded_int_cfg_set(&dev_ctx, IIS2DULPX_EMBEDDED_INT_LATCHED);
 

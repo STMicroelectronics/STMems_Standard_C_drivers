@@ -133,7 +133,6 @@ static void platform_init(void);
 /* Main Example --------------------------------------------------------------*/
 void ism6hg256x_read_data_polling(void)
 {
-  ism6hg256x_reset_t rst;
   stmdev_ctx_t dev_ctx;
   double_t lowg_xl_sum[3], hg_xl_sum[3], gyro_sum[3], temp_sum;
   uint16_t lowg_xl_cnt = 0, hg_xl_cnt = 0, gyro_cnt = 0, temp_cnt = 0;
@@ -143,24 +142,25 @@ void ism6hg256x_read_data_polling(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
+
   /* Check device ID */
   ism6hg256x_device_id_get(&dev_ctx, &whoamI);
 
   if (whoamI != ISM6HG256X_ID)
     while (1);
 
-  /* Restore default configuration */
-  ism6hg256x_reset_set(&dev_ctx, ISM6HG256X_RESTORE_CTRL_REGS);
-  do {
-    ism6hg256x_reset_get(&dev_ctx, &rst);
-  } while (rst != ISM6HG256X_READY);
+  /* Perform device power-on-reset */
+  ism6hg256x_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
   ism6hg256x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+
   /* Set Output Data Rate.
    * Selected data rate have to be equal or greater with respect
    * with MLC data rate.

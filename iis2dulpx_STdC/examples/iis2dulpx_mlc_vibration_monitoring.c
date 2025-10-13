@@ -154,7 +154,6 @@ void iis2dulpx_vibration_monitoring_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void iis2dulpx_vibration_monitoring(void)
 {
-  iis2dulpx_status_t status;
   uint8_t id;
   uint32_t i;
 
@@ -176,10 +175,7 @@ void iis2dulpx_vibration_monitoring(void)
     while(1);
 
   /* Restore default configuration */
-  iis2dulpx_init_set(&dev_ctx, IIS2DULPX_RESET);
-  do {
-    iis2dulpx_status_get(&dev_ctx, &status);
-  } while (status.sw_reset);
+  iis2dulpx_sw_reset(&dev_ctx);
 
   /* Start Machine Learning Core configuration */
   for ( i = 0; i < (sizeof(iis2dulpx_vibration_monitoring_conf_0) / sizeof(struct mems_conf_op) ); i++ ) {

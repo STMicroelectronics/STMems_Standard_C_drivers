@@ -186,7 +186,6 @@ void lsm6dsv16x_sensor_hub_handler(void)
 void lsm6dsv16x_sensor_hub(void)
 {
   lsm6dsv16x_pin_int_route_t pin_int;
-  lsm6dsv16x_reset_t rst;
   lsm6dsv16x_sh_cfg_read_t sh_cfg_read;
   lps22df_id_t id;
   lps22df_bus_mode_t bus_mode;
@@ -225,13 +224,11 @@ void lsm6dsv16x_sensor_hub(void)
     while (1);
 
   /* Restore default configuration */
-  lsm6dsv16x_reset_set(&lsm6dsv16x_ctx, LSM6DSV16X_RESTORE_CTRL_REGS);
-  do {
-    lsm6dsv16x_reset_get(&lsm6dsv16x_ctx, &rst);
-  } while (rst != LSM6DSV16X_READY);
+  lsm6dsv16x_sw_por(&lsm6dsv16x_ctx);
 
   /* Enable Block Data Update */
   lsm6dsv16x_block_data_update_set(&lsm6dsv16x_ctx, PROPERTY_ENABLE);
+
   /* Set full scale */
   lsm6dsv16x_xl_full_scale_set(&lsm6dsv16x_ctx, LSM6DSV16X_2g);
 

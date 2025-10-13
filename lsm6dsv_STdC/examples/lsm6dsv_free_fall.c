@@ -142,17 +142,19 @@ void lsm6dsv_free_fall_handler(void)
 void lsm6dsv_free_fall(void)
 {
   lsm6dsv_pin_int_route_t pin_int;
-  lsm6dsv_reset_t rst;
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
+
   /* Check device ID */
   lsm6dsv_device_id_get(&dev_ctx, &whoamI);
 
@@ -160,10 +162,7 @@ void lsm6dsv_free_fall(void)
     while (1);
 
   /* Restore default configuration */
-  lsm6dsv_reset_set(&dev_ctx, LSM6DSV_RESTORE_CTRL_REGS);
-  do {
-    lsm6dsv_reset_get(&dev_ctx, &rst);
-  } while (rst != LSM6DSV_READY);
+  lsm6dsv_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
   lsm6dsv_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);

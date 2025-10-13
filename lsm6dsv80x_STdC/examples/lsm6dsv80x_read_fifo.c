@@ -357,7 +357,6 @@ void lsm6dsv80x_read_fifo_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lsm6dsv80x_read_fifo(void)
 {
-  lsm6dsv80x_reset_t rst;
   lsm6dsv80x_pin_int_route_t pin_int = { 0 };
 
   /* Initialize mems driver interface */
@@ -375,11 +374,8 @@ void lsm6dsv80x_read_fifo(void)
   if (whoamI != LSM6DSV80X_ID)
     while (1);
 
-  /* Restore default configuration */
-  lsm6dsv80x_reset_set(&dev_ctx, LSM6DSV80X_RESTORE_CTRL_REGS);
-  do {
-    lsm6dsv80x_reset_get(&dev_ctx, &rst);
-  } while (rst != LSM6DSV80X_READY);
+  /* Perform device power-on-reset */
+  lsm6dsv80x_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
   lsm6dsv80x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);

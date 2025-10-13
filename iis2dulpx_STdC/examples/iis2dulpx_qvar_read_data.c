@@ -165,13 +165,10 @@ void iis2dulpx_qvar_read_data(void)
     while(1);
 
   /* Restore default configuration */
-  iis2dulpx_init_set(&dev_ctx, IIS2DULPX_RESET);
-  do {
-    iis2dulpx_status_get(&dev_ctx, &status);
-  } while (status.sw_reset);
+  iis2dulpx_sw_reset(&dev_ctx);
 
-  /* Set bdu and if_inc recommended for driver usage */
-  iis2dulpx_init_set(&dev_ctx, IIS2DULPX_SENSOR_ONLY_ON);
+  /* init bdu and add_inc */
+  iis2dulpx_init_set(&dev_ctx);
 
   /* Configure interrupt pins */
   int_route.drdy       = PROPERTY_ENABLE;

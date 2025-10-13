@@ -366,7 +366,6 @@ void lsm6dsv320x_read_fifo_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lsm6dsv320x_read_fifo(void)
 {
-  lsm6dsv320x_reset_t rst;
   lsm6dsv320x_pin_int_route_t pin_int = { 0 };
 
   /* Initialize mems driver interface */
@@ -374,21 +373,21 @@ void lsm6dsv320x_read_fifo(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
+
   /* Check device ID */
   lsm6dsv320x_device_id_get(&dev_ctx, &whoamI);
 
   if (whoamI != LSM6DSV320X_ID)
     while (1);
 
-  /* Restore default configuration */
-  lsm6dsv320x_reset_set(&dev_ctx, LSM6DSV320X_RESTORE_CTRL_REGS);
-  do {
-    lsm6dsv320x_reset_get(&dev_ctx, &rst);
-  } while (rst != LSM6DSV320X_READY);
+  /* Perform device power-on-reset */
+  lsm6dsv320x_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
   lsm6dsv320x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
@@ -398,10 +397,12 @@ void lsm6dsv320x_read_fifo(void)
    * stored in FIFO) to FIFO_WATERMARK samples
    */
   lsm6dsv320x_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
+
   /* Set FIFO batch XL/Gyro ODR */
   lsm6dsv320x_fifo_xl_batch_set(&dev_ctx, LSM6DSV320X_XL_BATCHED_AT_60Hz);
   lsm6dsv320x_fifo_hg_xl_batch_set(&dev_ctx, 1);
   lsm6dsv320x_fifo_gy_batch_set(&dev_ctx, LSM6DSV320X_GY_BATCHED_AT_120Hz);
+
   /* Set FIFO batch SFLP */
   lsm6dsv320x_sflp_data_rate_set(&dev_ctx, LSM6DSV320X_SFLP_120Hz);
 

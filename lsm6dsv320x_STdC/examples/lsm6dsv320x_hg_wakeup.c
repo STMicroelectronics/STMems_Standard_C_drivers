@@ -145,7 +145,6 @@ void lsm6dsv320x_hg_wakeup_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lsm6dsv320x_hg_wakeup(void)
 {
-  lsm6dsv320x_reset_t rst;
   lsm6dsv320x_pin_int_route_t pin_int = { 0 };
   lsm6dsv320x_hg_wake_up_cfg_t wu_cfg = { 0 };
   lsm6dsv320x_hg_wu_interrupt_cfg_t int_cfg = { 0 };
@@ -155,21 +154,21 @@ void lsm6dsv320x_hg_wakeup(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
+
   /* Check device ID */
   lsm6dsv320x_device_id_get(&dev_ctx, &whoamI);
 
   if (whoamI != LSM6DSV320X_ID)
     while (1);
 
-  /* Restore default configuration */
-  lsm6dsv320x_reset_set(&dev_ctx, LSM6DSV320X_RESTORE_CTRL_REGS);
-  do {
-    lsm6dsv320x_reset_get(&dev_ctx, &rst);
-  } while (rst != LSM6DSV320X_READY);
+  /* Perform device power-on-reset */
+  lsm6dsv320x_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
   lsm6dsv320x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);

@@ -145,7 +145,6 @@ void lis2duxs12_tilt_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lis2duxs12_tilt(void)
 {
-  lis2duxs12_status_t status;
   uint8_t id;
   lis2duxs12_md_t md;
   lis2duxs12_int_config_t int_mode;
@@ -170,13 +169,11 @@ void lis2duxs12_tilt(void)
     while(1);
 
   /* Restore default configuration */
-  lis2duxs12_init_set(&dev_ctx, LIS2DUXS12_RESET);
-  do {
-    lis2duxs12_status_get(&dev_ctx, &status);
-  } while (status.sw_reset);
+  lis2duxs12_sw_reset(&dev_ctx);
 
-  /* Set bdu and if_inc recommended for driver usage */
-  lis2duxs12_init_set(&dev_ctx, LIS2DUXS12_SENSOR_EMB_FUNC_ON);
+  /* init bdu and add_inc */
+  lis2duxs12_init_set(&dev_ctx);
+
   platform_delay(10);
 
   lis2duxs12_tilt_mode_set(&dev_ctx, 1);

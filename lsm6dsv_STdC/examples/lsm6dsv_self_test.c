@@ -143,7 +143,6 @@ void lsm6dsv_self_test(void)
   float_t test_val[3];
   uint8_t st_result;
   uint8_t whoamI;
-  lsm6dsv_reset_t rst;
   uint8_t i;
   uint8_t j;
 
@@ -152,8 +151,10 @@ void lsm6dsv_self_test(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
 
@@ -164,10 +165,7 @@ void lsm6dsv_self_test(void)
     while (1);
 
   /* Restore default configuration */
-  lsm6dsv_reset_set(&dev_ctx, LSM6DSV_RESTORE_CTRL_REGS);
-  do {
-    lsm6dsv_reset_get(&dev_ctx, &rst);
-  } while (rst != LSM6DSV_READY);
+  lsm6dsv_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
   lsm6dsv_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);

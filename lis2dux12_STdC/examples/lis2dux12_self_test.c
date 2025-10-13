@@ -175,7 +175,6 @@ static void lis2dux12_st_avg_5_samples(stmdev_ctx_t *ctx,
 /* Main Example --------------------------------------------------------------*/
 void lis2dux12_self_test(void)
 {
-  lis2dux12_status_t status;
   lis2dux12_md_t md;
   lis2dux12_fifo_mode_t fifo_mode;
   uint8_t id;
@@ -204,10 +203,10 @@ void lis2dux12_self_test(void)
     while(1);
 
   /* Restore default configuration */
-  lis2dux12_init_set(&dev_ctx, LIS2DUX12_RESET);
-  do {
-    lis2dux12_status_get(&dev_ctx, &status);
-  } while (status.sw_reset);
+  lis2dux12_sw_reset(&dev_ctx);
+
+  /* init bdu and add_inc */
+  lis2dux12_init_set(&dev_ctx);
 
   /*
    * Accelerometer Self Test

@@ -153,7 +153,6 @@ void lis2dux12_read_fifo_handler(void)
 void lis2dux12_read_fifo(void)
 {
   lis2dux12_pin_int_route_t int1_route;
-  lis2dux12_status_t status;
   uint8_t id;
 
   /* Initialize mems driver interface */
@@ -176,13 +175,10 @@ void lis2dux12_read_fifo(void)
     while(1);
 
   /* Restore default configuration */
-  lis2dux12_init_set(&dev_ctx, LIS2DUX12_RESET);
-  do {
-    lis2dux12_status_get(&dev_ctx, &status);
-  } while (status.sw_reset);
+  lis2dux12_sw_reset(&dev_ctx);
 
-  /* Set bdu and if_inc recommended for driver usage */
-  lis2dux12_init_set(&dev_ctx, LIS2DUX12_SENSOR_ONLY_ON);
+  /* init bdu and add_inc */
+  lis2dux12_init_set(&dev_ctx);
 
   /* Set FIFO watermark to 32 sample(s) */
   fifo_mode.store = LIS2DUX12_FIFO_1X;

@@ -165,13 +165,10 @@ void lis2duxs12_qvar_read_data(void)
     while(1);
 
   /* Restore default configuration */
-  lis2duxs12_init_set(&dev_ctx, LIS2DUXS12_RESET);
-  do {
-    lis2duxs12_status_get(&dev_ctx, &status);
-  } while (status.sw_reset);
+  lis2duxs12_sw_reset(&dev_ctx);
 
-  /* Set bdu and if_inc recommended for driver usage */
-  lis2duxs12_init_set(&dev_ctx, LIS2DUXS12_SENSOR_ONLY_ON);
+  /* init bdu and add_inc */
+  lis2duxs12_init_set(&dev_ctx);
 
   /* Configure interrupt pins */
   int_route.drdy       = PROPERTY_ENABLE;

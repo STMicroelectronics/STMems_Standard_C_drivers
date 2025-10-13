@@ -175,7 +175,6 @@ static void iis2dulpx_st_avg_5_samples(stmdev_ctx_t *ctx,
 /* Main Example --------------------------------------------------------------*/
 void iis2dulpx_self_test(void)
 {
-  iis2dulpx_status_t status;
   iis2dulpx_md_t md;
   iis2dulpx_fifo_mode_t fifo_mode;
   uint8_t id;
@@ -204,10 +203,7 @@ void iis2dulpx_self_test(void)
     while(1);
 
   /* Restore default configuration */
-  iis2dulpx_init_set(&dev_ctx, IIS2DULPX_RESET);
-  do {
-    iis2dulpx_status_get(&dev_ctx, &status);
-  } while (status.sw_reset);
+  iis2dulpx_sw_reset(&dev_ctx);
 
   /*
    * Accelerometer Self Test

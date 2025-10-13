@@ -182,13 +182,13 @@ void lsm6dsv16x_sensor_fusion(void)
 {
   lsm6dsv16x_fifo_status_t fifo_status;
   stmdev_ctx_t dev_ctx;
-  lsm6dsv16x_reset_t rst;
   lsm6dsv16x_sflp_gbias_t gbias;
 
   /* Uncomment to configure INT 1 */
   //lsm6dsv16x_pin_int1_route_t int1_route;
   /* Uncomment to configure INT 2 */
   //lsm6dsv16x_pin_int2_route_t int2_route;
+
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
@@ -197,6 +197,7 @@ void lsm6dsv16x_sensor_fusion(void)
 
   /* Init test platform */
   platform_init(dev_ctx.handle);
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
 
@@ -207,10 +208,7 @@ void lsm6dsv16x_sensor_fusion(void)
     while (1);
 
   /* Restore default configuration */
-  lsm6dsv16x_reset_set(&dev_ctx, LSM6DSV16X_RESTORE_CTRL_REGS);
-  do {
-    lsm6dsv16x_reset_get(&dev_ctx, &rst);
-  } while (rst != LSM6DSV16X_READY);
+  lsm6dsv16x_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
   lsm6dsv16x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);

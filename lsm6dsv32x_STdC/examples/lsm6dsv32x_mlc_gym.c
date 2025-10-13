@@ -142,7 +142,6 @@ void lsm6dsv32x_mlc_gym_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lsm6dsv32x_mlc_gym(void)
 {
-  lsm6dsv32x_reset_t rst;
   uint32_t i;
 
   /* Initialize mems driver interface */
@@ -150,10 +149,13 @@ void lsm6dsv32x_mlc_gym(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
+
   /* Check device ID */
   lsm6dsv32x_device_id_get(&dev_ctx, &whoamI);
 
@@ -161,10 +163,7 @@ void lsm6dsv32x_mlc_gym(void)
     while (1);
 
   /* Restore default configuration */
-  lsm6dsv32x_reset_set(&dev_ctx, LSM6DSV32X_RESTORE_CTRL_REGS);
-  do {
-    lsm6dsv32x_reset_get(&dev_ctx, &rst);
-  } while (rst != LSM6DSV32X_READY);
+  lsm6dsv32x_sw_por(&dev_ctx);
 
   /* Start Machine Learning Core configuration */
   for ( i = 0; i < (sizeof(lsm6dsv32x_gym_activity_recognition_right_conf_0) /

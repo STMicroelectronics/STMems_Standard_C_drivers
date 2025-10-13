@@ -159,7 +159,6 @@ void lsm6dsv16x_wakeup_handler(void)
 void lsm6dsv16x_wakeup(void)
 {
   lsm6dsv16x_pin_int_route_t pin_int;
-  lsm6dsv16x_reset_t rst;
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
@@ -169,8 +168,10 @@ void lsm6dsv16x_wakeup(void)
 
   /* Init test platform */
   platform_init(dev_ctx.handle);
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
+
   /* Check device ID */
   lsm6dsv16x_device_id_get(&dev_ctx, &whoamI);
 
@@ -178,10 +179,7 @@ void lsm6dsv16x_wakeup(void)
     while (1);
 
   /* Restore default configuration */
-  lsm6dsv16x_reset_set(&dev_ctx, LSM6DSV16X_RESTORE_CTRL_REGS);
-  do {
-    lsm6dsv16x_reset_get(&dev_ctx, &rst);
-  } while (rst != LSM6DSV16X_READY);
+  lsm6dsv16x_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
   lsm6dsv16x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);

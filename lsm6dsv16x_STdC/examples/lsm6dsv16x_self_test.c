@@ -159,9 +159,9 @@ void lsm6dsv16x_self_test(void)
   float_t test_val[3];
   uint8_t st_result;
   uint8_t whoamI;
-  lsm6dsv16x_reset_t rst;
   uint8_t i;
   uint8_t j;
+
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
@@ -170,6 +170,7 @@ void lsm6dsv16x_self_test(void)
 
   /* Init test platform */
   platform_init(dev_ctx.handle);
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
 
@@ -180,10 +181,7 @@ void lsm6dsv16x_self_test(void)
     while (1);
 
   /* Restore default configuration */
-  lsm6dsv16x_reset_set(&dev_ctx, LSM6DSV16X_RESTORE_CTRL_REGS);
-  do {
-    lsm6dsv16x_reset_get(&dev_ctx, &rst);
-  } while (rst != LSM6DSV16X_READY);
+  lsm6dsv16x_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
   lsm6dsv16x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);

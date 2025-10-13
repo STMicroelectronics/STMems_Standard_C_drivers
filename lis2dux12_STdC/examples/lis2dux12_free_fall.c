@@ -144,7 +144,6 @@ void lis2dux12_ff_handler(void)
 void lis2dux12_free_fall(void)
 {
   lis2dux12_pin_int_route_t int1_route;
-  lis2dux12_status_t status;
   uint8_t id;
   lis2dux12_md_t md;
   lis2dux12_int_config_t int_mode;
@@ -169,13 +168,10 @@ void lis2dux12_free_fall(void)
     while(1);
 
   /* Restore default configuration */
-  lis2dux12_init_set(&dev_ctx, LIS2DUX12_RESET);
-  do {
-    lis2dux12_status_get(&dev_ctx, &status);
-  } while (status.sw_reset);
+  lis2dux12_sw_reset(&dev_ctx);
 
-  /* Set bdu and if_inc recommended for driver usage */
-  lis2dux12_init_set(&dev_ctx, LIS2DUX12_SENSOR_ONLY_ON);
+  /* init bdu and add_inc */
+  lis2dux12_init_set(&dev_ctx);
 
   lis2dux12_ff_duration_set(&dev_ctx, 10);
   lis2dux12_ff_thresholds_set(&dev_ctx, LIS2DUX12_312_mg);

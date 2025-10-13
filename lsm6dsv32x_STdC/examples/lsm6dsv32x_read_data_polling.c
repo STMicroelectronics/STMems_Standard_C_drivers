@@ -133,16 +133,19 @@ void lsm6dsv32x_read_data_polling(void)
 {
   lsm6dsv32x_filt_settling_mask_t filt_settling_mask;
   lsm6dsv32x_data_ready_t drdy;
-  lsm6dsv32x_reset_t rst;
   stmdev_ctx_t dev_ctx;
+
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.handle = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
+
   /* Check device ID */
   lsm6dsv32x_device_id_get(&dev_ctx, &whoamI);
 
@@ -150,10 +153,7 @@ void lsm6dsv32x_read_data_polling(void)
     while (1);
 
   /* Restore default configuration */
-  lsm6dsv32x_reset_set(&dev_ctx, LSM6DSV32X_RESTORE_CTRL_REGS);
-  do {
-    lsm6dsv32x_reset_get(&dev_ctx, &rst);
-  } while (rst != LSM6DSV32X_READY);
+  lsm6dsv32x_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
   lsm6dsv32x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
