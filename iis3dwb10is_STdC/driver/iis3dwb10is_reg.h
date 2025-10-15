@@ -845,14 +845,9 @@ typedef enum
 int32_t iis3dwb10is_mem_bank_set(const stmdev_ctx_t *ctx, iis3dwb10is_mem_bank_t val);
 int32_t iis3dwb10is_mem_bank_get(const stmdev_ctx_t *ctx, iis3dwb10is_mem_bank_t *val);
 
-typedef struct
-{
-  uint8_t sw_por : 1; /* Complete reset of sensor */
-  uint8_t sw_rst : 1; /* Reset register to default */
-  uint8_t boot   : 1; /* reloads memory content */
-} iis3dwb10is_reset_t;
-int32_t iis3dwb10is_reset_set(const stmdev_ctx_t *ctx, iis3dwb10is_reset_t val);
-int32_t iis3dwb10is_reset_get(const stmdev_ctx_t *ctx, iis3dwb10is_reset_t *val);
+int32_t iis3dwb10is_reboot(const stmdev_ctx_t *ctx);
+int32_t iis3dwb10is_sw_por(const stmdev_ctx_t *ctx);
+int32_t iis3dwb10is_sw_reset(const stmdev_ctx_t *ctx);
 
 typedef struct
 {

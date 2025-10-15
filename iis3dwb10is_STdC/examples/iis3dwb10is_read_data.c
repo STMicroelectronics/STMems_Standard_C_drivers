@@ -146,7 +146,6 @@ void iis3dwb10is_read_data_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void iis3dwb10is_read_data(void)
 {
-  iis3dwb10is_reset_t rst;
   iis3dwb10is_data_rate_t rate;
   iis3dwb10is_xl_data_cfg_t xl_cfg;
 
@@ -166,13 +165,7 @@ void iis3dwb10is_read_data(void)
     while (1);
 
   /* Restore default configuration */
-  rst.boot = 1;
-  rst.sw_rst = 1;
-  iis3dwb10is_reset_set(&dev_ctx, rst);
-
-  do {
-    iis3dwb10is_reset_get(&dev_ctx, &rst);
-  } while (rst.sw_rst);
+  iis3dwb10is_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
   iis3dwb10is_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);

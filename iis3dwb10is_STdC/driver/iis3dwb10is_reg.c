@@ -222,52 +222,151 @@ int32_t iis3dwb10is_mem_bank_get(const stmdev_ctx_t *ctx, iis3dwb10is_mem_bank_t
 }
 
 /**
-  * @brief  reset device.[set]
+  * @brief  Perform reboot of the device.
   *
   * @param  ctx      read / write interface definitions
-  * @param  val      enum iis3dwb10is_reset_t
-  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  * @retval          0: reboot has been performed, -1: error
   *
   */
-int32_t iis3dwb10is_reset_set(const stmdev_ctx_t *ctx, iis3dwb10is_reset_t val)
+int32_t iis3dwb10is_reboot(const stmdev_ctx_t *ctx)
 {
+  iis3dwb10is_ctrl3_t ctrl3;
+  iis3dwb10is_data_rate_t val;
   int32_t ret;
 
-  if (val.sw_por) {
-    iis3dwb10is_ram_access_t ram_access;
-
-    ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_RAM_ACCESS, (uint8_t *)&ram_access, 1);
-    ram_access.sw_por = (uint8_t)val.sw_por;
-    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_RAM_ACCESS, (uint8_t *)&ram_access, 1);
-  } else {
-    iis3dwb10is_ctrl3_t ctrl3;
-
-    ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
-    ctrl3.sw_reset = (uint8_t)val.sw_rst;
-    ctrl3.boot = (uint8_t)val.boot;
-    ret += iis3dwb10is_write_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
+  if (ctx->mdelay == NULL)
+  {
+    ret = -1;
+    goto exit;
   }
 
+  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  /* 1. Set the accelerometer in idle mode */
+  val.odr = IIS3DWB10IS_ODR_IDLE;
+  ret = iis3dwb10is_xl_data_rate_set(ctx, val);
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  /* 2. wait 1 ms */
+  ctx->mdelay(1);
+
+  /* 3. Set the BOOT bit of the CTRL3 register to 1. */
+  ctrl3.boot = 1;
+  ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  /* 4. Wait 20 ms. */
+  ctx->mdelay(20);
+
+exit:
   return ret;
 }
 
 /**
-  * @brief  reset device.[get]
+  * @brief  Perform power-on-reset of the device.
   *
   * @param  ctx      read / write interface definitions
-  * @param  val      pointer to enum iis3dwb10is_reset_t
-  * @retval          interface status (MANDATORY: return 0 -> no Error)
+  * @retval          0: power-on-reset has been performed, -1: error
   *
   */
-int32_t iis3dwb10is_reset_get(const stmdev_ctx_t *ctx, iis3dwb10is_reset_t *val)
+int32_t iis3dwb10is_sw_por(const stmdev_ctx_t *ctx)
 {
-  iis3dwb10is_ctrl3_t ctrl3;
+  iis3dwb10is_ram_access_t ram_access = {0};
+  iis3dwb10is_data_rate_t val;
   int32_t ret;
 
-  ret = iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
-  val->sw_rst = ctrl3.sw_reset;
-  val->boot = ctrl3.boot;
+  if (ctx->mdelay == NULL)
+  {
+    ret = -1;
+    goto exit;
+  }
 
+  /* 1. Set the accelerometer in idle mode */
+  val.odr = IIS3DWB10IS_ODR_IDLE;
+  ret = iis3dwb10is_xl_data_rate_set(ctx, val);
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  /* 2. wait 1 ms */
+  ctx->mdelay(1);
+
+  /* 3. Set the SW_POR bit of the FUNC_CFG_ACCESS register to 1. */
+  ram_access.sw_por = 1;
+  ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_RAM_ACCESS, (uint8_t *)&ram_access, 1);
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  /* 4. Wait 20 ms. */
+  ctx->mdelay(20);
+
+exit:
+  return ret;
+}
+
+/**
+  * @brief  Perform s/w reset of the device.
+  *
+  * @param  ctx      read / write interface definitions
+  * @retval          0: s/w reset has been performed, -1: error
+  *
+  */
+int32_t iis3dwb10is_sw_reset(const stmdev_ctx_t *ctx)
+{
+  iis3dwb10is_ctrl3_t ctrl3 = {0};
+  iis3dwb10is_data_rate_t val;
+  uint8_t retry = 0;
+  int32_t ret;
+
+  if (ctx->mdelay == NULL)
+  {
+    ret = -1;
+    goto exit;
+  }
+
+  /* 1. Set the accelerometer in idle mode */
+  val.odr = IIS3DWB10IS_ODR_IDLE;
+  ret = iis3dwb10is_xl_data_rate_set(ctx, val);
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  /* 2. wait 1 ms */
+  ctx->mdelay(1);
+
+  /* 3. Set the SW_RESET bit to 1. */
+  ctrl3.sw_reset = 1;
+  ret = iis3dwb10is_write_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
+
+  /* 4. Poll the SW_RESET bit until it returns to 0. */
+  do
+  {
+    ret += iis3dwb10is_read_reg(ctx, IIS3DWB10IS_CTRL3, (uint8_t *)&ctrl3, 1);
+    if (ret != 0)
+    {
+      goto exit;
+    }
+
+    ctx->mdelay(1);
+  } while (ctrl3.sw_reset == 1 && retry++ < 3);
+
+  return (ctrl3.sw_reset == 0) ? 0 : -1;
+
+exit:
   return ret;
 }
 

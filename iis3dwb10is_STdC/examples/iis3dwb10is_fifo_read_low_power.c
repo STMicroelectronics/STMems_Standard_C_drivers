@@ -218,7 +218,6 @@ static void iis3dwb10is_fifo_read_lp_thread(void)
 /* Main Example --------------------------------------------------------------*/
 void iis3dwb10is_fifo_read_low_power(void)
 {
-  iis3dwb10is_reset_t rst;
   iis3dwb10is_data_rate_t rate;
   iis3dwb10is_fifo_sensor_batch_t fifo_batch;
   iis3dwb10is_slpcnt_cfg_t slp_cfg;
@@ -241,13 +240,7 @@ void iis3dwb10is_fifo_read_low_power(void)
     while (1);
 
   /* Restore default configuration */
-  rst.boot = 1;
-  rst.sw_rst = 1;
-  iis3dwb10is_reset_set(&dev_ctx, rst);
-
-  do {
-    iis3dwb10is_reset_get(&dev_ctx, &rst);
-  } while (rst.sw_rst);
+  iis3dwb10is_sw_por(&dev_ctx);
 
   /*
    * Set FIFO watermark (number of unread sensor data TAG + 9 bytes
