@@ -325,3 +325,6 @@
 [submodule "ism6hg256x_STdC/driver"]
 	path = ism6hg256x_STdC/driver
 	url = https://github.com/STMicroelectronics/ism6hg256x-pid
+[submodule "iis3dwbg1_STdC/driver"]
+	path = iis3dwbg1_STdC/driver
+	url = https://github.com/STMicroelectronics/iis3dwbg1-pid
