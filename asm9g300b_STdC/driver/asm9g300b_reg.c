@@ -118,8 +118,7 @@ int32_t asm9g300b_dec_miso_frame(uint32_t frame, uint16_t *data)
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t __weak asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint8_t *data,
-                                  uint16_t len)
+int32_t __weak asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint8_t *data)
 {
   uint32_t frame;
   uint16_t d;
@@ -130,7 +129,7 @@ int32_t __weak asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint8_t 
     return -1;
   }
 
-  ret = ctx->read_reg(ctx->handle, reg, (uint8_t *)&frame, len);
+  ret = ctx->read_reg(ctx->handle, reg, (uint8_t *)&frame, 1);
   if (ret < 0)
   {
     return -1;
@@ -158,8 +157,7 @@ int32_t __weak asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint8_t 
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t __weak asm9g300b_write_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint16_t *data,
-                                   uint16_t len)
+int32_t __weak asm9g300b_write_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint16_t *data)
 {
   uint32_t fr;
 
@@ -171,7 +169,7 @@ int32_t __weak asm9g300b_write_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint16_
   fr = asm9g300b_gen_mosi_frame(reg, 1, *data);
 
   /* send frame. Pls note that 'reg' is already incapsulated in frame */
-  return ctx->write_reg(ctx->handle, 0, (uint8_t *)&fr, 2);
+  return ctx->write_reg(ctx->handle, 0, (uint8_t *)&fr, 1);
 }
 
 /**
@@ -192,7 +190,7 @@ int32_t asm9g300b_set_command(const stmdev_ctx_t *ctx, asm9g300b_commands_t cmd)
   uint16_t val = (uint16_t)cmd;
   int32_t ret;
 
-  ret = asm9g300b_write_reg(ctx, ASM9G300B_CONFIG02, &val, 1);
+  ret = asm9g300b_write_reg(ctx, ASM9G300B_CONFIG02, &val);
 
   return ret;
 }
@@ -228,13 +226,13 @@ int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx)
   val1 = 0x1234;
 
   do {
-    ret = asm9g300b_write_reg(ctx, ASM9G300B_TEST_REG, &val1, 1);
+    ret = asm9g300b_write_reg(ctx, ASM9G300B_TEST_REG, &val1);
     if (ret == -1) {
       return -1;
     }
 
     val2 = 0;
-    ret = asm9g300b_read_reg(ctx, ASM9G300B_TEST_REG, (uint8_t *)&val2, 1);
+    ret = asm9g300b_read_reg(ctx, ASM9G300B_TEST_REG, (uint8_t *)&val2);
     if (ret == -1) {
       return -1;
     }

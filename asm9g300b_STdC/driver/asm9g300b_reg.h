@@ -853,11 +853,9 @@ uint32_t asm9g300b_gen_mosi_frame(uint8_t ta, uint8_t rw, uint16_t data);
  */
 
 int32_t asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg,
-                           uint8_t *data,
-                           uint16_t len);
+                           uint8_t *data);
 int32_t asm9g300b_write_reg(const stmdev_ctx_t *ctx, uint8_t reg,
-                            uint16_t *data,
-                            uint16_t len);
+                            uint16_t *data);
 
 typedef enum
 {
