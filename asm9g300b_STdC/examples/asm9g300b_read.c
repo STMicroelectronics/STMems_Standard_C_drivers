@@ -1,0 +1,278 @@
+/*
+ ******************************************************************************
+ * @file    read.c
+ * @author  Sensors Software Solution Team
+ * @brief   This file show the simplest way to get data from sensor.
+ *
+ ******************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2020 STMicroelectronics.
+ * All rights reserved.</center></h2>
+ *
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
+ *
+ ******************************************************************************
+ */
+
+/*
+ * This example was developed using the following STMicroelectronics
+ * evaluation boards:
+ *
+ * - STEVAL_MKI109V3 + STEVAL-MKI208V1K
+ * - DISCOVERY_SPC584B + STEVAL-MKI208V1K
+ *
+ * and STM32CubeMX tool with STM32CubeF4 MCU Package
+ *
+ * Used interfaces:
+ *
+ * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
+ *                    - Sensor side: SPI(Default) / I2C(supported)
+ *
+ * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I2C(Default) / SPI(supported)
+ *
+ *
+ * If you need to run this example on a different hardware platform a
+ * modification of the functions: `platform_write`, `platform_read`,
+ * `tx_com` and 'platform_init' is required.
+ *
+ */
+
+/* STMicroelectronics evaluation boards definition
+ *
+ * Please uncomment ONLY the evaluation boards in use.
+ * If a different hardware is used please comment all
+ * following target board and redefine yours.
+ */
+
+//#define STEVAL_MKI109V3  /* little endian */
+//#define SPC584B_DIS      /* big endian */
+
+/* ATTENTION: By default the driver is little endian. If you need switch
+ *            to big endian please see "Endianness definitions" in the
+ *            header file of the driver (_reg.h).
+ */
+
+#if defined(STEVAL_MKI109V3)
+/* MKI109V3: Define communication interface */
+#define SENSOR_BUS hspi2
+/* MKI109V3: Vdd and Vddio power supply values */
+#define PWM_3V3 915
+
+#elif defined(SPC584B_DIS)
+/* DISCOVERY_SPC584B: Define communication interface */
+#define SENSOR_BUS NULL
+#endif
+
+/* Includes ------------------------------------------------------------------*/
+#include <string.h>
+#include <stdio.h>
+#include "iis3dwb_reg.h"
+
+#if defined(NUCLEO_F411RE)
+#include "stm32f4xx_hal.h"
+#include "usart.h"
+#include "gpio.h"
+#include "i2c.h"
+
+#elif defined(STEVAL_MKI109V3)
+#include "stm32f4xx_hal.h"
+#include "usbd_cdc_if.h"
+#include "gpio.h"
+#include "spi.h"
+#include "tim.h"
+
+#elif defined(SPC584B_DIS)
+#include "components.h"
+#endif
+
+/* Private macro -------------------------------------------------------------*/
+#define    BOOT_TIME        10 //ms
+
+/* Private variables ---------------------------------------------------------*/
+static int16_t data_raw_acceleration[3];
+static int16_t data_raw_temperature;
+static float acceleration_mg[3];
+static float temperature_degC;
+static uint8_t whoamI, rst;
+static uint8_t tx_buffer[1000];
+
+/* Extern variables ----------------------------------------------------------*/
+
+/* Private functions ---------------------------------------------------------*/
+
+/*
+ *   WARNING:
+ *   Functions declare in this section are defined at the end of this file
+ *   and are strictly related to the hardware platform used.
+ *
+ */
+static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
+                              uint16_t len);
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
+                             uint16_t len);
+static void tx_com( uint8_t *tx_buffer, uint16_t len );
+static void platform_delay(uint32_t ms);
+static void platform_init(void);
+
+/* Main Example --------------------------------------------------------------*/
+void asm9g300b_read(void)
+{
+  stmdev_ctx_t dev_ctx;
+  /* Initialize mems driver interface */
+  dev_ctx.write_reg = platform_write;
+  dev_ctx.read_reg = platform_read;
+  dev_ctx.mdelay = platform_delay;
+  dev_ctx.handle = &SENSOR_BUS;
+
+  /* Init test platform */
+  platform_init();
+
+  /* Wait sensor boot time */
+  //platform_delay(BOOT_TIME);
+
+  asm9g300b_startup(&dev_ctx);
+}
+
+/*
+ * @brief  Write generic device register (platform dependent)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to write
+ * @param  bufp      pointer to data to write in register reg
+ * @param  len       number of consecutive register to write
+ *
+ */
+static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
+                              uint16_t len)
+{
+#ifdef STEVAL_MKI109V3
+  uint8_t txBuf[4];
+
+  txBuf[0] = bufp[3];	//MSB[3]
+  txBuf[1] = bufp[2];	//MSB[2]
+  txBuf[2] = bufp[1];	//MSB[1]
+  txBuf[3] = bufp[0];			//MSB[0]
+
+  if (handle == &hspi2) {
+    //HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+    //HAL_SPI_Transmit(handle, &reg, 1, 1000);
+    //HAL_SPI_Transmit(handle, (uint8_t*) bufp, len, 1000);
+   // HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+
+      HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+      uint8_t status = (HAL_SPI_Transmit(handle, txBuf, 4, HAL_MAX_DELAY) == HAL_OK);
+      while(HAL_SPI_GetState(handle) != HAL_SPI_STATE_READY);
+      HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+
+
+  }
+
+#elif defined(SPC584B_DIS)
+  /* Add here the SPC5 write SPI interface */
+#endif
+  return 0;
+}
+
+/*
+ * @brief  Read generic device register (platform dependent)
+ *
+ * @param  handle    customizable argument. In this examples is used in
+ *                   order to select the correct sensor bus handler.
+ * @param  reg       register to read
+ * @param  bufp      pointer to buffer that store the data read
+ * @param  len       number of consecutive register to read
+ *
+ */
+static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
+                             uint16_t len)
+{
+#ifdef STEVAL_MKI109V3
+  uint8_t txBuf[4];
+  uint8_t rxBuf[4];
+
+  txBuf[0] = bufp[3];	//MSB[3]
+  txBuf[1] = bufp[2];	//MSB[2]
+  txBuf[2] = bufp[1];	//MSB[1]
+  txBuf[3] = bufp[0];			//MSB[0]
+
+  if (handle == &hspi2) {
+    /* Read command */
+    //reg |= 0x80;
+    //HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+    //HAL_SPI_Transmit(handle, &reg, 1, 1000);
+    //HAL_SPI_Receive(handle, bufp, len, 1000);
+    //HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+
+      HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+      HAL_SPI_TransmitReceive(handle, txBuf,rxBuf, 4, HAL_MAX_DELAY);
+      while(HAL_SPI_GetState(handle) != HAL_SPI_STATE_READY);
+      HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+
+      bufp[0] = rxBuf[3];
+      bufp[1] = rxBuf[2];
+      bufp[2] = rxBuf[1];
+      bufp[3] = rxBuf[0];
+ }
+
+#elif defined(SPC584B_DIS)
+  /* Add here the SPC5 read SPI interface */
+#endif
+  return 0;
+}
+
+/*
+ * @brief  Send buffer to console (platform dependent)
+ *
+ * @param  tx_buffer     buffer to transmit
+ * @param  len           number of byte to send
+ *
+ */
+static void tx_com(uint8_t *tx_buffer, uint16_t len)
+{
+#ifdef STEVAL_MKI109V3
+  CDC_Transmit_FS(tx_buffer, len);
+#elif defined(SPC584B_DIS)
+  sd_lld_write(&SD2, tx_buffer, len);
+#endif
+}
+
+/*
+ * @brief  platform specific delay (platform dependent)
+ *
+ * @param  ms        delay in ms
+ *
+ */
+static void platform_delay(uint32_t ms)
+{
+#if defined(NUCLEO_F411RE) | defined(STEVAL_MKI109V3)
+  HAL_Delay(ms);
+#elif defined(SPC584B_DIS)
+  osalThreadDelayMilliseconds(ms);
+#endif
+}
+
+/*
+ * @brief  platform specific initialization (platform dependent)
+ */
+static void platform_init(void)
+{
+#if defined(STEVAL_MKI109V3)
+  TIM3->CCR1 = PWM_3V3;
+  TIM3->CCR2 = PWM_3V3;
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
+  HAL_Delay(1000);
+
+  /* Toggle HAL GPIO */
+ // HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
+//  HAL_Delay(1);
+ // HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+ // HAL_Delay(50);
+#endif
+}
