@@ -212,8 +212,6 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   ret = asm9g300b_set_command(ctx, ASM9G300B_CMD_HARD_RESET);
   ctx->mdelay(20);
 
-  asm9g300b_check_spi_communication(ctx);
-
   /* Configure Combo4  */
   //Combo4_WriteRegister(imu, FILTER_CONTROL, Filter); /* (Set Filter to 60Hz and SDO Drive=0x1C00 is default) */
   ctx->mdelay(10);
@@ -224,23 +222,30 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
 int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx)
 {
   int32_t ret;
-  uint16_t val1, val2;
+  uint16_t val1, val2 = 0;
+  uint8_t i;
 
   val1 = 0x1234;
-  ret = asm9g300b_write_reg(ctx, ASM9G300B_TEST_REG, &val1, 1);
-  if (ret == -1) {
-    return -1;
-  }
 
-  ret = asm9g300b_read_reg(ctx, ASM9G300B_TEST_REG, (uint8_t *)&val2, 1);
-  if (ret == -1) {
-    return -1;
-  }
+  do {
+    ret = asm9g300b_write_reg(ctx, ASM9G300B_TEST_REG, &val1, 1);
+    if (ret == -1) {
+      return -1;
+    }
 
-  if (val1 != val2)
-  {
-    return -1;
-  }
+    val2 = 0;
+    ret = asm9g300b_read_reg(ctx, ASM9G300B_TEST_REG, (uint8_t *)&val2, 1);
+    if (ret == -1) {
+      return -1;
+    }
+
+    if (val1 != val2)
+    {
+      return -1;
+    }
+
+    val1 += 0x1111;
+  } while (i++ < 5);
 
   return ret;
 }

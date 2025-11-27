@@ -71,7 +71,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
-#include "iis3dwb_reg.h"
+#include "asm9g300b_reg.h"
 
 #if defined(NUCLEO_F411RE)
 #include "stm32f4xx_hal.h"
@@ -135,7 +135,14 @@ void asm9g300b_read(void)
   /* Wait sensor boot time */
   //platform_delay(BOOT_TIME);
 
+  if (asm9g300b_check_spi_communication(&dev_ctx) < 0)
+  {
+    while(1); /* stop here if SPI communication is not established */
+  }
+
   asm9g300b_startup(&dev_ctx);
+
+  while(1);
 }
 
 /*
