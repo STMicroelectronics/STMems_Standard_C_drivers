@@ -70,6 +70,7 @@ void iis3dwb10is_read_data_handler(void);
 void iis3dwb10is_read_data_16b_handler(void);
 void iis3dwb10is_fifo_read_handler(void);
 void iis3dwb10is_fifo_read_low_power_handler(void);
+void asm9g300b_read(void);
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
@@ -128,7 +129,7 @@ int main(void)
     //iis3dwb_fifo();
     //iis3dwb10is_read_data_16b();
     //iis3dwb10is_read_data();
-    iis3dwb10is_fifo_read();
+    asm9g300b_read();
     //iis3dwb10is_fifo_read_low_power();
     /* USER CODE END WHILE */
 

@@ -62,7 +62,7 @@
                 </option>
                 <option>
                     <name>RTDescription</name>
-                    <state>Use the full configuration of the C/C++ runtime library. Full locale interface, C locale, file descriptor support, multibytes in printf and scanf, and hex floats in strtod.</state>
+                    <state>A complete configuration of the C/C++14 runtime library. Full locale interface, C locale, file descriptor support, multibytes in printf and scanf, and hex floats in strtod.</state>
                 </option>
                 <option>
                     <name>OGProductVersion</name>
@@ -189,7 +189,7 @@
                 <option>
                     <name>TrustZoneModes</name>
                     <version>0</version>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>OGAarch64Abi</name>
@@ -364,6 +364,7 @@
                     <state>C:\Users\visconta\Projects\STdC\iis3dhhc_STdC\driver</state>
                     <state>C:\Users\visconta\Projects\STdC\iis3dwb_STdC\driver</state>
                     <state>C:\Users\visconta\Projects\STdC\iis3dwb10is_STdC\driver</state>
+                    <state>C:\Users\visconta\Projects\STdC\asm9g300b_STdC\driver</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -1148,6 +1149,15 @@
                 <name>$PROJ_DIR$\..\Src\usbd_desc.c</name>
             </file>
         </group>
+    </group>
+    <group>
+        <name>asm9g300b</name>
+        <file>
+            <name>$PROJ_DIR$\..\..\asm9g300b_STdC\examples\asm9g300b_read.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\asm9g300b_STdC\driver\asm9g300b_reg.c</name>
+        </file>
     </group>
     <group>
         <name>Drivers</name>
