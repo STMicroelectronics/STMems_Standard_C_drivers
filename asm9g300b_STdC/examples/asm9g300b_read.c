@@ -91,7 +91,7 @@
 #endif
 
 /* Private macro -------------------------------------------------------------*/
-#define    BOOT_TIME        10 //ms
+#define    BOOT_TIME        25 //ms
 
 /* Private variables ---------------------------------------------------------*/
 static int16_t data_raw_acceleration[3];
@@ -133,7 +133,7 @@ void asm9g300b_read(void)
   platform_init();
 
   /* Wait sensor boot time */
-  //platform_delay(BOOT_TIME);
+  platform_delay(BOOT_TIME);
 
   if (asm9g300b_check_spi_communication(&dev_ctx) < 0)
   {
