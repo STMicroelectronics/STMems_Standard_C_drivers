@@ -154,23 +154,16 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
 #ifdef STEVAL_MKI109V3
   uint8_t txBuf[4];
 
-  txBuf[0] = bufp[3];	//MSB[3]
-  txBuf[1] = bufp[2];	//MSB[2]
-  txBuf[2] = bufp[1];	//MSB[1]
-  txBuf[3] = bufp[0];			//MSB[0]
-
   if (handle == &hspi2) {
-    //HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    //HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    //HAL_SPI_Transmit(handle, (uint8_t*) bufp, len, 1000);
-   // HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+      txBuf[0] = bufp[3];
+      txBuf[1] = bufp[2];
+      txBuf[2] = bufp[1];
+      txBuf[3] = bufp[0];
 
       HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
       uint8_t status = (HAL_SPI_Transmit(handle, txBuf, 4, HAL_MAX_DELAY) == HAL_OK);
       while(HAL_SPI_GetState(handle) != HAL_SPI_STATE_READY);
       HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
-
-
   }
 
 #elif defined(SPC584B_DIS)
@@ -196,18 +189,11 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   uint8_t txBuf[4];
   uint8_t rxBuf[4];
 
-  txBuf[0] = bufp[3];	//MSB[3]
-  txBuf[1] = bufp[2];	//MSB[2]
-  txBuf[2] = bufp[1];	//MSB[1]
-  txBuf[3] = bufp[0];			//MSB[0]
-
   if (handle == &hspi2) {
-    /* Read command */
-    //reg |= 0x80;
-    //HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-    //HAL_SPI_Transmit(handle, &reg, 1, 1000);
-    //HAL_SPI_Receive(handle, bufp, len, 1000);
-    //HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
+      txBuf[0] = bufp[3];
+      txBuf[1] = bufp[2];
+      txBuf[2] = bufp[1];
+      txBuf[3] = bufp[0];
 
       HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
       HAL_SPI_TransmitReceive(handle, txBuf,rxBuf, 4, HAL_MAX_DELAY);
@@ -268,11 +254,5 @@ static void platform_init(void)
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
-
-  /* Toggle HAL GPIO */
- // HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
-//  HAL_Delay(1);
- // HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
- // HAL_Delay(50);
 #endif
 }
