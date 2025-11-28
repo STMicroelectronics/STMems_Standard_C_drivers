@@ -855,7 +855,7 @@ uint32_t asm9g300b_gen_mosi_frame(uint8_t ta, uint8_t rw, uint16_t data);
 int32_t asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg,
                            uint8_t *data);
 int32_t asm9g300b_write_reg(const stmdev_ctx_t *ctx, uint8_t reg,
-                            uint16_t *data);
+                            uint16_t data);
 
 typedef enum
 {
@@ -872,6 +872,13 @@ typedef enum
   ASM9G300B_CMD_EOI                = 0x3F,
 } asm9g300b_commands_t;
 int32_t asm9g300b_set_command(const stmdev_ctx_t *ctx, asm9g300b_commands_t cmd);
+
+/* IIR Filter values */
+#define ASM9G300B_IIR_FILTER_60HZ   0x0
+#define ASM9G300B_IIR_FILTER_30HZ   0x1
+#define ASM9G300B_IIR_FILTER_15HZ   0x2
+#define ASM9G300B_IIR_FILTER_300HZ  0x3
+#define ASM9G300B_IIR_FILTER_227HZ  0x3
 
 int32_t asm9g300b_startup(const stmdev_ctx_t *ctx);
 

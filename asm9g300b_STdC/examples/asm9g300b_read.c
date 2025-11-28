@@ -98,7 +98,7 @@ static int16_t data_raw_acceleration[3];
 static int16_t data_raw_temperature;
 static float acceleration_mg[3];
 static float temperature_degC;
-static uint8_t whoamI, rst;
+//static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
 /* Extern variables ----------------------------------------------------------*/
@@ -162,10 +162,13 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
   uint8_t txBuf[4];
 
   if (handle == &hspi2) {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+      /* on SPI bus dta is sent big endian */
       txBuf[0] = bufp[3];
       txBuf[1] = bufp[2];
       txBuf[2] = bufp[1];
       txBuf[3] = bufp[0];
+#endif /* DRV_BYTE_ORDER */
 
       HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
       uint8_t status = (HAL_SPI_Transmit(handle, txBuf, 4, HAL_MAX_DELAY) == HAL_OK);
@@ -197,20 +200,26 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   uint8_t rxBuf[4];
 
   if (handle == &hspi2) {
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+      /* on SPI bus dta is sent big endian */
       txBuf[0] = bufp[3];
       txBuf[1] = bufp[2];
       txBuf[2] = bufp[1];
       txBuf[3] = bufp[0];
+#endif /* DRV_BYTE_ORDER */
 
       HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
       HAL_SPI_TransmitReceive(handle, txBuf,rxBuf, 4, HAL_MAX_DELAY);
       while(HAL_SPI_GetState(handle) != HAL_SPI_STATE_READY);
       HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+      /* on SPI bus dta is sent big endian */
       bufp[0] = rxBuf[3];
       bufp[1] = rxBuf[2];
       bufp[2] = rxBuf[1];
       bufp[3] = rxBuf[0];
+#endif /* DRV_BYTE_ORDER */
  }
 
 #elif defined(SPC584B_DIS)

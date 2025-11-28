@@ -157,7 +157,7 @@ int32_t __weak asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint8_t 
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t __weak asm9g300b_write_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint16_t *data)
+int32_t __weak asm9g300b_write_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint16_t data)
 {
   uint32_t fr;
 
@@ -166,7 +166,7 @@ int32_t __weak asm9g300b_write_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint16_
     return -1;
   }
 
-  fr = asm9g300b_gen_mosi_frame(reg, 1, *data);
+  fr = asm9g300b_gen_mosi_frame(reg, 1, data);
 
   /* send frame. Pls note that 'reg' is already incapsulated in frame */
   return ctx->write_reg(ctx->handle, 0, (uint8_t *)&fr, 1);
@@ -190,7 +190,7 @@ int32_t asm9g300b_set_command(const stmdev_ctx_t *ctx, asm9g300b_commands_t cmd)
   uint16_t val = (uint16_t)cmd;
   int32_t ret;
 
-  ret = asm9g300b_write_reg(ctx, ASM9G300B_CONFIG02, &val);
+  ret = asm9g300b_write_reg(ctx, ASM9G300B_CONFIG02, val);
 
   return ret;
 }
@@ -198,6 +198,9 @@ int32_t asm9g300b_set_command(const stmdev_ctx_t *ctx, asm9g300b_commands_t cmd)
 int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
 {
   int32_t ret;
+  asm9g300b_config01_t cfg = {0};
+  uint16_t *cfgp = (uint16_t *)&cfg;
+  uint16_t tmp;
 
   if (ctx == NULL || ctx->mdelay == NULL)
   {
@@ -210,9 +213,31 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   ret = asm9g300b_set_command(ctx, ASM9G300B_CMD_HARD_RESET);
   ctx->mdelay(20);
 
-  /* Configure Combo4  */
-  //Combo4_WriteRegister(imu, FILTER_CONTROL, Filter); /* (Set Filter to 60Hz and SDO Drive=0x1C00 is default) */
+  /* Configure filters and SDO strength  */
+  cfg.sdo_drv = 0;
+  cfg.iir_bw_sel_ax = ASM9G300B_IIR_FILTER_60HZ;
+  cfg.iir_bw_sel_ay = ASM9G300B_IIR_FILTER_60HZ;
+  cfg.iir_bw_sel_az = ASM9G300B_IIR_FILTER_60HZ;
+  cfg.iir_bw_sel_rx = ASM9G300B_IIR_FILTER_60HZ;
+  cfg.iir_bw_sel_rz = ASM9G300B_IIR_FILTER_60HZ;
+  ret = asm9g300b_write_reg(ctx, ASM9G300B_CONFIG01, *cfgp);
+  if (ret == -1) {
+    return -1;
+  }
+
   ctx->mdelay(10);
+
+  /* wake-up sensor */
+  ret = asm9g300b_set_command(ctx, ASM9G300B_CMD_WAKE_UP);
+  ctx->mdelay(350);
+
+  /* read all status register to clear the events */
+  asm9g300b_read_reg(ctx, ASM9G300B_SSUMOK, (uint8_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_SSUMRNG, (uint8_t *)&tmp);
+
+  /* Put sensor in Normal mode */
+  ret = asm9g300b_set_command(ctx, ASM9G300B_CMD_EOI);
+  ctx->mdelay(350);
 
   return ret;
 }
@@ -226,7 +251,7 @@ int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx)
   val1 = 0x1234;
 
   do {
-    ret = asm9g300b_write_reg(ctx, ASM9G300B_TEST_REG, &val1);
+    ret = asm9g300b_write_reg(ctx, ASM9G300B_TEST_REG, val1);
     if (ret == -1) {
       return -1;
     }
