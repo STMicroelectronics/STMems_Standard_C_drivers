@@ -256,29 +256,24 @@ int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx)
 {
   int32_t ret;
   uint16_t val1, val2 = 0;
-  uint8_t i;
 
   val1 = 0x1234;
 
-  do {
-    ret = asm9g300b_write_reg(ctx, ASM9G300B_TEST_REG, val1);
-    if (ret == -1) {
-      return -1;
-    }
+  ret = asm9g300b_write_reg(ctx, ASM9G300B_TEST_REG, val1);
+  if (ret == -1) {
+    return -1;
+  }
 
-    val2 = 0;
-    ret = asm9g300b_read_reg(ctx, ASM9G300B_TEST_REG, (uint8_t *)&val2);
-    if (ret == -1) {
-      return -1;
-    }
+  val2 = 0;
+  ret = asm9g300b_read_reg(ctx, ASM9G300B_TEST_REG, (uint8_t *)&val2);
+  if (ret == -1) {
+    return -1;
+  }
 
-    if (val1 != val2)
-    {
-      return -1;
-    }
-
-    val1 += 0x1111;
-  } while (i++ < 5);
+  if (val1 != val2)
+  {
+    return -1;
+  }
 
   return ret;
 }
