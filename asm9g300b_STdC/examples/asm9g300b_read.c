@@ -135,14 +135,24 @@ void asm9g300b_read(void)
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
 
+  asm9g300b_startup(&dev_ctx);
+
   if (asm9g300b_check_spi_communication(&dev_ctx) < 0)
   {
     while(1); /* stop here if SPI communication is not established */
   }
 
-  asm9g300b_startup(&dev_ctx);
+  while(1)
+  {
+    int16_t raw[3];
+    int32_t accel[3];
 
-  while(1);
+    asm9g300b_acc_data_get(&dev_ctx, raw, accel);
+
+    sprintf((char *)tx_buffer, "------ %d %d %d\r\n", accel[0], accel[1], accel[2]);
+    tx_com(tx_buffer, strlen((char const *)tx_buffer));
+    platform_delay(1000);
+  }
 }
 
 /*

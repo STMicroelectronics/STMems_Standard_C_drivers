@@ -884,6 +884,8 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx);
 
 int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx);
 
+int32_t asm9g300b_acc_data_get(const stmdev_ctx_t *ctx, int16_t *raw, int32_t *accel);
+
 #ifdef __cplusplus
 }
 #endif

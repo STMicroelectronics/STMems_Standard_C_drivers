@@ -86,15 +86,16 @@ uint32_t asm9g300b_gen_mosi_frame(uint8_t ta, uint8_t rw, uint16_t data)
 /**
   * @brief  Decode SafeSPI MISO frame
   *
-  * @param  ta    register to access
-  * @param  read  0: read request, 1: write request
-  * @param  data  data to be sent
-  * @retval       the MOSI frame
+  * @param  frame frame to be decoded
+  * @param  data  pointer to buffer to be filled with the data field
+  * @param  state pointer to S1:0 field
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t asm9g300b_dec_miso_frame(uint32_t frame, uint16_t *data)
+int32_t asm9g300b_dec_miso_frame(uint32_t frame, uint16_t *data, uint8_t *state)
 {
   uint32_t crc3;
+  uint8_t s1, s0;
 
   /* poly is (x^3 + x^1 + x^0) */
   crc3 = asm9g300b_calc_crc3(frame & ~0x7, 0x05, 0xB);
@@ -103,6 +104,9 @@ int32_t asm9g300b_dec_miso_frame(uint32_t frame, uint16_t *data)
     return -1;
   }
 
+  s1 = (frame >> 20) & 0x1;
+  s0 = (frame >> 3) & 0x1;
+  *state = (s1 << 1) | s0;
   *data = (frame >> 4) & 0xffff;
 
   return 0;
@@ -114,7 +118,6 @@ int32_t asm9g300b_dec_miso_frame(uint32_t frame, uint16_t *data)
   * @param  ctx   read / write interface definitions(ptr)
   * @param  reg   register to read
   * @param  data  pointer to buffer that store the data read(ptr)
-  * @param  len   number of consecutive register to read
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
@@ -122,6 +125,7 @@ int32_t __weak asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint8_t 
 {
   uint32_t frame;
   uint16_t d;
+  uint8_t s;
   int ret;
 
   if (ctx == NULL)
@@ -135,7 +139,7 @@ int32_t __weak asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint8_t 
     return -1;
   }
 
-  ret = asm9g300b_dec_miso_frame(frame, &d);
+  ret = asm9g300b_dec_miso_frame(frame, &d, &s);
   if (ret < 0)
   {
     return -1;
@@ -152,8 +156,7 @@ int32_t __weak asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint8_t 
   *
   * @param  ctx   read / write interface definitions(ptr)
   * @param  reg   register to write
-  * @param  data  pointer to data to write in register reg(ptr)
-  * @param  len   number of consecutive register to write
+  * @param  data  data to be written to register reg(ptr)
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
@@ -269,6 +272,29 @@ int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx)
 
     val1 += 0x1111;
   } while (i++ < 5);
+
+  return ret;
+}
+
+int32_t asm9g300b_acc_data_get(const stmdev_ctx_t *ctx, int16_t *raw, int32_t *accel)
+{
+  int32_t ret;
+  uint16_t tmp = 0;
+
+  ret = asm9g300b_write_reg(ctx, ASM9G300B_ACCX, tmp);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_ACCX, (uint8_t *)&tmp);
+  raw[0] = tmp;
+  accel[0] = 5 * raw[0];
+
+  ret += asm9g300b_write_reg(ctx, ASM9G300B_ACCY, tmp);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_ACCY, (uint8_t *)&tmp);
+  raw[1] = tmp;
+  accel[1] = 5 * raw[1];
+
+  ret += asm9g300b_write_reg(ctx, ASM9G300B_ACCZ, tmp);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_ACCZ, (uint8_t *)&tmp);
+  raw[2] = tmp;
+  accel[2] = 5 * raw[2];
 
   return ret;
 }
