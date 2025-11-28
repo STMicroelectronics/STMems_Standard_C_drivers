@@ -252,10 +252,10 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   asm9g300b_read_reg(ctx, ASM9G300B_STATACCZ, (uint8_t *)&tmp);
   asm9g300b_read_reg(ctx, ASM9G300B_STATCOM1, (uint8_t *)&tmp);
   asm9g300b_read_reg(ctx, ASM9G300B_STATCOM2, (uint8_t *)&tmp);
+  ctx->mdelay(10);
 
   /* Put sensor in Normal mode */
   ret = asm9g300b_set_command(ctx, ASM9G300B_CMD_EOI);
-  ctx->mdelay(350);
 
   return ret;
 }
@@ -286,6 +286,55 @@ int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx)
   return ret;
 }
 
+/* read raw data from reg channel */
+static int32_t asm9g300b_read_data(const stmdev_ctx_t *ctx, uint8_t reg, int16_t *raw)
+{
+  int32_t ret;
+  uint16_t tmp = 0;
+
+  ret = asm9g300b_write_reg(ctx, reg, tmp);
+  if (ret == -1) {
+    return -1;
+  }
+
+  return asm9g300b_read_reg(ctx, reg, (uint8_t *)raw);
+}
+
+/**
+  * @brief  Get Device Summary Status register
+  *
+  * @param  ctx    communication interface handler.(ptr)
+  * @param  status Summary status register content .(ptr)
+  * @retval        interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t asm9g300b_summary_status_get(const stmdev_ctx_t *ctx, uint16_t *status)
+{
+  return asm9g300b_read_data(ctx, ASM9G300B_SSUMOK, (int16_t *)status);
+}
+
+/**
+  * @brief  Get Common Mode Status register
+  *         It chains StatCOM1 and StatCOM2 together
+  *
+  * @param  ctx    communication interface handler.(ptr)
+  * @param  status Summary status register content .(ptr)
+  * @retval        interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t asm9g300b_com_status_get(const stmdev_ctx_t *ctx, uint32_t *status)
+{
+  int32_t ret;
+  uint16_t temp1, temp2;
+
+  ret = asm9g300b_read_data(ctx, ASM9G300B_STATCOM1, (int16_t *)&temp1);
+  ret += asm9g300b_read_data(ctx, ASM9G300B_STATCOM2, (int16_t *)&temp2);
+
+  *status = (temp2 << 16) | temp1;
+
+  return ret;
+}
+
 int32_t asm9g300b_from_acc_lsb_to_mms2(int16_t lsb)
 {
   return 5 * lsb; /* unit is mm/s^2 */
@@ -299,20 +348,6 @@ int32_t asm9g300b_from_mgp_lsb_to_mms2(int16_t lsb)
 int32_t asm9g300b_from_temp_lsb_to_celsius(int16_t lsb)
 {
   return (25000 + 40 * lsb); /* unit is milliCelsius degrees */
-}
-
-/* read raw data from reg channel */
-static int32_t asm9g300b_read_data(const stmdev_ctx_t *ctx, uint8_t reg, int16_t *raw)
-{
-  int32_t ret;
-  uint16_t tmp = 0;
-
-  ret = asm9g300b_write_reg(ctx, reg, tmp);
-  if (ret == -1) {
-    return -1;
-  }
-
-  return asm9g300b_read_reg(ctx, reg, (uint8_t *)raw);
 }
 
 /**

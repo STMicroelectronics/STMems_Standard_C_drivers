@@ -869,7 +869,7 @@ typedef enum
   ASM9G300B_CMD_GY_AUTO_SELF_TEST  = 0x1E,
   ASM9G300B_CMD_ALL_AUTO_SELF_TEST = 0x1F,
   ASM9G300B_CMD_GY_RESTART         = 0x21,
-  ASM9G300B_CMD_EOI                = 0x3F,
+  ASM9G300B_CMD_EOI                = 0x7F,
 } asm9g300b_commands_t;
 int32_t asm9g300b_set_command(const stmdev_ctx_t *ctx, asm9g300b_commands_t cmd);
 
@@ -883,6 +883,9 @@ int32_t asm9g300b_set_command(const stmdev_ctx_t *ctx, asm9g300b_commands_t cmd)
 int32_t asm9g300b_startup(const stmdev_ctx_t *ctx);
 
 int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx);
+
+int32_t asm9g300b_summary_status_get(const stmdev_ctx_t *ctx, uint16_t *status);
+int32_t asm9g300b_com_status_get(const stmdev_ctx_t *ctx, uint32_t *status);
 
 /* read ACC data */
 int32_t asm9g300b_acc_data_get(const stmdev_ctx_t *ctx, int16_t *raw);

@@ -120,9 +120,28 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
+void check_device_status(stmdev_ctx_t *ctx)
+{
+    uint16_t status;
+    asm9g300b_summary_status_get(ctx, &status);
+    sprintf((char *)tx_buffer, "Summary status %04x\r\n", status);
+    tx_com(tx_buffer, strlen((char const *)tx_buffer));
+
+    if ((status & 0x400) == 0)
+    {
+      /* S_OK_C is zero */
+      uint32_t com_status;
+
+      asm9g300b_com_status_get(ctx, &com_status);
+      sprintf((char *)tx_buffer, "COMMON status %08x\r\n", com_status);
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
+    }
+}
+
 void asm9g300b_read(void)
 {
   stmdev_ctx_t dev_ctx;
+
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
@@ -147,12 +166,14 @@ void asm9g300b_read(void)
     int16_t raw[3];
     int32_t accel[3], temp;
 
+    check_device_status(&dev_ctx);
+
     asm9g300b_acc_data_get(&dev_ctx, raw);
     accel[0] = asm9g300b_from_acc_lsb_to_mms2(raw[0]);
     accel[1] = asm9g300b_from_acc_lsb_to_mms2(raw[1]);
     accel[2] = asm9g300b_from_acc_lsb_to_mms2(raw[2]);
 
-    sprintf((char *)tx_buffer, "\r\nLOW-G %d (mm/s^2) %d (mm/s^2) %d (mm/s^2)\r\n",
+    sprintf((char *)tx_buffer, "LOW-G %d (mm/s^2) %d (mm/s^2) %d (mm/s^2)\r\n",
                                 accel[0], accel[1], accel[2]);
     tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
@@ -168,7 +189,7 @@ void asm9g300b_read(void)
     asm9g300b_temp_data_get(&dev_ctx, &raw[0]);
     temp = asm9g300b_from_temp_lsb_to_celsius(raw[0]);
 
-    sprintf((char *)tx_buffer, "TEMP %d (milli Celsius)\r\n", temp);
+    sprintf((char *)tx_buffer, "TEMP %d (milli Celsius)\r\n\r\n", temp);
     tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
     platform_delay(1000);
