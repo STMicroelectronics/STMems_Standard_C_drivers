@@ -884,9 +884,19 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx);
 
 int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx);
 
-/* read ACC data and transform into engineering units */
+/* read ACC data */
 int32_t asm9g300b_acc_data_get(const stmdev_ctx_t *ctx, int16_t *raw);
-int32_t asm9g300b_from_lsb_to_mms2(int16_t lsb);
+
+/* read MGP data  */
+int32_t asm9g300b_mgp_data_get(const stmdev_ctx_t *ctx, int16_t *raw);
+
+/* read TEMP data  */
+int32_t asm9g300b_temp_data_get(const stmdev_ctx_t *ctx, int16_t *raw);
+
+/* transform lsb data into engineering units */
+int32_t asm9g300b_from_acc_lsb_to_mms2(int16_t lsb);
+int32_t asm9g300b_from_mgp_lsb_to_mms2(int16_t lsb);
+int32_t asm9g300b_from_temp_lsb_to_celsius(int16_t lsb);
 
 #ifdef __cplusplus
 }

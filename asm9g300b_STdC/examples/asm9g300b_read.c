@@ -145,15 +145,32 @@ void asm9g300b_read(void)
   while(1)
   {
     int16_t raw[3];
-    int32_t accel[3];
+    int32_t accel[3], temp;
 
     asm9g300b_acc_data_get(&dev_ctx, raw);
-    accel[0] = asm9g300b_from_lsb_to_mms2(raw[0]);
-    accel[1] = asm9g300b_from_lsb_to_mms2(raw[1]);
-    accel[2] = asm9g300b_from_lsb_to_mms2(raw[2]);
+    accel[0] = asm9g300b_from_acc_lsb_to_mms2(raw[0]);
+    accel[1] = asm9g300b_from_acc_lsb_to_mms2(raw[1]);
+    accel[2] = asm9g300b_from_acc_lsb_to_mms2(raw[2]);
 
-    sprintf((char *)tx_buffer, "------ %d %d %d\r\n", accel[0], accel[1], accel[2]);
+    sprintf((char *)tx_buffer, "\r\nLOW-G %d (mm/s^2) %d (mm/s^2) %d (mm/s^2)\r\n",
+                                accel[0], accel[1], accel[2]);
     tx_com(tx_buffer, strlen((char const *)tx_buffer));
+
+    asm9g300b_mgp_data_get(&dev_ctx, raw);
+    accel[0] = asm9g300b_from_mgp_lsb_to_mms2(raw[0]);
+    accel[1] = asm9g300b_from_mgp_lsb_to_mms2(raw[1]);
+    accel[2] = asm9g300b_from_mgp_lsb_to_mms2(raw[2]);
+
+    sprintf((char *)tx_buffer, "MID-G %d (mm/s^2) %d (mm/s^2) %d (mm/s^2)\r\n",
+                                accel[0], accel[1], accel[2]);
+    tx_com(tx_buffer, strlen((char const *)tx_buffer));
+
+    asm9g300b_temp_data_get(&dev_ctx, &raw[0]);
+    temp = asm9g300b_from_temp_lsb_to_celsius(raw[0]);
+
+    sprintf((char *)tx_buffer, "TEMP %d (milli Celsius)\r\n", temp);
+    tx_com(tx_buffer, strlen((char const *)tx_buffer));
+
     platform_delay(1000);
   }
 }

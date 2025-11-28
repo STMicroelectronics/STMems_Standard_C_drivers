@@ -244,6 +244,14 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   /* read all status register to clear the events */
   asm9g300b_read_reg(ctx, ASM9G300B_SSUMOK, (uint8_t *)&tmp);
   asm9g300b_read_reg(ctx, ASM9G300B_SSUMRNG, (uint8_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATARSX, (uint8_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATARSY, (uint8_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATARSZ, (uint8_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATACCX, (uint8_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATACCY, (uint8_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATACCZ, (uint8_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATCOM1, (uint8_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATCOM2, (uint8_t *)&tmp);
 
   /* Put sensor in Normal mode */
   ret = asm9g300b_set_command(ctx, ASM9G300B_CMD_EOI);
@@ -278,13 +286,37 @@ int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx)
   return ret;
 }
 
-int32_t asm9g300b_from_lsb_to_mms2(int16_t lsb)
+int32_t asm9g300b_from_acc_lsb_to_mms2(int16_t lsb)
 {
   return 5 * lsb; /* unit is mm/s^2 */
 }
 
+int32_t asm9g300b_from_mgp_lsb_to_mms2(int16_t lsb)
+{
+  return 40 * lsb; /* unit is mm/s^2 */
+}
+
+int32_t asm9g300b_from_temp_lsb_to_celsius(int16_t lsb)
+{
+  return (25000 + 40 * lsb); /* unit is milliCelsius degrees */
+}
+
+/* read raw data from reg channel */
+static int32_t asm9g300b_read_data(const stmdev_ctx_t *ctx, uint8_t reg, int16_t *raw)
+{
+  int32_t ret;
+  uint16_t tmp = 0;
+
+  ret = asm9g300b_write_reg(ctx, reg, tmp);
+  if (ret == -1) {
+    return -1;
+  }
+
+  return asm9g300b_read_reg(ctx, reg, (uint8_t *)raw);
+}
+
 /**
-  * @brief  LOWG Accelerometer data.[get]
+  * @brief  Low-g Accelerometer data.[get]
   *
   * @param  ctx   communication interface handler.(ptr)
   * @param  raw   lsb data retrived from the sensor.(ptr)
@@ -294,21 +326,44 @@ int32_t asm9g300b_from_lsb_to_mms2(int16_t lsb)
 int32_t asm9g300b_acc_data_get(const stmdev_ctx_t *ctx, int16_t *raw)
 {
   int32_t ret;
-  uint16_t tmp = 0;
 
-  ret = asm9g300b_write_reg(ctx, ASM9G300B_ACCX, tmp);
-  ret += asm9g300b_read_reg(ctx, ASM9G300B_ACCX, (uint8_t *)&tmp);
-  raw[0] = tmp;
-
-  ret += asm9g300b_write_reg(ctx, ASM9G300B_ACCY, tmp);
-  ret += asm9g300b_read_reg(ctx, ASM9G300B_ACCY, (uint8_t *)&tmp);
-  raw[1] = tmp;
-
-  ret += asm9g300b_write_reg(ctx, ASM9G300B_ACCZ, tmp);
-  ret += asm9g300b_read_reg(ctx, ASM9G300B_ACCZ, (uint8_t *)&tmp);
-  raw[2] = tmp;
+  ret = asm9g300b_read_data(ctx, ASM9G300B_ACCX, &raw[0]);
+  ret += asm9g300b_read_data(ctx, ASM9G300B_ACCY, &raw[1]);
+  ret += asm9g300b_read_data(ctx, ASM9G300B_ACCZ, &raw[2]);
 
   return ret;
+}
+
+/**
+  * @brief  Mid-g Accelerometer data.[get]
+  *
+  * @param  ctx   communication interface handler.(ptr)
+  * @param  raw   lsb data retrived from the sensor.(ptr)
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t asm9g300b_mgp_data_get(const stmdev_ctx_t *ctx, int16_t *raw)
+{
+  int32_t ret;
+
+  ret = asm9g300b_read_data(ctx, ASM9G300B_MGPX, &raw[0]);
+  ret += asm9g300b_read_data(ctx, ASM9G300B_MGPY, &raw[1]);
+  ret += asm9g300b_read_data(ctx, ASM9G300B_MGPZ, &raw[2]);
+
+  return ret;
+}
+
+/**
+  * @brief  Temperature data.[get]
+  *
+  * @param  ctx   communication interface handler.(ptr)
+  * @param  raw   lsb data retrived from the sensor.(ptr)
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t asm9g300b_temp_data_get(const stmdev_ctx_t *ctx, int16_t *raw)
+{
+  return asm9g300b_read_data(ctx, ASM9G300B_TEMP, raw);
 }
 
 /**
