@@ -198,6 +198,13 @@ int32_t asm9g300b_set_command(const stmdev_ctx_t *ctx, asm9g300b_commands_t cmd)
   return ret;
 }
 
+/**
+  * @brief  Device startup
+  *
+  * @param  ctx   communication interface handler.(ptr)
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
 int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
 {
   int32_t ret;
@@ -276,7 +283,20 @@ int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx)
   return ret;
 }
 
-int32_t asm9g300b_acc_data_get(const stmdev_ctx_t *ctx, int16_t *raw, int32_t *accel)
+int32_t asm9g300b_from_lsb_to_mms2(int16_t lsb)
+{
+  return 5 * lsb; /* unit is mm/s^2 */
+}
+
+/**
+  * @brief  LOWG Accelerometer data.[get]
+  *
+  * @param  ctx   communication interface handler.(ptr)
+  * @param  raw   lsb data retrived from the sensor.(ptr)
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t asm9g300b_acc_data_get(const stmdev_ctx_t *ctx, int16_t *raw)
 {
   int32_t ret;
   uint16_t tmp = 0;
@@ -284,17 +304,14 @@ int32_t asm9g300b_acc_data_get(const stmdev_ctx_t *ctx, int16_t *raw, int32_t *a
   ret = asm9g300b_write_reg(ctx, ASM9G300B_ACCX, tmp);
   ret += asm9g300b_read_reg(ctx, ASM9G300B_ACCX, (uint8_t *)&tmp);
   raw[0] = tmp;
-  accel[0] = 5 * raw[0];
 
   ret += asm9g300b_write_reg(ctx, ASM9G300B_ACCY, tmp);
   ret += asm9g300b_read_reg(ctx, ASM9G300B_ACCY, (uint8_t *)&tmp);
   raw[1] = tmp;
-  accel[1] = 5 * raw[1];
 
   ret += asm9g300b_write_reg(ctx, ASM9G300B_ACCZ, tmp);
   ret += asm9g300b_read_reg(ctx, ASM9G300B_ACCZ, (uint8_t *)&tmp);
   raw[2] = tmp;
-  accel[2] = 5 * raw[2];
 
   return ret;
 }

@@ -147,7 +147,10 @@ void asm9g300b_read(void)
     int16_t raw[3];
     int32_t accel[3];
 
-    asm9g300b_acc_data_get(&dev_ctx, raw, accel);
+    asm9g300b_acc_data_get(&dev_ctx, raw);
+    accel[0] = asm9g300b_from_lsb_to_mms2(raw[0]);
+    accel[1] = asm9g300b_from_lsb_to_mms2(raw[1]);
+    accel[2] = asm9g300b_from_lsb_to_mms2(raw[2]);
 
     sprintf((char *)tx_buffer, "------ %d %d %d\r\n", accel[0], accel[1], accel[2]);
     tx_com(tx_buffer, strlen((char const *)tx_buffer));
