@@ -834,11 +834,6 @@ typedef struct
   *
   */
 
-/*
- * Generate SafeSPI MOSI frame
- */
-uint32_t asm9g300b_gen_mosi_frame(uint8_t ta, uint8_t rw, uint16_t data);
-
 #ifndef __weak
 #define __weak __attribute__((weak))
 #endif /* __weak */
@@ -852,10 +847,10 @@ uint32_t asm9g300b_gen_mosi_frame(uint8_t ta, uint8_t rw, uint16_t data);
  * them with a custom implementation.
  */
 
-int32_t asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg,
-                           uint8_t *data);
-int32_t asm9g300b_write_reg(const stmdev_ctx_t *ctx, uint8_t reg,
-                            uint16_t data);
+int32_t asm9g300b_read_frame(const stmdev_ctx_t *ctx, uint8_t reg,
+                             uint8_t *data);
+int32_t asm9g300b_write_frame(const stmdev_ctx_t *ctx, uint8_t reg,
+                              uint16_t data);
 
 typedef enum
 {

@@ -71,7 +71,7 @@ static uint8_t asm9g300b_calc_crc3(uint32_t data, uint8_t init, uint8_t poly)
   * @retval       the MOSI frame
   *
   */
-uint32_t asm9g300b_gen_mosi_frame(uint8_t ta, uint8_t rw, uint16_t data)
+static uint32_t asm9g300b_gen_mosi_frame(uint8_t ta, uint8_t rw, uint16_t data)
 {
   uint32_t frame, crc3;
 
@@ -92,7 +92,7 @@ uint32_t asm9g300b_gen_mosi_frame(uint8_t ta, uint8_t rw, uint16_t data)
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t asm9g300b_dec_miso_frame(uint32_t frame, uint16_t *data, uint8_t *state)
+static int32_t asm9g300b_dec_miso_frame(uint32_t frame, uint16_t *data, uint8_t *state)
 {
   uint32_t crc3;
   uint8_t s1, s0;
@@ -113,7 +113,7 @@ int32_t asm9g300b_dec_miso_frame(uint32_t frame, uint16_t *data, uint8_t *state)
 }
 
 /**
-  * @brief  Read generic device register
+  * @brief  Read frame from SafeSPI bus
   *
   * @param  ctx   read / write interface definitions(ptr)
   * @param  reg   register to read
@@ -121,7 +121,7 @@ int32_t asm9g300b_dec_miso_frame(uint32_t frame, uint16_t *data, uint8_t *state)
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t __weak asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint8_t *data)
+int32_t __weak asm9g300b_read_frame(const stmdev_ctx_t *ctx, uint8_t reg, uint8_t *data)
 {
   uint32_t frame;
   uint16_t d;
@@ -152,7 +152,7 @@ int32_t __weak asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint8_t 
 }
 
 /**
-  * @brief  Write generic device register
+  * @brief  Write frame to SafeSPI bus
   *
   * @param  ctx   read / write interface definitions(ptr)
   * @param  reg   register to write
@@ -160,7 +160,7 @@ int32_t __weak asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint8_t 
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t __weak asm9g300b_write_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint16_t data)
+int32_t __weak asm9g300b_write_frame(const stmdev_ctx_t *ctx, uint8_t reg, uint16_t data)
 {
   uint32_t fr;
 
@@ -173,6 +173,20 @@ int32_t __weak asm9g300b_write_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint16_
 
   /* send frame. Pls note that 'reg' is already incapsulated in frame */
   return ctx->write_reg(ctx->handle, 0, (uint8_t *)&fr, 1);
+}
+
+/* read raw data from reg channel */
+static int32_t asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, int16_t *raw)
+{
+  int32_t ret;
+  uint16_t tmp = 0;
+
+  ret = asm9g300b_write_frame(ctx, reg, tmp);
+  if (ret == -1) {
+    return -1;
+  }
+
+  return asm9g300b_read_frame(ctx, reg, (uint8_t *)raw);
 }
 
 /**
@@ -193,7 +207,7 @@ int32_t asm9g300b_set_command(const stmdev_ctx_t *ctx, asm9g300b_commands_t cmd)
   uint16_t val = (uint16_t)cmd;
   int32_t ret;
 
-  ret = asm9g300b_write_reg(ctx, ASM9G300B_CONFIG02, val);
+  ret = asm9g300b_write_frame(ctx, ASM9G300B_CONFIG02, val);
 
   return ret;
 }
@@ -230,7 +244,7 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   cfg.iir_bw_sel_az = ASM9G300B_IIR_FILTER_60HZ;
   cfg.iir_bw_sel_rx = ASM9G300B_IIR_FILTER_60HZ;
   cfg.iir_bw_sel_rz = ASM9G300B_IIR_FILTER_60HZ;
-  ret = asm9g300b_write_reg(ctx, ASM9G300B_CONFIG01, *cfgp);
+  ret = asm9g300b_write_frame(ctx, ASM9G300B_CONFIG01, *cfgp);
   if (ret == -1) {
     return -1;
   }
@@ -242,16 +256,16 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   ctx->mdelay(350);
 
   /* read all status register to clear the events */
-  asm9g300b_read_reg(ctx, ASM9G300B_SSUMOK, (uint8_t *)&tmp);
-  asm9g300b_read_reg(ctx, ASM9G300B_SSUMRNG, (uint8_t *)&tmp);
-  asm9g300b_read_reg(ctx, ASM9G300B_STATARSX, (uint8_t *)&tmp);
-  asm9g300b_read_reg(ctx, ASM9G300B_STATARSY, (uint8_t *)&tmp);
-  asm9g300b_read_reg(ctx, ASM9G300B_STATARSZ, (uint8_t *)&tmp);
-  asm9g300b_read_reg(ctx, ASM9G300B_STATACCX, (uint8_t *)&tmp);
-  asm9g300b_read_reg(ctx, ASM9G300B_STATACCY, (uint8_t *)&tmp);
-  asm9g300b_read_reg(ctx, ASM9G300B_STATACCZ, (uint8_t *)&tmp);
-  asm9g300b_read_reg(ctx, ASM9G300B_STATCOM1, (uint8_t *)&tmp);
-  asm9g300b_read_reg(ctx, ASM9G300B_STATCOM2, (uint8_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_SSUMOK, (int16_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_SSUMRNG, (int16_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATARSX, (int16_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATARSY, (int16_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATARSZ, (int16_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATACCX, (int16_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATACCY, (int16_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATACCZ, (int16_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATCOM1, (int16_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATCOM2, (int16_t *)&tmp);
   ctx->mdelay(10);
 
   /* Put sensor in Normal mode */
@@ -267,13 +281,13 @@ int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx)
 
   val1 = 0x1234;
 
-  ret = asm9g300b_write_reg(ctx, ASM9G300B_TEST_REG, val1);
+  ret = asm9g300b_write_frame(ctx, ASM9G300B_TEST_REG, val1);
   if (ret == -1) {
     return -1;
   }
 
   val2 = 0;
-  ret = asm9g300b_read_reg(ctx, ASM9G300B_TEST_REG, (uint8_t *)&val2);
+  ret = asm9g300b_read_frame(ctx, ASM9G300B_TEST_REG, (uint8_t *)&val2);
   if (ret == -1) {
     return -1;
   }
@@ -286,20 +300,6 @@ int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx)
   return ret;
 }
 
-/* read raw data from reg channel */
-static int32_t asm9g300b_read_data(const stmdev_ctx_t *ctx, uint8_t reg, int16_t *raw)
-{
-  int32_t ret;
-  uint16_t tmp = 0;
-
-  ret = asm9g300b_write_reg(ctx, reg, tmp);
-  if (ret == -1) {
-    return -1;
-  }
-
-  return asm9g300b_read_reg(ctx, reg, (uint8_t *)raw);
-}
-
 /**
   * @brief  Get Device Summary Status register
   *
@@ -310,7 +310,7 @@ static int32_t asm9g300b_read_data(const stmdev_ctx_t *ctx, uint8_t reg, int16_t
   */
 int32_t asm9g300b_summary_status_get(const stmdev_ctx_t *ctx, uint16_t *status)
 {
-  return asm9g300b_read_data(ctx, ASM9G300B_SSUMOK, (int16_t *)status);
+  return asm9g300b_read_reg(ctx, ASM9G300B_SSUMOK, (int16_t *)status);
 }
 
 /**
@@ -327,8 +327,8 @@ int32_t asm9g300b_com_status_get(const stmdev_ctx_t *ctx, uint32_t *status)
   int32_t ret;
   uint16_t temp1, temp2;
 
-  ret = asm9g300b_read_data(ctx, ASM9G300B_STATCOM1, (int16_t *)&temp1);
-  ret += asm9g300b_read_data(ctx, ASM9G300B_STATCOM2, (int16_t *)&temp2);
+  ret = asm9g300b_read_reg(ctx, ASM9G300B_STATCOM1, (int16_t *)&temp1);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_STATCOM2, (int16_t *)&temp2);
 
   *status = (temp2 << 16) | temp1;
 
@@ -362,9 +362,9 @@ int32_t asm9g300b_acc_data_get(const stmdev_ctx_t *ctx, int16_t *raw)
 {
   int32_t ret;
 
-  ret = asm9g300b_read_data(ctx, ASM9G300B_ACCX, &raw[0]);
-  ret += asm9g300b_read_data(ctx, ASM9G300B_ACCY, &raw[1]);
-  ret += asm9g300b_read_data(ctx, ASM9G300B_ACCZ, &raw[2]);
+  ret = asm9g300b_read_reg(ctx, ASM9G300B_ACCX, &raw[0]);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_ACCY, &raw[1]);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_ACCZ, &raw[2]);
 
   return ret;
 }
@@ -381,9 +381,9 @@ int32_t asm9g300b_mgp_data_get(const stmdev_ctx_t *ctx, int16_t *raw)
 {
   int32_t ret;
 
-  ret = asm9g300b_read_data(ctx, ASM9G300B_MGPX, &raw[0]);
-  ret += asm9g300b_read_data(ctx, ASM9G300B_MGPY, &raw[1]);
-  ret += asm9g300b_read_data(ctx, ASM9G300B_MGPZ, &raw[2]);
+  ret = asm9g300b_read_reg(ctx, ASM9G300B_MGPX, &raw[0]);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_MGPY, &raw[1]);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_MGPZ, &raw[2]);
 
   return ret;
 }
@@ -398,7 +398,7 @@ int32_t asm9g300b_mgp_data_get(const stmdev_ctx_t *ctx, int16_t *raw)
   */
 int32_t asm9g300b_temp_data_get(const stmdev_ctx_t *ctx, int16_t *raw)
 {
-  return asm9g300b_read_data(ctx, ASM9G300B_TEMP, raw);
+  return asm9g300b_read_reg(ctx, ASM9G300B_TEMP, raw);
 }
 
 /**
