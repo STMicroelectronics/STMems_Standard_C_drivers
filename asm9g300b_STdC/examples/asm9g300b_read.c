@@ -120,13 +120,19 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 /* Main Example --------------------------------------------------------------*/
-void check_device_status(stmdev_ctx_t *ctx)
+static void check_device_status(stmdev_ctx_t *ctx)
 {
     uint16_t status;
+
     asm9g300b_summary_status_get(ctx, &status);
     sprintf((char *)tx_buffer, "Summary status %04x\r\n", status);
     tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
+    asm9g300b_summary_sig_range_status_get(ctx, &status);
+    sprintf((char *)tx_buffer, "Summary signal range status %04x\r\n", status);
+    tx_com(tx_buffer, strlen((char const *)tx_buffer));
+
+#if 0
     if ((status & 0x400) == 0)
     {
       /* S_OK_C is zero */
@@ -136,6 +142,7 @@ void check_device_status(stmdev_ctx_t *ctx)
       sprintf((char *)tx_buffer, "COMMON status %08x\r\n", com_status);
       tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
+#endif
 }
 
 void asm9g300b_read(void)
@@ -165,31 +172,41 @@ void asm9g300b_read(void)
   {
     int16_t raw[3];
     int32_t accel[3], temp;
+    int ret;
+    uint8_t *tx_p;
+    uint16_t num;
 
     check_device_status(&dev_ctx);
+    tx_p = tx_buffer;
 
-    asm9g300b_acc_data_get(&dev_ctx, raw);
+    ret = asm9g300b_acc_data_get(&dev_ctx, raw);
+    if (ret < 0)
+    {
+      num = sprintf((char *)tx_p, "LOW-G error\r\n");
+      tx_p += num;
+    }
+
     accel[0] = asm9g300b_from_acc_lsb_to_mms2(raw[0]);
     accel[1] = asm9g300b_from_acc_lsb_to_mms2(raw[1]);
     accel[2] = asm9g300b_from_acc_lsb_to_mms2(raw[2]);
 
-    sprintf((char *)tx_buffer, "LOW-G %d (mm/s^2) %d (mm/s^2) %d (mm/s^2)\r\n",
+    num = sprintf((char *)tx_p, "LOW-G %d (mm/s^2) %d (mm/s^2) %d (mm/s^2)\r\n",
                                 accel[0], accel[1], accel[2]);
-    tx_com(tx_buffer, strlen((char const *)tx_buffer));
+    tx_p += num;
 
     asm9g300b_mgp_data_get(&dev_ctx, raw);
     accel[0] = asm9g300b_from_mgp_lsb_to_mms2(raw[0]);
     accel[1] = asm9g300b_from_mgp_lsb_to_mms2(raw[1]);
     accel[2] = asm9g300b_from_mgp_lsb_to_mms2(raw[2]);
 
-    sprintf((char *)tx_buffer, "MID-G %d (mm/s^2) %d (mm/s^2) %d (mm/s^2)\r\n",
+    num = sprintf((char *)tx_p, "MID-G %d (mm/s^2) %d (mm/s^2) %d (mm/s^2)\r\n",
                                 accel[0], accel[1], accel[2]);
-    tx_com(tx_buffer, strlen((char const *)tx_buffer));
+    tx_p += num;
 
     asm9g300b_temp_data_get(&dev_ctx, &raw[0]);
     temp = asm9g300b_from_temp_lsb_to_celsius(raw[0]);
 
-    sprintf((char *)tx_buffer, "TEMP %d (milli Celsius)\r\n\r\n", temp);
+    sprintf((char *)tx_p, "TEMP %d (milli Celsius)\r\n\r\n", temp);
     tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
     platform_delay(1000);
@@ -201,7 +218,7 @@ void asm9g300b_read(void)
  *
  * @param  handle    customizable argument. In this examples is used in
  *                   order to select the correct sensor bus handler.
- * @param  reg       register to write
+ * @param  reg       register to write (unused)
  * @param  bufp      pointer to data to write in register reg
  * @param  len       number of consecutive register to write
  *
@@ -209,6 +226,8 @@ void asm9g300b_read(void)
 static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len)
 {
+  (void)reg; /* 'reg' argument is anused (it's already embedded in bufp) */
+
 #ifdef STEVAL_MKI109V3
   uint8_t txBuf[4];
 
@@ -246,6 +265,8 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
+  (void)reg; /* 'reg' argument is anused (it's already embedded in bufp) */
+
 #ifdef STEVAL_MKI109V3
   uint8_t txBuf[4];
   uint8_t rxBuf[4];

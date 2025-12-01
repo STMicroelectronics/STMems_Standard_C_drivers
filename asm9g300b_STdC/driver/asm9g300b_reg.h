@@ -847,7 +847,7 @@ typedef struct
  * them with a custom implementation.
  */
 
-int32_t asm9g300b_read_frame(const stmdev_ctx_t *ctx, uint8_t reg,
+int32_t asm9g300b_read_frame(const stmdev_ctx_t *ctx, uint8_t *reg,
                              uint8_t *data);
 int32_t asm9g300b_write_frame(const stmdev_ctx_t *ctx, uint8_t reg,
                               uint16_t data);
@@ -880,6 +880,9 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx);
 int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx);
 
 int32_t asm9g300b_summary_status_get(const stmdev_ctx_t *ctx, uint16_t *status);
+int32_t asm9g300b_summary_sig_range_status_get(const stmdev_ctx_t *ctx, uint16_t *status);
+int32_t asm9g300b_ars_status_get(const stmdev_ctx_t *ctx, uint16_t *status);
+int32_t asm9g300b_acc_status_get(const stmdev_ctx_t *ctx, uint16_t *status);
 int32_t asm9g300b_com_status_get(const stmdev_ctx_t *ctx, uint32_t *status);
 
 /* read ACC data */
@@ -895,6 +898,9 @@ int32_t asm9g300b_temp_data_get(const stmdev_ctx_t *ctx, int16_t *raw);
 int32_t asm9g300b_from_acc_lsb_to_mms2(int16_t lsb);
 int32_t asm9g300b_from_mgp_lsb_to_mms2(int16_t lsb);
 int32_t asm9g300b_from_temp_lsb_to_celsius(int16_t lsb);
+
+/* read device serial number */
+int32_t asm9g300b_getSerialNum(const stmdev_ctx_t *ctx, uint32_t *s_num)
 
 #ifdef __cplusplus
 }

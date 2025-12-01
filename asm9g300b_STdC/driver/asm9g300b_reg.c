@@ -121,7 +121,7 @@ static int32_t asm9g300b_dec_miso_frame(uint32_t frame, uint16_t *data, uint8_t 
   * @retval       interface status (MANDATORY: return 0 -> no Error)
   *
   */
-int32_t __weak asm9g300b_read_frame(const stmdev_ctx_t *ctx, uint8_t reg, uint8_t *data)
+int32_t __weak asm9g300b_read_frame(const stmdev_ctx_t *ctx, uint8_t *reg, uint8_t *data)
 {
   uint32_t frame;
   uint16_t d;
@@ -133,7 +133,8 @@ int32_t __weak asm9g300b_read_frame(const stmdev_ctx_t *ctx, uint8_t reg, uint8_
     return -1;
   }
 
-  ret = ctx->read_reg(ctx->handle, reg, (uint8_t *)&frame, 1);
+  /* 'reg' argument is unused */
+  ret = ctx->read_reg(ctx->handle, 0, (uint8_t *)&frame, 1);
   if (ret < 0)
   {
     return -1;
@@ -180,13 +181,14 @@ static int32_t asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, int16_t 
 {
   int32_t ret;
   uint16_t tmp = 0;
+  uint8_t sa;
 
   ret = asm9g300b_write_frame(ctx, reg, tmp);
   if (ret == -1) {
     return -1;
   }
 
-  return asm9g300b_read_frame(ctx, reg, (uint8_t *)raw);
+  return asm9g300b_read_frame(ctx, &sa, (uint8_t *)raw);
 }
 
 /**
@@ -278,6 +280,7 @@ int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx)
 {
   int32_t ret;
   uint16_t val1, val2 = 0;
+  uint8_t reg = 0;
 
   val1 = 0x1234;
 
@@ -287,7 +290,7 @@ int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx)
   }
 
   val2 = 0;
-  ret = asm9g300b_read_frame(ctx, ASM9G300B_TEST_REG, (uint8_t *)&val2);
+  ret = asm9g300b_read_frame(ctx, &reg, (uint8_t *)&val2);
   if (ret == -1) {
     return -1;
   }
@@ -311,6 +314,57 @@ int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx)
 int32_t asm9g300b_summary_status_get(const stmdev_ctx_t *ctx, uint16_t *status)
 {
   return asm9g300b_read_reg(ctx, ASM9G300B_SSUMOK, (int16_t *)status);
+}
+
+/**
+  * @brief  Get Device Summary Signal Range Status register
+  *
+  * @param  ctx    communication interface handler.(ptr)
+  * @param  status Summary signal range status register content .(ptr)
+  * @retval        interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t asm9g300b_summary_sig_range_status_get(const stmdev_ctx_t *ctx, uint16_t *status)
+{
+  return asm9g300b_read_reg(ctx, ASM9G300B_SSUMRNG, (int16_t *)status);
+}
+
+/**
+  * @brief  Get ARS Status registers
+  *
+  * @param  ctx    communication interface handler.(ptr)
+  * @param  status ARS status registers content .(ptr to 3 uint16_t)
+  * @retval        interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t asm9g300b_ars_status_get(const stmdev_ctx_t *ctx, uint16_t *status)
+{
+  int32_t ret;
+
+  ret = asm9g300b_read_reg(ctx, ASM9G300B_STATARSX, (int16_t *)&status[0]);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_STATARSY, (int16_t *)&status[1]);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_STATARSZ, (int16_t *)&status[2]);
+
+  return ret;
+}
+
+/**
+  * @brief  Get ACC Status registers
+  *
+  * @param  ctx    communication interface handler.(ptr)
+  * @param  status ACC status registers content .(ptr to 3 uint16_t)
+  * @retval        interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t asm9g300b_acc_status_get(const stmdev_ctx_t *ctx, uint16_t *status)
+{
+  int32_t ret;
+
+  ret = asm9g300b_read_reg(ctx, ASM9G300B_STATACCX, (int16_t *)&status[0]);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_STATACCY, (int16_t *)&status[1]);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_STATACCZ, (int16_t *)&status[2]);
+
+  return ret;
 }
 
 /**
@@ -399,6 +453,30 @@ int32_t asm9g300b_mgp_data_get(const stmdev_ctx_t *ctx, int16_t *raw)
 int32_t asm9g300b_temp_data_get(const stmdev_ctx_t *ctx, int16_t *raw)
 {
   return asm9g300b_read_reg(ctx, ASM9G300B_TEMP, raw);
+}
+
+/**
+  * @brief  Get Device serial number.[get]
+  *
+  * @param  ctx   communication interface handler.(ptr)
+  * @param  s_num Serial number.(ptr)
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t asm9g300b_getSerialNum(const stmdev_ctx_t *ctx, uint32_t *s_num)
+{
+  uint16_t tmp0 = 0, tmp1 = 0;
+  int32_t ret;
+
+  ret = asm9g300b_read_reg(ctx, ASM9G300B_ASIC_ID, &tmp0);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_ID_TRACKING2, &tmp1);
+  if (ret == -1) {
+    return -1;
+  }
+
+  *s_num = ((tmp0 & 0xf800) << 5) + tmp1;
+
+  return ret;
 }
 
 /**
