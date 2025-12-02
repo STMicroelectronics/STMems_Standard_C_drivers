@@ -177,7 +177,7 @@ int32_t __weak asm9g300b_write_frame(const stmdev_ctx_t *ctx, uint8_t reg, uint1
 }
 
 /* read raw data from reg channel */
-static int32_t asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, int16_t *raw)
+static int32_t asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint16_t *raw)
 {
   int32_t ret;
   uint16_t tmp = 0;
@@ -258,16 +258,16 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   ctx->mdelay(350);
 
   /* read all status register to clear the events */
-  asm9g300b_read_reg(ctx, ASM9G300B_SSUMOK, (int16_t *)&tmp);
-  asm9g300b_read_reg(ctx, ASM9G300B_SSUMRNG, (int16_t *)&tmp);
-  asm9g300b_read_reg(ctx, ASM9G300B_STATARSX, (int16_t *)&tmp);
-  asm9g300b_read_reg(ctx, ASM9G300B_STATARSY, (int16_t *)&tmp);
-  asm9g300b_read_reg(ctx, ASM9G300B_STATARSZ, (int16_t *)&tmp);
-  asm9g300b_read_reg(ctx, ASM9G300B_STATACCX, (int16_t *)&tmp);
-  asm9g300b_read_reg(ctx, ASM9G300B_STATACCY, (int16_t *)&tmp);
-  asm9g300b_read_reg(ctx, ASM9G300B_STATACCZ, (int16_t *)&tmp);
-  asm9g300b_read_reg(ctx, ASM9G300B_STATCOM1, (int16_t *)&tmp);
-  asm9g300b_read_reg(ctx, ASM9G300B_STATCOM2, (int16_t *)&tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_SSUMOK, &tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_SSUMRNG, &tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATARSX, &tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATARSY, &tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATARSZ, &tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATACCX, &tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATACCY, &tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATACCZ, &tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATCOM1, &tmp);
+  asm9g300b_read_reg(ctx, ASM9G300B_STATCOM2, &tmp);
   ctx->mdelay(10);
 
   /* Put sensor in Normal mode */
@@ -313,7 +313,7 @@ int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx)
   */
 int32_t asm9g300b_summary_status_get(const stmdev_ctx_t *ctx, uint16_t *status)
 {
-  return asm9g300b_read_reg(ctx, ASM9G300B_SSUMOK, (int16_t *)status);
+  return asm9g300b_read_reg(ctx, ASM9G300B_SSUMOK, status);
 }
 
 /**
@@ -326,7 +326,7 @@ int32_t asm9g300b_summary_status_get(const stmdev_ctx_t *ctx, uint16_t *status)
   */
 int32_t asm9g300b_summary_sig_range_status_get(const stmdev_ctx_t *ctx, uint16_t *status)
 {
-  return asm9g300b_read_reg(ctx, ASM9G300B_SSUMRNG, (int16_t *)status);
+  return asm9g300b_read_reg(ctx, ASM9G300B_SSUMRNG, status);
 }
 
 /**
@@ -341,9 +341,9 @@ int32_t asm9g300b_ars_status_get(const stmdev_ctx_t *ctx, uint16_t *status)
 {
   int32_t ret;
 
-  ret = asm9g300b_read_reg(ctx, ASM9G300B_STATARSX, (int16_t *)&status[0]);
-  ret += asm9g300b_read_reg(ctx, ASM9G300B_STATARSY, (int16_t *)&status[1]);
-  ret += asm9g300b_read_reg(ctx, ASM9G300B_STATARSZ, (int16_t *)&status[2]);
+  ret = asm9g300b_read_reg(ctx, ASM9G300B_STATARSX, &status[0]);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_STATARSY, &status[1]);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_STATARSZ, &status[2]);
 
   return ret;
 }
@@ -360,9 +360,9 @@ int32_t asm9g300b_acc_status_get(const stmdev_ctx_t *ctx, uint16_t *status)
 {
   int32_t ret;
 
-  ret = asm9g300b_read_reg(ctx, ASM9G300B_STATACCX, (int16_t *)&status[0]);
-  ret += asm9g300b_read_reg(ctx, ASM9G300B_STATACCY, (int16_t *)&status[1]);
-  ret += asm9g300b_read_reg(ctx, ASM9G300B_STATACCZ, (int16_t *)&status[2]);
+  ret = asm9g300b_read_reg(ctx, ASM9G300B_STATACCX, &status[0]);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_STATACCY, &status[1]);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_STATACCZ, &status[2]);
 
   return ret;
 }
@@ -381,8 +381,8 @@ int32_t asm9g300b_com_status_get(const stmdev_ctx_t *ctx, uint32_t *status)
   int32_t ret;
   uint16_t temp1, temp2;
 
-  ret = asm9g300b_read_reg(ctx, ASM9G300B_STATCOM1, (int16_t *)&temp1);
-  ret += asm9g300b_read_reg(ctx, ASM9G300B_STATCOM2, (int16_t *)&temp2);
+  ret = asm9g300b_read_reg(ctx, ASM9G300B_STATCOM1, &temp1);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_STATCOM2, &temp2);
 
   *status = (temp2 << 16) | temp1;
 
@@ -416,9 +416,9 @@ int32_t asm9g300b_acc_data_get(const stmdev_ctx_t *ctx, int16_t *raw)
 {
   int32_t ret;
 
-  ret = asm9g300b_read_reg(ctx, ASM9G300B_ACCX, &raw[0]);
-  ret += asm9g300b_read_reg(ctx, ASM9G300B_ACCY, &raw[1]);
-  ret += asm9g300b_read_reg(ctx, ASM9G300B_ACCZ, &raw[2]);
+  ret = asm9g300b_read_reg(ctx, ASM9G300B_ACCX, (uint16_t *)&raw[0]);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_ACCY, (uint16_t *)&raw[1]);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_ACCZ, (uint16_t *)&raw[2]);
 
   return ret;
 }
@@ -435,9 +435,9 @@ int32_t asm9g300b_mgp_data_get(const stmdev_ctx_t *ctx, int16_t *raw)
 {
   int32_t ret;
 
-  ret = asm9g300b_read_reg(ctx, ASM9G300B_MGPX, &raw[0]);
-  ret += asm9g300b_read_reg(ctx, ASM9G300B_MGPY, &raw[1]);
-  ret += asm9g300b_read_reg(ctx, ASM9G300B_MGPZ, &raw[2]);
+  ret = asm9g300b_read_reg(ctx, ASM9G300B_MGPX, (uint16_t *)&raw[0]);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_MGPY, (uint16_t *)&raw[1]);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_MGPZ, (uint16_t *)&raw[2]);
 
   return ret;
 }
@@ -452,7 +452,7 @@ int32_t asm9g300b_mgp_data_get(const stmdev_ctx_t *ctx, int16_t *raw)
   */
 int32_t asm9g300b_temp_data_get(const stmdev_ctx_t *ctx, int16_t *raw)
 {
-  return asm9g300b_read_reg(ctx, ASM9G300B_TEMP, raw);
+  return asm9g300b_read_reg(ctx, ASM9G300B_TEMP, (uint16_t *)raw);
 }
 
 /**

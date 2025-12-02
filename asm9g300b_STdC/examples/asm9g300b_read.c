@@ -168,6 +168,12 @@ void asm9g300b_read(void)
     while(1); /* stop here if SPI communication is not established */
   }
 
+  uint32_t serial_num;
+  asm9g300b_getSerialNum(&dev_ctx, &serial_num);
+
+  sprintf((char *)tx_buffer, "serial_num %08x\r\n", serial_num);
+  tx_com(tx_buffer, strlen((char const *)tx_buffer));
+
   while(1)
   {
     int16_t raw[3];

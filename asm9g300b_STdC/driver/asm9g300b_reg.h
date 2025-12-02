@@ -900,7 +900,7 @@ int32_t asm9g300b_from_mgp_lsb_to_mms2(int16_t lsb);
 int32_t asm9g300b_from_temp_lsb_to_celsius(int16_t lsb);
 
 /* read device serial number */
-int32_t asm9g300b_getSerialNum(const stmdev_ctx_t *ctx, uint32_t *s_num)
+int32_t asm9g300b_getSerialNum(const stmdev_ctx_t *ctx, uint32_t *s_num);
 
 #ifdef __cplusplus
 }
