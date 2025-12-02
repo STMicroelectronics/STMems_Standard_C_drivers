@@ -177,7 +177,7 @@ void asm9g300b_read(void)
   while(1)
   {
     int16_t raw[3];
-    int32_t accel[3], temp;
+    int32_t accel[3], gyro[3], temp;
     int ret;
     uint8_t *tx_p;
     uint16_t num;
@@ -185,6 +185,7 @@ void asm9g300b_read(void)
     check_device_status(&dev_ctx);
     tx_p = tx_buffer;
 
+    /* Get low-g accel data */
     ret = asm9g300b_acc_data_get(&dev_ctx, raw);
     if (ret < 0)
     {
@@ -200,6 +201,18 @@ void asm9g300b_read(void)
                                 accel[0], accel[1], accel[2]);
     tx_p += num;
 
+    /* Get angular rate data */
+    asm9g300b_ars_data_get(&dev_ctx, raw);
+
+    gyro[0] = asm9g300b_from_ars_lsb_to_mdps(raw[0]);
+    gyro[1] = asm9g300b_from_ars_lsb_to_mdps(raw[1]);
+    gyro[2] = asm9g300b_from_ars_lsb_to_mdps(raw[2]);
+
+    num = sprintf((char *)tx_p, "GYRO %d (mdps) %d (mdps) %d (mdps)\r\n",
+                                gyro[0], gyro[1], gyro[2]);
+    tx_p += num;
+
+    /* Get Mid-g accel data */
     asm9g300b_mgp_data_get(&dev_ctx, raw);
     accel[0] = asm9g300b_from_mgp_lsb_to_mms2(raw[0]);
     accel[1] = asm9g300b_from_mgp_lsb_to_mms2(raw[1]);
@@ -209,6 +222,7 @@ void asm9g300b_read(void)
                                 accel[0], accel[1], accel[2]);
     tx_p += num;
 
+    /* Get TEMPERATURE data */
     asm9g300b_temp_data_get(&dev_ctx, &raw[0]);
     temp = asm9g300b_from_temp_lsb_to_celsius(raw[0]);
 

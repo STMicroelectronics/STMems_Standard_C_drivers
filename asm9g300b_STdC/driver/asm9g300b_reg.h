@@ -885,6 +885,9 @@ int32_t asm9g300b_ars_status_get(const stmdev_ctx_t *ctx, uint16_t *status);
 int32_t asm9g300b_acc_status_get(const stmdev_ctx_t *ctx, uint16_t *status);
 int32_t asm9g300b_com_status_get(const stmdev_ctx_t *ctx, uint32_t *status);
 
+/* read ARS data */
+int32_t asm9g300b_ars_data_get(const stmdev_ctx_t *ctx, int16_t *raw);
+
 /* read ACC data */
 int32_t asm9g300b_acc_data_get(const stmdev_ctx_t *ctx, int16_t *raw);
 
@@ -895,6 +898,7 @@ int32_t asm9g300b_mgp_data_get(const stmdev_ctx_t *ctx, int16_t *raw);
 int32_t asm9g300b_temp_data_get(const stmdev_ctx_t *ctx, int16_t *raw);
 
 /* transform lsb data into engineering units */
+int32_t asm9g300b_from_ars_lsb_to_mdps(int16_t lsb);
 int32_t asm9g300b_from_acc_lsb_to_mms2(int16_t lsb);
 int32_t asm9g300b_from_mgp_lsb_to_mms2(int16_t lsb);
 int32_t asm9g300b_from_temp_lsb_to_celsius(int16_t lsb);

@@ -389,6 +389,11 @@ int32_t asm9g300b_com_status_get(const stmdev_ctx_t *ctx, uint32_t *status)
   return ret;
 }
 
+int32_t asm9g300b_from_ars_lsb_to_mdps(int16_t lsb)
+{
+  return 20 * lsb; /* unit is mdps */
+}
+
 int32_t asm9g300b_from_acc_lsb_to_mms2(int16_t lsb)
 {
   return 5 * lsb; /* unit is mm/s^2 */
@@ -402,6 +407,25 @@ int32_t asm9g300b_from_mgp_lsb_to_mms2(int16_t lsb)
 int32_t asm9g300b_from_temp_lsb_to_celsius(int16_t lsb)
 {
   return (25000 + 40 * lsb); /* unit is milliCelsius degrees */
+}
+
+/**
+  * @brief  Angular rate data.[get]
+  *
+  * @param  ctx   communication interface handler.(ptr)
+  * @param  raw   lsb data retrived from the sensor.(ptr)
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t asm9g300b_ars_data_get(const stmdev_ctx_t *ctx, int16_t *raw)
+{
+  int32_t ret;
+
+  ret = asm9g300b_read_reg(ctx, ASM9G300B_ARSX, (uint16_t *)&raw[0]);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_ARSY, (uint16_t *)&raw[1]);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_ARSZ, (uint16_t *)&raw[2]);
+
+  return ret;
 }
 
 /**
