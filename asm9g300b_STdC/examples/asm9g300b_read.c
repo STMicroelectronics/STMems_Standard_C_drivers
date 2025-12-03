@@ -229,7 +229,7 @@ void asm9g300b_read(void)
     sprintf((char *)tx_p, "TEMP %d (milli Celsius)\r\n\r\n", temp);
     tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
-    platform_delay(1000);
+    platform_delay(10); /* 100 Hz polling mode */
   }
 }
 
