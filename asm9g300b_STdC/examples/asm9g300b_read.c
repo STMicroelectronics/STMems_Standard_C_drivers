@@ -156,6 +156,8 @@ asm9g300b_priv_t asm9g300b_config =
     .t_debounce_ry = ASM9G300B_DEBOUNCE_TIME_0MS,
     .t_debounce_rz = ASM9G300B_DEBOUNCE_TIME_0MS,
 
+    .z_clamp = 1, //ASM9G300B_NVM_CLIPPING,
+
     .sdo_drv = 0,
     .disable_auto_self_test = 0,
   };
@@ -195,6 +197,8 @@ void asm9g300b_read(void)
   sprintf((char *)tx_buffer, "serial_num %08x\r\n", serial_num);
   tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
+  uint32_t num_samples = 0;
+
   while(1)
   {
     int16_t raw[3];
@@ -204,6 +208,9 @@ void asm9g300b_read(void)
 
     check_device_status(&dev_ctx);
     tx_p = tx_buffer;
+
+    num = sprintf((char *)tx_p, "NUM %d\r\n", num_samples++);
+    tx_p += num;
 
     /* Get low-g accel data */
     ret = asm9g300b_acc_data_get(&dev_ctx, raw);
@@ -249,7 +256,7 @@ void asm9g300b_read(void)
     sprintf((char *)tx_p, "TEMP %d (milli Celsius)\r\n\r\n", temp);
     tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
-    platform_delay(10); /* 100 Hz polling mode */
+    platform_delay(1); /* 1 kHz polling mode */
   }
 }
 

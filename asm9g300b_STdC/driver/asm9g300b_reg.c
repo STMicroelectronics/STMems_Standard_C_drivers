@@ -226,6 +226,7 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   int32_t ret;
   asm9g300b_config01_t cfg01 = {0};
   asm9g300b_config04_t cfg04 = {0};
+  asm9g300b_config05_t cfg05 = {0};
   asm9g300b_config06_t cfg06 = {0};
   uint16_t *cfgp = (uint16_t *)&cfg01;
   uint16_t tmp;
@@ -264,6 +265,14 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   cfg04.tdebrng_rz = cfg_priv->t_debounce_rz;
   cfgp = (uint16_t *)&cfg04;
   ret = asm9g300b_write_frame(ctx, ASM9G300B_CONFIG04, *cfgp);
+  if (ret == -1) {
+    return -1;
+  }
+
+  /* Configure Z clamp */
+  cfg05.zclampconfig = cfg_priv->z_clamp;
+  cfgp = (uint16_t *)&cfg05;
+  ret = asm9g300b_write_frame(ctx, ASM9G300B_CONFIG05, *cfgp);
   if (ret == -1) {
     return -1;
   }

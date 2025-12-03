@@ -118,7 +118,7 @@ typedef struct
   uint32_t t_debounce_rx                       : 3;
   uint32_t t_debounce_ry                       : 3;
   uint32_t t_debounce_rz                       : 3;
-  uint32_t reserved_2                          : 2;
+  uint32_t z_clamp                             : 2;
 } asm9g300b_priv_t;
 
 /**
@@ -904,6 +904,9 @@ int32_t asm9g300b_set_command(const stmdev_ctx_t *ctx, asm9g300b_commands_t cmd)
 #define ASM9G300B_DEBOUNCE_TIME_14_29MS  0x5
 #define ASM9G300B_DEBOUNCE_TIME_17_14MS  0x6
 #define ASM9G300B_DEBOUNCE_TIME_20MS     0x7
+
+/* z-clamp values */
+#define ASM9G300B_NVM_CLIPPING      0x0
 
 /* Device startup procedure */
 int32_t asm9g300b_startup(const stmdev_ctx_t *ctx);
