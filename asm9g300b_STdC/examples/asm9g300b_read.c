@@ -121,11 +121,11 @@ static void check_device_status(stmdev_ctx_t *ctx)
 
     asm9g300b_summary_status_get(ctx, &status);
     sprintf((char *)tx_buffer, "Summary status %04x\r\n", status);
-    tx_com(tx_buffer, strlen((char const *)tx_buffer));
+    //tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
     asm9g300b_summary_sig_range_status_get(ctx, &status);
     sprintf((char *)tx_buffer, "Summary signal range status %04x\r\n", status);
-    tx_com(tx_buffer, strlen((char const *)tx_buffer));
+    //tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
 #if 0
     if ((status & 0x400) == 0)
@@ -140,7 +140,61 @@ static void check_device_status(stmdev_ctx_t *ctx)
 #endif
 }
 
-asm9g300b_priv_t asm9g300b_config =
+static uint32_t num_samples = 0;
+
+static void asm9g300b_read_all_sensors(stmdev_ctx_t *ctx)
+{
+    int16_t raw[3];
+    int32_t accel[3], gyro[3], temp;
+    uint8_t *tx_p;
+    uint16_t num;
+
+    check_device_status(ctx);
+    tx_p = tx_buffer;
+
+    num = sprintf((char *)tx_p, "NUM %d\r\n", num_samples);
+    tx_p += num;
+
+    /* Get low-g accel data */
+    asm9g300b_acc_data_get(ctx, raw);
+
+    accel[0] = asm9g300b_from_acc_lsb_to_mms2(raw[0]);
+    accel[1] = asm9g300b_from_acc_lsb_to_mms2(raw[1]);
+    accel[2] = asm9g300b_from_acc_lsb_to_mms2(raw[2]);
+
+    num = sprintf((char *)tx_p, "LOW-G %d (mm/s^2) %d (mm/s^2) %d (mm/s^2)\r\n",
+                                accel[0], accel[1], accel[2]);
+    tx_p += num;
+
+    /* Get angular rate data */
+    asm9g300b_ars_data_get(ctx, raw);
+
+    gyro[0] = asm9g300b_from_ars_lsb_to_mdps(raw[0]);
+    gyro[1] = asm9g300b_from_ars_lsb_to_mdps(raw[1]);
+    gyro[2] = asm9g300b_from_ars_lsb_to_mdps(raw[2]);
+
+    num = sprintf((char *)tx_p, "GYRO %d (mdps) %d (mdps) %d (mdps)\r\n",
+                                gyro[0], gyro[1], gyro[2]);
+    tx_p += num;
+
+    /* Get Mid-g accel data */
+    asm9g300b_mgp_data_get(ctx, raw);
+    accel[0] = asm9g300b_from_mgp_lsb_to_mms2(raw[0]);
+    accel[1] = asm9g300b_from_mgp_lsb_to_mms2(raw[1]);
+    accel[2] = asm9g300b_from_mgp_lsb_to_mms2(raw[2]);
+
+    num = sprintf((char *)tx_p, "MID-G %d (mm/s^2) %d (mm/s^2) %d (mm/s^2)\r\n",
+                                accel[0], accel[1], accel[2]);
+    tx_p += num;
+
+    /* Get TEMPERATURE data */
+    asm9g300b_temp_data_get(ctx, &raw[0]);
+    temp = asm9g300b_from_temp_lsb_to_celsius(raw[0]);
+
+    sprintf((char *)tx_p, "TEMP %d (milli Celsius)\r\n\r\n", temp);
+}
+
+static asm9g300b_priv_t asm9g300b_config =
   {
     .iir_bw_sel_ax = ASM9G300B_IIR_FILTER_60HZ,
     .iir_bw_sel_ay = ASM9G300B_IIR_FILTER_60HZ,
@@ -197,66 +251,24 @@ void asm9g300b_read(void)
   sprintf((char *)tx_buffer, "serial_num %08x\r\n", serial_num);
   tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
-  uint32_t num_samples = 0;
+  uint32_t tick_start = HAL_GetTick();
 
   while(1)
   {
-    int16_t raw[3];
-    int32_t accel[3], gyro[3], temp;
-    uint8_t *tx_p;
-    uint16_t num;
+    uint32_t tick_curr;
 
-    check_device_status(&dev_ctx);
-    tx_p = tx_buffer;
+    tick_curr = HAL_GetTick();
 
-    num = sprintf((char *)tx_p, "NUM %d\r\n", num_samples++);
-    tx_p += num;
-
-    /* Get low-g accel data */
-    ret = asm9g300b_acc_data_get(&dev_ctx, raw);
-    if (ret < 0)
+    /* simulate a thread scheduled every 1ms (1kHz) */
+    if ((tick_curr - tick_start) >= 1)
     {
-      num = sprintf((char *)tx_p, "LOW-G error\r\n");
-      tx_p += num;
+      tick_start = tick_curr;
+      asm9g300b_read_all_sensors(&dev_ctx);
+
+      /* prints out only every 1000 samples */
+      if ((num_samples++ % 1000) == 999)
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
     }
-
-    accel[0] = asm9g300b_from_acc_lsb_to_mms2(raw[0]);
-    accel[1] = asm9g300b_from_acc_lsb_to_mms2(raw[1]);
-    accel[2] = asm9g300b_from_acc_lsb_to_mms2(raw[2]);
-
-    num = sprintf((char *)tx_p, "LOW-G %d (mm/s^2) %d (mm/s^2) %d (mm/s^2)\r\n",
-                                accel[0], accel[1], accel[2]);
-    tx_p += num;
-
-    /* Get angular rate data */
-    asm9g300b_ars_data_get(&dev_ctx, raw);
-
-    gyro[0] = asm9g300b_from_ars_lsb_to_mdps(raw[0]);
-    gyro[1] = asm9g300b_from_ars_lsb_to_mdps(raw[1]);
-    gyro[2] = asm9g300b_from_ars_lsb_to_mdps(raw[2]);
-
-    num = sprintf((char *)tx_p, "GYRO %d (mdps) %d (mdps) %d (mdps)\r\n",
-                                gyro[0], gyro[1], gyro[2]);
-    tx_p += num;
-
-    /* Get Mid-g accel data */
-    asm9g300b_mgp_data_get(&dev_ctx, raw);
-    accel[0] = asm9g300b_from_mgp_lsb_to_mms2(raw[0]);
-    accel[1] = asm9g300b_from_mgp_lsb_to_mms2(raw[1]);
-    accel[2] = asm9g300b_from_mgp_lsb_to_mms2(raw[2]);
-
-    num = sprintf((char *)tx_p, "MID-G %d (mm/s^2) %d (mm/s^2) %d (mm/s^2)\r\n",
-                                accel[0], accel[1], accel[2]);
-    tx_p += num;
-
-    /* Get TEMPERATURE data */
-    asm9g300b_temp_data_get(&dev_ctx, &raw[0]);
-    temp = asm9g300b_from_temp_lsb_to_celsius(raw[0]);
-
-    sprintf((char *)tx_p, "TEMP %d (milli Celsius)\r\n\r\n", temp);
-    tx_com(tx_buffer, strlen((char const *)tx_buffer));
-
-    platform_delay(1); /* 1 kHz polling mode */
   }
 }
 
