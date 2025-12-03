@@ -94,11 +94,6 @@
 #define    BOOT_TIME        25 //ms
 
 /* Private variables ---------------------------------------------------------*/
-static int16_t data_raw_acceleration[3];
-static int16_t data_raw_temperature;
-static float acceleration_mg[3];
-static float temperature_degC;
-//static uint8_t whoamI, rst;
 static uint8_t tx_buffer[1000];
 
 /* Extern variables ----------------------------------------------------------*/
@@ -151,7 +146,16 @@ asm9g300b_priv_t asm9g300b_config =
     .iir_bw_sel_ay = ASM9G300B_IIR_FILTER_60HZ,
     .iir_bw_sel_az = ASM9G300B_IIR_FILTER_60HZ,
     .iir_bw_sel_rx = ASM9G300B_IIR_FILTER_60HZ,
+    .iir_bw_sel_ry = ASM9G300B_IIR_FILTER_60HZ,
     .iir_bw_sel_rz = ASM9G300B_IIR_FILTER_60HZ,
+
+    .t_debounce_ax = ASM9G300B_DEBOUNCE_TIME_0MS,
+    .t_debounce_ay = ASM9G300B_DEBOUNCE_TIME_0MS,
+    .t_debounce_az = ASM9G300B_DEBOUNCE_TIME_0MS,
+    .t_debounce_rx = ASM9G300B_DEBOUNCE_TIME_0MS,
+    .t_debounce_ry = ASM9G300B_DEBOUNCE_TIME_0MS,
+    .t_debounce_rz = ASM9G300B_DEBOUNCE_TIME_0MS,
+
     .sdo_drv = 0,
     .disable_auto_self_test = 0,
   };

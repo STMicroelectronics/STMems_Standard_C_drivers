@@ -103,14 +103,22 @@ typedef struct
 
 typedef struct
 {
-  uint32_t disable_auto_self_test              : 1;
+  uint8_t disable_auto_self_test               : 1;
+  uint8_t sdo_drv                              : 3;
+  uint8_t reserved_1                           : 4;
   uint32_t iir_bw_sel_ax                       : 2;
   uint32_t iir_bw_sel_ay                       : 2;
   uint32_t iir_bw_sel_az                       : 2;
   uint32_t iir_bw_sel_rx                       : 2;
+  uint32_t iir_bw_sel_ry                       : 2;
   uint32_t iir_bw_sel_rz                       : 2;
-  uint32_t sdo_drv                             : 3;
-  uint32_t reserved                            : 18;
+  uint32_t t_debounce_ax                       : 3;
+  uint32_t t_debounce_ay                       : 3;
+  uint32_t t_debounce_az                       : 3;
+  uint32_t t_debounce_rx                       : 3;
+  uint32_t t_debounce_ry                       : 3;
+  uint32_t t_debounce_rz                       : 3;
+  uint32_t reserved_2                          : 2;
 } asm9g300b_priv_t;
 
 /**
@@ -886,6 +894,16 @@ int32_t asm9g300b_set_command(const stmdev_ctx_t *ctx, asm9g300b_commands_t cmd)
 #define ASM9G300B_IIR_FILTER_15HZ   0x2
 #define ASM9G300B_IIR_FILTER_300HZ  0x3
 #define ASM9G300B_IIR_FILTER_227HZ  0x3
+
+/* debounce timer values */
+#define ASM9G300B_DEBOUNCE_TIME_0MS      0x0
+#define ASM9G300B_DEBOUNCE_TIME_2_86MS   0x1
+#define ASM9G300B_DEBOUNCE_TIME_5_71MS   0x2
+#define ASM9G300B_DEBOUNCE_TIME_8_57MS   0x3
+#define ASM9G300B_DEBOUNCE_TIME_11_43MS  0x4
+#define ASM9G300B_DEBOUNCE_TIME_14_29MS  0x5
+#define ASM9G300B_DEBOUNCE_TIME_17_14MS  0x6
+#define ASM9G300B_DEBOUNCE_TIME_20MS     0x7
 
 /* Device startup procedure */
 int32_t asm9g300b_startup(const stmdev_ctx_t *ctx);

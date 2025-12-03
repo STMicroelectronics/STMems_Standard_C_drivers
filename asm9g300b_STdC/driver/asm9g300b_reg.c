@@ -224,8 +224,10 @@ int32_t asm9g300b_set_command(const stmdev_ctx_t *ctx, asm9g300b_commands_t cmd)
 int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
 {
   int32_t ret;
-  asm9g300b_config01_t cfg = {0};
-  uint16_t *cfgp = (uint16_t *)&cfg;
+  asm9g300b_config01_t cfg01 = {0};
+  asm9g300b_config04_t cfg04 = {0};
+  asm9g300b_config06_t cfg06 = {0};
+  uint16_t *cfgp = (uint16_t *)&cfg01;
   uint16_t tmp;
   asm9g300b_priv_t *cfg_priv;
 
@@ -241,14 +243,36 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   ret = asm9g300b_set_command(ctx, ASM9G300B_CMD_HARD_RESET);
   ctx->mdelay(20);
 
-  /* Configure filters and SDO strength  */
-  cfg.sdo_drv = cfg_priv->sdo_drv;
-  cfg.iir_bw_sel_ax = cfg_priv->iir_bw_sel_ax;
-  cfg.iir_bw_sel_ay = cfg_priv->iir_bw_sel_ay;
-  cfg.iir_bw_sel_az = cfg_priv->iir_bw_sel_az;
-  cfg.iir_bw_sel_rx = cfg_priv->iir_bw_sel_rx;
-  cfg.iir_bw_sel_rz = cfg_priv->iir_bw_sel_rz;
+  /* Configure filters and SDO strength */
+  cfg01.sdo_drv = cfg_priv->sdo_drv;
+  cfg01.iir_bw_sel_ax = cfg_priv->iir_bw_sel_ax;
+  cfg01.iir_bw_sel_ay = cfg_priv->iir_bw_sel_ay;
+  cfg01.iir_bw_sel_az = cfg_priv->iir_bw_sel_az;
+  cfg01.iir_bw_sel_rx = cfg_priv->iir_bw_sel_rx;
+  cfg01.iir_bw_sel_rz = cfg_priv->iir_bw_sel_rz;
+  cfgp = (uint16_t *)&cfg01;
   ret = asm9g300b_write_frame(ctx, ASM9G300B_CONFIG01, *cfgp);
+  if (ret == -1) {
+    return -1;
+  }
+
+  /* Configure debounce times */
+  cfg04.tdebrng_ax = cfg_priv->t_debounce_ax;
+  cfg04.tdebrng_ay = cfg_priv->t_debounce_ay;
+  cfg04.tdebrng_az = cfg_priv->t_debounce_az;
+  cfg04.tdebrng_rx = cfg_priv->t_debounce_rx;
+  cfg04.tdebrng_rz = cfg_priv->t_debounce_rz;
+  cfgp = (uint16_t *)&cfg04;
+  ret = asm9g300b_write_frame(ctx, ASM9G300B_CONFIG04, *cfgp);
+  if (ret == -1) {
+    return -1;
+  }
+
+  /* Configure leftovers */
+  cfg06.iir_bw_sel_ry = cfg_priv->iir_bw_sel_ry;
+  cfg06.tdebrng_ry = cfg_priv->t_debounce_ry;
+  cfgp = (uint16_t *)&cfg06;
+  ret = asm9g300b_write_frame(ctx, ASM9G300B_CONFIG06, *cfgp);
   if (ret == -1) {
     return -1;
   }
@@ -276,7 +300,7 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   ctx->mdelay(10);
 
   if (cfg_priv->disable_auto_self_test == 0) {
-    /* Invoke Acc Auto self-test */
+    /* Invoke Acc/Ars Auto self-test */
     ret = asm9g300b_set_command(ctx, ASM9G300B_CMD_ALL_AUTO_SELF_TEST);
     if (ret == -1) {
       return -1;
