@@ -145,6 +145,17 @@ static void check_device_status(stmdev_ctx_t *ctx)
 #endif
 }
 
+asm9g300b_priv_t asm9g300b_config =
+  {
+    .iir_bw_sel_ax = ASM9G300B_IIR_FILTER_60HZ,
+    .iir_bw_sel_ay = ASM9G300B_IIR_FILTER_60HZ,
+    .iir_bw_sel_az = ASM9G300B_IIR_FILTER_60HZ,
+    .iir_bw_sel_rx = ASM9G300B_IIR_FILTER_60HZ,
+    .iir_bw_sel_rz = ASM9G300B_IIR_FILTER_60HZ,
+    .sdo_drv = 0,
+    .disable_auto_self_test = 0,
+  };
+
 void asm9g300b_read(void)
 {
   stmdev_ctx_t dev_ctx;
@@ -155,6 +166,7 @@ void asm9g300b_read(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+  dev_ctx.priv_data = &asm9g300b_config;
 
   /* Init test platform */
   platform_init();

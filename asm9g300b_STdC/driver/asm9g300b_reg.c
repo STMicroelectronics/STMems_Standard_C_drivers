@@ -227,25 +227,27 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   asm9g300b_config01_t cfg = {0};
   uint16_t *cfgp = (uint16_t *)&cfg;
   uint16_t tmp;
+  asm9g300b_priv_t *cfg_priv;
 
-  if (ctx == NULL || ctx->mdelay == NULL)
+  if (ctx == NULL || ctx->mdelay == NULL || ctx->priv_data == NULL)
   {
     return -1;
   }
-
   ctx->mdelay(25);
+
+  cfg_priv = ctx->priv_data;
 
   /* Perform hard reset */
   ret = asm9g300b_set_command(ctx, ASM9G300B_CMD_HARD_RESET);
   ctx->mdelay(20);
 
   /* Configure filters and SDO strength  */
-  cfg.sdo_drv = 0;
-  cfg.iir_bw_sel_ax = ASM9G300B_IIR_FILTER_60HZ;
-  cfg.iir_bw_sel_ay = ASM9G300B_IIR_FILTER_60HZ;
-  cfg.iir_bw_sel_az = ASM9G300B_IIR_FILTER_60HZ;
-  cfg.iir_bw_sel_rx = ASM9G300B_IIR_FILTER_60HZ;
-  cfg.iir_bw_sel_rz = ASM9G300B_IIR_FILTER_60HZ;
+  cfg.sdo_drv = cfg_priv->sdo_drv;
+  cfg.iir_bw_sel_ax = cfg_priv->iir_bw_sel_ax;
+  cfg.iir_bw_sel_ay = cfg_priv->iir_bw_sel_ay;
+  cfg.iir_bw_sel_az = cfg_priv->iir_bw_sel_az;
+  cfg.iir_bw_sel_rx = cfg_priv->iir_bw_sel_rx;
+  cfg.iir_bw_sel_rz = cfg_priv->iir_bw_sel_rz;
   ret = asm9g300b_write_frame(ctx, ASM9G300B_CONFIG01, *cfgp);
   if (ret == -1) {
     return -1;
@@ -273,22 +275,24 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   asm9g300b_read_reg(ctx, ASM9G300B_STATCOM2, &tmp);
   ctx->mdelay(10);
 
-  /* Invoke Acc Auto self-test */
-  ret = asm9g300b_set_command(ctx, ASM9G300B_CMD_ALL_AUTO_SELF_TEST);
-  if (ret == -1) {
-    return -1;
-  }
+  if (cfg_priv->disable_auto_self_test == 0) {
+    /* Invoke Acc Auto self-test */
+    ret = asm9g300b_set_command(ctx, ASM9G300B_CMD_ALL_AUTO_SELF_TEST);
+    if (ret == -1) {
+      return -1;
+    }
 
-  /* check self-test result */
-  uint32_t st_status = 0, retry = 0;
-  do {
-    ctx->mdelay(50);
-    asm9g300b_st_status_get(ctx, &st_status);
-  } while((st_status & ASM9G300B_ST_STATUS_MASK) != ASM9G300B_ST_STATUS_OK && retry++ < 5);
+    /* check self-test result */
+    uint32_t st_status = 0, retry = 0;
+    do {
+      ctx->mdelay(50);
+      asm9g300b_st_status_get(ctx, &st_status);
+    } while((st_status & ASM9G300B_ST_STATUS_MASK) != ASM9G300B_ST_STATUS_OK && retry++ < 5);
 
-  if (retry >= 5)
-  {
-    return -1;
+    if (retry >= 5)
+    {
+      return -1;
+    }
   }
 
   /* Put sensor in Normal mode */

@@ -101,6 +101,18 @@ typedef struct
   void *priv_data;
 } stmdev_ctx_t;
 
+typedef struct
+{
+  uint32_t disable_auto_self_test              : 1;
+  uint32_t iir_bw_sel_ax                       : 2;
+  uint32_t iir_bw_sel_ay                       : 2;
+  uint32_t iir_bw_sel_az                       : 2;
+  uint32_t iir_bw_sel_rx                       : 2;
+  uint32_t iir_bw_sel_rz                       : 2;
+  uint32_t sdo_drv                             : 3;
+  uint32_t reserved                            : 18;
+} asm9g300b_priv_t;
+
 /**
   * @}
   *
