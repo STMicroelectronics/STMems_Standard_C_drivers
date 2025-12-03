@@ -148,6 +148,7 @@ static void check_device_status(stmdev_ctx_t *ctx)
 void asm9g300b_read(void)
 {
   stmdev_ctx_t dev_ctx;
+  int ret;
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
@@ -161,7 +162,11 @@ void asm9g300b_read(void)
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
 
-  asm9g300b_startup(&dev_ctx);
+  ret = asm9g300b_startup(&dev_ctx);
+  if (ret < 0)
+  {
+    while(1); /* device not started */
+  }
 
   if (asm9g300b_check_spi_communication(&dev_ctx) < 0)
   {
@@ -178,7 +183,6 @@ void asm9g300b_read(void)
   {
     int16_t raw[3];
     int32_t accel[3], gyro[3], temp;
-    int ret;
     uint8_t *tx_p;
     uint16_t num;
 

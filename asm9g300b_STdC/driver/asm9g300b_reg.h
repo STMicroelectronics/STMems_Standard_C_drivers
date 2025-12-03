@@ -875,15 +875,22 @@ int32_t asm9g300b_set_command(const stmdev_ctx_t *ctx, asm9g300b_commands_t cmd)
 #define ASM9G300B_IIR_FILTER_300HZ  0x3
 #define ASM9G300B_IIR_FILTER_227HZ  0x3
 
+/* Device startup procedure */
 int32_t asm9g300b_startup(const stmdev_ctx_t *ctx);
 
 int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx);
 
+/* Retrieve status */
 int32_t asm9g300b_summary_status_get(const stmdev_ctx_t *ctx, uint16_t *status);
 int32_t asm9g300b_summary_sig_range_status_get(const stmdev_ctx_t *ctx, uint16_t *status);
 int32_t asm9g300b_ars_status_get(const stmdev_ctx_t *ctx, uint16_t *status);
 int32_t asm9g300b_acc_status_get(const stmdev_ctx_t *ctx, uint16_t *status);
 int32_t asm9g300b_com_status_get(const stmdev_ctx_t *ctx, uint32_t *status);
+
+/* Auto self-test status */
+#define ASM9G300B_ST_STATUS_MASK 0x003F003F
+#define ASM9G300B_ST_STATUS_OK   0x00150015
+int32_t asm9g300b_st_status_get(const stmdev_ctx_t *ctx, uint32_t *status);
 
 /* read ARS data */
 int32_t asm9g300b_ars_data_get(const stmdev_ctx_t *ctx, int16_t *raw);

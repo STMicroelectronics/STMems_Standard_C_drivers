@@ -255,6 +255,9 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
 
   /* wake-up sensor */
   ret = asm9g300b_set_command(ctx, ASM9G300B_CMD_WAKE_UP);
+  if (ret == -1) {
+    return -1;
+  }
   ctx->mdelay(350);
 
   /* read all status register to clear the events */
@@ -270,8 +273,29 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   asm9g300b_read_reg(ctx, ASM9G300B_STATCOM2, &tmp);
   ctx->mdelay(10);
 
+  /* Invoke Acc Auto self-test */
+  ret = asm9g300b_set_command(ctx, ASM9G300B_CMD_ALL_AUTO_SELF_TEST);
+  if (ret == -1) {
+    return -1;
+  }
+
+  /* check self-test result */
+  uint32_t st_status = 0, retry = 0;
+  do {
+    ctx->mdelay(50);
+    asm9g300b_st_status_get(ctx, &st_status);
+  } while((st_status & ASM9G300B_ST_STATUS_MASK) != ASM9G300B_ST_STATUS_OK && retry++ < 5);
+
+  if (retry >= 5)
+  {
+    return -1;
+  }
+
   /* Put sensor in Normal mode */
   ret = asm9g300b_set_command(ctx, ASM9G300B_CMD_EOI);
+  if (ret == -1) {
+    return -1;
+  }
 
   return ret;
 }
@@ -383,6 +407,28 @@ int32_t asm9g300b_com_status_get(const stmdev_ctx_t *ctx, uint32_t *status)
 
   ret = asm9g300b_read_reg(ctx, ASM9G300B_STATCOM1, &temp1);
   ret += asm9g300b_read_reg(ctx, ASM9G300B_STATCOM2, &temp2);
+
+  *status = (temp2 << 16) | temp1;
+
+  return ret;
+}
+
+/**
+  * @brief  Get Self-Test Status registers
+  *         It chains ST_STATUS_ARS and ST_STATUS_ACC together
+  *
+  * @param  ctx    communication interface handler.(ptr)
+  * @param  status Summary status register content .(ptr)
+  * @retval        interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t asm9g300b_st_status_get(const stmdev_ctx_t *ctx, uint32_t *status)
+{
+  int32_t ret;
+  uint16_t temp1, temp2;
+
+  ret = asm9g300b_read_reg(ctx, ASM9G300B_ST_STATUS_ARS, &temp1);
+  ret += asm9g300b_read_reg(ctx, ASM9G300B_ST_STATUS_ACC, &temp2);
 
   *status = (temp2 << 16) | temp1;
 
