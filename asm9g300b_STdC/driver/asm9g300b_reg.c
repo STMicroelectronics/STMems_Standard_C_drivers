@@ -62,15 +62,9 @@ static uint8_t asm9g300b_calc_crc3(uint32_t data, uint8_t init, uint8_t poly)
   return crc;
 }
 
-/**
-  * @brief  Generate SafeSPI MOSI frame
-  *
-  * @param  ta    register to access
-  * @param  read  0: read request, 1: write request
-  * @param  data  data to be sent
-  * @retval       the MOSI frame
-  *
-  */
+/*
+ * Generate SafeSPI MOSI frame
+ */
 static uint32_t asm9g300b_gen_mosi_frame(uint8_t ta, uint8_t rw, uint16_t data)
 {
   uint32_t frame, crc3;
@@ -83,15 +77,9 @@ static uint32_t asm9g300b_gen_mosi_frame(uint8_t ta, uint8_t rw, uint16_t data)
   return (frame | crc3);
 }
 
-/**
-  * @brief  Decode SafeSPI MISO frame
-  *
-  * @param  frame frame to be decoded
-  * @param  data  pointer to buffer to be filled with the data field
-  * @param  state pointer to S1:0 field
-  * @retval       interface status (MANDATORY: return 0 -> no Error)
-  *
-  */
+/*
+ * Decode SafeSPI MISO frame
+ */
 static int32_t asm9g300b_dec_miso_frame(uint32_t frame, uint16_t *data, uint8_t *state)
 {
   uint32_t crc3;
@@ -337,6 +325,13 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   return ret;
 }
 
+/**
+  * @brief  Check  communication on SPI bus
+  *
+  * @param  ctx   communication interface handler.(ptr)
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
 int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx)
 {
   int32_t ret;

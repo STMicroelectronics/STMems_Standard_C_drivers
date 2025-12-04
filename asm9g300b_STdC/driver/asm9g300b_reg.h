@@ -913,6 +913,7 @@ int32_t asm9g300b_set_command(const stmdev_ctx_t *ctx, asm9g300b_commands_t cmd)
 /* Device startup procedure */
 int32_t asm9g300b_startup(const stmdev_ctx_t *ctx);
 
+/* Routine that can be used to check proper communication on SPI bus */
 int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx);
 
 /* Retrieve status */
