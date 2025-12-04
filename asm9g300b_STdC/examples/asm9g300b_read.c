@@ -210,7 +210,7 @@ static asm9g300b_priv_t asm9g300b_config =
     .t_debounce_ry = ASM9G300B_DEBOUNCE_TIME_0MS,
     .t_debounce_rz = ASM9G300B_DEBOUNCE_TIME_0MS,
 
-    .z_clamp = 1, //ASM9G300B_NVM_CLIPPING,
+    .z_clamp = ASM9G300B_NVM_CLIPPING_DEFAULT,
 
     .sdo_drv = 0,
     .disable_auto_self_test = 0,

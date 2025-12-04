@@ -906,7 +906,9 @@ int32_t asm9g300b_set_command(const stmdev_ctx_t *ctx, asm9g300b_commands_t cmd)
 #define ASM9G300B_DEBOUNCE_TIME_20MS     0x7
 
 /* z-clamp values */
-#define ASM9G300B_NVM_CLIPPING      0x0
+#define ASM9G300B_NVM_CLIPPING_DEFAULT            0x0
+#define ASM9G300B_NVM_CLIPPING_DEFAULT_PLUS_1g    0x1
+#define ASM9G300B_NVM_CLIPPING_DEFAULT_MINUS_1g   0x2
 
 /* Device startup procedure */
 int32_t asm9g300b_startup(const stmdev_ctx_t *ctx);
