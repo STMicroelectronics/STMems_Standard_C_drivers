@@ -867,10 +867,8 @@ typedef struct
  * them with a custom implementation.
  */
 
-int32_t asm9g300b_read_frame(const stmdev_ctx_t *ctx, uint8_t *reg,
-                             uint8_t *data);
-int32_t asm9g300b_write_frame(const stmdev_ctx_t *ctx, uint8_t reg,
-                              uint16_t data);
+int32_t __weak asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint16_t *raw);
+int32_t __weak asm9g300b_write_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint16_t raw);
 
 typedef enum
 {

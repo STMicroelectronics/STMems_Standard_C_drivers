@@ -100,16 +100,10 @@ static int32_t asm9g300b_dec_miso_frame(uint32_t frame, uint16_t *data, uint8_t 
   return 0;
 }
 
-/**
-  * @brief  Read frame from SafeSPI bus
-  *
-  * @param  ctx   read / write interface definitions(ptr)
-  * @param  reg   register to read
-  * @param  data  pointer to buffer that store the data read(ptr)
-  * @retval       interface status (MANDATORY: return 0 -> no Error)
-  *
-  */
-int32_t __weak asm9g300b_read_frame(const stmdev_ctx_t *ctx, uint8_t *reg, uint8_t *data)
+/*
+ * Read frame from SafeSPI bus
+ */
+static int32_t asm9g300b_read_frame(const stmdev_ctx_t *ctx, uint8_t *reg, uint8_t *data)
 {
   uint32_t frame;
   uint16_t d;
@@ -140,16 +134,10 @@ int32_t __weak asm9g300b_read_frame(const stmdev_ctx_t *ctx, uint8_t *reg, uint8
   return ret;
 }
 
-/**
-  * @brief  Write frame to SafeSPI bus
-  *
-  * @param  ctx   read / write interface definitions(ptr)
-  * @param  reg   register to write
-  * @param  data  data to be written to register reg(ptr)
-  * @retval       interface status (MANDATORY: return 0 -> no Error)
-  *
-  */
-int32_t __weak asm9g300b_write_frame(const stmdev_ctx_t *ctx, uint8_t reg, uint16_t data)
+/*
+ * Write frame to SafeSPI bus
+ */
+static int32_t asm9g300b_write_frame(const stmdev_ctx_t *ctx, uint8_t rw, uint8_t reg, uint16_t data)
 {
   uint32_t fr;
 
@@ -158,25 +146,47 @@ int32_t __weak asm9g300b_write_frame(const stmdev_ctx_t *ctx, uint8_t reg, uint1
     return -1;
   }
 
-  fr = asm9g300b_gen_mosi_frame(reg, 1, data);
+  fr = asm9g300b_gen_mosi_frame(reg, rw, data);
 
   /* send frame. Pls note that 'reg' is already incapsulated in frame */
   return ctx->write_reg(ctx->handle, 0, (uint8_t *)&fr, 1);
 }
 
-/* read raw data from reg channel */
-static int32_t asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint16_t *raw)
+/**
+  * @brief  Read raw data from reg channel
+  *
+  * @param  ctx   read / write interface definitions(ptr)
+  * @param  reg   register to read
+  * @param  raw   buffer to retrieve data(ptr)
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t __weak asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint16_t *raw)
 {
   int32_t ret;
   uint16_t tmp = 0;
   uint8_t sa;
 
-  ret = asm9g300b_write_frame(ctx, reg, tmp);
+  ret = asm9g300b_write_frame(ctx, 0, reg, tmp);
   if (ret == -1) {
     return -1;
   }
 
   return asm9g300b_read_frame(ctx, &sa, (uint8_t *)raw);
+}
+
+/**
+  * @brief  Write raw data to reg channel
+  *
+  * @param  ctx   read / write interface definitions(ptr)
+  * @param  reg   register to be written
+  * @param  raw   data to be written
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t __weak asm9g300b_write_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint16_t raw)
+{
+  return asm9g300b_write_frame(ctx, 1, reg, raw);
 }
 
 /**
@@ -197,7 +207,7 @@ int32_t asm9g300b_set_command(const stmdev_ctx_t *ctx, asm9g300b_commands_t cmd)
   uint16_t val = (uint16_t)cmd;
   int32_t ret;
 
-  ret = asm9g300b_write_frame(ctx, ASM9G300B_CONFIG02, val);
+  ret = asm9g300b_write_frame(ctx, 1, ASM9G300B_CONFIG02, val);
 
   return ret;
 }
@@ -240,7 +250,7 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   cfg01.iir_bw_sel_rx = cfg_priv->iir_bw_sel_rx;
   cfg01.iir_bw_sel_rz = cfg_priv->iir_bw_sel_rz;
   cfgp = (uint16_t *)&cfg01;
-  ret = asm9g300b_write_frame(ctx, ASM9G300B_CONFIG01, *cfgp);
+  ret = asm9g300b_write_frame(ctx, 1, ASM9G300B_CONFIG01, *cfgp);
   if (ret == -1) {
     return -1;
   }
@@ -252,7 +262,7 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   cfg04.tdebrng_rx = cfg_priv->t_debounce_rx;
   cfg04.tdebrng_rz = cfg_priv->t_debounce_rz;
   cfgp = (uint16_t *)&cfg04;
-  ret = asm9g300b_write_frame(ctx, ASM9G300B_CONFIG04, *cfgp);
+  ret = asm9g300b_write_frame(ctx, 1, ASM9G300B_CONFIG04, *cfgp);
   if (ret == -1) {
     return -1;
   }
@@ -260,7 +270,7 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   /* Configure Z clamp */
   cfg05.zclampconfig = cfg_priv->z_clamp;
   cfgp = (uint16_t *)&cfg05;
-  ret = asm9g300b_write_frame(ctx, ASM9G300B_CONFIG05, *cfgp);
+  ret = asm9g300b_write_frame(ctx, 1, ASM9G300B_CONFIG05, *cfgp);
   if (ret == -1) {
     return -1;
   }
@@ -269,7 +279,7 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   cfg06.iir_bw_sel_ry = cfg_priv->iir_bw_sel_ry;
   cfg06.tdebrng_ry = cfg_priv->t_debounce_ry;
   cfgp = (uint16_t *)&cfg06;
-  ret = asm9g300b_write_frame(ctx, ASM9G300B_CONFIG06, *cfgp);
+  ret = asm9g300b_write_frame(ctx, 1, ASM9G300B_CONFIG06, *cfgp);
   if (ret == -1) {
     return -1;
   }
@@ -340,7 +350,7 @@ int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx)
 
   val1 = 0x1234;
 
-  ret = asm9g300b_write_frame(ctx, ASM9G300B_TEST_REG, val1);
+  ret = asm9g300b_write_frame(ctx, 1, ASM9G300B_TEST_REG, val1);
   if (ret == -1) {
     return -1;
   }
