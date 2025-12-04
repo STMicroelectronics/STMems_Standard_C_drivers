@@ -142,7 +142,7 @@ static void check_device_status(stmdev_ctx_t *ctx)
 
 static uint32_t num_samples = 0;
 
-static void asm9g300b_read_all_sensors(stmdev_ctx_t *ctx)
+static void asm9g300b_read_all_sensors_task(stmdev_ctx_t *ctx)
 {
     int16_t raw[3];
     int32_t accel[3], gyro[3], temp;
@@ -263,7 +263,7 @@ void asm9g300b_read(void)
     if ((tick_curr - tick_start) >= 1)
     {
       tick_start = tick_curr;
-      asm9g300b_read_all_sensors(&dev_ctx);
+      asm9g300b_read_all_sensors_task(&dev_ctx);
 
       /* prints out only every 1000 samples */
       if ((num_samples++ % 1000) == 999)
