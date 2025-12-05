@@ -66,6 +66,7 @@ void iis3dwb10is_fifo_read_low_power(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void asm6g300b_read(void);
 void asm9g300b_read(void);
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
@@ -116,7 +117,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    asm9g300b_read();
+    asm6g300b_read();
+    //asm9g300b_read();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

@@ -361,10 +361,8 @@
                     <state>$PROJ_DIR$/../Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc</state>
                     <state>$PROJ_DIR$/../Drivers/CMSIS/Device/ST/STM32F4xx/Include</state>
                     <state>$PROJ_DIR$/../Drivers/CMSIS/Include</state>
-                    <state>C:\Users\visconta\Projects\STdC\iis3dhhc_STdC\driver</state>
-                    <state>C:\Users\visconta\Projects\STdC\iis3dwb_STdC\driver</state>
-                    <state>C:\Users\visconta\Projects\STdC\iis3dwb10is_STdC\driver</state>
                     <state>C:\Users\visconta\Projects\STdC\asm9g300b_STdC\driver</state>
+                    <state>C:\Users\visconta\Projects\STdC\asm6g300b_STdC\driver</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -1149,6 +1147,15 @@
                 <name>$PROJ_DIR$\..\Src\usbd_desc.c</name>
             </file>
         </group>
+    </group>
+    <group>
+        <name>asm6g300b</name>
+        <file>
+            <name>$PROJ_DIR$\..\..\asm6g300b_STdC\examples\asm6g300b_read.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\asm6g300b_STdC\driver\asm6g300b_reg.c</name>
+        </file>
     </group>
     <group>
         <name>asm9g300b</name>
