@@ -65,40 +65,90 @@ static uint8_t asm6g300b_calc_crc3(uint32_t data, uint8_t init, uint8_t poly)
   return crc;
 }
 
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint32_t crc3   :  3;
+  uint32_t data   : 16;
+  uint32_t unused :  1;
+  uint32_t cap    :  1;
+  uint32_t rw     :  1;
+  uint32_t ta     : 10;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint32_t ta     : 10;
+  uint32_t rw     :  1;
+  uint32_t cap    :  1;
+  uint32_t unused :  1;
+  uint32_t data   : 16;
+  uint32_t crc3   :  3;
+#endif /* DRV_BYTE_ORDER */
+} safespi_mosi_frame_t;
+
 /*
  * Generate SafeSPI MOSI frame
+ *
+ * 31                22  21 20  19  18                             3 2     0
+ * +-------------------+---+---+---+--------------------------------+------+
+ * |      TA9:0        |RW |CAP| 0 |           DATAI15:0            | C2:0 |
+ * +-------------------+---+---+---+--------------------------------+------+
+ *
  */
 static uint32_t asm6g300b_gen_mosi_frame(uint8_t ta, uint8_t rw, uint16_t data)
 {
-  uint32_t frame, crc3;
+  uint32_t frame = 0;
+  safespi_mosi_frame_t *fp = (safespi_mosi_frame_t *)&frame;
 
-  frame = (ta << 22) | (rw << 21) | (data << 3);
+  fp->ta = ta;
+  fp->rw = rw;
+  fp->data = data;
 
   /* poly is (x^3 + x^1 + x^0) */
-  crc3 = asm6g300b_calc_crc3(frame & ~0x7, 0x05, 0xB);
+  fp->crc3 = asm6g300b_calc_crc3(frame, 0x05, 0xB);
 
-  return (frame | crc3);
+  return frame;
 }
+
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint32_t crc3   :  3;
+  uint32_t s0     :  1;
+  uint32_t data   : 16;
+  uint32_t s1     :  1;
+  uint32_t sa     : 10;
+  uint32_t d      :  1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint32_t d      :  1;
+  uint32_t sa     : 10;
+  uint32_t s1     :  1;
+  uint32_t data   : 16;
+  uint32_t s0     :  1;
+  uint32_t crc3   :  3;
+#endif /* DRV_BYTE_ORDER */
+} safespi_miso_frame_t;
 
 /*
  * Decode SafeSPI MISO frame
+ *
+ *  31  30                21 20  19                            4  3  2     0
+ * +---+--------------------+---+-------------------------------+---+------+
+ * | D |        SA9:0       |S1 |           DATAI15:0           | S0| C2:0 |
+ * +---+--------------------+---+-------------------------------+---+------+
  */
 static int32_t asm6g300b_dec_miso_frame(uint32_t frame, uint16_t *data, uint8_t *state)
 {
   uint32_t crc3;
-  uint8_t s1, s0;
+  safespi_miso_frame_t *fp = (safespi_miso_frame_t *)&frame;
 
   /* poly is (x^3 + x^1 + x^0) */
   crc3 = asm6g300b_calc_crc3(frame & ~0x7, 0x05, 0xB);
-  if (crc3 != (frame & 0x7))
+  if (crc3 != fp->crc3)
   {
     return -1;
   }
 
-  s1 = (frame >> 20) & 0x1;
-  s0 = (frame >> 3) & 0x1;
-  *state = (s1 << 1) | s0;
-  *data = (frame >> 4) & 0xffff;
+  *state = (fp->s1 << 1) | fp->s0;
+  *data = fp->data;
 
   return 0;
 }
