@@ -44,7 +44,8 @@ static uint8_t asm9g300b_calc_crc3(uint32_t data, uint8_t init, uint8_t poly)
 {
   uint8_t crc = init;
 
-  for (int i = 31; i >= 0; --i) {
+  for (int i = 31; i >= 0; --i)
+  {
     // Bring in the next data bit
     uint8_t bit = (data >> i) & 1;
 
@@ -53,7 +54,9 @@ static uint8_t asm9g300b_calc_crc3(uint32_t data, uint8_t init, uint8_t poly)
 
     // If the new MSB (bit 3) is set, apply the polynomial
     if (crc & 0x8)
+    {
       crc ^= poly;
+    }
 
     // Keep CRC to 3 bits (mask off the 4th bit)
     crc &= 0x7;
@@ -137,7 +140,8 @@ static int32_t asm9g300b_recv_rsp_frame(const stmdev_ctx_t *ctx, uint8_t *reg, u
 /*
  * Write frame to SafeSPI bus
  */
-static int32_t asm9g300b_send_req_frame(const stmdev_ctx_t *ctx, uint8_t rw, uint8_t reg, uint16_t data)
+static int32_t asm9g300b_send_req_frame(const stmdev_ctx_t *ctx, uint8_t rw, uint8_t reg,
+                                        uint16_t data)
 {
   uint32_t fr;
 
@@ -168,7 +172,8 @@ int32_t __weak asm9g300b_read_reg(const stmdev_ctx_t *ctx, uint8_t reg, uint16_t
   uint8_t sa;
 
   ret = asm9g300b_send_req_frame(ctx, 0, reg, tmp);
-  if (ret == -1) {
+  if (ret == -1)
+  {
     return -1;
   }
 
@@ -251,7 +256,8 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   cfg01.iir_bw_sel_rz = cfg_priv->iir_bw_sel_rz;
   cfgp = (uint16_t *)&cfg01;
   ret = asm9g300b_send_req_frame(ctx, 1, ASM9G300B_CONFIG01, *cfgp);
-  if (ret == -1) {
+  if (ret == -1)
+  {
     return -1;
   }
 
@@ -263,7 +269,8 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   cfg04.tdebrng_rz = cfg_priv->t_debounce_rz;
   cfgp = (uint16_t *)&cfg04;
   ret = asm9g300b_send_req_frame(ctx, 1, ASM9G300B_CONFIG04, *cfgp);
-  if (ret == -1) {
+  if (ret == -1)
+  {
     return -1;
   }
 
@@ -271,7 +278,8 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   cfg05.zclampconfig = cfg_priv->z_clamp;
   cfgp = (uint16_t *)&cfg05;
   ret = asm9g300b_send_req_frame(ctx, 1, ASM9G300B_CONFIG05, *cfgp);
-  if (ret == -1) {
+  if (ret == -1)
+  {
     return -1;
   }
 
@@ -280,7 +288,8 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   cfg06.tdebrng_ry = cfg_priv->t_debounce_ry;
   cfgp = (uint16_t *)&cfg06;
   ret = asm9g300b_send_req_frame(ctx, 1, ASM9G300B_CONFIG06, *cfgp);
-  if (ret == -1) {
+  if (ret == -1)
+  {
     return -1;
   }
 
@@ -288,7 +297,8 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
 
   /* wake-up sensor */
   ret = asm9g300b_set_command(ctx, ASM9G300B_CMD_WAKE_UP);
-  if (ret == -1) {
+  if (ret == -1)
+  {
     return -1;
   }
   ctx->mdelay(350);
@@ -306,19 +316,22 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
   asm9g300b_read_reg(ctx, ASM9G300B_STATCOM2, &tmp);
   ctx->mdelay(10);
 
-  if (cfg_priv->disable_auto_self_test == 0) {
+  if (cfg_priv->disable_auto_self_test == 0)
+  {
     /* Invoke Acc/Ars Auto self-test */
     ret = asm9g300b_set_command(ctx, ASM9G300B_CMD_ALL_AUTO_SELF_TEST);
-    if (ret == -1) {
+    if (ret == -1)
+    {
       return -1;
     }
 
     /* check self-test result */
     uint32_t st_status = 0, retry = 0;
-    do {
+    do
+    {
       ctx->mdelay(50);
       asm9g300b_st_status_get(ctx, &st_status);
-    } while((st_status & ASM9G300B_ST_STATUS_MASK) != ASM9G300B_ST_STATUS_OK && retry++ < 5);
+    } while ((st_status & ASM9G300B_ST_STATUS_MASK) != ASM9G300B_ST_STATUS_OK && retry++ < 5);
 
     if (retry >= 5)
     {
@@ -328,7 +341,8 @@ int32_t asm9g300b_startup(const stmdev_ctx_t *ctx)
 
   /* Put sensor in Normal mode */
   ret = asm9g300b_set_command(ctx, ASM9G300B_CMD_EOI);
-  if (ret == -1) {
+  if (ret == -1)
+  {
     return -1;
   }
 
@@ -351,13 +365,15 @@ int32_t asm9g300b_check_spi_communication(const stmdev_ctx_t *ctx)
   val1 = 0x1234;
 
   ret = asm9g300b_send_req_frame(ctx, 1, ASM9G300B_TEST_REG, val1);
-  if (ret == -1) {
+  if (ret == -1)
+  {
     return -1;
   }
 
   val2 = 0;
   ret = asm9g300b_recv_rsp_frame(ctx, &reg, (uint8_t *)&val2);
-  if (ret == -1) {
+  if (ret == -1)
+  {
     return -1;
   }
 
@@ -582,7 +598,8 @@ int32_t asm9g300b_getSerialNum(const stmdev_ctx_t *ctx, uint32_t *s_num)
 
   ret = asm9g300b_read_reg(ctx, ASM9G300B_ASIC_ID, &tmp0);
   ret += asm9g300b_read_reg(ctx, ASM9G300B_ID_TRACKING2, &tmp1);
-  if (ret == -1) {
+  if (ret == -1)
+  {
     return -1;
   }
 
