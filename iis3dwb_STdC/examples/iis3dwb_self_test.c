@@ -22,12 +22,16 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
+ * - STEVAL_MKI109D  +
  * - STEVAL_MKI109V3 + STEVAL-MKI208V1K
  * - DISCOVERY_SPC584B + STEVAL-MKI208V1K
  *
  * and STM32CubeMX tool with STM32CubeF4 MCU Package
  *
  * Used interfaces:
+ *
+ * STEVAL_MKI109D     - Host side:   USB (Virtual COM)
+ *                    - Sensor side: SPI(Default) / I2C(supported)
  *
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
@@ -57,7 +61,15 @@
  *            header file of the driver (_reg.h).
  */
 
-#if defined(STEVAL_MKI109V3)
+#if defined(STEVAL_MKI109D)
+/* MKI109D: Define communication interface */
+#define SENSOR_BUS hspi1
+
+/* MKI109D: Vdd and Vddio power supply values */
+#define LSM6DSV16X_VDD 1.8f
+#define LSM6DSV16X_VDDIO 1.8f
+
+#elif defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
 /* MKI109V3: Vdd and Vddio power supply values */
@@ -73,11 +85,9 @@
 #include <stdio.h>
 #include "iis3dwb_reg.h"
 
-#if defined(NUCLEO_F401RE)
-#include "stm32f4xx_hal.h"
-#include "usart.h"
-#include "gpio.h"
-#include "i2c.h"
+#if defined(STEVAL_MKI109D)
+#include "board.h"
+#include "usbd_cdc_if.h"
 
 #elif defined(STEVAL_MKI109V3)
 #include "stm32f4xx_hal.h"
@@ -137,15 +147,19 @@ void iis3dwb_self_test(void)
   uint8_t rst;
   uint8_t i;
   uint8_t j;
+
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
-  //dev_ctx.handle = &SENSOR_BUS;
+  dev_ctx.handle = &SENSOR_BUS;
+
   /* Init test platform */
   platform_init();
+
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
+
   /* Check device ID */
   iis3dwb_device_id_get(&dev_ctx, &whoamI);
 
@@ -161,13 +175,16 @@ void iis3dwb_self_test(void)
 
   /* Enable Block Data Update */
   iis3dwb_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+
   /*
    * Accelerometer Self Test
    */
   /* Set Output Data Rate */
   iis3dwb_xl_data_rate_set(&dev_ctx, IIS3DWB_XL_ODR_26k7Hz);
+
   /* Set full scale */
   iis3dwb_xl_full_scale_set(&dev_ctx, IIS3DWB_4g);
+
   /* Wait stable output */
   platform_delay(WAIT_TIME);
 
@@ -178,6 +195,7 @@ void iis3dwb_self_test(void)
 
   /* Read dummy data and discard it */
   iis3dwb_acceleration_raw_get(&dev_ctx, data_raw);
+
   /* Read 5 sample and get the average vale for each axis */
   memset(val_st_off, 0x00, 3 * sizeof(float));
 
@@ -203,6 +221,7 @@ void iis3dwb_self_test(void)
   /* Enable Self Test positive (or negative) */
   iis3dwb_xl_self_test_set(&dev_ctx, IIS3DWB_XL_ST_POSITIVE);
   //iis3dwb_xl_self_test_set(&dev_ctx, IIS3DWB_XL_ST_NEGATIVE);
+
   /* Wait stable output */
   platform_delay(WAIT_TIME);
 
@@ -213,6 +232,7 @@ void iis3dwb_self_test(void)
 
   /* Read dummy data and discard it */
   iis3dwb_acceleration_raw_get(&dev_ctx, data_raw);
+
   /* Read 5 sample and get the average vale for each axis */
   memset(val_st_on, 0x00, 3 * sizeof(float));
 
@@ -279,8 +299,12 @@ void iis3dwb_self_test(void)
 static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
                               uint16_t len)
 {
-#ifdef STEVAL_MKI109V3
-
+#if defined(STEVAL_MKI109D)
+  HAL_GPIO_WritePin(SPI1_NSS_GPIO_Port, SPI1_NSS_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, HAL_MAX_DELAY);
+  HAL_SPI_Transmit(handle, (uint8_t*) bufp, len, HAL_MAX_DELAY);
+  HAL_GPIO_WritePin(SPI1_NSS_GPIO_Port, SPI1_NSS_Pin, GPIO_PIN_SET);
+#elif defined(STEVAL_MKI109V3)
   if (handle == &hspi2) {
     HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
     HAL_SPI_Transmit(handle, &reg, 1, 1000);
@@ -307,8 +331,13 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
 static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len)
 {
-#ifdef STEVAL_MKI109V3
-
+#if defined(STEVAL_MKI109D)
+  reg |= 0x80;
+  HAL_GPIO_WritePin(SPI1_NSS_GPIO_Port, SPI1_NSS_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, HAL_MAX_DELAY);
+  HAL_SPI_Receive(handle, bufp, len, HAL_MAX_DELAY);
+  HAL_GPIO_WritePin(SPI1_NSS_GPIO_Port, SPI1_NSS_Pin, GPIO_PIN_SET);
+#elif defined(STEVAL_MKI109V3)
   if (handle == &hspi2) {
     /* Read command */
     reg |= 0x80;
@@ -333,7 +362,9 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
  */
 static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
-#ifdef STEVAL_MKI109V3
+#if defined(STEVAL_MKI109D)
+  CDC_Transmit_FS(tx_buffer, len);
+#elif defined(STEVAL_MKI109V3)
   CDC_Transmit_FS(tx_buffer, len);
 #elif defined(SPC584B_DIS)
   sd_lld_write(&SD2, tx_buffer, len);
@@ -348,8 +379,10 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
-#if defined(NUCLEO_F401RE) | defined(STEVAL_MKI109V3)
+#if defined(STEVAL_MKI109V3)
   HAL_Delay(ms);
+#elif defined(STEVAL_MKI109D)
+  delay(ms);
 #elif defined(SPC584B_DIS)
   osalThreadDelayMilliseconds(ms);
 #endif
@@ -360,7 +393,19 @@ static void platform_delay(uint32_t ms)
  */
 static void platform_init(void)
 {
-#if defined(STEVAL_MKI109V3)
+#if defined(STEVAL_MKI109D)
+  struct spi_conf spi_conf;
+
+  /* init SPI bus communication */
+  spi_conf.wire = WIRE_4;
+  spi_init(&spi_conf);
+
+  /* set VDD/VDDIO on DIL24 */
+  set_vdd(LSM6DSV16X_VDD);
+  set_vddio(LSM6DSV16X_VDDIO);
+  delay(100);
+
+#elif defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
