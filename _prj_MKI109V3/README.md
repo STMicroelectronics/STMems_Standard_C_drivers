@@ -1,5 +1,7 @@
 # STEVAL-MKI109V3 platform
 
+**Please note that STEVAL-MKI109V3 board is OBSOLETE. Replacement with STEVAL-MKI109D is recommended.**
+
 This folder contains a simple STEVAL MKI109V3 CubeMX .ioc project file, which may be used to set up a basic system based on SPI with interrupt and UART capability and that can be used to test SPI-based examples.
 
 Please read the [STM32CubeMX](https://www.st.com/en/development-tools/stm32cubemx.html) documentation to understand how to automatically generate a simple software project that can be selected among several different toolchains, from basic Makefile to more complex ones, like IAR EWARM and Keil MDK-ARM.
