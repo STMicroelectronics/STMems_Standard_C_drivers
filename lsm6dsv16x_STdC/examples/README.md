@@ -10,7 +10,7 @@ This folder contains application examples. The examples refer to following board
 
 *Nucleo H503RB board has been used to run the examples on I3C bus. All the examples except the sensor_hub one have been run on a [X-NUCLEO-IKS4A1 shield](https://www.st.com/en/ecosystems/x-nucleo-iks4a1.html) with a LSM6DSV16X device on DIL24. In all these cases, the shield has been configured in Mode 1 (Standard Mode). For the sensor_hub example case the shield is configured in Mode 3 (lsm6dsv16x SensorHub Mode), and the DIL24 is not required.*
 
-**Please note that STEVAL-MKI109V3 board has been declared as obsolete and replacement with STEVAL-MKI109D is instead suggested.**
+Please note that STEVAL-MKI109V3 board is OBSOLETE. Replacement with STEVAL-MKI109D is recommended.
 
 ## Self Test (ST)
 

@@ -7,7 +7,7 @@ This folder contains application examples. The examples refer to following board
 - NUCLEO-F401RE (https://www.st.com/en/microcontrollers-microprocessors/stm32f401re.html)
 - DISCOVERY-SPC584B (https://www.st.com/en/evaluation-tools/spc584b-dis.html)
 
-**Please note that STEVAL-MKI109V3 board has been declared as obsolete and replacement with STEVAL-MKI109D is instead suggested.**
+Please note that STEVAL-MKI109V3 board is OBSOLETE. Replacement with STEVAL-MKI109D is recommended.
 
 ## Self Test (ST)
 
