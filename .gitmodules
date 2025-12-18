@@ -328,3 +328,6 @@
 [submodule "iis3dwbg1_STdC/driver"]
 	path = iis3dwbg1_STdC/driver
 	url = https://github.com/STMicroelectronics/iis3dwbg1-pid
+[submodule "mis2du12_STdC/driver"]
+	path = mis2du12_STdC/driver
+	url = https://github.com/STMicroelectronics/mis2du12-pid.git
