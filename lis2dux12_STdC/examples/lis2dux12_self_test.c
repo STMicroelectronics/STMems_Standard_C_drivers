@@ -108,6 +108,7 @@
 /* Private variables ---------------------------------------------------------*/
 static uint8_t tx_buffer[1000];
 static   lis2dux12_fifo_data_t out1, out2, st_dev;
+static lis2dux12_priv_t priv_data;
 
 /* Self test results. */
 #define    ST_PASS     1U
@@ -188,6 +189,7 @@ void lis2dux12_self_test(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+  dev_ctx.priv_data = &priv_data;
 
   /* Initialize platform specific hardware */
   platform_init();

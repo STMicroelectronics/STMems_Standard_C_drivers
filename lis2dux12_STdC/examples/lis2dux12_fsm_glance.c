@@ -103,6 +103,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t tx_buffer[1000];
+static lis2dux12_priv_t priv_data;
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -158,6 +159,8 @@ void lis2dux12_fsm_glance(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+  dev_ctx.priv_data = &priv_data;
+
   /* Init test platform */
   platform_init();
   /* Wait sensor boot time */
