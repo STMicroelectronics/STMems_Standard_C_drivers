@@ -109,6 +109,7 @@
 /* Private variables ---------------------------------------------------------*/
 static uint8_t tx_buffer[1000];
 static iis2dulpx_stpcnt_mode_t stpcnt_mode;
+static iis2dulpx_priv_t priv_data;
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -156,6 +157,7 @@ void iis2dulpx_pedometer(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+  dev_ctx.priv_data = &priv_data;
 
   /* Initialize platform specific hardware */
   platform_init();
