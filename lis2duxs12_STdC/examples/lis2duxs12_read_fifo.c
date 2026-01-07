@@ -112,6 +112,7 @@ static lis2duxs12_md_t md;
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t tx_buffer[1000];
+static lis2duxs12_priv_t priv_data;
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -160,6 +161,7 @@ void lis2duxs12_read_fifo(void)
   dev_ctx.read_reg = platform_read;
   dev_ctx.mdelay = platform_delay;
   dev_ctx.handle = &SENSOR_BUS;
+  dev_ctx.priv_data = &priv_data;
 
   /* Initialize platform specific hardware */
   platform_init();
