@@ -167,10 +167,7 @@ void st1vafe3bx_mlc_six_d_position(void)
     while(1);
 
   /* Restore default configuration */
-  st1vafe3bx_init_set(&dev_ctx, ST1VAFE3BX_RESET);
-  do {
-    st1vafe3bx_status_get(&dev_ctx, &rst);
-  } while (rst.sw_reset);
+  st1vafe3bx_sw_reset(&dev_ctx);
 
   /* Start Machine Learning Core configuration */
   for ( i = 0; i < (sizeof(st1vafe3bx_six_d_position_conf_0) / sizeof(struct mems_conf_op) ); i++ ) {

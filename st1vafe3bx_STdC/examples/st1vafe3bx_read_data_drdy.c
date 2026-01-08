@@ -167,10 +167,7 @@ void st1vafe3bx_read_data_drdy(void)
     while(1);
 
   /* Restore default configuration */
-  st1vafe3bx_init_set(&dev_ctx, ST1VAFE3BX_RESET);
-  do {
-    st1vafe3bx_status_get(&dev_ctx, &status);
-  } while (status.sw_reset);
+  st1vafe3bx_sw_reset(&dev_ctx);
 
   /* Enable ENG (fully differential, gain 2, Zin 100Mohm) */
   cfg.mode = ST1VAFE3BX_DIFFERENTIAL_MODE;
@@ -180,7 +177,7 @@ void st1vafe3bx_read_data_drdy(void)
   st1vafe3bx_ah_bio_active(&dev_ctx, 0); /* lpf0_en is 0, so odr == 800Hz */
 
   /* Set bdu and if_inc recommended for driver usage */
-  st1vafe3bx_init_set(&dev_ctx, ST1VAFE3BX_SENSOR_ONLY_ON);
+  st1vafe3bx_init_set(&dev_ctx);
 
   /* Configure interrupt pins */
   int_route.drdy   = PROPERTY_ENABLE;

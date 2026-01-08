@@ -162,10 +162,7 @@ void st1vafe3bx_read_xl_fifo(void)
     while(1);
 
   /* Restore default configuration */
-  st1vafe3bx_init_set(&dev_ctx, ST1VAFE3BX_RESET);
-  do {
-    st1vafe3bx_status_get(&dev_ctx, &status);
-  } while (status.sw_reset);
+  st1vafe3bx_sw_reset(&dev_ctx);
 
   /* Set FIFO watermark to 32 sample(s) */
   fifo_mode.watermark = NUM_FIFO_ENTRY;
@@ -176,7 +173,7 @@ void st1vafe3bx_read_xl_fifo(void)
   st1vafe3bx_fifo_mode_set(&dev_ctx, fifo_mode);
 
   /* Set bdu and if_inc recommended for driver usage */
-  st1vafe3bx_init_set(&dev_ctx, ST1VAFE3BX_SENSOR_ONLY_ON);
+  st1vafe3bx_init_set(&dev_ctx);
 
   st1vafe3bx_timestamp_set(&dev_ctx, PROPERTY_ENABLE);
 
