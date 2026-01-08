@@ -176,6 +176,8 @@ void lis2duxs12_tilt(void)
   /* init bdu and add_inc */
   lis2duxs12_init_set(&dev_ctx);
 
+  lis2duxs12_embedded_state_set(&dev_ctx, PROPERTY_ENABLE);
+
   platform_delay(10);
 
   lis2duxs12_tilt_mode_set(&dev_ctx, 1);
