@@ -108,9 +108,13 @@ static lsm6dsv16bx_filt_settling_mask_t filt_settling_mask;
 /* Extern variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
-static int16_t *datax;
-static int16_t *datay;
-static int16_t *dataz;
+static int16_t *gyro_x;
+static int16_t *gyro_y;
+static int16_t *gyro_z;
+
+static int16_t *acc_x;
+static int16_t *acc_y;
+static int16_t *acc_z;
 
 /*
  *   WARNING:
@@ -215,24 +219,29 @@ void lsm6dsv16bx_fifo(void)
 
         /* Read FIFO tag */
         lsm6dsv16bx_fifo_out_raw_get(&dev_ctx, &f_data);
-        dataz = (int16_t *)&f_data.data[0]; /* axis are inverted */
-        datay = (int16_t *)&f_data.data[2];
-        datax = (int16_t *)&f_data.data[4];
+        gyro_x = (int16_t *)&f_data.data[0];
+        gyro_y = (int16_t *)&f_data.data[2];
+        gyro_z = (int16_t *)&f_data.data[4];
+
+        // Accelerometer data are store in inversed order: Z, Y, X
+        acc_z = (int16_t *)&f_data.data[0];
+        acc_y = (int16_t *)&f_data.data[2];
+        acc_x = (int16_t *)&f_data.data[4];
 
         switch (f_data.tag) {
           case LSM6DSV16BX_XL_NC_TAG:
             snprintf((char *)tx_buffer, sizeof(tx_buffer), "ACC [mg]:\t%4.2f\t%4.2f\t%4.2f\r\n",
-                  lsm6dsv16bx_from_fs2_to_mg(*datax),
-                  lsm6dsv16bx_from_fs2_to_mg(*datay),
-                  lsm6dsv16bx_from_fs2_to_mg(*dataz));
+                  lsm6dsv16bx_from_fs2_to_mg(*acc_x),
+                  lsm6dsv16bx_from_fs2_to_mg(*acc_y),
+                  lsm6dsv16bx_from_fs2_to_mg(*acc_z));
             tx_com(tx_buffer, strlen((char const *)tx_buffer));
             break;
 
           case LSM6DSV16BX_GY_NC_TAG:
             snprintf((char *)tx_buffer, sizeof(tx_buffer), "GYR [mdps]:\t%4.2f\t%4.2f\t%4.2f\r\n",
-                  lsm6dsv16bx_from_fs2000_to_mdps(*datax),
-                  lsm6dsv16bx_from_fs2000_to_mdps(*datay),
-                  lsm6dsv16bx_from_fs2000_to_mdps(*dataz));
+                  lsm6dsv16bx_from_fs2000_to_mdps(*gyro_x),
+                  lsm6dsv16bx_from_fs2000_to_mdps(*gyro_y),
+                  lsm6dsv16bx_from_fs2000_to_mdps(*gyro_z));
             tx_com(tx_buffer, strlen((char const *)tx_buffer));
             break;
 
