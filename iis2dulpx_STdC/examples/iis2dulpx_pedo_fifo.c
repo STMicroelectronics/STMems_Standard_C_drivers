@@ -182,6 +182,8 @@ void iis2dulpx_pedo_fifo(void)
   /* init bdu and add_inc */
   iis2dulpx_init_set(&dev_ctx);
 
+  iis2dulpx_embedded_state_set(&dev_ctx, PROPERTY_ENABLE);
+
   iis2dulpx_embedded_int_cfg_set(&dev_ctx, IIS2DULPX_EMBEDDED_INT_LATCHED);
 
   iis2dulpx_stpcnt_debounce_set(&dev_ctx, 4);
