@@ -182,6 +182,8 @@ void lis2dux12_pedo_fifo(void)
   /* init bdu and add_inc */
   lis2dux12_init_set(&dev_ctx);
 
+  lis2dux12_embedded_state_set(&dev_ctx, PROPERTY_ENABLE);
+
   platform_delay(10);
 
   lis2dux12_embedded_int_cfg_set(&dev_ctx, LIS2DUX12_EMBEDDED_INT_LATCHED);
