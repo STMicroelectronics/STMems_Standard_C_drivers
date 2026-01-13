@@ -246,8 +246,7 @@ void lsm6dso_hub_fifo_lps22hh(void)
   /* Prepare sensor hub to read data from external Slave0 continuously
    * in order to store data in FIFO.
    */
-  sh_cfg_read.slv_add = (LPS22HH_I2C_ADD_H & 0xFEU) >>
-                        1; /* 7bit I2C address */
+  sh_cfg_read.slv_add = LPS22HH_I2C_ADD_H; /* 8 bit I2C address */
   sh_cfg_read.slv_subadd = LPS22HH_STATUS;
   sh_cfg_read.slv_len = 6;
   lsm6dso_sh_slv_cfg_read(&ag_ctx, 0, &sh_cfg_read);
@@ -464,8 +463,7 @@ static int32_t lsm6dso_write_lps22hh_cx(void *ctx, uint8_t reg,
   lsm6dso_status_master_t master_status;
   lsm6dso_sh_cfg_write_t sh_cfg_write;
   /* Configure Sensor Hub to read LPS22HH. */
-  sh_cfg_write.slv0_add = (LPS22HH_I2C_ADD_H & 0xFEU) >>
-                          1; /* 7bit I2C address */
+  sh_cfg_write.slv0_add = LPS22HH_I2C_ADD_H; /* 8 bit I2C address */
   sh_cfg_write.slv0_subadd = reg,
   sh_cfg_write.slv0_data = *data,
   ret = lsm6dso_sh_cfg_write(&ag_ctx, &sh_cfg_write);
@@ -516,8 +514,7 @@ static int32_t lsm6dso_read_lps22hh_cx(void *ctx, uint8_t reg,
   /* Disable accelerometer. */
   lsm6dso_xl_data_rate_set(&ag_ctx, LSM6DSO_XL_ODR_OFF);
   /* Configure Sensor Hub to read LPS22HH. */
-  sh_cfg_read.slv_add = (LPS22HH_I2C_ADD_H & 0xFEU) >>
-                        1; /* 7bit I2C address */
+  sh_cfg_read.slv_add = LPS22HH_I2C_ADD_H; /* 8 bit I2C address */
   sh_cfg_read.slv_subadd = reg;
   sh_cfg_read.slv_len = len;
   ret = lsm6dso_sh_slv_cfg_read(&ag_ctx, 0, &sh_cfg_read);
