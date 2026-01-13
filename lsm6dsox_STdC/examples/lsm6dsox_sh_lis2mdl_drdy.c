@@ -257,8 +257,7 @@ void lsm6dsox_sh_lis2mdl_drdy(void)
    * Prepare sensor hub to read data from external Slave0 continuously
    * in order to store data in FIFO.
    */
-  sh_cfg_read.slv_add = (LIS2MDL_I2C_ADD & 0xFEU) >>
-                        1; /* 7bit I2C address */
+  sh_cfg_read.slv_add = LIS2MDL_I2C_ADD; /* 8 bit I2C address */
   sh_cfg_read.slv_subadd = LIS2MDL_OUTX_L_REG;
   sh_cfg_read.slv_len = 6;
   lsm6dsox_sh_slv0_cfg_read(&ag_ctx, &sh_cfg_read);
@@ -398,7 +397,7 @@ static int32_t lsm6dsox_write_lis2mdl_cx(void *ctx, uint8_t reg,
   lsm6dsox_status_master_t master_status;
   lsm6dsox_sh_cfg_write_t sh_cfg_write;
   /* Configure Sensor Hub to read LIS2MDL. */
-  sh_cfg_write.slv0_add = (LIS2MDL_I2C_ADD & 0xFEU) >> 1; /* 7bit I2C address */
+  sh_cfg_write.slv0_add = LIS2MDL_I2C_ADD; /* 8 bit I2C address */
   sh_cfg_write.slv0_subadd = reg,
   sh_cfg_write.slv0_data = *data,
   ret = lsm6dsox_sh_cfg_write((stmdev_ctx_t *)ctx, &sh_cfg_write);
@@ -450,8 +449,7 @@ static int32_t lsm6dsox_read_lis2mdl_cx(void *ctx, uint8_t reg,
   /* Disable accelerometer. */
   lsm6dsox_xl_data_rate_set((stmdev_ctx_t *)ctx, LSM6DSOX_XL_ODR_OFF);
   /* Configure Sensor Hub to read LIS2MDL. */
-  sh_cfg_read.slv_add = (LIS2MDL_I2C_ADD & 0xFEU) >>
-                        1; /* 7bit I2C address */
+  sh_cfg_read.slv_add = LIS2MDL_I2C_ADD; /* 8 bit I2C address */
   sh_cfg_read.slv_subadd = reg;
   sh_cfg_read.slv_len = len;
   ret = lsm6dsox_sh_slv0_cfg_read((stmdev_ctx_t *)ctx, &sh_cfg_read);
