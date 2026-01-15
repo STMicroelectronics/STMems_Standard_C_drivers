@@ -357,7 +357,7 @@ void lsm6dsv80x_read_fifo_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lsm6dsv80x_read_fifo(void)
 {
-  lsm6dsv80x_pin_int_route_t pin_int = { 0 };
+  lsm6dsv80x_pin_int1_route_t pin_int = { 0 };
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
