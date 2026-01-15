@@ -140,7 +140,7 @@ void iis2dulpx_qvar_drdy_handler(void)
 
 void iis2dulpx_qvar_read_data(void)
 {
-  iis2dulpx_pin_int_route_t int_route;
+  iis2dulpx_pin_int1_route_t int_route;
   uint8_t id;
   iis2dulpx_md_t md;
   iis2dulpx_ah_qvar_data_t data;

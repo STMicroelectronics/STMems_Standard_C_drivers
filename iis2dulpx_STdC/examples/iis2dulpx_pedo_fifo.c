@@ -134,7 +134,7 @@ static void platform_init(void);
 static stmdev_ctx_t dev_ctx;
 static iis2dulpx_fifo_mode_t fifo_mode;
 static iis2dulpx_fifo_batch_t fifo_batch;
-static iis2dulpx_pin_int_route_t int1_route;
+static iis2dulpx_pin_int1_route_t int1_route;
 static uint8_t fifo_wtm_event = 0;
 
 void iis2dulpx_pedo_fifo_handler(void)
