@@ -145,7 +145,7 @@ void lsm6dsv320x_hg_wakeup_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lsm6dsv320x_hg_wakeup(void)
 {
-  lsm6dsv320x_pin_int_route_t pin_int = { 0 };
+  lsm6dsv320x_pin_int_route_hg_t pin_int = { 0 };
   lsm6dsv320x_hg_wake_up_cfg_t wu_cfg = { 0 };
   lsm6dsv320x_hg_wu_interrupt_cfg_t int_cfg = { 0 };
 
