@@ -145,7 +145,7 @@ void ism6hg256x_read_data_drdy_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void ism6hg256x_read_data_drdy(void)
 {
-  ism6hg256x_pin_int_route_t pin_int = { 0 };
+  ism6hg256x_pin_int_route_hg_t pin_int = { 0 };
   double_t lowg_xl_sum[3], hg_xl_sum[3], gyro_sum[3], temp_sum;
   uint16_t lowg_xl_cnt = 0, hg_xl_cnt = 0, gyro_cnt = 0, temp_cnt = 0;
 

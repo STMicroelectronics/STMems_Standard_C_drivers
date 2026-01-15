@@ -366,7 +366,7 @@ void ism6hg256x_read_fifo_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void ism6hg256x_read_fifo(void)
 {
-  ism6hg256x_pin_int_route_t pin_int = { 0 };
+  ism6hg256x_pin_int1_route_t pin_int = { 0 };
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
