@@ -140,7 +140,7 @@ void lis2duxs12_qvar_drdy_handler(void)
 
 void lis2duxs12_qvar_read_data(void)
 {
-  lis2duxs12_pin_int_route_t int_route;
+  lis2duxs12_pin_int1_route_t int_route;
   uint8_t id;
   lis2duxs12_md_t md;
   lis2duxs12_ah_qvar_data_t data;

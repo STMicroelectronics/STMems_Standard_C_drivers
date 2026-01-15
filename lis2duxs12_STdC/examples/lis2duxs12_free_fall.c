@@ -144,7 +144,7 @@ void lis2duxs12_ff_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lis2duxs12_free_fall(void)
 {
-  lis2duxs12_pin_int_route_t int1_route;
+  lis2duxs12_pin_int1_route_t int1_route;
   uint8_t id;
   lis2duxs12_md_t md;
   lis2duxs12_int_config_t int_mode;
