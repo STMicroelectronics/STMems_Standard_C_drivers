@@ -142,7 +142,7 @@ void lis2dux12_read_data_drdy_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lis2dux12_read_data_drdy(void)
 {
-  lis2dux12_pin_int_route_t int_route;
+  lis2dux12_pin_int1_route_t int_route;
   uint8_t id;
 
   /* Initialize mems driver interface */
