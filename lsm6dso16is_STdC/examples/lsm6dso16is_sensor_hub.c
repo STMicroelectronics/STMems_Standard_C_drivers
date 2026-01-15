@@ -262,7 +262,7 @@ void lsm6dso16is_sensor_hub(void)
   //lsm6dso16is_pin_int2_route_set(&lsm6dso16is_ctx, pin_int);
 
   /* Set Output Data Rate */
-  lsm6dso16is_xl_data_rate_set(&lsm6dso16is_ctx, LSM6DSO16IS_XL_ODR_AT_26H_HP);
+  lsm6dso16is_xl_data_rate_set(&lsm6dso16is_ctx, LSM6DSO16IS_XL_ODR_AT_26Hz_HP);
   lsm6dso16is_timestamp_set(&lsm6dso16is_ctx, PROPERTY_ENABLE);
 
   /* Set full scale */
@@ -300,7 +300,7 @@ void lsm6dso16is_sensor_hub(void)
   * Selected data rate have to be equal or greater with respect
   * with MLC data rate.
   */
-  lsm6dso16is_xl_data_rate_set(&lsm6dso16is_ctx, LSM6DSO16IS_XL_ODR_AT_26H_HP);
+  lsm6dso16is_xl_data_rate_set(&lsm6dso16is_ctx, LSM6DSO16IS_XL_ODR_AT_26Hz_HP);
 
   /* wait forever (xl samples read with drdy irq) */
   while (1) {
@@ -468,7 +468,7 @@ static int32_t lsm6dso16is_write_target_cx(void *ctx, uint8_t i2c_add, uint8_t r
   /* Enable I2C Master. */
   lsm6dso16is_sh_master_set(&lsm6dso16is_ctx, PROPERTY_ENABLE);
   /* Enable accelerometer to trigger Sensor Hub operation. */
-  lsm6dso16is_xl_data_rate_set(&lsm6dso16is_ctx, LSM6DSO16IS_XL_ODR_AT_26H_HP);
+  lsm6dso16is_xl_data_rate_set(&lsm6dso16is_ctx, LSM6DSO16IS_XL_ODR_AT_26Hz_HP);
   /* Wait Sensor Hub operation flag set. */
   lsm6dso16is_acceleration_raw_get(&lsm6dso16is_ctx, raw_xl);
 
@@ -540,7 +540,7 @@ static int32_t lsm6dso16is_read_target_cx(void *ctx, uint8_t i2c_add, uint8_t re
   /* Enable I2C Master and I2C master. */
   lsm6dso16is_sh_master_set(&lsm6dso16is_ctx, PROPERTY_ENABLE);
   /* Enable accelerometer to trigger Sensor Hub operation. */
-  lsm6dso16is_xl_data_rate_set(&lsm6dso16is_ctx, LSM6DSO16IS_XL_ODR_AT_26H_HP);
+  lsm6dso16is_xl_data_rate_set(&lsm6dso16is_ctx, LSM6DSO16IS_XL_ODR_AT_26Hz_HP);
   /* Wait Sensor Hub operation flag set. */
   lsm6dso16is_acceleration_raw_get(&lsm6dso16is_ctx, raw_xl);
 
