@@ -363,6 +363,7 @@
                     <state>$PROJ_DIR$/../Drivers/CMSIS/Include</state>
                     <state>C:\Users\visconta\Projects\STdC\asm9g300b_STdC\driver</state>
                     <state>C:\Users\visconta\Projects\STdC\asm6g300b_STdC\driver</state>
+                    <state>C:\Users\visconta\Projects\STdC\asm330ab1_STdC\driver</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -1147,6 +1148,15 @@
                 <name>$PROJ_DIR$\..\Src\usbd_desc.c</name>
             </file>
         </group>
+    </group>
+    <group>
+        <name>asm330ab1</name>
+        <file>
+            <name>$PROJ_DIR$\..\..\asm330ab1_STdC\examples\asm330ab1_read_safespi.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\asm330ab1_STdC\driver\asm330ab1_reg.c</name>
+        </file>
     </group>
     <group>
         <name>asm6g300b</name>
