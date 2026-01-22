@@ -748,6 +748,46 @@ typedef struct
 #endif /* DRV_BYTE_ORDER */
 } asm330ab1_sum_range_t;
 
+#define ASM330AB1_ST_AUTO_CFG                          0x5D
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t xl_data_n_dump           : 3;
+  uint8_t st_auto_xl_start         : 1;
+  uint8_t gy_data_n_dump           : 3;
+  uint8_t st_auto_gy_start         : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t st_auto_gy_start         : 1;
+  uint8_t gy_data_n_dump           : 3;
+  uint8_t st_auto_xl_start         : 1;
+  uint8_t xl_data_n_dump           : 3;
+#endif /* DRV_BYTE_ORDER */
+} asm330ab1_st_auto_cfg_t;
+
+#define ASM330AB1_ST_AUTO_SUM_STATUS                   0x5E
+typedef struct
+{
+#if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
+  uint8_t st_auto_ok_zero_xl       : 1;
+  uint8_t st_auto_ok_pos_xl        : 1;
+  uint8_t st_auto_ok_neg_xl        : 1;
+  uint8_t st_auto_xl_done          : 1;
+  uint8_t not_used                 : 1;
+  uint8_t st_auto_ok_pos_gy        : 1;
+  uint8_t st_auto_ok_neg_gy        : 1;
+  uint8_t st_auto_gy_done          : 1;
+#elif DRV_BYTE_ORDER == DRV_BIG_ENDIAN
+  uint8_t st_auto_gy_done          : 1;
+  uint8_t st_auto_ok_neg_gy        : 1;
+  uint8_t st_auto_ok_pos_gy        : 1;
+  uint8_t not_used                 : 1;
+  uint8_t st_auto_xl_done          : 1;
+  uint8_t st_auto_ok_neg_xl        : 1;
+  uint8_t st_auto_ok_pos_xl        : 1;
+  uint8_t st_auto_ok_zero_xl       : 1;
+#endif /* DRV_BYTE_ORDER */
+} asm330ab1_st_auto_sum_status_t;
+
 #define ASM330AB1_RESERVED_PAGE_1                      0x01
 #define ASM330AB1_RESERVED_PAGE_16                     0x10
 /**
@@ -826,6 +866,18 @@ typedef struct
   uint16_t gy_range_z                  : 1;
 } asm330ab1_fusa_faults_t;
 int32_t asm330ab1_fusa_status_read(const stmdev_ctx_t *ctx, asm330ab1_fusa_faults_t *status);
+
+typedef struct
+{
+  uint8_t gy_data_n_dump           : 3;
+  uint8_t xl_data_n_dump           : 3;
+} asm330ab1_data_n_dump_t;
+
+int32_t asm330ab1_data_n_dump_set(const stmdev_ctx_t *ctx, asm330ab1_data_n_dump_t ndump);
+int32_t asm330ab1_st_auto_gy_start(const stmdev_ctx_t *ctx, uint8_t val);
+int32_t asm330ab1_st_auto_xl_start(const stmdev_ctx_t *ctx, uint8_t val);
+int32_t asm330ab1_st_auto_sum_status_get(const stmdev_ctx_t *ctx,
+                                         asm330ab1_st_auto_sum_status_t *sum_status);
 
 typedef enum
 {

@@ -870,38 +870,98 @@ int32_t asm330ab1_xl_data_rate_get(const stmdev_ctx_t *ctx, asm330ab1_odr_t *val
   /* build up the asm330ab1_odr_t value */
   switch ((cfg << 4) | ctrl1.odr_xl)
   {
-    case 0x00: *val = ASM330AB1_HA00_ODR_POWER_DOWN; break;
-    case 0x03: *val = ASM330AB1_HA00_ODR_AT_15Hz;    break;
-    case 0x04: *val = ASM330AB1_HA00_ODR_AT_30Hz;    break;
-    case 0x05: *val = ASM330AB1_HA00_ODR_AT_60Hz;    break;
-    case 0x06: *val = ASM330AB1_HA00_ODR_AT_120Hz;   break;
-    case 0x07: *val = ASM330AB1_HA00_ODR_AT_240Hz;   break;
-    case 0x08: *val = ASM330AB1_HA00_ODR_AT_480Hz;   break;
-    case 0x09: *val = ASM330AB1_HA00_ODR_AT_960Hz;   break;
-    case 0x0A: *val = ASM330AB1_HA00_ODR_AT_1920Hz;  break;
-    case 0x0B: *val = ASM330AB1_HA00_ODR_AT_3840Hz;  break;
+    case 0x00:
+      *val = ASM330AB1_HA00_ODR_POWER_DOWN;
+      break;
+    case 0x03:
+      *val = ASM330AB1_HA00_ODR_AT_15Hz;
+      break;
+    case 0x04:
+      *val = ASM330AB1_HA00_ODR_AT_30Hz;
+      break;
+    case 0x05:
+      *val = ASM330AB1_HA00_ODR_AT_60Hz;
+      break;
+    case 0x06:
+      *val = ASM330AB1_HA00_ODR_AT_120Hz;
+      break;
+    case 0x07:
+      *val = ASM330AB1_HA00_ODR_AT_240Hz;
+      break;
+    case 0x08:
+      *val = ASM330AB1_HA00_ODR_AT_480Hz;
+      break;
+    case 0x09:
+      *val = ASM330AB1_HA00_ODR_AT_960Hz;
+      break;
+    case 0x0A:
+      *val = ASM330AB1_HA00_ODR_AT_1920Hz;
+      break;
+    case 0x0B:
+      *val = ASM330AB1_HA00_ODR_AT_3840Hz;
+      break;
 
-    case 0x20: *val = ASM330AB1_HA02_ODR_POWER_DOWN; break;
-    case 0x23: *val = ASM330AB1_HA02_ODR_AT_12Hz5;   break;
-    case 0x24: *val = ASM330AB1_HA02_ODR_AT_25Hz;    break;
-    case 0x25: *val = ASM330AB1_HA02_ODR_AT_50Hz;    break;
-    case 0x26: *val = ASM330AB1_HA02_ODR_AT_100Hz;   break;
-    case 0x27: *val = ASM330AB1_HA02_ODR_AT_200Hz;   break;
-    case 0x28: *val = ASM330AB1_HA02_ODR_AT_400Hz;   break;
-    case 0x29: *val = ASM330AB1_HA02_ODR_AT_800Hz;   break;
-    case 0x2A: *val = ASM330AB1_HA02_ODR_AT_1600Hz;  break;
-    case 0x2B: *val = ASM330AB1_HA02_ODR_AT_3200Hz;  break;
+    case 0x20:
+      *val = ASM330AB1_HA02_ODR_POWER_DOWN;
+      break;
+    case 0x23:
+      *val = ASM330AB1_HA02_ODR_AT_12Hz5;
+      break;
+    case 0x24:
+      *val = ASM330AB1_HA02_ODR_AT_25Hz;
+      break;
+    case 0x25:
+      *val = ASM330AB1_HA02_ODR_AT_50Hz;
+      break;
+    case 0x26:
+      *val = ASM330AB1_HA02_ODR_AT_100Hz;
+      break;
+    case 0x27:
+      *val = ASM330AB1_HA02_ODR_AT_200Hz;
+      break;
+    case 0x28:
+      *val = ASM330AB1_HA02_ODR_AT_400Hz;
+      break;
+    case 0x29:
+      *val = ASM330AB1_HA02_ODR_AT_800Hz;
+      break;
+    case 0x2A:
+      *val = ASM330AB1_HA02_ODR_AT_1600Hz;
+      break;
+    case 0x2B:
+      *val = ASM330AB1_HA02_ODR_AT_3200Hz;
+      break;
 
-    case 0x30: *val = ASM330AB1_HA03_ODR_POWER_DOWN; break;
-    case 0x33: *val = ASM330AB1_HA03_ODR_AT_13Hz;    break;
-    case 0x34: *val = ASM330AB1_HA03_ODR_AT_26Hz;    break;
-    case 0x35: *val = ASM330AB1_HA03_ODR_AT_52Hz;    break;
-    case 0x36: *val = ASM330AB1_HA03_ODR_AT_104Hz;   break;
-    case 0x37: *val = ASM330AB1_HA03_ODR_AT_208Hz;   break;
-    case 0x38: *val = ASM330AB1_HA03_ODR_AT_417Hz;   break;
-    case 0x39: *val = ASM330AB1_HA03_ODR_AT_833Hz;   break;
-    case 0x3A: *val = ASM330AB1_HA03_ODR_AT_1667Hz;  break;
-    case 0x3B: *val = ASM330AB1_HA03_ODR_AT_3333Hz;  break;
+    case 0x30:
+      *val = ASM330AB1_HA03_ODR_POWER_DOWN;
+      break;
+    case 0x33:
+      *val = ASM330AB1_HA03_ODR_AT_13Hz;
+      break;
+    case 0x34:
+      *val = ASM330AB1_HA03_ODR_AT_26Hz;
+      break;
+    case 0x35:
+      *val = ASM330AB1_HA03_ODR_AT_52Hz;
+      break;
+    case 0x36:
+      *val = ASM330AB1_HA03_ODR_AT_104Hz;
+      break;
+    case 0x37:
+      *val = ASM330AB1_HA03_ODR_AT_208Hz;
+      break;
+    case 0x38:
+      *val = ASM330AB1_HA03_ODR_AT_417Hz;
+      break;
+    case 0x39:
+      *val = ASM330AB1_HA03_ODR_AT_833Hz;
+      break;
+    case 0x3A:
+      *val = ASM330AB1_HA03_ODR_AT_1667Hz;
+      break;
+    case 0x3B:
+      *val = ASM330AB1_HA03_ODR_AT_3333Hz;
+      break;
 
     default:
       ret = -1;
@@ -965,38 +1025,98 @@ int32_t asm330ab1_gy_data_rate_get(const stmdev_ctx_t *ctx, asm330ab1_odr_t *val
   /* build up the asm330ab1_odr_t value */
   switch ((cfg << 4) | ctrl2.odr_g)
   {
-    case 0x00: *val = ASM330AB1_HA00_ODR_POWER_DOWN; break;
-    case 0x03: *val = ASM330AB1_HA00_ODR_AT_15Hz;    break;
-    case 0x04: *val = ASM330AB1_HA00_ODR_AT_30Hz;    break;
-    case 0x05: *val = ASM330AB1_HA00_ODR_AT_60Hz;    break;
-    case 0x06: *val = ASM330AB1_HA00_ODR_AT_120Hz;   break;
-    case 0x07: *val = ASM330AB1_HA00_ODR_AT_240Hz;   break;
-    case 0x08: *val = ASM330AB1_HA00_ODR_AT_480Hz;   break;
-    case 0x09: *val = ASM330AB1_HA00_ODR_AT_960Hz;   break;
-    case 0x0A: *val = ASM330AB1_HA00_ODR_AT_1920Hz;  break;
-    case 0x0B: *val = ASM330AB1_HA00_ODR_AT_3840Hz;  break;
+    case 0x00:
+      *val = ASM330AB1_HA00_ODR_POWER_DOWN;
+      break;
+    case 0x03:
+      *val = ASM330AB1_HA00_ODR_AT_15Hz;
+      break;
+    case 0x04:
+      *val = ASM330AB1_HA00_ODR_AT_30Hz;
+      break;
+    case 0x05:
+      *val = ASM330AB1_HA00_ODR_AT_60Hz;
+      break;
+    case 0x06:
+      *val = ASM330AB1_HA00_ODR_AT_120Hz;
+      break;
+    case 0x07:
+      *val = ASM330AB1_HA00_ODR_AT_240Hz;
+      break;
+    case 0x08:
+      *val = ASM330AB1_HA00_ODR_AT_480Hz;
+      break;
+    case 0x09:
+      *val = ASM330AB1_HA00_ODR_AT_960Hz;
+      break;
+    case 0x0A:
+      *val = ASM330AB1_HA00_ODR_AT_1920Hz;
+      break;
+    case 0x0B:
+      *val = ASM330AB1_HA00_ODR_AT_3840Hz;
+      break;
 
-    case 0x20: *val = ASM330AB1_HA02_ODR_POWER_DOWN; break;
-    case 0x23: *val = ASM330AB1_HA02_ODR_AT_12Hz5;   break;
-    case 0x24: *val = ASM330AB1_HA02_ODR_AT_25Hz;    break;
-    case 0x25: *val = ASM330AB1_HA02_ODR_AT_50Hz;    break;
-    case 0x26: *val = ASM330AB1_HA02_ODR_AT_100Hz;   break;
-    case 0x27: *val = ASM330AB1_HA02_ODR_AT_200Hz;   break;
-    case 0x28: *val = ASM330AB1_HA02_ODR_AT_400Hz;   break;
-    case 0x29: *val = ASM330AB1_HA02_ODR_AT_800Hz;   break;
-    case 0x2A: *val = ASM330AB1_HA02_ODR_AT_1600Hz;  break;
-    case 0x2B: *val = ASM330AB1_HA02_ODR_AT_3200Hz;  break;
+    case 0x20:
+      *val = ASM330AB1_HA02_ODR_POWER_DOWN;
+      break;
+    case 0x23:
+      *val = ASM330AB1_HA02_ODR_AT_12Hz5;
+      break;
+    case 0x24:
+      *val = ASM330AB1_HA02_ODR_AT_25Hz;
+      break;
+    case 0x25:
+      *val = ASM330AB1_HA02_ODR_AT_50Hz;
+      break;
+    case 0x26:
+      *val = ASM330AB1_HA02_ODR_AT_100Hz;
+      break;
+    case 0x27:
+      *val = ASM330AB1_HA02_ODR_AT_200Hz;
+      break;
+    case 0x28:
+      *val = ASM330AB1_HA02_ODR_AT_400Hz;
+      break;
+    case 0x29:
+      *val = ASM330AB1_HA02_ODR_AT_800Hz;
+      break;
+    case 0x2A:
+      *val = ASM330AB1_HA02_ODR_AT_1600Hz;
+      break;
+    case 0x2B:
+      *val = ASM330AB1_HA02_ODR_AT_3200Hz;
+      break;
 
-    case 0x30: *val = ASM330AB1_HA03_ODR_POWER_DOWN; break;
-    case 0x33: *val = ASM330AB1_HA03_ODR_AT_13Hz;    break;
-    case 0x34: *val = ASM330AB1_HA03_ODR_AT_26Hz;    break;
-    case 0x35: *val = ASM330AB1_HA03_ODR_AT_52Hz;    break;
-    case 0x36: *val = ASM330AB1_HA03_ODR_AT_104Hz;   break;
-    case 0x37: *val = ASM330AB1_HA03_ODR_AT_208Hz;   break;
-    case 0x38: *val = ASM330AB1_HA03_ODR_AT_417Hz;   break;
-    case 0x39: *val = ASM330AB1_HA03_ODR_AT_833Hz;   break;
-    case 0x3A: *val = ASM330AB1_HA03_ODR_AT_1667Hz;  break;
-    case 0x3B: *val = ASM330AB1_HA03_ODR_AT_3333Hz;  break;
+    case 0x30:
+      *val = ASM330AB1_HA03_ODR_POWER_DOWN;
+      break;
+    case 0x33:
+      *val = ASM330AB1_HA03_ODR_AT_13Hz;
+      break;
+    case 0x34:
+      *val = ASM330AB1_HA03_ODR_AT_26Hz;
+      break;
+    case 0x35:
+      *val = ASM330AB1_HA03_ODR_AT_52Hz;
+      break;
+    case 0x36:
+      *val = ASM330AB1_HA03_ODR_AT_104Hz;
+      break;
+    case 0x37:
+      *val = ASM330AB1_HA03_ODR_AT_208Hz;
+      break;
+    case 0x38:
+      *val = ASM330AB1_HA03_ODR_AT_417Hz;
+      break;
+    case 0x39:
+      *val = ASM330AB1_HA03_ODR_AT_833Hz;
+      break;
+    case 0x3A:
+      *val = ASM330AB1_HA03_ODR_AT_1667Hz;
+      break;
+    case 0x3B:
+      *val = ASM330AB1_HA03_ODR_AT_3333Hz;
+      break;
 
     default:
       ret = -1;
@@ -1625,7 +1745,8 @@ int32_t asm330ab1_sensor_power_down(const stmdev_ctx_t *ctx)
   int32_t ret;
 
   /* set power down */
-  ret = asm330ab1_xl_data_rate_set(ctx, ASM330AB1_HA00_ODR_POWER_DOWN);
+  ret = asm330ab1_page_sel_set(ctx, ASM330AB1_MAIN_PAGE);
+  ret += asm330ab1_xl_data_rate_set(ctx, ASM330AB1_HA00_ODR_POWER_DOWN);
   ret += asm330ab1_gy_data_rate_set(ctx, ASM330AB1_HA00_ODR_POWER_DOWN);
 
   /* Step 2.2 */
@@ -1825,6 +1946,120 @@ int32_t asm330ab1_fusa_status_read(const stmdev_ctx_t *ctx, asm330ab1_fusa_fault
   status->gy_range_x  = sum_range.gy_range_x;
   status->gy_range_y  = sum_range.gy_range_y;
   status->gy_range_z  = sum_range.gy_range_z;
+
+exit:
+  return ret;
+}
+
+/**
+  * @brief  Set the XL/GY data_n_dump for self-test
+  *
+  * @param  ctx    communication interface handler.(ptr)
+  * @param  ndump  XL/GY data_n_dump value
+  * @retval        interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t asm330ab1_data_n_dump_set(const stmdev_ctx_t *ctx, asm330ab1_data_n_dump_t ndump)
+{
+  asm330ab1_st_auto_cfg_t st_auto_cfg = { 0 };
+  int32_t ret;
+
+  ret = asm330ab1_page_sel_set(ctx, ASM330AB1_FUSA_PAGE);
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  st_auto_cfg.gy_data_n_dump = ndump.gy_data_n_dump;
+  st_auto_cfg.xl_data_n_dump = ndump.xl_data_n_dump;
+  ret = asm330ab1_write_reg(ctx, ASM330AB1_ST_AUTO_CFG, (uint8_t *)&st_auto_cfg, 1);
+
+  ret += asm330ab1_page_sel_set(ctx, ASM330AB1_MAIN_PAGE);
+
+exit:
+  return ret;
+}
+
+/**
+  * @brief  Start/Stop GY self-test automatic procedure
+  *
+  * @param  ctx    communication interface handler.(ptr)
+  * @param  val    0: stop, 1: start
+  * @retval        interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t asm330ab1_st_auto_gy_start(const stmdev_ctx_t *ctx, uint8_t val)
+{
+  asm330ab1_st_auto_cfg_t st_auto_cfg = { 0 };
+  int32_t ret;
+
+  ret = asm330ab1_page_sel_set(ctx, ASM330AB1_FUSA_PAGE);
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  ret = asm330ab1_read_reg(ctx, ASM330AB1_ST_AUTO_CFG, (uint8_t *)&st_auto_cfg, 1);
+  st_auto_cfg.st_auto_gy_start = val;
+  ret += asm330ab1_write_reg(ctx, ASM330AB1_ST_AUTO_CFG, (uint8_t *)&st_auto_cfg, 1);
+
+  ret += asm330ab1_page_sel_set(ctx, ASM330AB1_MAIN_PAGE);
+
+exit:
+  return ret;
+}
+
+/**
+  * @brief  Start/Stop XL self-test automatic procedure
+  *
+  * @param  ctx    communication interface handler.(ptr)
+  * @param  val    0: stop, 1: start
+  * @retval        interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t asm330ab1_st_auto_xl_start(const stmdev_ctx_t *ctx, uint8_t val)
+{
+  asm330ab1_st_auto_cfg_t st_auto_cfg = { 0 };
+  int32_t ret;
+
+  ret = asm330ab1_page_sel_set(ctx, ASM330AB1_FUSA_PAGE);
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  ret = asm330ab1_read_reg(ctx, ASM330AB1_ST_AUTO_CFG, (uint8_t *)&st_auto_cfg, 1);
+  st_auto_cfg.st_auto_xl_start = val;
+  ret += asm330ab1_write_reg(ctx, ASM330AB1_ST_AUTO_CFG, (uint8_t *)&st_auto_cfg, 1);
+
+  ret += asm330ab1_page_sel_set(ctx, ASM330AB1_MAIN_PAGE);
+
+exit:
+  return ret;
+}
+
+/**
+  * @brief  Get self-test auto sum_status register
+  *
+  * @param  ctx         communication interface handler.(ptr)
+  * @param  sum_status  sum_status register
+  * @retval             interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int32_t asm330ab1_st_auto_sum_status_get(const stmdev_ctx_t *ctx,
+                                         asm330ab1_st_auto_sum_status_t *sum_status)
+{
+  int32_t ret;
+
+  ret = asm330ab1_page_sel_set(ctx, ASM330AB1_FUSA_PAGE);
+  if (ret != 0)
+  {
+    goto exit;
+  }
+
+  ret = asm330ab1_read_reg(ctx, ASM330AB1_ST_AUTO_SUM_STATUS, (uint8_t *)sum_status, 1);
+
+  ret += asm330ab1_page_sel_set(ctx, ASM330AB1_MAIN_PAGE);
 
 exit:
   return ret;
