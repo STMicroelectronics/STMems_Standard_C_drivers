@@ -69,7 +69,8 @@ typedef struct
 {
 #if DRV_BYTE_ORDER == DRV_LITTLE_ENDIAN
   uint32_t crc3   :  3;
-  uint32_t data   : 16;
+  uint32_t data   :  8;
+  uint32_t xxx    :  8;
   uint32_t unused :  1;
   uint32_t cap    :  1;
   uint32_t rw     :  1;
@@ -79,7 +80,8 @@ typedef struct
   uint32_t rw     :  1;
   uint32_t cap    :  1;
   uint32_t unused :  1;
-  uint32_t data   : 16;
+  uint32_t xxx    :  8;
+  uint32_t data   :  8;
   uint32_t crc3   :  3;
 #endif /* DRV_BYTE_ORDER */
 } safespi_mosi_frame_t;
@@ -87,13 +89,13 @@ typedef struct
 /*
  * Generate SafeSPI MOSI frame
  *
- * 31                22  21 20  19  18                             3 2     0
- * +-------------------+---+---+---+--------------------------------+------+
- * |      TA9:0        |RW |CAP| 0 |           DATAI15:0            | C2:0 |
- * +-------------------+---+---+---+--------------------------------+------+
+ * 31                22  21 20  19  18            11 10            3 2     0
+ * +-------------------+---+---+---+----------------+---------------+------+
+ * |      TA9:0        |RW |CAP| 0 |      XXX       |   DATAI7:0    | C2:0 |
+ * +-------------------+---+---+---+----------------+---------------+------+
  *
  */
-static uint32_t asm330ab1_gen_mosi_frame(uint8_t ta, uint8_t rw, uint16_t data)
+static uint32_t asm330ab1_gen_mosi_frame(uint16_t ta, uint8_t rw, uint16_t data)
 {
   uint32_t frame = 0;
   safespi_mosi_frame_t *fp = (safespi_mosi_frame_t *)&frame;
@@ -194,13 +196,20 @@ static int32_t asm330ab1_send_req_frame(const stmdev_ctx_t *ctx, uint8_t rw, uin
                                         uint16_t data)
 {
   uint32_t fr;
+  uint16_t ta = reg;
+  asm330ab1_priv_t *priv = ctx->priv_data;
 
   if (ctx == NULL)
   {
     return -1;
   }
 
-  fr = asm330ab1_gen_mosi_frame(reg, rw, data);
+  if (priv && priv->ta9 == 1)
+  {
+    ta |= 0x200;
+  }
+
+  fr = asm330ab1_gen_mosi_frame(ta, rw, data);
 
   /* send frame. Pls note that 'reg' is already incapsulated in frame */
   return ctx->write_reg(ctx->handle, 0, (uint8_t *)&fr, 1);
@@ -670,7 +679,7 @@ int32_t asm330ab1_check_spi_communication(const stmdev_ctx_t *ctx)
   uint16_t val1, val2 = 0;
   uint8_t reg = 0;
 
-  val1 = 0x1234;
+  val1 = 0xAB;
 
   ret = asm330ab1_send_req_frame(ctx, 1, ASM330AB1_TEST_IF, val1);
   if (ret == -1)

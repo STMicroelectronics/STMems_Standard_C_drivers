@@ -106,7 +106,8 @@ typedef struct
 typedef struct
 {
   uint8_t use_safespi_bus               : 1;
-  uint8_t reserved_1                    : 7;
+  uint8_t ta9                           : 1;
+  uint8_t reserved_1                    : 6;
 } asm330ab1_priv_t;
 
 /**
