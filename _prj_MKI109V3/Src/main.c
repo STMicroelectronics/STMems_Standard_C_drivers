@@ -69,9 +69,11 @@ void iis3dwb10is_fifo_read_low_power(void);
 void asm6g300b_read(void);
 void asm9g300b_read(void);
 void asm330ab1_read_safespi(void);
+void asm330ab1_read_safespi_handler(void);
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+  asm330ab1_read_safespi_handler();
 }
 
 /* USER CODE END 0 */
@@ -118,9 +120,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    asm6g300b_read();
+    //asm6g300b_read();
     //asm9g300b_read();
-    //asm330ab1_read_safespi();
+    asm330ab1_read_safespi();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
