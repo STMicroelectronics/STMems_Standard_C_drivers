@@ -279,6 +279,7 @@ int32_t __weak asm330ab1_write_reg(const stmdev_ctx_t *ctx, uint8_t reg,
                                    uint16_t len)
 {
   asm330ab1_priv_t *cfg;
+  int32_t ret;
 
   if (ctx == NULL || ctx->priv_data == NULL)
   {
@@ -289,10 +290,17 @@ int32_t __weak asm330ab1_write_reg(const stmdev_ctx_t *ctx, uint8_t reg,
 
   if (cfg->use_safespi_bus)
   {
-    uint16_t raw = 0;
+    ret = 0;
+    for (int k = 0; k < len; k++)
+    {
+      ret += asm330ab1_send_req_frame(ctx, 1, reg++, *data++);
+      if (ret != 0)
+      {
+        break;
+      }
+    }
 
-    memcpy((uint8_t *)&raw, data, sizeof(uint16_t));
-    return asm330ab1_send_req_frame(ctx, 1, reg, raw);
+    return ret;
   }
   else
   {
