@@ -244,14 +244,17 @@ int32_t __weak asm330ab1_read_reg(const stmdev_ctx_t *ctx, uint8_t reg,
     uint8_t sa;
     int32_t ret;
 
-    ret = asm330ab1_send_req_frame(ctx, 0, reg, tmp);
-    if (ret == -1)
+    for (int k = 0; k < len; k++)
     {
-      return -1;
-    }
+      ret = asm330ab1_send_req_frame(ctx, 0, reg++, tmp);
+      ret += asm330ab1_recv_rsp_frame(ctx, &sa, (uint8_t *)&tmp);
+      if (ret != 0)
+      {
+        break;
+      }
 
-    ret = asm330ab1_recv_rsp_frame(ctx, &sa, (uint8_t *)&tmp);
-    *data = tmp & 0xFF;
+      *data++ = tmp & 0xFF;
+    }
 
     return ret;
   }
