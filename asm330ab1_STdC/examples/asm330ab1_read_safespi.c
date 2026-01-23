@@ -106,6 +106,10 @@
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t tx_buffer[1000];
+static int16_t data_raw[3];
+static float_t acceleration_mg[3];
+static float_t rotation_mdps[3];
+static double_t temperature_degC;
 
 /* Extern variables ----------------------------------------------------------*/
 
@@ -132,11 +136,78 @@ static asm330ab1_priv_t asm330ab1_config =
     .ta9 = 1,
   };
 
+static void asm330ab1_thread(stmdev_ctx_t *ctx)
+{
+    asm330ab1_status_t status;
+    uint64_t timestamp;
+    uint8_t *tx_p;
+
+    asm330ab1_status_get(ctx, &status);
+    tx_p = tx_buffer;
+
+    asm330ab1_timestamp_odr_us_get(ctx, &timestamp);
+    tx_p += snprintf((char *)tx_p, sizeof(tx_buffer),
+            "Timestamp [us]:%lld\r\n", timestamp);
+
+    if (status.xlda) {
+      /* Read acceleration field data */
+      memset(data_raw, 0x00, 3 * sizeof(int16_t));
+      asm330ab1_acceleration_raw_get(ctx, data_raw);
+      acceleration_mg[0] =
+        asm330ab1_from_fs2g_to_mg(data_raw[0]);
+      acceleration_mg[1] =
+        asm330ab1_from_fs2g_to_mg(data_raw[1]);
+      acceleration_mg[2] =
+        asm330ab1_from_fs2g_to_mg(data_raw[2]);
+
+      tx_p += snprintf((char *)tx_p, sizeof(tx_buffer),
+              "Acceleration [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+              acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+    }
+
+    if (status.gda) {
+      /* Read Gyroscope field data */
+      memset(data_raw, 0x00, 3 * sizeof(int16_t));
+      asm330ab1_angular_rate_raw_get(ctx, data_raw);
+      rotation_mdps[0] =
+        asm330ab1_from_fs1000_to_mdps(data_raw[0]);
+      rotation_mdps[1] =
+        asm330ab1_from_fs1000_to_mdps(data_raw[1]);
+      rotation_mdps[2] =
+        asm330ab1_from_fs1000_to_mdps(data_raw[2]);
+
+      tx_p += snprintf((char *)tx_p, sizeof(tx_buffer),
+              "Amgular rate [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
+              rotation_mdps[0], rotation_mdps[1], rotation_mdps[2]);
+    }
+
+    if (status.gda) {
+      /* Read Temperature field data */
+      memset(data_raw, 0x00, sizeof(int16_t));
+      asm330ab1_temperature_raw_get(ctx, data_raw);
+      temperature_degC = asm330ab1_from_lsb_to_celsius(data_raw[0]);
+
+      tx_p += snprintf((char *)tx_p, sizeof(tx_buffer),
+              "Temperature [C]:%6.2f\r\n", temperature_degC);
+    }
+
+    if (tx_p > tx_buffer)
+      tx_com(tx_buffer, strlen((char const *)tx_buffer));
+}
+
+static int schedule_thread;
+void asm330ab1_read_safespi_handler(void)
+{
+  schedule_thread = 1;
+}
+
 void asm330ab1_read_safespi(void)
 {
   stmdev_ctx_t dev_ctx;
   int ret;
   uint8_t whoamI;
+  asm330ab1_pin_int_route_t int_route = {0};
+  asm330ab1_device_status_t status;
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
@@ -155,18 +226,99 @@ void asm330ab1_read_safespi(void)
   {
     while(1);
   }
-  while(1);
-
-  static uint8_t test = 0xf1;
-  asm330ab1_write_reg(&dev_ctx, 0x7, &test, 1);
-  test = 0;
-  asm330ab1_read_reg(&dev_ctx, 0x7, &test, 1);
 
   /* Check device ID */
   asm330ab1_device_id_get(&dev_ctx, &whoamI);
 
   if (whoamI != ASM330AB1_ID)
     while (1);
+
+  /* Power On Reset */
+  ret = asm330ab1_sw_por(&dev_ctx);
+  if (ret != 0) {
+    goto error;
+  }
+
+  /* Initialize registers from OTP */
+  ret = asm330ab1_reboot(&dev_ctx);
+  if (ret != 0) {
+    goto error;
+  }
+
+  /* unlock pages */
+  ret = asm330ab1_pages_lock(&dev_ctx, 0);
+  if (ret != 0) {
+    goto error;
+  }
+
+  /* perform sensor power-down */
+  ret = asm330ab1_sensor_power_down(&dev_ctx);
+  if (ret != 0) {
+    goto error;
+  }
+
+  /* Set XL full scale */
+  asm330ab1_xl_full_scale_set(&dev_ctx, ASM330AB1_2g);
+
+  /* Set XL Output Data Rate */
+  asm330ab1_xl_data_rate_set(&dev_ctx, ASM330AB1_HA02_ODR_AT_50Hz);
+
+  /* Set GY full scale */
+  asm330ab1_gy_full_scale_set(&dev_ctx, ASM330AB1_1000dps);
+
+  /* Set GY Output Data Rate */
+  asm330ab1_gy_data_rate_set(&dev_ctx, ASM330AB1_HA02_ODR_AT_50Hz);
+
+  /* enable timestamp */
+  asm330ab1_timestamp_enable(&dev_ctx, 1);
+
+  /* Set XL interrupt */
+  int_route.drdy_xl = 1;
+  asm330ab1_pin_int1_route_set(&dev_ctx, &int_route);
+
+  /* start-up sensors */
+  ret = asm330ab1_sensor_start_up(&dev_ctx);
+  if (ret != 0) {
+    goto error;
+  }
+
+  /* Check if sensors started up */
+  while(1)
+  {
+    platform_delay(10); /* wait 10ms */
+
+    asm330ab1_device_status_get(&dev_ctx, &status);
+    if (status.xl_startup == 0 && status.gy_startup == 0)
+    {
+      break;
+    }
+  }
+
+  /* lock pages */
+  ret = asm330ab1_pages_lock(&dev_ctx, 1);
+  if (ret != 0) {
+    goto error;
+  }
+
+  /* complete initialization (set EOI) */
+  ret = asm330ab1_eoi_set(&dev_ctx);
+  if (ret != 0) {
+    goto error;
+  }
+
+  asm330ab1_check_faults(&dev_ctx);
+
+  while (1)
+  {
+    if (schedule_thread) {
+      /* schedule thread to read data */
+      schedule_thread = 0;
+      asm330ab1_thread(&dev_ctx);
+    }
+  }
+
+error:
+  while(1);
 }
 
 /*
