@@ -173,8 +173,8 @@ void lsm6dsv80x_sensor_fusion(void)
    * Selected data rate have to be equal or greater with respect
    * with MLC data rate.
    */
-  lsm6dsv80x_xl_data_rate_set(&dev_ctx, LSM6DSV80X_ODR_AT_60Hz);
-  lsm6dsv80x_gy_data_rate_set(&dev_ctx, LSM6DSV80X_ODR_AT_120Hz);
+  lsm6dsv80x_xl_setup(&dev_ctx, LSM6DSV80X_ODR_AT_60Hz, LSM6DSV80X_XL_HIGH_PERFORMANCE_MD);
+  lsm6dsv80x_gy_setup(&dev_ctx, LSM6DSV80X_ODR_AT_120Hz, LSM6DSV80X_GY_HIGH_PERFORMANCE_MD);
 
   /* Set full scale */
   lsm6dsv80x_xl_full_scale_set(&dev_ctx, LSM6DSV80X_2g);

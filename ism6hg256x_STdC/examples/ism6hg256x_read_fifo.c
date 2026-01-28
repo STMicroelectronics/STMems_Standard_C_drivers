@@ -425,9 +425,9 @@ void ism6hg256x_read_fifo(void)
    * Selected data rate have to be equal or greater with respect
    * with MLC data rate.
    */
-  ism6hg256x_xl_data_rate_set(&dev_ctx, ISM6HG256X_ODR_AT_60Hz);
+  ism6hg256x_xl_setup(&dev_ctx, ISM6HG256X_ODR_AT_60Hz, ISM6HG256X_XL_HIGH_PERFORMANCE_MD);
   ism6hg256x_hg_xl_data_rate_set(&dev_ctx, ISM6HG256X_HG_XL_ODR_AT_480Hz, 0);
-  ism6hg256x_gy_data_rate_set(&dev_ctx, ISM6HG256X_ODR_AT_120Hz);
+  ism6hg256x_gy_setup(&dev_ctx, ISM6HG256X_ODR_AT_120Hz, ISM6HG256X_GY_HIGH_PERFORMANCE_MD);
 
   /* Set full scale */
   ism6hg256x_xl_full_scale_set(&dev_ctx, ISM6HG256X_2g);

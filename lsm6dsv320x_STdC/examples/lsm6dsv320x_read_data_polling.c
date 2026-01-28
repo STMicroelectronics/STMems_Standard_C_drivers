@@ -165,9 +165,9 @@ void lsm6dsv320x_read_data_polling(void)
    * Selected data rate have to be equal or greater with respect
    * with MLC data rate.
    */
-  lsm6dsv320x_xl_data_rate_set(&dev_ctx, LSM6DSV320X_ODR_AT_60Hz);
+  lsm6dsv320x_xl_setup(&dev_ctx, LSM6DSV320X_ODR_AT_60Hz, LSM6DSV320X_XL_HIGH_PERFORMANCE_MD);
   lsm6dsv320x_hg_xl_data_rate_set(&dev_ctx, LSM6DSV320X_HG_XL_ODR_AT_960Hz, 1);
-  lsm6dsv320x_gy_data_rate_set(&dev_ctx, LSM6DSV320X_ODR_AT_120Hz);
+  lsm6dsv320x_gy_setup(&dev_ctx, LSM6DSV320X_ODR_AT_120Hz, LSM6DSV320X_GY_HIGH_PERFORMANCE_MD);
 
   /* Set full scale */
   lsm6dsv320x_xl_full_scale_set(&dev_ctx, LSM6DSV320X_2g);
