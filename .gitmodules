@@ -331,3 +331,6 @@
 [submodule "mis2du12_STdC/driver"]
 	path = mis2du12_STdC/driver
 	url = https://github.com/STMicroelectronics/mis2du12-pid.git
+[submodule "asm330lhhg1_STdC/driver"]
+	path = asm330lhhg1_STdC/driver
+	url = https://github.com/STMicroelectronics/asm330lhhg1-pid.git
