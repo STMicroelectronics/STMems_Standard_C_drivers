@@ -158,7 +158,7 @@ static int32_t asm9g300b_dec_miso_frame(uint32_t frame, uint16_t *data, uint8_t 
  */
 static int32_t asm9g300b_recv_rsp_frame(const stmdev_ctx_t *ctx, uint8_t *reg, uint8_t *data)
 {
-  uint32_t frame;
+  uint32_t frame = 0;
   uint16_t d;
   uint8_t s;
   int ret;
