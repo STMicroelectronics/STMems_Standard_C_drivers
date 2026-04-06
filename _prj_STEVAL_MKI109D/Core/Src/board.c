@@ -116,13 +116,22 @@ void spi_init(struct spi_conf *spi_conf)
     interface = SPI;
     break;
   case WIRE_3:
-    MX_SPI1_Init_3W();
+    MX_SPI1_3W_Init();
+    interface = SPI;
+    break;
+  case WIRE_4_EXT:
+    MX_SPI1_Ext_Init();
+    interface = SPI;
+    break;
+  case WIRE_3_EXT:
+    MX_SPI1_3W_Ext_Init();
     interface = SPI;
     break;
   default:
     break;
   }
 }
+
 
 extern SPI_HandleTypeDef hspi1;
 void spi_set_freq(enum spi_freq freq)

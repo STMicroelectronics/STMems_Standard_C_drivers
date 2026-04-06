@@ -48,7 +48,7 @@ struct i2c_conf {
   uint8_t dev_addr;
 };
 
-enum wire { WIRE_4, WIRE_3 };
+enum wire { WIRE_4, WIRE_3, WIRE_4_EXT, WIRE_3_EXT};
 
 enum spi_freq {
   SPI_FREQ_1_MHZ = SPI_BAUDRATEPRESCALER_256,
@@ -76,6 +76,13 @@ struct cmd_parser {
   uint32_t cnt;
   uint8_t collect;
 };
+
+void MX_SPI1_Ext_Init(void);
+void MX_SPI1_3W_Init(void);
+void MX_SPI1_3W_Ext_Init(void);
+void MX_SPI6_Ext_Init(void);
+void MX_SPI6_3W_Init(void);
+void MX_SPI6_3W_Ext_Init(void);
 
 void set_vdd(float voltage);
 void set_vddio(float voltage);

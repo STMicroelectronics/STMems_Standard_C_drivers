@@ -4,41 +4,119 @@ This folder contains a STEVAL MKI109D CubeMX .ioc project file and a complete ST
 
 ## Basic Project Setup Instructions
 
-You need to execute following steps in order to get a working project based on your favourite toolchain/IDE environment:
-                                                 
-1. Open the ```$STDC_PATH/_prj_MKI109D/_prj_STEVAL_MKI109D.ioc``` file using the STM32CubeMX tool (e.g. by double clicking the file) and generate the code.
+To create a working project based on your preferred toolchain/IDE environment, follow the steps below.
+These steps apply **to all toolchains** before importing or configuring the project.
 
-   *Please note that EWARM is the default toolchain declared in the ioc file, hence you may need to configure it accordingly before generating the code.*
+## Generate the project using STM32CubeMX
 
-2. Add core source files to the project:
+Open the file:
+
+    $STDC_PATH/_prj_MKI109D/_prj_STEVAL_MKI109D.ioc
+
+(e.g., double‑click it)
+
+Then generate the code using STM32CubeMX.
+
+> **Note:**  
+> The `.ioc` file defines **IAR EWARM** as the default toolchain.  
+> If you intend to use **STM32CubeIDE**, change the toolchain in CubeMX before generating code:  
+> *Project Manager → Project → Toolchain / IDE → STM32CubeIDE*
+
+
+## IAR (EWARM) Instructions
+
+The following steps apply only when using IAR EWARM.
+
+### Add core source files to the EWARM project
 
 ```c
 $STDC_PATH/_prj_MKI109D/Core/Src/board.c
 $STDC_PATH/_prj_MKI109D/Core/Src/queue.c
-$STDC_PATH/_prj_MKI109D/Core/Src/spi_3w.c
+$STDC_PATH/_prj_MKI109D/Core/Src/spi_extended.c
 ```
 
-3. Add Middleware source files to the project:
+### Add middleware source files
 
 ```c
-  $STDC_PATH/_prj_MKI109D/Middleware\USB\Device\Class\CDC\Src\usbd_cdc_if.c
-  $STDC_PATH/_prj_MKI109D/Middleware\USB\Device\Core\Src\usb_device.c
-  $STDC_PATH/_prj_MKI109D/Middleware\USB\Device\Core\Src\usbd_conf.c
-  $STDC_PATH/_prj_MKI109D/Middleware\USB\Device\Core\Src\usbd_desc.c
-  $STDC_PATH/_prj_MKI109D/Middleware\USB\stm32-mw-usb-device\Class\CDC\Src\usbd_cdc.c
-  $STDC_PATH/_prj_MKI109D/Middleware\USB\stm32-mw-usb-device\Core\Src\usbd_core.c
-  $STDC_PATH/_prj_MKI109D/Middleware\USB\stm32-mw-usb-device\Core\Src\usbd_ctlreq.c
-  $STDC_PATH/_prj_MKI109D/Middleware\USB\stm32-mw-usb-device\Core\Src\usbd_ioreq.c
+$STDC_PATH/_prj_MKI109D/Middleware/USB/Device/Class/CDC/Src/usbd_cdc_if.c
+$STDC_PATH/_prj_MKI109D/Middleware/USB/Device/Core/Src/usb_device.c
+$STDC_PATH/_prj_MKI109D/Middleware/USB/Device/Core/Src/usbd_conf.c
+$STDC_PATH/_prj_MKI109D/Middleware/USB/Device/Core/Src/usbd_desc.c
+
+$STDC_PATH/_prj_MKI109D/Middleware/USB/stm32-mw-usb-device/Class/CDC/Src/usbd_cdc.c
+$STDC_PATH/_prj_MKI109D/Middleware/USB/stm32-mw-usb-device/Core/Src/usbd_core.c
+$STDC_PATH/_prj_MKI109D/Middleware/USB/stm32-mw-usb-device/Core/Src/usbd_ctlreq.c
+$STDC_PATH/_prj_MKI109D/Middleware/USB/stm32-mw-usb-device/Core/Src/usbd_ioreq.c
 ```
 
-4. Add following directories to the compiler include paths (e.g., in your Makefile or IDE settings):
+### Include Paths in IAR Project Configuration
+To ensure successful compilation, configure the USB middleware include paths in IAR Embedded Workbench as follows:
+`Project → Options → C/C++ Compiler → Preprocessor → Additional Include Directories`
+
+    $STDC_PATH/_prj_MKI109D/Middleware/USB/stm32-mw-usb-device/Core/Inc
+    $STDC_PATH/_prj_MKI109D/Middleware/USB/stm32-mw-usb-device/Class/CDC/Inc
+    $STDC_PATH/_prj_MKI109D/Middleware/USB/Device/Core/Inc
+    $STDC_PATH/_prj_MKI109D/Middleware/USB/Device/Class/CDC/Inc
+
+
+### Add the preprocessor macro
+
+    -D STEVAL_MKI109D
+
+
+## STM32CubeIDE Instructions
+
+These steps apply **only** if STM32CubeIDE is selected as the target toolchain in STM32CubeMX.
+
+### Add core source files to the EWARM project
 
 ```c
-  CFLAGS += -I $STDC_PATH/_prj_MKI109D/Middleware/USB/stm32-mw-usb-device/Core/Inc \
-            -I $STDC_PATH/_prj_MKI109D/Middleware/USB/stm32-mw-usb-device/Class/CDC/Inc \
-            -I $STDC_PATH/_prj_MKI109D/Middleware/USB/Device/Core/Inc \
-            -I $STDC_PATH/_prj_MKI109D/Middleware/USB/Device/Class/CDC/Inc
+$STDC_PATH/_prj_MKI109D/Core/Src/spi_extended.c
 ```
+
+### Add the following include paths
+In Project → Properties → C/C++ Build Settings → MCU/MPU GCC Compiler → Include paths.
+
+    -I ../Middleware/USB/stm32-mw-usb-device/Core/Inc
+    -I ../Middleware/USB/stm32-mw-usb-device/Class/CDC/Inc
+    -I ../Middleware/USB/Device/Core/Inc
+    -I ../Middleware/USB/Device/Class/CDC/Inc
+
+
+### Add source directories in Path and Symbols
+In Project → Properties → C/C++ General → Paths and Symbols → Source Location.
+
+    _prj_MKI109D/Middleware/USB/stm32-mw-usb-device/Core
+    _prj_MKI109D/Middleware/USB/stm32-mw-usb-device/Class/CDC
+    _prj_MKI109D/Middleware/USB/Device
+
+
+### Add the preprocessor macro
+
+    -D STEVAL_MKI109D
+
+
+### Exclude Templates c./.h
+Go to project explorer, localize the following files under Middleware/USBstm32-mw-usb-device and 
+exclude them from Building.
+
+    Headers
+       - usbd_conf_template.h
+       - usbd_desc_template.h
+       - usbd_cdc_if_template.h
+
+    Sources
+       - usbd_conf_template.c
+       - usbd_desc_template.c
+       - usbd_cdc_if_template.c
+
+
+### Enable Use of Float
+In MCU/MPU Setting, ebable the following settings:
+
+    - Use float with printf from newlib-nano (-u _printf_float)
+    - Use float with scanf from newlib-nano (-u _printf_float)
+
 
 ## How to run a driver example
 
@@ -103,7 +181,7 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 CFLAGS += -I $STDC_PATH/lsm6dsv16x_STdC/driver
 ```
 
-3. Add STEVAL_MKI109D to the list of preprocessor enabled macros for the compiler, e.g :
+3. Add or verify that STEVAL_MKI109D is defined in the list of enabled preprocessor macros for the compiler, e.g :
 
 ```make
 CFLAGS += -D STEVAL_MKI109D
