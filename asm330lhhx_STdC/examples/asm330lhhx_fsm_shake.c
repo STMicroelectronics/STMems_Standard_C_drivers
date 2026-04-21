@@ -89,7 +89,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "asm330lhhx_shake_detection_detection.h"
+#include "asm330lhhx_shake_detection.h"
 #include "asm330lhhx_reg.h"
 
 #if defined(NUCLEO_F401RE)
@@ -164,10 +164,10 @@ void asm330lhhx_fsm_shake(void)
   } while (rst);
 
   /* Start FSM configuration */
-  for ( i = 0; i < (sizeof(asm330lhhx_shake_detection_detection_conf_0) /
+  for ( i = 0; i < (sizeof(asm330lhhx_shake_detection_conf_0) /
                     sizeof(struct mems_conf_op) ); i++ ) {
-    asm330lhhx_write_reg(&dev_ctx, asm330lhhx_shake_detection_detection_conf_0[i].address,
-                       (uint8_t *)&asm330lhhx_shake_detection_detection_conf_0[i].data, 1);
+    asm330lhhx_write_reg(&dev_ctx, asm330lhhx_shake_detection_conf_0[i].address,
+                       (uint8_t *)&asm330lhhx_shake_detection_conf_0[i].data, 1);
   }
 
   asm330lhhx_int_notification_set(&dev_ctx,

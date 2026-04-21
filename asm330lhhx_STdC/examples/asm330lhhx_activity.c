@@ -100,10 +100,6 @@
 #include "components.h"
 #endif
 
-#include <string.h>
-#include <stdio.h>
-#include "stm32f4xx_hal.h"
-
 /* Private macro -------------------------------------------------------------*/
 #define    BOOT_TIME            10 //ms
 
