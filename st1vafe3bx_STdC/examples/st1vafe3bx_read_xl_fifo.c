@@ -23,22 +23,28 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3 + STEVAL-
- * - NUCLEO_F401RE + STEVAL-
- * - DISCOVERY_SPC584B + STEVAL-
- *
- * and STM32CubeMX tool with STM32CubeF4 MCU Package
+ * - STEVAL_MKI109D  + STEVAL-MKI250KA
+ * - STEVAL_MKI109V3 + STEVAL-MKI250KA
+ * - NUCLEO_F401RE + X-NUCLEO-IKS01A3
+ * - DISCOVERY_SPC584B + STEVAL-MKI250KA
+ * - NUCLEO_H503RB + X-NUCLEO-IKS4A1
  *
  * Used interfaces:
+ *
+ * STEVAL_MKI109D     - Host side:   USB (Virtual COM)
+ *                    - Sensor side: SPI(Default) / I2C(supported)
  *
  * STEVAL_MKI109V3    - Host side:   USB (Virtual COM)
  *                    - Sensor side: SPI(Default) / I2C(supported)
  *
- * NUCLEO_STM32F411RE - Host side: UART(COM) to USB bridge
+ * NUCLEO_STM32F401RE - Host side: UART(COM) to USB bridge
  *                    - Sensor side: I2C(Default) / SPI(supported)
  *
  * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
  *                    - Sensor side: I2C(Default) / SPI(supported)
+ *
+ * NUCLEO_STM32H503RG - Host side: UART(COM) to USB bridge
+ *                    - Sensor side: I3C(Default)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -62,8 +68,15 @@
  *            header file of the driver (_reg.h).
  */
 
+#if defined(STEVAL_MKI109D)
+/* MKI109D: Define communication interface */
+#define SENSOR_BUS hspi1
 
-#if defined(STEVAL_MKI109V3)
+/* MKI109D: Vdd and Vddio power supply values */
+#define LSM6DSV16X_VDD 1.8f
+#define LSM6DSV16X_VDDIO 1.8f
+
+#elif defined(STEVAL_MKI109V3)
 /* MKI109V3: Define communication interface */
 #define SENSOR_BUS hspi2
 /* MKI109V3: Vdd and Vddio power supply values */
@@ -76,6 +89,10 @@
 #elif defined(SPC584B_DIS)
 /* DISCOVERY_SPC584B: Define communication interface */
 #define SENSOR_BUS I2CD1
+
+#elif defined(NUCLEO_H503RB)
+/* NUCLEO_H503RB: Define communication interface */
+#define SENSOR_BUS hi3c1
 
 #endif
 
@@ -90,6 +107,10 @@
 #include "gpio.h"
 #include "i2c.h"
 
+#elif defined(STEVAL_MKI109D)
+#include "board.h"
+#include "usbd_cdc_if.h"
+
 #elif defined(STEVAL_MKI109V3)
 #include "stm32f4xx_hal.h"
 #include "usbd_cdc_if.h"
@@ -99,6 +120,14 @@
 
 #elif defined(SPC584B_DIS)
 #include "components.h"
+
+#elif defined(NUCLEO_H503RB)
+#include "usart.h"
+#include "i3c.h"
+#include "i3c_api.h"
+#include <stdio.h>
+
+static uint8_t i3c_dyn_addr = 0x0A;
 #endif
 
 /* Private typedef -----------------------------------------------------------*/
@@ -125,7 +154,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
-static void platform_init(void);
+static void platform_init(void *handle);
 
 #define NUM_FIFO_ENTRY  33 /* 32 samples + timestamp */
 
@@ -149,7 +178,7 @@ void st1vafe3bx_read_xl_fifo(void)
   dev_ctx.priv_data = &vafe_info;
 
   /* Initialize platform specific hardware */
-  platform_init();
+  platform_init(dev_ctx.handle);
 
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
@@ -255,6 +284,11 @@ static int32_t platform_write(void *handle, uint8_t reg,
 #if defined(NUCLEO_F401RE)
   HAL_I2C_Mem_Write(handle, ST1VAFE3BX_I2C_ADD_L, reg,
                     I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, len, 1000);
+#elif defined(STEVAL_MKI109D)
+  HAL_GPIO_WritePin(SPI1_NSS_GPIO_Port, SPI1_NSS_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, HAL_MAX_DELAY);
+  HAL_SPI_Transmit(handle, (uint8_t*) bufp, len, HAL_MAX_DELAY);
+  HAL_GPIO_WritePin(SPI1_NSS_GPIO_Port, SPI1_NSS_Pin, GPIO_PIN_SET);
 #elif defined(STEVAL_MKI109V3)
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
   HAL_SPI_Transmit(handle, &reg, 1, 1000);
@@ -262,6 +296,8 @@ static int32_t platform_write(void *handle, uint8_t reg,
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_write(handle,  ST1VAFE3BX_I2C_ADD_L & 0xFE, reg, (uint8_t*) bufp, len);
+#elif defined(NUCLEO_H503RB)
+  i3c_write(handle, i3c_dyn_addr, reg, (uint8_t*) bufp, len);
 #endif
   return 0;
 }
@@ -282,6 +318,12 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
 #if defined(NUCLEO_F401RE)
   HAL_I2C_Mem_Read(handle, ST1VAFE3BX_I2C_ADD_L, reg,
                    I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+#elif defined(STEVAL_MKI109D)
+  reg |= 0x80;
+  HAL_GPIO_WritePin(SPI1_NSS_GPIO_Port, SPI1_NSS_Pin, GPIO_PIN_RESET);
+  HAL_SPI_Transmit(handle, &reg, 1, HAL_MAX_DELAY);
+  HAL_SPI_Receive(handle, bufp, len, HAL_MAX_DELAY);
+  HAL_GPIO_WritePin(SPI1_NSS_GPIO_Port, SPI1_NSS_Pin, GPIO_PIN_SET);
 #elif defined(STEVAL_MKI109V3)
   reg |= 0x80;
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_RESET);
@@ -290,6 +332,8 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_read(handle, ST1VAFE3BX_I2C_ADD_L & 0xFE, reg, bufp, len);
+#elif defined(NUCLEO_H503RB)
+  i3c_read(handle, i3c_dyn_addr, reg, bufp, len);
 #endif
   return 0;
 }
@@ -305,10 +349,14 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
 {
 #if defined(NUCLEO_F401RE)
   HAL_UART_Transmit(&huart2, tx_buffer, len, 1000);
+#elif defined(STEVAL_MKI109D)
+  CDC_Transmit_FS(tx_buffer, len);
 #elif defined(STEVAL_MKI109V3)
   CDC_Transmit_FS(tx_buffer, len);
 #elif defined(SPC584B_DIS)
   sd_lld_write(&SD2, tx_buffer, len);
+#elif defined(NUCLEO_H503RB)
+  HAL_UART_Transmit(&huart3, tx_buffer, len, 1000);
 #endif
 }
 
@@ -320,8 +368,10 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
-#if defined(NUCLEO_F401RE) | defined(STEVAL_MKI109V3)
+#if defined(NUCLEO_F401RE) || defined(STEVAL_MKI109V3) || defined(NUCLEO_H503RB)
   HAL_Delay(ms);
+#elif defined(STEVAL_MKI109D)
+  delay(ms);
 #elif defined(SPC584B_DIS)
   osalThreadDelayMilliseconds(ms);
 #endif
@@ -330,13 +380,31 @@ static void platform_delay(uint32_t ms)
 /*
  * @brief  platform specific initialization (platform dependent)
  */
-static void platform_init(void)
+static void platform_init(void *handle)
 {
-#if defined(STEVAL_MKI109V3)
+#if defined(STEVAL_MKI109D)
+  struct spi_conf spi_conf;
+
+  /* init SPI bus communication */
+  spi_conf.wire = WIRE_4;
+  spi_init(&spi_conf);
+
+  /* set VDD/VDDIO on DIL24 */
+  set_vdd(LSM6DSV16X_VDD);
+  set_vddio(LSM6DSV16X_VDDIO);
+  delay(100);
+
+#elif defined(STEVAL_MKI109V3)
   TIM3->CCR1 = PWM_3V3;
   TIM3->CCR2 = PWM_3V3;
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
+
+#elif defined(NUCLEO_H503RB)
+  i3c_set_bus_frequency(handle, 1000000);
+  i3c_rstdaa(handle);
+  i3c_setdasa(handle, LSM6DSV16X_I2C_ADD_L, &i3c_dyn_addr, 1);
+  i3c_set_bus_frequency(handle, 12500000);
 #endif
 }
