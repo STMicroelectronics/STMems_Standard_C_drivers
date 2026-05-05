@@ -167,7 +167,6 @@ void lsm6dso16is_sensor_hub(void)
   lps22df_bus_mode_t bus_mode;
   lps22df_stat_t status;
   lps22df_md_t md;
-  uint8_t lis2mdl_rst;
 
   /* Initialize mems driver interface */
   lsm6dso16is_ctx.write_reg = platform_write;
@@ -216,11 +215,7 @@ void lsm6dso16is_sensor_hub(void)
     while (1);
 
   /* Restore default configuration */
-  lis2mdl_reset_set(&lis2mdl_ctx, PROPERTY_ENABLE);
-
-  do {
-    lis2mdl_reset_get(&lis2mdl_ctx, &lis2mdl_rst);
-  } while (lis2mdl_rst);
+  lis2mdl_sw_reset(&lis2mdl_ctx);
 
   lis2mdl_block_data_update_set(&lis2mdl_ctx, PROPERTY_ENABLE);
   lis2mdl_offset_temp_comp_set(&lis2mdl_ctx, PROPERTY_ENABLE);
