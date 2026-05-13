@@ -130,7 +130,7 @@ static void platform_init(void);
 static mis2du12_int_mode_t int_mode;
 static mis2du12_pin_int_route_t int_route;
 static stmdev_ctx_t dev_ctx;
-static uint8_t free_fall_event = 0;
+static volatile uint8_t free_fall_event = 0;
 
 /* irq handler ---------------------------------------------------------------*/
 void mis2du12_free_fall_irq_handler(void)

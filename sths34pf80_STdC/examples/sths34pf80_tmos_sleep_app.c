@@ -121,7 +121,7 @@ typedef enum
 /* Private variables ---------------------------------------------------------*/
 static uint8_t tx_buffer[1000];
 static stmdev_ctx_t dev_ctx;
-static int wakeup_thread = 0;
+static volatile int wakeup_thread = 0;
 
 static State current_state = STATE_0;
 static volatile uint8_t counter = 0;

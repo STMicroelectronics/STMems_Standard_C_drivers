@@ -125,7 +125,7 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 static stmdev_ctx_t dev_ctx;
-static uint8_t lps22df_fifo_wtm_event;
+static volatile uint8_t lps22df_fifo_wtm_event;
 
 
 /* Main Example --------------------------------------------------------------*/

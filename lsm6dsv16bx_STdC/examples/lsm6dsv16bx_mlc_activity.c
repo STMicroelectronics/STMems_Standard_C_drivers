@@ -155,7 +155,7 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void *handle);
 
 static stmdev_ctx_t dev_ctx;
-static uint8_t activity_event_catched = 0;
+static volatile uint8_t activity_event_catched = 0;
 
 void lsm6dsv16bx_mlc_activity_handler(void)
 {

@@ -155,11 +155,11 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void *handle);
 
 static stmdev_ctx_t dev_ctx;
-static uint8_t stationary_event_catched = 0;
-static uint8_t walking_event_catched = 0;
-static uint8_t jogging_event_catched = 0;
-static uint8_t biking_event_catched = 0;
-static uint8_t driving_event_catched = 0;
+static volatile uint8_t stationary_event_catched = 0;
+static volatile uint8_t walking_event_catched = 0;
+static volatile uint8_t jogging_event_catched = 0;
+static volatile uint8_t biking_event_catched = 0;
+static volatile uint8_t driving_event_catched = 0;
 
 void lis2dux12_mlc_activity_mobile_handler(void)
 {

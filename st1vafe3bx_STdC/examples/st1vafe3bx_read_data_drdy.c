@@ -158,7 +158,7 @@ static void platform_init(void *handle);
 
 static stmdev_ctx_t dev_ctx;
 static st1vafe3bx_md_t md;
-static uint8_t drdy_event = 0;
+static volatile uint8_t drdy_event = 0;
 static st1vafe3bx_ah_bio_config_t cfg;
 
 void st1vafe3bx_read_data_drdy_handler(void)

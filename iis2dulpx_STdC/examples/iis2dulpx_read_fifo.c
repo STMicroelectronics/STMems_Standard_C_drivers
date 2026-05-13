@@ -166,7 +166,7 @@ static void platform_init(void *handle);
 static stmdev_ctx_t dev_ctx;
 static iis2dulpx_fifo_mode_t fifo_mode;
 static iis2dulpx_fifo_batch_t batch;
-static uint8_t fifo_wtm_event = 0;
+static volatile uint8_t fifo_wtm_event = 0;
 
 void iis2dulpx_read_fifo_handler(void)
 {

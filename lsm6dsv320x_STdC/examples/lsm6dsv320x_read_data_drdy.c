@@ -167,7 +167,7 @@ static   uint8_t lg_xl_data_valid = 0;
 static   uint8_t hg_xl_data_valid = 0;
 static   uint8_t gyro_data_valid = 0;
 static   uint8_t temp_data_valid = 0;
-static   uint8_t thread_wake = 0;
+static   volatile uint8_t thread_wake = 0;
 
 void lsm6dsv320x_read_data_drdy_handler(void)
 {

@@ -155,9 +155,9 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void *handle);
 
 static stmdev_ctx_t dev_ctx;
-static uint8_t no_vibration = 0;
-static uint8_t low_vibration = 0;
-static uint8_t high_vibration = 0;
+static volatile uint8_t no_vibration = 0;
+static volatile uint8_t low_vibration = 0;
+static volatile uint8_t high_vibration = 0;
 
 void iis2dulpx_vibration_monitoring_handler(void)
 {

@@ -159,9 +159,9 @@ static void platform_init(void *handle);
 
 static stmdev_ctx_t dev_ctx;
 static lis2dux12_pin_int_route_t int1_route;
-static uint8_t fifo_1_tap_event = 0;
-static uint8_t fifo_2_tap_event = 0;
-static uint8_t fifo_3_tap_event = 0;
+static volatile uint8_t fifo_1_tap_event = 0;
+static volatile uint8_t fifo_2_tap_event = 0;
+static volatile uint8_t fifo_3_tap_event = 0;
 
 void lis2dux12_tap_handler(void)
 {

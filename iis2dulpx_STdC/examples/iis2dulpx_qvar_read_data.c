@@ -157,7 +157,7 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void *handle);
 
 /* Main Example --------------------------------------------------------------*/
-static uint8_t qvar_drdy_event = 0;
+static volatile uint8_t qvar_drdy_event = 0;
 
 void iis2dulpx_qvar_drdy_handler(void)
 {

@@ -123,7 +123,7 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 static stmdev_ctx_t dev_ctx;
-static uint8_t fourd_event_catched = 0;
+static volatile uint8_t fourd_event_catched = 0;
 
 void ism330bx_fsm_fourd_handler(void)
 {

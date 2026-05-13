@@ -130,7 +130,7 @@ static void platform_init(void);
 static   stmdev_ctx_t dev_ctx;
 static   lis2du12_md_t md;
 static   lis2du12_fifo_md_t fifo_mode;
-static uint8_t fifo_wtm_event = 0;
+static volatile uint8_t fifo_wtm_event = 0;
 
 void lis2du12_read_fifo_handler(void)
 {

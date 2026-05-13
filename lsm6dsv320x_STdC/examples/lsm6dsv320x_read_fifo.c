@@ -170,7 +170,7 @@ static uint16_t gravity_cnt = 0, gbias_cnt = 0, rot_cnt = 0;
 static float_t gravity_sum[3], gbias_sum[3];
 static double_t rot_sum[4];
 
-static   uint8_t fifo_thread_run = 0;
+static   volatile uint8_t fifo_thread_run = 0;
 
 static float_t npy_half_to_float(uint16_t h)
 {

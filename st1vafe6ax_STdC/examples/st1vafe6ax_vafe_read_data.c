@@ -157,7 +157,7 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void *handle);
 
-static uint8_t drdy_event = 0;
+static volatile uint8_t drdy_event = 0;
 void st1vafe6ax_wake_up_handler(void)
 {
   drdy_event = 1;

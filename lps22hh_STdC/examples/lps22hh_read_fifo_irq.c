@@ -132,7 +132,7 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 static stmdev_ctx_t dev_ctx;
-static uint8_t lps22hh_fifo_wtm_event;
+static volatile uint8_t lps22hh_fifo_wtm_event;
 
 /* Main Example --------------------------------------------------------------*/
 void lps22hh_read_fifo_irq_handler(void)

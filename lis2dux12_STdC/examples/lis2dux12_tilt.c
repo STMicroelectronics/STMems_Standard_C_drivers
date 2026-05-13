@@ -159,7 +159,7 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void *handle);
 
-static uint8_t tilt_event = 0;
+static volatile uint8_t tilt_event = 0;
 
 void lis2dux12_tilt_handler(void)
 {

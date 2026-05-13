@@ -123,7 +123,7 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 static stmdev_ctx_t dev_ctx;
-static uint8_t vibration_monitoring_event_catched = 0xFF;
+static volatile uint8_t vibration_monitoring_event_catched = 0xFF;
 
 void ism330bx_mlc_vibration_monitoring_handler(void)
 {

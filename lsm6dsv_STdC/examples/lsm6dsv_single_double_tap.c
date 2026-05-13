@@ -143,8 +143,8 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 static stmdev_ctx_t dev_ctx;
-static uint8_t stap_event_catched = 0;
-static uint8_t dtap_event_catched = 0;
+static volatile uint8_t stap_event_catched = 0;
+static volatile uint8_t dtap_event_catched = 0;
 
 void lsm6dsv_single_double_tap_handler(void)
 {

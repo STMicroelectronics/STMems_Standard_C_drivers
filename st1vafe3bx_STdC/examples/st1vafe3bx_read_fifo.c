@@ -161,7 +161,7 @@ static void platform_init(void *handle);
 static stmdev_ctx_t dev_ctx;
 static st1vafe3bx_md_t md;
 static st1vafe3bx_fifo_mode_t fifo_mode;
-static uint8_t fifo_wtm_event = 0;
+static volatile uint8_t fifo_wtm_event = 0;
 static st1vafe3bx_ah_bio_config_t cfg;
 
 void st1vafe3bx_read_fifo_handler(void)

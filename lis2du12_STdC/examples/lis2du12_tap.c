@@ -130,8 +130,8 @@ static void platform_init(void);
 static lis2du12_int_mode_t int_mode;
 static lis2du12_pin_int_route_t int_route;
 static stmdev_ctx_t dev_ctx;
-static uint8_t tap_1_event = 0;
-static uint8_t tap_2_event = 0;
+static volatile uint8_t tap_1_event = 0;
+static volatile uint8_t tap_2_event = 0;
 
 /* irq handler ---------------------------------------------------------------*/
 void lis2du12_tap_irq_handler(void)

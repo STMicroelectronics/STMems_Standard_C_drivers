@@ -161,7 +161,7 @@ static void platform_init(void *handle);
 
 static stmdev_ctx_t dev_ctx;
 static lis2duxs12_md_t md;
-static uint8_t drdy_event = 0;
+static volatile uint8_t drdy_event = 0;
 
 void lis2duxs12_read_data_drdy_handler(void)
 {

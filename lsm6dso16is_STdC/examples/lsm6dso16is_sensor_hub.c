@@ -183,7 +183,7 @@ static int32_t lsm6dso16is_write_lps22df_cx(void *ctx, uint8_t reg,
 static int32_t lsm6dso16is_read_lps22df_cx(void *ctx, uint8_t reg,
                                           uint8_t *data, uint16_t len);
 
-static uint8_t drdy_event = 0;
+static volatile uint8_t drdy_event = 0;
 void lsm6dso16is_sensor_hub_handler(void)
 {
   drdy_event = 1;

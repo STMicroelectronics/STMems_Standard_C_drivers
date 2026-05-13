@@ -158,7 +158,7 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void *handle);
 
 static stmdev_ctx_t dev_ctx;
-static uint8_t ff_event = 0;
+static volatile uint8_t ff_event = 0;
 
 void lis2dux12_ff_handler(void)
 {

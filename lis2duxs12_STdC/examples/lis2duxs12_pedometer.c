@@ -160,7 +160,7 @@ static void platform_init(void *handle);
 
 static   stmdev_ctx_t dev_ctx;
 static   lis2duxs12_emb_pin_int_route_t int1_route;
-static uint8_t step_event = 0;
+static volatile uint8_t step_event = 0;
 
 void lis2duxs12_step_handler(void)
 {
