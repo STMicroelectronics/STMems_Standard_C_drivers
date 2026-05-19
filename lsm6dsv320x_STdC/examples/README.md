@@ -28,6 +28,10 @@ Program LSM6DSV320X to receive High-g wakeup events and data on INT1:
 
   - lsm6dsv320x_hg_wakeup.c
 
+Program LSM6DSV320X Sensor Fusion Low Power (SFLP) to receive GBIAS, Gravity and Game rotation vectors:
+
+  - lsm6dsv320x_sensor_fusion.c
+
 ## Finite State Machine (FSM)
 
 Program LSM6DSV320X FSM to detect *glance* and *de-glance* gestures typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/st-mems-finite-state-machine/blob/main/examples/glance_detection/lsm6dsv320x/README.md)):
@@ -37,6 +41,10 @@ Program LSM6DSV320X FSM to detect *glance* and *de-glance* gestures typically us
 Program LSM6DSV320X FSM to detect 4D position recognition typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/st-mems-finite-state-machine/blob/main/examples/fourd_orientation_detection/lsm6dsv320x/README.md)):
 
   - lsm6dsv320x_fsm_fourd.c
+
+Program LSM6DSV320X FSM to detect  *Peak tracking* suitable for detecting high-intensity impacts (read more [here](https://github.com/STMicroelectronics/st-mems-finite-state-machine/blob/main/examples/peak_tracking/lsm6dsv320x/README.md)):
+
+  - lsm6dsv320x_fsm_peak_training.c
 
 ## Machine Learning Core (MLC)
 

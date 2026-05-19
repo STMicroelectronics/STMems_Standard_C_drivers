@@ -1,8 +1,8 @@
 /*
  ******************************************************************************
- * @file    read_data_drdy.c
+ * @file    fsm_peak_training.c
  * @author  Sensors Software Solution Team
- * @brief   This file shows how to get data from sensor.
+ * @brief   This file shows how to generate and handle a Free Fall event.
  *
  ******************************************************************************
  * @attention
@@ -98,6 +98,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
+#include "lsm6dsv320x_peak_tracking.h"
 #include "lsm6dsv320x_reg.h"
 
 #if defined(NUCLEO_F401RE)
@@ -131,23 +132,14 @@ static uint8_t i3c_dyn_addr = 0x0A;
 
 /* Private macro -------------------------------------------------------------*/
 #define    BOOT_TIME            10 //ms
-#define    CNT_FOR_OUTPUT       100
 
 /* Private variables ---------------------------------------------------------*/
-static int16_t data_raw_motion[3];
-static int16_t data_raw_temperature;
-static float_t acceleration_mg[3];
-static float_t angular_rate_mdps[3];
-static float_t temperature_degC;
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
-
-static lsm6dsv320x_filt_settling_mask_t filt_settling_mask;
 
 /* Extern variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
-
 /*
  *   WARNING:
  *   Functions declare in this section are defined at the end of this file
@@ -162,24 +154,19 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void *handle);
 
-static   stmdev_ctx_t dev_ctx;
-static   uint8_t lg_xl_data_valid = 0;
-static   uint8_t hg_xl_data_valid = 0;
-static   uint8_t gyro_data_valid = 0;
-static   uint8_t temp_data_valid = 0;
-static   volatile uint8_t thread_wake = 0;
+static stmdev_ctx_t dev_ctx;
+static volatile uint8_t peak_catched;
 
-void lsm6dsv320x_read_data_drdy_handler(void)
+void lsm6dsv320x_fsm_peak_training_handler(void)
 {
-  thread_wake = 1;
+  peak_catched = 1;
 }
 
 /* Main Example --------------------------------------------------------------*/
-void lsm6dsv320x_read_data_drdy(void)
+void lsm6dsv320x_fsm_peak_training(void)
 {
-  lsm6dsv320x_pin_int_route_t pin_int = { 0 };
-  double_t lowg_xl_sum[3], hg_xl_sum[3], gyro_sum[3], temp_sum;
-  uint16_t lowg_xl_cnt = 0, hg_xl_cnt = 0, gyro_cnt = 0, temp_cnt = 0;
+  float_t acceleration_mg[3];
+  uint32_t i;
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
@@ -202,161 +189,64 @@ void lsm6dsv320x_read_data_drdy(void)
   /* Perform device power-on-reset */
   lsm6dsv320x_sw_por(&dev_ctx);
 
-  /* Enable Block Data Update */
-  lsm6dsv320x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+#if defined(NUCLEO_H503RB)
+  /* if I3C is used then INT pin must be explicitly enabled */
+  lsm6dsv320x_i3c_int_en_set(&dev_ctx, 1);
+#endif
 
-  /* Set Output Data Rate.
-   * Selected data rate have to be equal or greater with respect
-   * with MLC data rate.
-   */
-  lsm6dsv320x_xl_setup(&dev_ctx, LSM6DSV320X_ODR_AT_60Hz, LSM6DSV320X_XL_HIGH_PERFORMANCE_MD);
-  lsm6dsv320x_hg_xl_data_rate_set(&dev_ctx, LSM6DSV320X_HG_XL_ODR_AT_960Hz, 1);
-  lsm6dsv320x_gy_setup(&dev_ctx, LSM6DSV320X_ODR_AT_120Hz, LSM6DSV320X_GY_HIGH_PERFORMANCE_MD);
+  /* Start FSM configuration */
+  for ( i = 0; i < (sizeof(lsm6dsv320x_peak_tracking_conf_0) /
+                    sizeof(struct mems_conf_op) ); i++ ) {
+    switch(lsm6dsv320x_peak_tracking_conf_0[i].type) {
+    case MEMS_CONF_OP_TYPE_DELAY:
+      platform_delay(lsm6dsv320x_peak_tracking_conf_0[i].data);
+      break;
+    case MEMS_CONF_OP_TYPE_WRITE:
+      lsm6dsv320x_write_reg(&dev_ctx, lsm6dsv320x_peak_tracking_conf_0[i].address,
+                           (uint8_t *)&lsm6dsv320x_peak_tracking_conf_0[i].data, 1);
+      break;
+    }
+  }
 
-  /* Set full scale */
-  lsm6dsv320x_xl_full_scale_set(&dev_ctx, LSM6DSV320X_2g);
-  lsm6dsv320x_hg_xl_full_scale_set(&dev_ctx, LSM6DSV320X_320g);
-  lsm6dsv320x_gy_full_scale_set(&dev_ctx, LSM6DSV320X_2000dps);
-
-  /* Configure filtering chain */
-  filt_settling_mask.drdy = PROPERTY_ENABLE;
-  filt_settling_mask.irq_xl = PROPERTY_ENABLE;
-  filt_settling_mask.irq_g = PROPERTY_ENABLE;
-  lsm6dsv320x_filt_settling_mask_set(&dev_ctx, filt_settling_mask);
-  lsm6dsv320x_filt_gy_lp1_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6dsv320x_filt_gy_lp1_bandwidth_set(&dev_ctx, LSM6DSV320X_GY_ULTRA_LIGHT);
-  lsm6dsv320x_filt_xl_lp2_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6dsv320x_filt_xl_lp2_bandwidth_set(&dev_ctx, LSM6DSV320X_XL_STRONG);
-
-  lowg_xl_sum[0] = lowg_xl_sum[1] = lowg_xl_sum[2] = 0.0;
-  hg_xl_sum[0] = hg_xl_sum[1] = hg_xl_sum[2] = 0.0;
-  gyro_sum[0] = gyro_sum[1] = gyro_sum[2] = 0.0;
-  temp_sum = 0.0;
-
-  /* enable interrupt on High-G XL (sensor at highest frequency) */
-  pin_int.drdy_hg_xl = PROPERTY_ENABLE;
-  lsm6dsv320x_pin_int1_route_hg_set(&dev_ctx, &pin_int);
-  //lsm6dsv320x_pin_int2_route_hg_set(&dev_ctx, &pin_int);
-
-  /* "thread" loop */
+  /* wait forever (FF event handle in irq handler) */
   while (1) {
-    if (thread_wake) {
-      lsm6dsv320x_data_ready_t status;
+    if (peak_catched) {
+      uint8_t fsm_status, buff[2];
+      lsm6dsv320x_fifo_out_raw_t f_data;
+      int16_t *datax;
+      int16_t *datay;
+      int16_t *dataz;
 
+      peak_catched = 0;
 
-      thread_wake = 0;
+      lsm6dsv320x_fsm_out_t fsm_outs;
+      lsm6dsv320x_read_reg(&dev_ctx, LSM6DSV320X_FSM_STATUS_MAINPAGE, &fsm_status, 1);
+      lsm6dsv320x_fsm_out_get(&dev_ctx, &fsm_outs);
+      if ((fsm_status == 0x1) && (fsm_outs.fsm_outs1 == 0))
+      {
+        /* Read FIFO sensor value */
+        lsm6dsv320x_fifo_out_raw_get(&dev_ctx, &f_data);
+        datax = (int16_t *)&f_data.data[0];
+        datay = (int16_t *)&f_data.data[2];
+        dataz = (int16_t *)&f_data.data[4];
 
-      /* Read output only if new xl value is available */
-      lsm6dsv320x_flag_data_ready_get(&dev_ctx, &status);
+        switch (f_data.tag) {
+        case LSM6DSV320X_HG_XL_PEAK_TAG:
+          acceleration_mg[0] = lsm6dsv320x_from_fs80_to_mg(*datax)/1000.0f;
+          acceleration_mg[1] = lsm6dsv320x_from_fs80_to_mg(*datay)/1000.0f;
+          acceleration_mg[2] = lsm6dsv320x_from_fs80_to_mg(*dataz)/1000.0f;
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "hg PEAK:%4.2f g\t%4.2f g\t%4.2f g\r\n",
+                  acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+          tx_com(tx_buffer, strlen((char const *)tx_buffer));
+          break;
 
-      hg_xl_data_valid = status.drdy_hgxl;
-      lg_xl_data_valid = status.drdy_xl;
-      gyro_data_valid = status.drdy_gy;
-      temp_data_valid = status.drdy_temp;
-
-      if (lg_xl_data_valid) {
-        lg_xl_data_valid = 0;
-
-        /* Read acceleration field data */
-        memset(data_raw_motion, 0x00, 3 * sizeof(int16_t));
-        lsm6dsv320x_acceleration_raw_get(&dev_ctx, data_raw_motion);
-        acceleration_mg[0] = lsm6dsv320x_from_fs2_to_mg(data_raw_motion[0]);
-        acceleration_mg[1] = lsm6dsv320x_from_fs2_to_mg(data_raw_motion[1]);
-        acceleration_mg[2] = lsm6dsv320x_from_fs2_to_mg(data_raw_motion[2]);
-
-        lowg_xl_sum[0] += acceleration_mg[0];
-        lowg_xl_sum[1] += acceleration_mg[1];
-        lowg_xl_sum[2] += acceleration_mg[2];
-        lowg_xl_cnt++;
-      }
-
-      if (hg_xl_data_valid) {
-        hg_xl_data_valid = 0;
-
-        /* Read acceleration field data */
-        memset(data_raw_motion, 0x00, 3 * sizeof(int16_t));
-        lsm6dsv320x_hg_acceleration_raw_get(&dev_ctx, data_raw_motion);
-        acceleration_mg[0] = lsm6dsv320x_from_fs256_to_mg(data_raw_motion[0]);
-        acceleration_mg[1] = lsm6dsv320x_from_fs256_to_mg(data_raw_motion[1]);
-        acceleration_mg[2] = lsm6dsv320x_from_fs256_to_mg(data_raw_motion[2]);
-
-        hg_xl_sum[0] += acceleration_mg[0];
-        hg_xl_sum[1] += acceleration_mg[1];
-        hg_xl_sum[2] += acceleration_mg[2];
-        hg_xl_cnt++;
-      }
-
-      /* Read output only if new xl value is available */
-      if (gyro_data_valid) {
-        gyro_data_valid = 0;
-
-        /* Read angular rate field data */
-        memset(data_raw_motion, 0x00, 3 * sizeof(int16_t));
-        lsm6dsv320x_angular_rate_raw_get(&dev_ctx, data_raw_motion);
-        angular_rate_mdps[0] = lsm6dsv320x_from_fs2000_to_mdps(data_raw_motion[0]);
-        angular_rate_mdps[1] = lsm6dsv320x_from_fs2000_to_mdps(data_raw_motion[1]);
-        angular_rate_mdps[2] = lsm6dsv320x_from_fs2000_to_mdps(data_raw_motion[2]);
-
-        gyro_sum[0] += angular_rate_mdps[0];
-        gyro_sum[1] += angular_rate_mdps[1];
-        gyro_sum[2] += angular_rate_mdps[2];
-        gyro_cnt++;
-      }
-
-      if (temp_data_valid) {
-        temp_data_valid = 0;
-
-       /* Read temperature data */
-        memset(&data_raw_temperature, 0x00, sizeof(int16_t));
-        lsm6dsv320x_temperature_raw_get(&dev_ctx, &data_raw_temperature);
-        temperature_degC = lsm6dsv320x_from_lsb_to_celsius(data_raw_temperature);
-        temp_sum += temperature_degC;
-        temp_cnt++;
+        default:
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "[%02x] UNHANDLED TAG \r\n", f_data.tag);
+          tx_com(tx_buffer, strlen((char const *)tx_buffer));
+          break;
+        }
       }
     }
-
-    if (lowg_xl_cnt >= CNT_FOR_OUTPUT) {
-      /* print avg low-g xl data */
-      acceleration_mg[0] = lowg_xl_sum[0] / lowg_xl_cnt;
-      acceleration_mg[1] = lowg_xl_sum[1] / lowg_xl_cnt;
-      acceleration_mg[2] = lowg_xl_sum[2] / lowg_xl_cnt;
-
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "lg xl (avg of %d samples) [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              lowg_xl_cnt, acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-      lowg_xl_sum[0] = lowg_xl_sum[1] = lowg_xl_sum[2] = 0.0;
-      lowg_xl_cnt = 0;
-
-      /* print avg high-g xl data */
-      acceleration_mg[0] = hg_xl_sum[0] / hg_xl_cnt;
-      acceleration_mg[1] = hg_xl_sum[1] / hg_xl_cnt;
-      acceleration_mg[2] = hg_xl_sum[2] / hg_xl_cnt;
-
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "hg xl (avg of %d samples) [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              hg_xl_cnt, acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-      hg_xl_sum[0] = hg_xl_sum[1] = hg_xl_sum[2] = 0.0;
-      hg_xl_cnt = 0;
-
-      /* print avg gyro data */
-      angular_rate_mdps[0] = gyro_sum[0] / gyro_cnt;
-      angular_rate_mdps[1] = gyro_sum[1] / gyro_cnt;
-      angular_rate_mdps[2] = gyro_sum[2] / gyro_cnt;
-
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "gyro (avg of %d samples) [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-              gyro_cnt, angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-      gyro_sum[0] = gyro_sum[1] = gyro_sum[2] = 0.0;
-      gyro_cnt = 0;
-
-      /* print avg temperature data */
-      temperature_degC = temp_sum / temp_cnt;
-      snprintf((char *)tx_buffer, sizeof(tx_buffer),"Temperature (avg of %d samples) [degC]:%6.2f\r\n\r\n",
-              temp_cnt, temperature_degC);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-      temp_cnt = 0;
-      temp_sum = 0.0;
-   }
   }
 }
 

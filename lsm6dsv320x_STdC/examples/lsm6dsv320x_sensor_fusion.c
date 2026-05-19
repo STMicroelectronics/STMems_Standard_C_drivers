@@ -1,19 +1,18 @@
 /*
  ******************************************************************************
- * @file    read_data_drdy.c
+ * @file    sensor_fusion.c
  * @author  Sensors Software Solution Team
- * @brief   This file shows how to get data from sensor.
+ * @brief   This file shows how to get data from SFLP sensor.
  *
  ******************************************************************************
  * @attention
  *
- * <h2><center>&copy; Copyright (c) 2021 STMicroelectronics.
- * All rights reserved.</center></h2>
+ * Copyright (c) 2025 STMicroelectronics.
+ * All rights reserved.
  *
- * This software component is licensed by ST under BSD 3-Clause license,
- * the "License"; You may not use this file except in compliance with the
- * License. You may obtain a copy of the License at:
- *                        opensource.org/licenses/BSD-3-Clause
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
  *
  ******************************************************************************
  */
@@ -22,11 +21,10 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3 + STEVAL-MKI251A
- * - STEVAL_MKI109D  + STEVAL-MKI251A
+ * - STEVAL_MKI109V3 + STEVAL-MKI247A
+ * - STEVAL_MKI109D  + STEVAL-MKI247A
  * - NUCLEO_F401RE + X_NUCLEO_IKS01A3
- * - NUCLEO_H503RB + X-NUCLEO-IKS4A1
- * - DISCOVERY_SPC584B + STEVAL-MKI251A
+ * - DISCOVERY_SPC584B + STEVAL-MKI247A
  *
  * Used interfaces:
  *
@@ -41,9 +39,6 @@
  *
  * DISCOVERY_SPC584B  - Host side: UART(COM) to USB bridge
  *                    - Sensor side: I2C(Default) / SPI(supported)
- *
- * NUCLEO_STM32H503RG - Host side: UART(COM) to USB bridge
- *                    - Sensor side: I3C(Default)
  *
  * If you need to run this example on a different hardware platform a
  * modification of the functions: `platform_write`, `platform_read`,
@@ -89,10 +84,6 @@
 /* DISCOVERY_SPC584B: Define communication interface */
 #define SENSOR_BUS I2CD1
 
-#elif defined(NUCLEO_H503RB)
-/* NUCLEO_H503RB: Define communication interface */
-#define SENSOR_BUS hi3c1
-
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -119,14 +110,6 @@
 
 #elif defined(SPC584B_DIS)
 #include "components.h"
-
-#elif defined(NUCLEO_H503RB)
-#include "usart.h"
-#include "i3c.h"
-#include "i3c_api.h"
-#include <stdio.h>
-
-static uint8_t i3c_dyn_addr = 0x0A;
 #endif
 
 /* Private macro -------------------------------------------------------------*/
@@ -135,10 +118,13 @@ static uint8_t i3c_dyn_addr = 0x0A;
 
 /* Private variables ---------------------------------------------------------*/
 static int16_t data_raw_motion[3];
-static int16_t data_raw_temperature;
-static float_t acceleration_mg[3];
-static float_t angular_rate_mdps[3];
-static float_t temperature_degC;
+static int16_t gbias_lsb[3];
+static int16_t gravity_lsb[3];
+static float_t gravity_mg[3];
+static uint16_t quats_lsb[4];
+static float_t quaternions[4];
+static float_t gbias_mdps[3];
+
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 
@@ -160,26 +146,20 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
                              uint16_t len);
 static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
-static void platform_init(void *handle);
+static void platform_init(void);
 
 static   stmdev_ctx_t dev_ctx;
-static   uint8_t lg_xl_data_valid = 0;
-static   uint8_t hg_xl_data_valid = 0;
-static   uint8_t gyro_data_valid = 0;
-static   uint8_t temp_data_valid = 0;
 static   volatile uint8_t thread_wake = 0;
 
-void lsm6dsv320x_read_data_drdy_handler(void)
+void lsm6dsv320x_sensor_fusion_handler(void)
 {
   thread_wake = 1;
 }
 
 /* Main Example --------------------------------------------------------------*/
-void lsm6dsv320x_read_data_drdy(void)
+void lsm6dsv320x_sensor_fusion(void)
 {
   lsm6dsv320x_pin_int_route_t pin_int = { 0 };
-  double_t lowg_xl_sum[3], hg_xl_sum[3], gyro_sum[3], temp_sum;
-  uint16_t lowg_xl_cnt = 0, hg_xl_cnt = 0, gyro_cnt = 0, temp_cnt = 0;
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
@@ -188,7 +168,7 @@ void lsm6dsv320x_read_data_drdy(void)
   dev_ctx.handle = &SENSOR_BUS;
 
   /* Init test platform */
-  platform_init(dev_ctx.handle);
+  platform_init();
 
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
@@ -210,12 +190,10 @@ void lsm6dsv320x_read_data_drdy(void)
    * with MLC data rate.
    */
   lsm6dsv320x_xl_setup(&dev_ctx, LSM6DSV320X_ODR_AT_60Hz, LSM6DSV320X_XL_HIGH_PERFORMANCE_MD);
-  lsm6dsv320x_hg_xl_data_rate_set(&dev_ctx, LSM6DSV320X_HG_XL_ODR_AT_960Hz, 1);
   lsm6dsv320x_gy_setup(&dev_ctx, LSM6DSV320X_ODR_AT_120Hz, LSM6DSV320X_GY_HIGH_PERFORMANCE_MD);
 
   /* Set full scale */
   lsm6dsv320x_xl_full_scale_set(&dev_ctx, LSM6DSV320X_2g);
-  lsm6dsv320x_hg_xl_full_scale_set(&dev_ctx, LSM6DSV320X_320g);
   lsm6dsv320x_gy_full_scale_set(&dev_ctx, LSM6DSV320X_2000dps);
 
   /* Configure filtering chain */
@@ -228,14 +206,17 @@ void lsm6dsv320x_read_data_drdy(void)
   lsm6dsv320x_filt_xl_lp2_set(&dev_ctx, PROPERTY_ENABLE);
   lsm6dsv320x_filt_xl_lp2_bandwidth_set(&dev_ctx, LSM6DSV320X_XL_STRONG);
 
-  lowg_xl_sum[0] = lowg_xl_sum[1] = lowg_xl_sum[2] = 0.0;
-  hg_xl_sum[0] = hg_xl_sum[1] = hg_xl_sum[2] = 0.0;
-  gyro_sum[0] = gyro_sum[1] = gyro_sum[2] = 0.0;
-  temp_sum = 0.0;
+  /* enable SFLP game rotation */
+  lsm6dsv320x_sflp_game_rotation_set(&dev_ctx, PROPERTY_ENABLE);
+
+  /* reset SFLP game rotation */
+  lsm6dsv320x_sflp_game_rotation_reset(&dev_ctx, PROPERTY_ENABLE);
+
+  lsm6dsv320x_sflp_data_rate_set(&dev_ctx, LSM6DSV320X_SFLP_240Hz);
 
   /* enable interrupt on High-G XL (sensor at highest frequency) */
-  pin_int.drdy_hg_xl = PROPERTY_ENABLE;
-  lsm6dsv320x_pin_int1_route_hg_set(&dev_ctx, &pin_int);
+  pin_int.drdy_xl = PROPERTY_ENABLE;
+  lsm6dsv320x_pin_int1_route_set(&dev_ctx, &pin_int);
   //lsm6dsv320x_pin_int2_route_hg_set(&dev_ctx, &pin_int);
 
   /* "thread" loop */
@@ -243,120 +224,48 @@ void lsm6dsv320x_read_data_drdy(void)
     if (thread_wake) {
       lsm6dsv320x_data_ready_t status;
 
-
       thread_wake = 0;
 
       /* Read output only if new xl value is available */
       lsm6dsv320x_flag_data_ready_get(&dev_ctx, &status);
 
-      hg_xl_data_valid = status.drdy_hgxl;
-      lg_xl_data_valid = status.drdy_xl;
-      gyro_data_valid = status.drdy_gy;
-      temp_data_valid = status.drdy_temp;
+      if (status.drdy_xl == 1) {
+        status.drdy_xl = 0;
 
-      if (lg_xl_data_valid) {
-        lg_xl_data_valid = 0;
-
-        /* Read acceleration field data */
-        memset(data_raw_motion, 0x00, 3 * sizeof(int16_t));
         lsm6dsv320x_acceleration_raw_get(&dev_ctx, data_raw_motion);
-        acceleration_mg[0] = lsm6dsv320x_from_fs2_to_mg(data_raw_motion[0]);
-        acceleration_mg[1] = lsm6dsv320x_from_fs2_to_mg(data_raw_motion[1]);
-        acceleration_mg[2] = lsm6dsv320x_from_fs2_to_mg(data_raw_motion[2]);
 
-        lowg_xl_sum[0] += acceleration_mg[0];
-        lowg_xl_sum[1] += acceleration_mg[1];
-        lowg_xl_sum[2] += acceleration_mg[2];
-        lowg_xl_cnt++;
-      }
+        memset(gbias_lsb, 0x00, 3 * sizeof(int16_t));
+        lsm6dsv320x_sflp_gbias_raw_get(&dev_ctx, gbias_lsb);
+        gbias_mdps[0] = lsm6dsv320x_from_fs125_to_mdps(gbias_lsb[0]);
+        gbias_mdps[1] = lsm6dsv320x_from_fs125_to_mdps(gbias_lsb[1]);
+        gbias_mdps[2] = lsm6dsv320x_from_fs125_to_mdps(gbias_lsb[2]);
 
-      if (hg_xl_data_valid) {
-        hg_xl_data_valid = 0;
+        memset(gravity_lsb, 0x00, 3 * sizeof(int16_t));
+        lsm6dsv320x_sflp_gravity_raw_get(&dev_ctx, gravity_lsb);
+        gravity_mg[0] = lsm6dsv320x_from_gravity_lsb_to_mg(gravity_lsb[0]);
+        gravity_mg[1] = lsm6dsv320x_from_gravity_lsb_to_mg(gravity_lsb[1]);
+        gravity_mg[2] = lsm6dsv320x_from_gravity_lsb_to_mg(gravity_lsb[2]);
 
-        /* Read acceleration field data */
-        memset(data_raw_motion, 0x00, 3 * sizeof(int16_t));
-        lsm6dsv320x_hg_acceleration_raw_get(&dev_ctx, data_raw_motion);
-        acceleration_mg[0] = lsm6dsv320x_from_fs256_to_mg(data_raw_motion[0]);
-        acceleration_mg[1] = lsm6dsv320x_from_fs256_to_mg(data_raw_motion[1]);
-        acceleration_mg[2] = lsm6dsv320x_from_fs256_to_mg(data_raw_motion[2]);
+        memset(quats_lsb, 0x00, 4 * sizeof(int16_t));
+        lsm6dsv320x_sflp_quaternion_raw_get(&dev_ctx, quats_lsb);
+        quaternions[0] = lsm6dsv320x_from_quaternion_lsb_to_float(quats_lsb[0]);
+        quaternions[1] = lsm6dsv320x_from_quaternion_lsb_to_float(quats_lsb[1]);
+        quaternions[2] = lsm6dsv320x_from_quaternion_lsb_to_float(quats_lsb[2]);
+        quaternions[3] = lsm6dsv320x_from_quaternion_lsb_to_float(quats_lsb[3]);
 
-        hg_xl_sum[0] += acceleration_mg[0];
-        hg_xl_sum[1] += acceleration_mg[1];
-        hg_xl_sum[2] += acceleration_mg[2];
-        hg_xl_cnt++;
-      }
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "GBIAS [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+              gbias_mdps[0], gbias_mdps[1], gbias_mdps[2]);
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
-      /* Read output only if new xl value is available */
-      if (gyro_data_valid) {
-        gyro_data_valid = 0;
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "GRAV [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
+              gravity_mg[0], gravity_mg[1], gravity_mg[2]);
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
-        /* Read angular rate field data */
-        memset(data_raw_motion, 0x00, 3 * sizeof(int16_t));
-        lsm6dsv320x_angular_rate_raw_get(&dev_ctx, data_raw_motion);
-        angular_rate_mdps[0] = lsm6dsv320x_from_fs2000_to_mdps(data_raw_motion[0]);
-        angular_rate_mdps[1] = lsm6dsv320x_from_fs2000_to_mdps(data_raw_motion[1]);
-        angular_rate_mdps[2] = lsm6dsv320x_from_fs2000_to_mdps(data_raw_motion[2]);
-
-        gyro_sum[0] += angular_rate_mdps[0];
-        gyro_sum[1] += angular_rate_mdps[1];
-        gyro_sum[2] += angular_rate_mdps[2];
-        gyro_cnt++;
-      }
-
-      if (temp_data_valid) {
-        temp_data_valid = 0;
-
-       /* Read temperature data */
-        memset(&data_raw_temperature, 0x00, sizeof(int16_t));
-        lsm6dsv320x_temperature_raw_get(&dev_ctx, &data_raw_temperature);
-        temperature_degC = lsm6dsv320x_from_lsb_to_celsius(data_raw_temperature);
-        temp_sum += temperature_degC;
-        temp_cnt++;
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "ROT: W: %4.2f\tX: %4.2f\tY: %4.2f\tZ: %4.2f\r\n\n",
+              quaternions[0], quaternions[1], quaternions[2], quaternions[3]);
+        tx_com(tx_buffer, strlen((char const *)tx_buffer));
       }
     }
-
-    if (lowg_xl_cnt >= CNT_FOR_OUTPUT) {
-      /* print avg low-g xl data */
-      acceleration_mg[0] = lowg_xl_sum[0] / lowg_xl_cnt;
-      acceleration_mg[1] = lowg_xl_sum[1] / lowg_xl_cnt;
-      acceleration_mg[2] = lowg_xl_sum[2] / lowg_xl_cnt;
-
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "lg xl (avg of %d samples) [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              lowg_xl_cnt, acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-      lowg_xl_sum[0] = lowg_xl_sum[1] = lowg_xl_sum[2] = 0.0;
-      lowg_xl_cnt = 0;
-
-      /* print avg high-g xl data */
-      acceleration_mg[0] = hg_xl_sum[0] / hg_xl_cnt;
-      acceleration_mg[1] = hg_xl_sum[1] / hg_xl_cnt;
-      acceleration_mg[2] = hg_xl_sum[2] / hg_xl_cnt;
-
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "hg xl (avg of %d samples) [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              hg_xl_cnt, acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-      hg_xl_sum[0] = hg_xl_sum[1] = hg_xl_sum[2] = 0.0;
-      hg_xl_cnt = 0;
-
-      /* print avg gyro data */
-      angular_rate_mdps[0] = gyro_sum[0] / gyro_cnt;
-      angular_rate_mdps[1] = gyro_sum[1] / gyro_cnt;
-      angular_rate_mdps[2] = gyro_sum[2] / gyro_cnt;
-
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "gyro (avg of %d samples) [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-              gyro_cnt, angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-      gyro_sum[0] = gyro_sum[1] = gyro_sum[2] = 0.0;
-      gyro_cnt = 0;
-
-      /* print avg temperature data */
-      temperature_degC = temp_sum / temp_cnt;
-      snprintf((char *)tx_buffer, sizeof(tx_buffer),"Temperature (avg of %d samples) [degC]:%6.2f\r\n\r\n",
-              temp_cnt, temperature_degC);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-      temp_cnt = 0;
-      temp_sum = 0.0;
-   }
   }
 }
 
@@ -388,8 +297,6 @@ static int32_t platform_write(void *handle, uint8_t reg, const uint8_t *bufp,
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_write(handle,  LSM6DSV320X_I2C_ADD_L & 0xFE, reg, (uint8_t*) bufp, len);
-#elif defined(NUCLEO_H503RB)
-  i3c_write(handle, i3c_dyn_addr, reg, (uint8_t*) bufp, len);
 #endif
   return 0;
 }
@@ -424,8 +331,6 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp,
   HAL_GPIO_WritePin(CS_up_GPIO_Port, CS_up_Pin, GPIO_PIN_SET);
 #elif defined(SPC584B_DIS)
   i2c_lld_read(handle, LSM6DSV320X_I2C_ADD_L & 0xFE, reg, bufp, len);
-#elif defined(NUCLEO_H503RB)
-  i3c_read(handle, i3c_dyn_addr, reg, bufp, len);
 #endif
   return 0;
 }
@@ -447,8 +352,6 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
   CDC_Transmit_FS(tx_buffer, len);
 #elif defined(SPC584B_DIS)
   sd_lld_write(&SD2, tx_buffer, len);
-#elif defined(NUCLEO_H503RB)
-  HAL_UART_Transmit(&huart3, tx_buffer, len, 1000);
 #endif
 }
 
@@ -460,7 +363,7 @@ static void tx_com(uint8_t *tx_buffer, uint16_t len)
  */
 static void platform_delay(uint32_t ms)
 {
-#if defined(NUCLEO_F401RE) || defined(STEVAL_MKI109V3) || defined(NUCLEO_H503RB)
+#if defined(NUCLEO_F401RE) | defined(STEVAL_MKI109V3)
   HAL_Delay(ms);
 #elif defined(STEVAL_MKI109D)
   delay(ms);
@@ -472,7 +375,7 @@ static void platform_delay(uint32_t ms)
 /*
  * @brief  platform specific initialization (platform dependent)
  */
-static void platform_init(void *handle)
+static void platform_init(void)
 {
 #if defined(STEVAL_MKI109D)
   struct spi_conf spi_conf;
@@ -492,12 +395,5 @@ static void platform_init(void *handle)
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_2);
   HAL_Delay(1000);
-
-#elif defined(NUCLEO_H503RB)
-  i3c_set_bus_frequency(handle, 1000000);
-  i3c_rstdaa(handle);
-  i3c_setdasa(handle, LSM6DSV320X_I2C_ADD_L, &i3c_dyn_addr, 1);
-  i3c_set_bus_frequency(handle, 12500000);
-
 #endif
 }

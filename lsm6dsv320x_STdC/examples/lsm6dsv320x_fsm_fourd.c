@@ -22,11 +22,11 @@
  * This example was developed using the following STMicroelectronics
  * evaluation boards:
  *
- * - STEVAL_MKI109V3 + STEVAL-MKI247A
- * - STEVAL_MKI109D  + STEVAL-MKI247A
+ * - STEVAL_MKI109V3 + STEVAL-MKI251A
+ * - STEVAL_MKI109D  + STEVAL-MKI251A
  * - NUCLEO_F401RE + X_NUCLEO_IKS01A3
  * - NUCLEO_H503RB + X-NUCLEO-IKS4A1
- * - DISCOVERY_SPC584B + STEVAL-MKI247A
+ * - DISCOVERY_SPC584B + STEVAL-MKI251A
  *
  * Used interfaces:
  *
