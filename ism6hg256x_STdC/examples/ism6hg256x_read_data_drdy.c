@@ -495,7 +495,7 @@ static void platform_init(void *handle)
 #elif defined(NUCLEO_H503RB)
   i3c_set_bus_frequency(handle, 1000000);
   i3c_rstdaa(handle);
-  i3c_setdasa(handle, LSM6DSV80X_I2C_ADD_L, &i3c_dyn_addr, 1);
+  i3c_setdasa(handle, ISM6HG256X_I2C_ADD_L, &i3c_dyn_addr, 1);
   i3c_set_bus_frequency(handle, 12500000);
 
 #endif

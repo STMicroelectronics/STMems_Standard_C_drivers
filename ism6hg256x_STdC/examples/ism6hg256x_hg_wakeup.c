@@ -1,6 +1,6 @@
 /*
  ******************************************************************************
- * @file    read_data_polling.c
+ * @file    hg_wakeup.c
  * @author  Sensors Software Solution Team
  * @brief   This file shows how to get data from sensor.
  *
@@ -25,6 +25,7 @@
  * - STEVAL_MKI109V3 + STEVAL-MKI247A
  * - STEVAL_MKI109D  + STEVAL-MKI247A
  * - NUCLEO_F401RE + X_NUCLEO_IKS01A3
+ * - NUCLEO_H503RB + X-NUCLEO-IKS4A1
  * - DISCOVERY_SPC584B + STEVAL-MKI247A
  *
  * Used interfaces:
@@ -118,7 +119,6 @@
 
 #elif defined(SPC584B_DIS)
 #include "components.h"
-
 #elif defined(NUCLEO_H503RB)
 #include "usart.h"
 #include "i3c.h"
@@ -133,11 +133,11 @@ static uint8_t i3c_dyn_addr = 0x0A;
 #define    CNT_FOR_OUTPUT       100
 
 /* Private variables ---------------------------------------------------------*/
-static int16_t data_raw_motion[3];
-static int16_t data_raw_temperature;
-static float_t acceleration_mg[3];
-static float_t angular_rate_mdps[3];
-static float_t temperature_degC;
+//static int16_t data_raw_motion[3];
+//static int16_t data_raw_temperature;
+//static float_t acceleration_mg[3];
+//static float_t angular_rate_mdps[3];
+//static float_t temperature_degC;
 static uint8_t whoamI;
 static uint8_t tx_buffer[1000];
 
@@ -146,6 +146,10 @@ static ism6hg256x_filt_settling_mask_t filt_settling_mask;
 /* Extern variables ----------------------------------------------------------*/
 
 /* Private functions ---------------------------------------------------------*/
+
+#define AXIS_X  0x1
+#define AXIS_Y  0x2
+#define AXIS_Z  0x4
 
 /*
  *   WARNING:
@@ -161,12 +165,20 @@ static void tx_com( uint8_t *tx_buffer, uint16_t len );
 static void platform_delay(uint32_t ms);
 static void platform_init(void *handle);
 
-/* Main Example --------------------------------------------------------------*/
-void ism6hg256x_read_data_polling(void)
+static   stmdev_ctx_t dev_ctx;
+static   volatile uint8_t thread_wake = 0;
+
+void ism6hg256x_hg_wakeup_handler(void)
 {
-  stmdev_ctx_t dev_ctx;
-  double_t lowg_xl_sum[3], hg_xl_sum[3], gyro_sum[3], temp_sum;
-  uint16_t lowg_xl_cnt = 0, hg_xl_cnt = 0, gyro_cnt = 0, temp_cnt = 0;
+  thread_wake = 1;
+}
+
+/* Main Example --------------------------------------------------------------*/
+void ism6hg256x_hg_wakeup(void)
+{
+  ism6hg256x_pin_int_route_t pin_int = { 0 };
+  ism6hg256x_hg_wake_up_cfg_t wu_cfg = { 0 };
+  ism6hg256x_hg_wu_interrupt_cfg_t int_cfg = { 0 };
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;
@@ -196,131 +208,64 @@ void ism6hg256x_read_data_polling(void)
    * Selected data rate have to be equal or greater with respect
    * with MLC data rate.
    */
-  ism6hg256x_xl_setup(&dev_ctx, ISM6HG256X_ODR_AT_60Hz, ISM6HG256X_XL_HIGH_PERFORMANCE_MD);
   ism6hg256x_hg_xl_data_rate_set(&dev_ctx, ISM6HG256X_HG_XL_ODR_AT_960Hz, 1);
-  ism6hg256x_gy_setup(&dev_ctx, ISM6HG256X_ODR_AT_120Hz, ISM6HG256X_GY_HIGH_PERFORMANCE_MD);
 
   /* Set full scale */
-  ism6hg256x_xl_full_scale_set(&dev_ctx, ISM6HG256X_2g);
   ism6hg256x_hg_xl_full_scale_set(&dev_ctx, ISM6HG256X_256g);
-  ism6hg256x_gy_full_scale_set(&dev_ctx, ISM6HG256X_2000dps);
 
   /* Configure filtering chain */
   filt_settling_mask.drdy = PROPERTY_ENABLE;
   filt_settling_mask.irq_xl = PROPERTY_ENABLE;
   filt_settling_mask.irq_g = PROPERTY_ENABLE;
   ism6hg256x_filt_settling_mask_set(&dev_ctx, filt_settling_mask);
-  ism6hg256x_filt_gy_lp1_set(&dev_ctx, PROPERTY_ENABLE);
-  ism6hg256x_filt_gy_lp1_bandwidth_set(&dev_ctx, ISM6HG256X_GY_ULTRA_LIGHT);
   ism6hg256x_filt_xl_lp2_set(&dev_ctx, PROPERTY_ENABLE);
   ism6hg256x_filt_xl_lp2_bandwidth_set(&dev_ctx, ISM6HG256X_XL_STRONG);
 
-  lowg_xl_sum[0] = lowg_xl_sum[1] = lowg_xl_sum[2] = 0.0;
-  hg_xl_sum[0] = hg_xl_sum[1] = hg_xl_sum[2] = 0.0;
-  gyro_sum[0] = gyro_sum[1] = gyro_sum[2] = 0.0;
-  temp_sum = 0.0;
+  wu_cfg.hg_shock_dur = 1;
+  wu_cfg.hg_wakeup_ths = 4;
+  ism6hg256x_hg_wake_up_cfg_set(&dev_ctx, wu_cfg);
 
-  /* Read samples in polling mode (no int) */
+  /* enable interrupt on HG wakeup */
+  pin_int.hg_wakeup = PROPERTY_ENABLE;
+  ism6hg256x_pin_int1_route_hg_set(&dev_ctx, &pin_int);
+  //ism6hg256x_pin_int2_route_hg_set(&dev_ctx, &pin_int);
+
+  int_cfg.hg_interrupts_enable = 1;
+  ism6hg256x_hg_wu_interrupt_cfg_set(&dev_ctx, int_cfg);
+
+  /* "thread" loop */
   while (1) {
-    ism6hg256x_data_ready_t drdy;
+    if (thread_wake) {
+      ism6hg256x_hg_event_t status;
 
-    /* Read output only if new xl value is available */
-    ism6hg256x_flag_data_ready_get(&dev_ctx, &drdy);
+      thread_wake = 0;
 
-    if (drdy.drdy_xl) {
-      /* Read acceleration field data */
-      memset(data_raw_motion, 0x00, 3 * sizeof(int16_t));
-      ism6hg256x_acceleration_raw_get(&dev_ctx, data_raw_motion);
-      acceleration_mg[0] = ism6hg256x_from_fs2_to_mg(data_raw_motion[0]);
-      acceleration_mg[1] = ism6hg256x_from_fs2_to_mg(data_raw_motion[1]);
-      acceleration_mg[2] = ism6hg256x_from_fs2_to_mg(data_raw_motion[2]);
+      ism6hg256x_hg_event_get(&dev_ctx, &status);
 
-      lowg_xl_sum[0] += acceleration_mg[0];
-      lowg_xl_sum[1] += acceleration_mg[1];
-      lowg_xl_sum[2] += acceleration_mg[2];
-      lowg_xl_cnt++;
+      if (status.hg_event) {
+        if (status.hg_wakeup) {
+          uint8_t axis = 0;
+
+          if (status.hg_wakeup_x) {
+            axis |= AXIS_X;
+          }
+
+          if (status.hg_wakeup_y) {
+            axis |= AXIS_Y;
+          }
+
+          if (status.hg_wakeup_z) {
+            axis |= AXIS_Z;
+          }
+
+          snprintf((char *)tx_buffer, sizeof(tx_buffer),"WAKEUP event on X: %d, Y = %d, Z= %d\r\n",
+                  (axis & AXIS_X) ? 1 : 0,
+                  (axis & AXIS_Y) ? 1 : 0,
+                  (axis & AXIS_Z) ? 1 : 0);
+          tx_com(tx_buffer, strlen((char const *)tx_buffer));
+        }
+      }
     }
-
-    if (drdy.drdy_hgxl) {
-      /* Read acceleration field data */
-      memset(data_raw_motion, 0x00, 3 * sizeof(int16_t));
-      ism6hg256x_hg_acceleration_raw_get(&dev_ctx, data_raw_motion);
-      acceleration_mg[0] = ism6hg256x_from_fs256_to_mg(data_raw_motion[0]);
-      acceleration_mg[1] = ism6hg256x_from_fs256_to_mg(data_raw_motion[1]);
-      acceleration_mg[2] = ism6hg256x_from_fs256_to_mg(data_raw_motion[2]);
-
-      hg_xl_sum[0] += acceleration_mg[0];
-      hg_xl_sum[1] += acceleration_mg[1];
-      hg_xl_sum[2] += acceleration_mg[2];
-      hg_xl_cnt++;
-    }
-
-    /* Read output only if new xl value is available */
-    if (drdy.drdy_gy) {
-      /* Read angular rate field data */
-      memset(data_raw_motion, 0x00, 3 * sizeof(int16_t));
-      ism6hg256x_angular_rate_raw_get(&dev_ctx, data_raw_motion);
-      angular_rate_mdps[0] = ism6hg256x_from_fs2000_to_mdps(data_raw_motion[0]);
-      angular_rate_mdps[1] = ism6hg256x_from_fs2000_to_mdps(data_raw_motion[1]);
-      angular_rate_mdps[2] = ism6hg256x_from_fs2000_to_mdps(data_raw_motion[2]);
-
-      gyro_sum[0] += angular_rate_mdps[0];
-      gyro_sum[1] += angular_rate_mdps[1];
-      gyro_sum[2] += angular_rate_mdps[2];
-      gyro_cnt++;
-    }
-
-    if (drdy.drdy_temp) {
-      /* Read temperature data */
-      memset(&data_raw_temperature, 0x00, sizeof(int16_t));
-      ism6hg256x_temperature_raw_get(&dev_ctx, &data_raw_temperature);
-      temperature_degC = ism6hg256x_from_lsb_to_celsius(data_raw_temperature);
-      temp_sum += temperature_degC;
-      temp_cnt++;
-    }
-
-    if (lowg_xl_cnt >= CNT_FOR_OUTPUT) {
-      /* print avg low-g xl data */
-      acceleration_mg[0] = lowg_xl_sum[0] / lowg_xl_cnt;
-      acceleration_mg[1] = lowg_xl_sum[1] / lowg_xl_cnt;
-      acceleration_mg[2] = lowg_xl_sum[2] / lowg_xl_cnt;
-
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "lg xl (avg of %d samples) [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              lowg_xl_cnt, acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-      lowg_xl_sum[0] = lowg_xl_sum[1] = lowg_xl_sum[2] = 0.0;
-      lowg_xl_cnt = 0;
-
-      /* print avg high-g xl data */
-      acceleration_mg[0] = hg_xl_sum[0] / hg_xl_cnt;
-      acceleration_mg[1] = hg_xl_sum[1] / hg_xl_cnt;
-      acceleration_mg[2] = hg_xl_sum[2] / hg_xl_cnt;
-
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "hg xl (avg of %d samples) [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
-              hg_xl_cnt, acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-      hg_xl_sum[0] = hg_xl_sum[1] = hg_xl_sum[2] = 0.0;
-      hg_xl_cnt = 0;
-
-      /* print avg gyro data */
-      angular_rate_mdps[0] = gyro_sum[0] / gyro_cnt;
-      angular_rate_mdps[1] = gyro_sum[1] / gyro_cnt;
-      angular_rate_mdps[2] = gyro_sum[2] / gyro_cnt;
-
-      snprintf((char *)tx_buffer, sizeof(tx_buffer), "gyro (avg of %d samples) [mdps]:%4.2f\t%4.2f\t%4.2f\r\n",
-              gyro_cnt, angular_rate_mdps[0], angular_rate_mdps[1], angular_rate_mdps[2]);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-      gyro_sum[0] = gyro_sum[1] = gyro_sum[2] = 0.0;
-      gyro_cnt = 0;
-
-      /* print avg temperature data */
-      temperature_degC = temp_sum / temp_cnt;
-      snprintf((char *)tx_buffer, sizeof(tx_buffer),"Temperature (avg of %d samples) [degC]:%6.2f\r\n\r\n",
-              temp_cnt, temperature_degC);
-      tx_com(tx_buffer, strlen((char const *)tx_buffer));
-      temp_cnt = 0;
-      temp_sum = 0.0;
-   }
   }
 }
 
