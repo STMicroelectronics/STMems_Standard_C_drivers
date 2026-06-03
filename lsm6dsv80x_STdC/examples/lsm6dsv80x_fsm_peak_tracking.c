@@ -156,6 +156,13 @@ static void platform_init(void *handle);
 static stmdev_ctx_t dev_ctx;
 static volatile uint8_t peak_catched;
 
+static float_t npy_half_to_float(uint16_t h)
+{
+    union { float_t ret; uint32_t retbits; } conv;
+    conv.retbits = lsm6dsv80x_from_f16_to_f32(h);
+    return conv.ret;
+}
+
 void lsm6dsv80x_fsm_peak_training_handler(void)
 {
   peak_catched = 1;
@@ -210,7 +217,7 @@ void lsm6dsv80x_fsm_peak_training(void)
   /* wait forever (FF event handle in irq handler) */
   while (1) {
     if (peak_catched) {
-      uint8_t fsm_status, buff[2];
+      uint8_t fsm_status;
       lsm6dsv80x_fifo_out_raw_t f_data;
       int16_t *datax;
       int16_t *datay;
@@ -231,9 +238,9 @@ void lsm6dsv80x_fsm_peak_training(void)
 
         switch (f_data.tag) {
         case LSM6DSV80X_HG_XL_PEAK_TAG:
-          acceleration_mg[0] = lsm6dsv80x_from_fs80_to_mg(*datax)/1000.0f;
-          acceleration_mg[1] = lsm6dsv80x_from_fs80_to_mg(*datay)/1000.0f;
-          acceleration_mg[2] = lsm6dsv80x_from_fs80_to_mg(*dataz)/1000.0f;
+          acceleration_mg[0] = npy_half_to_float(*datax) * 100;
+          acceleration_mg[1] = npy_half_to_float(*datay) * 100;
+          acceleration_mg[2] = npy_half_to_float(*dataz) * 100;
           snprintf((char *)tx_buffer, sizeof(tx_buffer), "hg PEAK:%4.2f g\t%4.2f g\t%4.2f g\r\n",
                   acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
