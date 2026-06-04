@@ -334,3 +334,6 @@
 [submodule "asm330lhhg1_STdC/driver"]
 	path = asm330lhhg1_STdC/driver
 	url = https://github.com/STMicroelectronics/asm330lhhg1-pid.git
+[submodule "iis3dwb10is_STdC/driver"]
+	path = iis3dwb10is_STdC/driver
+	url = https://github.com/STMicroelectronics/iis3dwb10is-pid.git
