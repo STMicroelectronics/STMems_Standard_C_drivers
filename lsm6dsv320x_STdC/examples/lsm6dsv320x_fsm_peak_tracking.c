@@ -220,9 +220,9 @@ void lsm6dsv320x_fsm_peak_training(void)
     if (peak_catched) {
       uint8_t fsm_status;
       lsm6dsv320x_fifo_out_raw_t f_data;
-      int16_t *datax;
-      int16_t *datay;
-      int16_t *dataz;
+      uint16_t *datax;
+      uint16_t *datay;
+      uint16_t *dataz;
 
       peak_catched = 0;
 
@@ -233,15 +233,15 @@ void lsm6dsv320x_fsm_peak_training(void)
       {
         /* Read FIFO sensor value */
         lsm6dsv320x_fifo_out_raw_get(&dev_ctx, &f_data);
-        datax = (int16_t *)&f_data.data[0];
-        datay = (int16_t *)&f_data.data[2];
-        dataz = (int16_t *)&f_data.data[4];
+        datax = (uint16_t *)&f_data.data[0];
+        datay = (uint16_t *)&f_data.data[2];
+        dataz = (uint16_t *)&f_data.data[4];
 
         switch (f_data.tag) {
         case LSM6DSV320X_HG_XL_PEAK_TAG:
-          acceleration_mg[0] = npy_half_to_float(*datax) * 100;
-          acceleration_mg[1] = npy_half_to_float(*datay) * 100;
-          acceleration_mg[2] = npy_half_to_float(*dataz) * 100;
+          acceleration_mg[0] = npy_half_to_float(*datax) * 100.0f;
+          acceleration_mg[1] = npy_half_to_float(*datay) * 100.0f;
+          acceleration_mg[2] = npy_half_to_float(*dataz) * 100.0f;
           snprintf((char *)tx_buffer, sizeof(tx_buffer), "hg PEAK:%4.2f g\t%4.2f g\t%4.2f g\r\n",
                   acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
