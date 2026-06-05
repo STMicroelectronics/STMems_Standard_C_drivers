@@ -155,6 +155,8 @@ static void platform_init(void *handle);
 
 static stmdev_ctx_t dev_ctx;
 static volatile uint8_t peak_catched;
+static volatile uint32_t peak_time;
+static uint32_t peak_start, peak_end;
 
 static float_t npy_half_to_float(uint16_t h)
 {
@@ -166,12 +168,13 @@ static float_t npy_half_to_float(uint16_t h)
 void lsm6dsv80x_fsm_peak_training_handler(void)
 {
   peak_catched = 1;
+  peak_time = HAL_GetTick();
 }
 
 /* Main Example --------------------------------------------------------------*/
 void lsm6dsv80x_fsm_peak_training(void)
 {
-  float_t acceleration_mg[3];
+  float_t acceleration_g[3];
   uint32_t i;
 
   /* Initialize mems driver interface */
@@ -228,8 +231,15 @@ void lsm6dsv80x_fsm_peak_training(void)
       lsm6dsv80x_fsm_out_t fsm_outs;
       lsm6dsv80x_read_reg(&dev_ctx, LSM6DSV80X_FSM_STATUS_MAINPAGE, &fsm_status, 1);
       lsm6dsv80x_fsm_out_get(&dev_ctx, &fsm_outs);
-      if ((fsm_status == 0x1) && (fsm_outs.fsm_outs1 == 0))
+
+      if ((fsm_status == 0x1) && (fsm_outs.fsm_outs1 == 1))
       {
+        peak_start = peak_time;
+      }
+      else if ((fsm_status == 0x1) && (fsm_outs.fsm_outs1 == 0))
+      {
+        peak_end = peak_time;
+
         /* Read FIFO sensor value */
         lsm6dsv80x_fifo_out_raw_get(&dev_ctx, &f_data);
         datax = (uint16_t *)&f_data.data[0];
@@ -238,11 +248,11 @@ void lsm6dsv80x_fsm_peak_training(void)
 
         switch (f_data.tag) {
         case LSM6DSV80X_HG_XL_PEAK_TAG:
-          acceleration_mg[0] = npy_half_to_float(*datax) * 100.0f;
-          acceleration_mg[1] = npy_half_to_float(*datay) * 100.0f;
-          acceleration_mg[2] = npy_half_to_float(*dataz) * 100.0f;
-          snprintf((char *)tx_buffer, sizeof(tx_buffer), "hg PEAK:%4.2f g\t%4.2f g\t%4.2f g\r\n",
-                  acceleration_mg[0], acceleration_mg[1], acceleration_mg[2]);
+          acceleration_g[0] = npy_half_to_float(*datax) * 100.0f;
+          acceleration_g[1] = npy_half_to_float(*datay) * 100.0f;
+          acceleration_g[2] = npy_half_to_float(*dataz) * 100.0f;
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "hg peak (x = %4.2f g, y = %4.2f g, z = %4.2f g, dur = %u ms)\r\n",
+                   acceleration_g[0], acceleration_g[1], acceleration_g[2], peak_end - peak_start);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;
 
