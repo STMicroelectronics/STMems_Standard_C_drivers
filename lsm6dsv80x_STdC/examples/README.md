@@ -32,6 +32,13 @@ Program LSM6DSV80X Sensor Fusion Low Power (SFLP) to receive GBIAS, Gravity and 
 
   - lsm6dsv80x_sensor_fusion.c
 
+## Sensor HUB
+
+Program LSM6DSV80X to receive in FIFO accelerometer data as well
+magnetometer data from lis2mdl sensors attached through Sensor HUB:
+
+  - lsm6dsv80x_sensor_hub.c
+
 ## Finite State Machine (FSM)
 
 Program LSM6DSV80X FSM to detect *glance* and *de-glance* gestures typically used in smartphone devices (read more [here](https://github.com/STMicroelectronics/st-mems-finite-state-machine/blob/main/examples/glance_detection/lsm6dsv80x/README.md)):
