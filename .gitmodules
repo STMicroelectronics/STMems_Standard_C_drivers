@@ -337,3 +337,54 @@
 [submodule "iis3dwb10is_STdC/driver"]
 	path = iis3dwb10is_STdC/driver
 	url = https://github.com/STMicroelectronics/iis3dwb10is-pid.git
+[submodule "fxls8961af_STdC/driver"]
+	path = fxls8961af_STdC/driver
+	url = https://github.com/STMicroelectronics/fxls8961af-pid
+[submodule "fxls8964af_STdC/driver"]
+	path = fxls8964af_STdC/driver
+	url = https://github.com/STMicroelectronics/fxls8964af-pid
+[submodule "fxls8967af_STdC/driver"]
+	path = fxls8967af_STdC/driver
+	url = https://github.com/STMicroelectronics/fxls8967af-pid
+[submodule "fxls8971cf_STdC/driver"]
+	path = fxls8971cf_STdC/driver
+	url = https://github.com/STMicroelectronics/fxls8971cf-pid
+[submodule "fxls8974cf_STdC/driver"]
+	path = fxls8974cf_STdC/driver
+	url = https://github.com/STMicroelectronics/fxls8974cf-pid
+[submodule "fxps7115d_STdC/driver"]
+	path = fxps7115d_STdC/driver
+	url = https://github.com/STMicroelectronics/fxps7115d-pid
+[submodule "fxps7165d_STdC/driver"]
+	path = fxps7165d_STdC/driver
+	url = https://github.com/STMicroelectronics/fxps7165d-pid
+[submodule "fxps7250a_STdC/driver"]
+	path = fxps7250a_STdC/driver
+	url = https://github.com/STMicroelectronics/fxps7250a-pid
+[submodule "fxps7250d_STdC/driver"]
+	path = fxps7250d_STdC/driver
+	url = https://github.com/STMicroelectronics/fxps7250d-pid
+[submodule "fxps7400a_STdC/driver"]
+	path = fxps7400a_STdC/driver
+	url = https://github.com/STMicroelectronics/fxps7400a-pid
+[submodule "fxps7400d_STdC/driver"]
+	path = fxps7400d_STdC/driver
+	url = https://github.com/STMicroelectronics/fxps7400d-pid
+[submodule "fxps7550a_STdC/driver"]
+	path = fxps7550a_STdC/driver
+	url = https://github.com/STMicroelectronics/fxps7550a-pid
+[submodule "fxps7550d_STdC/driver"]
+	path = fxps7550d_STdC/driver
+	url = https://github.com/STMicroelectronics/fxps7550d-pid
+[submodule "mpl3115a2s_STdC/driver"]
+	path = mpl3115a2s_STdC/driver
+	url = https://github.com/STMicroelectronics/mpl3115a2s-pid
+[submodule "mpxv5004_STdC/driver"]
+	path = mpxv5004_STdC/driver
+	url = https://github.com/STMicroelectronics/mpxv5004-pid
+[submodule "nbp8fd4s_STdC/driver"]
+	path = nbp8fd4s_STdC/driver
+	url = https://github.com/STMicroelectronics/nbp8fd4s-pid
+[submodule "nmh1000_STdC/driver"]
+	path = nmh1000_STdC/driver
+	url = https://github.com/STMicroelectronics/nmh1000-pid
