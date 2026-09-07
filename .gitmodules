@@ -391,3 +391,6 @@
 [submodule "lps27dewo_STdC/driver"]
 	path = lps27dewo_STdC/driver
 	url = https://github.com/STMicroelectronics/lps27dewo-pid/
+[submodule "lsm6dsk320x_STdC/driver"]
+	path = lsm6dsk320x_STdC/driver
+	url = https://github.st.com/mems-sw-oem-drivers-pid/lsm6dsk320x-pid
