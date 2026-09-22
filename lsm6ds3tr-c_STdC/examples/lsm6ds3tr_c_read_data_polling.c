@@ -187,7 +187,7 @@ void lsm6ds3tr_c_read_data_polling(void)
     lsm6ds3tr_c_status_reg_get(&dev_ctx, &reg.status_reg);
 
     if (reg.status_reg.xlda) {
-      /* Read magnetic field data */
+      /* Read acceleration field data */
       memset(data_raw_acceleration, 0x00, 3 * sizeof(int16_t));
       lsm6ds3tr_c_acceleration_raw_get(&dev_ctx,
                                        data_raw_acceleration);
@@ -204,7 +204,7 @@ void lsm6ds3tr_c_read_data_polling(void)
     }
 
     if (reg.status_reg.gda) {
-      /* Read magnetic field data */
+      /* Read angular rate field data */
       memset(data_raw_angular_rate, 0x00, 3 * sizeof(int16_t));
       lsm6ds3tr_c_angular_rate_raw_get(&dev_ctx,
                                        data_raw_angular_rate);
