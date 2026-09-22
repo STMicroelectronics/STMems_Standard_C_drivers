@@ -394,3 +394,6 @@
 [submodule "lsm6dsk320x_STdC/driver"]
 	path = lsm6dsk320x_STdC/driver
 	url = https://github.st.com/mems-sw-oem-drivers-pid/lsm6dsk320x-pid
+[submodule "ism6hgk256x_STdC/driver"]
+	path = ism6hgk256x_STdC/driver
+	url = https://github.com/STMicroelectronics/ism6hgk256x-pid
