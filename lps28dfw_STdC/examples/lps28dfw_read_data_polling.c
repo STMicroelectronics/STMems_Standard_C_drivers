@@ -127,7 +127,7 @@ static void platform_init(void);
 /* Main Example --------------------------------------------------------------*/
 void lps28dfw_read_data_polling(void)
 {
-  lps28dfw_pin_int_route_t int_route;
+  lps28dfw_pin_int_route_t int_route = {0};
   lps28dfw_all_sources_t all_sources;
   lps28dfw_bus_mode_t bus_mode;
   lps28dfw_stat_t status;

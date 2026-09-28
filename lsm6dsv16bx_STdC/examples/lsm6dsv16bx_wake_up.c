@@ -168,7 +168,7 @@ void lsm6dsv16bx_wake_up(void)
   lsm6dsv16bx_all_sources_t all_sources;
   lsm6dsv16bx_reset_t rst;
   stmdev_ctx_t dev_ctx;
-  lsm6dsv16bx_pin_int_route_t int_route;
+  lsm6dsv16bx_pin_int_route_t int_route = {0};
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;

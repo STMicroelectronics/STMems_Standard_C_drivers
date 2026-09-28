@@ -126,7 +126,7 @@ static void platform_init(void);
 /* Main Example --------------------------------------------------------------*/
 void lps22df_read_data_polling(void)
 {
-  lps22df_pin_int_route_t int_route;
+  lps22df_pin_int_route_t int_route = {0};
   lps22df_all_sources_t all_sources;
   lps22df_bus_mode_t bus_mode;
   stmdev_ctx_t dev_ctx;

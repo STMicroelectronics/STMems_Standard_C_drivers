@@ -179,7 +179,7 @@ void lsm6dsv16x_sixd_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lsm6dsv16x_sixd(void)
 {
-  lsm6dsv16x_pin_int_route_t pin_int;
+  lsm6dsv16x_pin_int_route_t pin_int = {0};
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;

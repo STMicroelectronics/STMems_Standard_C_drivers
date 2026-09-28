@@ -158,7 +158,7 @@ void lsm6dsv_wakeup_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lsm6dsv_wakeup(void)
 {
-  lsm6dsv_pin_int_route_t pin_int;
+  lsm6dsv_pin_int_route_t pin_int = {0};
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;

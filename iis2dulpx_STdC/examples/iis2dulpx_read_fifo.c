@@ -182,7 +182,7 @@ void iis2dulpx_read_fifo_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void iis2dulpx_read_fifo(void)
 {
-  iis2dulpx_pin_int_route_t int1_route;
+  iis2dulpx_pin_int_route_t int1_route = {0};
   uint8_t id;
 
   /* Initialize mems driver interface */

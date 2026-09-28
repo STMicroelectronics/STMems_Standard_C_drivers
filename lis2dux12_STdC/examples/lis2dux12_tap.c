@@ -158,7 +158,7 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void *handle);
 
 static stmdev_ctx_t dev_ctx;
-static lis2dux12_pin_int_route_t int1_route;
+static lis2dux12_pin_int_route_t int1_route = {0};
 static volatile uint8_t fifo_1_tap_event = 0;
 static volatile uint8_t fifo_2_tap_event = 0;
 static volatile uint8_t fifo_3_tap_event = 0;

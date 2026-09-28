@@ -137,7 +137,7 @@ static uint8_t i3c_dyn_addr = 0x0A;
 
 /* Private variables ---------------------------------------------------------*/
 static uint8_t tx_buffer[1000];
-static lis2dux12_emb_pin_int_route_t int1_route;
+static lis2dux12_emb_pin_int_route_t int1_route = {0};
 static stmdev_ctx_t dev_ctx;
 static lis2dux12_priv_t priv_data;
 

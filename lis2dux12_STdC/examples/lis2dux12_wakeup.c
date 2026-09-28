@@ -159,7 +159,7 @@ static void platform_init(void *handle);
 
 static stmdev_ctx_t dev_ctx;
 static volatile uint8_t wu_event = 0;
-static   lis2dux12_pin_int_route_t int1_route;
+static   lis2dux12_pin_int_route_t int1_route = {0};
 
 void lis2dux12_wu_handler(void)
 {

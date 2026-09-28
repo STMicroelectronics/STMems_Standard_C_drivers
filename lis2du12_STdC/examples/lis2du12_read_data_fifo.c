@@ -145,7 +145,7 @@ void lis2du12_read_fifo_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lis2du12_read_data_fifo(void)
 {
-  lis2du12_pin_int_route_t int_route;
+  lis2du12_pin_int_route_t int_route = {0};
   lis2du12_status_t status;
   lis2du12_id_t id;
 

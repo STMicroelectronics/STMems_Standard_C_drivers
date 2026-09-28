@@ -135,7 +135,7 @@ void lps27dewo_read_fifo_handler(void)
 
 void lps27dewo_read_fifo(void)
 {
-  lps27dewo_pin_int_route_t int_route;
+  lps27dewo_pin_int_route_t int_route = {0};
   lps27dewo_fifo_status_t fifo_status;
   lps27dewo_bus_mode_t bus_mode;
   lps27dewo_stat_t status;

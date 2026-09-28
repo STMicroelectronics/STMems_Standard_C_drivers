@@ -128,7 +128,7 @@ static void platform_delay(uint32_t ms);
 static void platform_init(void);
 
 static lis2du12_int_mode_t int_mode;
-static lis2du12_pin_int_route_t int_route;
+static lis2du12_pin_int_route_t int_route = {0};
 static stmdev_ctx_t dev_ctx;
 static volatile uint8_t sixd_event = 0;
 

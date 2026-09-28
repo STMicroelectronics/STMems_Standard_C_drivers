@@ -127,7 +127,7 @@ static void platform_init(void);
 /* Main Example --------------------------------------------------------------*/
 void lps27dewo_read_data_polling(void)
 {
-  lps27dewo_pin_int_route_t int_route;
+  lps27dewo_pin_int_route_t int_route = {0};
   lps27dewo_all_sources_t all_sources;
   lps27dewo_bus_mode_t bus_mode;
   lps27dewo_stat_t status;

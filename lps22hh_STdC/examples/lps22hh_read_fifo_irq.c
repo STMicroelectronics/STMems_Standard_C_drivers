@@ -142,7 +142,7 @@ void lps22hh_read_fifo_irq_handler(void)
 
 void lps22hh_read_fifo_irq(void)
 {
-  lps22hh_pin_int_route_t int_route;
+  lps22hh_pin_int_route_t int_route = {0};
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;

@@ -193,7 +193,7 @@ void lsm6dsv80x_sensor_hub_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lsm6dsv80x_sensor_hub(void)
 {
-  lsm6dsv80x_pin_int_route_t pin_int;
+  lsm6dsv80x_pin_int_route_t pin_int = {0};
   lsm6dsv80x_sh_cfg_read_t sh_cfg_read;
   uint8_t lis2mdl_rst;
 

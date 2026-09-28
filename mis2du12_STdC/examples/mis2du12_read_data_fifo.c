@@ -145,7 +145,7 @@ void mis2du12_read_fifo_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void mis2du12_read_data_fifo(void)
 {
-  mis2du12_pin_int_route_t int_route;
+  mis2du12_pin_int_route_t int_route = {0};
   mis2du12_status_t status;
   mis2du12_id_t id;
 

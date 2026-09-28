@@ -180,7 +180,7 @@ void lsm6dsv16x_single_double_tap_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lsm6dsv16x_single_double_tap(void)
 {
-  lsm6dsv16x_pin_int_route_t pin_int;
+  lsm6dsv16x_pin_int_route_t pin_int = {0};
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;

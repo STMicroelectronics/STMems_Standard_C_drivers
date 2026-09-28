@@ -131,7 +131,7 @@ static void platform_init(void);
 /* Main Example --------------------------------------------------------------*/
 void lis2du12_read_data_polling(void)
 {
-  lis2du12_pin_int_route_t int1_route;
+  lis2du12_pin_int_route_t int1_route = {0};
   lis2du12_status_t status;
   stmdev_ctx_t dev_ctx;
   lis2du12_id_t id;

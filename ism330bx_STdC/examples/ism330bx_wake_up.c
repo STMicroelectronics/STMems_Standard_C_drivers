@@ -136,7 +136,7 @@ void ism330bx_wake_up(void)
   ism330bx_all_sources_t all_sources;
   ism330bx_reset_t rst;
   stmdev_ctx_t dev_ctx;
-  ism330bx_pin_int_route_t int_route;
+  ism330bx_pin_int_route_t int_route = {0};
 
   /* Initialize mems driver interface */
   dev_ctx.write_reg = platform_write;

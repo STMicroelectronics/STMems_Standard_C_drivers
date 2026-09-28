@@ -133,7 +133,7 @@ static uint8_t tx_buffer[1000];
 stmdev_ctx_t dev_ctx;
 fxls8971cf_fs_t fs;
 fxls8971cf_odr_t odr;
-fxls8971cf_pin_int_route_t int_pin;
+fxls8971cf_pin_int_route_t int_pin = {0};
 fxls8971cf_aslp_config_t aslp_config;
 /* USER CODE END PV */
 

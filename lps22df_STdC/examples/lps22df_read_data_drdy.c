@@ -135,7 +135,7 @@ void lps22df_read_data_drdy_handler(void)
 
 void lps22df_read_data_drdy(void)
 {
-  lps22df_pin_int_route_t int_route;
+  lps22df_pin_int_route_t int_route = {0};
   lps22df_bus_mode_t bus_mode;
   lps22df_stat_t status;
   lps22df_id_t id;

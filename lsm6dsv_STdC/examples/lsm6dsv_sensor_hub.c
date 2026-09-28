@@ -176,7 +176,7 @@ void lsm6dsv_sensor_hub_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lsm6dsv_sensor_hub(void)
 {
-  lsm6dsv_pin_int_route_t pin_int;
+  lsm6dsv_pin_int_route_t pin_int = {0};
   lsm6dsv_sh_cfg_read_t sh_cfg_read;
   lps22df_id_t id;
   lps22df_bus_mode_t bus_mode;

@@ -139,7 +139,7 @@ void lps27dewo_read_data_irq_handler(void)
 
 void lps27dewo_read_data_data_ready(void)
 {
-  lps27dewo_pin_int_route_t int_route;
+  lps27dewo_pin_int_route_t int_route = {0};
   lps27dewo_bus_mode_t bus_mode;
   lps27dewo_stat_t status;
   lps27dewo_id_t id;

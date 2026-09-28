@@ -146,7 +146,7 @@ void mis2du12_read_drdy_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void mis2du12_read_data_drdy(void)
 {
-  mis2du12_pin_int_route_t int2_route;
+  mis2du12_pin_int_route_t int2_route = {0};
   mis2du12_id_t id;
 
   /* Initialize mems driver interface */

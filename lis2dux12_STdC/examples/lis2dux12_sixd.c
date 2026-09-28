@@ -178,7 +178,7 @@ void lis2dux12_sixd_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void lis2dux12_sixd(void)
 {
-  lis2dux12_pin_int_route_t int1_route;
+  lis2dux12_pin_int_route_t int1_route = {0};
   uint8_t id;
   lis2dux12_md_t md;
   lis2dux12_sixd_config_t val;

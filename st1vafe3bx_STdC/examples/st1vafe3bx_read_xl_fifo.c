@@ -165,7 +165,7 @@ static st1vafe3bx_fifo_mode_t fifo_mode;
 /* Main Example --------------------------------------------------------------*/
 void st1vafe3bx_read_xl_fifo(void)
 {
-  st1vafe3bx_pin_int_route_t int_route;
+  st1vafe3bx_pin_int_route_t int_route = {0};
   st1vafe3bx_status_t status;
   uint8_t id;
 

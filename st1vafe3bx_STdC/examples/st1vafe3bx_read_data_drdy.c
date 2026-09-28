@@ -169,7 +169,7 @@ void st1vafe3bx_read_data_drdy_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void st1vafe3bx_read_data_drdy(void)
 {
-  st1vafe3bx_pin_int_route_t int_route;
+  st1vafe3bx_pin_int_route_t int_route = {0};
   st1vafe3bx_status_t status;
   uint8_t id;
   st1vafe3bx_ah_bio_data_t data;

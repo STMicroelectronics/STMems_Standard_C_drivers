@@ -177,7 +177,7 @@ void st1vafe3bx_read_fifo_handler(void)
 /* Main Example --------------------------------------------------------------*/
 void st1vafe3bx_read_fifo(void)
 {
-  st1vafe3bx_pin_int_route_t int_route;
+  st1vafe3bx_pin_int_route_t int_route = {0};
   st1vafe3bx_status_t status;
   uint8_t id;
 
