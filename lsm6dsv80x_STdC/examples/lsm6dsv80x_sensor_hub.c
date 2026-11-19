@@ -219,16 +219,16 @@ void lsm6dsv80x_sensor_hub(void)
   lsm6dsv80x_sw_por(&lsm6dsv80x_ctx);
 
   /* Check device ID */
-  lsm6dsv80x_device_id_get(&lsm6dsv80x_ctx, &whoamI);
+  lsm6dsv80x_get_device_id(&lsm6dsv80x_ctx, &whoamI);
 
   if (whoamI != LSM6DSV80X_ID)
     while (1);
 
   /* Enable Block Data Update */
-  lsm6dsv80x_block_data_update_set(&lsm6dsv80x_ctx, PROPERTY_ENABLE);
+  lsm6dsv80x_set_block_data_update(&lsm6dsv80x_ctx, PROPERTY_ENABLE);
 
   /* Set full scale */
-  lsm6dsv80x_xl_full_scale_set(&lsm6dsv80x_ctx, LSM6DSV80X_2g);
+  lsm6dsv80x_set_xl_full_scale(&lsm6dsv80x_ctx, LSM6DSV80X_2g);
 
   /*
    * Configure LIS2MDL target.
@@ -256,35 +256,35 @@ void lsm6dsv80x_sensor_hub(void)
    * Set FIFO watermark (number of unread sensor data TAG + 6 bytes
    * stored in FIFO) to FIFO_WATERMARK samples
    */
-  lsm6dsv80x_fifo_watermark_set(&lsm6dsv80x_ctx, FIFO_WATERMARK);
+  lsm6dsv80x_set_fifo_watermark(&lsm6dsv80x_ctx, FIFO_WATERMARK);
 
   /* Set FIFO batch XL/Gyro ODR to 60Hz */
-  lsm6dsv80x_fifo_xl_batch_set(&lsm6dsv80x_ctx, LSM6DSV80X_XL_BATCHED_AT_60Hz);
+  lsm6dsv80x_set_fifo_xl_batch(&lsm6dsv80x_ctx, LSM6DSV80X_XL_BATCHED_AT_60Hz);
 
   /* Set FIFO mode to Stream mode (aka Continuous Mode) */
-  lsm6dsv80x_fifo_mode_set(&lsm6dsv80x_ctx, LSM6DSV80X_STREAM_MODE);
+  lsm6dsv80x_set_fifo_mode(&lsm6dsv80x_ctx, LSM6DSV80X_STREAM_MODE);
 
   pin_int.fifo_th = PROPERTY_ENABLE;
-  lsm6dsv80x_pin_int1_route_set(&lsm6dsv80x_ctx, &pin_int);
+  lsm6dsv80x_set_pin_int1_route(&lsm6dsv80x_ctx, &pin_int);
   //lsm6dsv80x_pin_int2_route_set(&lsm6dsv80x_ctx, &pin_int);
 
   /* Set Output Data Rate */
-  lsm6dsv80x_xl_data_rate_set(&lsm6dsv80x_ctx, LSM6DSV80X_ODR_AT_60Hz);
-  lsm6dsv80x_fifo_timestamp_batch_set(&lsm6dsv80x_ctx, LSM6DSV80X_TMSTMP_DEC_32);
-  lsm6dsv80x_timestamp_set(&lsm6dsv80x_ctx, PROPERTY_ENABLE);
+  lsm6dsv80x_set_xl_data_rate(&lsm6dsv80x_ctx, LSM6DSV80X_ODR_AT_60Hz);
+  lsm6dsv80x_set_fifo_timestamp_batch(&lsm6dsv80x_ctx, LSM6DSV80X_TMSTMP_DEC_32);
+  lsm6dsv80x_set_timestamp(&lsm6dsv80x_ctx, PROPERTY_ENABLE);
 
   /* Set full scale */
-  lsm6dsv80x_xl_full_scale_set(&lsm6dsv80x_ctx, LSM6DSV80X_2g);
+  lsm6dsv80x_set_xl_full_scale(&lsm6dsv80x_ctx, LSM6DSV80X_2g);
 
   /* Configure filtering chain */
   filt_settling_mask.drdy = PROPERTY_ENABLE;
   filt_settling_mask.irq_xl = PROPERTY_ENABLE;
   filt_settling_mask.irq_g = PROPERTY_ENABLE;
-  lsm6dsv80x_filt_settling_mask_set(&lsm6dsv80x_ctx, filt_settling_mask);
-  lsm6dsv80x_filt_xl_lp2_set(&lsm6dsv80x_ctx, PROPERTY_ENABLE);
-  lsm6dsv80x_filt_xl_lp2_bandwidth_set(&lsm6dsv80x_ctx, LSM6DSV80X_XL_STRONG);
+  lsm6dsv80x_set_filt_settling_mask(&lsm6dsv80x_ctx, filt_settling_mask);
+  lsm6dsv80x_set_filt_xl_lp2(&lsm6dsv80x_ctx, PROPERTY_ENABLE);
+  lsm6dsv80x_set_filt_xl_lp2_bandwidth(&lsm6dsv80x_ctx, LSM6DSV80X_XL_STRONG);
 
-  lsm6dsv80x_xl_data_rate_set(&lsm6dsv80x_ctx, LSM6DSV80X_ODR_OFF);
+  lsm6dsv80x_set_xl_data_rate(&lsm6dsv80x_ctx, LSM6DSV80X_ODR_OFF);
 
   /*
   * Prepare sensor hub to read data from external target0 (lis2mdl)
@@ -294,19 +294,19 @@ void lsm6dsv80x_sensor_hub(void)
   sh_cfg_read.tgt_subadd = LIS2MDL_OUTX_L_REG;
   sh_cfg_read.tgt_len = 6;
   lsm6dsv80x_sh_tgt_cfg_read(&lsm6dsv80x_ctx, 0, &sh_cfg_read);
-  lsm6dsv80x_fifo_sh_batch_target_set(&lsm6dsv80x_ctx, 0, PROPERTY_ENABLE);
+  lsm6dsv80x_set_fifo_sh_batch_target(&lsm6dsv80x_ctx, 0, PROPERTY_ENABLE);
 
   /* Configure Sensor Hub data rate */
-  lsm6dsv80x_sh_data_rate_set(&lsm6dsv80x_ctx, LSM6DSV80X_SH_15Hz);
+  lsm6dsv80x_set_sh_data_rate(&lsm6dsv80x_ctx, LSM6DSV80X_SH_15Hz);
 
   /* Configure Sensor Hub to read one target. */
-  lsm6dsv80x_sh_target_connected_set(&lsm6dsv80x_ctx, LSM6DSV80X_TGT_0);
+  lsm6dsv80x_set_sh_target_connected(&lsm6dsv80x_ctx, LSM6DSV80X_TGT_0);
 
   /* set SHUB write_once bit */
-  lsm6dsv80x_sh_write_mode_set(&lsm6dsv80x_ctx, LSM6DSV80X_ONLY_FIRST_CYCLE);
+  lsm6dsv80x_set_sh_write_mode(&lsm6dsv80x_ctx, LSM6DSV80X_ONLY_FIRST_CYCLE);
 
   /* Enable I2C Master. */
-  lsm6dsv80x_sh_controller_set(&lsm6dsv80x_ctx, PROPERTY_ENABLE);
+  lsm6dsv80x_set_sh_controller(&lsm6dsv80x_ctx, PROPERTY_ENABLE);
 
   /* Set Output Data Rate.
   * Selected data rate have to be equal or greater with respect
@@ -326,7 +326,7 @@ void lsm6dsv80x_sensor_hub(void)
       lsm6dsv80x_read_reg(&lsm6dsv80x_ctx, LSM6DSV80X_FUNC_CFG_ACCESS, &temp, 1);
 
       /* Read watermark flag */
-      lsm6dsv80x_fifo_status_get(&lsm6dsv80x_ctx, &fifo_status);
+      lsm6dsv80x_get_fifo_status(&lsm6dsv80x_ctx, &fifo_status);
 
       num = fifo_status.fifo_level;
       snprintf((char *)tx_buffer, sizeof(tx_buffer), "-- FIFO num %d \r\n", num);
@@ -337,7 +337,7 @@ void lsm6dsv80x_sensor_hub(void)
         float_t ts_usec;
 
         /* Read FIFO sensor value */
-        lsm6dsv80x_fifo_out_raw_get(&lsm6dsv80x_ctx, &f_data);
+        lsm6dsv80x_get_fifo_out_raw(&lsm6dsv80x_ctx, &f_data);
         datax = (int16_t *)&f_data.data[0];
         datay = (int16_t *)&f_data.data[2];
         dataz = (int16_t *)&f_data.data[4];
@@ -532,30 +532,30 @@ static int32_t lsm6dsv80x_write_target_cx(void *ctx, uint8_t i2c_add, uint8_t re
   ret = lsm6dsv80x_sh_cfg_write(&lsm6dsv80x_ctx, &sh_cfg_write);
 
   /* Disable accelerometer. */
-  lsm6dsv80x_xl_data_rate_set(&lsm6dsv80x_ctx, LSM6DSV80X_ODR_OFF);
+  lsm6dsv80x_set_xl_data_rate(&lsm6dsv80x_ctx, LSM6DSV80X_ODR_OFF);
 
   /* Enable I2C Master. */
-  lsm6dsv80x_sh_controller_set(&lsm6dsv80x_ctx, PROPERTY_ENABLE);
+  lsm6dsv80x_set_sh_controller(&lsm6dsv80x_ctx, PROPERTY_ENABLE);
 
   /* Enable accelerometer to trigger Sensor Hub operation. */
-  lsm6dsv80x_xl_data_rate_set(&lsm6dsv80x_ctx, LSM6DSV80X_ODR_AT_120Hz);
+  lsm6dsv80x_set_xl_data_rate(&lsm6dsv80x_ctx, LSM6DSV80X_ODR_AT_120Hz);
 
   /* Wait Sensor Hub operation flag set. */
-  lsm6dsv80x_acceleration_raw_get(&lsm6dsv80x_ctx, raw_xl);
+  lsm6dsv80x_get_acceleration_raw(&lsm6dsv80x_ctx, raw_xl);
 
   do {
     HAL_Delay(20);
-    lsm6dsv80x_flag_data_ready_get(&lsm6dsv80x_ctx, &drdy);
+    lsm6dsv80x_get_flag_data_ready(&lsm6dsv80x_ctx, &drdy);
   } while (!drdy.drdy_xl);
 
   do {
     HAL_Delay(20);
-    lsm6dsv80x_sh_status_get(&lsm6dsv80x_ctx, &controller_status);
+    lsm6dsv80x_get_sh_status(&lsm6dsv80x_ctx, &controller_status);
   } while (!controller_status.sens_hub_endop);
 
   /* Disable I2C controller and XL (trigger). */
-  lsm6dsv80x_sh_controller_set(&lsm6dsv80x_ctx, PROPERTY_DISABLE);
-  lsm6dsv80x_xl_data_rate_set(&lsm6dsv80x_ctx, LSM6DSV80X_ODR_OFF);
+  lsm6dsv80x_set_sh_controller(&lsm6dsv80x_ctx, PROPERTY_DISABLE);
+  lsm6dsv80x_set_xl_data_rate(&lsm6dsv80x_ctx, LSM6DSV80X_ODR_OFF);
 
   return ret;
 }
@@ -594,32 +594,32 @@ static int32_t lsm6dsv80x_read_target_cx(void *ctx, uint8_t i2c_add, uint8_t reg
   sh_cfg_read.tgt_len = len;
   ret = lsm6dsv80x_sh_tgt_cfg_read(&lsm6dsv80x_ctx, 0, &sh_cfg_read);
 
-  lsm6dsv80x_sh_target_connected_set(&lsm6dsv80x_ctx, LSM6DSV80X_TGT_0_1);
+  lsm6dsv80x_set_sh_target_connected(&lsm6dsv80x_ctx, LSM6DSV80X_TGT_0_1);
 
   /* Enable I2C Master and I2C controller. */
-  lsm6dsv80x_sh_controller_set(&lsm6dsv80x_ctx, PROPERTY_ENABLE);
+  lsm6dsv80x_set_sh_controller(&lsm6dsv80x_ctx, PROPERTY_ENABLE);
 
   /* Enable accelerometer to trigger Sensor Hub operation. */
   lsm6dsv80x_xl_setup(&lsm6dsv80x_ctx, LSM6DSV80X_ODR_AT_120Hz, LSM6DSV80X_XL_UNCHANGED_MD);
 
   /* Wait Sensor Hub operation flag set. */
-  lsm6dsv80x_acceleration_raw_get(&lsm6dsv80x_ctx, raw_xl);
+  lsm6dsv80x_get_acceleration_raw(&lsm6dsv80x_ctx, raw_xl);
 
   do {
     HAL_Delay(20);
-    lsm6dsv80x_flag_data_ready_get(&lsm6dsv80x_ctx, &drdy);
+    lsm6dsv80x_get_flag_data_ready(&lsm6dsv80x_ctx, &drdy);
   } while (!drdy.drdy_xl);
 
   do {
     //HAL_Delay(20);
-    lsm6dsv80x_sh_status_get(&lsm6dsv80x_ctx, &controller_status);
+    lsm6dsv80x_get_sh_status(&lsm6dsv80x_ctx, &controller_status);
   } while (!controller_status.sens_hub_endop);
 
   /* Disable I2C controller and XL(trigger). */
-  lsm6dsv80x_sh_controller_set(&lsm6dsv80x_ctx, PROPERTY_DISABLE);
+  lsm6dsv80x_set_sh_controller(&lsm6dsv80x_ctx, PROPERTY_DISABLE);
   lsm6dsv80x_xl_setup(&lsm6dsv80x_ctx, LSM6DSV80X_ODR_OFF, LSM6DSV80X_XL_UNCHANGED_MD);
   /* Read SensorHub registers. */
-  lsm6dsv80x_sh_read_data_raw_get(&lsm6dsv80x_ctx, data, len);
+  lsm6dsv80x_get_sh_read_data_raw(&lsm6dsv80x_ctx, data, len);
 
   return ret;
 }

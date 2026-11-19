@@ -193,7 +193,7 @@ static void ism6hg256x_fifo_thread(void)
     fifo_thread_run = 0;
 
     /* Read watermark flag */
-    ism6hg256x_fifo_status_get(&dev_ctx, &fifo_status);
+    ism6hg256x_get_fifo_status(&dev_ctx, &fifo_status);
 
     num = fifo_status.fifo_level;
 
@@ -201,7 +201,7 @@ static void ism6hg256x_fifo_thread(void)
       ism6hg256x_fifo_out_raw_t f_data;
 
       /* Read FIFO sensor value */
-      ism6hg256x_fifo_out_raw_get(&dev_ctx, &f_data);
+      ism6hg256x_get_fifo_out_raw(&dev_ctx, &f_data);
       datax = (int16_t *)&f_data.data[0];
       datay = (int16_t *)&f_data.data[2];
       dataz = (int16_t *)&f_data.data[4];
@@ -296,7 +296,7 @@ static void ism6hg256x_fifo_thread(void)
 
 
       case ISM6HG256X_TIMESTAMP_TAG:
-        snprintf((char *)tx_buffer, sizeof(tx_buffer), "TIMESTAMP [ms] %d\r\n", *ts);
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "TIMESTAMP [ms] %ld\r\n", *ts);
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
         /* print avg low-g xl data */
@@ -412,7 +412,7 @@ void ism6hg256x_read_fifo(void)
   platform_delay(BOOT_TIME);
 
   /* Check device ID */
-  ism6hg256x_device_id_get(&dev_ctx, &whoamI);
+  ism6hg256x_get_device_id(&dev_ctx, &whoamI);
 
   if (whoamI != ISM6HG256X_ID)
     while (1);
@@ -421,21 +421,21 @@ void ism6hg256x_read_fifo(void)
   ism6hg256x_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
-  ism6hg256x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  ism6hg256x_set_block_data_update(&dev_ctx, PROPERTY_ENABLE);
 
   /*
    * Set FIFO watermark (number of unread sensor data TAG + 6 bytes
    * stored in FIFO) to FIFO_WATERMARK samples
    */
-  ism6hg256x_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
+  ism6hg256x_set_fifo_watermark(&dev_ctx, FIFO_WATERMARK);
 
   /* Set FIFO batch XL/Gyro ODR */
-  ism6hg256x_fifo_xl_batch_set(&dev_ctx, ISM6HG256X_XL_BATCHED_AT_60Hz);
-  ism6hg256x_fifo_hg_xl_batch_set(&dev_ctx, 1);
-  ism6hg256x_fifo_gy_batch_set(&dev_ctx, ISM6HG256X_GY_BATCHED_AT_120Hz);
+  ism6hg256x_set_fifo_xl_batch(&dev_ctx, ISM6HG256X_XL_BATCHED_AT_60Hz);
+  ism6hg256x_set_fifo_hg_xl_batch(&dev_ctx, 1);
+  ism6hg256x_set_fifo_gy_batch(&dev_ctx, ISM6HG256X_GY_BATCHED_AT_120Hz);
 
   /* Set FIFO batch SFLP */
-  ism6hg256x_sflp_data_rate_set(&dev_ctx, ISM6HG256X_SFLP_120Hz);
+  ism6hg256x_set_sflp_data_rate(&dev_ctx, ISM6HG256X_SFLP_120Hz);
 
   ism6hg256x_fifo_sflp_raw_t sflp =
         {
@@ -443,41 +443,41 @@ void ism6hg256x_read_fifo(void)
           .gravity = 1,
           .gbias = 1,
         };
-  ism6hg256x_fifo_sflp_batch_set(&dev_ctx, sflp);
+  ism6hg256x_set_fifo_sflp_batch(&dev_ctx, sflp);
 
-  ism6hg256x_sflp_game_rotation_set(&dev_ctx, PROPERTY_ENABLE);
+  ism6hg256x_set_sflp_game_rotation(&dev_ctx, PROPERTY_ENABLE);
 
   /* Set FIFO mode to Stream mode (aka Continuous Mode) */
-  ism6hg256x_fifo_mode_set(&dev_ctx, ISM6HG256X_STREAM_MODE);
-  ism6hg256x_fifo_timestamp_batch_set(&dev_ctx, ISM6HG256X_TMSTMP_DEC_32);
-  ism6hg256x_timestamp_set(&dev_ctx, PROPERTY_ENABLE);
+  ism6hg256x_set_fifo_mode(&dev_ctx, ISM6HG256X_STREAM_MODE);
+  ism6hg256x_set_fifo_timestamp_batch(&dev_ctx, ISM6HG256X_TMSTMP_DEC_32);
+  ism6hg256x_set_timestamp(&dev_ctx, PROPERTY_ENABLE);
 
   /* Set Output Data Rate.
    * Selected data rate have to be equal or greater with respect
    * with MLC data rate.
    */
   ism6hg256x_xl_setup(&dev_ctx, ISM6HG256X_ODR_AT_60Hz, ISM6HG256X_XL_HIGH_PERFORMANCE_MD);
-  ism6hg256x_hg_xl_data_rate_set(&dev_ctx, ISM6HG256X_HG_XL_ODR_AT_480Hz, 0);
+  ism6hg256x_set_hg_xl_data_rate(&dev_ctx, ISM6HG256X_HG_XL_ODR_AT_480Hz, 0);
   ism6hg256x_gy_setup(&dev_ctx, ISM6HG256X_ODR_AT_120Hz, ISM6HG256X_GY_HIGH_PERFORMANCE_MD);
 
   /* Set full scale */
-  ism6hg256x_xl_full_scale_set(&dev_ctx, ISM6HG256X_2g);
-  ism6hg256x_hg_xl_full_scale_set(&dev_ctx, ISM6HG256X_256g);
-  ism6hg256x_gy_full_scale_set(&dev_ctx, ISM6HG256X_2000dps);
+  ism6hg256x_set_xl_full_scale(&dev_ctx, ISM6HG256X_2g);
+  ism6hg256x_set_hg_xl_full_scale(&dev_ctx, ISM6HG256X_256g);
+  ism6hg256x_set_gy_full_scale(&dev_ctx, ISM6HG256X_2000dps);
 
   /* Configure filtering chain */
   filt_settling_mask.drdy = PROPERTY_ENABLE;
   filt_settling_mask.irq_xl = PROPERTY_ENABLE;
   filt_settling_mask.irq_g = PROPERTY_ENABLE;
-  ism6hg256x_filt_settling_mask_set(&dev_ctx, filt_settling_mask);
-  ism6hg256x_filt_gy_lp1_set(&dev_ctx, PROPERTY_ENABLE);
-  ism6hg256x_filt_gy_lp1_bandwidth_set(&dev_ctx, ISM6HG256X_GY_ULTRA_LIGHT);
-  ism6hg256x_filt_xl_lp2_set(&dev_ctx, PROPERTY_ENABLE);
-  ism6hg256x_filt_xl_lp2_bandwidth_set(&dev_ctx, ISM6HG256X_XL_STRONG);
+  ism6hg256x_set_filt_settling_mask(&dev_ctx, filt_settling_mask);
+  ism6hg256x_set_filt_gy_lp1(&dev_ctx, PROPERTY_ENABLE);
+  ism6hg256x_set_filt_gy_lp1_bandwidth(&dev_ctx, ISM6HG256X_GY_ULTRA_LIGHT);
+  ism6hg256x_set_filt_xl_lp2(&dev_ctx, PROPERTY_ENABLE);
+  ism6hg256x_set_filt_xl_lp2_bandwidth(&dev_ctx, ISM6HG256X_XL_STRONG);
 
   /* enable fifo_th on High-G XL (sensor at highest frequency) */
   pin_int.fifo_th = PROPERTY_ENABLE;
-  ism6hg256x_pin_int1_route_set(&dev_ctx, &pin_int);
+  ism6hg256x_set_pin_int1_route(&dev_ctx, &pin_int);
   //ism6hg256x_pin_int2_route_set(&dev_ctx, &pin_int);
 
   /* Read samples in polling mode (no int) */

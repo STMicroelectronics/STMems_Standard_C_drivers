@@ -174,7 +174,7 @@ void lsm6dsv80x_sensor_fusion(void)
   platform_delay(BOOT_TIME);
 
   /* Check device ID */
-  lsm6dsv80x_device_id_get(&dev_ctx, &whoamI);
+  lsm6dsv80x_get_device_id(&dev_ctx, &whoamI);
 
   if (whoamI != LSM6DSV80X_ID)
     while (1);
@@ -183,7 +183,7 @@ void lsm6dsv80x_sensor_fusion(void)
   lsm6dsv80x_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
-  lsm6dsv80x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsv80x_set_block_data_update(&dev_ctx, PROPERTY_ENABLE);
 
   /* Set Output Data Rate.
    * Selected data rate have to be equal or greater with respect
@@ -193,31 +193,30 @@ void lsm6dsv80x_sensor_fusion(void)
   lsm6dsv80x_gy_setup(&dev_ctx, LSM6DSV80X_ODR_AT_120Hz, LSM6DSV80X_GY_HIGH_PERFORMANCE_MD);
 
   /* Set full scale */
-  lsm6dsv80x_xl_full_scale_set(&dev_ctx, LSM6DSV80X_2g);
-  lsm6dsv80x_gy_full_scale_set(&dev_ctx, LSM6DSV80X_2000dps);
+  lsm6dsv80x_set_xl_full_scale(&dev_ctx, LSM6DSV80X_2g);
+  lsm6dsv80x_set_gy_full_scale(&dev_ctx, LSM6DSV80X_2000dps);
 
   /* Configure filtering chain */
   filt_settling_mask.drdy = PROPERTY_ENABLE;
   filt_settling_mask.irq_xl = PROPERTY_ENABLE;
   filt_settling_mask.irq_g = PROPERTY_ENABLE;
-  lsm6dsv80x_filt_settling_mask_set(&dev_ctx, filt_settling_mask);
-  lsm6dsv80x_filt_gy_lp1_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6dsv80x_filt_gy_lp1_bandwidth_set(&dev_ctx, LSM6DSV80X_GY_ULTRA_LIGHT);
-  lsm6dsv80x_filt_xl_lp2_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6dsv80x_filt_xl_lp2_bandwidth_set(&dev_ctx, LSM6DSV80X_XL_STRONG);
+  lsm6dsv80x_set_filt_settling_mask(&dev_ctx, filt_settling_mask);
+  lsm6dsv80x_set_filt_gy_lp1(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsv80x_set_filt_gy_lp1_bandwidth(&dev_ctx, LSM6DSV80X_GY_ULTRA_LIGHT);
+  lsm6dsv80x_set_filt_xl_lp2(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsv80x_set_filt_xl_lp2_bandwidth(&dev_ctx, LSM6DSV80X_XL_STRONG);
 
   /* enable SFLP game rotation */
-  lsm6dsv80x_sflp_game_rotation_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsv80x_set_sflp_game_rotation(&dev_ctx, PROPERTY_ENABLE);
 
   /* reset SFLP game rotation */
   lsm6dsv80x_sflp_game_rotation_reset(&dev_ctx, PROPERTY_ENABLE);
 
-  lsm6dsv80x_sflp_data_rate_set(&dev_ctx, LSM6DSV80X_SFLP_240Hz);
+  lsm6dsv80x_set_sflp_data_rate(&dev_ctx, LSM6DSV80X_SFLP_240Hz);
 
   /* enable interrupt on High-G XL (sensor at highest frequency) */
   pin_int.drdy_xl = PROPERTY_ENABLE;
-  lsm6dsv80x_pin_int1_route_set(&dev_ctx, &pin_int);
-  //lsm6dsv80x_pin_int2_route_hg_set(&dev_ctx, &pin_int);
+  lsm6dsv80x_set_pin_int1_route(&dev_ctx, &pin_int);
 
   /* "thread" loop */
   while (1) {
@@ -227,31 +226,31 @@ void lsm6dsv80x_sensor_fusion(void)
       thread_wake = 0;
 
       /* Read output only if new xl value is available */
-      lsm6dsv80x_flag_data_ready_get(&dev_ctx, &status);
+      lsm6dsv80x_get_flag_data_ready(&dev_ctx, &status);
 
       if (status.drdy_xl == 1) {
         status.drdy_xl = 0;
 
-        lsm6dsv80x_acceleration_raw_get(&dev_ctx, data_raw_motion);
+        lsm6dsv80x_get_acceleration_raw(&dev_ctx, data_raw_motion);
 
         memset(gbias_lsb, 0x00, 3 * sizeof(int16_t));
-        lsm6dsv80x_sflp_gbias_raw_get(&dev_ctx, gbias_lsb);
+        lsm6dsv80x_get_sflp_gbias_raw(&dev_ctx, gbias_lsb);
         gbias_mdps[0] = lsm6dsv80x_from_fs125_to_mdps(gbias_lsb[0]);
         gbias_mdps[1] = lsm6dsv80x_from_fs125_to_mdps(gbias_lsb[1]);
         gbias_mdps[2] = lsm6dsv80x_from_fs125_to_mdps(gbias_lsb[2]);
 
         memset(gravity_lsb, 0x00, 3 * sizeof(int16_t));
-        lsm6dsv80x_sflp_gravity_raw_get(&dev_ctx, gravity_lsb);
+        lsm6dsv80x_get_sflp_gravity_raw(&dev_ctx, gravity_lsb);
         gravity_mg[0] = lsm6dsv80x_from_gravity_lsb_to_mg(gravity_lsb[0]);
         gravity_mg[1] = lsm6dsv80x_from_gravity_lsb_to_mg(gravity_lsb[1]);
         gravity_mg[2] = lsm6dsv80x_from_gravity_lsb_to_mg(gravity_lsb[2]);
 
         memset(quats_lsb, 0x00, 4 * sizeof(int16_t));
-        lsm6dsv80x_sflp_quaternion_raw_get(&dev_ctx, quats_lsb);
-        quaternions[0] = lsm6dsv80x_from_quaternion_lsb_to_float(quats_lsb[0]);
-        quaternions[1] = lsm6dsv80x_from_quaternion_lsb_to_float(quats_lsb[1]);
-        quaternions[2] = lsm6dsv80x_from_quaternion_lsb_to_float(quats_lsb[2]);
-        quaternions[3] = lsm6dsv80x_from_quaternion_lsb_to_float(quats_lsb[3]);
+        lsm6dsv80x_get_sflp_quat_raw(&dev_ctx, quats_lsb);
+        quaternions[0] = lsm6dsv80x_from_quat_lsb_to_float(quats_lsb[0]);
+        quaternions[1] = lsm6dsv80x_from_quat_lsb_to_float(quats_lsb[1]);
+        quaternions[2] = lsm6dsv80x_from_quat_lsb_to_float(quats_lsb[2]);
+        quaternions[3] = lsm6dsv80x_from_quat_lsb_to_float(quats_lsb[3]);
 
         snprintf((char *)tx_buffer, sizeof(tx_buffer), "GBIAS [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               gbias_mdps[0], gbias_mdps[1], gbias_mdps[2]);

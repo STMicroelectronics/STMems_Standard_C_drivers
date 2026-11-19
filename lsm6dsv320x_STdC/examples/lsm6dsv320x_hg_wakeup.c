@@ -193,7 +193,7 @@ void lsm6dsv320x_hg_wakeup(void)
   platform_delay(BOOT_TIME);
 
   /* Check device ID */
-  lsm6dsv320x_device_id_get(&dev_ctx, &whoamI);
+  lsm6dsv320x_get_device_id(&dev_ctx, &whoamI);
 
   if (whoamI != LSM6DSV320X_ID)
     while (1);
@@ -202,36 +202,36 @@ void lsm6dsv320x_hg_wakeup(void)
   lsm6dsv320x_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
-  lsm6dsv320x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsv320x_set_block_data_update(&dev_ctx, PROPERTY_ENABLE);
 
   /* Set Output Data Rate.
    * Selected data rate have to be equal or greater with respect
    * with MLC data rate.
    */
-  lsm6dsv320x_hg_xl_data_rate_set(&dev_ctx, LSM6DSV320X_HG_XL_ODR_AT_960Hz, 1);
+  lsm6dsv320x_set_hg_xl_data_rate(&dev_ctx, LSM6DSV320X_HG_XL_ODR_AT_960Hz, 1);
 
   /* Set full scale */
-  lsm6dsv320x_hg_xl_full_scale_set(&dev_ctx, LSM6DSV320X_256g);
+  lsm6dsv320x_set_hg_xl_full_scale(&dev_ctx, LSM6DSV320X_256g);
 
   /* Configure filtering chain */
   filt_settling_mask.drdy = PROPERTY_ENABLE;
   filt_settling_mask.irq_xl = PROPERTY_ENABLE;
   filt_settling_mask.irq_g = PROPERTY_ENABLE;
-  lsm6dsv320x_filt_settling_mask_set(&dev_ctx, filt_settling_mask);
-  lsm6dsv320x_filt_xl_lp2_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6dsv320x_filt_xl_lp2_bandwidth_set(&dev_ctx, LSM6DSV320X_XL_STRONG);
+  lsm6dsv320x_set_filt_settling_mask(&dev_ctx, filt_settling_mask);
+  lsm6dsv320x_set_filt_xl_lp2(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsv320x_set_filt_xl_lp2_bandwidth(&dev_ctx, LSM6DSV320X_XL_STRONG);
 
   wu_cfg.hg_shock_dur = 1;
   wu_cfg.hg_wakeup_ths = 4;
-  lsm6dsv320x_hg_wake_up_cfg_set(&dev_ctx, wu_cfg);
+  lsm6dsv320x_set_hg_wake_up_cfg(&dev_ctx, wu_cfg);
 
   /* enable interrupt on HG wakeup */
   pin_int.hg_wakeup = PROPERTY_ENABLE;
-  lsm6dsv320x_pin_int1_route_hg_set(&dev_ctx, &pin_int);
-  //lsm6dsv320x_pin_int2_route_hg_set(&dev_ctx, &pin_int);
+  lsm6dsv320x_set_pin_int1_hg_route(&dev_ctx, &pin_int);
+  //lsm6dsv320x_pin_int2_hg_route(&dev_ctx, &pin_int);
 
   int_cfg.hg_interrupts_enable = 1;
-  lsm6dsv320x_hg_wu_interrupt_cfg_set(&dev_ctx, int_cfg);
+  lsm6dsv320x_set_hg_wu_interrupt_cfg(&dev_ctx, int_cfg);
 
   /* "thread" loop */
   while (1) {
@@ -240,7 +240,7 @@ void lsm6dsv320x_hg_wakeup(void)
 
       thread_wake = 0;
 
-      lsm6dsv320x_hg_event_get(&dev_ctx, &status);
+      lsm6dsv320x_get_hg_event(&dev_ctx, &status);
 
       if (status.hg_event) {
         if (status.hg_wakeup) {

@@ -159,14 +159,14 @@ static volatile uint8_t gym_event_catched = 0;
 void lsm6dsv80x_mlc_gym_handler(void)
 {
   lsm6dsv80x_all_sources_t status;
-  lsm6dsv80x_mlc_out_t mlc_out;
+  uint8_t mlc_out[8];
 
   /* Read output only if new xl value is available */
-  lsm6dsv80x_all_sources_get(&dev_ctx, &status);
+  lsm6dsv80x_get_all_sources(&dev_ctx, &status);
 
   if (status.mlc1) {
-    lsm6dsv80x_mlc_out_get(&dev_ctx, &mlc_out);
-    gym_event_catched = mlc_out.mlc1_src;
+    lsm6dsv80x_get_mlc_out(&dev_ctx, mlc_out);
+    gym_event_catched = mlc_out[0];
   }
 }
 
@@ -188,7 +188,7 @@ void lsm6dsv80x_mlc_gym(void)
   platform_delay(BOOT_TIME);
 
   /* Check device ID */
-  lsm6dsv80x_device_id_get(&dev_ctx, &whoamI);
+  lsm6dsv80x_get_device_id(&dev_ctx, &whoamI);
 
   if (whoamI != LSM6DSV80X_ID)
     while (1);
@@ -198,7 +198,7 @@ void lsm6dsv80x_mlc_gym(void)
 
 #if defined(NUCLEO_H503RB)
   /* if I3C is used then INT pin must be explicitly enabled */
-  lsm6dsv80x_i3c_int_en_set(&dev_ctx, 1);
+  lsm6dsv80x_set_i3c_int_en(&dev_ctx, 1);
 #endif
 
   /* Start Machine Learning Core configuration */

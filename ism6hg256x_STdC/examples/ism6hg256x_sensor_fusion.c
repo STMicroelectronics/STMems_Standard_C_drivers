@@ -174,7 +174,7 @@ void ism6hg256x_sensor_fusion(void)
   platform_delay(BOOT_TIME);
 
   /* Check device ID */
-  ism6hg256x_device_id_get(&dev_ctx, &whoamI);
+  ism6hg256x_get_device_id(&dev_ctx, &whoamI);
 
   if (whoamI != ISM6HG256X_ID)
     while (1);
@@ -183,7 +183,7 @@ void ism6hg256x_sensor_fusion(void)
   ism6hg256x_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
-  ism6hg256x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  ism6hg256x_set_block_data_update(&dev_ctx, PROPERTY_ENABLE);
 
   /* Set Output Data Rate.
    * Selected data rate have to be equal or greater with respect
@@ -193,31 +193,30 @@ void ism6hg256x_sensor_fusion(void)
   ism6hg256x_gy_setup(&dev_ctx, ISM6HG256X_ODR_AT_120Hz, ISM6HG256X_GY_HIGH_PERFORMANCE_MD);
 
   /* Set full scale */
-  ism6hg256x_xl_full_scale_set(&dev_ctx, ISM6HG256X_2g);
-  ism6hg256x_gy_full_scale_set(&dev_ctx, ISM6HG256X_2000dps);
+  ism6hg256x_set_xl_full_scale(&dev_ctx, ISM6HG256X_2g);
+  ism6hg256x_set_gy_full_scale(&dev_ctx, ISM6HG256X_2000dps);
 
   /* Configure filtering chain */
   filt_settling_mask.drdy = PROPERTY_ENABLE;
   filt_settling_mask.irq_xl = PROPERTY_ENABLE;
   filt_settling_mask.irq_g = PROPERTY_ENABLE;
-  ism6hg256x_filt_settling_mask_set(&dev_ctx, filt_settling_mask);
-  ism6hg256x_filt_gy_lp1_set(&dev_ctx, PROPERTY_ENABLE);
-  ism6hg256x_filt_gy_lp1_bandwidth_set(&dev_ctx, ISM6HG256X_GY_ULTRA_LIGHT);
-  ism6hg256x_filt_xl_lp2_set(&dev_ctx, PROPERTY_ENABLE);
-  ism6hg256x_filt_xl_lp2_bandwidth_set(&dev_ctx, ISM6HG256X_XL_STRONG);
+  ism6hg256x_set_filt_settling_mask(&dev_ctx, filt_settling_mask);
+  ism6hg256x_set_filt_gy_lp1(&dev_ctx, PROPERTY_ENABLE);
+  ism6hg256x_set_filt_gy_lp1_bandwidth(&dev_ctx, ISM6HG256X_GY_ULTRA_LIGHT);
+  ism6hg256x_set_filt_xl_lp2(&dev_ctx, PROPERTY_ENABLE);
+  ism6hg256x_set_filt_xl_lp2_bandwidth(&dev_ctx, ISM6HG256X_XL_STRONG);
 
   /* enable SFLP game rotation */
-  ism6hg256x_sflp_game_rotation_set(&dev_ctx, PROPERTY_ENABLE);
+  ism6hg256x_set_sflp_game_rotation(&dev_ctx, PROPERTY_ENABLE);
 
   /* reset SFLP game rotation */
   ism6hg256x_sflp_game_rotation_reset(&dev_ctx, PROPERTY_ENABLE);
 
-  ism6hg256x_sflp_data_rate_set(&dev_ctx, ISM6HG256X_SFLP_240Hz);
+  ism6hg256x_set_sflp_data_rate(&dev_ctx, ISM6HG256X_SFLP_240Hz);
 
   /* enable interrupt on High-G XL (sensor at highest frequency) */
   pin_int.drdy_xl = PROPERTY_ENABLE;
-  ism6hg256x_pin_int1_route_set(&dev_ctx, &pin_int);
-  //ism6hg256x_pin_int2_route_hg_set(&dev_ctx, &pin_int);
+  ism6hg256x_set_pin_int1_route(&dev_ctx, &pin_int);
 
   /* "thread" loop */
   while (1) {
@@ -227,31 +226,31 @@ void ism6hg256x_sensor_fusion(void)
       thread_wake = 0;
 
       /* Read output only if new xl value is available */
-      ism6hg256x_flag_data_ready_get(&dev_ctx, &status);
+      ism6hg256x_get_flag_data_ready(&dev_ctx, &status);
 
       if (status.drdy_xl == 1) {
         status.drdy_xl = 0;
 
-        ism6hg256x_acceleration_raw_get(&dev_ctx, data_raw_motion);
+        ism6hg256x_get_acceleration_raw(&dev_ctx, data_raw_motion);
 
         memset(gbias_lsb, 0x00, 3 * sizeof(int16_t));
-        ism6hg256x_sflp_gbias_raw_get(&dev_ctx, gbias_lsb);
+        ism6hg256x_get_sflp_gbias_raw(&dev_ctx, gbias_lsb);
         gbias_mdps[0] = ism6hg256x_from_fs125_to_mdps(gbias_lsb[0]);
         gbias_mdps[1] = ism6hg256x_from_fs125_to_mdps(gbias_lsb[1]);
         gbias_mdps[2] = ism6hg256x_from_fs125_to_mdps(gbias_lsb[2]);
 
         memset(gravity_lsb, 0x00, 3 * sizeof(int16_t));
-        ism6hg256x_sflp_gravity_raw_get(&dev_ctx, gravity_lsb);
+        ism6hg256x_get_sflp_gravity_raw(&dev_ctx, gravity_lsb);
         gravity_mg[0] = ism6hg256x_from_gravity_lsb_to_mg(gravity_lsb[0]);
         gravity_mg[1] = ism6hg256x_from_gravity_lsb_to_mg(gravity_lsb[1]);
         gravity_mg[2] = ism6hg256x_from_gravity_lsb_to_mg(gravity_lsb[2]);
 
         memset(quats_lsb, 0x00, 4 * sizeof(int16_t));
-        ism6hg256x_sflp_quaternion_raw_get(&dev_ctx, quats_lsb);
-        quaternions[0] = ism6hg256x_from_quaternion_lsb_to_float(quats_lsb[0]);
-        quaternions[1] = ism6hg256x_from_quaternion_lsb_to_float(quats_lsb[1]);
-        quaternions[2] = ism6hg256x_from_quaternion_lsb_to_float(quats_lsb[2]);
-        quaternions[3] = ism6hg256x_from_quaternion_lsb_to_float(quats_lsb[3]);
+        ism6hg256x_get_sflp_quat_raw(&dev_ctx, quats_lsb);
+        quaternions[0] = ism6hg256x_from_quat_lsb_to_float(quats_lsb[0]);
+        quaternions[1] = ism6hg256x_from_quat_lsb_to_float(quats_lsb[1]);
+        quaternions[2] = ism6hg256x_from_quat_lsb_to_float(quats_lsb[2]);
+        quaternions[3] = ism6hg256x_from_quat_lsb_to_float(quats_lsb[3]);
 
         snprintf((char *)tx_buffer, sizeof(tx_buffer), "GBIAS [mg]:%4.2f\t%4.2f\t%4.2f\r\n",
               gbias_mdps[0], gbias_mdps[1], gbias_mdps[2]);

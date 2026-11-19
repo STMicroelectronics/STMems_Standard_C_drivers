@@ -182,7 +182,7 @@ void lsm6dsv320x_read_data_polling(void)
   platform_delay(BOOT_TIME);
 
   /* Check device ID */
-  lsm6dsv320x_device_id_get(&dev_ctx, &whoamI);
+  lsm6dsv320x_get_device_id(&dev_ctx, &whoamI);
 
   if (whoamI != LSM6DSV320X_ID)
     while (1);
@@ -191,30 +191,30 @@ void lsm6dsv320x_read_data_polling(void)
   lsm6dsv320x_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
-  lsm6dsv320x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsv320x_set_block_data_update(&dev_ctx, PROPERTY_ENABLE);
 
   /* Set Output Data Rate.
    * Selected data rate have to be equal or greater with respect
    * with MLC data rate.
    */
   lsm6dsv320x_xl_setup(&dev_ctx, LSM6DSV320X_ODR_AT_60Hz, LSM6DSV320X_XL_HIGH_PERFORMANCE_MD);
-  lsm6dsv320x_hg_xl_data_rate_set(&dev_ctx, LSM6DSV320X_HG_XL_ODR_AT_960Hz, 1);
+  lsm6dsv320x_set_hg_xl_data_rate(&dev_ctx, LSM6DSV320X_HG_XL_ODR_AT_960Hz, 1);
   lsm6dsv320x_gy_setup(&dev_ctx, LSM6DSV320X_ODR_AT_120Hz, LSM6DSV320X_GY_HIGH_PERFORMANCE_MD);
 
   /* Set full scale */
-  lsm6dsv320x_xl_full_scale_set(&dev_ctx, LSM6DSV320X_2g);
-  lsm6dsv320x_hg_xl_full_scale_set(&dev_ctx, LSM6DSV320X_320g);
-  lsm6dsv320x_gy_full_scale_set(&dev_ctx, LSM6DSV320X_2000dps);
+  lsm6dsv320x_set_xl_full_scale(&dev_ctx, LSM6DSV320X_2g);
+  lsm6dsv320x_set_hg_xl_full_scale(&dev_ctx, LSM6DSV320X_320g);
+  lsm6dsv320x_set_gy_full_scale(&dev_ctx, LSM6DSV320X_2000dps);
 
   /* Configure filtering chain */
   filt_settling_mask.drdy = PROPERTY_ENABLE;
   filt_settling_mask.irq_xl = PROPERTY_ENABLE;
   filt_settling_mask.irq_g = PROPERTY_ENABLE;
-  lsm6dsv320x_filt_settling_mask_set(&dev_ctx, filt_settling_mask);
-  lsm6dsv320x_filt_gy_lp1_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6dsv320x_filt_gy_lp1_bandwidth_set(&dev_ctx, LSM6DSV320X_GY_ULTRA_LIGHT);
-  lsm6dsv320x_filt_xl_lp2_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6dsv320x_filt_xl_lp2_bandwidth_set(&dev_ctx, LSM6DSV320X_XL_STRONG);
+  lsm6dsv320x_set_filt_settling_mask(&dev_ctx, filt_settling_mask);
+  lsm6dsv320x_set_filt_gy_lp1(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsv320x_set_filt_gy_lp1_bandwidth(&dev_ctx, LSM6DSV320X_GY_ULTRA_LIGHT);
+  lsm6dsv320x_set_filt_xl_lp2(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsv320x_set_filt_xl_lp2_bandwidth(&dev_ctx, LSM6DSV320X_XL_STRONG);
 
   lowg_xl_sum[0] = lowg_xl_sum[1] = lowg_xl_sum[2] = 0.0;
   hg_xl_sum[0] = hg_xl_sum[1] = hg_xl_sum[2] = 0.0;
@@ -226,12 +226,12 @@ void lsm6dsv320x_read_data_polling(void)
     lsm6dsv320x_data_ready_t drdy;
 
     /* Read output only if new xl value is available */
-    lsm6dsv320x_flag_data_ready_get(&dev_ctx, &drdy);
+    lsm6dsv320x_get_flag_data_ready(&dev_ctx, &drdy);
 
     if (drdy.drdy_xl) {
       /* Read acceleration field data */
       memset(data_raw_motion, 0x00, 3 * sizeof(int16_t));
-      lsm6dsv320x_acceleration_raw_get(&dev_ctx, data_raw_motion);
+      lsm6dsv320x_get_acceleration_raw(&dev_ctx, data_raw_motion);
       acceleration_mg[0] = lsm6dsv320x_from_fs2_to_mg(data_raw_motion[0]);
       acceleration_mg[1] = lsm6dsv320x_from_fs2_to_mg(data_raw_motion[1]);
       acceleration_mg[2] = lsm6dsv320x_from_fs2_to_mg(data_raw_motion[2]);
@@ -245,7 +245,7 @@ void lsm6dsv320x_read_data_polling(void)
     if (drdy.drdy_hgxl) {
       /* Read acceleration field data */
       memset(data_raw_motion, 0x00, 3 * sizeof(int16_t));
-      lsm6dsv320x_hg_acceleration_raw_get(&dev_ctx, data_raw_motion);
+      lsm6dsv320x_get_hg_acceleration_raw(&dev_ctx, data_raw_motion);
       acceleration_mg[0] = lsm6dsv320x_from_fs256_to_mg(data_raw_motion[0]);
       acceleration_mg[1] = lsm6dsv320x_from_fs256_to_mg(data_raw_motion[1]);
       acceleration_mg[2] = lsm6dsv320x_from_fs256_to_mg(data_raw_motion[2]);
@@ -260,7 +260,7 @@ void lsm6dsv320x_read_data_polling(void)
     if (drdy.drdy_gy) {
       /* Read angular rate field data */
       memset(data_raw_motion, 0x00, 3 * sizeof(int16_t));
-      lsm6dsv320x_angular_rate_raw_get(&dev_ctx, data_raw_motion);
+      lsm6dsv320x_get_angular_rate_raw(&dev_ctx, data_raw_motion);
       angular_rate_mdps[0] = lsm6dsv320x_from_fs2000_to_mdps(data_raw_motion[0]);
       angular_rate_mdps[1] = lsm6dsv320x_from_fs2000_to_mdps(data_raw_motion[1]);
       angular_rate_mdps[2] = lsm6dsv320x_from_fs2000_to_mdps(data_raw_motion[2]);
@@ -274,7 +274,7 @@ void lsm6dsv320x_read_data_polling(void)
     if (drdy.drdy_temp) {
       /* Read temperature data */
       memset(&data_raw_temperature, 0x00, sizeof(int16_t));
-      lsm6dsv320x_temperature_raw_get(&dev_ctx, &data_raw_temperature);
+      lsm6dsv320x_get_temperature_raw(&dev_ctx, &data_raw_temperature);
       temperature_degC = lsm6dsv320x_from_lsb_to_celsius(data_raw_temperature);
       temp_sum += temperature_degC;
       temp_cnt++;

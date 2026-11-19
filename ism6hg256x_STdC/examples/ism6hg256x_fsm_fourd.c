@@ -159,14 +159,14 @@ static volatile uint8_t fourd_event_catched = 0;
 void ism6hg256x_fsm_fourd_handler(void)
 {
   ism6hg256x_all_sources_t status;
-  ism6hg256x_fsm_out_t fsm_out;
+  uint8_t fsm_out[8];
 
   /* Read output only if new xl value is available */
-  ism6hg256x_all_sources_get(&dev_ctx, &status);
+  ism6hg256x_get_all_sources(&dev_ctx, &status);
 
   if (status.fsm1) {
-    ism6hg256x_fsm_out_get(&dev_ctx, &fsm_out);
-    fourd_event_catched = fsm_out.fsm_outs1;
+    ism6hg256x_get_fsm_out(&dev_ctx, fsm_out);
+    fourd_event_catched = fsm_out[0];
   }
 }
 
@@ -188,7 +188,7 @@ void ism6hg256x_fsm_fourd(void)
   platform_delay(BOOT_TIME);
 
   /* Check device ID */
-  ism6hg256x_device_id_get(&dev_ctx, &whoamI);
+  ism6hg256x_get_device_id(&dev_ctx, &whoamI);
 
   if (whoamI != ISM6HG256X_ID)
     while (1);
@@ -198,7 +198,7 @@ void ism6hg256x_fsm_fourd(void)
 
 #if defined(NUCLEO_H503RB)
   /* if I3C is used then INT pin must be explicitly enabled */
-  ism6hg256x_i3c_int_en_set(&dev_ctx, 1);
+  ism6hg256x_set_i3c_int_en(&dev_ctx, 1);
 #endif
 
   /* Start Machine Learning Core configuration */

@@ -190,7 +190,7 @@ void lsm6dsv80x_fsm_peak_training(void)
   platform_delay(BOOT_TIME);
 
   /* Check device ID */
-  lsm6dsv80x_device_id_get(&dev_ctx, &whoamI);
+  lsm6dsv80x_get_device_id(&dev_ctx, &whoamI);
 
   if (whoamI != LSM6DSV80X_ID)
     while (1);
@@ -200,7 +200,7 @@ void lsm6dsv80x_fsm_peak_training(void)
 
 #if defined(NUCLEO_H503RB)
   /* if I3C is used then INT pin must be explicitly enabled */
-  lsm6dsv80x_i3c_int_en_set(&dev_ctx, 1);
+  lsm6dsv80x_set_i3c_int_en(&dev_ctx, 1);
 #endif
 
   /* Start FSM configuration */
@@ -228,20 +228,20 @@ void lsm6dsv80x_fsm_peak_training(void)
 
       peak_catched = 0;
 
-      lsm6dsv80x_fsm_out_t fsm_outs;
+      uint8_t fsm_outs[8];
       lsm6dsv80x_read_reg(&dev_ctx, LSM6DSV80X_FSM_STATUS_MAINPAGE, &fsm_status, 1);
-      lsm6dsv80x_fsm_out_get(&dev_ctx, &fsm_outs);
+      lsm6dsv80x_get_fsm_out(&dev_ctx, fsm_outs);
 
-      if ((fsm_status == 0x1) && (fsm_outs.fsm_outs1 == 1))
+      if ((fsm_status == 0x1) && (fsm_outs[0] == 1))
       {
         peak_start = peak_time;
       }
-      else if ((fsm_status == 0x1) && (fsm_outs.fsm_outs1 == 0))
+      else if ((fsm_status == 0x1) && (fsm_outs[0] == 0))
       {
         peak_end = peak_time;
 
         /* Read FIFO sensor value */
-        lsm6dsv80x_fifo_out_raw_get(&dev_ctx, &f_data);
+        lsm6dsv80x_get_fifo_out_raw(&dev_ctx, &f_data);
         datax = (uint16_t *)&f_data.data[0];
         datay = (uint16_t *)&f_data.data[2];
         dataz = (uint16_t *)&f_data.data[4];
@@ -251,7 +251,7 @@ void lsm6dsv80x_fsm_peak_training(void)
           acceleration_g[0] = npy_half_to_float(*datax) * 100.0f;
           acceleration_g[1] = npy_half_to_float(*datay) * 100.0f;
           acceleration_g[2] = npy_half_to_float(*dataz) * 100.0f;
-          snprintf((char *)tx_buffer, sizeof(tx_buffer), "hg peak (x = %4.2f g, y = %4.2f g, z = %4.2f g, dur = %u ms)\r\n",
+          snprintf((char *)tx_buffer, sizeof(tx_buffer), "hg peak (x = %4.2f g, y = %4.2f g, z = %4.2f g, dur = %lu ms)\r\n",
                    acceleration_g[0], acceleration_g[1], acceleration_g[2], peak_end - peak_start);
           tx_com(tx_buffer, strlen((char const *)tx_buffer));
           break;

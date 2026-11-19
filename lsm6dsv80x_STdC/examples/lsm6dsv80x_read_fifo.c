@@ -170,7 +170,7 @@ static void lsm6dsv80x_fifo_thread(void)
     fifo_thread_run = 0;
 
     /* Read watermark flag */
-    lsm6dsv80x_fifo_status_get(&dev_ctx, &fifo_status);
+    lsm6dsv80x_get_fifo_status(&dev_ctx, &fifo_status);
 
     num = fifo_status.fifo_level;
 
@@ -178,7 +178,7 @@ static void lsm6dsv80x_fifo_thread(void)
       lsm6dsv80x_fifo_out_raw_t f_data;
 
       /* Read FIFO sensor value */
-      lsm6dsv80x_fifo_out_raw_get(&dev_ctx, &f_data);
+      lsm6dsv80x_get_fifo_out_raw(&dev_ctx, &f_data);
       datax = (int16_t *)&f_data.data[0];
       datay = (int16_t *)&f_data.data[2];
       dataz = (int16_t *)&f_data.data[4];
@@ -249,12 +249,12 @@ static void lsm6dsv80x_fifo_thread(void)
 
         if (f_data.data[0] == 0x00) {
           /* Game Rotation first word */
-          quat[0] = lsm6dsv80x_from_quaternion_lsb_to_float(sflp[0]);
-          quat[1] = lsm6dsv80x_from_quaternion_lsb_to_float(sflp[1]);
+          quat[0] = lsm6dsv80x_from_quat_lsb_to_float(sflp[0]);
+          quat[1] = lsm6dsv80x_from_quat_lsb_to_float(sflp[1]);
         } else if (f_data.data[0] == 0x01) {
           /* Game Rotation second word */
-          quat[2] = lsm6dsv80x_from_quaternion_lsb_to_float(sflp[0]);
-          quat[3] = lsm6dsv80x_from_quaternion_lsb_to_float(sflp[1]);
+          quat[2] = lsm6dsv80x_from_quat_lsb_to_float(sflp[0]);
+          quat[3] = lsm6dsv80x_from_quat_lsb_to_float(sflp[1]);
 
           rot_sum[0] += quat[0];
           rot_sum[1] += quat[1];
@@ -272,7 +272,7 @@ static void lsm6dsv80x_fifo_thread(void)
       }
 
       case LSM6DSV80X_TIMESTAMP_TAG:
-        snprintf((char *)tx_buffer, sizeof(tx_buffer), "TIMESTAMP [ms] %d\r\n", *ts);
+        snprintf((char *)tx_buffer, sizeof(tx_buffer), "TIMESTAMP [ms] %ld\r\n", *ts);
         tx_com(tx_buffer, strlen((char const *)tx_buffer));
 
         /* print avg low-g xl data */
@@ -385,7 +385,7 @@ void lsm6dsv80x_read_fifo(void)
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
   /* Check device ID */
-  lsm6dsv80x_device_id_get(&dev_ctx, &whoamI);
+  lsm6dsv80x_get_device_id(&dev_ctx, &whoamI);
 
   if (whoamI != LSM6DSV80X_ID)
     while (1);
@@ -394,21 +394,21 @@ void lsm6dsv80x_read_fifo(void)
   lsm6dsv80x_sw_por(&dev_ctx);
 
   /* Enable Block Data Update */
-  lsm6dsv80x_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsv80x_set_block_data_update(&dev_ctx, PROPERTY_ENABLE);
 
   /*
    * Set FIFO watermark (number of unread sensor data TAG + 6 bytes
    * stored in FIFO) to FIFO_WATERMARK samples
    */
-  lsm6dsv80x_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
+  lsm6dsv80x_set_fifo_watermark(&dev_ctx, FIFO_WATERMARK);
 
   /* Set FIFO batch XL/Gyro ODR */
-  lsm6dsv80x_fifo_xl_batch_set(&dev_ctx, LSM6DSV80X_XL_BATCHED_AT_60Hz);
-  lsm6dsv80x_fifo_hg_xl_batch_set(&dev_ctx, 1);
-  lsm6dsv80x_fifo_gy_batch_set(&dev_ctx, LSM6DSV80X_GY_BATCHED_AT_120Hz);
+  lsm6dsv80x_set_fifo_xl_batch(&dev_ctx, LSM6DSV80X_XL_BATCHED_AT_60Hz);
+  lsm6dsv80x_set_fifo_hg_xl_batch(&dev_ctx, 1);
+  lsm6dsv80x_set_fifo_gy_batch(&dev_ctx, LSM6DSV80X_GY_BATCHED_AT_120Hz);
 
   /* Set FIFO batch SFLP */
-  lsm6dsv80x_sflp_data_rate_set(&dev_ctx, LSM6DSV80X_SFLP_120Hz);
+  lsm6dsv80x_set_sflp_data_rate(&dev_ctx, LSM6DSV80X_SFLP_120Hz);
 
   lsm6dsv80x_fifo_sflp_raw_t sflp =
         {
@@ -416,41 +416,41 @@ void lsm6dsv80x_read_fifo(void)
           .gravity = 1,
           .gbias = 1,
         };
-  lsm6dsv80x_fifo_sflp_batch_set(&dev_ctx, sflp);
+  lsm6dsv80x_set_fifo_sflp_batch(&dev_ctx, sflp);
 
-  lsm6dsv80x_sflp_game_rotation_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsv80x_set_sflp_game_rotation(&dev_ctx, PROPERTY_ENABLE);
 
   /* Set FIFO mode to Stream mode (aka Continuous Mode) */
-  lsm6dsv80x_fifo_mode_set(&dev_ctx, LSM6DSV80X_STREAM_MODE);
-  lsm6dsv80x_fifo_timestamp_batch_set(&dev_ctx, LSM6DSV80X_TMSTMP_DEC_32);
-  lsm6dsv80x_timestamp_set(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsv80x_set_fifo_mode(&dev_ctx, LSM6DSV80X_STREAM_MODE);
+  lsm6dsv80x_set_fifo_timestamp_batch(&dev_ctx, LSM6DSV80X_TMSTMP_DEC_32);
+  lsm6dsv80x_set_timestamp(&dev_ctx, PROPERTY_ENABLE);
 
   /* Set Output Data Rate.
    * Selected data rate have to be equal or greater with respect
    * with MLC data rate.
    */
   lsm6dsv80x_xl_setup(&dev_ctx, LSM6DSV80X_ODR_AT_60Hz, LSM6DSV80X_XL_HIGH_PERFORMANCE_MD);
-  lsm6dsv80x_hg_xl_data_rate_set(&dev_ctx, LSM6DSV80X_HG_XL_ODR_AT_480Hz, 0);
+  lsm6dsv80x_set_hg_xl_data_rate(&dev_ctx, LSM6DSV80X_HG_XL_ODR_AT_480Hz, 0);
   lsm6dsv80x_gy_setup(&dev_ctx, LSM6DSV80X_ODR_AT_120Hz, LSM6DSV80X_GY_HIGH_PERFORMANCE_MD);
 
   /* Set full scale */
-  lsm6dsv80x_xl_full_scale_set(&dev_ctx, LSM6DSV80X_2g);
-  lsm6dsv80x_hg_xl_full_scale_set(&dev_ctx, LSM6DSV80X_80g);
-  lsm6dsv80x_gy_full_scale_set(&dev_ctx, LSM6DSV80X_2000dps);
+  lsm6dsv80x_set_xl_full_scale(&dev_ctx, LSM6DSV80X_2g);
+  lsm6dsv80x_set_hg_xl_full_scale(&dev_ctx, LSM6DSV80X_80g);
+  lsm6dsv80x_set_gy_full_scale(&dev_ctx, LSM6DSV80X_2000dps);
 
   /* Configure filtering chain */
   filt_settling_mask.drdy = PROPERTY_ENABLE;
   filt_settling_mask.irq_xl = PROPERTY_ENABLE;
   filt_settling_mask.irq_g = PROPERTY_ENABLE;
-  lsm6dsv80x_filt_settling_mask_set(&dev_ctx, filt_settling_mask);
-  lsm6dsv80x_filt_gy_lp1_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6dsv80x_filt_gy_lp1_bandwidth_set(&dev_ctx, LSM6DSV80X_GY_ULTRA_LIGHT);
-  lsm6dsv80x_filt_xl_lp2_set(&dev_ctx, PROPERTY_ENABLE);
-  lsm6dsv80x_filt_xl_lp2_bandwidth_set(&dev_ctx, LSM6DSV80X_XL_STRONG);
+  lsm6dsv80x_set_filt_settling_mask(&dev_ctx, filt_settling_mask);
+  lsm6dsv80x_set_filt_gy_lp1(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsv80x_set_filt_gy_lp1_bandwidth(&dev_ctx, LSM6DSV80X_GY_ULTRA_LIGHT);
+  lsm6dsv80x_set_filt_xl_lp2(&dev_ctx, PROPERTY_ENABLE);
+  lsm6dsv80x_set_filt_xl_lp2_bandwidth(&dev_ctx, LSM6DSV80X_XL_STRONG);
 
   /* enable fifo_th on High-G XL (sensor at highest frequency) */
   pin_int.fifo_th = PROPERTY_ENABLE;
-  lsm6dsv80x_pin_int1_route_set(&dev_ctx, &pin_int);
+  lsm6dsv80x_set_pin_int1_route(&dev_ctx, &pin_int);
   //lsm6dsv80x_pin_int2_route_set(&dev_ctx, &pin_int);
 
   /* Read samples in polling mode (no int) */
