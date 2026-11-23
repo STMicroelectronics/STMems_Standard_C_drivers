@@ -204,7 +204,7 @@ void lis2du12_read_data_fifo(void)
 
       fifo_wtm_event = 0;
 
-      lis2du12_fifo_level_get(&dev_ctx, &fifo_mode, &fifo_level);
+      lis2du12_fifo_level_get(&dev_ctx, &fifo_level);
 
       snprintf((char*)tx_buffer, sizeof(tx_buffer), "-- FIFO level is %d\r\n", fifo_level);
       tx_com(tx_buffer, strlen((char const*)tx_buffer));
