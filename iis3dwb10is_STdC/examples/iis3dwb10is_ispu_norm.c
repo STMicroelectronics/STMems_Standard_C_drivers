@@ -150,19 +150,19 @@ void iis3dwb10is_ispu_norm(void)
   platform_delay(BOOT_TIME);
 
   /* Check device ID */
-  iis3dwb10is_device_id_get(&dev_ctx, &whoamI);
+  iis3dwb10is_get_device_id(&dev_ctx, &whoamI);
 
   if (whoamI != IIS3DWB10IS_ID)
     while (1);
 
   /* Restore default configuration */
-  iis3dwb10is_sw_por(&dev_ctx);
+  iis3dwb10is_sw_por(&dev_ctx, 20);
 
   /* interrupt pins electrical configurations */
   pin_ctrl.pp_od = IIS3DWB10IS_PUSH_PULL;
   pin_ctrl.pd_dis = IIS3DWB10IS_PD_INT1_OFF_INT2_OFF;
   pin_ctrl.strength = IIS3DWB10IS_PAD_STRENGTH_LOWER;
-  iis3dwb10is_interrupt_pin_mode_set(&dev_ctx,  pin_ctrl);
+  iis3dwb10is_set_interrupt_pin_mode(&dev_ctx,  pin_ctrl);
 
   /* Load ISPU configuration */
   for ( i = 0; i < (sizeof(ispu_conf_conf_0) / sizeof(struct mems_conf_op) ); i++ ) {
@@ -189,13 +189,13 @@ void iis3dwb10is_ispu_norm(void)
 
       task_event = 0;
 
-      iis3dwb10is_ispu_int_status_get(&dev_ctx, &ispu_int);
+      iis3dwb10is_get_ispu_int_status(&dev_ctx, &ispu_int);
 
       /* handle only ISPU INT1 interrupts */
       if ((ispu_int & 0x1) == 0)
         continue;
 
-      iis3dwb10is_ispu_read_data_raw_get(&dev_ctx, dout, 16);
+      iis3dwb10is_get_ispu_read_data_raw(&dev_ctx, dout, 16);
 
       x = (int32_t)dout[3];
       x = (x * 256) + (int32_t)dout[2];

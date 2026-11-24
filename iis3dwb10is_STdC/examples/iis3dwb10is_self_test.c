@@ -286,22 +286,22 @@ void iis3dwb10is_self_test(void)
   platform_delay(BOOT_TIME);
 
   /* Check device ID */
-  iis3dwb10is_device_id_get(&dev_ctx, &whoamI);
+  iis3dwb10is_get_device_id(&dev_ctx, &whoamI);
 
   if (whoamI != IIS3DWB10IS_ID)
     while (1);
 
   /* Restore default configuration */
-  iis3dwb10is_sw_por(&dev_ctx);
+  iis3dwb10is_sw_por(&dev_ctx, 20);
 
   /* Enable Block Data Update */
-  iis3dwb10is_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  iis3dwb10is_set_block_data_update(&dev_ctx, PROPERTY_ENABLE);
 
   /* interrupt pins electrical configurations */
   pin_ctrl.pp_od = IIS3DWB10IS_PUSH_PULL;
   pin_ctrl.pd_dis = IIS3DWB10IS_PD_INT1_OFF_INT2_OFF;
   pin_ctrl.strength = IIS3DWB10IS_PAD_STRENGTH_LOWER;
-  iis3dwb10is_interrupt_pin_mode_set(&dev_ctx,  pin_ctrl);
+  iis3dwb10is_set_interrupt_pin_mode(&dev_ctx,  pin_ctrl);
 
   while (1)
   {
@@ -311,14 +311,14 @@ void iis3dwb10is_self_test(void)
     /* Set Output Data Rate */
     rate.burst = IIS3DWB10IS_CONTINUOS_MODE;
     rate.odr = IIS3DWB10IS_ODR_2KHz5;
-    iis3dwb10is_xl_data_rate_set(&dev_ctx, rate);
+    iis3dwb10is_set_xl_data_rate(&dev_ctx, rate);
 
     /* Set full scale */
-    iis3dwb10is_xl_full_scale_set(&dev_ctx, IIS3DWB10IS_50g);
+    iis3dwb10is_set_xl_full_scale(&dev_ctx, IIS3DWB10IS_50g);
 
-    iis3dwb10is_pin_int1_route_get(&dev_ctx, &route);
+    iis3dwb10is_get_pin_int1_route(&dev_ctx, &route);
     route.drdy_xl = 1;
-    iis3dwb10is_pin_int1_route_set(&dev_ctx, route);
+    iis3dwb10is_set_pin_int1_route(&dev_ctx, route);
 
     self_test.sign = (self_test.sign) ? 0 : 1;
     ret = iis3dwb10is_self_test_run(&dev_ctx);

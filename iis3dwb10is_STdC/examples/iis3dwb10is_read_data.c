@@ -123,17 +123,17 @@ void iis3dwb10is_read_data_handler(void)
   iis3dwb10is_data_ready_t drdy;
 
   /* Read output only if new xl value is available */
-  iis3dwb10is_data_ready_get(&dev_ctx, &drdy);
+  iis3dwb10is_get_data_ready(&dev_ctx, &drdy);
   if (drdy.drdy_xl) {
     xl_event = 1;
     xl_event_num++;
-    iis3dwb10is_acceleration_raw_get(&dev_ctx, data_raw_acceleration);
+    iis3dwb10is_get_acceleration_raw(&dev_ctx, data_raw_acceleration);
   }
 
   if (drdy.drdy_temp) {
     temp_event = 1;
     temp_event_num++;
-    iis3dwb10is_temperature_raw_get(&dev_ctx, &data_raw_temperature);
+    iis3dwb10is_get_temperature_raw(&dev_ctx, &data_raw_temperature);
   }
 }
 
@@ -153,33 +153,33 @@ void iis3dwb10is_read_data(void)
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
   /* Check device ID */
-  iis3dwb10is_device_id_get(&dev_ctx, &whoamI);
+  iis3dwb10is_get_device_id(&dev_ctx, &whoamI);
 
   if (whoamI != IIS3DWB10IS_ID)
     while (1);
 
   /* Restore default configuration */
-  iis3dwb10is_sw_por(&dev_ctx);
+  iis3dwb10is_sw_por(&dev_ctx, 20);
 
   /* Enable Block Data Update */
-  iis3dwb10is_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  iis3dwb10is_set_block_data_update(&dev_ctx, PROPERTY_ENABLE);
 
-  iis3dwb10is_xl_data_config_get(&dev_ctx, &xl_cfg);
-  xl_cfg.rounding = IIS3DWB10IS_WRAPAROUND_DISABLED;
-  iis3dwb10is_xl_data_config_set(&dev_ctx, xl_cfg);
+  iis3dwb10is_get_xl_data_config(&dev_ctx, &xl_cfg);
+  xl_cfg.read_mode = IIS3DWB10IS_WRAPAROUND_DISABLED;
+  iis3dwb10is_set_xl_data_config(&dev_ctx, xl_cfg);
 
   /* Set full scale */
-  iis3dwb10is_xl_full_scale_set(&dev_ctx, IIS3DWB10IS_50g);
+  iis3dwb10is_set_xl_full_scale(&dev_ctx, IIS3DWB10IS_50g);
 
-  iis3dwb10is_pin_int1_route_get(&dev_ctx, &route);
+  iis3dwb10is_get_pin_int1_route(&dev_ctx, &route);
   route.drdy_xl = 1;
   route.drdy_temp = 1;
-  iis3dwb10is_pin_int1_route_set(&dev_ctx, route);
+  iis3dwb10is_set_pin_int1_route(&dev_ctx, route);
 
   /* Set Output Data Rate */
   rate.burst = IIS3DWB10IS_CONTINUOS_MODE;
   rate.odr = IIS3DWB10IS_ODR_10KHz;
-  iis3dwb10is_xl_data_rate_set(&dev_ctx, rate);
+  iis3dwb10is_set_xl_data_rate(&dev_ctx, rate);
 
   /* Read samples in polling mode */
   while (1) {

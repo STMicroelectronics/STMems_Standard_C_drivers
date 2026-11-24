@@ -137,7 +137,7 @@ static void iis3dwb10is_fifo_read_thread(void)
   uint8_t do_print = 0;
 
   /* Read watermark flag */
-  iis3dwb10is_fifo_status_get(&dev_ctx, &fifo_status);
+  iis3dwb10is_get_fifo_status(&dev_ctx, &fifo_status);
 
   if (fifo_status.fifo_th) {
     if (fifo_event_num++%10 == 0) {
@@ -151,7 +151,7 @@ static void iis3dwb10is_fifo_read_thread(void)
   if (fifo_level == 0)
     return;
 
-  iis3dwb10is_fifo_out_raw_get(&dev_ctx, fifo_buf, fifo_level);
+  iis3dwb10is_get_fifo_out_raw(&dev_ctx, fifo_buf, fifo_level);
 
   if (do_print) {
     sprintf((char *)tx_buffer, "%lld: FIFO level %d\r\n", fifo_event_num, fifo_level);
@@ -225,51 +225,51 @@ void iis3dwb10is_fifo_read(void)
   /* Wait sensor boot time */
   platform_delay(BOOT_TIME);
   /* Check device ID */
-  iis3dwb10is_device_id_get(&dev_ctx, &whoamI);
+  iis3dwb10is_get_device_id(&dev_ctx, &whoamI);
 
   if (whoamI != IIS3DWB10IS_ID)
     while (1);
 
   /* Restore default configuration */
-  iis3dwb10is_sw_por(&dev_ctx);
+  iis3dwb10is_sw_por(&dev_ctx, 20);
 
   /*
    * Set FIFO watermark (number of unread sensor data TAG + 9 bytes
    * stored in FIFO) to FIFO_WATERMARK samples
    */
 
-  iis3dwb10is_fifo_watermark_set(&dev_ctx, FIFO_WATERMARK);
-  iis3dwb10is_fifo_stop_on_wtm_set(&dev_ctx, 1);
+  iis3dwb10is_set_fifo_watermark(&dev_ctx, FIFO_WATERMARK);
+  iis3dwb10is_set_fifo_stop_on_wtm(&dev_ctx, 1);
 
-  iis3dwb10is_fifo_batch_get(&dev_ctx,  &fifo_batch);
+  iis3dwb10is_get_fifo_batch(&dev_ctx,  &fifo_batch);
   fifo_batch.batch_xl = 1;
   fifo_batch.batch_temp = 1;
   fifo_batch.batch_ts = IIS3DWB10IS_TMSTMP_NOT_BATCHED;
-  iis3dwb10is_fifo_batch_set(&dev_ctx,  fifo_batch);
+  iis3dwb10is_set_fifo_batch(&dev_ctx,  fifo_batch);
 
   /* Set FIFO mode to Stream mode (aka Continuous Mode) */
-  iis3dwb10is_fifo_mode_set(&dev_ctx, IIS3DWB10IS_STREAM_MODE);
+  iis3dwb10is_set_fifo_mode(&dev_ctx, IIS3DWB10IS_CONTINUOUS_MODE);
 
   /* Enable Block Data Update */
-  iis3dwb10is_block_data_update_set(&dev_ctx, PROPERTY_ENABLE);
+  iis3dwb10is_set_block_data_update(&dev_ctx, PROPERTY_ENABLE);
 
   /* Set full scale */
-  iis3dwb10is_xl_full_scale_set(&dev_ctx, IIS3DWB10IS_50g);
+  iis3dwb10is_set_xl_full_scale(&dev_ctx, IIS3DWB10IS_50g);
 
-  iis3dwb10is_interrupt_pin_mode_get(&dev_ctx, &int_pin);
+  iis3dwb10is_get_interrupt_pin_mode(&dev_ctx, &int_pin);
   int_pin.pp_od = IIS3DWB10IS_PUSH_PULL;
   int_pin.strength = IIS3DWB10IS_PAD_STRENGTH_LOWER;
   int_pin.pd_dis = IIS3DWB10IS_PD_INT1_OFF_INT2_OFF;
-  iis3dwb10is_interrupt_pin_mode_set(&dev_ctx, int_pin);
+  iis3dwb10is_set_interrupt_pin_mode(&dev_ctx, int_pin);
 
-  iis3dwb10is_pin_int1_route_get(&dev_ctx, &route);
+  iis3dwb10is_get_pin_int1_route(&dev_ctx, &route);
   route.fifo_th = 1;
-  iis3dwb10is_pin_int1_route_set(&dev_ctx, route);
+  iis3dwb10is_set_pin_int1_route(&dev_ctx, route);
 
   /* Set Output Data Rate */
   rate.burst = IIS3DWB10IS_CONTINUOS_MODE;
   rate.odr = IIS3DWB10IS_ODR_10KHz;
-  iis3dwb10is_xl_data_rate_set(&dev_ctx, rate);
+  iis3dwb10is_set_xl_data_rate(&dev_ctx, rate);
 
   /* Read samples in polling mode */
   while (1) {
